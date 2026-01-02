@@ -1,0 +1,135 @@
+# generated: 2025-12-30
+# project: primeeditz-tanstack-webapp
+# tracking_system: file-system
+# story_location: _bmad-output/implementation-artifacts
+
+# STATUS DEFINITIONS:
+# ==================
+# Epic Status:
+#   - backlog: Epic not yet started
+#   - in-progress: Epic actively being worked on
+#   - done: All stories in epic completed
+#
+# Story Status:
+#   - backlog: Story only exists in epic file
+#   - ready-for-dev: Story file created, ready for development
+#   - in-progress: Developer actively working on implementation
+#   - review: Implementation complete, ready for review
+#   - done: Story completed
+#
+# Retrospective Status:
+#   - optional: Can be completed but not required
+#   - done: Retrospective has been completed
+#
+# WORKFLOW NOTES:
+# ===============
+# - Mark epic as 'in-progress' when starting work on its first story
+# - SM typically creates next story ONLY after previous one is 'done' to incorporate learnings
+# - Dev moves story to 'review', then runs code-review (fresh context, ideally different LLM)
+
+generated: 2025-12-30
+project: primeeditz-tanstack-webapp
+tracking_system: file-system
+story_location: _bmad-output/implementation-artifacts/stories
+
+development_status:
+  # =========================================
+  # EPIC 0: Project Foundation
+  # =========================================
+  epic-0: done
+  0-1-project-infrastructure-environment-setup: done
+  0-2-core-v3-project-centric-schema: done
+  0-3a-base-app-shell-with-sidebar-header: done
+  0-3b-breadcrumb-system-user-menu: done
+  0-4-convex-helper-utilities-auth-wrappers: done
+  epic-0-retrospective: optional
+
+  # =========================================
+  # EPIC 1: Authentication & Onboarding
+  # =========================================
+  epic-1: done
+  1-1a-better-auth-server-configuration: done
+  1-1b-auth-api-route-mounting: done
+  1-1c-convex-session-verification: done
+  1-2-sign-up-with-email-password: done
+  1-3-sign-in-with-email-password: done
+  1-4-profile-onboarding-flow: done
+  1-5-route-protection-auth-middleware: done
+  1-6-rbac-sidebar-navigation: done
+  epic-1-retrospective: done
+
+  # =========================================
+  # EPIC 2: Client Portal — Project Request
+  # =========================================
+  epic-2: in-progress
+  2-0-wizard-infrastructure-draft-project: in-progress
+  2-1-client-dashboard-with-project-listing: backlog
+  2-2-wizard-step-1-project-type-basic-info: backlog
+  2-3-wizard-step-2-project-specific-details-dynamic: backlog
+  2-4-wizard-step-3-reference-files-upload: backlog
+  2-5-wizard-step-4-description-additional-notes: backlog
+  2-6-wizard-step-5-review-submit: backlog
+  2-7-client-project-detail-view: backlog
+  epic-2-retrospective: optional
+
+  # =========================================
+  # EPIC 3: Admin Portal — Project & System Management
+  # =========================================
+  epic-3: backlog
+  3-1-admin-dashboard-layout: backlog
+  3-2-admin-project-listing-with-filters: backlog
+  3-3-admin-project-detail-view: backlog
+  3-4-project-stage-folder-setup: backlog
+  3-5-update-project-status: backlog
+  3-6-employee-management-crud: backlog
+  3-7-project-types-management: backlog
+  3-8-quotation-templates-management: backlog
+  3-9-storage-pricing-tiers-configuration: backlog
+  3-10-folder-templates-configuration: backlog
+  epic-3-retrospective: optional
+
+  # =========================================
+  # EPIC 4: Quotation System
+  # =========================================
+  epic-4: backlog
+  4-1-create-quotation-from-template: backlog
+  4-2-edit-quotation-line-items: backlog
+  4-3-send-quotation-to-client: backlog
+  4-4-client-view-quotation: backlog
+  4-5-client-approve-quotation: backlog
+  4-6-client-request-quotation-changes: backlog
+  epic-4-retrospective: optional
+
+  # =========================================
+  # EPIC 5: Asset Upload & Folder Management
+  # =========================================
+  epic-5: backlog
+  5-1-view-project-folders: backlog
+  5-2-gated-upload-enforcement: backlog
+  5-3-file-upload-with-signed-urls: backlog
+  5-4-upload-progress-validation: backlog
+  5-5-storage-limit-enforcement: backlog
+  5-6-mark-upload-complete: backlog
+  5-7-admin-asset-upload-for-internal-projects: backlog
+  epic-5-retrospective: optional
+
+  # =========================================
+  # EPIC 6: Deliverables & QC Workflow
+  # =========================================
+  epic-6: backlog
+  6-1-upload-deliverables-admin-employee: backlog
+  6-2-qc-review-approval: backlog
+  6-3-client-view-approved-deliverables: backlog
+  6-4-client-approve-or-request-revision: backlog
+  epic-6-retrospective: optional
+
+  # =========================================
+  # EPIC 7: Status Tracking & Dashboards
+  # =========================================
+  epic-7: backlog
+  7-1-client-dashboard-enhancements: backlog
+  7-2-admin-dashboard-enhancements: backlog
+  7-3-real-time-status-updates: backlog
+  7-4-status-history-audit-trail: backlog
+  7-5-client-download-final-deliverables: backlog
+  epic-7-retrospective: optional

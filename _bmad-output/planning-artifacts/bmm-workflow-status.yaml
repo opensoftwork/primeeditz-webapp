@@ -1,0 +1,65 @@
+# BMM Workflow Status - PrimeEditz
+# ================================
+# This tracks progress through BMad Method workflow phases.
+# Implementation phase (Phase 4) tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#   - skipped: Optional/conditional workflow that was deliberately skipped
+#
+# Completion Status:
+#   - {file-path}: File created/found (workflow completed)
+
+generated: "2025-12-28T09:02:00+05:30"
+project: "primeeditz-tanstack-webapp"
+project_type: "B2B Workflow Management Platform"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "_bmad/bmm/workflows/workflow-status/paths/method-greenfield.yaml"
+
+# ===================================
+# WORKFLOW STATUS TRACKING
+# ===================================
+workflow_status:
+  # ---------------------------
+  # PHASE 0: Discovery (Optional)
+  # ---------------------------
+  brainstorm-project: "_bmad-output/planning-artifacts/research/brainstorming-session-2025-12-28.md"
+  research: "_bmad-output/planning-artifacts/ux/user-flows/"
+  product-brief: "_bmad-output/planning-artifacts/prd.md"
+
+  # ---------------------------
+  # PHASE 1: Planning (Required)
+  # ---------------------------
+  prd: "_bmad-output/planning-artifacts/prd.md"
+  create-ux-design: required # ⬅️ NEXT: Doing this now
+
+  # ---------------------------
+  # PHASE 2: Solutioning (Required)
+  # ---------------------------
+  create-architecture: required
+  create-epics-and-stories: "_bmad-output/planning-artifacts/epics/"
+  test-design: recommended
+  validate-architecture: optional
+  implementation-readiness: required
+
+  # ---------------------------
+  # PHASE 3: Implementation
+  # ---------------------------
+  sprint-planning: required
+  # Note: Story-level tracking moves to sprint-status.yaml
+
+# ===================================
+# SESSION NOTES
+# ===================================
+notes:
+  - "2025-12-28: Workflow initialized via analyst agent"
+  - "Discovery phase already completed (brainstorm + research + brief)"
+  - "PRD v2.1 complete with Project-centric model pivot"
+  - "User flows (9 documents) provide detailed UX specification"
+  - "Next: Create UX to formalize visual designs before architecture"
