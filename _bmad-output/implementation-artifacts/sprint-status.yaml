@@ -50,8 +50,8 @@ development_status:
   # =========================================
   epic-1: in-progress
   1-1-nextjs-auth-infrastructure: review # auth-client, auth-server, API route, Convex provider
-  1-2-sign-up-with-email-password: backlog # Sign up page and flow
-  1-3-sign-in-with-email-password: backlog # Sign in page and flow
+  1-2-sign-up-with-email-password: review # Sign up page and flow
+  1-3-sign-in-with-email-password: review # Sign in page and flow
   1-4-profile-onboarding-flow: backlog # Onboarding page after first sign-in
   1-5-route-protection-proxy: backlog # Next.js proxy pattern for auth protection
   1-6-rbac-parallel-routes: backlog # Parallel routes for role-based layouts
