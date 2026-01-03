@@ -45,18 +45,18 @@ development_status:
   epic-0-retrospective: optional
 
   # =========================================
-  # EPIC 1: Authentication & Onboarding
+  # EPIC 1: Authentication & Onboarding (Next.js 16)
+  # RESET for Next.js framework migration
   # =========================================
-  epic-1: done
-  1-1a-better-auth-server-configuration: done
-  1-1b-auth-api-route-mounting: done
-  1-1c-convex-session-verification: done
-  1-2-sign-up-with-email-password: done
-  1-3-sign-in-with-email-password: done
-  1-4-profile-onboarding-flow: done
-  1-5-route-protection-auth-middleware: done
-  1-6-rbac-sidebar-navigation: done
-  epic-1-retrospective: done
+  epic-1: in-progress
+  1-1-nextjs-auth-infrastructure: ready-for-dev # auth-client, auth-server, API route, Convex provider
+  1-2-sign-up-with-email-password: backlog # Sign up page and flow
+  1-3-sign-in-with-email-password: backlog # Sign in page and flow
+  1-4-profile-onboarding-flow: backlog # Onboarding page after first sign-in
+  1-5-route-protection-proxy: backlog # Next.js proxy pattern for auth protection
+  1-6-rbac-parallel-routes: backlog # Parallel routes for role-based layouts
+  1-7-rbac-sidebar-navigation: backlog # Dynamic sidebar based on role
+  epic-1-retrospective: optional
 
   # =========================================
   # EPIC 2: Client Portal — Project Request
