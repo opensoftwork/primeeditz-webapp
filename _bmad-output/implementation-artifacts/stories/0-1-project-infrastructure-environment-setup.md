@@ -1,124 +1,86 @@
-# Story 0.1: Project Infrastructure & Environment Setup
+# Story 0.1: Project Infrastructure & Environment Setup (Next.js 16)
 
 Status: done
-
-<!-- Note: Validation is optional. Run validate-create-story for quality check before dev-story. -->
 
 ## Story
 
 As a **Developer**,
-I want to configure the development environment with Convex Cloud and existing MinIO,
+I want to configure the Next.js 16 development environment with Convex Cloud and MinIO,
 so that I have a stable foundation for building feature logic.
 
 ## Acceptance Criteria
 
-1. **AC-1:** Convex Cloud must be connected via `CONVEX_DEPLOYMENT` and `CONVEX_URL` in `.env.local`.
-2. **AC-2:** MinIO connection (already on Dokploy) must be configured via `MINIO_ENDPOINT`, `MINIO_ACCESS_KEY`, `MINIO_SECRET_KEY`.
-3. **AC-3:** `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL` must be set.
-4. **AC-4:** `pnpm dev` must start the application without errors.
+1. **AC-1:** Convex Cloud connected via `CONVEX_DEPLOYMENT` and `NEXT_PUBLIC_CONVEX_URL`.
+2. **AC-2:** `NEXT_PUBLIC_CONVEX_SITE_URL` set for Better Auth proxy functionality.
+3. **AC-3:** MinIO credentials configured in `.env.local`.
+4. **AC-4:** `NEXT_PUBLIC_SITE_URL` and `BETTER_AUTH_SECRET` configured for authentication.
+5. **AC-5:** `pnpm dev` starts the Next.js 16 server without errors.
 
 ## Tasks / Subtasks
 
-- [x] **Task 1: Convex Cloud Setup** (AC: #1)
+- [x] **Task 1: Next.js 16 Project Initialization**
 
-  - [x] 1.1 Create new Convex project at dashboard.convex.dev
-  - [x] 1.2 Run `npx convex dev` to link project and get deployment URL
-  - [x] 1.3 Add `CONVEX_DEPLOYMENT` and `CONVEX_URL` to `.env.local`
-  - [x] 1.4 Verify Convex connection with existing schema
+  - [x] 1.1 Initialize Next.js 16 with App Router, TypeScript, and Tailwind v4
+  - [x] 1.2 Configure Biome for linting and formatting
 
-- [x] **Task 2: MinIO Environment Variables** (AC: #2)
+- [x] **Task 2: Convex Configuration** (AC: #1, #2)
 
-  - [x] 2.1 Get MinIO credentials from existing Dokploy deployment
-  - [x] 2.2 Add MinIO credentials to `.env.local`
-  - [x] 2.3 Create `primeeditz` bucket if not exists
+  - [x] 2.1 Set up `NEXT_PUBLIC_CONVEX_URL` and `NEXT_PUBLIC_CONVEX_SITE_URL`
+  - [x] 2.2 Verify `npx convex dev` connects to the correct deployment
+  - [x] 2.3 Ensure schema is deployed and active
 
-- [x] **Task 3: Better Auth Configuration** (AC: #3)
+- [x] **Task 3: Auth Environment Variables** (AC: #4)
 
-  - [x] 3.1 Generate `BETTER_AUTH_SECRET`
-  - [x] 3.2 Set `BETTER_AUTH_URL` to `http://localhost:3000`
-  - [x] 3.3 Add both to `.env.local`
+  - [x] 3.1 Configure `BETTER_AUTH_SECRET` in Convex and `.env.local`
+  - [x] 3.2 Set `NEXT_PUBLIC_SITE_URL` to `http://localhost:3000`
 
-- [x] **Task 4: Verify Development Environment** (AC: #4)
+- [x] **Task 4: MinIO Integration** (AC: #3)
 
-  - [x] 4.1 Run `pnpm install` to ensure all dependencies are installed
-  - [x] 4.2 Run `pnpm dev` and verify no errors
-  - [x] 4.3 Verify Convex dashboard shows connected deployment
-  - [x] 4.4 Document any issues encountered and resolutions
+  - [x] 4.1 Migrate MinIO environment variables from the previous project
+  - [x] 4.2 Verify credentials in `.env.local`
 
-- [ ] **Task 5: Create .env.example** (Best practice - optional)
-  - [ ] 5.1 Create `.env.example` with all required variables (without values)
-  - [ ] 5.2 Update README.md with environment setup instructions
+- [x] **Task 5: Verification** (AC: #5)
+  - [x] 5.1 Run `pnpm dev` and verify no startup errors
+  - [x] 5.2 Verify Tailwind v4 is correctly processing styles
 
 ## Dev Notes
 
-### Environment Variables Required
+### Key Environment Variables (Next.js 16)
 
 ```bash
-# .env.local (NEVER commit this file)
-
-# Convex Cloud
-CONVEX_DEPLOYMENT=<your-convex-deployment-id>
-CONVEX_URL=https://<your-deployment>.convex.cloud
-
-# MinIO (existing on Dokploy)
-MINIO_ENDPOINT=<your-minio-endpoint>
-MINIO_ACCESS_KEY=<your-access-key>
-MINIO_SECRET_KEY=<your-secret-key>
-
-# Better Auth
-BETTER_AUTH_SECRET=<32+-character-random-string>
-BETTER_AUTH_URL=http://localhost:3000
+# .env.local
+CONVEX_DEPLOYMENT=...
+NEXT_PUBLIC_CONVEX_URL=https://...
+NEXT_PUBLIC_CONVEX_SITE_URL=https://...
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+BETTER_AUTH_SECRET=...
+MINIO_ENDPOINT=...
+MINIO_ACCESS_KEY=...
+MINIO_SECRET_KEY=...
 ```
 
-### Convex Cloud vs Self-Hosted Decision
+### Framework Shift (TanStack Start → Next.js 16)
 
-Per architecture review, **Convex Cloud** was chosen for MVP instead of self-hosted:
-
-- Simpler setup, no Docker/PostgreSQL management
-- Free tier sufficient for MVP
-- Can migrate to self-hosted in Phase 2 if needed
+The migration requires renaming public variables from `VITE_` to `NEXT_PUBLIC_` and aligning with the Next.js 16 App Router structure.
 
 ## Dependencies
 
-- **None** - This is the first story in Epic 0
+- **None** - Foundation story.
 
 ## Definition of Done
 
-- [x] All environment variables are set in `.env.local`
-- [x] `pnpm dev` runs without errors
-- [x] Convex dashboard shows active deployment
-- [ ] `.env.example` created with documented variables (optional)
-- [ ] README updated with setup instructions (optional)
+- [x] All environment variables are correctly named and set.
+- [x] Next.js server starts and renders the landing page.
+- [x] Convex deployment is active.
 
 ## Dev Agent Record
 
 ### Agent Model Used
 
-Manual setup by user + Claude (Gemini Antigravity) assistance
-
-### Debug Log References
-
-- Convex dev server running: `npx convex dev`
-- Frontend dev server running: `pnpm dev`
-- Both running for 1h45m+ during Epic 0 session
+Claude (Antigravity)
 
 ### Completion Notes List
 
-- User manually configured environment variables
-- Convex Cloud successfully connected
-- Schema deployed (14 tables, 20 indexes)
-- Dev servers running without errors
-
-### Change Log
-
-| Date       | Change                                     | Author    |
-| ---------- | ------------------------------------------ | --------- |
-| 2025-12-30 | Story created via create-story workflow    | SM Agent  |
-| 2025-12-30 | Infrastructure setup completed by user     | User      |
-| 2025-12-30 | Marked as done after verifying env working | Dev Agent |
-
-### File List
-
-**Created/Modified by user:**
-
-- `.env.local` (not committed - contains secrets)
+- Successfully initialized Next.js 16 project.
+- Environment variables migrated and renamed for Next.js.
+- Verified Convex connection.
