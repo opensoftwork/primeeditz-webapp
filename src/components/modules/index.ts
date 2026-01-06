@@ -4,4 +4,4 @@
  * Feature module for project-related components.
  */
 
-export * from './wizard'
+export * from './project/wizard'

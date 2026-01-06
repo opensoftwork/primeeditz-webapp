@@ -40,18 +40,26 @@ export default function SignInForm() {
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       try {
-        await authClient.signIn.email({
+        const result = await authClient.signIn.email({
           email: value.email,
           password: value.password,
         });
+
+        // Check if sign-in was successful
+        if (result.error) {
+          // Better Auth returns error in result object
+          toast.error(result.error.message || "Invalid email or password.");
+          setIsLoading(false);
+          return;
+        }
+
+        // Only redirect if successful
         toast.success("Welcome back!");
         router.push("/dashboard");
       } catch (error: any) {
-        if (error.message?.includes("Invalid")) {
-          toast.error("Invalid email or password.");
-        } else {
-          toast.error(error.message || "Failed to sign in.");
-        }
+        // Fallback error handling
+        console.error("Sign in error:", error);
+        toast.error(error.message || "Failed to sign in.");
         setIsLoading(false);
       }
     },

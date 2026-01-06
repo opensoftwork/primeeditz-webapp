@@ -44,11 +44,9 @@ So that the system can tailor my experience correctly.
 
 ### Task 4: Post-Onboarding Redirect (AC: 6, 7)
 
-- [ ] 4.1 After profile creation, fetch the profile to get role
-- [ ] 4.2 Redirect based on role:
-  - Admin → `/admin/dashboard`
-  - Client → `/client/dashboard`
-- [ ] 4.3 Show success toast: "Profile created! Welcome to PrimeEditz"
+- [ ] 4.1 After profile creation, show success toast
+- [ ] 4.2 Redirect to `/dashboard` (parallel routes will handle role-based rendering)
+- [ ] 4.3 Toast message: "Profile created! Welcome to PrimeEditz"
 
 ## Dev Notes
 

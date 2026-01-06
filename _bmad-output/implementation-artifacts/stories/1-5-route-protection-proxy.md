@@ -1,6 +1,6 @@
 # Story 1.5: Route Protection with Next.js 16 Proxy
 
-Status: backlog
+Status: review
 
 ## Story
 
@@ -21,31 +21,31 @@ So that our business data remains secure.
 
 ### Task 1: Create Next.js Proxy File (AC: 1, 2)
 
-- [ ] 1.1 Create `proxy.ts` at project root
-- [ ] 1.2 Import `getSessionCookie` from `better-auth/cookies`
-- [ ] 1.3 Define matcher for protected routes
-- [ ] 1.4 Redirect to `/auth/sign-in` if no session cookie
+- [x] 1.1 Create `proxy.ts` at project root
+- [x] 1.2 Import `getSessionCookie` from `better-auth/cookies`
+- [x] 1.3 Define matcher for protected routes
+- [x] 1.4 Redirect to `/auth/sign-in` if no session cookie
 
 ### Task 2: Define Protected Route Group (AC: 4)
 
-- [ ] 2.1 Create `src/app/(protected)/layout.tsx`
-- [ ] 2.2 Add server-side auth check in layout
-- [ ] 2.3 Fetch user profile in layout for role verification
+- [x] 2.1 Create `src/app/(protected)/layout.tsx`
+- [x] 2.2 Add server-side auth check in layout
+- [x] 2.3 Fetch user profile in layout for role verification
 
 ### Task 3: Profile Check Logic (AC: 3)
 
-- [ ] 3.1 In protected layout, check if user has profile
-- [ ] 3.2 If no profile exists → redirect to `/onboarding`
-- [ ] 3.3 Pass profile data to child routes via context or props
+- [x] 3.1 In protected layout, check if user has profile
+- [x] 3.2 If no profile exists → redirect to `/onboarding`
+- [x] 3.3 Pass profile data to child routes via context or props
 
 ### Task 4: Update Route Matchers (AC: 5)
 
-- [ ] 4.1 Configure proxy matcher to cover:
+- [x] 4.1 Configure proxy matcher to cover:
   - `/client/*`
   - `/admin/*`
   - `/employee/*`
   - `/onboarding`
-- [ ] 4.2 Exclude from proxy:
+- [x] 4.2 Exclude from proxy:
   - `/auth/*`
   - `/api/*`
   - `/_next/*`
@@ -144,12 +144,23 @@ app/
 
 ### Agent Model Used
 
-(To be filled by dev agent)
+Gemini 2.0 Flash Thinking (Experimental)
 
 ### Completion Notes List
 
-(To be filled by dev agent)
+- ✅ Created `proxy.ts` at project root using Next.js 16 proxy pattern
+- ✅ Implemented fast cookie-only auth check using `getSessionCookie` from better-auth/cookies
+- ✅ Configured route matchers for `/client/*`, `/admin/*`, `/employee/*`, and `/onboarding`
+- ✅ Added redirect parameter preservation to maintain user's intended destination
+- ✅ Created `(protected)` route group with server-side layout
+- ✅ Implemented two-layer protection: proxy (fast cookie check) + layout (full DB verification)
+- ✅ Added profile existence check in protected layout
+- ✅ Configured automatic redirect to `/onboarding` for users without profiles
+- ✅ Moved `/onboarding` inside `(protected)` group (requires auth, allows no profile)
+- ✅ Added pathname detection to allow onboarding access without profile
+- ✅ All acceptance criteria satisfied
 
 ### File List
 
-(To be filled by dev agent)
+- `proxy.ts` (new)
+- `src/app/(protected)/layout.tsx` (new)

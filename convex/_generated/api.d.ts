@@ -17,6 +17,7 @@ import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_helpers from "../lib/helpers.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as profiles from "../profiles.js";
 
 import type {
   ApiFromModules,
@@ -34,6 +35,7 @@ declare const fullApi: ApiFromModules<{
   "lib/customFunctions": typeof lib_customFunctions;
   "lib/helpers": typeof lib_helpers;
   "lib/validators": typeof lib_validators;
+  profiles: typeof profiles;
 }>;
 
 /**

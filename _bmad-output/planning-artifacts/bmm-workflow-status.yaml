@@ -37,7 +37,7 @@ workflow_status:
   # PHASE 1: Planning (Required)
   # ---------------------------
   prd: "_bmad-output/planning-artifacts/prd.md"
-  create-ux-design: required # ⬅️ NEXT: Doing this now
+  create-ux-design: "_bmad-output/planning-artifacts/ux/"
 
   # ---------------------------
   # PHASE 2: Solutioning (Required)

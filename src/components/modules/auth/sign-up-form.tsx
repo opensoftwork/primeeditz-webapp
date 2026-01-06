@@ -66,20 +66,32 @@ export default function SignUpForm() {
     onSubmit: async ({ value }) => {
       setIsLoading(true);
       try {
-        await authClient.signUp.email({
+        const result = await authClient.signUp.email({
           email: value.email,
           password: value.password,
           name: `${value.firstName} ${value.lastName}`,
           image: undefined,
         });
+
+        // Check if sign-up was successful
+        if (result.error) {
+          // Better Auth returns error in result object
+          if (result.error.message?.includes("already exists")) {
+            toast.error("An account with this email already exists.");
+          } else {
+            toast.error(result.error.message || "Failed to create account.");
+          }
+          setIsLoading(false);
+          return;
+        }
+
+        // Only redirect if successful
         toast.success("Account created! Please complete your profile.");
         router.push("/onboarding");
       } catch (error: any) {
-        if (error.message?.includes("already exists")) {
-          toast.error("An account with this email already exists.");
-        } else {
-          toast.error(error.message || "Failed to create account.");
-        }
+        // Fallback error handling
+        console.error("Sign up error:", error);
+        toast.error(error.message || "Failed to create account.");
         setIsLoading(false);
       }
     },
