@@ -87,18 +87,49 @@ export default defineSchema({
     .index('by_role', ['role']),
 
   // --------------------------------------------------------------------------
-  // Project Types & Projects
+  // Project Types & Dynamic Fields
   // --------------------------------------------------------------------------
   projectTypes: defineTable({
     name: v.string(),
     category: v.string(),
     isActive: v.boolean(),
+    displayOrder: v.optional(v.number()), // For ordering in UI
     defaultFolderTemplateId: v.optional(v.id('folderTemplates')),
-  }).index('by_category', ['category']),
+  })
+    .index('by_category', ['category'])
+    .index('by_isActive', ['isActive']),
+
+  // Dynamic field definitions for each project type
+  // Allows admins to configure what fields appear in Step 2 of the wizard
+  projectTypeFields: defineTable({
+    projectTypeId: v.id('projectTypes'),
+    name: v.string(), // Field key (e.g., 'albumCount')
+    label: v.string(), // Display label (e.g., 'Number of Albums')
+    type: v.union(
+      v.literal('text'),
+      v.literal('number'),
+      v.literal('select'),
+      v.literal('checkbox'),
+      v.literal('textarea')
+    ),
+    required: v.boolean(),
+    placeholder: v.optional(v.string()),
+    description: v.optional(v.string()),
+    // For select type: JSON array of { value, label }
+    options: v.optional(v.string()), // JSON string of options array
+    // Validation
+    min: v.optional(v.number()),
+    max: v.optional(v.number()),
+    // Ordering
+    displayOrder: v.number(),
+    isActive: v.boolean(),
+  })
+    .index('by_projectTypeId', ['projectTypeId'])
+    .index('by_projectTypeId_active', ['projectTypeId', 'isActive']),
 
   projects: defineTable({
     code: v.string(),
-    projectTypeId: v.id('projectTypes'),
+  projectTypeId: v.id('projectTypes'),
     clientId: v.id('profiles'),
     source: projectSourceValidator,
     status: projectStatusValidator,
@@ -110,6 +141,8 @@ export default defineSchema({
     description: v.optional(v.string()),
     additionalNotes: v.optional(v.string()),
     preferredDeliveryDate: v.optional(v.number()),
+    // Reference files (uploaded during wizard)
+    referenceFiles: v.optional(v.array(v.string())),
     // Dynamic project-type-specific fields
     typeSpecificDetails: v.optional(v.any()),
     // Storage

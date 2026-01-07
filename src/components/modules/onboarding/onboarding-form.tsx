@@ -49,11 +49,17 @@ export default function OnboardingForm() {
       phone: "",
       company: "",
     },
-    validators: {
-      onSubmit: onboardingSchema,
-    },
     onSubmit: async ({ value }) => {
       setIsLoading(true);
+
+      // Validate with Zod
+      const validation = onboardingSchema.safeParse(value);
+      if (!validation.success) {
+        toast.error(validation.error.issues[0].message);
+        setIsLoading(false);
+        return;
+      }
+
       try {
         const result = await createProfile({
           name: value.name,

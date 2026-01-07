@@ -8,11 +8,17 @@
  * @module
  */
 
+import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_profiles_mutations from "../functions/profiles/mutations.js";
 import type * as functions_profiles_queries from "../functions/profiles/queries.js";
+import type * as functions_projectTypeFields_queries from "../functions/projectTypeFields/queries.js";
+import type * as functions_projectTypeFields_seed from "../functions/projectTypeFields/seed.js";
+import type * as functions_projectTypes_queries from "../functions/projectTypes/queries.js";
 import type * as functions_projects_mutations from "../functions/projects/mutations.js";
 import type * as functions_projects_queries from "../functions/projects/queries.js";
+import type * as functions_seed from "../functions/seed.js";
 import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_helpers from "../lib/helpers.js";
@@ -26,11 +32,17 @@ import type {
 } from "convex/server";
 
 declare const fullApi: ApiFromModules<{
+  admin: typeof admin;
   auth: typeof auth;
+  "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/profiles/mutations": typeof functions_profiles_mutations;
   "functions/profiles/queries": typeof functions_profiles_queries;
+  "functions/projectTypeFields/queries": typeof functions_projectTypeFields_queries;
+  "functions/projectTypeFields/seed": typeof functions_projectTypeFields_seed;
+  "functions/projectTypes/queries": typeof functions_projectTypes_queries;
   "functions/projects/mutations": typeof functions_projects_mutations;
   "functions/projects/queries": typeof functions_projects_queries;
+  "functions/seed": typeof functions_seed;
   http: typeof http;
   "lib/customFunctions": typeof lib_customFunctions;
   "lib/helpers": typeof lib_helpers;

@@ -3,7 +3,7 @@
 # Version: 6.0.0-alpha.21
 # Date: 2025-12-27T06:57:44.375Z
 
-project_name: primeeditz-tanstack-webapp
+project_name: primeeditz-nextjs-webapp
 user_skill_level: intermediate
 planning_artifacts: "{project-root}/_bmad-output/planning-artifacts"
 implementation_artifacts: "{project-root}/_bmad-output/implementation-artifacts"

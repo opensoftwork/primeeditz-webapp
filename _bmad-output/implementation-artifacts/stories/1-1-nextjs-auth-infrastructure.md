@@ -1,6 +1,6 @@
 # Story 1.1: Next.js Auth Infrastructure
 
-Status: review
+Status: done
 
 ## Story
 
@@ -182,7 +182,10 @@ Claude 3.5 Sonnet (Anthropic)
 - ✅ API route handler created at correct path
 - ✅ Convex provider wraps entire app
 - ✅ Dark mode enabled by default
-- ⏳ Awaiting dev server restart for route verification
+- ✅ Dev server running without auth errors
+- ✅ **Code Review (2026-01-06):** Added environment variable validation
+- ✅ **Code Review (2026-01-06):** Removed unused ProfileGuard component
+- ✅ **Code Review (2026-01-06):** Improved production safety with proper error messages
 
 ### File List
 
@@ -195,11 +198,20 @@ Claude 3.5 Sonnet (Anthropic)
 - `src/app/layout.tsx` (added Providers, dark mode, updated metadata)
 - `src/app/api/auth/[...all]/route.ts` (moved from `/api/[...all]`)
 
-**Already Existing (no changes):**
+**Modified (Code Review Fixes):**
 
-- `src/lib/auth-client.ts`
-- `src/lib/auth-server.ts`
-- `convex/http.ts`
-- `convex/auth.ts`
-- `convex/auth.config.ts`
-- `convex/convex.config.ts`
+- `src/app/providers.tsx` (added env validation)
+- `src/lib/auth-server.ts` (added env validation)
+
+**Deleted (Code Review Cleanup):**
+
+- `src/components/guards/profile-guard.tsx` (unused dead code)
+- `src/components/guards/index.ts` (unused dead code)
+
+**Already Existing (verified working):**
+
+- `src/lib/auth-client.ts` ✅
+- `convex/http.ts` ✅
+- `convex/auth.ts` ✅
+- `convex/auth.config.ts` ✅
+- `convex/convex.config.ts` ✅

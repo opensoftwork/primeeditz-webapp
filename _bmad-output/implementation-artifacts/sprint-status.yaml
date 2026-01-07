@@ -1,5 +1,5 @@
 # generated: 2025-12-30
-# project: primeeditz-tanstack-webapp
+# project: primeeditz-nextjs-webapp
 # tracking_system: file-system
 # story_location: _bmad-output/implementation-artifacts
 
@@ -28,7 +28,7 @@
 # - Dev moves story to 'review', then runs code-review (fresh context, ideally different LLM)
 
 generated: 2025-12-30
-project: primeeditz-tanstack-webapp
+project: primeeditz-nextjs-webapp
 tracking_system: file-system
 story_location: _bmad-output/implementation-artifacts/stories
 
@@ -36,11 +36,11 @@ development_status:
   # =========================================
   # EPIC 0: Project Foundation (Next.js 16)
   # =========================================
-  epic-0: in-progress
+  epic-0: done
   0-1-project-infrastructure-environment-setup: done
   0-2-core-v3-project-centric-schema: done
-  0-3a-base-app-shell-with-sidebar-header: ready-for-dev
-  0-3b-breadcrumb-system-user-menu: ready-for-dev
+  0-3a-base-app-shell-with-sidebar-header: done
+  0-3b-breadcrumb-system-user-menu: done
   0-4-convex-helper-utilities-auth-wrappers: done
   epic-0-retrospective: optional
 
@@ -48,37 +48,37 @@ development_status:
   # EPIC 1: Authentication & Onboarding (Next.js 16)
   # RESET for Next.js framework migration
   # =========================================
-  epic-1: in-progress
-  1-1-nextjs-auth-infrastructure: review # auth-client, auth-server, API route, Convex provider
-  1-2-sign-up-with-email-password: review # Sign up page and flow
-  1-3-sign-in-with-email-password: review # Sign in page and flow
-  1-4-profile-onboarding-flow: review # Onboarding page after first sign-in
-  1-5-route-protection-proxy: review # Next.js proxy pattern for auth protection
-  1-6-rbac-parallel-routes: review # Parallel routes for role-based layouts
-  1-7-rbac-sidebar-navigation: backlog # Dynamic sidebar based on role
+  epic-1: done
+  1-1-nextjs-auth-infrastructure: done # auth-client, auth-server, API route, Convex provider
+  1-2-sign-up-with-email-password: done # Sign up page and flow
+  1-3-sign-in-with-email-password: done # Sign in page and flow
+  1-4-profile-onboarding-flow: done # Onboarding page after first sign-in
+  1-5-route-protection-proxy: done # Next.js proxy pattern for auth protection
+  1-6-rbac-parallel-routes: done # Parallel routes for role-based layouts
+  1-7-rbac-sidebar-navigation: done # Dynamic sidebar based on role
   epic-1-retrospective: optional
 
   # =========================================
   # EPIC 2: Client Portal — Project Request
-  # Blocked by: Epic 1 (Auth infrastructure)
+  # Blocked by: Epic 1 (Auth infrastructure) ✅ COMPLETE
   # =========================================
-  epic-2: backlog
-  2-0-wizard-infrastructure-draft-project: backlog
-  2-1-client-dashboard-with-project-listing: backlog
-  2-2-wizard-step-1-project-type-basic-info: backlog
-  2-3-wizard-step-2-project-specific-details-dynamic: backlog
-  2-4-wizard-step-3-reference-files-upload: backlog
-  2-5-wizard-step-4-description-additional-notes: backlog
-  2-6-wizard-step-5-review-submit: backlog
-  2-7-client-project-detail-view: backlog
+  epic-2: in-progress
+  2-0-wizard-infrastructure-draft-project: in-progress
+  2-1-client-dashboard-with-project-listing: ready-for-dev
+  2-2-wizard-step-1-project-type-basic-info: ready-for-dev
+  2-3-wizard-step-2-project-specific-details-dynamic: ready-for-dev
+  2-4-wizard-step-3-reference-files-upload: ready-for-dev
+  2-5-wizard-step-4-description-additional-notes: ready-for-dev
+  2-6-wizard-step-5-review-submit: ready-for-dev
+  2-7-client-project-detail-view: ready-for-dev
   epic-2-retrospective: optional
 
   # =========================================
   # EPIC 3: Admin Portal — Project & System Management
   # =========================================
-  epic-3: backlog
-  3-1-admin-dashboard-layout: backlog
-  3-2-admin-project-listing-with-filters: backlog
+  epic-3: in-progress
+  3-1-admin-dashboard-layout: done
+  3-2-admin-project-listing-with-filters: done
   3-3-admin-project-detail-view: backlog
   3-4-project-stage-folder-setup: backlog
   3-5-update-project-status: backlog
