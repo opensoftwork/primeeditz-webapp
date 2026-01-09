@@ -1,7 +1,7 @@
 /**
- * Projects Module Exports
+ * Component Modules Exports
  *
- * Feature module for project-related components.
+ * Feature modules for all application components.
  */
 
-export * from './project/wizard'
+export * from './projects'

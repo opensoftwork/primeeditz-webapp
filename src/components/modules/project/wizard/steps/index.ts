@@ -1,5 +1,0 @@
-export { Step1BasicInfo } from './step-1-basic-info'
-export { Step2Details } from './step-2-details'
-export { Step3Files } from './step-3-files'
-export { Step4Description } from './step-4-description'
-export { Step5Review } from './step-5-review'

@@ -13,11 +13,13 @@
 import {
   customQuery,
   customMutation,
+  customAction,
 } from 'convex-helpers/server/customFunctions'
-import { query, mutation } from '../_generated/server'
-import type { QueryCtx, MutationCtx } from '../_generated/server'
+import { query, mutation, action } from '../_generated/server'
+import type { QueryCtx, MutationCtx, ActionCtx } from '../_generated/server'
 import type { Id } from '../_generated/dataModel'
 import { authComponent } from '../auth'
+import { api } from '../_generated/api'
 
 // ============================================================================
 // Types
@@ -254,5 +256,35 @@ export const staffMutation = customMutation(mutation, {
     const { authUser, profile } = await getAuthUserWithProfile(ctx)
     requireRole(profile, ['admin', 'employee'])
     return { ctx: { ...ctx, authUser, profile }, args: {} }
+  },
+})
+
+// ============================================================================
+// Action Wrappers
+// ============================================================================
+
+/**
+ * Action wrapper that requires client role.
+ * Adds `ctx.profile`.
+ */
+export const clientAction = customAction(action, {
+  args: {},
+  input: async (ctx: ActionCtx): Promise<{ ctx: { profile: Profile } & ActionCtx; args: Record<string, unknown> }> => {
+    const authUser = await authComponent.getAuthUser(ctx)
+    if (!authUser) {
+      throw new Error('Not authenticated')
+    }
+
+    const profile = (await ctx.runQuery(api.profiles.getMyProfile)) as Profile | null
+    
+    if (!profile) {
+      throw new Error('Profile not found')
+    }
+
+    if (profile.role !== 'client') {
+      throw new Error('Access denied')
+    }
+
+    return { ctx: { ...ctx, profile }, args: {} }
   },
 })

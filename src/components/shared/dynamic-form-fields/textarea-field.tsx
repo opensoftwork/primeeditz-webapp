@@ -34,14 +34,19 @@ export function TextareaField({
           onChange={(e) => onChange(e.target.value)}
           aria-invalid={isInvalid}
           placeholder={fieldDef.placeholder}
-          className="min-h-[100px] text-base resize-none"
+          className="min-h-[120px] p-6 text-[15px] font-black uppercase tracking-wider bg-white/3 border-white/10 focus:border-primary/40 focus:ring-primary/20 transition-all rounded-2xl resize-none"
         />
         {fieldDef.description && (
           <FieldDescription className="text-xs mt-1.5">
             {fieldDef.description}
           </FieldDescription>
         )}
-        {isInvalid && <FieldError>{errors.join(", ")}</FieldError>}
+        {isInvalid && (
+          <FieldError
+            className="mt-2 ml-1"
+            errors={errors.map((m) => ({ message: m }))}
+          />
+        )}
       </FieldContent>
     </Field>
   );

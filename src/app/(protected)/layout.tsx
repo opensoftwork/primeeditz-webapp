@@ -8,6 +8,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/modules/sidebar";
+import { usePathname } from "next/navigation";
 import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
@@ -39,11 +40,16 @@ export default function DashboardLayout({
     isAuthenticated ? {} : "skip"
   );
 
+  const pathname = usePathname();
+  const isWizardPage = pathname?.includes("/projects/new");
+
   // Show loading state while profile is being fetched
   if (!userProfile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-lg">Loading your dashboard...</div>
+        <div className="text-lg text-muted-foreground animate-pulse font-medium">
+          Loading your dashboard...
+        </div>
       </div>
     );
   }
@@ -64,43 +70,45 @@ export default function DashboardLayout({
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      {!isWizardPage && <AppSidebar />}
       <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
-          <SidebarTrigger className="-ml-1" />
-          <Separator orientation="vertical" className="mr-2 h-4" />
-          <Breadcrumb>
-            <BreadcrumbList>
-              <BreadcrumbItem className="hidden md:block">
-                <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
-              </BreadcrumbItem>
-              <BreadcrumbSeparator className="hidden md:block" />
-              <BreadcrumbItem>
-                <BreadcrumbPage>Home</BreadcrumbPage>
-              </BreadcrumbItem>
-            </BreadcrumbList>
-          </Breadcrumb>
+        {!isWizardPage && (
+          <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
+            <SidebarTrigger className="-ml-1" />
+            <Separator orientation="vertical" className="mr-2 h-4" />
+            <Breadcrumb>
+              <BreadcrumbList>
+                <BreadcrumbItem className="hidden md:block">
+                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                </BreadcrumbItem>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Home</BreadcrumbPage>
+                </BreadcrumbItem>
+              </BreadcrumbList>
+            </Breadcrumb>
 
-          {/* Right side - Polished user info */}
-          <div className="ml-auto flex items-center gap-3">
-            <div className="hidden md:flex items-center gap-3">
-              <div className="flex flex-col items-end">
-                <span className="text-sm font-medium leading-none">
-                  {userProfile.name}
-                </span>
-                <span className="mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
-                  {userProfile.role}
-                </span>
-              </div>
-              <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <span className="text-sm font-semibold">
-                  {userProfile.name.charAt(0).toUpperCase()}
-                </span>
+            {/* Right side - Polished user info */}
+            <div className="ml-auto flex items-center gap-3">
+              <div className="hidden md:flex items-center gap-3">
+                <div className="flex flex-col items-end">
+                  <span className="text-sm font-medium leading-none">
+                    {userProfile.name}
+                  </span>
+                  <span className="mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
+                    {userProfile.role}
+                  </span>
+                </div>
+                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
+                  <span className="text-sm font-semibold">
+                    {userProfile.name.charAt(0).toUpperCase()}
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </header>
-        <div className="flex flex-1 flex-col gap-4 p-4">
+          </header>
+        )}
+        <div className="flex flex-1 flex-col overflow-hidden">
           {renderRoleContent()}
         </div>
       </SidebarInset>

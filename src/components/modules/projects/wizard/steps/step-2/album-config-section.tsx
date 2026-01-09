@@ -3,8 +3,12 @@
 import { motion } from "motion/react";
 import { AlbumConfigField } from "../../album-config-field";
 
+import { type FieldValue } from "@/components/shared/dynamic-form-fields";
+
 interface AlbumConfigSectionProps {
-  form: any;
+  form: {
+    Field: any;
+  };
   albumCount: number;
 }
 
@@ -20,8 +24,10 @@ export function AlbumConfigSection({
       animate={{ opacity: 1, height: "auto" }}
       exit={{ opacity: 0, height: 0 }}
       transition={{ duration: 0.3 }}
-      className="mt-6 p-5 rounded-xl bg-linear-to-br from-primary/5 to-primary/10 border border-primary/20"
+      className="mt-10 p-8 rounded-2xl bg-white/2 border border-white/5 backdrop-blur-xs relative overflow-hidden"
     >
+      {/* Decorative accent */}
+      <div className="absolute top-0 left-0 w-1 h-full bg-primary/20" />
       <form.Field
         name="sheetsPerAlbum"
         validators={{
@@ -35,7 +41,15 @@ export function AlbumConfigSection({
             return undefined;
           },
         }}
-        children={(field: any) => {
+      >
+        {(field: {
+          state: {
+            value: FieldValue;
+            meta: { isTouched: boolean; errors: any[] };
+          };
+          handleChange: (val: FieldValue) => void;
+          handleBlur: () => void;
+        }) => {
           const isInvalid =
             field.state.meta.isTouched && field.state.meta.errors.length > 0;
           return (
@@ -48,7 +62,7 @@ export function AlbumConfigSection({
             />
           );
         }}
-      />
+      </form.Field>
     </motion.div>
   );
 }

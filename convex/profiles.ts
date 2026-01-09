@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 
 // Check if this is the first user (for admin bootstrap)
 export const isFirstUser = query({
@@ -69,5 +69,16 @@ export const getMyProfile = query({
       .first();
 
     return profile;
+  },
+});
+
+// Helper for actions to lookup profile
+export const getProfileByUserId = query({
+  args: { userId: v.string() },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", args.userId))
+      .first();
   },
 });

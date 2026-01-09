@@ -95,9 +95,9 @@ export function canAccessRoleRoute(userRole: Role | undefined, routeRole: Role):
   // Admin can access any route
   if (userRole === ROLES.admin) return true
   
-  // Staff routes
-  if (routeRole === 'employee') {
-    return userRole === ROLES.employee || userRole === ROLES.admin
+  // Staff routes - employees and admins can access
+  if (routeRole === ROLES.employee) {
+    return hasAnyRole(userRole, [ROLES.employee, ROLES.admin])
   }
   
   // Role must match exactly for other routes

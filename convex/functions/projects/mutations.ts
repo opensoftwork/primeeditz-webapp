@@ -86,6 +86,7 @@ export const createDraft = clientMutation({
       clientId: ctx.profile._id,
       source: 'client_request',
       status: 'draft',
+      lastStep: 1,
       storageUsed: 0,
       updatedAt: now(),
     })
@@ -110,11 +111,23 @@ export const updateDraft = clientMutation({
     // Step 2: Type-specific details
     typeSpecificDetails: v.optional(v.any()),
     // Step 3: Reference files (stored as IDs)
-    referenceFiles: v.optional(v.array(v.string())),
+    referenceFiles: v.optional(
+      v.array(
+        v.object({
+          fileId: v.string(),
+          fileName: v.string(),
+          fileSize: v.number(),
+          fileType: v.string(),
+          storageKey: v.optional(v.string()),
+          previewUrl: v.optional(v.string()),
+        })
+      )
+    ),
     // Step 4: Description
     description: v.optional(v.string()),
     additionalNotes: v.optional(v.string()),
     preferredDeliveryDate: v.optional(v.number()),
+    lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { projectId, ...updates } = args

@@ -150,83 +150,111 @@ export function AlbumConfigField({
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <BookOpen className="h-4 w-4 text-primary" />
-          <span className="text-sm font-medium">Sheets per Album</span>
+      <div className="flex flex-col gap-1.5 mb-2">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2.5">
+            <div className="p-2 rounded-lg bg-primary/10">
+              <BookOpen className="h-4 w-4 text-primary" />
+            </div>
+            <div>
+              <h3 className="text-sm font-black uppercase tracking-widest">
+                Album Specifications
+              </h3>
+              <p className="text-[10px] text-muted-foreground font-medium">
+                Define exact sheet counts for each of your {albumCount}{" "}
+                deliverables
+              </p>
+            </div>
+          </div>
+          {totalSheets > 0 && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-black uppercase tracking-tighter"
+            >
+              Total Volume: {totalSheets} sheets
+            </motion.div>
+          )}
         </div>
-        {totalSheets > 0 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded-full"
-          >
-            Total: {totalSheets} sheets
-          </motion.div>
-        )}
       </div>
 
       {/* Dynamic Album Inputs */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
         <AnimatePresence mode="popLayout">
           {Array.from({ length: albumCount }).map((_, index) => (
             <motion.div
               key={`album-${index}`}
-              initial={{ opacity: 0, scale: 0.8, y: 20 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.8, y: -20 }}
+              exit={{ opacity: 0, scale: 0.95, y: -10 }}
               transition={{
-                type: "spring",
-                stiffness: 500,
-                damping: 30,
+                duration: 0.2,
                 delay: index * 0.05,
               }}
+              className="relative"
             >
-              <Field>
-                <FieldLabel
-                  htmlFor={`album-sheets-${index}`}
-                  className="sr-only"
-                >
-                  Album {index + 1} Sheets
-                </FieldLabel>
-                <FieldContent>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none z-10">
-                      <span
-                        className={cn(
-                          "text-xs font-mono transition-colors",
-                          localSheets[index]
-                            ? "text-primary"
-                            : "text-muted-foreground group-focus-within:text-primary"
-                        )}
-                      >
-                        #{index + 1}
-                      </span>
-                    </div>
-                    <InputGroup>
-                      <InputGroupInput
-                        id={`album-sheets-${index}`}
-                        type="number"
-                        placeholder={`Album ${index + 1}`}
-                        value={localSheets[index] ?? ""}
-                        onChange={(e) =>
-                          handleSheetChange(index, e.target.value)
-                        }
-                        onBlur={onBlur}
-                        onKeyDown={handleKeyDown}
-                        min={min}
-                        max={max}
-                        className="text-base pl-10 pr-16"
-                      />
-                      <InputGroupAddon align="inline-end">
-                        <span className="text-xs text-muted-foreground">
-                          sheets
-                        </span>
-                      </InputGroupAddon>
-                    </InputGroup>
+              <div
+                className={cn(
+                  "p-6 rounded-2xl border transition-all duration-300 group cursor-pointer relative overflow-hidden",
+                  localSheets[index]
+                    ? "bg-primary/5 border-primary/20 shadow-xl ring-1 ring-primary/10"
+                    : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-primary/40 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1"
+                )}
+                onClick={() => {
+                  document.getElementById(`album-sheets-${index}`)?.focus();
+                }}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <span
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-[0.2em]",
+                      localSheets[index]
+                        ? "text-primary"
+                        : "text-muted-foreground/30"
+                    )}
+                  >
+                    Volume {index + 1}
+                  </span>
+                  <div
+                    className={cn(
+                      "p-1.5 rounded-lg transition-colors",
+                      localSheets[index] ? "bg-primary/10" : "bg-white/5"
+                    )}
+                  >
+                    <Layers
+                      className={cn(
+                        "h-3 w-3",
+                        localSheets[index]
+                          ? "text-primary"
+                          : "text-muted-foreground/20"
+                      )}
+                    />
                   </div>
-                </FieldContent>
-              </Field>
+                </div>
+
+                <div className="flex items-baseline gap-2 mt-4 relative z-10">
+                  <input
+                    id={`album-sheets-${index}`}
+                    type="number"
+                    placeholder="00"
+                    value={localSheets[index] ?? ""}
+                    onChange={(e) => handleSheetChange(index, e.target.value)}
+                    onBlur={onBlur}
+                    onKeyDown={handleKeyDown}
+                    min={min}
+                    max={max}
+                    className="w-16 bg-transparent border-none p-0 focus:ring-0 text-3xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                  />
+                  <span className="text-[10px] font-black uppercase text-muted-foreground/20 tracking-widest group-hover:text-primary/40 transition-colors">
+                    Sheets
+                  </span>
+                </div>
+
+                {/* Subtle background glow on hover if not active */}
+                {!localSheets[index] && (
+                  <div className="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                )}
+              </div>
             </motion.div>
           ))}
         </AnimatePresence>

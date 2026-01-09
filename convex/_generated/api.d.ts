@@ -18,6 +18,7 @@ import type * as functions_projectTypeFields_seed from "../functions/projectType
 import type * as functions_projectTypes_queries from "../functions/projectTypes/queries.js";
 import type * as functions_projects_mutations from "../functions/projects/mutations.js";
 import type * as functions_projects_queries from "../functions/projects/queries.js";
+import type * as functions_projects_storage from "../functions/projects/storage.js";
 import type * as functions_seed from "../functions/seed.js";
 import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
@@ -42,6 +43,7 @@ declare const fullApi: ApiFromModules<{
   "functions/projectTypes/queries": typeof functions_projectTypes_queries;
   "functions/projects/mutations": typeof functions_projects_mutations;
   "functions/projects/queries": typeof functions_projects_queries;
+  "functions/projects/storage": typeof functions_projects_storage;
   "functions/seed": typeof functions_seed;
   http: typeof http;
   "lib/customFunctions": typeof lib_customFunctions;

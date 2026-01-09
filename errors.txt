@@ -1,0 +1,17 @@
+convex/functions/projects/storage.ts(35,14): error TS7022: 'generateUploadUrl' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+convex/functions/projects/storage.ts(41,3): error TS7023: 'handler' implicitly has return type 'any' because it does not have a return type annotation and is referenced directly or indirectly in one of its return expressions.
+convex/functions/projects/storage.ts(43,11): error TS7022: 'project' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+convex/functions/projects/storage.ts(57,11): error TS7022: 'projectCode' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+convex/functions/projects/storage.ts(59,11): error TS7022: 'storageKey' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+convex/functions/projects/storage.ts(63,11): error TS7022: 'command' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+convex/functions/projects/storage.ts(69,11): error TS7022: 'uploadUrl' implicitly has type 'any' because it does not have a type annotation and is referenced directly or indirectly in its own initializer.
+src/app/(protected)/@admin/dashboard/page.tsx(175,37): error TS7006: Parameter 'project' implicitly has an 'any' type.
+src/app/(protected)/@client/dashboard/page.tsx(26,23): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/(protected)/@client/dashboard/page.tsx(29,23): error TS7006: Parameter 'p' implicitly has an 'any' type.
+src/app/(protected)/@client/dashboard/page.tsx(127,44): error TS7006: Parameter 'project' implicitly has an 'any' type.
+src/components/modules/admin/project-type-fields-manager.tsx(122,28): error TS7006: Parameter 'f' implicitly has an 'any' type.
+src/components/modules/admin/project-type-fields-manager.tsx(189,27): error TS7006: Parameter 'field' implicitly has an 'any' type.
+src/components/modules/admin/project-type-list.tsx(159,35): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/components/modules/projects/admin-project-list.tsx(204,36): error TS7006: Parameter 'type' implicitly has an 'any' type.
+src/components/modules/projects/admin-project-list.tsx(268,30): error TS7006: Parameter 'project' implicitly has an 'any' type.
+src/components/modules/projects/wizard/steps/step-1-project-type.tsx(137,26): error TS7006: Parameter 'pt' implicitly has an 'any' type.

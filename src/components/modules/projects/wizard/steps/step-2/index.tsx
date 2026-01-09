@@ -8,6 +8,7 @@
 
 "use client";
 
+import { useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -25,9 +26,11 @@ import { useWizardForm } from "../../wizard-form-context";
 import {
   hasAlbumConfig,
   filterAlbumFields,
+  type FieldValue,
 } from "@/components/shared/dynamic-form-fields";
 import { ArrowLeft, ArrowRight, Layers } from "lucide-react";
-import { LoadingState } from "./loading-state";
+import { cn } from "@/lib/utils";
+import { WizardLoadingState } from "../../wizard-loading-state";
 import { NoProjectTypeState } from "./no-project-type-state";
 import { NoFieldsState } from "./no-fields-state";
 import { FormFieldWrapper } from "./form-field-wrapper";
@@ -39,7 +42,11 @@ export function WizardStep2() {
     setFormData,
     nextStep,
     prevStep,
+    goToStep,
     isLoading: wizardLoading,
+    isReviewing,
+    setReviewing,
+    setSubmitTrigger,
   } = useWizardForm();
   const step2Data = formData.step2;
 
@@ -62,127 +69,114 @@ export function WizardStep2() {
 
   const form = useForm({
     defaultValues: {
-      ...(step2Data.typeSpecificDetails as Record<string, unknown>),
+      ...(step2Data.typeSpecificDetails as Record<string, FieldValue>),
       sheetsPerAlbum:
         (step2Data.typeSpecificDetails?.sheetsPerAlbum as number[]) ?? [],
     },
     onSubmit: async ({ value }) => {
-      setFormData("step2", { typeSpecificDetails: value });
-      await nextStep();
+      setFormData("step2", {
+        typeSpecificDetails: value as Record<string, FieldValue>,
+      });
+      if (isReviewing) {
+        setReviewing(false);
+        await goToStep(5);
+      } else {
+        await nextStep();
+      }
     },
   });
 
+  // Register submit trigger for the global footer
+  useEffect(() => {
+    setSubmitTrigger(() => form.handleSubmit());
+    return () => setSubmitTrigger(null);
+  }, [form, setSubmitTrigger]);
+
   const handlePrev = async () => {
-    setFormData("step2", { typeSpecificDetails: form.state.values });
+    setFormData("step2", {
+      typeSpecificDetails: form.state.values as Record<string, FieldValue>,
+    });
     await prevStep();
   };
 
-  if (
+  const isLoading =
     (dbFields === undefined || projectType === undefined) &&
-    formData.step1.projectTypeId
-  )
-    return <LoadingState />;
-  if (!projectType) return <NoProjectTypeState onBack={handlePrev} />;
-  if (!dbFields || dbFields.length === 0) {
-    return (
-      <NoFieldsState
-        projectTypeName={projectType.name}
-        onPrev={handlePrev}
-        onNext={nextStep}
-        isLoading={wizardLoading}
-      />
-    );
-  }
+    formData.step1.projectTypeId;
 
   return (
-    <motion.form
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      onSubmit={(e) => {
-        e.preventDefault();
-        form.handleSubmit();
-      }}
-      className="space-y-6"
-    >
-      <Card className="border border-border/50 shadow-sm overflow-hidden">
-        <CardHeader className="pb-4 bg-muted/20">
-          <div className="flex items-center gap-3">
-            <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center">
-              <Layers className="h-5 w-5 text-primary" />
+    <WizardLoadingState isLoading={!!isLoading}>
+      {!projectType ? (
+        <NoProjectTypeState onBack={handlePrev} />
+      ) : !dbFields || dbFields.length === 0 ? (
+        <NoFieldsState
+          projectTypeName={projectType.name}
+          onPrev={handlePrev}
+          onNext={nextStep}
+          isLoading={wizardLoading}
+        />
+      ) : (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            form.handleSubmit();
+          }}
+          className="w-full flex flex-col h-full"
+        >
+          <div className="flex-1">
+            <div className="mb-8 space-y-1">
+              <h2 className="text-xl font-black tracking-tight uppercase">
+                {projectType.name} Configuration
+              </h2>
+              <p className="text-sm text-white/40 font-medium">
+                Customize specific parameters for your{" "}
+                {projectType.name.toLowerCase()} project
+              </p>
             </div>
-            <div>
-              <CardTitle className="text-lg font-semibold">
-                {projectType.name} Details
-              </CardTitle>
-              <CardDescription className="text-sm">
-                Provide specific details for your project
-              </CardDescription>
-            </div>
-          </div>
-        </CardHeader>
 
-        <CardContent className="pt-6">
-          <FieldSet>
-            <FieldGroup className="space-y-5">
-              <div className="grid gap-5 md:grid-cols-2">
-                {displayFields.map((fieldDef, index) => (
-                  <motion.div
-                    key={fieldDef._id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2, delay: index * 0.05 }}
-                    className={
-                      fieldDef.type === "textarea" ? "md:col-span-2" : ""
+            <FieldSet className="w-full border-none p-0">
+              <FieldGroup className="space-y-8">
+                <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
+                  {displayFields.map((fieldDef, index) => (
+                    <motion.div
+                      key={fieldDef._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2, delay: index * 0.05 }}
+                      className={cn(
+                        "w-full",
+                        fieldDef.type === "textarea" ? "md:col-span-2" : ""
+                      )}
+                    >
+                      <FormFieldWrapper
+                        form={form}
+                        fieldDef={fieldDef}
+                        isAlbumCountField={
+                          isAlbumProject && fieldDef.name === "albumCount"
+                        }
+                      />
+                    </motion.div>
+                  ))}
+                </div>
+
+                {isAlbumProject && (
+                  <form.Subscribe
+                    selector={(state) =>
+                      (state.values as Record<string, unknown>)
+                        .albumCount as number
                     }
-                  >
-                    <FormFieldWrapper
-                      form={form}
-                      fieldDef={fieldDef}
-                      isAlbumCountField={
-                        isAlbumProject && fieldDef.name === "albumCount"
-                      }
-                    />
-                  </motion.div>
-                ))}
-              </div>
-
-              {isAlbumProject && (
-                <form.Subscribe
-                  selector={(state) =>
-                    (state.values as Record<string, unknown>)
-                      .albumCount as number
-                  }
-                  children={(albumCount) => (
-                    <AlbumConfigSection
-                      form={form}
-                      albumCount={albumCount ?? 0}
-                    />
-                  )}
-                />
-              )}
-            </FieldGroup>
-          </FieldSet>
-        </CardContent>
-      </Card>
-
-      <div className="flex justify-between">
-        <Button
-          type="button"
-          variant="outline"
-          onClick={handlePrev}
-          disabled={wizardLoading}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" /> Previous
-        </Button>
-        <Button
-          type="submit"
-          disabled={wizardLoading}
-          className="min-w-[120px]"
-        >
-          Next <ArrowRight className="ml-2 h-4 w-4" />
-        </Button>
-      </div>
-    </motion.form>
+                    children={(albumCount) => (
+                      <AlbumConfigSection
+                        form={form}
+                        albumCount={albumCount ?? 0}
+                      />
+                    )}
+                  />
+                )}
+              </FieldGroup>
+            </FieldSet>
+          </div>
+        </form>
+      )}
+    </WizardLoadingState>
   );
 }

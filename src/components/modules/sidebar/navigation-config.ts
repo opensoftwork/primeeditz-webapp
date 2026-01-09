@@ -69,6 +69,11 @@ export const adminNavItems: NavItem[] = [
     url: "/quotations",
     icon: FileText,
   },
+  {
+    title: "Project Types",
+    url: "/settings/project-types",
+    icon: Settings,
+  },
 ];
 
 // Common items for all roles

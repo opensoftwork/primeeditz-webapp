@@ -7,6 +7,7 @@
 
 "use client";
 
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "motion/react";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
@@ -25,11 +26,12 @@ import { WizardFormProvider, useWizardForm } from "./wizard-form-context";
 import { StepNavigation, type FormStep } from "./step-navigation";
 import { WizardStep1 } from "./steps/step-1-project-type";
 import { WizardStep2 } from "./steps/step-2";
-import { WizardStep3 } from "./steps/step-3-files";
+import { WizardStep3 } from "./steps/step-3";
 import { WizardStep4 } from "./steps/step-4-description";
 import { WizardStep5 } from "./steps/step-5-review";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { ArrowLeft, Loader2, X } from "lucide-react";
+import { ArrowLeft, ArrowRight, Check, Loader2, X } from "lucide-react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 // Define the wizard steps
@@ -51,8 +53,53 @@ export function ProjectWizard() {
 
 function ProjectWizardContent() {
   const router = useRouter();
-  const { currentStep, projectCode, isDirty, isLoading, error, goToStep } =
-    useWizardForm();
+  const {
+    currentStep,
+    projectCode,
+    isDirty,
+    isLoading,
+    error,
+    goToStep,
+    prevStep,
+    nextStep,
+    cancelWizard,
+    submitTrigger,
+    isReviewing,
+  } = useWizardForm();
+
+  // Debounce the loading state and ensure a minimum display time to prevent flicker
+  const [showSyncOverlay, setShowSyncOverlay] = useState(false);
+  const loadingStartTime = useRef<number>(0);
+
+  useEffect(() => {
+    let showTimer: NodeJS.Timeout;
+    let hideTimer: NodeJS.Timeout;
+
+    if (isLoading) {
+      // Much larger delay for the modal overlay - only show for truly slow connections
+      showTimer = setTimeout(() => {
+        setShowSyncOverlay(true);
+        loadingStartTime.current = Date.now();
+      }, 1000);
+    } else {
+      // If we are currently showing it, ensure it stays for a minimum time
+      const timeShown = Date.now() - loadingStartTime.current;
+      const MIN_VISIBILITY = 600;
+
+      if (showSyncOverlay && timeShown < MIN_VISIBILITY) {
+        hideTimer = setTimeout(() => {
+          setShowSyncOverlay(false);
+        }, MIN_VISIBILITY - timeShown);
+      } else {
+        setShowSyncOverlay(false);
+      }
+    }
+
+    return () => {
+      clearTimeout(showTimer);
+      clearTimeout(hideTimer);
+    };
+  }, [isLoading, showSyncOverlay]);
 
   // Track completed steps based on current progress
   const completedSteps = new Set(
@@ -63,12 +110,18 @@ function ProjectWizardContent() {
   const { showDialog, confirmNavigation, cancelNavigation, safeNavigate } =
     useUnsavedChanges({ isDirty });
 
-  const handleCancel = () => {
+  const handleCancel = async () => {
     if (isDirty) {
       safeNavigate("/dashboard");
     } else {
+      await cancelWizard();
       router.push("/dashboard");
     }
+  };
+
+  const handleConfirmLeave = async () => {
+    await cancelWizard();
+    confirmNavigation();
   };
 
   const handleStepClick = (stepIndex: number) => {
@@ -78,186 +131,292 @@ function ProjectWizardContent() {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="py-4 px-3 md:py-5 md:px-5 lg:py-6 lg:px-6">
-        <div className="w-full max-w-4xl mx-auto">
-          <Card className="border-0 shadow-2xl backdrop-blur-md bg-card/95 overflow-hidden">
-            {/* Header */}
-            <div className="sticky top-0 z-10 border-b bg-muted/30">
-              <div className="absolute inset-0 bg-[url('/grid.svg')] opacity-5" />
-              <div className="absolute -top-1 -right-1 w-24 h-24 bg-linear-to-bl from-primary/10 to-transparent rounded-bl-full" />
-
-              <CardHeader className="relative px-4 sm:px-5 lg:px-6 py-3 sm:py-4 lg:py-5">
-                <div className="flex flex-col lg:flex-row lg:items-start gap-3 lg:gap-4">
-                  <div className="flex-1 space-y-2.5">
-                    <div className="flex-1 space-y-1.5">
-                      <motion.div
-                        initial={{ opacity: 0, y: -10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3 }}
-                      >
-                        <h1 className="text-2xl lg:text-3xl font-bold tracking-tight bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                          New Project Request
-                        </h1>
-                        <div className="flex items-center gap-2 mt-1">
-                          <div className="h-1 w-12 bg-linear-to-r from-primary to-primary/60 rounded-full" />
-                          {projectCode && (
-                            <span className="text-xs font-mono font-medium text-primary uppercase tracking-wider">
-                              {projectCode}
-                            </span>
-                          )}
-                        </div>
-                      </motion.div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Link href="/dashboard">
-                      <Button variant="outline" size="sm" className="gap-2">
-                        <ArrowLeft className="h-4 w-4" />
-                        <span className="hidden sm:inline">Back</span>
-                      </Button>
-                    </Link>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={handleCancel}
-                      className="gap-2"
-                    >
-                      <X className="h-4 w-4" />
-                      <span className="hidden sm:inline">Cancel</span>
-                    </Button>
-                  </div>
-                </div>
-              </CardHeader>
-
-              {/* Step Navigation */}
-              <div className="border-t bg-muted/10">
-                <StepNavigation
-                  steps={WIZARD_STEPS}
-                  currentStep={currentStep - 1}
-                  completedSteps={completedSteps}
-                  onStepClick={handleStepClick}
-                  className="py-1"
-                />
+    <div className="dark flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/20">
+      {/* Utility Header */}
+      <header className="shrink-0 border-b border-white/5 flex items-center justify-between px-10 bg-background/95 backdrop-blur-xl z-20 py-8">
+        <div className="flex items-center gap-8">
+          <div className="flex flex-col gap-1">
+            <h1 className="text-xl font-black uppercase tracking-widest text-white">
+              Create Project Request
+            </h1>
+            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/40">
+              Project Setup
+            </p>
+          </div>
+          {projectCode && (
+            <div className="flex items-center gap-4">
+              <div className="px-4 py-2 rounded-xl bg-white/2 border border-white/5 shadow-sm group hover:border-primary/30 transition-all duration-500 cursor-default">
+                <span className="text-[13px] font-mono font-black text-primary tracking-widest leading-none">
+                  {projectCode}
+                </span>
               </div>
-            </div>
 
-            {/* Form Content */}
-            <CardContent className="p-4 sm:p-5 lg:p-6">
-              {/* Error Display */}
-              <AnimatePresence>
-                {error && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: "auto" }}
-                    exit={{ opacity: 0, height: 0 }}
-                    className="mb-4 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-sm"
-                  >
-                    {error}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-
-              {/* Loading Overlay */}
+              {/* Header Syncing Indicator - Subtler than the big overlay */}
               <AnimatePresence>
                 {isLoading && (
                   <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="absolute inset-0 bg-background/50 backdrop-blur-sm flex items-center justify-center z-20"
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -10 }}
+                    className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-primary/5 border border-primary/10"
                   >
-                    <div className="flex items-center gap-2">
-                      <Loader2 className="h-6 w-6 animate-spin text-primary" />
-                      <span className="text-sm text-muted-foreground">
-                        Saving...
-                      </span>
-                    </div>
+                    <Loader2 className="h-3 w-3 animate-spin text-primary" />
+                    <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/80">
+                      Saving
+                    </span>
                   </motion.div>
                 )}
               </AnimatePresence>
-
-              {/* Step Content */}
-              <div className="min-h-[400px] relative">
-                <AnimatePresence mode="wait">
-                  {currentStep === 1 && (
-                    <motion.div
-                      key="step1"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <WizardStep1 />
-                    </motion.div>
-                  )}
-                  {currentStep === 2 && (
-                    <motion.div
-                      key="step2"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <WizardStep2 />
-                    </motion.div>
-                  )}
-                  {currentStep === 3 && (
-                    <motion.div
-                      key="step3"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <WizardStep3 />
-                    </motion.div>
-                  )}
-                  {currentStep === 4 && (
-                    <motion.div
-                      key="step4"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <WizardStep4 />
-                    </motion.div>
-                  )}
-                  {currentStep === 5 && (
-                    <motion.div
-                      key="step5"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      transition={{ duration: 0.2 }}
-                    >
-                      <WizardStep5 />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-            </CardContent>
-          </Card>
+            </div>
+          )}
         </div>
+
+        <div className="flex items-center gap-6">
+          {isLoading && (
+            <div className="flex items-center gap-2 mr-1 text-white/40 animate-in fade-in slide-in-from-right-2 duration-300">
+              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span className="text-xs font-bold uppercase tracking-wider">
+                Saving
+              </span>
+            </div>
+          )}
+          <div className="w-px h-6 bg-border" />
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleCancel}
+            className="h-11 px-6 text-[11px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
+          >
+            Cancel
+          </Button>
+          <Link href="/dashboard">
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-11 px-6 text-[11px] font-black uppercase tracking-widest border-white/10 hover:border-primary/40 hover:bg-primary/5 rounded-xl transition-all shadow-lg shadow-black/20"
+            >
+              Dashboard
+            </Button>
+          </Link>
+        </div>
+      </header>
+
+      <div className="flex flex-1 overflow-hidden">
+        {/* Step Navigation Sidebar */}
+        <aside className="w-64 shrink-0 border-r bg-[#09090b] p-6 flex flex-col pt-10">
+          <StepNavigation
+            steps={WIZARD_STEPS}
+            currentStep={currentStep - 1}
+            completedSteps={completedSteps}
+            onStepClick={handleStepClick}
+          />
+
+          <div className="mt-auto relative">
+            <div className="p-5 rounded-xl bg-white/2 border border-white/5 space-y-3 backdrop-blur-sm">
+              <div className="flex items-center gap-3">
+                <div className="relative flex items-center justify-center">
+                  <div className="absolute inset-0 bg-primary/20 rounded-full blur-sm" />
+                  <Loader2 className="h-4 w-4 text-primary animate-spin relative z-10" />
+                </div>
+                <span className="text-xs font-bold uppercase tracking-widest text-white/80">
+                  Progress
+                </span>
+              </div>
+              <p className="text-[11px] text-white/40 leading-relaxed font-medium">
+                Complete all required fields to proceed to the review stage.
+              </p>
+            </div>
+
+            {/* Nav Icon Placeholder (The 'N' button from image) */}
+            <div className="absolute -left-2 -bottom-2 w-8 h-8 rounded-full bg-background border border-border flex items-center justify-center shadow-lg cursor-pointer hover:bg-muted transition-colors">
+              <span className="text-[10px] font-black italic">N</span>
+            </div>
+          </div>
+        </aside>
+
+        {/* Content Area - Full Horizontal Width */}
+        <main className="flex-1 overflow-y-auto bg-background/50 relative flex flex-col">
+          <div className="flex-1 w-full p-6 md:p-8">
+            {/* Error Display */}
+            <AnimatePresence>
+              {error && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  className="mb-8 p-4 bg-destructive/5 border border-destructive/10 rounded-xl text-destructive text-xs font-semibold flex items-center gap-3"
+                >
+                  <div className="w-1.5 h-1.5 rounded-full bg-destructive" />
+                  {error}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Step Form Container */}
+            <div className="relative w-full">
+              <AnimatePresence mode="wait">
+                {currentStep === 1 && (
+                  <motion.div
+                    key="step1"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep1 />
+                  </motion.div>
+                )}
+                {currentStep === 2 && (
+                  <motion.div
+                    key="step2"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep2 />
+                  </motion.div>
+                )}
+                {currentStep === 3 && (
+                  <motion.div
+                    key="step3"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep3 />
+                  </motion.div>
+                )}
+                {currentStep === 4 && (
+                  <motion.div
+                    key="step4"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep4 />
+                  </motion.div>
+                )}
+                {currentStep === 5 && (
+                  <motion.div
+                    key="step5"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep5 />
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Global Sticky Footer */}
+          <footer className="sticky bottom-0 shrink-0 border-t border-white/5 bg-[#09090b]/95 backdrop-blur-xl px-10 py-6 flex items-center justify-between z-20">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={prevStep}
+              disabled={isLoading || currentStep === 1}
+              className={cn(
+                "h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] border-white/10 hover:bg-white/5 transition-all duration-300 gap-3",
+                currentStep === 1 && "opacity-0 pointer-events-none"
+              )}
+            >
+              <ArrowLeft className="h-4 w-4" /> Go Back
+            </Button>
+
+            <div className="flex items-center gap-4">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mr-4">
+                Step 0{currentStep} / 05
+              </span>
+              <Button
+                type="button"
+                onClick={() => {
+                  if (submitTrigger) {
+                    submitTrigger();
+                  } else {
+                    nextStep();
+                  }
+                }}
+                disabled={isLoading}
+                className={cn(
+                  "h-12 px-10 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl transition-all duration-500 group min-w-[180px] gap-3",
+                  "bg-white text-black hover:bg-white/90 shadow-white/10"
+                )}
+              >
+                {isLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <>
+                    {currentStep === 5
+                      ? "Submit Project"
+                      : isReviewing
+                      ? "Save & Return"
+                      : currentStep === 4
+                      ? "Review Order"
+                      : "Next Step"}
+                    {currentStep === 5 ? (
+                      <Check className="h-4 w-4 group-hover:scale-125 transition-transform" />
+                    ) : (
+                      <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                    )}
+                  </>
+                )}
+              </Button>
+            </div>
+          </footer>
+
+          {/* Sync Overlay */}
+          <AnimatePresence>
+            {showSyncOverlay && (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 bg-background/60 backdrop-blur-sm flex items-center justify-center z-50 transition-all duration-300"
+              >
+                <div className="bg-background/95 border border-border/50 p-6 rounded-[2rem] shadow-2xl flex flex-col items-center gap-4 min-w-[240px]">
+                  <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                    <Loader2 className="h-6 w-6 animate-spin text-primary" />
+                  </div>
+                  <div className="space-y-1 text-center">
+                    <p className="text-sm font-black uppercase tracking-widest">
+                      Saving Changes
+                    </p>
+                    <p className="text-[10px] text-white font-bold uppercase tracking-tighter opacity-40">
+                      Ensuring data integrity...
+                    </p>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </main>
       </div>
 
       {/* Unsaved Changes Dialog */}
-      <AlertDialog open={showDialog}>
+      <AlertDialog open={showDialog} onOpenChange={cancelNavigation}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Discard changes?</AlertDialogTitle>
             <AlertDialogDescription>
-              You have unsaved changes. Are you sure you want to leave? Your
-              draft will be saved, but any unsaved changes will be lost.
+              You have unsaved changes. Leaving will discard these changes and
+              permanently remove this project draft.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={cancelNavigation}>
-              Keep Editing
+              Continue Editing
             </AlertDialogCancel>
-            <AlertDialogAction onClick={confirmNavigation}>
-              Discard Changes
+            <AlertDialogAction
+              onClick={handleConfirmLeave}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Discard & Exit
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -21,7 +21,6 @@ export function NumberField({
   onBlur,
   isInvalid,
   errors,
-  isHighlighted,
 }: FieldRenderProps) {
   const Icon = getFieldIcon(fieldDef.type, fieldDef.name);
 
@@ -35,26 +34,23 @@ export function NumberField({
       <FieldContent>
         <InputGroup>
           <InputGroupAddon align="inline-start">
-            <Icon
-              className={`h-4 w-4 ${
-                isHighlighted ? "text-primary" : "text-muted-foreground"
-              }`}
-            />
+            <Icon className="h-4 w-4 text-white/20" />
           </InputGroupAddon>
           <InputGroupInput
             id={`field-${fieldDef.name}`}
-            type="number"
             name={fieldDef.name}
+            type="number"
             value={(value as number) ?? ""}
             onBlur={onBlur}
-            onChange={(e) =>
-              onChange(e.target.value ? Number(e.target.value) : null)
-            }
+            onChange={(e) => {
+              const val = e.target.value;
+              onChange(val === "" ? null : Number(val));
+            }}
             aria-invalid={isInvalid}
-            placeholder={fieldDef.placeholder}
             min={fieldDef.min}
             max={fieldDef.max}
-            className={`text-base ${isHighlighted ? "font-medium" : ""}`}
+            placeholder={fieldDef.placeholder}
+            className="h-14 px-6 text-[15px] font-black uppercase tracking-wider text-white bg-white/3 border-white/10 focus:border-primary/40 focus:ring-primary/20 transition-all rounded-2xl [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none placeholder:text-white/10"
           />
         </InputGroup>
         {fieldDef.description && (
@@ -62,7 +58,12 @@ export function NumberField({
             {fieldDef.description}
           </FieldDescription>
         )}
-        {isInvalid && <FieldError>{errors.join(", ")}</FieldError>}
+        {isInvalid && (
+          <FieldError
+            className="mt-2 ml-1"
+            errors={errors.map((m) => ({ message: m }))}
+          />
+        )}
       </FieldContent>
     </Field>
   );

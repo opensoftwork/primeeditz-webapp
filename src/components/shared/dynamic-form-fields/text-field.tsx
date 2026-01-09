@@ -34,7 +34,7 @@ export function TextField({
       <FieldContent>
         <InputGroup>
           <InputGroupAddon align="inline-start">
-            <Icon className="h-4 w-4 text-muted-foreground" />
+            <Icon className="h-4 w-4 text-white/20" />
           </InputGroupAddon>
           <InputGroupInput
             id={`field-${fieldDef.name}`}
@@ -45,7 +45,7 @@ export function TextField({
             aria-invalid={isInvalid}
             placeholder={fieldDef.placeholder}
             autoComplete="off"
-            className="text-base"
+            className="h-14 px-6 text-[15px] font-black uppercase tracking-wider text-white bg-white/3 border-white/10 focus:border-primary/40 focus:ring-primary/20 transition-all rounded-2xl placeholder:text-white/10"
           />
         </InputGroup>
         {fieldDef.description && (
@@ -53,7 +53,12 @@ export function TextField({
             {fieldDef.description}
           </FieldDescription>
         )}
-        {isInvalid && <FieldError>{errors.join(", ")}</FieldError>}
+        {isInvalid && (
+          <FieldError
+            className="mt-2 ml-1"
+            errors={errors.map((m) => ({ message: m }))}
+          />
+        )}
       </FieldContent>
     </Field>
   );

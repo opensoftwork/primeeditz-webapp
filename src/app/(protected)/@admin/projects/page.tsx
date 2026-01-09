@@ -1,4 +1,4 @@
-import { AdminProjectList } from "@/components/modules/project/admin-project";
+import { AdminProjectList } from "@/components/modules/projects/admin-project-list";
 
 export default function AdminProjectsPage() {
   return <AdminProjectList />;

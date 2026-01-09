@@ -1,6 +1,6 @@
 "use client";
 
-import { DbFieldDefinition, FieldRenderProps } from "./types";
+import { DbFieldDefinition, FieldRenderProps, FieldValue } from "./types";
 import { TextField } from "./text-field";
 import { NumberField } from "./number-field";
 import { SelectField } from "./select-field";
@@ -9,8 +9,8 @@ import { TextareaField } from "./textarea-field";
 
 interface DynamicFieldProps {
   fieldDef: DbFieldDefinition;
-  value: unknown;
-  onChange: (value: unknown) => void;
+  value: FieldValue;
+  onChange: (value: FieldValue) => void;
   onBlur: () => void;
   isInvalid: boolean;
   errors: string[];

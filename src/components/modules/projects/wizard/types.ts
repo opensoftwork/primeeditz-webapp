@@ -74,14 +74,25 @@ export interface Step1Data {
   venue: string
 }
 
+import { type FieldValue } from '@/components/shared/dynamic-form-fields'
+
 /** Step 2: Type-Specific Details (dynamic based on project type) */
 export interface Step2Data {
-  typeSpecificDetails: Record<string, unknown>
+  typeSpecificDetails: Record<string, FieldValue>
 }
 
 /** Step 3: Reference Files */
+export interface ReferenceFile {
+  fileId: string
+  fileName: string
+  fileSize: number
+  fileType: string
+  storageKey?: string
+  previewUrl?: string
+}
+
 export interface Step3Data {
-  referenceFiles: string[] // File IDs or URLs
+  referenceFiles: ReferenceFile[]
 }
 
 /** Step 4: Description & Notes */

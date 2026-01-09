@@ -7,7 +7,7 @@
 
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -16,13 +16,6 @@ import { format } from "date-fns";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import {
   Popover,
   PopoverContent,
@@ -42,7 +35,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { Skeleton } from "@/components/ui/skeleton";
+import { WizardLoadingState } from "../wizard-loading-state";
 import { useWizardForm } from "../wizard-form-context";
 import { ProjectTypeSelectionDrawer } from "../project-type-drawer";
 import { ArrowRight, CalendarIcon, MapPin, Tag, User } from "lucide-react";
@@ -53,7 +46,11 @@ export function WizardStep1() {
     formData,
     setFormData,
     nextStep,
+    goToStep,
     isLoading: wizardLoading,
+    isReviewing,
+    setReviewing,
+    setSubmitTrigger,
   } = useWizardForm();
   const step1Data = formData.step1;
   const [projectTypeDrawerOpen, setProjectTypeDrawerOpen] = useState(false);
@@ -81,7 +78,12 @@ export function WizardStep1() {
         eventDate: value.eventDate ?? null,
         venue: value.venue ?? "",
       });
-      await nextStep();
+      if (isReviewing) {
+        setReviewing(false);
+        await goToStep(5);
+      } else {
+        await nextStep();
+      }
     },
   });
 
@@ -90,311 +92,284 @@ export function WizardStep1() {
     form.setFieldValue("projectTypeId", projectTypeId);
   };
 
-  if (!projectTypes) {
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="space-y-6"
-      >
-        <div className="space-y-2">
-          <Skeleton className="h-4 w-24" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-        <div className="grid gap-4 md:grid-cols-2">
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-2">
-            <Skeleton className="h-4 w-24" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
-      </motion.div>
-    );
-  }
+  // Register submit trigger for the global footer
+  useEffect(() => {
+    setSubmitTrigger(() => form.handleSubmit());
+    return () => setSubmitTrigger(null);
+  }, [form, setSubmitTrigger]);
 
   return (
-    <>
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
+    <WizardLoadingState isLoading={!projectTypes}>
+      <form
         onSubmit={(e) => {
           e.preventDefault();
           form.handleSubmit();
         }}
+        className="w-full flex flex-col h-full"
       >
-        <Card className="border border-border/50 shadow-sm">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base font-semibold">
+        <div className="flex-1">
+          <div className="mb-8 space-y-1">
+            <h2 className="text-xl font-black tracking-tight uppercase text-white">
               Basic Information
-            </CardTitle>
-            <CardDescription className="text-sm">
+            </h2>
+            <p className="text-sm text-white/40 font-medium">
               Core details about your project request
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <FieldSet>
-              <FieldGroup className="space-y-4">
-                {/* Project Type - Opens Drawer */}
-                <form.Field
-                  name="projectTypeId"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value ? "Please select a project type" : undefined,
-                  }}
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched &&
-                      field.state.meta.errors.length > 0;
-                    // Use the form field value to find the selected project type
-                    const currentProjectType = projectTypes?.find(
-                      (pt) => pt._id === field.state.value
-                    );
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor="projectType">
-                          Project Type{" "}
-                          <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <FieldContent>
-                          <Button
-                            type="button"
-                            variant="outline"
-                            onClick={() => setProjectTypeDrawerOpen(true)}
-                            className={cn(
-                              "w-full justify-start gap-2",
-                              !currentProjectType && "text-muted-foreground"
-                            )}
-                          >
-                            <Tag className="h-4 w-4" />
-                            {currentProjectType?.name || "Select project type"}
-                          </Button>
-                          <FieldDescription className="mt-2">
-                            Click to select from available project types
-                          </FieldDescription>
-                          {isInvalid && (
-                            <FieldError>
-                              {field.state.meta.errors.join(", ")}
-                            </FieldError>
-                          )}
-                        </FieldContent>
-                      </Field>
-                    );
-                  }}
-                />
+            </p>
+          </div>
 
-                {/* End Client Name */}
-                <form.Field
-                  name="endClientName"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value || value.length < 2
-                        ? "Client name must be at least 2 characters"
-                        : undefined,
-                  }}
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched &&
-                      field.state.meta.errors.length > 0;
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor="endClientName">
-                          End Client Name{" "}
-                          <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <FieldContent>
-                          <InputGroup>
-                            <InputGroupAddon align="inline-start">
-                              <User className="h-4 w-4 text-muted-foreground" />
-                            </InputGroupAddon>
-                            <InputGroupInput
-                              id="endClientName"
-                              name={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) =>
-                                field.handleChange(e.target.value)
-                              }
-                              aria-invalid={isInvalid}
-                              placeholder="e.g., John & Jane"
-                              autoComplete="off"
-                            />
-                          </InputGroup>
-                          {isInvalid && (
-                            <FieldError>
-                              {field.state.meta.errors.join(", ")}
-                            </FieldError>
-                          )}
-                        </FieldContent>
-                      </Field>
-                    );
-                  }}
-                />
-
-                {/* Event Name */}
-                <form.Field
-                  name="eventName"
-                  validators={{
-                    onChange: ({ value }) =>
-                      !value || value.length < 2
-                        ? "Event name must be at least 2 characters"
-                        : undefined,
-                  }}
-                  children={(field) => {
-                    const isInvalid =
-                      field.state.meta.isTouched &&
-                      field.state.meta.errors.length > 0;
-                    return (
-                      <Field data-invalid={isInvalid}>
-                        <FieldLabel htmlFor="eventName">
-                          Event Name <span className="text-destructive">*</span>
-                        </FieldLabel>
-                        <FieldContent>
-                          <InputGroup>
-                            <InputGroupAddon align="inline-start">
-                              <Tag className="h-4 w-4 text-muted-foreground" />
-                            </InputGroupAddon>
-                            <InputGroupInput
-                              id="eventName"
-                              name={field.name}
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) =>
-                                field.handleChange(e.target.value)
-                              }
-                              aria-invalid={isInvalid}
-                              placeholder="e.g., Smith Wedding"
-                              autoComplete="off"
-                            />
-                          </InputGroup>
-                          {isInvalid && (
-                            <FieldError>
-                              {field.state.meta.errors.join(", ")}
-                            </FieldError>
-                          )}
-                        </FieldContent>
-                      </Field>
-                    );
-                  }}
-                />
-
-                {/* Event Date - Calendar Popover */}
-                <form.Field
-                  name="eventDate"
-                  children={(field) => {
-                    return (
-                      <Field>
-                        <FieldLabel htmlFor="eventDate">
-                          Event Date (Optional)
-                        </FieldLabel>
-                        <FieldContent>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                className={cn(
-                                  "w-full justify-start text-left font-normal",
-                                  !field.state.value && "text-muted-foreground"
-                                )}
-                              >
-                                <CalendarIcon className="mr-2 h-4 w-4" />
-                                {field.state.value
-                                  ? format(field.state.value, "PPP")
-                                  : "Pick a date"}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent
-                              className="w-auto p-0"
-                              align="start"
+          <div className="w-full">
+            <FieldSet className="w-full border-none p-0">
+              <FieldGroup className="space-y-10">
+                <div className="grid gap-x-8 gap-y-10 md:grid-cols-2">
+                  {/* Project Type - Opens Drawer */}
+                  <form.Field
+                    name="projectTypeId"
+                    validators={{
+                      onChange: ({ value }) =>
+                        !value ? "Please select a project type" : undefined,
+                    }}
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched &&
+                        field.state.meta.errors.length > 0;
+                      // Use the form field value to find the selected project type
+                      const currentProjectType = projectTypes?.find(
+                        (pt: { _id: string; name: string }) =>
+                          pt._id === field.state.value
+                      );
+                      return (
+                        <Field
+                          data-invalid={isInvalid}
+                          className="md:col-span-2"
+                        >
+                          <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                            Project Type{" "}
+                            <span className="text-primary ml-1.5">*</span>
+                          </FieldLabel>
+                          <FieldContent>
+                            <Button
+                              type="button"
+                              className={cn(
+                                "w-full h-12 justify-start gap-4 rounded-xl border border-white/10 bg-white/3 hover:bg-white/5 hover:border-white/20 transition-all duration-300 font-black uppercase tracking-wider px-4",
+                                currentProjectType
+                                  ? "text-white"
+                                  : "text-white/20"
+                              )}
+                              onClick={() => setProjectTypeDrawerOpen(true)}
                             >
-                              <Calendar
-                                mode="single"
-                                selected={
-                                  field.state.value
-                                    ? new Date(field.state.value)
-                                    : undefined
-                                }
-                                onSelect={(date) =>
-                                  field.handleChange(date?.getTime() ?? null)
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FieldDescription className="mt-2">
-                            Select the date when your event will take place
-                          </FieldDescription>
-                        </FieldContent>
-                      </Field>
-                    );
-                  }}
-                />
+                              <Tag className="h-4 w-4 text-primary" />
+                              <span className="text-[15px]">
+                                {currentProjectType?.name ||
+                                  "Select project type"}
+                              </span>
+                            </Button>
+                            {isInvalid && (
+                              <FieldError className="mt-2 ml-1">
+                                {field.state.meta.errors.join(", ")}
+                              </FieldError>
+                            )}
+                          </FieldContent>
+                        </Field>
+                      );
+                    }}
+                  />
 
-                {/* Venue */}
-                <form.Field
-                  name="venue"
-                  children={(field) => {
-                    return (
-                      <Field>
-                        <FieldLabel htmlFor="venue">
-                          Venue (Optional)
-                        </FieldLabel>
-                        <FieldContent>
-                          <InputGroup>
-                            <InputGroupAddon align="inline-start">
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                            </InputGroupAddon>
-                            <InputGroupInput
-                              id="venue"
-                              name={field.name}
-                              value={field.state.value ?? ""}
-                              onBlur={field.handleBlur}
-                              onChange={(e) =>
-                                field.handleChange(e.target.value)
-                              }
-                              placeholder="e.g., Grand Ballroom, Central Park"
-                              autoComplete="off"
-                            />
-                          </InputGroup>
-                          <FieldDescription className="text-xs">
-                            Location or venue where the event will be held
-                          </FieldDescription>
-                        </FieldContent>
-                      </Field>
-                    );
-                  }}
-                />
+                  {/* End Client Name */}
+                  <form.Field
+                    name="endClientName"
+                    validators={{
+                      onChange: ({ value }) =>
+                        !value || value.length < 2
+                          ? "Client name must be at least 2 characters"
+                          : undefined,
+                    }}
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched &&
+                        field.state.meta.errors.length > 0;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                            End Client Name{" "}
+                            <span className="text-primary ml-1.5">*</span>
+                          </FieldLabel>
+                          <FieldContent>
+                            <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
+                              <InputGroupAddon
+                                align="inline-start"
+                                className="pl-4"
+                              >
+                                <User className="h-4 w-4 text-white/10" />
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                id="endClientName"
+                                name={field.name}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                aria-invalid={isInvalid}
+                                placeholder="e.g., John & Jane"
+                                className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
+                              />
+                            </InputGroup>
+                            {isInvalid && (
+                              <FieldError className="mt-2 ml-1">
+                                {field.state.meta.errors.join(", ")}
+                              </FieldError>
+                            )}
+                          </FieldContent>
+                        </Field>
+                      );
+                    }}
+                  />
+
+                  {/* Event Name */}
+                  <form.Field
+                    name="eventName"
+                    validators={{
+                      onChange: ({ value }) =>
+                        !value || value.length < 2
+                          ? "Event name must be at least 2 characters"
+                          : undefined,
+                    }}
+                    children={(field) => {
+                      const isInvalid =
+                        field.state.meta.isTouched &&
+                        field.state.meta.errors.length > 0;
+                      return (
+                        <Field data-invalid={isInvalid}>
+                          <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                            Event Name{" "}
+                            <span className="text-primary ml-1.5">*</span>
+                          </FieldLabel>
+                          <FieldContent>
+                            <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
+                              <InputGroupAddon
+                                align="inline-start"
+                                className="pl-4"
+                              >
+                                <Tag className="h-4 w-4 text-white/10" />
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                id="eventName"
+                                name={field.name}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                aria-invalid={isInvalid}
+                                placeholder="e.g., Smith Wedding"
+                                className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
+                              />
+                            </InputGroup>
+                            {isInvalid && (
+                              <FieldError className="mt-2 ml-1">
+                                {field.state.meta.errors.join(", ")}
+                              </FieldError>
+                            )}
+                          </FieldContent>
+                        </Field>
+                      );
+                    }}
+                  />
+
+                  {/* Event Date - Calendar Popover */}
+                  <form.Field
+                    name="eventDate"
+                    children={(field) => {
+                      return (
+                        <Field>
+                          <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                            Event Date (Optional)
+                          </FieldLabel>
+                          <FieldContent>
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full h-12 justify-start text-left font-black uppercase tracking-wider rounded-xl border-white/10 bg-white/3 hover:bg-white/5 hover:border-white/20 transition-all duration-300 px-4",
+                                    !field.state.value && "text-white/20"
+                                  )}
+                                >
+                                  <CalendarIcon className="mr-3 h-4 w-4 text-white/10" />
+                                  <span className="text-[15px]">
+                                    {field.state.value
+                                      ? format(field.state.value, "PPP")
+                                      : "Pick a date"}
+                                  </span>
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent
+                                className="w-auto p-0 bg-background border-white/10 rounded-2xl shadow-2xl"
+                                align="start"
+                              >
+                                <Calendar
+                                  mode="single"
+                                  selected={
+                                    field.state.value
+                                      ? new Date(field.state.value)
+                                      : undefined
+                                  }
+                                  onSelect={(date) =>
+                                    field.handleChange(date?.getTime() ?? null)
+                                  }
+                                  disabled={(date) => date < new Date()}
+                                  initialFocus
+                                  className="p-3"
+                                />
+                              </PopoverContent>
+                            </Popover>
+                          </FieldContent>
+                        </Field>
+                      );
+                    }}
+                  />
+
+                  {/* Venue */}
+                  <form.Field
+                    name="venue"
+                    children={(field) => {
+                      return (
+                        <Field>
+                          <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                            Venue (Optional)
+                          </FieldLabel>
+                          <FieldContent>
+                            <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
+                              <InputGroupAddon
+                                align="inline-start"
+                                className="pl-4"
+                              >
+                                <MapPin className="h-4 w-4 text-white/10" />
+                              </InputGroupAddon>
+                              <InputGroupInput
+                                id="venue"
+                                name={field.name}
+                                value={field.state.value ?? ""}
+                                onBlur={field.handleBlur}
+                                onChange={(e) =>
+                                  field.handleChange(e.target.value)
+                                }
+                                placeholder="e.g., Grand Ballroom"
+                                className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
+                              />
+                            </InputGroup>
+                          </FieldContent>
+                        </Field>
+                      );
+                    }}
+                  />
+                </div>
               </FieldGroup>
             </FieldSet>
-          </CardContent>
-        </Card>
-
-        {/* Navigation */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
-          className="flex justify-end pt-6"
-        >
-          <form.Subscribe
-            selector={(state) => [state.canSubmit, state.isSubmitting]}
-            children={([canSubmit, isSubmitting]) => (
-              <Button
-                type="submit"
-                disabled={!canSubmit || isSubmitting || wizardLoading}
-                className="min-w-[120px]"
-              >
-                Next
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            )}
-          />
-        </motion.div>
-      </motion.form>
+          </div>
+        </div>
+      </form>
 
       {/* Project Type Selection Drawer */}
       <ProjectTypeSelectionDrawer
@@ -404,6 +379,6 @@ export function WizardStep1() {
         selectedProjectTypeId={form.state.values.projectTypeId}
         onSelect={handleProjectTypeSelect}
       />
-    </>
+    </WizardLoadingState>
   );
 }

@@ -133,6 +133,7 @@ export default defineSchema({
     clientId: v.id('profiles'),
     source: projectSourceValidator,
     status: projectStatusValidator,
+    lastStep: v.optional(v.number()), // To track wizard progress (1-5)
     // Event/project details
     endClientName: v.optional(v.string()),
     eventName: v.optional(v.string()),
@@ -142,7 +143,18 @@ export default defineSchema({
     additionalNotes: v.optional(v.string()),
     preferredDeliveryDate: v.optional(v.number()),
     // Reference files (uploaded during wizard)
-    referenceFiles: v.optional(v.array(v.string())),
+    referenceFiles: v.optional(
+      v.array(
+        v.object({
+          fileId: v.string(),
+          fileName: v.string(),
+          fileSize: v.number(),
+          fileType: v.string(),
+          storageKey: v.optional(v.string()),
+          previewUrl: v.optional(v.string()),
+        })
+      )
+    ),
     // Dynamic project-type-specific fields
     typeSpecificDetails: v.optional(v.any()),
     // Storage

@@ -60,6 +60,23 @@ export const getDraft = clientQuery({
 })
 
 /**
+ * Get the current active draft project for the current client.
+ * Used to resume a draft without knowing its ID.
+ */
+export const getMyActiveDraft = clientQuery({
+  args: {},
+  handler: async (ctx) => {
+    const draft = await ctx.db
+      .query('projects')
+      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
+      .filter((q) => q.eq(q.field('status'), 'draft'))
+      .first()
+
+    return draft
+  },
+})
+
+/**
  * Get a single project by ID.
  * Verifies ownership for clients.
  */

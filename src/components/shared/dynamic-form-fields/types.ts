@@ -21,10 +21,12 @@ export interface SelectOption {
   label: string
 }
 
+export type FieldValue = string | number | boolean | number[] | null | undefined
+
 export interface FieldRenderProps {
   fieldDef: DbFieldDefinition
-  value: unknown
-  onChange: (value: unknown) => void
+  value: FieldValue
+  onChange: (value: FieldValue) => void
   onBlur: () => void
   isInvalid: boolean
   errors: string[]
