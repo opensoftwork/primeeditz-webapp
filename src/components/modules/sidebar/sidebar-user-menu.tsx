@@ -48,62 +48,73 @@ export function SidebarUserMenu({
   };
 
   return (
-    <SidebarFooter>
+    <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-3 group-data-[collapsible=icon]:pb-8 transition-all duration-300">
       <SidebarMenu>
         <SidebarMenuItem>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                className="h-14 rounded-xl border border-white/5 bg-white/2 px-3 transition-all duration-300 hover:bg-white/5 hover:border-white/10 data-[state=open]:bg-white/5 shadow-sm group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto"
               >
                 {isLoading ? (
                   <>
-                    <Skeleton className="size-8 rounded-lg shrink-0" />
-                    <div className="grid flex-1 text-left text-sm leading-tight gap-1">
+                    <Skeleton className="size-10 rounded-lg shrink-0 group-data-[collapsible=icon]:size-10" />
+                    <div className="grid flex-1 text-left text-sm leading-tight gap-1 group-data-[collapsible=icon]:hidden">
                       <Skeleton className="h-4 w-full" />
                       <Skeleton className="h-3 w-16" />
                     </div>
-                    <ChevronUp className="ml-auto size-4" />
+                    <ChevronUp className="ml-auto size-4 group-data-[collapsible=icon]:hidden" />
                   </>
                 ) : (
                   <>
-                    <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                      <User2 className="size-4" />
+                    <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-linear-to-br from-white/10 to-white/5 text-foreground/80 shadow-inner ring-1 ring-white/10 shrink-0 group-data-[collapsible=icon]:size-10">
+                      <User2 className="size-6 group-data-[collapsible=icon]:size-6" />
                     </div>
-                    <div className="grid flex-1 text-left text-sm leading-tight">
-                      <span className="truncate font-semibold">{userName}</span>
-                      <span className="truncate text-xs capitalize text-muted-foreground">
+                    <div className="grid flex-1 text-left leading-tight ml-2 group-data-[collapsible=icon]:hidden">
+                      <span className="truncate text-sm font-bold tracking-tight">
+                        {userName}
+                      </span>
+                      <span className="truncate text-[10px] uppercase tracking-widest font-black opacity-30 mt-0.5">
                         {userRole}
                       </span>
                     </div>
-                    <ChevronUp className="ml-auto size-4" />
+                    <ChevronUp className="ml-auto size-4 opacity-30 group-data-[collapsible=icon]:hidden" />
                   </>
                 )}
               </SidebarMenuButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent
-              className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-              side="top"
+              className="w-[--radix-dropdown-menu-trigger-width] min-w-64 rounded-xl p-2 bg-popover/80 backdrop-blur-xl border-white/10 shadow-2xl"
+              side="right"
               align="end"
-              sideOffset={4}
+              sideOffset={16}
             >
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                className="rounded-lg py-2.5 focus:bg-primary/10 focus:text-primary transition-colors"
+              >
                 <Link href="/settings/profile">
-                  <User2 className="mr-2 size-4" />
-                  Profile Settings
+                  <User2 className="mr-2 size-4 opacity-60" />
+                  <span className="font-medium text-sm">Profile Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
+              <DropdownMenuItem
+                asChild
+                className="rounded-lg py-2.5 focus:bg-primary/10 focus:text-primary transition-colors"
+              >
                 <Link href="/settings">
-                  <Settings className="mr-2 size-4" />
-                  Settings
+                  <Settings className="mr-2 size-4 opacity-60" />
+                  <span className="font-medium text-sm">System Settings</span>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={handleSignOut}>
+              <DropdownMenuSeparator className="bg-white/10 my-1" />
+              <DropdownMenuItem
+                onClick={handleSignOut}
+                className="rounded-lg py-2.5 focus:bg-destructive/10 focus:text-destructive transition-colors text-destructive"
+              >
                 <LogOut className="mr-2 size-4" />
-                Sign out
+                <span className="font-bold text-sm">Sign out</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

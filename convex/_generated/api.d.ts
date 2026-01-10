@@ -20,9 +20,11 @@ import type * as functions_projects_mutations from "../functions/projects/mutati
 import type * as functions_projects_queries from "../functions/projects/queries.js";
 import type * as functions_projects_storage from "../functions/projects/storage.js";
 import type * as functions_seed from "../functions/seed.js";
+import type * as functions_storage_actions from "../functions/storage/actions.js";
 import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_helpers from "../lib/helpers.js";
+import type * as lib_storageUtils from "../lib/storageUtils.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as profiles from "../profiles.js";
 
@@ -45,9 +47,11 @@ declare const fullApi: ApiFromModules<{
   "functions/projects/queries": typeof functions_projects_queries;
   "functions/projects/storage": typeof functions_projects_storage;
   "functions/seed": typeof functions_seed;
+  "functions/storage/actions": typeof functions_storage_actions;
   http: typeof http;
   "lib/customFunctions": typeof lib_customFunctions;
   "lib/helpers": typeof lib_helpers;
+  "lib/storageUtils": typeof lib_storageUtils;
   "lib/validators": typeof lib_validators;
   profiles: typeof profiles;
 }>;

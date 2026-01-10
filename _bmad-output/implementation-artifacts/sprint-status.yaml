@@ -62,28 +62,29 @@ development_status:
   # EPIC 2: Client Portal — Project Request
   # Blocked by: Epic 1 (Auth infrastructure) ✅ COMPLETE
   # =========================================
-  epic-2: in-progress
-  2-0-wizard-infrastructure-draft-project: in-progress
-  2-1-client-dashboard-with-project-listing: ready-for-dev
-  2-2-wizard-step-1-project-type-basic-info: ready-for-dev
-  2-3-wizard-step-2-project-specific-details-dynamic: ready-for-dev
-  2-4-wizard-step-3-reference-files-upload: ready-for-dev
-  2-5-wizard-step-4-description-additional-notes: ready-for-dev
-  2-6-wizard-step-5-review-submit: ready-for-dev
-  2-7-client-project-detail-view: ready-for-dev
-  epic-2-retrospective: optional
+  epic-2: done
+  2-0-wizard-infrastructure-draft-project: done
+  2-1-client-dashboard-with-project-listing: done
+  2-2-wizard-step-1-project-type-basic-info: done
+  2-3-wizard-step-2-project-specific-details-dynamic: done
+  2-4-wizard-step-3-reference-files-upload: done
+  2-5-wizard-step-4-description-additional-notes: done
+  2-6-wizard-step-5-review-submit: done
+  2-7-client-project-detail-view: done
+  epic-2-retrospective: done
 
   # =========================================
   # EPIC 3: Admin Portal — Project & System Management
+  # Updated: 2026-01-09 with Epic 2 learnings applied
   # =========================================
   epic-3: in-progress
   3-1-admin-dashboard-layout: done
   3-2-admin-project-listing-with-filters: done
-  3-3-admin-project-detail-view: backlog
+  3-3-admin-project-detail-view: ready-for-dev # New story file created with Epic 2 patterns
   3-4-project-stage-folder-setup: backlog
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog
-  3-7-project-types-management: backlog
+  3-7-project-types-management: backlog # Story file exists (project-type-fields-admin.md)
   3-8-quotation-templates-management: backlog
   3-9-storage-pricing-tiers-configuration: backlog
   3-10-folder-templates-configuration: backlog

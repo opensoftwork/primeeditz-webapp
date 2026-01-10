@@ -17,6 +17,26 @@
 
 ---
 
+## 📘 Epic 2 Learnings Applied
+
+**IMPORTANT**: Based on Epic 2 retrospective (2026-01-09), apply these corrections:
+
+### Framework Corrections
+
+| Original Specification | Actual Implementation     |
+| ---------------------- | ------------------------- |
+| TanStack Start Router  | **Next.js 15 App Router** |
+| TanStack Form          | **React Hook Form + Zod** |
+
+### Reusable Patterns
+
+1. **Route Structure**: Use parallel routes (`@client/`, `@admin/`)
+2. **Form Handling**: React Hook Form with Zod validation
+3. **Styling**: Premium studio aesthetic with motion/react animations
+4. **Data Fetching**: Convex useQuery with authenticated wrappers
+
+---
+
 ### Story 4.1: Create Quotation from Template
 
 **As an** Admin,

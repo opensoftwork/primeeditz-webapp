@@ -12,6 +12,8 @@
 - Project detail view (client perspective)
 - Project status display
 - Project code generation
+- **Production Vault**: Shared asset management system with high-fidelity Image Projection Slider
+- **Secure Asset Protocol**: Unified MinIO access via pre-signed authenticated URLs
 
 **Standalone:** ✅ Clients can create and view projects without admin intervention.
 
@@ -180,3 +182,7 @@
 - **And** real-time subscription must update the status if it changes.
 - **And** loading state must show skeleton components.
 - **And** empty states must be shown for sections with no data.
+- **Production Vault**: A shared system (`FilesVaultDrawer`) used in both the wizard and detail views to provide a consistent, high-density asset browsing experience.
+- **Image Projection Slider**: A dedicated high-fidelity viewer for visual assets, integrated directly into the vault and main detail page.
+- **MinIO Signing Action**: Move to server-side URL generation using `getSignedFileUrl` action for secure, time-limited access to files.
+- **Type-Safe Reference Handling**: Enrichment of project data in Convex queries to support the `displayUrl` pattern.

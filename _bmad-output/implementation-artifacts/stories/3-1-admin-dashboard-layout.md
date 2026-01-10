@@ -1,7 +1,7 @@
 # Story 3.1: Admin Dashboard Layout
 
 **Epic**: Epic 3 - Admin Portal — Project & System Management  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Medium  
 **Created**: 2026-01-06
 
@@ -307,25 +307,26 @@ if (!dashboardStats || !pendingProjects) {
 
 ## 🚀 Definition of Done
 
-- [ ] Admin dashboard queries created and tested
-- [ ] Dashboard page component updated with real data
-- [ ] All acceptance criteria met
-- [ ] Loading states implemented
-- [ ] Empty states implemented
-- [ ] Manual testing completed
-- [ ] Code follows project patterns (convex-helpers, shadcn/ui)
-- [ ] No TypeScript errors
-- [ ] No console errors in browser
-- [ ] Responsive design verified
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Admin dashboard queries created and tested
+- [x] Dashboard page component updated with real data
+- [x] All acceptance criteria met
+- [x] Loading states implemented
+- [x] Empty states implemented
+- [x] Manual testing completed
+- [x] Code follows project patterns (convex-helpers, shadcn/ui)
+- [x] No TypeScript errors
+- [x] No console errors in browser
+- [x] Responsive design verified
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status        | Notes                         |
-| ---------- | ------------- | ----------------------------- |
-| 2026-01-06 | ready-for-dev | Story created, ready to start |
+| Date       | Status        | Notes                                                     |
+| ---------- | ------------- | --------------------------------------------------------- |
+| 2026-01-06 | ready-for-dev | Story created, ready to start                             |
+| 2026-01-07 | done          | Implemented with premium stats cards and pending requests |
 
 ---
 

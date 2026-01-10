@@ -18,6 +18,33 @@
 
 ---
 
+## 📘 Epic 2 Learnings Applied
+
+**IMPORTANT**: Based on Epic 2 retrospective (2026-01-09), apply these corrections:
+
+### Framework Corrections
+
+| Original Specification | Actual Implementation     |
+| ---------------------- | ------------------------- |
+| TanStack Start Router  | **Next.js 15 App Router** |
+| TanStack Form          | **React Hook Form + Zod** |
+
+### Critical Patterns from Epic 2
+
+1. **Pre-signed MinIO URLs**: Use `storage/actions:getSignedFileUrls` for download URLs
+2. **Upload URLs**: Create similar action for upload signed URLs
+3. **Deferred Upload Pattern**: Consider storing file metadata in Zustand until batch complete
+4. **FilesVaultDrawer**: Reuse for displaying uploaded assets
+5. **ImageSlider**: Reuse for image previews
+
+### Key Files to Reference
+
+- `convex/functions/storage/actions.ts` - MinIO signed URL generation
+- `src/stores/reference-files-store.ts` - Zustand file management pattern
+- `src/components/shared/files-vault/drawer.tsx` - File display component
+
+---
+
 ### Story 5.1: View Project Folders
 
 **As a** Client,

@@ -111,15 +111,18 @@ After completing Epic 2, clients will be able to:
 - Project detail view
 - Dynamic form field renderer
 - File upload with progress tracking
+- **Production Vault (`FilesVaultDrawer`)**: Generic, high-density asset browser shared across wizard and detail views.
+- **Image Projection Slider**: High-fidelity, dedicated visual asset viewer with thumbnail navigation and download support.
 
-### New Convex Functions:
+### New Convex Functions & Actions:
 
 - `createDraft` - Create draft project
 - `updateDraft` - Update draft project
 - `submitProject` - Submit project for review
 - `getMyProjects` - List client's projects
-- `getProject` - Get single project details
+- `getProject` - Get single project details (enriched with field names and URLs)
 - `generateReferenceUploadUrl` - Signed URL for file upload
+- `storage/actions:getSignedFileUrls` - Node.js action for generating secure, time-limited MinIO download URLs.
 
 ### New Routes:
 

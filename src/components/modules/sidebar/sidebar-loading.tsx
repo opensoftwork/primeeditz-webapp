@@ -6,113 +6,53 @@ import {
   SidebarContent,
   SidebarFooter,
   SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
   SidebarMenuItem,
-  SidebarMenuButton,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import Link from "next/link";
-import { LayoutDashboard, ChevronUp, LogOut } from "lucide-react";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
+import { LayoutDashboard, ChevronUp } from "lucide-react";
 
 export function SidebarLoading() {
-  const handleSignOut = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            toast.success("Signed out successfully");
-            window.location.href = "/sign-in";
-          },
-        },
-      });
-    } catch (error) {
-      console.error("Sign out error:", error);
-      toast.error("Failed to sign out. Please try again.");
-    }
-  };
-
   return (
     <Sidebar collapsible="icon">
-      <SidebarHeader>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <SidebarMenuButton size="lg" asChild>
-              <Link href="/dashboard">
-                <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
-                  <LayoutDashboard className="size-4" />
-                </div>
-                <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">PrimeEditz</span>
-                  <span className="truncate text-xs text-muted-foreground">
-                    Studio Portal
-                  </span>
-                </div>
-              </Link>
-            </SidebarMenuButton>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarHeader className="p-4 group-data-[collapsible=icon]:p-3 group-data-[collapsible=icon]:pt-8 transition-all duration-300">
+        <div className="flex items-center gap-3 px-0 group-data-[collapsible=icon]:justify-center">
+          <div className="flex aspect-square size-12 shrink-0 items-center justify-center rounded-xl bg-muted animate-pulse group-data-[collapsible=icon]:size-10 group-data-[collapsible=icon]:rounded-lg">
+            <LayoutDashboard className="size-6 opacity-20 group-data-[collapsible=icon]:size-6" />
+          </div>
+          <div className="grid flex-1 gap-1.5 group-data-[collapsible=icon]:hidden">
+            <div className="h-4 w-24 bg-muted rounded-full animate-pulse" />
+            <div className="h-3 w-16 bg-muted/40 rounded-full animate-pulse" />
+          </div>
+        </div>
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {[1, 2, 3].map((i) => (
-                <SidebarMenuItem key={i}>
-                  <SidebarMenuButton disabled>
-                    <Skeleton className="size-4 shrink-0" />
-                    <Skeleton className="h-4 flex-1" />
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
-              ))}
-            </SidebarMenu>
-          </SidebarGroupContent>
+        <SidebarGroup className="px-4 mt-2 group-data-[collapsible=icon]:px-0">
+          <div className="h-3 w-20 bg-muted/20 rounded-full mb-6 uppercase tracking-widest animate-pulse group-data-[collapsible=icon]:hidden" />
+          <SidebarMenu className="gap-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <SidebarMenuItem key={i} className="flex justify-center">
+                <div className="flex items-center gap-3.5 px-3 py-4 rounded-xl border border-white/5 bg-white/2 animate-pulse group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
+                  <div className="size-6 rounded-lg bg-muted/20 shrink-0 group-data-[collapsible=icon]:size-6" />
+                  <div className="h-4 flex-1 bg-muted/20 rounded-md group-data-[collapsible=icon]:hidden" />
+                </div>
+              </SidebarMenuItem>
+            ))}
+          </SidebarMenu>
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>
-        <SidebarMenu>
-          <SidebarMenuItem>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <SidebarMenuButton
-                  size="lg"
-                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
-                >
-                  <Skeleton className="size-8 rounded-lg shrink-0" />
-                  <div className="grid flex-1 text-left text-sm leading-tight gap-1">
-                    <Skeleton className="h-4 w-full" />
-                    <Skeleton className="h-3 w-16" />
-                  </div>
-                  <ChevronUp className="ml-auto size-4" />
-                </SidebarMenuButton>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                className="w-[--radix-dropdown-menu-trigger-width] min-w-56 rounded-lg"
-                side="top"
-                align="end"
-                sideOffset={4}
-              >
-                <DropdownMenuItem onClick={handleSignOut}>
-                  <LogOut className="mr-2 size-4" />
-                  Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </SidebarMenuItem>
-        </SidebarMenu>
+      <SidebarFooter className="p-4 group-data-[collapsible=icon]:p-3 group-data-[collapsible=icon]:pb-8 transition-all duration-300">
+        <div className="h-14 rounded-xl border border-white/5 bg-white/2 px-3 flex items-center gap-3 animate-pulse group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto">
+          <div className="size-10 rounded-lg bg-muted/20 shrink-0 group-data-[collapsible=icon]:size-10" />
+          <div className="grid flex-1 gap-1.5 group-data-[collapsible=icon]:hidden">
+            <div className="h-4 w-3/4 bg-muted/20 rounded-md" />
+            <div className="h-3 w-1/2 bg-muted/10 rounded-md" />
+          </div>
+          <ChevronUp className="size-4 opacity-10 group-data-[collapsible=icon]:hidden" />
+        </div>
       </SidebarFooter>
 
       <SidebarRail />

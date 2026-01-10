@@ -22,6 +22,58 @@
 
 ---
 
+## 📘 Epic 2 Learnings Applied
+
+**IMPORTANT**: Based on Epic 2 retrospective (2026-01-09), apply these corrections to all stories:
+
+### Framework Corrections
+
+| Original Specification | Actual Implementation              |
+| ---------------------- | ---------------------------------- |
+| TanStack Start Router  | **Next.js 15 App Router**          |
+| TanStack Form          | **React Hook Form + Zod**          |
+| `@unpic/react`         | **`next/image`**                   |
+| `useSearch` for params | **`useParams`, `useSearchParams`** |
+| `beforeLoad` guards    | **Parallel routes + middleware**   |
+
+### Reusable Patterns from Epic 2
+
+1. **FilesVaultDrawer** (`src/components/shared/files-vault/drawer.tsx`)
+
+   - Use for any file display (reference files, deliverables, assets)
+   - Supports: thumbnails, categories, ImageSlider integration
+
+2. **Pre-signed MinIO URLs** (`convex/functions/storage/actions.ts`)
+
+   - Use `getSignedFileUrls` action for all MinIO access
+   - Never generate public URLs directly
+
+3. **Dynamic Form Fields** (`src/components/shared/dynamic-form-fields/`)
+
+   - Reuse field components for any database-driven forms
+
+4. **Zustand Deferred Upload** pattern
+   - Store files client-side until final submission
+   - Prevents orphaned files
+
+### Route Structure
+
+Admin routes follow parallel route pattern:
+
+```
+src/app/(protected)
+├── @admin/
+│   ├── dashboard/page.tsx
+│   ├── projects/page.tsx
+│   ├── projects/[projectId]/page.tsx
+│   └── settings/
+│       ├── project-types/page.tsx
+│       └── employees/page.tsx
+└── layout.tsx (conditional slot rendering)
+```
+
+---
+
 ### Story 3.1: Admin Dashboard Layout
 
 **As an** Admin,

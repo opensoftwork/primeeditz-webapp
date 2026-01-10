@@ -7,6 +7,7 @@
 
 import { v } from 'convex/values'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
+import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
 
 // ============================================================================
 // Client Queries
@@ -79,6 +80,7 @@ export const getMyActiveDraft = clientQuery({
 /**
  * Get a single project by ID.
  * Verifies ownership for clients.
+ * Enriches reference files with proper MinIO public URLs.
  */
 export const getProject = clientQuery({
   args: {
@@ -96,7 +98,17 @@ export const getProject = clientQuery({
       throw new Error('Access denied')
     }
 
-    return project
+    // Enrich with project type
+    const projectType = await ctx.db.get(project.projectTypeId)
+
+    // Enrich reference files with proper URLs
+    const enrichedFiles = enrichReferenceFilesWithUrls(project.referenceFiles)
+
+    return {
+      ...project,
+      projectTypeName: projectType?.name ?? 'Unknown',
+      referenceFiles: enrichedFiles,
+    }
   },
 })
 

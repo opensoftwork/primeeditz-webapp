@@ -1,7 +1,7 @@
 # Story 3.2: Admin Project Listing with Filters
 
 **Epic**: Epic 3 - Admin Portal — Project & System Management  
-**Status**: in-progress  
+**Status**: done  
 **Complexity**: Medium  
 **Created**: 2026-01-07
 
@@ -25,44 +25,74 @@
 
 ---
 
+## 📘 Framework Notes (Epic 2 Learnings)
+
+- **Route**: `src/app/(protected)/@admin/projects/page.tsx`
+- **Form Library**: React Hook Form + Zod (if forms needed)
+- **Data Fetching**: Convex `useQuery` with `getAdminProjects` query
+- **Styling**: Premium studio aesthetic with motion animations
+
+---
+
 ## 🎯 Implementation Tasks
 
 ### Task 1: Create Admin Projects Convex Query
 
-**File**: `convex/admin.ts` (add to existing)
+**File**: `convex/functions/admin/queries.ts`
 
 Create `getAdminProjects` query:
 
-- Returns all projects with enriched data (project type name, client name)
-- Supports filtering by status, projectTypeId
-- Supports sorting by createdAt, status
-- Pagination: 20 per page
+- [x] Returns all projects with enriched data (project type name, client name)
+- [x] Supports filtering by status, projectTypeId
+- [x] Supports sorting by createdAt, status
+- [x] Pagination: 20 per page
 
 ### Task 2: Create Projects Page for Admin Slot
 
 **File**: `src/app/(protected)/@admin/projects/page.tsx`
 
-- Create new route following parallel routes pattern
-- Display projects in a table with columns: Code, Client, Type, Status, Date, Actions
-- Add filter controls (dropdowns, search)
-- Add sort controls
-- Implement pagination
+- [x] Create new route following parallel routes pattern
+- [x] Display projects in a table with columns: Code, Client, Type, Status, Date, Actions
+- [x] Add filter controls (dropdowns, search)
+- [x] Add sort controls
+- [x] Implement pagination
 
 ### Task 3: Add Default Route
 
 **File**: `src/app/(protected)/@admin/projects/default.tsx`
 
-- Create default export for parallel route
+- [x] Create default export for parallel route
 
 ---
 
 ## 📦 Dependencies
 
-- Existing `convex/admin.ts` from Story 3.1
-- shadcn/ui components (Table, Select, Input, Button)
+- [x] Existing `convex/functions/admin/queries.ts`
+- [x] shadcn/ui components (Table, Select, Input, Button)
+- [x] DataTable component (from Epic 2)
 
 ---
 
-## 🔗 Routes
+## 🚀 Definition of Done
 
-- `/projects` → Renders `@admin/projects/page.tsx` for admin users
+- [x] Admin projects query created and tested
+- [x] Projects page displays with real data
+- [x] Filter controls work
+- [x] Sort controls work
+- [x] Row click navigates to project detail
+- [x] No TypeScript errors
+- [x] Responsive design verified
+- [x] Story marked as `done` in `sprint-status.yaml`
+
+---
+
+## 🔄 Status Updates
+
+| Date       | Status        | Notes                                            |
+| ---------- | ------------- | ------------------------------------------------ |
+| 2026-01-07 | ready-for-dev | Story created                                    |
+| 2026-01-07 | done          | Implemented with DataTable, filters, and sorting |
+
+---
+
+**Next Story**: 3.3 - Admin Project Detail View

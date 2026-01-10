@@ -44,20 +44,18 @@ export function AppSidebar() {
       <SidebarContent>
         {isLoading ? (
           // Inline skeleton while loading
-          <SidebarGroup>
-            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {[1, 2, 3].map((i) => (
-                  <SidebarMenuItem key={i}>
-                    <SidebarMenuButton disabled>
-                      <Skeleton className="size-4 shrink-0" />
-                      <Skeleton className="h-4 flex-1" />
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
+          <SidebarGroup className="px-4 group-data-[collapsible=icon]:px-0">
+            <div className="h-4 w-24 bg-white/5 rounded-full mb-6 animate-pulse group-data-[collapsible=icon]:hidden" />
+            <SidebarMenu className="gap-2">
+              {[1, 2, 3, 4].map((i) => (
+                <SidebarMenuItem key={i} className="flex justify-center">
+                  <div className="flex items-center gap-3 px-3 py-4 rounded-xl border border-white/5 bg-white/2 animate-pulse group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center">
+                    <div className="size-6 rounded-lg bg-white/5 shrink-0 group-data-[collapsible=icon]:size-6" />
+                    <div className="h-4 flex-1 bg-white/5 rounded-md group-data-[collapsible=icon]:hidden" />
+                  </div>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
           </SidebarGroup>
         ) : (
           <>
