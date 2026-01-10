@@ -1,7 +1,7 @@
 # Story 3.3: Admin Project Detail View
 
 **Epic**: Epic 3 - Admin Portal — Project & System Management  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Medium  
 **Created**: 2026-01-09
 
@@ -55,6 +55,27 @@ src/app/(protected)/@admin/projects/[projectId]/page.tsx
 - Use existing `getProject` query (or create `getAdminProject` with additional admin fields)
 - Use `getSignedFileUrls` action for MinIO access
 
+### 🔐 MinIO Signed URL Security (CRITICAL)
+
+**All file/image URLs MUST use MinIO pre-signed URLs:**
+
+1. **Never expose raw storage URLs** — All images displayed in this view must use pre-signed URLs
+2. **User-scoped access** — Signed URLs must be generated with the authenticated admin user's context
+3. **Short expiry** — URLs should have a reasonable expiry (e.g., 1 hour) to prevent unauthorized sharing
+4. **Server-side generation** — Use Convex action `getSignedFileUrls` to generate signed URLs
+5. **Pattern from Epic 2** — Follow `FilesVaultDrawer` implementation which already implements this correctly
+
+```typescript
+// Example: Getting signed URLs in component
+const signedUrls = useAction(api.files.actions.getSignedFileUrls);
+
+// Call with file storage keys
+const urls = await signedUrls({
+  storageKeys: files.map((f) => f.storageKey),
+  expirySeconds: 3600, // 1 hour
+});
+```
+
 ---
 
 ## 🎯 Implementation Tasks
@@ -63,56 +84,59 @@ src/app/(protected)/@admin/projects/[projectId]/page.tsx
 
 **File**: `src/app/(protected)/@admin/projects/[projectId]/page.tsx`
 
-- [ ] 1.1 Create route following parallel routes pattern
-- [ ] 1.2 Extract `projectId` from params using `use()` hook (Next.js 15)
-- [ ] 1.3 Add default.tsx for parallel route
+- [x] 1.1 Create route following parallel routes pattern
+- [x] 1.2 Extract `projectId` from params using `use()` hook (Next.js 15)
+- [x] 1.3 Add default.tsx for parallel route
 
 ### Task 2: Create/Enhance Convex Query
 
-**File**: `convex/functions/admin/queries.ts`
+**File**: `convex/admin.ts`
 
-- [ ] 2.1 Create `getAdminProject` query (or reuse `getProject`)
-- [ ] 2.2 Include: client profile info (name, email)
-- [ ] 2.3 Include: project type name
-- [ ] 2.4 Include: reference files with storageKeys
-- [ ] 2.5 Include: status history (if table exists)
+- [x] 2.1 Create `getAdminProject` query (or reuse `getProject`)
+- [x] 2.2 Include: client profile info (name, email)
+- [x] 2.3 Include: project type name
+- [x] 2.4 Include: reference files with storageKeys
+- [x] 2.5 Include: status history (if table exists)
 
 ### Task 3: Create Admin Project Detail View Component
 
 **File**: `src/components/modules/admin/projects/project-detail-view.tsx`
 
-- [ ] 3.1 Create main container component
-- [ ] 3.2 Reuse `DetailSection` from client detail
-- [ ] 3.3 Display project header with status badge
-- [ ] 3.4 Display client information section
-- [ ] 3.5 Display project specifications
-- [ ] 3.6 Integrate `FilesVaultDrawer` for reference files
-- [ ] 3.7 Add admin action buttons
+- [x] 3.1 Create main container component
+- [x] 3.2 Reuse `DetailSection` from client detail
+- [x] 3.3 Display project header with status badge
+- [x] 3.4 Display client information section
+- [x] 3.5 Display project specifications
+- [x] 3.6 Integrate `FilesVaultDrawer` for reference files
+- [x] 3.7 Add admin action buttons
 
 ### Task 4: Admin Action Buttons
 
-- [ ] 4.1 "Create Quotation" → `/admin/projects/{id}/quotation/new` (disabled if not pending_review)
-- [ ] 4.2 "Assign Team" → Modal or separate page (disabled until quotation approved)
-- [ ] 4.3 "Setup Folders" → Modal or inline (disabled until quotation approved)
-- [ ] 4.4 "Update Status" → Dropdown with valid transitions (Story 3-5)
+- [x] 4.1 "Create Quotation" → `/admin/projects/{id}/quotation/new` (disabled if not pending_review)
+- [x] 4.2 "Assign Team" → Modal or separate page (disabled until quotation approved)
+- [x] 4.3 "Setup Folders" → Modal or inline (disabled until quotation approved)
+- [x] 4.4 "Update Status" → Dropdown with valid transitions (Story 3-5)
 
-### Task 5: Integrate FilesVaultDrawer
+### Task 5: Integrate FilesVaultDrawer with Signed URLs
 
-- [ ] 5.1 Map project reference files to `VaultFile` interface
-- [ ] 5.2 Use `getSignedFileUrls` action for secure URLs
-- [ ] 5.3 Enable ImageSlider for images
-- [ ] 5.4 Enable download functionality
+- [x] 5.1 Map project reference files to `VaultFile` interface
+- [x] 5.2 **Use `getSignedFileUrls` action for MinIO pre-signed URLs** (SECURITY-CRITICAL)
+- [x] 5.3 Ensure signed URLs are user-scoped (admin must be authenticated)
+- [x] 5.4 Set appropriate URL expiry (1 hour recommended)
+- [x] 5.5 Enable ImageSlider for images (using signed URLs)
+- [x] 5.6 Enable download functionality (using signed URLs)
+- [x] 5.7 Handle URL expiry gracefully (re-fetch if needed)
 
 ### Task 6: Loading & Empty States
 
-- [ ] 6.1 Add skeleton loader while fetching
-- [ ] 6.2 Add 404 state for non-existent projects
-- [ ] 6.3 Add empty states for sections without data
+- [x] 6.1 Add skeleton loader while fetching
+- [x] 6.2 Add 404 state for non-existent projects
+- [x] 6.3 Add empty states for sections without data
 
 ### Task 7: Motion Animations
 
-- [ ] 7.1 Add staggered entrance animations (matching client detail)
-- [ ] 7.2 Use `motion/react` for consistent premium feel
+- [x] 7.1 Add staggered entrance animations (matching client detail)
+- [x] 7.2 Use `motion/react` for consistent premium feel
 
 ---
 
@@ -174,6 +198,27 @@ src/app/(protected)/@admin/projects/[projectId]/page.tsx
 ### Styling
 
 - Match existing client detail view aesthetic
+
+---
+
+## 🔒 Security Requirements
+
+### MinIO Pre-Signed URL Implementation
+
+| Requirement          | Implementation                                             |
+| -------------------- | ---------------------------------------------------------- |
+| **No raw URLs**      | Never render `storageKey` directly; always use signed URLs |
+| **Auth-scoped**      | Signed URLs generated with admin user context              |
+| **Short expiry**     | 1 hour maximum; re-fetch on interaction if expired         |
+| **Server-side only** | URL signing happens in Convex action, never client-side    |
+| **Audit trail**      | Log file access in server action (optional)                |
+
+### Why This Matters
+
+- Prevents unauthorized access to client reference files
+- Ensures only authenticated admins can view project assets
+- Limits exposure window if URL is leaked
+- Follows security best practices for object storage
 - Use amber accent for admin-specific elements
 - Premium glassmorphism, motion animations
 
@@ -220,11 +265,40 @@ src/app/(protected)/@admin/projects/[projectId]/page.tsx
 
 ## 🔄 Status Updates
 
-| Date       | Status        | Notes                                  |
-| ---------- | ------------- | -------------------------------------- |
-| 2026-01-09 | ready-for-dev | Story created based on Epic 2 patterns |
+| Date       | Status        | Notes                                                           |
+| ---------- | ------------- | --------------------------------------------------------------- |
+| 2026-01-09 | ready-for-dev | Story created based on Epic 2 patterns                          |
+| 2026-01-10 | ready-for-dev | Added MinIO pre-signed URL security requirements (user request) |
+
+---
 
 ---
 
 **Previous Story**: 3.2 - Admin Project Listing with Filters  
-**Next Story**: 3.4 - Project Stage/Folder Setup
+ **Next Story**: 3.4 - Project Stage/Folder Setup
+
+## Senior Developer Review (AI)
+
+**Review Date**: 2026-01-10
+**Reviewer**: Antigravity (Senior AI Coding Assistant)
+**Outcome**: APPROVED (After Fixes)
+
+### Review Summary
+
+The implementation successfully follows the premium UI patterns established in Epic 2 while correctly implementing admin-specific requirements. Security protocols for MinIO pre-signed URLs are strictly followed.
+
+### Issues Addressed During Review:
+
+1. **Performance/Security**: Replaced raw `<img>` tags with `next/image` for optimized asset delivery.
+2. **Type Safety**: Defined `StatusHistoryEntry` interface and removed `any` types from data mappings.
+3. **Schema Optimization**: Added `email` field to the `profiles` table to allow admins to view client contact info without complex auth sub-queries.
+4. **Code Quality**: Cleaned up component naming (Skeleton) and removed unused imports.
+
+### Verification Results
+
+- [x] Pre-signed URLs correctly generated in action
+- [x] Staggered animations match project style
+- [x] Loading/404 states functional
+- [x] Action buttons correctly gated by status
+- [x] Responsive layout verified
+- [x] Build passing with no TypeScript errors

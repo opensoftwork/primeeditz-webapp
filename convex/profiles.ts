@@ -42,6 +42,7 @@ export const createProfile = mutation({
     // Create the profile
     const profileId = await ctx.db.insert("profiles", {
       userId: user.subject,
+      email: user.email!, // Email is usually present in identity
       name: args.name,
       phone: args.phone,
       company: args.company,

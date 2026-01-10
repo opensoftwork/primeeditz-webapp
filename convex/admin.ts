@@ -5,8 +5,10 @@
  * for the admin portal.
  */
 
-import { v } from 'convex/values'
-import { adminQuery, adminMutation } from './lib/customFunctions'
+import { paginationOptsValidator } from "convex/server";
+import { mutation } from "./_generated/server";
+import { v } from "convex/values";
+import { adminMutation, adminQuery } from "./lib/customFunctions";
 
 /**
  * Get admin dashboard statistics.
@@ -17,42 +19,39 @@ export const getAdminDashboardStats = adminQuery({
   handler: async (ctx) => {
     // Count pending requests (status: pending_review)
     const pendingProjects = await ctx.db
-      .query('projects')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_review'))
-      .collect()
-    const pendingRequestsCount = pendingProjects.length
+      .query("projects")
+      .withIndex("by_status", (q) => q.eq("status", "pending_review"))
+      .collect();
+    const pendingRequestsCount = pendingProjects.length;
 
     // Count active projects (status: active or in_progress)
     const activeProjects = await ctx.db
-      .query('projects')
+      .query("projects")
       .filter((q) =>
         q.or(
-          q.eq(q.field('status'), 'active'),
-          q.eq(q.field('status'), 'in_progress')
-        )
+          q.eq(q.field("status"), "active"),
+          q.eq(q.field("status"), "in_progress"),
+        ),
       )
-      .collect()
-    const activeProjectsCount = activeProjects.length
+      .collect();
+    const activeProjectsCount = activeProjects.length;
 
     // Count team members (role: employee or admin)
     const teamMembers = await ctx.db
-      .query('profiles')
+      .query("profiles")
       .filter((q) =>
-        q.or(
-          q.eq(q.field('role'), 'employee'),
-          q.eq(q.field('role'), 'admin')
-        )
+        q.or(q.eq(q.field("role"), "employee"), q.eq(q.field("role"), "admin")),
       )
-      .collect()
-    const totalEmployeesCount = teamMembers.length
+      .collect();
+    const totalEmployeesCount = teamMembers.length;
 
     return {
       pendingRequestsCount,
       activeProjectsCount,
       totalEmployeesCount,
-    }
+    };
   },
-})
+});
 
 /**
  * Get pending projects list for admin dashboard.
@@ -64,140 +63,201 @@ export const getPendingProjects = adminQuery({
   handler: async (ctx) => {
     // Get pending projects sorted by creation time (newest first)
     const pendingProjects = await ctx.db
-      .query('projects')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_review'))
-      .order('desc')
-      .take(10)
+      .query("projects")
+      .withIndex("by_status", (q) => q.eq("status", "pending_review"))
+      .order("desc")
+      .take(10);
 
     // Enrich with project type and client information
     const enrichedProjects = await Promise.all(
       pendingProjects.map(async (project) => {
         // Get project type
-        const projectType = await ctx.db.get(project.projectTypeId)
+        const projectType = await ctx.db.get(project.projectTypeId);
 
         // Get client profile
-        const client = await ctx.db.get(project.clientId)
+        const client = await ctx.db.get(project.clientId);
 
         return {
           _id: project._id,
           code: project.code,
-          projectTypeName: projectType?.name ?? 'Unknown',
-          clientName: client?.name ?? 'Unknown Client',
+          projectTypeName: projectType?.name ?? "Unknown",
+          clientName: client?.name ?? "Unknown Client",
           eventName: project.eventName,
           eventDate: project.eventDate,
           createdAt: project._creationTime,
-        }
-      })
-    )
+        };
+      }),
+    );
 
-    return enrichedProjects
+    return enrichedProjects;
   },
-})
+});
 
 /**
- * Get all projects for admin listing with filters and pagination.
+ * Get all projects for admin listing with cursor-based pagination.
+ * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
+ */
+export const getAdminProjectsPaginated = adminQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(v.string()),
+    projectTypeId: v.optional(v.id("projectTypes")),
+  },
+  handler: async (ctx, args) => {
+    // Execute pagination - conditionally use index for status filtering
+    const results = args.status
+      ? await ctx.db
+          .query("projects")
+          .withIndex("by_status", (q) => q.eq("status", args.status as any))
+          .order("desc")
+          .paginate(args.paginationOpts)
+      : await ctx.db
+          .query("projects")
+          .order("desc")
+          .paginate(args.paginationOpts);
+
+    // Get all project types and clients for enrichment
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
+
+    const clients = await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .collect();
+    const clientMap = new Map(clients.map((c) => [c._id, c]));
+
+    // Filter by projectTypeId in memory and enrich
+    const enrichedPage = results.page
+      .filter(
+        (p) => !args.projectTypeId || p.projectTypeId === args.projectTypeId,
+      )
+      .map((project) => {
+        const projectType = projectTypeMap.get(project.projectTypeId);
+        const client = clientMap.get(project.clientId);
+
+        return {
+          _id: project._id,
+          code: project.code,
+          status: project.status,
+          projectTypeName: projectType?.name ?? "Unknown",
+          clientName: client?.name ?? "Unknown Client",
+          clientId: project.clientId,
+          eventName: project.eventName,
+          eventDate: project.eventDate,
+          createdAt: project._creationTime,
+          updatedAt: project.updatedAt,
+        };
+      });
+
+    return {
+      ...results,
+      page: enrichedPage,
+    };
+  },
+});
+
+/**
+ * Get all projects for admin listing with offset-based pagination.
+ * @deprecated Use getAdminProjectsPaginated with useSimplePaginatedQuery for better UX
  */
 export const getAdminProjects = adminQuery({
   args: {
     status: v.optional(v.string()),
-    projectTypeId: v.optional(v.id('projectTypes')),
+    projectTypeId: v.optional(v.id("projectTypes")),
     clientSearch: v.optional(v.string()),
-    sortBy: v.optional(v.union(v.literal('date'), v.literal('status'))),
-    sortOrder: v.optional(v.union(v.literal('asc'), v.literal('desc'))),
+    sortBy: v.optional(v.union(v.literal("date"), v.literal("status"))),
+    sortOrder: v.optional(v.union(v.literal("asc"), v.literal("desc"))),
     page: v.optional(v.number()),
     pageSize: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const page = args.page ?? 1
-    const pageSize = args.pageSize ?? 20
-    const sortOrder = args.sortOrder ?? 'desc'
+    const page = args.page ?? 1;
+    const pageSize = args.pageSize ?? 20;
+    const sortOrder = args.sortOrder ?? "desc";
 
     // Get all projects - filter by status if provided
-    let allProjects
+    let allProjects;
     if (args.status) {
       allProjects = await ctx.db
-        .query('projects')
-        .withIndex('by_status', (q) => q.eq('status', args.status as any))
+        .query("projects")
+        .withIndex("by_status", (q) => q.eq("status", args.status as any))
         .order(sortOrder)
-        .collect()
+        .collect();
     } else {
-      allProjects = await ctx.db
-        .query('projects')
-        .order(sortOrder)
-        .collect()
+      allProjects = await ctx.db.query("projects").order(sortOrder).collect();
     }
 
     // Apply projectTypeId filter in memory (no index for this)
     if (args.projectTypeId) {
       allProjects = allProjects.filter(
-        (p) => p.projectTypeId === args.projectTypeId
-      )
+        (p) => p.projectTypeId === args.projectTypeId,
+      );
     }
 
     // Get all project types and clients for enrichment
-    const projectTypes = await ctx.db.query('projectTypes').collect()
-    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]))
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
 
     const clients = await ctx.db
-      .query('profiles')
-      .withIndex('by_role', (q) => q.eq('role', 'client'))
-      .collect()
-    const clientMap = new Map(clients.map((c) => [c._id, c]))
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .collect();
+    const clientMap = new Map(clients.map((c) => [c._id, c]));
 
     // Enrich projects with type and client names
     let enrichedProjects = allProjects.map((project) => {
-      const projectType = projectTypeMap.get(project.projectTypeId)
-      const client = clientMap.get(project.clientId)
+      const projectType = projectTypeMap.get(project.projectTypeId);
+      const client = clientMap.get(project.clientId);
 
       return {
         _id: project._id,
         code: project.code,
         status: project.status,
-        projectTypeName: projectType?.name ?? 'Unknown',
-        clientName: client?.name ?? 'Unknown Client',
+        projectTypeName: projectType?.name ?? "Unknown",
+        clientName: client?.name ?? "Unknown Client",
         clientId: project.clientId,
         eventName: project.eventName,
         eventDate: project.eventDate,
         createdAt: project._creationTime,
         updatedAt: project.updatedAt,
-      }
-    })
+      };
+    });
 
     // Apply client search filter in memory
     if (args.clientSearch) {
-      const search = args.clientSearch.toLowerCase()
+      const search = args.clientSearch.toLowerCase();
       enrichedProjects = enrichedProjects.filter(
         (p) =>
           p.clientName.toLowerCase().includes(search) ||
-          p.code.toLowerCase().includes(search)
-      )
+          p.code.toLowerCase().includes(search),
+      );
     }
 
     // Sort by status if requested
-    if (args.sortBy === 'status') {
+    if (args.sortBy === "status") {
       const statusOrder = [
-        'pending_review',
-        'active',
-        'in_progress',
-        'completed',
-        'archived',
-        'draft',
-      ]
+        "pending_review",
+        "active",
+        "in_progress",
+        "completed",
+        "archived",
+        "draft",
+      ];
       enrichedProjects.sort((a, b) => {
-        const aIndex = statusOrder.indexOf(a.status)
-        const bIndex = statusOrder.indexOf(b.status)
-        return sortOrder === 'asc' ? aIndex - bIndex : bIndex - aIndex
-      })
+        const aIndex = statusOrder.indexOf(a.status);
+        const bIndex = statusOrder.indexOf(b.status);
+        return sortOrder === "asc" ? aIndex - bIndex : bIndex - aIndex;
+      });
     }
 
     // Calculate pagination
-    const totalCount = enrichedProjects.length
-    const totalPages = Math.ceil(totalCount / pageSize)
-    const startIndex = (page - 1) * pageSize
+    const totalCount = enrichedProjects.length;
+    const totalPages = Math.ceil(totalCount / pageSize);
+    const startIndex = (page - 1) * pageSize;
     const paginatedProjects = enrichedProjects.slice(
       startIndex,
-      startIndex + pageSize
-    )
+      startIndex + pageSize,
+    );
 
     return {
       projects: paginatedProjects,
@@ -209,9 +269,9 @@ export const getAdminProjects = adminQuery({
         hasNext: page < totalPages,
         hasPrev: page > 1,
       },
-    }
+    };
   },
-})
+});
 
 /**
  * Get all project types for filter dropdown.
@@ -219,29 +279,31 @@ export const getAdminProjects = adminQuery({
 export const getProjectTypes = adminQuery({
   args: {},
   handler: async (ctx) => {
-    const projectTypes = await ctx.db.query('projectTypes').collect()
+    const projectTypes = await ctx.db.query("projectTypes").collect();
     return projectTypes.map((pt) => ({
       _id: pt._id,
       name: pt.name,
       category: pt.category,
       isActive: pt.isActive,
-    }))
+    }));
   },
-})
+});
 
 /**
  * Get fields for a specific project type.
  */
 export const getProjectTypeFields = adminQuery({
-  args: { projectTypeId: v.id('projectTypes') },
+  args: { projectTypeId: v.id("projectTypes") },
   handler: async (ctx, args) => {
     return await ctx.db
-      .query('projectTypeFields')
-      .withIndex('by_projectTypeId', (q) => q.eq('projectTypeId', args.projectTypeId))
-      .order('asc')
-      .collect()
+      .query("projectTypeFields")
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId),
+      )
+      .order("asc")
+      .collect();
   },
-})
+});
 
 /**
  * Create a new project type.
@@ -254,44 +316,44 @@ export const createProjectType = adminMutation({
     displayOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert('projectTypes', {
+    return await ctx.db.insert("projectTypes", {
       ...args,
-    })
+    });
   },
-})
+});
 
 /**
  * Update a project type.
  */
 export const updateProjectType = adminMutation({
   args: {
-    id: v.id('projectTypes'),
+    id: v.id("projectTypes"),
     name: v.optional(v.string()),
     category: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
     displayOrder: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { id, ...updates } = args
-    await ctx.db.patch(id, updates)
+    const { id, ...updates } = args;
+    await ctx.db.patch(id, updates);
   },
-})
+});
 
 /**
  * Create or update a project type field.
  */
 export const upsertProjectTypeField = adminMutation({
   args: {
-    id: v.optional(v.id('projectTypeFields')),
-    projectTypeId: v.id('projectTypes'),
+    id: v.optional(v.id("projectTypeFields")),
+    projectTypeId: v.id("projectTypes"),
     name: v.string(),
     label: v.string(),
     type: v.union(
-      v.literal('text'),
-      v.literal('number'),
-      v.literal('select'),
-      v.literal('checkbox'),
-      v.literal('textarea')
+      v.literal("text"),
+      v.literal("number"),
+      v.literal("select"),
+      v.literal("checkbox"),
+      v.literal("textarea"),
     ),
     required: v.boolean(),
     placeholder: v.optional(v.string()),
@@ -303,25 +365,25 @@ export const upsertProjectTypeField = adminMutation({
     isActive: v.boolean(),
   },
   handler: async (ctx, args) => {
-    const { id, ...data } = args
+    const { id, ...data } = args;
     if (id) {
-      await ctx.db.patch(id, data)
-      return id
+      await ctx.db.patch(id, data);
+      return id;
     } else {
-      return await ctx.db.insert('projectTypeFields', data)
+      return await ctx.db.insert("projectTypeFields", data);
     }
   },
-})
+});
 
 /**
  * Delete a project type field.
  */
 export const deleteProjectTypeField = adminMutation({
-  args: { id: v.id('projectTypeFields') },
+  args: { id: v.id("projectTypeFields") },
   handler: async (ctx, args) => {
-    await ctx.db.delete(args.id)
+    await ctx.db.delete(args.id);
   },
-})
+});
 
 /**
  * Reorder project type fields.
@@ -330,15 +392,64 @@ export const reorderProjectTypeFields = adminMutation({
   args: {
     fields: v.array(
       v.object({
-        id: v.id('projectTypeFields'),
+        id: v.id("projectTypeFields"),
         displayOrder: v.number(),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {
     for (const field of args.fields) {
-      await ctx.db.patch(field.id, { displayOrder: field.displayOrder })
+      await ctx.db.patch(field.id, { displayOrder: field.displayOrder });
     }
   },
-})
+});
 
+/**
+ * Get a single project by ID (admin view).
+ * Includes detailed client info, project type, and status history.
+ */
+
+export const getAdminProject = adminQuery({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project) {
+      return null;
+    }
+
+    // Get client profile
+    const client = await ctx.db.get(project.clientId);
+
+    // Get project type
+    const projectType = await ctx.db.get(project.projectTypeId);
+
+    // Get status history
+    const history = await ctx.db
+      .query("statusHistory")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .order("desc")
+      .collect();
+
+    // Enrich history with actor names
+    const enrichedHistory = await Promise.all(
+      history.map(async (entry) => {
+        const actor = await ctx.db.get(entry.changedBy);
+        return {
+          ...entry,
+          actorName: actor?.name ?? "Unknown",
+        };
+      }),
+    );
+
+    return {
+      ...project,
+      clientName: client?.name ?? "Unknown Client",
+      clientEmail: client?.email ?? "Unknown Email",
+      projectTypeName: projectType?.name ?? "Unknown",
+      statusHistory: enrichedHistory,
+    };
+  },
+});

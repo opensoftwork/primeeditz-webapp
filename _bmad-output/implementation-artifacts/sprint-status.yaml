@@ -80,7 +80,7 @@ development_status:
   epic-3: in-progress
   3-1-admin-dashboard-layout: done
   3-2-admin-project-listing-with-filters: done
-  3-3-admin-project-detail-view: ready-for-dev # New story file created with Epic 2 patterns
+  3-3-admin-project-detail-view: done # New story file created with Epic 2 patterns
   3-4-project-stage-folder-setup: backlog
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog

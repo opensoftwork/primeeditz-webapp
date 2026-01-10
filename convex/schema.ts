@@ -76,6 +76,7 @@ export default defineSchema({
   // --------------------------------------------------------------------------
   profiles: defineTable({
     userId: v.string(), // Better Auth user ID (component isolation)
+    email: v.string(), // User's email address
     role: roleValidator,
     name: v.string(),
     phone: v.optional(v.string()),

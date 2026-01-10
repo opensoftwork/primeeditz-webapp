@@ -39,6 +39,7 @@ export const createProfile = authenticatedMutation({
     // Create the profile
     const profileId = await ctx.db.insert('profiles', {
       userId: userId, // Store Better Auth user ID as string
+      email: ctx.authUser.email, // Store email for easier admin access
       name: args.name,
       phone: args.phone,
       role: args.role,

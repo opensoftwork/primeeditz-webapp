@@ -1,5 +1,7 @@
 "use client";
 
+import React from "react";
+import Link from "next/link";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import {
@@ -79,12 +81,42 @@ export default function DashboardLayout({
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink asChild>
+                    <Link href="/dashboard">Dashboard</Link>
+                  </BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Home</BreadcrumbPage>
-                </BreadcrumbItem>
+                {pathname !== "/dashboard" && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    {pathname
+                      .split("/")
+                      .filter(
+                        (segment) => segment !== "" && segment !== "dashboard"
+                      )
+                      .map((segment, index, array) => {
+                        const isLast = index === array.length - 1;
+                        const href = `/${array.slice(0, index + 1).join("/")}`;
+                        const label =
+                          segment.charAt(0).toUpperCase() +
+                          segment.slice(1).replace(/-/g, " ");
+
+                        return (
+                          <React.Fragment key={href}>
+                            <BreadcrumbItem>
+                              {isLast ? (
+                                <BreadcrumbPage>{label}</BreadcrumbPage>
+                              ) : (
+                                <BreadcrumbLink asChild>
+                                  <Link href={href}>{label}</Link>
+                                </BreadcrumbLink>
+                              )}
+                            </BreadcrumbItem>
+                            {!isLast && <BreadcrumbSeparator />}
+                          </React.Fragment>
+                        );
+                      })}
+                  </>
+                )}
               </BreadcrumbList>
             </Breadcrumb>
 
