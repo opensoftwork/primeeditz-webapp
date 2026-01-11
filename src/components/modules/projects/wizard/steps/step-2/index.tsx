@@ -86,6 +86,10 @@ export function WizardStep2() {
     },
   });
 
+  const isLoading =
+    (dbFields === undefined || projectType === undefined) &&
+    formData.step1.projectTypeId;
+
   // Register submit trigger for the global footer
   useEffect(() => {
     setSubmitTrigger(() => form.handleSubmit());
@@ -98,10 +102,6 @@ export function WizardStep2() {
     });
     await prevStep();
   };
-
-  const isLoading =
-    (dbFields === undefined || projectType === undefined) &&
-    formData.step1.projectTypeId;
 
   return (
     <WizardLoadingState isLoading={!!isLoading}>

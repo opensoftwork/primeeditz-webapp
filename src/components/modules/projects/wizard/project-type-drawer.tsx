@@ -16,7 +16,7 @@ import { Button } from "@/components/ui/button";
 interface ProjectType {
   _id: string;
   name: string;
-  category?: string;
+  categoryName?: string;
 }
 
 interface ProjectTypeSelectionDrawerProps {
@@ -36,7 +36,7 @@ export function ProjectTypeSelectionDrawer({
 }: ProjectTypeSelectionDrawerProps) {
   // Group project types by category
   const groupedTypes = projectTypes?.reduce((acc, type) => {
-    const category = type.category || "Other";
+    const category = type.categoryName || "Other";
     if (!acc[category]) {
       acc[category] = [];
     }

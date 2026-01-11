@@ -84,7 +84,7 @@ development_status:
   3-4-project-stage-folder-setup: backlog
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog
-  3-7-project-types-management: backlog # Story file exists (project-type-fields-admin.md)
+  3-7-project-types-management: in-progress # Story implementation started
   3-8-quotation-templates-management: backlog
   3-9-storage-pricing-tiers-configuration: backlog
   3-10-folder-templates-configuration: backlog

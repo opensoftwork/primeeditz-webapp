@@ -20,6 +20,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -43,7 +44,9 @@ export default function DashboardLayout({
   );
 
   const pathname = usePathname();
-  const isWizardPage = pathname?.includes("/projects/new");
+  const { overrides } = useBreadcrumbStore();
+  const isWizardPage =
+    pathname?.includes("/projects/new") || pathname?.includes("/preview");
 
   // Show loading state while profile is being fetched
   if (!userProfile) {
@@ -97,8 +100,14 @@ export default function DashboardLayout({
                         const isLast = index === array.length - 1;
                         const href = `/${array.slice(0, index + 1).join("/")}`;
                         const label =
-                          segment.charAt(0).toUpperCase() +
-                          segment.slice(1).replace(/-/g, " ");
+                          overrides[segment] ||
+                          segment
+                            .split("-")
+                            .map(
+                              (word) =>
+                                word.charAt(0).toUpperCase() + word.slice(1)
+                            )
+                            .join(" ");
 
                         return (
                           <React.Fragment key={href}>

@@ -10,36 +10,56 @@ import { mutation } from '../_generated/server'
  * Seed default project types.
  * Run this once to set up initial project types.
  */
-export const seedProjectTypes = mutation({
+/**
+ * Wipe all project configuration and re-seed.
+ */
+export const resetAndSeed = mutation({
   args: {},
   handler: async (ctx) => {
-    // Check if already seeded
-    const existing = await ctx.db.query('projectTypes').first()
-    if (existing) {
-      return { message: 'Project types already seeded', count: 0 }
-    }
+    // 1. Wipe existing data
+    const categories = await ctx.db.query('projectCategories').collect()
+    const types = await ctx.db.query('projectTypes').collect()
+    const fields = await ctx.db.query('projectTypeFields').collect()
 
-    const projectTypes = [
-      // Album category
-      { name: 'Wedding Album', category: 'Album', isActive: true },
-      { name: 'Pre-Wedding Album', category: 'Album', isActive: true },
-      { name: 'Birthday Album', category: 'Album', isActive: true },
-      // Photography category
-      { name: 'Wedding Photography Edit', category: 'Photography', isActive: true },
-      // Video category
-      { name: 'Wedding Film', category: 'Video', isActive: true },
-      { name: 'YouTube Video', category: 'Video', isActive: true },
-      { name: 'Instagram Reel', category: 'Video', isActive: true },
-      // Corporate category
-      { name: 'Corporate Event', category: 'Corporate', isActive: true },
+    for (const c of categories) await ctx.db.delete(c._id)
+    for (const t of types) await ctx.db.delete(t._id)
+    for (const f of fields) await ctx.db.delete(f._id)
+
+    // 2. Initial categories
+    const categoryData = [
+      { name: 'Album', isActive: true },
+      { name: 'Photography', isActive: true },
+      { name: 'Video', isActive: true },
+      { name: 'Corporate', isActive: true },
     ]
 
-    let count = 0
-    for (const projectType of projectTypes) {
-      await ctx.db.insert('projectTypes', projectType)
-      count++
+    const categoryMap = new Map()
+    for (const cat of categoryData) {
+      const id = await ctx.db.insert('projectCategories', cat)
+      categoryMap.set(cat.name, id)
     }
 
-    return { message: `Seeded ${count} project types`, count }
+    // 3. Initial types
+    const projectTypeData = [
+      { name: 'Wedding Album', categoryId: categoryMap.get('Album'), isActive: true },
+      { name: 'Pre-Wedding Album', categoryId: categoryMap.get('Album'), isActive: true },
+      { name: 'Birthday Album', categoryId: categoryMap.get('Album'), isActive: true },
+      { name: 'Wedding Photography Edit', categoryId: categoryMap.get('Photography'), isActive: true },
+      { name: 'Wedding Film', categoryId: categoryMap.get('Video'), isActive: true },
+      { name: 'YouTube Video', categoryId: categoryMap.get('Video'), isActive: true },
+      { name: 'Instagram Reel', categoryId: categoryMap.get('Video'), isActive: true },
+      { name: 'Corporate Event', categoryId: categoryMap.get('Corporate'), isActive: true },
+    ]
+
+    for (const projectType of projectTypeData) {
+      await ctx.db.insert('projectTypes', {
+        name: projectType.name,
+        categoryId: projectType.categoryId,
+        isActive: projectType.isActive,
+      })
+    }
+
+    return { message: 'Data reset and re-seeded successfully' }
   },
 })
+

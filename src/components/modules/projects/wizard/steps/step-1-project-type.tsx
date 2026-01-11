@@ -51,14 +51,10 @@ export function WizardStep1() {
     isReviewing,
     setReviewing,
     setSubmitTrigger,
+    projectTypes,
   } = useWizardForm();
   const step1Data = formData.step1;
   const [projectTypeDrawerOpen, setProjectTypeDrawerOpen] = useState(false);
-
-  // Fetch project types from Convex
-  const projectTypes = useQuery(
-    api.functions.projectTypes.queries.getActiveProjectTypes
-  );
 
   // TanStack Form setup with field-level validation
   const form = useForm({

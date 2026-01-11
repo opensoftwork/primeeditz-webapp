@@ -90,14 +90,20 @@ export default defineSchema({
   // --------------------------------------------------------------------------
   // Project Types & Dynamic Fields
   // --------------------------------------------------------------------------
+  projectCategories: defineTable({
+    name: v.string(),
+    isActive: v.boolean(),
+    displayOrder: v.optional(v.number()),
+  }).index('by_isActive', ['isActive']),
+
   projectTypes: defineTable({
     name: v.string(),
-    category: v.string(),
+    categoryId: v.id('projectCategories'),
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()), // For ordering in UI
     defaultFolderTemplateId: v.optional(v.id('folderTemplates')),
   })
-    .index('by_category', ['category'])
+    .index('by_categoryId', ['categoryId'])
     .index('by_isActive', ['isActive']),
 
   // Dynamic field definitions for each project type

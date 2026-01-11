@@ -13,8 +13,12 @@ import type * as auth from "../auth.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_profiles_mutations from "../functions/profiles/mutations.js";
 import type * as functions_profiles_queries from "../functions/profiles/queries.js";
+import type * as functions_projectCategories_mutations from "../functions/projectCategories/mutations.js";
+import type * as functions_projectCategories_queries from "../functions/projectCategories/queries.js";
+import type * as functions_projectTypeFields_mutations from "../functions/projectTypeFields/mutations.js";
 import type * as functions_projectTypeFields_queries from "../functions/projectTypeFields/queries.js";
 import type * as functions_projectTypeFields_seed from "../functions/projectTypeFields/seed.js";
+import type * as functions_projectTypes_mutations from "../functions/projectTypes/mutations.js";
 import type * as functions_projectTypes_queries from "../functions/projectTypes/queries.js";
 import type * as functions_projects_mutations from "../functions/projects/mutations.js";
 import type * as functions_projects_queries from "../functions/projects/queries.js";
@@ -26,6 +30,7 @@ import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_helpers from "../lib/helpers.js";
 import type * as lib_storageUtils from "../lib/storageUtils.js";
 import type * as lib_validators from "../lib/validators.js";
+import type * as migrations from "../migrations.js";
 import type * as profiles from "../profiles.js";
 
 import type {
@@ -40,8 +45,12 @@ declare const fullApi: ApiFromModules<{
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/profiles/mutations": typeof functions_profiles_mutations;
   "functions/profiles/queries": typeof functions_profiles_queries;
+  "functions/projectCategories/mutations": typeof functions_projectCategories_mutations;
+  "functions/projectCategories/queries": typeof functions_projectCategories_queries;
+  "functions/projectTypeFields/mutations": typeof functions_projectTypeFields_mutations;
   "functions/projectTypeFields/queries": typeof functions_projectTypeFields_queries;
   "functions/projectTypeFields/seed": typeof functions_projectTypeFields_seed;
+  "functions/projectTypes/mutations": typeof functions_projectTypes_mutations;
   "functions/projectTypes/queries": typeof functions_projectTypes_queries;
   "functions/projects/mutations": typeof functions_projects_mutations;
   "functions/projects/queries": typeof functions_projects_queries;
@@ -53,6 +62,7 @@ declare const fullApi: ApiFromModules<{
   "lib/helpers": typeof lib_helpers;
   "lib/storageUtils": typeof lib_storageUtils;
   "lib/validators": typeof lib_validators;
+  migrations: typeof migrations;
   profiles: typeof profiles;
 }>;
 

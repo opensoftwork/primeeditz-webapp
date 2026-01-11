@@ -62,7 +62,7 @@ export function WizardStep5() {
     formData.step1.projectTypeId
       ? { projectTypeId: formData.step1.projectTypeId }
       : "skip"
-  );
+  ) as any;
 
   const handleEdit = (step: 1 | 2 | 3 | 4) => {
     setReviewing(true);
@@ -160,6 +160,38 @@ export function WizardStep5() {
               />
             </div>
           </SectionWrapper>
+
+          {/* Section: Project Details (Conditional) */}
+          {projectType?.hasCustomFields && (
+            <SectionWrapper
+              title="Project Specifications"
+              onEdit={() => handleEdit(2)}
+              icon={<Sparkles className="h-4 w-4" />}
+            >
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                {Object.entries(formData.step2.typeSpecificDetails || {}).map(
+                  ([key, value]) => {
+                    // Basic formatting for review
+                    let displayValue = String(value);
+                    if (Array.isArray(value)) displayValue = value.join(", ");
+                    if (typeof value === "boolean")
+                      displayValue = value ? "Yes" : "No";
+
+                    return (
+                      <ReviewData
+                        key={key}
+                        icon={
+                          <div className="w-1.5 h-1.5 rounded-full bg-primary/40" />
+                        }
+                        label={key.replace(/([A-Z])/g, " $1").trim()} // Simple camelCase to Space conversion
+                        value={displayValue}
+                      />
+                    );
+                  }
+                )}
+              </div>
+            </SectionWrapper>
+          )}
 
           {/* Section: Project Description */}
           <SectionWrapper

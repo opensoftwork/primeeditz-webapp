@@ -43,6 +43,7 @@ interface WizardContextValue {
   isLoading: boolean;
   error: string | null;
   submitTrigger: (() => void) | null;
+  projectTypes: any[] | undefined;
 
   // Actions
   setFormData: <K extends keyof WizardFormData>(
@@ -128,9 +129,13 @@ export function WizardFormProvider({
     api.functions.projects.storage.generateUploadUrl
   );
 
-  // Check for existing draft
   const existingDraft = useQuery(
     api.functions.projects.queries.getMyActiveDraft
+  );
+
+  // Fetch all active project types for logic and selection
+  const projectTypes = useQuery(
+    api.functions.projectTypes.queries.getActiveProjectTypes
   );
 
   // Create or Resume draft on first load
@@ -266,11 +271,27 @@ export function WizardFormProvider({
   );
 
   const nextStep = useCallback(async () => {
-    const nextIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep) + 1;
+    const currentIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep);
+    const nextIndex = currentIndex + 1;
+
     if (nextIndex < WIZARD_STEPS.length) {
-      await goToStep(WIZARD_STEPS[nextIndex].id);
+      let nextStepId = WIZARD_STEPS[nextIndex].id;
+
+      // Logic: Skip Step 2 if project type has no custom fields
+      if (nextStepId === 2) {
+        const selectedType = projectTypes?.find(
+          (pt) => pt._id === formData.step1.projectTypeId
+        );
+
+        if (selectedType && !selectedType.hasCustomFields) {
+          // Jump over step 2 directly to step 3 (Files)
+          nextStepId = 3;
+        }
+      }
+
+      await goToStep(nextStepId);
     }
-  }, [currentStep, goToStep]);
+  }, [currentStep, goToStep, projectTypes, formData.step1.projectTypeId]);
 
   const prevStep = useCallback(async () => {
     const prevIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep) - 1;
@@ -448,6 +469,7 @@ export function WizardFormProvider({
         resetWizard,
         submitTrigger,
         setSubmitTrigger,
+        projectTypes,
       }}
     >
       {children}

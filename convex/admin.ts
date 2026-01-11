@@ -280,12 +280,18 @@ export const getProjectTypes = adminQuery({
   args: {},
   handler: async (ctx) => {
     const projectTypes = await ctx.db.query("projectTypes").collect();
-    return projectTypes.map((pt) => ({
-      _id: pt._id,
-      name: pt.name,
-      category: pt.category,
-      isActive: pt.isActive,
-    }));
+    const enriched = await Promise.all(
+      projectTypes.map(async (pt) => {
+        const category = pt.categoryId ? await ctx.db.get(pt.categoryId) : null;
+        return {
+          _id: pt._id,
+          name: pt.name,
+          categoryName: category?.name || 'Uncategorized',
+          isActive: pt.isActive,
+        };
+      })
+    )
+    return enriched;
   },
 });
 
@@ -311,7 +317,7 @@ export const getProjectTypeFields = adminQuery({
 export const createProjectType = adminMutation({
   args: {
     name: v.string(),
-    category: v.string(),
+    categoryId: v.id("projectCategories"),
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()),
   },
@@ -329,7 +335,7 @@ export const updateProjectType = adminMutation({
   args: {
     id: v.id("projectTypes"),
     name: v.optional(v.string()),
-    category: v.optional(v.string()),
+    categoryId: v.optional(v.id("projectCategories")),
     isActive: v.optional(v.boolean()),
     displayOrder: v.optional(v.number()),
   },

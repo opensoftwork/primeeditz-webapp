@@ -126,14 +126,19 @@ export const getMyProjectsWithType = clientQuery({
       .order('desc')
       .collect()
 
-    // Enrich with project type
+    // Enrich with project type and category
     const enriched = await Promise.all(
       projects.map(async (project) => {
         const projectType = await ctx.db.get(project.projectTypeId)
+        let categoryName = 'Other'
+        if (projectType && projectType.categoryId) {
+          const category = await ctx.db.get(projectType.categoryId)
+          categoryName = category?.name || 'Other'
+        }
         return {
           ...project,
           projectTypeName: projectType?.name ?? 'Unknown',
-          projectTypeCategory: projectType?.category ?? 'Other',
+          projectTypeCategory: categoryName,
         }
       })
     )
