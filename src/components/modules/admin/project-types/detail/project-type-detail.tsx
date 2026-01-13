@@ -3,7 +3,7 @@
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useParams } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Boxes } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,7 +14,7 @@ import { FieldList, FieldDrawer } from "./index";
 import { type FieldFormValues } from "./field-drawer";
 import { DetailHeader, DetailStats, DetailAlerts } from "./index";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import type { Id } from "@convex/_generated/dataModel";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 
 export function ProjectTypeDetail() {
   const params = useParams();
@@ -43,8 +43,11 @@ export function ProjectTypeDetail() {
 
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingField, setEditingField] = useState<any>(null);
-  const [localFields, setLocalFields] = useState<any[]>([]);
+  const [editingField, setEditingField] =
+    useState<Doc<"projectTypeFields"> | null>(null);
+  const [localFields, setLocalFields] = useState<Doc<"projectTypeFields">[]>(
+    []
+  );
   const [fieldToDeactivate, setFieldToDeactivate] = useState<string | null>(
     null
   );
@@ -54,14 +57,28 @@ export function ProjectTypeDetail() {
   const [fieldToHardDelete, setFieldToHardDelete] = useState<string | null>(
     null
   );
+  const isSyncingOrder = useRef(false);
+  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const { setOverride } = useBreadcrumbStore();
 
   // Sync breadcrumbs and local fields
   useEffect(() => {
-    if (projectType?.fields) setLocalFields(projectType.fields);
+    if (projectType?.fields) {
+      if (isSyncingOrder.current) {
+        // Check if server state matches local order
+        const isMatch =
+          projectType.fields.length === localFields.length &&
+          projectType.fields.every((f, i) => f._id === localFields[i]?._id);
+        if (isMatch) {
+          isSyncingOrder.current = false;
+        }
+      } else {
+        setLocalFields(projectType.fields);
+      }
+    }
     if (projectType?.name) setOverride(id, projectType.name);
-  }, [id, projectType, setOverride]);
+  }, [id, projectType, localFields, setOverride]);
 
   // Handlers
   const handleAddField = () => {
@@ -69,7 +86,7 @@ export function ProjectTypeDetail() {
     setIsDrawerOpen(true);
   };
 
-  const handleEditField = (field: any) => {
+  const handleEditField = (field: Doc<"projectTypeFields">) => {
     setEditingField(field);
     setIsDrawerOpen(true);
   };
@@ -93,15 +110,26 @@ export function ProjectTypeDetail() {
     }
   };
 
-  const handleReorder = async (fields: any[]) => {
+  const handleReorder = (fields: Doc<"projectTypeFields">[]) => {
+    // 1. Update UI immediately
     setLocalFields(fields);
-    try {
-      await reorderFields({
-        fields: fields.map((f, i) => ({ id: f._id, displayOrder: i })),
-      });
-    } catch (error) {
-      toast.error("Failed to save field order");
-    }
+    isSyncingOrder.current = true;
+
+    // 2. Debounce server sync
+    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
+
+    syncTimeoutRef.current = setTimeout(async () => {
+      try {
+        await reorderFields({
+          fields: fields.map((f, i) => ({ id: f._id, displayOrder: i })),
+        });
+      } catch (error) {
+        toast.error("Failed to save field order");
+        // Revert to server state on error
+        if (projectType?.fields) setLocalFields(projectType.fields);
+        isSyncingOrder.current = false;
+      }
+    }, 500);
   };
 
   const handleToggleStatusRequest = async (id: string, current: boolean) => {

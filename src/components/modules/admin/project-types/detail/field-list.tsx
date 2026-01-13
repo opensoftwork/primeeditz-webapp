@@ -15,30 +15,21 @@ import {
   ListOrdered,
   CheckSquare,
   AlignLeft,
+  LucideIcon,
 } from "lucide-react";
 import { motion, Reorder, AnimatePresence } from "motion/react";
 import { cn } from "@/lib/utils";
-
-interface Field {
-  _id: string;
-  name: string;
-  label: string;
-  type: string;
-  required: boolean;
-  isActive: boolean;
-  displayOrder: number;
-  options?: string;
-}
+import type { Doc } from "@convex/_generated/dataModel";
 
 interface FieldListProps {
-  fields: Field[];
-  onEdit: (field: Field) => void;
+  fields: Doc<"projectTypeFields">[];
+  onEdit: (field: Doc<"projectTypeFields">) => void;
   onDelete: (id: string) => void;
   onToggleStatus: (id: string, current: boolean) => void;
-  onReorder: (fields: Field[]) => void;
+  onReorder: (fields: Doc<"projectTypeFields">[]) => void;
 }
 
-const TYPE_ICONS: Record<string, any> = {
+const TYPE_ICONS: Record<string, LucideIcon> = {
   text: Type,
   number: Hash,
   select: ListOrdered,
@@ -75,7 +66,7 @@ export function FieldList({
                 boxShadow: "0 20px 25px -5px rgb(0 0 0 / 0.5)",
               }}
               className={cn(
-                "flex items-center gap-4 p-4 rounded-2xl border transition-all duration-300 group relative overflow-hidden",
+                "flex items-center gap-4 p-4 rounded-2xl border transition-[background-color,border-color,box-shadow,opacity,filter] duration-300 group relative overflow-hidden",
                 field.isActive
                   ? "bg-white/5 border-white/5 hover:bg-white/10"
                   : "bg-white/2 border-white/5 opacity-60 grayscale-[0.5]"

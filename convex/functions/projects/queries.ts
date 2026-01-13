@@ -8,6 +8,7 @@
 import { v } from 'convex/values'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
+import type { Doc } from '../../_generated/dataModel'
 
 // ============================================================================
 // Client Queries
@@ -131,9 +132,10 @@ export const getMyProjectsWithType = clientQuery({
       projects.map(async (project) => {
         const projectType = await ctx.db.get(project.projectTypeId)
         let categoryName = 'Other'
-        if (projectType && projectType.categoryId) {
-          const category = await ctx.db.get(projectType.categoryId)
-          categoryName = category?.name || 'Other'
+        const pt = projectType as Doc<"projectTypes"> | null;
+        if (pt && pt.categoryId) {
+          const category = await ctx.db.get(pt.categoryId)
+          categoryName = (category as Doc<"projectCategories"> | null)?.name || 'Other'
         }
         return {
           ...project,

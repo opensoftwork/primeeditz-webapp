@@ -67,15 +67,17 @@ export function ListAlerts({
             <AlertDialogTitle className="text-white uppercase font-black tracking-tight text-xl">
               Delete Project Type?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] space-y-2">
-              <p>
-                You are about to permanently delete{" "}
-                <span className="text-white">{typeToDelete?.name}</span>.
-              </p>
-              <p className="text-red-500/80">
-                This action cannot be undone and will also delete all associated
-                form fields.
-              </p>
+            <AlertDialogDescription asChild>
+              <div className="text-white/40 font-bold uppercase tracking-widest text-[10px] space-y-2">
+                <p>
+                  You are about to permanently delete{" "}
+                  <span className="text-white">{typeToDelete?.name}</span>.
+                </p>
+                <p className="text-red-500/80">
+                  This action cannot be undone and will also delete all
+                  associated form fields.
+                </p>
+              </div>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-4">

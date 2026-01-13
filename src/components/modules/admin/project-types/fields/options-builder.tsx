@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Plus, Trash2, GripVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -18,9 +18,30 @@ interface OptionsBuilderProps {
 }
 
 export function OptionsBuilder({ value, onChange }: OptionsBuilderProps) {
-  const [options, setOptions] = useState<Option[]>([]);
+  const [options, setOptions] = useState<Option[]>(() => {
+    try {
+      const parsed = JSON.parse(value);
+      if (Array.isArray(parsed)) {
+        return parsed.map((opt, i) => ({
+          id: opt.id || `opt-${i}-${Date.now()}`,
+          label: opt.label || "",
+          value: opt.value || "",
+        }));
+      }
+    } catch (e) {
+      // ignore
+    }
+    return [];
+  });
+
+  // Track the last value we sent to avoid re-parsing our own updates
+  const lastSentValueRef = useRef<string>(value);
 
   useEffect(() => {
+    // Only sync from parent if the value changed externally (not from our own updates)
+    if (value === lastSentValueRef.current) {
+      return;
+    }
     try {
       const parsed = JSON.parse(value);
       if (Array.isArray(parsed)) {
@@ -35,14 +56,20 @@ export function OptionsBuilder({ value, onChange }: OptionsBuilderProps) {
     } catch (e) {
       setOptions([]);
     }
+    lastSentValueRef.current = value;
   }, [value]);
 
-  const updateOptions = (newOptions: Option[]) => {
-    setOptions(newOptions);
-    onChange(
-      JSON.stringify(newOptions.map(({ label, value }) => ({ label, value })))
-    );
-  };
+  const updateOptions = useCallback(
+    (newOptions: Option[]) => {
+      setOptions(newOptions);
+      const jsonValue = JSON.stringify(
+        newOptions.map(({ label, value }) => ({ label, value }))
+      );
+      lastSentValueRef.current = jsonValue;
+      onChange(jsonValue);
+    },
+    [onChange]
+  );
 
   const addOption = () => {
     const newOptions = [

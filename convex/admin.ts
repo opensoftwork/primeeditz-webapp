@@ -9,6 +9,7 @@ import { paginationOptsValidator } from "convex/server";
 import { mutation } from "./_generated/server";
 import { v } from "convex/values";
 import { adminMutation, adminQuery } from "./lib/customFunctions";
+import type { Doc, Id } from "./_generated/dataModel";
 
 /**
  * Get admin dashboard statistics.
@@ -286,7 +287,7 @@ export const getProjectTypes = adminQuery({
         return {
           _id: pt._id,
           name: pt.name,
-          categoryName: category?.name || 'Uncategorized',
+          categoryName: (category as Doc<"projectCategories"> | null)?.name || 'Uncategorized',
           isActive: pt.isActive,
         };
       })

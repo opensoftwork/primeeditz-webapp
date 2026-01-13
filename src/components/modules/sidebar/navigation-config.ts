@@ -6,6 +6,8 @@ import {
   FileText,
   Settings,
   ClipboardList,
+  LayoutGrid,
+  ClipboardCheck,
 } from "lucide-react";
 
 export interface NavItem {
@@ -73,6 +75,16 @@ export const adminNavItems: NavItem[] = [
     title: "Project Types",
     url: "/settings/project-types",
     icon: Settings,
+  },
+  {
+    title: "Quotation Sections",
+    url: "/settings/quotation-sections",
+    icon: LayoutGrid,
+  },
+  {
+    title: "Quotation Templates",
+    url: "/settings/quotation-templates",
+    icon: ClipboardCheck,
   },
 ];
 

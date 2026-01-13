@@ -75,31 +75,55 @@ development_status:
 
   # =========================================
   # EPIC 3: Admin Portal — Project & System Management
-  # Updated: 2026-01-09 with Epic 2 learnings applied
+  # Updated: 2026-01-12 with quotation-first sequencing
+  # Decision: planning-artifacts/decisions/2026-01-12-quotation-folder-sequencing.md
   # =========================================
   epic-3: in-progress
   3-1-admin-dashboard-layout: done
   3-2-admin-project-listing-with-filters: done
-  3-3-admin-project-detail-view: done # New story file created with Epic 2 patterns
-  3-4-project-stage-folder-setup: backlog
+  3-3-admin-project-detail-view: done
+  3-4-project-stage-folder-setup: backlog # Blocked by: 4.5 (quotation approval gate)
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog
-  3-7-project-types-management: in-progress # Story implementation started
-  3-8-quotation-templates-management: backlog
+  3-7-project-types-management: done
+  3-8-quotation-templates-management: review # Implementation complete, ready for review
   3-9-storage-pricing-tiers-configuration: backlog
-  3-10-folder-templates-configuration: backlog
+  3-10-folder-templates-configuration: backlog # Blocked by: 3.8 (templates needed first)
   epic-3-retrospective: optional
 
   # =========================================
-  # EPIC 4: Quotation System
+  # EPIC 4: Quotation System (Revised 2026-01-13)
+  # Brainstorming: analysis/brainstorming-session-2026-01-13-quotation-architecture.md
+  # Architecture: Standalone, modular, portable as Convex Component
   # =========================================
   epic-4: backlog
-  4-1-create-quotation-from-template: backlog
-  4-2-edit-quotation-line-items: backlog
-  4-3-send-quotation-to-client: backlog
-  4-4-client-view-quotation: backlog
-  4-5-client-approve-quotation: backlog
-  4-6-client-request-quotation-changes: backlog
+
+  # Phase A: Foundation (MVP)
+  4-1-quotation-sections-configuration: done # Completed: schema, queries, mutations, seed, UI
+  4-2-quotation-templates-crud: see-3-8 # Covered by Story 3.8 in Epic 3
+  4-3-create-quotation-standalone: ready-for-dev # Story file created
+  4-4-quotation-line-items-nested: backlog
+  4-5-quotation-preview-print: backlog
+
+  # Phase B: Client Workflow
+  4-6-send-quotation-to-client: backlog
+  4-7-client-view-quotation: backlog
+  4-8-client-approve-quotation: backlog
+  4-9-client-request-changes: backlog
+  4-10-quotation-versioning-history: backlog
+
+  # Phase C: Integration & Library
+  4-11-link-quotation-to-projects: backlog
+  4-12-item-library-crud: backlog
+  4-13-add-items-from-library: backlog
+  4-14-project-type-hints-for-templates: backlog
+
+  # Phase D: ERP Extensions (Future - not in current sprint)
+  # 4-15-recurring-client-tracking: future
+  # 4-16-multi-currency-support: future
+  # 4-17-payment-tracking-invoicing: future
+  # 4-18-quotation-expiry-reminders: future
+
   epic-4-retrospective: optional
 
   # =========================================

@@ -36,11 +36,13 @@ const fieldSchema = z.object({
 
 export type FieldFormValues = z.infer<typeof fieldSchema>;
 
+import type { Doc } from "@convex/_generated/dataModel";
+
 interface FieldDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (values: FieldFormValues) => Promise<void>;
-  initialData?: any | null;
+  initialData?: Doc<"projectTypeFields"> | null;
   projectTypeId: string;
   nextDisplayOrder: number;
 }
@@ -63,7 +65,7 @@ export function FieldDrawer({
     defaultValues: {
       name: initialData?.name ?? "",
       label: initialData?.label ?? "",
-      type: (initialData?.type as any) ?? "text",
+      type: (initialData?.type as FieldFormValues["type"]) ?? "text",
       required: initialData?.required ?? false,
       placeholder: initialData?.placeholder ?? "",
       description: initialData?.description ?? "",
@@ -194,26 +196,47 @@ export function FieldDrawer({
               <form.Field name="type">
                 {(field) => (
                   <div className="space-y-3">
-                    <Label className="text-white/60 font-medium">
-                      Field Type
-                    </Label>
+                    <div className="flex items-center justify-between">
+                      <Label className="text-white/60 font-medium">
+                        Field Type
+                      </Label>
+                      {initialData && (
+                        <span className="text-[9px] font-bold uppercase tracking-widest text-white/20">
+                          Locked
+                        </span>
+                      )}
+                    </div>
                     <div className="grid grid-cols-3 gap-2">
                       {FIELD_TYPES.map((t) => (
                         <button
                           key={t.value}
                           type="button"
-                          onClick={() => field.handleChange(t.value as any)}
+                          onClick={() =>
+                            !initialData &&
+                            field.handleChange(
+                              t.value as FieldFormValues["type"]
+                            )
+                          }
+                          disabled={!!initialData}
                           className={cn(
                             "px-3 py-2 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all border",
                             field.state.value === t.value
                               ? "bg-primary text-primary-foreground border-primary"
-                              : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white"
+                              : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white",
+                            initialData &&
+                              "cursor-not-allowed opacity-50 hover:border-white/5 hover:text-white/40"
                           )}
                         >
                           {t.label}
                         </button>
                       ))}
                     </div>
+                    {initialData && (
+                      <p className="text-[9px] text-white/30 font-medium leading-relaxed">
+                        Field type cannot be changed after creation. Delete this
+                        field and create a new one if you need a different type.
+                      </p>
+                    )}
                   </div>
                 )}
               </form.Field>

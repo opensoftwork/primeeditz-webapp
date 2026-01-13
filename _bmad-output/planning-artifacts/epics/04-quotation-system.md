@@ -1,128 +1,378 @@
-# Epic 4: Quotation System
+# Epic 4: Quotation System (Revised)
 
-**User Outcome:** Admins can generate quotations for sessions, and clients can view and approve/reject them.
-
-**FRs covered:** FR6 (Quotation System)
-
-**Scope:**
-
-- Quotation creation attached to sessions
-- Template-based pricing with line items
-- GST calculation (18%)
-- Quotation status workflow (draft → sent → approved/rejected)
-- Client quotation view
-- Approval/rejection with optional comments
-
-**Standalone:** ✅ Complete quotation workflow from creation to approval.
+**Epic Owner**: Admin/CEO  
+**Status**: Planning  
+**Created**: 2026-01-13  
+**Complexity**: High (Multi-phase implementation)  
+**Context**: Brainstorming session 2026-01-12
 
 ---
 
-## 📘 Epic 2 Learnings Applied
+## 📋 Epic Summary
 
-**IMPORTANT**: Based on Epic 2 retrospective (2026-01-09), apply these corrections:
+A **standalone, modular quotation system** designed for post-production teams that:
 
-### Framework Corrections
+- Creates quotations independently OR linked to projects
+- Supports reusable templates and item libraries
+- Enables client approval workflow with versioning
+- Is architecturally portable as a Convex Component
 
-| Original Specification | Actual Implementation     |
-| ---------------------- | ------------------------- |
-| TanStack Start Router  | **Next.js 15 App Router** |
-| TanStack Form          | **React Hook Form + Zod** |
-
-### Reusable Patterns
-
-1. **Route Structure**: Use parallel routes (`@client/`, `@admin/`)
-2. **Form Handling**: React Hook Form with Zod validation
-3. **Styling**: Premium studio aesthetic with motion/react animations
-4. **Data Fetching**: Convex useQuery with authenticated wrappers
+**Key Insight from Brainstorming**: Quotation is a **first-class entity**, not a child of Project. This enables internal estimates, multi-project quotes, and future ERP capabilities.
 
 ---
 
-### Story 4.1: Create Quotation from Template
+## 🎯 User Outcomes
 
-**As an** Admin,
-**I want** to create a quotation for a project by selecting a template,
-**So that** I can quickly generate professional quotations.
+| Role          | Outcome                                                                 |
+| ------------- | ----------------------------------------------------------------------- |
+| **Admin/CEO** | Create and manage quotations for any service, with or without a project |
+| **Admin/CEO** | Reuse templates and library items for consistent, fast quoting          |
+| **Admin/CEO** | Track quotation versions and revision history                           |
+| **Client**    | View, approve, or request changes to quotations                         |
+| **Client**    | See quotation status without calling the studio                         |
 
-**Acceptance Criteria:**
+---
 
-- **Given** I am on a project detail page with status `pending_review`
-- **When** I click "Create Quotation"
-- **Then** I must select a Quotation Template from configured templates.
-- **And** the template must auto-populate: Line Items, Subtotal, GST (18%), and Total.
-- **And** I must select a Storage Tier from configured tiers.
-- **And** saving must create a quotation record with status `draft`.
-- **And** the "Send to Client" button must be disabled if quotation has zero line items.
+## 🗂️ Phased Implementation
 
-### Story 4.2: Edit Quotation Line Items
+### Phase A: Foundation (MVP)
 
-**As an** Admin,
-**I want** to customize the line items on a quotation,
-**So that** I can adjust for project-specific requirements.
+**Goal**: Basic quotation CRUD with sections and line items
 
-**Acceptance Criteria:**
+| Story | Description                                  | Points |
+| ----- | -------------------------------------------- | ------ |
+| 4.1   | Quotation Sections Configuration             | 3      |
+| 4.2   | Quotation Templates CRUD                     | 5      |
+| 4.3   | Create Quotation (Standalone)                | 8      |
+| 4.4   | Quotation Line Items (with nested hierarchy) | 8      |
+| 4.5   | Quotation Preview & Print                    | 3      |
 
-- **Given** I am editing a draft quotation
-- **When** I modify line items
-- **Then** I can add, remove, or edit line items (description, quantity, unit price).
-- **And** subtotal, GST, and total must auto-calculate on change.
-- **And** changes must be saved to the quotation record.
+### Phase B: Client Workflow
 
-### Story 4.3: Send Quotation to Client
+**Goal**: Enable client-facing quotation flow
 
-**As an** Admin,
-**I want** to send a completed quotation to the client,
-**So that** they can review and approve it.
+| Story | Description                             | Points |
+| ----- | --------------------------------------- | ------ |
+| 4.6   | Send Quotation to Client                | 3      |
+| 4.7   | Client View Quotation                   | 5      |
+| 4.8   | Client Approve Quotation                | 3      |
+| 4.9   | Client Request Changes (with notes)     | 5      |
+| 4.10  | Quotation Versioning & Revision History | 8      |
 
-**Acceptance Criteria:**
+### Phase C: Integration & Library
 
-- **Given** I am on a draft quotation
-- **When** I click "Send to Client"
-- **Then** the quotation status must change to `sent`.
-- **And** the project status must change to `pending_quotation`.
-- **And** the client must see the quotation on their project detail page.
+**Goal**: Connect quotations to projects, enable reuse
 
-### Story 4.4: Client View Quotation
+| Story | Description                         | Points |
+| ----- | ----------------------------------- | ------ |
+| 4.11  | Link Quotation to Project(s)        | 5      |
+| 4.12  | Item Library CRUD                   | 8      |
+| 4.13  | Add Items from Library to Quotation | 5      |
+| 4.14  | Project Type Hints for Templates    | 3      |
 
-**As a** Client,
-**I want** to view a quotation sent by the studio,
-**So that** I can review the pricing and terms.
+### Phase D: ERP Extensions (Future)
 
-**Acceptance Criteria:**
+**Goal**: Enterprise-level capabilities
 
-- **Given** I am on my project detail page with a quotation
-- **When** I click "View Quotation"
-- **Then** I must see: Line Items, Subtotal, GST, Total, Storage Tier, and Terms.
-- **And** I must see "Approve" and "Request Changes" buttons.
+| Story | Description                  | Points |
+| ----- | ---------------------------- | ------ |
+| 4.15  | Recurring Client Tracking    | 8      |
+| 4.16  | Multi-Currency Support       | 5      |
+| 4.17  | Payment Tracking & Invoicing | 13     |
+| 4.18  | Quotation Expiry & Reminders | 5      |
 
-### Story 4.5: Client Approve Quotation
+---
 
-**As a** Client,
-**I want** to approve a quotation,
-**So that** my project can proceed and I can upload assets.
+## 📊 Data Architecture
 
-**Acceptance Criteria:**
+### Core Tables (Phase A)
 
-- **Given** I am viewing a quotation with status `sent`
-- **When** I click "Approve Quotation"
-- **Then** the quotation status must change to `approved`.
-- **And** the project status must change to `active`.
-- **And** the project's `storageAllocated` field must be set based on the selected tier (e.g., 100GB).
-- **And** the upload section on my project must become unlocked.
+```typescript
+// User-configurable sections (not hardcoded)
+quotationSections: defineTable({
+  name: v.string(), // "Design Services", "Post-Production"
+  displayOrder: v.number(),
+  icon: v.optional(v.string()), // Lucide icon name
+  color: v.optional(v.string()), // Accent color
+  isActive: v.boolean(),
+}).index("by_isActive", ["isActive"]);
 
-**Note:** Storage is not pre-allocated in MinIO. The limit is checked at upload time (Story 5.5).
+// Reusable templates (independent of project types)
+quotationTemplates: defineTable({
+  name: v.string(),
+  description: v.optional(v.string()),
+  lineItems: v.array(
+    v.object({
+      sectionId: v.id("quotationSections"),
+      description: v.string(),
+      unit: v.string(),
+      unitPrice: v.number(),
+      defaultQuantity: v.number(),
+      subItems: v.optional(
+        v.array(
+          v.object({
+            description: v.string(),
+            unit: v.string(),
+            unitPrice: v.number(),
+            defaultQuantity: v.number(),
+          })
+        )
+      ),
+    })
+  ),
+  terms: v.optional(v.string()),
+  projectTypeHint: v.optional(v.id("projectTypes")), // Soft filter
+  isActive: v.boolean(),
+  createdBy: v.id("profiles"),
+  updatedAt: v.number(),
+}).index("by_isActive", ["isActive"]);
 
-### Story 4.6: Client Request Quotation Changes
+// Main quotation entity (standalone, first-class)
+quotations: defineTable({
+  code: v.string(), // "QT-000001"
+  version: v.number(), // 1, 2, 3... for revisions
+  parentQuotationId: v.optional(v.id("quotations")), // Link to previous version
 
-**As a** Client,
-**I want** to request changes to a quotation,
-**So that** I can negotiate terms before approving.
+  // Client linking (optional for internal estimates)
+  clientId: v.optional(v.id("profiles")),
 
-**Acceptance Criteria:**
+  // Project linking (optional, can be 0, 1, or many)
+  projectIds: v.optional(v.array(v.id("projects"))),
 
-- **Given** I am viewing a quotation with status `sent`
-- **When** I click "Request Changes" and enter a message
-- **Then** the quotation status must change to `revision_requested`.
-- **And** the admin must be notified of the change request.
-- **And** when admin revises and re-sends, the quotation `version` field must increment.
+  // Template reference (if created from template)
+  templateId: v.optional(v.id("quotationTemplates")),
 
-**MVP Note:** Quotation updates the existing record with incremented version. Phase 2 will create new records per version for full audit trail.
+  // Status workflow
+  status: v.union(
+    v.literal("draft"),
+    v.literal("sent"),
+    v.literal("viewed"),
+    v.literal("approved"),
+    v.literal("changes_requested"),
+    v.literal("rejected"),
+    v.literal("expired"),
+    v.literal("superseded") // When a new version is created
+  ),
+
+  // Line items (with nested hierarchy)
+  lineItems: v.array(
+    v.object({
+      id: v.string(), // Client-generated UUID for drag/drop
+      sectionId: v.id("quotationSections"),
+      description: v.string(),
+      unit: v.string(),
+      rate: v.number(),
+      quantity: v.number(),
+      length: v.optional(v.string()),
+      width: v.optional(v.string()),
+      image: v.optional(v.string()), // MinIO storage key
+      subItems: v.optional(
+        v.array(
+          v.object({
+            id: v.string(),
+            description: v.string(),
+            unit: v.string(),
+            rate: v.number(),
+            quantity: v.number(),
+          })
+        )
+      ),
+    })
+  ),
+
+  // Calculated totals
+  subtotal: v.number(),
+  taxRate: v.number(), // Configurable (0.18 for 18% GST)
+  taxAmount: v.number(),
+  total: v.number(),
+
+  // Terms & validity
+  terms: v.optional(v.string()),
+  validUntil: v.optional(v.number()), // Timestamp
+
+  // Client feedback (for changes_requested / rejected)
+  clientNotes: v.optional(v.string()),
+
+  // Audit
+  createdBy: v.id("profiles"),
+  sentAt: v.optional(v.number()),
+  viewedAt: v.optional(v.number()),
+  approvedAt: v.optional(v.number()),
+  updatedAt: v.number(),
+})
+  .index("by_clientId", ["clientId"])
+  .index("by_status", ["status"])
+  .index("by_code", ["code"])
+  .index("by_parentQuotationId", ["parentQuotationId"]);
+```
+
+### Extension Tables (Phase C)
+
+```typescript
+// Item Library for reuse
+libraryItems: defineTable({
+  sectionId: v.id("quotationSections"),
+  category: v.string(), // Sub-category within section
+  name: v.string(),
+  description: v.optional(v.string()),
+  unit: v.string(),
+  defaultRate: v.number(),
+  image: v.optional(v.string()),
+  displayOrder: v.number(),
+  isActive: v.boolean(),
+})
+  .index("by_sectionId", ["sectionId"])
+  .index("by_isActive", ["isActive"]);
+```
+
+---
+
+## 🔄 Status Workflow
+
+```
+                    ┌─────────────────────────────────────┐
+                    │                                     │
+                    ▼                                     │
+┌───────┐    ┌──────────┐    ┌──────────┐    ┌──────────┐│
+│ draft │───▶│   sent   │───▶│  viewed  │───▶│ approved ││
+└───────┘    └──────────┘    └──────────┘    └──────────┘│
+                    │              │                      │
+                    │              │         (revision)   │
+                    │              ▼                      │
+                    │       ┌──────────────────┐          │
+                    │       │ changes_requested │──────────┘
+                    │       └──────────────────┘
+                    │              │
+                    │              │
+                    ▼              ▼
+              ┌──────────┐  ┌──────────┐
+              │ expired  │  │ rejected │
+              └──────────┘  └──────────┘
+```
+
+**Versioning Flow:**
+
+1. Client requests changes → Admin creates new version
+2. Previous version marked as `superseded`
+3. New version starts as `draft`, linked via `parentQuotationId`
+4. Version number increments
+
+---
+
+## 🧩 Convex Component Structure (Modularity)
+
+For maximum portability, structure as a local Convex Component:
+
+```
+convex/
+├── components/
+│   └── quotation/
+│       ├── convex.config.ts      # Component definition
+│       ├── _generated/           # Auto-generated
+│       ├── schema.ts             # Quotation-specific tables
+│       ├── quotations/
+│       │   ├── queries.ts
+│       │   ├── mutations.ts
+│       │   └── internal.ts
+│       ├── templates/
+│       │   ├── queries.ts
+│       │   └── mutations.ts
+│       ├── sections/
+│       │   ├── queries.ts
+│       │   └── mutations.ts
+│       └── library/              # Phase C
+│           ├── queries.ts
+│           └── mutations.ts
+```
+
+---
+
+## 🎨 UI Component Structure
+
+```
+src/components/modules/quotation/
+├── index.ts                      # Barrel exports
+├── builder/
+│   ├── quotation-builder.tsx     # Main editor
+│   ├── line-item-row.tsx         # Single line item
+│   ├── line-items-section.tsx    # Section container
+│   ├── section-header.tsx
+│   └── totals-footer.tsx
+├── preview/
+│   ├── quotation-preview.tsx
+│   └── printable-quotation.tsx
+├── list/
+│   ├── quotation-list.tsx
+│   ├── quotation-card.tsx
+│   └── quotation-filters.tsx
+├── templates/
+│   ├── template-list.tsx
+│   ├── template-drawer.tsx
+│   └── template-card.tsx
+├── library/                      # Phase C
+│   ├── library-drawer.tsx
+│   └── library-category-list.tsx
+└── client-view/                  # Phase B
+    ├── client-quotation-view.tsx
+    ├── approval-buttons.tsx
+    └── changes-requested-form.tsx
+```
+
+---
+
+## ✅ Acceptance Criteria Summary
+
+### Phase A MVP Success
+
+- [ ] Admin can create quotation sections
+- [ ] Admin can create/edit quotation templates
+- [ ] Admin can create standalone quotation (no client/project required)
+- [ ] Admin can add nested line items with sections
+- [ ] Quotation calculates totals with configurable tax rate
+- [ ] Preview and print modes work
+
+### Phase B Client Workflow Success
+
+- [ ] Admin can send quotation to client
+- [ ] Client receives link and can view quotation
+- [ ] Client can approve quotation
+- [ ] Client can request changes with notes
+- [ ] Versions are tracked with history
+
+---
+
+## 🔗 Dependencies
+
+| This Epic | Depends On        | Notes                                 |
+| --------- | ----------------- | ------------------------------------- |
+| 4.x       | Epic 1 (Auth)     | User profiles for createdBy, clientId |
+| 4.6+      | Epic 2 (optional) | Link to projects if desired           |
+| Phase C   | Story 3.7         | Project types for filtering hints     |
+
+---
+
+## 📝 Brainstorming Session Notes
+
+**Date**: 2026-01-12 to 2026-01-13  
+**Techniques Used**: System Decomposition, Constraint Analysis  
+**Key Decisions**:
+
+1. Quotation is first-class, not child of Project
+2. Templates independent of project types (optional hint only)
+3. Sections are user-configurable, not hardcoded
+4. Client linking is optional (internal estimates allowed)
+5. Versioning with parentQuotationId link
+6. Phased approach: MVP → Client Flow → Integration → ERP
+
+---
+
+## 🔄 Status Updates
+
+| Date       | Status   | Notes                                   |
+| ---------- | -------- | --------------------------------------- |
+| 2026-01-13 | planning | Epic created from brainstorming session |
+
+---
+
+**Previous Epic**: Epic 3 - Admin Portal  
+**Next Epic**: Epic 5 - Asset Upload & Folder Management

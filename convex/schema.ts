@@ -28,14 +28,6 @@ const projectSourceValidator = v.union(
   v.literal('admin_init')
 )
 
-// Quotation status flow: draft → sent → approved / revision_requested
-const quotationStatusValidator = v.union(
-  v.literal('draft'),
-  v.literal('sent'),
-  v.literal('approved'),
-  v.literal('revision_requested')
-)
-
 // Folder status flow: pending_upload → in_progress → completed
 const folderStatusValidator = v.union(
   v.literal('pending_upload'),
@@ -50,13 +42,6 @@ const deliverableStatusValidator = v.union(
   v.literal('revision_needed'),
   v.literal('revision_requested')
 )
-
-// Line item for quotations
-const lineItemValidator = v.object({
-  description: v.string(),
-  quantity: v.number(),
-  unitPrice: v.number(),
-})
 
 // ============================================================================
 // Schema Definition
@@ -187,22 +172,6 @@ export default defineSchema({
     priceINR: v.number(),
     isActive: v.boolean(),
   }),
-
-  quotations: defineTable({
-    projectId: v.id('projects'),
-    version: v.number(),
-    status: quotationStatusValidator,
-    lineItems: v.array(lineItemValidator),
-    subtotal: v.number(),
-    gstAmount: v.number(),
-    total: v.number(),
-    storageTierId: v.optional(v.id('storageTiers')),
-    terms: v.optional(v.string()),
-    // Uses _creationTime for created
-    updatedAt: v.number(),
-  })
-    .index('by_projectId', ['projectId'])
-    .index('by_status', ['status']),
 
   // --------------------------------------------------------------------------
   // Folder Templates, Folders & Assets

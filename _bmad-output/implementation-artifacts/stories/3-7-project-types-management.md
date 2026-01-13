@@ -1,7 +1,7 @@
 # Story 3-7: Project Types & Fields Management
 
 **Epic**: Epic 3 - Admin Portal — Project & System Management  
-**Status**: in-progress  
+**Status**: done  
 **Complexity**: High (13 points)  
 **Created**: 2026-01-10
 
