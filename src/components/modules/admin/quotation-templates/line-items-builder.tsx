@@ -98,8 +98,8 @@ export function LineItemsBuilder({
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-2">
           <div className="h-4 w-1 bg-primary/40 rounded-full" />
-          <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-            Line Item Framework
+          <h4 className="text-xs font-bold tracking-tight text-white/50">
+            Line Items breakdown
           </h4>
         </div>
 
@@ -109,16 +109,16 @@ export function LineItemsBuilder({
               type="button"
               variant="outline"
               size="sm"
-              className="h-10 px-5 text-[10px] font-black uppercase tracking-[0.2em] text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 rounded-xl transition-all shadow-lg hover:shadow-primary/5 active:scale-95"
+              className="h-10 px-5 text-xs font-bold text-primary border-primary/20 bg-primary/5 hover:bg-primary/10 hover:border-primary/40 rounded-xl transition-all shadow-lg hover:shadow-primary/5 active:scale-95"
             >
               <Plus className="h-3.5 w-3.5 mr-2" />
-              Categorical Addition
+              Add Item
               <ChevronDown className="h-3.5 w-3.5 ml-2 opacity-40 group-hover:opacity-100 transition-opacity" />
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent className="w-64 bg-zinc-900/95 backdrop-blur-3xl border-white/10 text-white p-2 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] border-t border-white/20">
-            <DropdownMenuLabel className="text-[9px] font-black uppercase tracking-[0.3em] text-white/30 px-3 py-3 mb-1">
-              Architecture Segments
+            <DropdownMenuLabel className="text-xs font-bold text-white/40 px-3 py-3 mb-1">
+              Select Category
             </DropdownMenuLabel>
             <DropdownMenuSeparator className="bg-white/5 mx-2" />
             <div className="space-y-1 mt-1">
@@ -129,25 +129,21 @@ export function LineItemsBuilder({
                   className="flex items-center gap-3 px-3 py-3 rounded-xl focus:bg-primary/20 focus:text-white cursor-pointer transition-colors group"
                 >
                   <div className="h-2 w-2 rounded-full bg-primary/40 group-hover:bg-primary group-hover:scale-125 transition-all" />
-                  <span className="text-[11px] font-bold uppercase tracking-wider">
-                    {section.name}
-                  </span>
+                  <span className="text-sm font-semibold">{section.name}</span>
                 </DropdownMenuItem>
               ))}
             </div>
             {sections.length === 0 && (
               <div className="px-4 py-8 text-center italic">
-                <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] leading-relaxed">
-                  System architectural categories not yet defined
+                <p className="text-xs text-white/30 italic">
+                  No categories defined yet
                 </p>
               </div>
             )}
             <DropdownMenuSeparator className="bg-white/5 mx-2 my-2" />
             <DropdownMenuItem className="flex items-center gap-3 px-3 py-3 rounded-xl opacity-20 grayscale pointer-events-none mb-1">
               <Package className="h-4 w-4" />
-              <span className="text-[10px] font-black uppercase tracking-widest">
-                Component Library
-              </span>
+              <span className="text-xs font-medium">Component Library</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -165,8 +161,8 @@ export function LineItemsBuilder({
               <Layers className="h-6 w-6 text-white/5" />
             </div>
           </div>
-          <p className="text-[10px] font-black text-white/10 uppercase tracking-[0.3em] text-center max-w-[200px] leading-relaxed">
-            Awaiting structural definition. Select a category to begin.
+          <p className="text-xs font-medium text-white/20 text-center max-w-[200px] leading-relaxed">
+            No items added. Select a category above to begin.
           </p>
         </motion.div>
       ) : (
@@ -189,8 +185,8 @@ export function LineItemsBuilder({
                     {/* Primary Info */}
                     <div className="flex flex-col xl:flex-row gap-6">
                       <div className="w-full xl:w-72 shrink-0">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-3 block ml-1">
-                          Operational Category
+                        <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
+                          Category
                         </Label>
                         <Select
                           value={item.sectionId}
@@ -198,7 +194,7 @@ export function LineItemsBuilder({
                             updateItem(index, "sectionId", v)
                           }
                         >
-                          <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-[11px] font-bold px-4 focus:ring-1 focus:ring-primary/30 transition-all hover:bg-white/8 hover:border-white/10">
+                          <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-sm font-medium px-4 focus:ring-1 focus:ring-primary/30 transition-all hover:bg-white/8 hover:border-white/10">
                             <SelectValue placeholder="Category" />
                           </SelectTrigger>
                           <SelectContent className="bg-zinc-900/95 backdrop-blur-2xl border-white/10 text-white rounded-xl shadow-2xl">
@@ -206,7 +202,7 @@ export function LineItemsBuilder({
                               <SelectItem
                                 key={s._id}
                                 value={s._id}
-                                className="text-[10px] font-bold uppercase tracking-wider focus:bg-primary/20 focus:text-white py-2.5"
+                                className="text-sm py-2.5"
                               >
                                 {s.name}
                               </SelectItem>
@@ -216,8 +212,8 @@ export function LineItemsBuilder({
                       </div>
 
                       <div className="flex-1">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-3 block ml-1">
-                          Product / Service Identification
+                        <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
+                          Description
                         </Label>
                         <Input
                           placeholder="e.g., Master Narrative Architecture"
@@ -233,14 +229,14 @@ export function LineItemsBuilder({
                     {/* Financial Metrics */}
                     <div className="flex flex-wrap items-end gap-6 pt-6 border-t border-white/5">
                       <div className="w-40 shrink-0">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-3 block ml-1">
-                          Unit Metrics
+                        <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
+                          Unit
                         </Label>
                         <Select
                           value={item.unit}
                           onValueChange={(v) => updateItem(index, "unit", v)}
                         >
-                          <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-[11px] font-bold px-4 transition-all hover:bg-white/8 hover:border-white/10">
+                          <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-sm font-medium px-4 transition-all hover:bg-white/8 hover:border-white/10">
                             <SelectValue placeholder="Unit" />
                           </SelectTrigger>
                           <SelectContent className="bg-zinc-900/95 backdrop-blur-2xl border-white/10 text-white rounded-xl shadow-2xl">
@@ -248,7 +244,7 @@ export function LineItemsBuilder({
                               <SelectItem
                                 key={opt.value}
                                 value={opt.value}
-                                className="text-[10px] font-bold uppercase tracking-wider focus:bg-primary/20 focus:text-white py-2.5"
+                                className="text-sm py-2.5"
                               >
                                 {opt.label}
                               </SelectItem>
@@ -258,8 +254,8 @@ export function LineItemsBuilder({
                       </div>
 
                       <div className="w-40">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-3 block ml-1">
-                          Base Rate
+                        <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
+                          Base Price
                         </Label>
                         <div className="relative group/input">
                           <Coins className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-white/20 group-focus-within/input:text-primary transition-colors" />
@@ -280,8 +276,8 @@ export function LineItemsBuilder({
                       </div>
 
                       <div className="w-28">
-                        <Label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-3 block ml-1">
-                          Target Qty
+                        <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
+                          Quantity
                         </Label>
                         <div className="relative group/input">
                           <Hash className="absolute left-4 top-1/2 -translate-y-1/2 h-3 w-3 text-white/20 group-focus-within/input:text-primary transition-colors" />
@@ -302,8 +298,8 @@ export function LineItemsBuilder({
                       </div>
 
                       <div className="flex-1 flex flex-col items-end gap-1 px-4 min-w-[140px]">
-                        <span className="text-[8px] font-black uppercase tracking-[0.3em] text-white/20">
-                          Valuation
+                        <span className="text-[10px] font-bold text-white/30">
+                          Total Value
                         </span>
                         <span className="text-2xl font-black text-white tracking-tighter drop-shadow-lg">
                           {formatCurrency(
@@ -343,8 +339,8 @@ export function LineItemsBuilder({
                           className="h-12 px-4 text-primary/40 hover:text-primary hover:bg-primary/10 rounded-xl transition-all"
                         >
                           <Plus className="h-4 w-4 mr-2" />
-                          <span className="text-[10px] font-black uppercase tracking-widest">
-                            Add Segment
+                          <span className="text-xs font-bold">
+                            Add Sub-item
                           </span>
                         </Button>
 
@@ -417,7 +413,7 @@ export function LineItemsBuilder({
                                     };
                                     onChange(updated);
                                   }}
-                                  className="w-24 bg-white/3 border-white/5 h-8 text-[10px] font-black text-center rounded-lg focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  className="w-24 bg-white/3 border-white/5 h-8 text-xs font-bold text-center rounded-lg focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <Input
                                   type="number"
@@ -439,10 +435,10 @@ export function LineItemsBuilder({
                                     };
                                     onChange(updated);
                                   }}
-                                  className="w-16 bg-white/3 border-white/5 h-8 text-[10px] font-black text-center rounded-lg focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                  className="w-16 bg-white/3 border-white/5 h-8 text-xs font-bold text-center rounded-lg focus:ring-1 focus:ring-primary/20 [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 />
                                 <div className="w-24 text-right">
-                                  <span className="text-[10px] font-black text-white/40 tracking-tight">
+                                  <span className="text-xs font-semibold text-white/50 tracking-tight">
                                     {formatCurrency(
                                       sub.unitPrice * sub.defaultQuantity
                                     )}

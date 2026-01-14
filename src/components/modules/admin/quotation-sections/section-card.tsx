@@ -14,6 +14,7 @@ import {
   Power,
   LucideIcon,
 } from "lucide-react";
+import { Section } from "./types";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Reorder, useDragControls } from "motion/react";
@@ -36,15 +37,6 @@ const COLOR_MAP: Record<string, string> = {
   red: "text-red-500 bg-red-500/10 border-red-500/20",
   slate: "text-slate-500 bg-slate-500/10 border-slate-500/20",
 };
-
-interface Section {
-  _id: string;
-  name: string;
-  icon?: string;
-  color?: string;
-  isActive: boolean;
-  displayOrder: number;
-}
 
 interface SectionCardProps {
   section: Section;

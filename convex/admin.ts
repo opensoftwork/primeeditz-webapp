@@ -6,10 +6,12 @@
  */
 
 import { paginationOptsValidator } from "convex/server";
-import { mutation } from "./_generated/server";
+import { mutation, query } from "./_generated/server";
 import { v } from "convex/values";
 import { adminMutation, adminQuery } from "./lib/customFunctions";
+import { api } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
+import { projectStatusValidator, quotationStatusValidator } from "./schema";
 
 /**
  * Get admin dashboard statistics.
@@ -101,38 +103,41 @@ export const getPendingProjects = adminQuery({
 export const getAdminProjectsPaginated = adminQuery({
   args: {
     paginationOpts: paginationOptsValidator,
-    status: v.optional(v.string()),
+    status: v.optional(projectStatusValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
   },
   handler: async (ctx, args) => {
     // Execute pagination - conditionally use index for status filtering
-    const results = args.status
-      ? await ctx.db
+    const results = await (args.status
+      ? ctx.db
           .query("projects")
-          .withIndex("by_status", (q) => q.eq("status", args.status as any))
+          .withIndex("by_status", (q) => q.eq("status", args.status!))
           .order("desc")
           .paginate(args.paginationOpts)
-      : await ctx.db
+      : ctx.db
           .query("projects")
           .order("desc")
-          .paginate(args.paginationOpts);
-
+          .paginate(args.paginationOpts));
     // Get all project types and clients for enrichment
-    const projectTypes = await ctx.db.query("projectTypes").collect();
-    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
+    const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map<Id<"projectTypes">, Doc<"projectTypes">>(
+      projectTypes.map((pt) => [pt._id, pt])
+    );
 
-    const clients = await ctx.db
+    const clients: Doc<"profiles">[] = await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "client"))
       .collect();
-    const clientMap = new Map(clients.map((c) => [c._id, c]));
+    const clientMap = new Map<Id<"profiles">, Doc<"profiles">>(
+      clients.map((c) => [c._id, c])
+    );
 
     // Filter by projectTypeId in memory and enrich
     const enrichedPage = results.page
       .filter(
-        (p) => !args.projectTypeId || p.projectTypeId === args.projectTypeId,
+        (p: Doc<"projects">) => !args.projectTypeId || p.projectTypeId === args.projectTypeId,
       )
-      .map((project) => {
+      .map((project: Doc<"projects">) => {
         const projectType = projectTypeMap.get(project.projectTypeId);
         const client = clientMap.get(project.clientId);
 
@@ -163,7 +168,7 @@ export const getAdminProjectsPaginated = adminQuery({
  */
 export const getAdminProjects = adminQuery({
   args: {
-    status: v.optional(v.string()),
+    status: v.optional(projectStatusValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
     clientSearch: v.optional(v.string()),
     sortBy: v.optional(v.union(v.literal("date"), v.literal("status"))),
@@ -177,11 +182,11 @@ export const getAdminProjects = adminQuery({
     const sortOrder = args.sortOrder ?? "desc";
 
     // Get all projects - filter by status if provided
-    let allProjects;
+    let allProjects: Doc<"projects">[];
     if (args.status) {
       allProjects = await ctx.db
         .query("projects")
-        .withIndex("by_status", (q) => q.eq("status", args.status as any))
+        .withIndex("by_status", (q) => q.eq("status", args.status!))
         .order(sortOrder)
         .collect();
     } else {
@@ -196,17 +201,21 @@ export const getAdminProjects = adminQuery({
     }
 
     // Get all project types and clients for enrichment
-    const projectTypes = await ctx.db.query("projectTypes").collect();
-    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
+    const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map<Id<"projectTypes">, Doc<"projectTypes">>(
+      projectTypes.map((pt) => [pt._id, pt])
+    );
 
-    const clients = await ctx.db
+    const clients: Doc<"profiles">[] = await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "client"))
       .collect();
-    const clientMap = new Map(clients.map((c) => [c._id, c]));
+    const clientMap = new Map<Id<"profiles">, Doc<"profiles">>(
+      clients.map((c) => [c._id, c])
+    );
 
     // Enrich projects with type and client names
-    let enrichedProjects = allProjects.map((project) => {
+    let enrichedProjects = allProjects.map((project: Doc<"projects">) => {
       const projectType = projectTypeMap.get(project.projectTypeId);
       const client = clientMap.get(project.clientId);
 
@@ -229,7 +238,7 @@ export const getAdminProjects = adminQuery({
       const search = args.clientSearch.toLowerCase();
       enrichedProjects = enrichedProjects.filter(
         (p) =>
-          p.clientName.toLowerCase().includes(search) ||
+          (p.clientName?.toLowerCase().includes(search) ?? false) ||
           p.code.toLowerCase().includes(search),
       );
     }
@@ -458,5 +467,104 @@ export const getAdminProject = adminQuery({
       projectTypeName: projectType?.name ?? "Unknown",
       statusHistory: enrichedHistory,
     };
+  },
+});
+
+export type EnrichedQuotation = Doc<"quotations"> & {
+  clientName?: string;
+  projectName?: string;
+};
+
+/**
+ * Get enriched quotations for admin listing.
+ */
+export const getAdminQuotations = query({
+  args: {
+    status: v.optional(quotationStatusValidator),
+    clientId: v.optional(v.string()),
+  },
+  handler: async (ctx, args): Promise<EnrichedQuotation[]> => {
+    // 1. Fetch raw quotations via standard functions
+    const quotations: Doc<"quotations">[] = await ctx.runQuery(api.functions.quotations.queries.getQuotations, {
+      status: args.status,
+      clientId: args.clientId,
+    });
+
+    // 2. Extract IDs for batch enrichment
+    const clientIds = quotations
+      .map((q: Doc<"quotations">) => q.clientId)
+      .filter((id: string | undefined): id is string => !!id);
+    
+    const projectIds = quotations
+      .map((q: Doc<"quotations">) => q.projectId)
+      .filter((id: string | undefined): id is string => !!id);
+
+    // 3. Fetch related data from host app tables
+    const clients = await Promise.all(
+      clientIds.map((id: string) => ctx.db.get(id as Id<"profiles">))
+    );
+    const clientMap = new Map(
+      clients.filter((c: Doc<"profiles"> | null): c is Doc<"profiles"> => !!c).map((c: Doc<"profiles">) => [c._id as string, c.name])
+    );
+
+    const projects = await Promise.all(
+      projectIds.map((id: string) => ctx.db.get(id as Id<"projects">))
+    );
+    const projectMap = new Map(
+      projects.filter((p: Doc<"projects"> | null): p is Doc<"projects"> => !!p).map((p: Doc<"projects">) => [p._id as string, p.eventName || p.code])
+    );
+
+    // 4. Enrich and return
+    return quotations.map((q: Doc<"quotations">) => ({
+      ...q,
+      clientName: q.clientId ? clientMap.get(q.clientId) : undefined,
+      projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+    }));
+  },
+});
+
+/**
+ * Get all clients for selection.
+ */
+export const getClients = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .collect();
+  },
+});
+
+/**
+ * Get simple list of projects for selection.
+ */
+export const getAdminProjectsSimple = adminQuery({
+  args: {
+    clientId: v.optional(v.id("profiles")),
+  },
+  handler: async (ctx, args) => {
+    let projects;
+    
+    if (args.clientId) {
+      projects = await ctx.db
+        .query("projects")
+        .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId!))
+        .collect();
+    } else {
+      projects = await ctx.db.query("projects").order("desc").collect();
+    }
+    
+    return Promise.all(
+      projects.map(async (p) => {
+        const type = await ctx.db.get(p.projectTypeId);
+        return {
+          _id: p._id,
+          code: p.code,
+          eventName: p.eventName,
+          projectTypeName: type?.name ?? "Unknown",
+        };
+      })
+    );
   },
 });

@@ -1,7 +1,7 @@
 # Story 4-3: Create Quotation (Standalone)
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: backlog  
+**Status**: in-progress  
 **Complexity**: High (8 points)  
 **Created**: 2026-01-13  
 **Priority**: HIGH — Core quotation creation feature
@@ -206,6 +206,7 @@
 **File**: `convex/schema.ts`
 
 - [ ] A1.1 Update `quotations` table with new architecture:
+
   ```typescript
   quotations: defineTable({
     // Reference
@@ -396,9 +397,9 @@ src/components/modules/quotation/
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes                     |
-| ---------- | ------- | ------------------------- |
-| 2026-01-13 | backlog | Story created by SM agent |
+| Date       | Status      | Notes                  |
+| ---------- | ----------- | ---------------------- |
+| 2026-01-13 | in-progress | Implementation started |
 
 ---
 

@@ -17,6 +17,7 @@ import {
 } from "@/components/ui/select";
 import { Plus, Search, FileText, Filter, LayoutList } from "lucide-react";
 import { Template, TemplateLineItem } from "../quotation-sections/types";
+import { Id } from "@convex/_generated/dataModel";
 
 import { TemplateCard } from "./template-card";
 import { TemplateViewDrawer } from "./template-view-drawer";
@@ -32,18 +33,25 @@ export function TemplateList() {
     (Template & { projectTypeName: string | null }) | null
   >(null);
 
-  const templates = useQuery(api.quotation.getTemplates, {
-    activeOnly: false,
-  });
+  const templates = useQuery(
+    api.functions.quotations.templates.queries.getTemplates,
+    {
+      activeOnly: false,
+    }
+  );
 
   const projectTypes = useQuery(api.admin.getProjectTypes);
-  const updateTemplate = useMutation(api.quotation.updateTemplate);
-  const deleteTemplate = useMutation(api.quotation.deleteTemplate);
+  const updateTemplate = useMutation(
+    api.functions.quotations.templates.mutations.updateTemplate
+  );
+  const deleteTemplate = useMutation(
+    api.functions.quotations.templates.mutations.deleteTemplate
+  );
 
   const handleToggleActive = async (id: string, current: boolean) => {
     try {
       await updateTemplate({
-        templateId: id,
+        templateId: id as Id<"quotationTemplates">,
         isActive: !current,
       });
       toast.success(current ? "Template deactivated" : "Template activated");
@@ -61,7 +69,7 @@ export function TemplateList() {
       return;
     }
     try {
-      await deleteTemplate({ templateId: id });
+      await deleteTemplate({ templateId: id as Id<"quotationTemplates"> });
       toast.success("Template deleted");
     } catch (error) {
       toast.error("Failed to delete template");
@@ -106,7 +114,7 @@ export function TemplateList() {
               Quotation Templates
             </h1>
           </div>
-          <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+          <p className="text-white/50 text-xs font-medium">
             Standardized pricing frameworks for rapid quotation generation.
           </p>
         </div>
@@ -114,7 +122,7 @@ export function TemplateList() {
         <div className="flex items-center gap-3">
           <Button
             onClick={() => router.push("/settings/quotation-templates/new")}
-            className="bg-primary text-primary-foreground font-black uppercase tracking-[0.2em] text-[10px] h-12 px-6 rounded-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="bg-primary text-primary-foreground font-bold h-12 px-6 rounded-xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
           >
             <Plus className="h-4 w-4 mr-2" />
             New Template
@@ -137,17 +145,14 @@ export function TemplateList() {
         <div className="h-6 w-px bg-white/5 self-center hidden md:block" />
 
         <Select value={projectTypeFilter} onValueChange={setProjectTypeFilter}>
-          <SelectTrigger className="w-full md:w-48 bg-transparent border-none text-white h-11 rounded-lg px-4 font-bold text-[10px] uppercase tracking-widest focus:ring-0">
+          <SelectTrigger className="w-full md:w-48 bg-transparent border-none text-white h-11 rounded-lg px-4 font-semibold text-xs focus:ring-0">
             <div className="flex items-center gap-2">
-              <Filter className="h-3.5 w-3.5 text-white/20" />
+              <Filter className="h-3.5 w-3.5 text-white/40" />
               <SelectValue placeholder="All Types" />
             </div>
           </SelectTrigger>
           <SelectContent className="bg-zinc-900/95 backdrop-blur-xl border-white/10 text-white">
-            <SelectItem
-              value="all"
-              className="text-[10px] font-black uppercase tracking-widest"
-            >
+            <SelectItem value="all" className="text-xs font-semibold">
               All Types
             </SelectItem>
             {projectTypes
@@ -180,10 +185,10 @@ export function TemplateList() {
               <FileText className="h-8 w-8 text-white/20" />
             </div>
             <div className="text-center">
-              <h3 className="text-white font-bold uppercase tracking-tight">
+              <h3 className="text-white text-lg font-bold">
                 {search ? "No matching templates" : "No templates found"}
               </h3>
-              <p className="text-[10px] text-white/20 font-black uppercase tracking-widest mt-1">
+              <p className="text-sm text-white/40 mt-1">
                 {search
                   ? "Try adjusting your search criteria"
                   : "Create your first template to get started"}
@@ -191,10 +196,10 @@ export function TemplateList() {
             </div>
             {!search && (
               <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                onClick={() => router.push("/settings/quotation-templates/new")} // Changed to navigate to new template page
-                className="flex-1 h-9 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[10px] font-black uppercase tracking-widest"
+                onClick={() => router.push("/settings/quotation-templates/new")}
+                className="text-primary border-primary/20 hover:bg-primary/10 font-bold"
               >
                 Create First Template
               </Button>

@@ -21,6 +21,7 @@ import { LineItemsBuilder, type LineItemData } from "./line-items-builder";
 import { PricePreview } from "./price-preview";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Section, Template } from "../quotation-sections/types";
+import { Id } from "@convex/_generated/dataModel";
 
 interface TemplateEditorProps {
   templateId?: string;
@@ -32,15 +33,22 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
 
   // Queries
   const existingTemplate = useQuery(
-    api.quotation.getTemplate,
-    templateId ? { templateId } : "skip"
+    api.functions.quotations.templates.queries.getTemplate,
+    templateId ? { templateId: templateId as Id<"quotationTemplates"> } : "skip"
   );
   const projectTypes = useQuery(api.admin.getProjectTypes);
-  const sections = useQuery(api.quotation.getSections, { activeOnly: true });
+  const sections = useQuery(
+    api.functions.quotations.sections.queries.getSections,
+    { activeOnly: true }
+  );
 
   // Mutations
-  const createTemplate = useMutation(api.quotation.createTemplate);
-  const updateTemplate = useMutation(api.quotation.updateTemplate);
+  const createTemplate = useMutation(
+    api.functions.quotations.templates.mutations.createTemplate
+  );
+  const updateTemplate = useMutation(
+    api.functions.quotations.templates.mutations.updateTemplate
+  );
 
   const form = useForm({
     defaultValues: {
@@ -64,12 +72,12 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
       try {
         if (isEditing && templateId) {
           await updateTemplate({
-            templateId,
+            templateId: templateId as Id<"quotationTemplates">,
             name: value.name,
             description: value.description || undefined,
             projectTypeHint: value.projectTypeHint || undefined,
             terms: value.terms || undefined,
-            lineItems: value.lineItems,
+            lineItems: value.lineItems as any,
           });
           toast.success("Template updated");
         } else {
@@ -78,7 +86,7 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
             description: value.description || undefined,
             projectTypeHint: value.projectTypeHint || undefined,
             terms: value.terms || undefined,
-            lineItems: value.lineItems,
+            lineItems: value.lineItems as any,
             createdBy: "SYSTEM",
           });
           toast.success("Template created");
@@ -140,7 +148,7 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
               <h1 className="text-lg font-black text-white uppercase tracking-tight">
                 {isEditing ? "Edit Template" : "New Template"}
               </h1>
-              <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+              <p className="text-xs font-medium text-white/40">
                 {isEditing
                   ? "Modify existing template"
                   : "Create a reusable pricing template"}
@@ -164,7 +172,7 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
                   state.isSubmitting ||
                   state.lineItems.length === 0
                 }
-                className="h-10 px-5 bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
+                className="h-10 px-5 bg-primary text-primary-foreground font-bold text-sm rounded-lg shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-40"
               >
                 {state.isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin mr-2" />
@@ -190,12 +198,12 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
       >
         {/* Core Info */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6 p-6 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl">
+          <div className="lg:col-span-2 space-y-6 p-6 rounded-2xl bg-white/2 border border-white/5 shadow-xl">
             <form.Field name="name">
               {(field) => (
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
-                    Template Identity *
+                  <Label className="text-xs font-bold tracking-tight text-white/50 ml-1">
+                    Template Name *
                   </Label>
                   <Input
                     value={field.state.value}
@@ -211,8 +219,8 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
             <form.Field name="description">
               {(field) => (
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
-                    Operational Scope
+                  <Label className="text-xs font-bold tracking-tight text-white/50 ml-1">
+                    Project Description
                   </Label>
                   <Textarea
                     value={field.state.value}
@@ -226,12 +234,12 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
             </form.Field>
           </div>
 
-          <div className="space-y-6 p-6 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl">
+          <div className="space-y-6 p-6 rounded-2xl bg-white/2 border border-white/5 shadow-xl">
             <form.Field name="projectTypeHint">
               {(field) => (
                 <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
-                    Industry Designation
+                  <Label className="text-xs font-bold tracking-tight text-white/50 ml-1">
+                    Project Category
                   </Label>
                   <Select
                     value={field.state.value || "none"}
@@ -239,15 +247,12 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
                       field.handleChange(v === "none" ? "" : v)
                     }
                   >
-                    <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-[11px] font-bold px-4 transition-all hover:bg-white/8 focus:ring-1 focus:ring-primary/30">
-                      <SelectValue placeholder="All Industry Types" />
+                    <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-sm font-medium px-4 transition-all hover:bg-white/8 focus:ring-1 focus:ring-primary/30">
+                      <SelectValue placeholder="All Categories" />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-900/95 backdrop-blur-2xl border-white/10 text-white rounded-xl shadow-2xl">
-                      <SelectItem
-                        value="none"
-                        className="text-[10px] font-black uppercase tracking-widest py-3"
-                      >
-                        Universal Type
+                      <SelectItem value="none" className="text-sm py-3">
+                        General / Universal
                       </SelectItem>
                       {projectTypes
                         .filter((pt) => pt.isActive)
@@ -255,7 +260,7 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
                           <SelectItem
                             key={pt._id}
                             value={pt._id}
-                            className="text-[10px] font-bold uppercase tracking-wider py-3 focus:bg-primary/20"
+                            className="text-sm py-3 focus:bg-primary/20"
                           >
                             {pt.name}
                           </SelectItem>
@@ -275,7 +280,7 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
         </div>
 
         {/* Line Items */}
-        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl">
+        <div className="p-6 rounded-2xl bg-white/2 border border-white/5 shadow-xl">
           <form.Field name="lineItems">
             {(field) => (
               <LineItemsBuilder
@@ -288,12 +293,12 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
         </div>
 
         {/* Terms */}
-        <div className="p-6 rounded-2xl bg-white/[0.02] border border-white/5 shadow-xl">
+        <div className="p-6 rounded-2xl bg-white/2 border border-white/5 shadow-xl">
           <form.Field name="terms">
             {(field) => (
               <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
-                  Contractual Provisions
+                <Label className="text-xs font-bold tracking-tight text-white/50 ml-1">
+                  Terms & Conditions
                 </Label>
                 <Textarea
                   value={field.state.value}

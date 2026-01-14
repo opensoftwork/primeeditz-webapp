@@ -6,14 +6,14 @@ import { v } from 'convex/values'
 // ============================================================================
 
 // Role validator for profiles
-const roleValidator = v.union(
+export const roleValidator = v.union(
   v.literal('client'),
   v.literal('employee'),
   v.literal('admin')
 )
 
 // Project status flow: draft → pending_review → active → in_progress → completed → archived
-const projectStatusValidator = v.union(
+export const projectStatusValidator = v.union(
   v.literal('draft'),
   v.literal('pending_review'),
   v.literal('active'),
@@ -23,24 +23,36 @@ const projectStatusValidator = v.union(
 )
 
 // Project source: client_request vs admin_init
-const projectSourceValidator = v.union(
+export const projectSourceValidator = v.union(
   v.literal('client_request'),
   v.literal('admin_init')
 )
 
 // Folder status flow: pending_upload → in_progress → completed
-const folderStatusValidator = v.union(
+export const folderStatusValidator = v.union(
   v.literal('pending_upload'),
   v.literal('in_progress'),
   v.literal('completed')
 )
 
 // Deliverable status flow: pending_qc → approved / revision_needed / revision_requested
-const deliverableStatusValidator = v.union(
+export const deliverableStatusValidator = v.union(
   v.literal('pending_qc'),
   v.literal('approved'),
   v.literal('revision_needed'),
   v.literal('revision_requested')
+)
+
+// Quotation status flow
+export const quotationStatusValidator = v.union(
+  v.literal('draft'),
+  v.literal('sent'),
+  v.literal('viewed'),
+  v.literal('approved'),
+  v.literal('changes_requested'),
+  v.literal('rejected'),
+  v.literal('expired'),
+  v.literal('superseded')
 )
 
 // ============================================================================
@@ -121,7 +133,7 @@ export default defineSchema({
 
   projects: defineTable({
     code: v.string(),
-  projectTypeId: v.id('projectTypes'),
+    projectTypeId: v.id('projectTypes'),
     clientId: v.id('profiles'),
     source: projectSourceValidator,
     status: projectStatusValidator,
@@ -231,5 +243,111 @@ export default defineSchema({
     changedBy: v.id('profiles'),
     changedAt: v.number(),
   }).index('by_projectId', ['projectId']),
-})
 
+  // --------------------------------------------------------------------------
+  // Quotation Management (Migrated from Component)
+  // --------------------------------------------------------------------------
+  quotationSections: defineTable({
+    name: v.string(),
+    icon: v.optional(v.string()),
+    color: v.optional(v.string()),
+    displayOrder: v.optional(v.number()),
+    isActive: v.boolean(),
+  })
+    .index('by_isActive', ['isActive'])
+    .index('by_displayOrder', ['displayOrder']),
+
+  quotationTemplates: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    projectTypeHint: v.optional(v.string()),
+    terms: v.optional(v.string()),
+    isActive: v.boolean(),
+    lineItems: v.array(
+      v.object({
+        sectionId: v.id('quotationSections'),
+        description: v.string(),
+        unit: v.string(),
+        unitPrice: v.number(),
+        defaultQuantity: v.number(),
+        subItems: v.optional(
+          v.array(
+            v.object({
+              description: v.string(),
+              unit: v.string(),
+              unitPrice: v.number(),
+              defaultQuantity: v.number(),
+            })
+          )
+        ),
+      })
+    ),
+    createdBy: v.optional(v.string()),
+    updatedAt: v.optional(v.number()),
+  }).index('by_isActive', ['isActive']),
+
+  quotationLibraryItems: defineTable({
+    name: v.string(),
+    description: v.optional(v.string()),
+    sectionId: v.id('quotationSections'),
+    unit: v.string(),
+    unitPrice: v.number(),
+    isActive: v.boolean(),
+    projectTypeHint: v.optional(v.id('projectTypes')),
+  })
+    .index('by_isActive', ['isActive'])
+    .index('by_sectionId', ['sectionId']),
+
+  quotations: defineTable({
+    code: v.string(),
+    version: v.number(),
+    parentQuotationId: v.optional(v.id('quotations')),
+    clientId: v.optional(v.string()), // Profile ID
+    projectId: v.optional(v.string()), // Project ID
+    projectIds: v.optional(v.array(v.string())),
+    templateId: v.optional(v.id('quotationTemplates')),
+    status: quotationStatusValidator,
+    lineItems: v.array(
+      v.object({
+        id: v.string(),
+        sectionId: v.id('quotationSections'),
+        projectId: v.optional(v.string()), // Associated project for this line item
+        description: v.string(),
+        unit: v.string(),
+        rate: v.number(),
+        quantity: v.number(),
+        length: v.optional(v.string()),
+        width: v.optional(v.string()),
+        image: v.optional(v.string()),
+        subItems: v.optional(
+          v.array(
+            v.object({
+              id: v.string(),
+              description: v.string(),
+              unit: v.string(),
+              rate: v.number(),
+              quantity: v.number(),
+            })
+          )
+        ),
+      })
+    ),
+    subtotal: v.number(),
+    taxRate: v.number(),
+    taxAmount: v.number(),
+    discountAmount: v.optional(v.number()),
+    total: v.number(),
+    terms: v.optional(v.string()),
+    validUntil: v.optional(v.number()),
+    clientNotes: v.optional(v.string()),
+    createdBy: v.string(),
+    sentAt: v.optional(v.number()),
+    viewedAt: v.optional(v.number()),
+    approvedAt: v.optional(v.number()),
+    rejectedAt: v.optional(v.number()),
+    updatedAt: v.optional(v.number()),
+  })
+    .index('by_code', ['code'])
+    .index('by_clientId', ['clientId'])
+    .index('by_status', ['status']),
+});

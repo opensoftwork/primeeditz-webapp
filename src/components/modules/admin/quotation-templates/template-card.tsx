@@ -52,9 +52,9 @@ export function TemplateCard({
               {template.name}
             </h3>
             {template.projectTypeName && (
-              <div className="flex items-center gap-1.5 mt-1">
-                <div className="h-1 w-2 bg-primary/40 rounded-full" />
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest truncate">
+              <div className="flex items-center gap-1.5 mt-1.5">
+                <div className="h-1 w-2 bg-primary/60 rounded-full" />
+                <span className="text-xs font-semibold text-white/50 truncate">
                   {template.projectTypeName}
                 </span>
               </div>
@@ -70,7 +70,7 @@ export function TemplateCard({
               template.isActive ? "bg-green-500 animate-pulse" : "bg-white/20"
             )}
           />
-          <span className="text-[8px] font-black uppercase tracking-widest text-white/30">
+          <span className="text-xs font-bold tracking-wide text-white/50">
             {template.isActive ? "Active" : "Draft"}
           </span>
         </div>
@@ -79,9 +79,7 @@ export function TemplateCard({
       {/* Pricing */}
       <div className="p-4 rounded-xl bg-black/20 border border-white/5 space-y-2 mb-4">
         <div className="flex items-center justify-between">
-          <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-            Total
-          </span>
+          <span className="text-xs font-medium text-white/40">Total</span>
           <span className="text-lg font-black text-white tracking-tight">
             {formatCurrency(template.calculatedTotal)}
           </span>
@@ -89,13 +87,13 @@ export function TemplateCard({
 
         <div className="flex items-center justify-between pt-2 border-t border-white/5">
           <div className="flex items-center gap-2">
-            <Tag className="h-3 w-3 text-white/20" />
-            <span className="text-[9px] font-bold text-white/20">
-              {template.lineItems.length} item
-              {template.lineItems.length !== 1 ? "s" : ""}
+            <Tag className="h-3 w-3 text-white/40" />
+            <span className="text-xs font-medium text-white/40">
+              {template.lineItems.length}{" "}
+              {template.lineItems.length !== 1 ? "items" : "item"}
             </span>
           </div>
-          <span className="text-[9px] font-bold text-white/20">
+          <span className="text-xs font-medium text-white/40">
             +{formatCurrency(template.calculatedGst)} GST
           </span>
         </div>
@@ -116,9 +114,9 @@ export function TemplateCard({
           variant="ghost"
           size="sm"
           onClick={() => onView(template)}
-          className="flex-1 h-9 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-[10px] font-black uppercase tracking-widest"
+          className="flex-1 h-9 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg text-xs font-bold tracking-tight"
         >
-          View Detailed Architecture
+          View Details
         </Button>
 
         <Button

@@ -86,7 +86,7 @@ development_status:
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog
   3-7-project-types-management: done
-  3-8-quotation-templates-management: review # Implementation complete, ready for review
+  3-8-quotation-templates-management: done
   3-9-storage-pricing-tiers-configuration: backlog
   3-10-folder-templates-configuration: backlog # Blocked by: 3.8 (templates needed first)
   epic-3-retrospective: optional
@@ -101,7 +101,7 @@ development_status:
   # Phase A: Foundation (MVP)
   4-1-quotation-sections-configuration: done # Completed: schema, queries, mutations, seed, UI
   4-2-quotation-templates-crud: see-3-8 # Covered by Story 3.8 in Epic 3
-  4-3-create-quotation-standalone: ready-for-dev # Story file created
+  4-3-create-quotation-standalone: in-progress # Implementation started
   4-4-quotation-line-items-nested: backlog
   4-5-quotation-preview-print: backlog
 

@@ -1,7 +1,7 @@
 # Story 3-8: Quotation Templates Management
 
 **Epic**: Epic 3 - Admin Portal — Project & System Management  
-**Status**: review  
+**Status**: done  
 **Complexity**: Medium (8 points)  
 **Created**: 2026-01-12  
 **Priority**: HIGH — Enables Epic 4 Quotation Flow

@@ -54,12 +54,12 @@ export function TemplateViewDrawer({
               <FileText className="h-5 w-5" />
             </div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-                Template Definition
+              <span className="text-xs font-bold text-primary">
+                Template Details
               </span>
               <div
                 className={cn(
-                  "px-2 py-0.5 rounded text-[8px] font-black uppercase tracking-widest",
+                  "px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider",
                   template.isActive
                     ? "bg-green-500/10 text-green-500 border border-green-500/20"
                     : "bg-white/5 text-white/40 border border-white/10"
@@ -73,7 +73,7 @@ export function TemplateViewDrawer({
             {template.name}
           </SheetTitle>
           {template.description && (
-            <p className="text-white/40 text-[11px] font-bold uppercase tracking-wider leading-relaxed">
+            <p className="text-white/50 text-sm font-medium leading-relaxed mt-2">
               {template.description}
             </p>
           )}
@@ -83,29 +83,38 @@ export function TemplateViewDrawer({
           {/* Metadata Grid */}
           <div className="grid grid-cols-2 gap-4">
             <div className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
-                Industry Designation
+              <span className="text-xs font-bold text-white/40">
+                Project Category
               </span>
-              <p className="text-sm font-bold text-white uppercase tracking-tight">
-                {template.projectTypeName || "General / Unspecified"}
+              <p className="text-sm font-semibold text-white">
+                {template.projectTypeName || "General"}
               </p>
             </div>
             <div className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-1">
-              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20">
-                Metric Density
+              <span className="text-xs font-bold text-white/40">
+                Items Count
               </span>
-              <p className="text-sm font-bold text-white uppercase tracking-tight">
-                {template.lineItems.length} Framework Components
+              <p className="text-sm font-semibold text-white">
+                {template.lineItems.length} Items included
               </p>
             </div>
+          </div>
+
+          {/* Guidelines */}
+          <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/2 border border-white/5">
+            <Info className="h-4 w-4 text-primary shrink-0" />
+            <p className="text-xs font-medium text-white/40 leading-relaxed">
+              Calculations are based on standard base rates. Final quantities
+              will be adjusted during quotation creation.
+            </p>
           </div>
 
           {/* Line Items Framework */}
           <div className="space-y-4">
             <div className="flex items-center gap-2 px-1">
-              <Tag className="h-3 w-3 text-primary/60" />
-              <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                Architectural Breakdown
+              <Tag className="h-3.5 w-3.5 text-white/40" />
+              <h4 className="text-xs font-bold text-white/50">
+                Line Items Breakdown
               </h4>
             </div>
 
@@ -115,7 +124,7 @@ export function TemplateViewDrawer({
                 return (
                   <div
                     key={idx}
-                    className="p-5 rounded-2xl bg-white/[0.02] border border-white/5 space-y-4"
+                    className="p-5 rounded-2xl bg-white/2 border border-white/5 space-y-4"
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex-1">
@@ -123,10 +132,10 @@ export function TemplateViewDrawer({
                           {item.description}
                         </h5>
                         <div className="flex items-center gap-3 mt-1.5">
-                          <span className="text-[9px] font-black uppercase tracking-widest text-white/20 bg-white/5 px-2 py-0.5 rounded">
+                          <span className="text-[10px] font-bold uppercase text-white/40 bg-white/5 px-2 py-0.5 rounded">
                             {item.unit}
                           </span>
-                          <span className="text-[9px] font-bold text-white/40 lowercase">
+                          <span className="text-xs font-medium text-white/40">
                             {item.defaultQuantity} {item.unit} @{" "}
                             {formatCurrency(item.unitPrice)}
                           </span>
@@ -143,12 +152,12 @@ export function TemplateViewDrawer({
                         {item.subItems.map((sub, sIdx) => (
                           <div
                             key={sIdx}
-                            className="flex items-center justify-between text-[11px]"
+                            className="flex items-center justify-between text-xs"
                           >
                             <span className="text-white/40 font-medium">
                               {sub.description}
                             </span>
-                            <span className="text-white/60 font-black">
+                            <span className="text-white/60 font-semibold">
                               {formatCurrency(
                                 sub.unitPrice * sub.defaultQuantity
                               )}
@@ -164,47 +173,47 @@ export function TemplateViewDrawer({
           </div>
 
           {/* Financial Summary */}
-          <div className="p-8 rounded-3xl bg-primary border border-primary/20 shadow-[0_20px_50px_rgba(var(--primary-rgb),0.2)] space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 p-8 opacity-[0.1] pointer-events-none">
-              <Receipt className="h-32 w-32 rotate-12 text-white" />
+          <div className="p-8 rounded-3xl bg-zinc-900 border border-primary/20 shadow-[0_20px_50px_rgba(0,0,0,0.5)] space-y-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-8 opacity-[0.03] pointer-events-none group-hover:opacity-[0.05] transition-opacity">
+              <Receipt className="h-32 w-32 rotate-12 text-primary" />
             </div>
 
             <div className="space-y-4 relative z-10">
               <div className="flex items-center justify-between">
-                <span className="text-[10px] font-black text-primary-foreground/40 uppercase tracking-[0.2em]">
-                  Base Revenue
+                <span className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                  Subtotal
                 </span>
-                <span className="text-lg font-black text-primary-foreground tracking-tight">
+                <span className="text-lg font-bold text-white tracking-tight">
                   {formatCurrency(subtotal)}
                 </span>
               </div>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
-                  <span className="text-[10px] font-black text-primary-foreground/40 uppercase tracking-[0.2em]">
-                    Tax Provision
+                  <span className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                    GST
                   </span>
-                  <span className="text-[8px] font-black bg-primary-foreground/10 px-1.5 py-0.5 rounded text-primary-foreground/40">
+                  <span className="text-[10px] font-bold bg-white/5 px-1.5 py-0.5 rounded text-white/40">
                     18%
                   </span>
                 </div>
-                <span className="text-lg font-black text-primary-foreground/40">
+                <span className="text-lg font-bold text-white/40">
                   {formatCurrency(gst)}
                 </span>
               </div>
 
-              <div className="pt-6 border-t border-primary-foreground/10 flex items-center justify-between">
+              <div className="pt-6 border-t border-white/10 flex items-center justify-between">
                 <div className="flex flex-col">
-                  <span className="text-[11px] font-black text-primary-foreground uppercase tracking-[0.3em]">
-                    Total Valuation
-                  </span>
-                  <span className="text-[9px] text-primary-foreground/40 font-bold uppercase tracking-widest mt-0.5">
-                    INR Corporate Standard
+                  <span className="text-sm font-bold text-primary uppercase tracking-widest">
+                    Estimated Total
                   </span>
                 </div>
-                <span className="text-4xl font-black text-primary-foreground tracking-tighter">
-                  {formatCurrency(total)}
-                </span>
+                <div className="flex flex-col items-end">
+                  <span className="text-4xl font-black text-primary tracking-tighter">
+                    {formatCurrency(total)}
+                  </span>
+                  <div className="h-1 w-12 bg-primary/20 rounded-full mt-1 blur-sm" />
+                </div>
               </div>
             </div>
           </div>
@@ -213,13 +222,13 @@ export function TemplateViewDrawer({
           {template.terms && (
             <div className="space-y-3">
               <div className="flex items-center gap-2 px-1">
-                <Info className="h-3 w-3 text-white/20" />
-                <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">
-                  Contractual Provisions
+                <Info className="h-4 w-4 text-white/40" />
+                <h4 className="text-xs font-bold text-white/50">
+                  Terms & Conditions
                 </h4>
               </div>
-              <div className="p-6 rounded-2xl bg-white/3 border border-white/5">
-                <p className="text-[11px] text-white/60 font-medium leading-relaxed whitespace-pre-wrap">
+              <div className="p-6 rounded-2xl bg-white/2 border border-white/5">
+                <p className="text-sm text-white/60 font-medium leading-relaxed whitespace-pre-wrap">
                   {template.terms}
                 </p>
               </div>

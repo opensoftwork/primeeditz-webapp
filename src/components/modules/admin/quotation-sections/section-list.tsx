@@ -11,14 +11,28 @@ import { SectionCard } from "./section-card";
 import { SectionDrawer, type SectionFormValues } from "./section-drawer";
 import { Reorder } from "motion/react";
 import { Section } from "./types";
+import { Id } from "@convex/_generated/dataModel";
 
 export function SectionList() {
-  const sections = useQuery(api.quotation.getSections, { activeOnly: false });
-  const createSection = useMutation(api.quotation.createSection);
-  const updateSection = useMutation(api.quotation.updateSection);
-  const reorderSections = useMutation(api.quotation.reorderSections);
-  const deleteSection = useMutation(api.quotation.deleteSection);
-  const toggleActive = useMutation(api.quotation.toggleActive);
+  const sections = useQuery(
+    api.functions.quotations.sections.queries.getSections,
+    { activeOnly: false }
+  );
+  const createSection = useMutation(
+    api.functions.quotations.sections.mutations.createSection
+  );
+  const updateSection = useMutation(
+    api.functions.quotations.sections.mutations.updateSection
+  );
+  const reorderSections = useMutation(
+    api.functions.quotations.sections.mutations.reorderSections
+  );
+  const deleteSection = useMutation(
+    api.functions.quotations.sections.mutations.deleteSection
+  );
+  const toggleActive = useMutation(
+    api.functions.quotations.sections.mutations.toggleSectionActive
+  );
 
   const [localSections, setLocalSections] = useState<Section[]>([]);
   const isSyncingOrder = useRef(false);
@@ -33,7 +47,9 @@ export function SectionList() {
         // Check if the current query result matches our local order
         const isMatch =
           sections.length === localSections.length &&
-          sections.every((s, i) => s._id === localSections[i]?._id);
+          sections.every(
+            (s: Section, i: number) => s._id === localSections[i]?._id
+          );
         if (isMatch) {
           isSyncingOrder.current = false;
         }
@@ -53,7 +69,9 @@ export function SectionList() {
 
     syncTimeoutRef.current = setTimeout(async () => {
       try {
-        await reorderSections({ orderedIds: newOrder.map((s) => s._id) });
+        await reorderSections({
+          orderedIds: newOrder.map((s) => s._id as Id<"quotationSections">),
+        });
       } catch (error) {
         toast.error("Failed to update order");
         // Revert to server state on error
@@ -68,7 +86,7 @@ export function SectionList() {
       const { isActive, ...data } = values;
       if (editingSection) {
         await updateSection({
-          sectionId: editingSection._id,
+          sectionId: editingSection._id as Id<"quotationSections">,
           isActive,
           ...data,
         });
@@ -86,8 +104,7 @@ export function SectionList() {
   const handleToggleActive = async (id: string, current: boolean) => {
     try {
       await toggleActive({
-        id,
-        isActive: !current,
+        sectionId: id as Id<"quotationSections">,
       });
       toast.success(current ? "Section deactivated" : "Section activated");
     } catch (error) {
@@ -104,7 +121,7 @@ export function SectionList() {
       return;
     }
     try {
-      await deleteSection({ sectionId: id });
+      await deleteSection({ sectionId: id as Id<"quotationSections"> });
       toast.success("Section deleted");
     } catch (error) {
       toast.error("Failed to delete section");
