@@ -2,13 +2,7 @@
 
 import { motion } from "motion/react";
 import { Briefcase, X } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { ProjectListingDrawer } from "./project-list";
 import type { Project } from "../../types";
 
 interface InvolvedProjectsProps {
@@ -35,38 +29,12 @@ export function InvolvedProjects({
           <Briefcase className="h-3.5 w-3.5 text-primary" /> Involved Projects
         </h3>
         <div className="flex items-center gap-4">
-          <Select
-            value=""
-            onValueChange={(val) => {
-              if (val && val !== "none" && !selectedProjectIds.includes(val)) {
-                onAddProject(val);
-              }
-            }}
-            disabled={!clientId}
-          >
-            <SelectTrigger className="h-9 bg-white/5 border-white/5 rounded-xl px-4 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white/10 transition-colors">
-              <SelectValue placeholder="Add Project..." />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10 text-white">
-              {projects
-                ?.filter((p) => !selectedProjectIds.includes(p._id))
-                .map((p) => (
-                  <SelectItem
-                    key={p._id}
-                    value={p._id}
-                    className="text-[10px] font-black uppercase tracking-wider py-3"
-                  >
-                    {p.eventName || p.code}
-                  </SelectItem>
-                ))}
-              {projects?.filter((p) => !selectedProjectIds.includes(p._id))
-                .length === 0 && (
-                <div className="p-4 text-center text-[10px] font-bold text-white/20 uppercase">
-                  No more projects available
-                </div>
-              )}
-            </SelectContent>
-          </Select>
+          <ProjectListingDrawer
+            clientId={clientId || ""}
+            selectedProjectIds={selectedProjectIds}
+            onAddProject={onAddProject}
+            onRemoveProject={onRemoveProject}
+          />
         </div>
       </div>
 
