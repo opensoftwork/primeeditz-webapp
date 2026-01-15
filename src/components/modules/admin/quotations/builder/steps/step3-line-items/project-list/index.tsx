@@ -84,7 +84,7 @@ export function ProjectListingDrawer({
         </Button>
       </SheetTrigger>
       <SheetContent
-        side="left"
+        side="right"
         className="w-[450px] bg-zinc-950 border-white/10 p-0 sm:max-w-none"
       >
         <div className="flex flex-col h-full">

@@ -1,25 +1,27 @@
+/**
+ * Units Configuration for Post-Production Company
+ *
+ * Organized by category with post-production relevant units prioritized.
+ */
+
 export const UNITS = {
-  area: ["sqft", "sqm", "sqmm"],
-  length: ["mm", "cm", "in", "ft", "meter", "yard", "yd", "km", "RFT", "RMT"],
-  volume: ["cum", "cft", "Litre", "KL", "CKM", "Brass"],
-  weight: ["kg", "quintal", "tonne"],
+  // Post-production primary
+  time: ["hours", "minutes", "days", "shifts", "weeks", "months"],
+  work: ["lumpsum", "ls", "package", "project", "session"],
   count: [
-    "numbers",
     "nos",
     "pcs",
     "each",
     "set",
-    "pair",
     "Item",
-    "Bundle",
-    "Lot",
-    "bags",
-    "points",
-    "unit",
+    "deliverables",
+    "revisions",
+    "versions",
   ],
-  time: ["hours", "Day", "Monthly", "shift", "manday"],
-  work: ["Trips", "Stage", "lumpsum", "ls"],
-  power: ["KW", "TR"],
+
+  // Secondary
+  media: ["clips", "tracks", "frames", "scenes", "shots", "reels"],
+  storage: ["GB", "TB", "files"],
   percentage: ["%"],
 } as const;
 
@@ -39,3 +41,6 @@ export const FLAT_UNIT_OPTIONS = ALL_UNITS.map((unit) => ({
   value: unit,
   label: unit.toUpperCase(),
 }));
+
+/** Default unit for new line items */
+export const DEFAULT_UNIT = "lumpsum";

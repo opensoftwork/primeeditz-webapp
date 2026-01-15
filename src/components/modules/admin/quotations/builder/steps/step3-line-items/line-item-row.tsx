@@ -48,7 +48,7 @@ export function LineItemRow({
         {/* Description & Section */}
         <div className="col-span-12 md:col-span-4 space-y-4">
           <Field>
-            <FieldLabel className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-1 mb-2">
+            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
               Service / Segment Description
             </FieldLabel>
             <FieldContent>
@@ -57,14 +57,14 @@ export function LineItemRow({
                 onChange={(e) =>
                   handleUpdateItem(idx, "description", e.target.value)
                 }
-                className="h-11 bg-white/5 border-none rounded-xl text-sm font-bold text-white placeholder:text-white/10"
+                className="h-11 bg-white/5 border-none rounded-xl text-sm font-bold text-white placeholder:text-white/30"
                 placeholder="Service or Product name..."
               />
             </FieldContent>
           </Field>
 
           <Field>
-            <FieldLabel className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-1 mb-2">
+            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
               Quotation Section
             </FieldLabel>
             <FieldContent>
@@ -72,7 +72,7 @@ export function LineItemRow({
                 value={item.sectionId}
                 onValueChange={(val) => handleUpdateItem(idx, "sectionId", val)}
               >
-                <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[10px] font-black uppercase tracking-wider text-white">
+                <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
                   <SelectValue placeholder="Select Section..." />
                 </SelectTrigger>
                 <SelectContent className="bg-zinc-900 border-white/10 text-white">
@@ -80,7 +80,7 @@ export function LineItemRow({
                     <SelectItem
                       key={s._id}
                       value={s._id}
-                      className="text-[10px] font-black uppercase tracking-wider"
+                      className="text-[11px] font-bold"
                     >
                       {s.name}
                     </SelectItem>
@@ -93,7 +93,7 @@ export function LineItemRow({
 
         {/* Project Association */}
         <Field className="col-span-12 md:col-span-3">
-          <FieldLabel className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1.5">
+          <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1.5">
             <Briefcase className="h-3.5 w-3.5" /> Associated Project
           </FieldLabel>
           <FieldContent>
@@ -107,21 +107,18 @@ export function LineItemRow({
                 )
               }
             >
-              <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[10px] font-black uppercase tracking-wider text-white">
+              <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
                 <SelectValue placeholder="General / No Project" />
               </SelectTrigger>
               <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                <SelectItem
-                  value="none"
-                  className="text-[10px] font-black uppercase tracking-wider"
-                >
+                <SelectItem value="none" className="text-[11px] font-bold">
                   General / No Project
                 </SelectItem>
                 {filteredProjects.map((p) => (
                   <SelectItem
                     key={p._id}
                     value={p._id}
-                    className="text-[10px] font-black uppercase tracking-wider"
+                    className="text-[11px] font-bold"
                   >
                     {p.eventName || p.code}
                   </SelectItem>
@@ -135,7 +132,7 @@ export function LineItemRow({
         <div className="col-span-12 md:col-span-5 grid grid-cols-6 gap-4">
           {/* Unit */}
           <Field className="col-span-2">
-            <FieldLabel className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-1 mb-2">
+            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
               Unit
             </FieldLabel>
             <FieldContent>
@@ -149,7 +146,7 @@ export function LineItemRow({
 
           {/* Rate */}
           <Field className="col-span-2">
-            <FieldLabel className="text-[10px] font-black text-white/20 uppercase tracking-widest pl-1 mb-2">
+            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
               Rate
             </FieldLabel>
             <FieldContent>
@@ -166,7 +163,7 @@ export function LineItemRow({
 
           {/* Quantity */}
           <Field className="col-span-2">
-            <FieldLabel className="text-[10px) font-black text-white/20 uppercase tracking-widest pl-1 mb-2">
+            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
               Qty
             </FieldLabel>
             <FieldContent>

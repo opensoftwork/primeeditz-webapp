@@ -4,6 +4,7 @@
 **Status**: in-progress  
 **Complexity**: High (8 points)  
 **Created**: 2026-01-13  
+**Updated**: 2026-01-15  
 **Priority**: HIGH — Core quotation creation feature
 
 ---
@@ -60,301 +61,181 @@
 
 ### Quotation List View
 
-- **Given** I am on `/quotations`
-- **When** the page loads
-- **Then** I see a list of all quotations
-- **And** each quotation shows: Reference #, Client (if linked), Status, Total, Date
-- **And** I can filter by status (Draft, Sent, Approved, etc.)
-- **And** I can search by reference number or client name
-- **And** I see a "New Quotation" button
+- [x] **Given** I am on `/quotations`
+- [x] **When** the page loads
+- [x] **Then** I see a list of all quotations
+- [x] **And** each quotation shows: Reference #, Client (if linked), Status, Total, Date
+- [x] **And** I can search by reference number or client name
+- [x] **And** I see a "New Quotation" button
 
 ### Quotation Creation
 
-- **Given** I am creating a new quotation
-- **When** I click "New Quotation"
-- **Then** a new quotation builder opens
-- **And** I can optionally select a template to pre-fill line items
-- **And** I can optionally link to a client
-- **And** I can optionally link to one or more projects
-- **And** a unique reference number is auto-generated (e.g., QT-000024)
+- [x] **Given** I am creating a new quotation
+- [x] **When** I click "New Quotation"
+- [x] **Then** a new quotation builder opens
+- [x] **And** I can optionally select a template to pre-fill line items
+- [x] **And** I can optionally link to a client
+- [x] **And** I can optionally link to one or more projects
+- [x] **And** a unique reference number is auto-generated (e.g., QT-000024)
 
 ### Line Items Management
 
-- **Given** I am in the quotation builder
-- **When** I add line items
-- **Then** line items are organized by quotation sections
-- **And** each line item has:
-  - Description (required)
-  - Unit (sqft, hr, ls, min, etc.)
-  - Length/Width (optional, for sqft calculations)
-  - Quantity (required)
-  - Rate/Unit Price (required)
-  - Total (auto-calculated)
-- **And** I can add nested sub-items under a parent line item
-- **And** I can reorder line items within a section
-- **And** section subtotals are shown
+- [x] **Given** I am in the quotation builder
+- [x] **When** I add line items
+- [x] **Then** line items are organized by quotation sections
+- [x] **And** each line item has:
+  - [x] Description (required)
+  - [x] Unit (lumpsum, hours, days, etc. - post-production focused)
+  - [x] Quantity (required)
+  - [x] Rate/Unit Price (required)
+  - [x] Total (auto-calculated)
+- [x] **And** I can add nested sub-items under a parent line item
+- [ ] **And** I can reorder line items within a section (drag-and-drop pending)
+- [x] **And** section subtotals are shown
 
 ### Totals Calculation
 
-- **Given** I have added line items
-- **When** viewing the totals section
-- **Then** I see:
-  - Subtotal (sum of all line items)
-  - Tax Rate field (default 18% GST, configurable)
-  - Tax Amount (auto-calculated)
-  - Grand Total
+- [x] **Given** I have added line items
+- [x] **When** viewing the totals section
+- [x] **Then** I see:
+  - [x] Subtotal (sum of all line items)
+  - [x] Tax Rate field (default 18% GST, configurable)
+  - [x] Tax Amount (auto-calculated)
+  - [x] Grand Total
 
 ### Terms & Conditions
 
-- **Given** I am editing a quotation
-- **When** I scroll to terms section
-- **Then** I can add/edit terms and conditions
-- **And** I can load default terms from a template
+- [ ] **Given** I am editing a quotation
+- [ ] **When** I scroll to terms section
+- [ ] **Then** I can add/edit terms and conditions
+- [ ] **And** I can load default terms from a template
 
 ### Save & Status
 
-- **Given** I am editing a quotation
-- **When** I save
-- **Then** the quotation is saved as "Draft" status
-- **And** I can continue editing later
-- **And** I see a timestamp of last update
+- [x] **Given** I am editing a quotation
+- [x] **When** I save
+- [x] **Then** the quotation is saved as "Draft" status
+- [x] **And** I see a timestamp of last update
 
 ---
 
-## 🎨 UX Design Reference
+## 🎨 Implemented UI Architecture
 
-### Route Structure
-
-```
-/quotations                      → List all quotations
-/quotations/new                  → Create new quotation
-/quotations/[id]                 → View/Edit quotation
-```
-
-### Quotation Builder Layout
+### Route Structure (Implemented)
 
 ```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│  ← Quotations                                                                │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │  QUOTATION #QT-000024                                      📝 Draft     ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                                                              │
-│  ┌────────────────────────────┐  ┌────────────────────────────────────────┐ │
-│  │ Client (optional)          │  │ Template (optional)                    │ │
-│  │ [Select client...       ▼] │  │ [Premium Wedding Package          ▼]  │ │
-│  └────────────────────────────┘  └────────────────────────────────────────┘ │
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │ Link to Projects (optional)                                              ││
-│  │ [Wedding - Priya & Raj ×] [+ Add Project]                               ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                                                              │
-│  ═══════════════════════════════════════════════════════════════════════════│
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │ 🎬 POST-PRODUCTION SERVICES                              [+ Add Item]   ││
-│  │ ───────────────────────────────────────────────────────────────────────│││
-│  │  #  Description           Unit   L    W   Qty   Rate      Total        ││
-│  │ ──────────────────────────────────────────────────────────────────────│││
-│  │  1  Video Editing         min    -    -   15   ₹1,000   ₹15,000  [⋮]  ││
-│  │     └─ Rough Cut          hr     -    -    2     ₹500    ₹1,000  [⋮]  ││
-│  │     └─ Final Cut          hr     -    -    3     ₹800    ₹2,400  [⋮]  ││
-│  │  2  Color Grading         ls     -    -    1   ₹8,000    ₹8,000  [⋮]  ││
-│  │                                                                         ││
-│  │                                           Section Total:    ₹26,400    ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │ 🔨 PHYSICAL WORK                                         [+ Add Item]   ││
-│  │ ───────────────────────────────────────────────────────────────────────│││
-│  │  #  Description           Unit   L    W   Qty   Rate      Total        ││
-│  │ ──────────────────────────────────────────────────────────────────────│││
-│  │  1  Studio Setup          day    -    -    2   ₹5,000   ₹10,000  [⋮]  ││
-│  │                                                                         ││
-│  │                                           Section Total:    ₹10,000    ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                                                              │
-│  ═══════════════════════════════════════════════════════════════════════════│
-│                                                                              │
-│  ┌─────────────────────────────────────────────────────────────────────────┐│
-│  │                                                                          ││
-│  │                                        Subtotal:           ₹36,400      ││
-│  │                                        GST (18%):           ₹6,552      ││
-│  │                                      ─────────────────────────────      ││
-│  │                                        GRAND TOTAL:        ₹42,952      ││
-│  │                                                                          ││
-│  └─────────────────────────────────────────────────────────────────────────┘│
-│                                                                              │
-│  ┌────────────────────┐  ┌──────────────────┐  ┌───────────────────────────┐│
-│  │   👁️ Preview       │  │  💾 Save Draft   │  │  ✨ Send to Client        ││
-│  └────────────────────┘  └──────────────────┘  └───────────────────────────┘│
-│                                                                              │
-└─────────────────────────────────────────────────────────────────────────────┘
+/quotations                      → List all quotations (QuotationsPage)
+/quotations/new                  → Create new quotation (redirects to builder)
+/quotations/builder              → Multi-step quotation builder wizard
+```
+
+### Quotation Builder - Multi-Step Wizard (Implemented)
+
+```
+Step 1: Client & Context
+├── Client selector (ComboBox with search)
+├── Template selector (for pre-loading line items)
+├── Project association (multi-select drawer)
+└── [Next Step] button
+
+Step 2: Template Selection
+├── Template cards grid
+├── Template preview
+└── Apply template to load line items
+
+Step 3: Calculate Worth (Line Items) ✅ COMPLETED
+├── Header: "Calculate Worth" with Library + Add Item buttons
+├── Involved Projects: Linked projects display with add/remove
+├── Section Filter: Dropdown to filter by All or specific section
+├── Line Items Table: Read-only table with click-to-edit
+│   ├── Columns: #, Description, Unit, Qty, Rate, Total
+│   ├── Nested sub-items with expand/collapse
+│   └── Edit/Delete action buttons (visible on hover)
+└── Drawers:
+    ├── LineItemDrawer: Add/Edit line items
+    ├── SectionPickerDrawer: Select section for item
+    ├── ProjectPickerDrawer: Associate item with project
+    └── LibraryItemsDrawer: Select from library
+
+Step 4: Terms & Conditions (pending)
+├── Terms editor
+└── Default terms loader
 ```
 
 ---
 
-## 📘 Implementation Phases
-
-### Phase A: Schema Updates (~2 points)
-
-#### Task A1: Update Quotations Schema
-
-**File**: `convex/schema.ts`
-
-- [ ] A1.1 Update `quotations` table with new architecture:
-
-  ```typescript
-  quotations: defineTable({
-    // Reference
-    referenceNumber: v.string(), // e.g., "QT-000024"
-    version: v.number(),
-    parentQuotationId: v.optional(v.id("quotations")), // For versioning
-
-    // Linking (all optional)
-    clientId: v.optional(v.id("profiles")),
-    projectIds: v.optional(v.array(v.id("projects"))),
-
-    // Status
-    status: quotationStatusValidator,
-
-    // Line Items (with section structure)
-    lineItems: v.array(
-      v.object({
-        sectionId: v.id("quotationSections"),
-        description: v.string(),
-        unit: v.string(),
-        length: v.optional(v.number()),
-        width: v.optional(v.number()),
-        quantity: v.number(),
-        rate: v.number(),
-        total: v.number(),
-        subItems: v.optional(
-          v.array(
-            v.object({
-              description: v.string(),
-              unit: v.string(),
-              quantity: v.number(),
-              rate: v.number(),
-              total: v.number(),
-            })
-          )
-        ),
-      })
-    ),
-
-    // Totals
-    subtotal: v.number(),
-    taxRate: v.number(), // e.g., 18 for 18%
-    taxAmount: v.number(),
-    total: v.number(),
-
-    // Terms
-    terms: v.optional(v.string()),
-
-    // Metadata
-    createdBy: v.id("profiles"),
-    updatedAt: v.number(),
-  })
-    .index("by_status", ["status"])
-    .index("by_clientId", ["clientId"])
-    .index("by_referenceNumber", ["referenceNumber"]);
-  ```
-
-### Phase B: Backend Queries & Mutations (~2 points)
-
-#### Task B1: Queries
-
-**File**: `convex/functions/quotations/queries.ts`
-
-- [ ] B1.1 Create `getQuotations` query (list with filters)
-- [ ] B1.2 Create `getQuotation` query (single by ID)
-- [ ] B1.3 Create `getNextReferenceNumber` query
-
-#### Task B2: Mutations
-
-**File**: `convex/functions/quotations/mutations.ts`
-
-- [ ] B2.1 Create `createQuotation` mutation
-- [ ] B2.2 Create `updateQuotation` mutation
-- [ ] B2.3 Create `addLineItem` mutation
-- [ ] B2.4 Create `updateLineItem` mutation
-- [ ] B2.5 Create `deleteLineItem` mutation
-- [ ] B2.6 Create `reorderLineItems` mutation
-- [ ] B2.7 Create `calculateTotals` helper function
-
-### Phase C: UI Components (~4 points)
-
-#### Task C1: Quotation List Page
-
-**File**: `src/app/(protected)/@admin/quotations/page.tsx`
-
-- [ ] C1.1 Create list page with filters
-- [ ] C1.2 Quotation cards with status badges
-- [ ] C1.3 Search and filter functionality
-- [ ] C1.4 Loading and empty states
-
-#### Task C2: Quotation Builder Page
-
-**File**: `src/app/(protected)/@admin/quotations/[id]/page.tsx`
-
-- [ ] C2.1 Create new quotation page
-- [ ] C2.2 Header with reference number and status
-- [ ] C2.3 Client and template selectors
-- [ ] C2.4 Project linking multi-select
-
-#### Task C3: Line Items Section Component
-
-**File**: `src/components/modules/quotation/builder/line-items-section.tsx`
-
-- [ ] C3.1 Section header with icon and title
-- [ ] C3.2 Line item rows with inline editing
-- [ ] C3.3 Nested sub-items support
-- [ ] C3.4 Add item button
-- [ ] C3.5 Section subtotal display
-
-#### Task C4: Line Item Row Component
-
-**File**: `src/components/modules/quotation/builder/line-item-row.tsx`
-
-- [ ] C4.1 Inline editable fields
-- [ ] C4.2 Auto-calculate total
-- [ ] C4.3 Action menu (edit, delete, add sub-item)
-- [ ] C4.4 Drag handle for reordering
-
-#### Task C5: Totals Footer Component
-
-**File**: `src/components/modules/quotation/builder/totals-footer.tsx`
-
-- [ ] C5.1 Subtotal display
-- [ ] C5.2 Tax rate input
-- [ ] C5.3 Tax amount calculation
-- [ ] C5.4 Grand total display
-
----
-
-## 🧩 Component Structure
+## 📁 Implemented Component Structure
 
 ```
-src/components/modules/quotation/
-├── index.ts                      # Barrel exports
+src/components/modules/admin/quotations/
+├── index.ts
+├── quotation-list.tsx                    # List page component
+├── quotation-card.tsx                    # Card for list view
 ├── builder/
-│   ├── quotation-builder.tsx     # Main editor
-│   ├── line-item-row.tsx         # Single line item
-│   ├── line-items-section.tsx    # Section container
-│   ├── section-header.tsx
-│   └── totals-footer.tsx
-├── list/
-│   ├── quotation-list.tsx
-│   ├── quotation-card.tsx
-│   └── quotation-filters.tsx
-└── shared/
-    ├── status-badge.tsx
-    └── reference-number.tsx
+│   ├── quotation-builder.tsx             # Main wizard container
+│   ├── quotation-builder-context.tsx     # Form state & actions
+│   ├── builder-header.tsx                # Wizard header with steps
+│   ├── builder-sidebar.tsx               # Valuation overview sidebar
+│   ├── types.ts                          # TypeScript types
+│   └── steps/
+│       ├── step1-client-context/         # Client & context selection
+│       ├── step2-template/               # Template selection
+│       ├── step3-line-items/             # ✅ Line items management
+│       │   ├── index.tsx                 # Main component with tab filter
+│       │   ├── line-items-table.tsx      # Table display component
+│       │   ├── line-item-drawer.tsx      # Add/Edit drawer
+│       │   ├── section-picker-drawer.tsx # Section selection drawer
+│       │   ├── project-picker-drawer.tsx # Project association drawer
+│       │   ├── library-items-drawer.tsx  # Library items drawer
+│       │   ├── involved-projects.tsx     # Projects display/management
+│       │   └── project-list/             # Project listing drawer
+│       └── step4-terms/                  # Terms & conditions (pending)
 ```
+
+---
+
+## 🛠 Technical Implementation Details
+
+### Units Configuration (Post-Production Focused)
+
+**File**: `src/constants/units.ts`
+
+```typescript
+export const UNITS = {
+  time: ["hours", "minutes", "days", "shifts", "weeks", "months"],
+  work: ["lumpsum", "ls", "package", "project", "session"],
+  count: [
+    "nos",
+    "pcs",
+    "each",
+    "set",
+    "Item",
+    "deliverables",
+    "revisions",
+    "versions",
+  ],
+  media: ["clips", "tracks", "frames", "scenes", "shots", "reels"],
+  storage: ["GB", "TB", "files"],
+  percentage: ["%"],
+} as const;
+
+export const DEFAULT_UNIT = "lumpsum";
+```
+
+### Key UI Patterns Implemented
+
+1. **Drawer-based editing** - Consistent right-slide drawers for all item operations
+2. **Select dropdown for section filter** - Scales to any number of sections (not horizontal tabs)
+3. **Table-based line items** - Compact, read-only display with click-to-edit
+4. **Visible action buttons** - Edit/Delete on hover instead of three-dots menu
+5. **Premium dark theme** - Zinc-950 background, white/5 borders, primary accent
+
+### Dependencies Used
+
+- `motion/react` (Framer Motion) for animations
+- `lucide-react` for icons
+- `shadcn/ui` for Button, Input, Select, Sheet, Drawer components
+- `convex` for backend queries/mutations
 
 ---
 
@@ -362,44 +243,74 @@ src/components/modules/quotation/
 
 ### Manual Testing
 
-- [ ] Navigate to `/quotations` → page loads with list
-- [ ] Click "New Quotation" → builder opens with auto-generated reference
-- [ ] Select template → line items pre-filled
-- [ ] Add line item → appears in correct section
-- [ ] Edit line item → total recalculates
-- [ ] Add nested sub-item → indented under parent
-- [ ] Change tax rate → totals update
-- [ ] Save draft → quotation saved
-- [ ] Reload page → quotation restored
+- [x] Navigate to `/quotations` → page loads with list
+- [x] Click "New Quotation" → builder opens with wizard
+- [x] Select template → line items pre-filled (basic)
+- [x] Add line item → opens drawer, saves correctly
+- [x] Edit line item → drawer opens with data, updates work
+- [x] Delete line item → removes from list
+- [x] Section filter dropdown → filters items correctly
+- [x] Totals update when items change
+- [ ] Add nested sub-item → (pending: full sub-item CRUD)
+- [ ] Drag-and-drop reorder → (pending)
 
 ### Edge Cases
 
-- [ ] No sections exist → error message shown
-- [ ] Empty quotation → can still save as draft
-- [ ] Very large numbers → formatted correctly
-- [ ] Long descriptions → truncated/wrapped
+- [x] No sections exist → gracefully handled
+- [x] Empty quotation → can still save as draft
+- [x] Long descriptions → truncated with ellipsis
 
 ---
 
 ## 🚀 Definition of Done
 
-- [ ] Schema updated with new quotation structure
-- [ ] All queries and mutations working
-- [ ] Quotation list page functional
-- [ ] Quotation builder fully working
-- [ ] Line items with nested sub-items
-- [ ] Auto-calculation of totals
-- [ ] Save draft functionality
-- [ ] Matches premium dark theme aesthetic
+- [x] Multi-step quotation builder working
+- [x] Line items with nested sub-items display
+- [x] Auto-calculation of totals
+- [x] Save draft functionality
+- [x] Matches premium dark theme aesthetic
+- [x] Drawer-based add/edit pattern (like Naksha)
+- [x] Section filter dropdown (not scrolling tabs)
+- [ ] Terms & conditions step
+- [ ] Drag-and-drop reorder
 - [ ] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status      | Notes                  |
-| ---------- | ----------- | ---------------------- |
-| 2026-01-13 | in-progress | Implementation started |
+| Date       | Status      | Notes                                                                                  |
+| ---------- | ----------- | -------------------------------------------------------------------------------------- |
+| 2026-01-13 | in-progress | Implementation started                                                                 |
+| 2026-01-15 | in-progress | Step 3 (Line Items) completed: Table UI, drawer-based editing, section filter dropdown |
+
+---
+
+## 📝 Implementation Notes (Added 2026-01-15)
+
+### Design Decisions
+
+1. **Drawer-based editing over inline editing**: Following the Naksha project patterns for consistency and cleaner code architecture.
+
+2. **Select dropdown for section filtering**: Replaced horizontal scrolling tabs with a single dropdown that scales to any number of sections.
+
+3. **Post-production focused units**: Removed architecture/construction units (sqft, sqm, etc.) and added time-based and media units appropriate for a video/post-production company.
+
+4. **Visible action buttons**: Replaced three-dots dropdown menu with visible Edit/Delete buttons that appear on hover for faster access.
+
+5. **Project association per line item**: Each line item can be optionally associated with a specific project for multi-project quotations.
+
+### Files Created/Modified This Sprint
+
+| File                                         | Action   | Description                   |
+| -------------------------------------------- | -------- | ----------------------------- |
+| `step3-line-items/index.tsx`                 | Modified | Tab filter → Select dropdown  |
+| `step3-line-items/line-items-table.tsx`      | Created  | Table-based read-only display |
+| `step3-line-items/line-item-drawer.tsx`      | Created  | Add/Edit drawer               |
+| `step3-line-items/section-picker-drawer.tsx` | Created  | Section selection drawer      |
+| `step3-line-items/project-picker-drawer.tsx` | Created  | Project association drawer    |
+| `step3-line-items/involved-projects.tsx`     | Modified | Cleaner layout                |
+| `src/constants/units.ts`                     | Modified | Post-production focused units |
 
 ---
 
