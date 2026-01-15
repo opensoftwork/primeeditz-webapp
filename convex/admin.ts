@@ -596,3 +596,74 @@ export const getAdminProjectsSimple = adminQuery({
     );
   },
 });
+
+/**
+ * Get a single client by ID with all their projects.
+ * Used for the individual client details page.
+ */
+export const getClientWithProjects = adminQuery({
+  args: {
+    clientId: v.id("profiles"),
+  },
+  handler: async (ctx, args) => {
+    // Get client profile
+    const client = await ctx.db.get(args.clientId);
+    
+    if (!client || client.role !== "client") {
+      return null;
+    }
+
+    // Get all projects for this client
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+      .order("desc")
+      .collect();
+
+    // Get all project types for enrichment
+    const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map<Id<"projectTypes">, Doc<"projectTypes">>(
+      projectTypes.map((pt) => [pt._id, pt])
+    );
+
+    // Enrich projects with type names
+    const enrichedProjects = projects.map((project) => {
+      const projectType = projectTypeMap.get(project.projectTypeId);
+      return {
+        _id: project._id,
+        code: project.code,
+        status: project.status,
+        projectTypeName: projectType?.name ?? "Unknown",
+        eventName: project.eventName,
+        eventDate: project.eventDate,
+        venue: project.venue,
+        description: project.description,
+        createdAt: project._creationTime,
+        updatedAt: project.updatedAt,
+      };
+    });
+
+    // Calculate stats
+    const stats = {
+      totalProjects: projects.length,
+      activeProjects: projects.filter(p => p.status === "active" || p.status === "in_progress").length,
+      completedProjects: projects.filter(p => p.status === "completed").length,
+      pendingProjects: projects.filter(p => p.status === "pending_review" || p.status === "draft").length,
+    };
+
+    return {
+      client: {
+        _id: client._id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        company: client.company,
+        onboardingComplete: client.onboardingComplete,
+        createdAt: client._creationTime,
+        updatedAt: client.updatedAt,
+      },
+      projects: enrichedProjects,
+      stats,
+    };
+  },
+});
