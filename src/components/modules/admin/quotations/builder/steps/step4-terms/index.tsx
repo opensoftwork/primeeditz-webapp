@@ -1,7 +1,5 @@
 /**
  * Quotation Builder Step 4: Terms & Conditions
- *
- * Enter terms of service and finalize the quotation.
  */
 
 "use client";
@@ -18,7 +16,7 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import { useQuotationBuilder } from "../quotation-builder-context";
+import { useQuotationBuilder } from "../../quotation-builder-context";
 
 export function Step4Terms() {
   const { formData, setFormData, saveQuotation, setSubmitTrigger } =

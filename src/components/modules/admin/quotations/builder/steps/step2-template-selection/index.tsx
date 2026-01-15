@@ -1,7 +1,5 @@
 /**
  * Quotation Builder Step 2: Template Selection
- *
- * Choose a pre-configured template or start from scratch.
  */
 
 "use client";
@@ -9,8 +7,8 @@
 import { useEffect } from "react";
 import { motion } from "motion/react";
 import { Plus, Layout, ChevronRight } from "lucide-react";
-import { useQuotationBuilder } from "../quotation-builder-context";
-import type { Template } from "../types";
+import { useQuotationBuilder } from "../../quotation-builder-context";
+import type { Template } from "../../types";
 
 export function Step2TemplateSelection() {
   const { templates, applyTemplate, nextStep, setFormData, setSubmitTrigger } =

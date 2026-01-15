@@ -24,10 +24,12 @@ import {
   useQuotationBuilder,
   QUOTATION_STEPS,
 } from "./quotation-builder-context";
-import { Step1ClientContext } from "./steps/step1-client-context";
-import { Step2TemplateSelection } from "./steps/step2-template-selection";
-import { Step3LineItems } from "./steps/step3-line-items";
-import { Step4Terms } from "./steps/step4-terms";
+import {
+  Step1ClientContext,
+  Step2TemplateSelection,
+  Step3LineItems,
+  Step4Terms,
+} from "./steps";
 import { SummarySidebar } from "./summary-sidebar";
 
 // ============================================================================
