@@ -27,16 +27,24 @@ interface ClientDataTableProps {
   onSelect?: (client: Client) => void;
   selectedId?: string;
   pageSize?: number;
+  /** If true, only shows clients that have at least one project */
+  onlyWithProjects?: boolean;
 }
 
 export function ClientDataTable({
   onSelect,
   selectedId,
   pageSize = 10,
+  onlyWithProjects = false,
 }: ClientDataTableProps) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-  const clients = useQuery(api.admin.getClients);
+  const allClients = useQuery(api.admin.getClients);
+  const clientsWithProjects = useQuery(api.admin.getClientsWithProjects);
+  
+  // Use the appropriate client list based on the prop
+  const clients = onlyWithProjects ? clientsWithProjects : allClients;
+
 
   const columns: ColumnDef<Client>[] = useMemo(
     () => [

@@ -91,9 +91,9 @@ function ProjectCard({ project }: { project: AdminProject }) {
 
 export default function ProjectList() {
   const [pageSize, setPageSize] = useState(15);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(
-    undefined
-  );
+  const [statusFilter, setStatusFilter] = useState<
+    "draft" | "pending_review" | "active" | "in_progress" | "completed" | "archived" | undefined
+  >(undefined);
   const [typeFilter, setTypeFilter] = useState<any>(undefined);
 
   const projectTypes = useQuery(api.admin.getProjectTypes);

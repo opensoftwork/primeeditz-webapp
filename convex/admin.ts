@@ -525,9 +525,22 @@ export const getAdminQuotations = query({
 
 /**
  * Get all clients for selection.
- * Only returns clients that have at least one project.
  */
 export const getClients = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .collect();
+  },
+});
+
+/**
+ * Get clients that have at least one project.
+ * Used for quotation builder where only clients with projects should be selectable.
+ */
+export const getClientsWithProjects = adminQuery({
   args: {},
   handler: async (ctx) => {
     // Get all clients with the "client" role
@@ -539,11 +552,11 @@ export const getClients = adminQuery({
     // Filter to only include clients with at least one project
     const clientsWithProjects = await Promise.all(
       allClients.map(async (client) => {
-        const projects = await ctx.db
+        const project = await ctx.db
           .query("projects")
           .withIndex("by_clientId", (q) => q.eq("clientId", client._id))
           .first();
-        return projects ? client : null;
+        return project ? client : null;
       })
     );
 
