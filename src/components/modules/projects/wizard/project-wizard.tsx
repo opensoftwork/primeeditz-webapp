@@ -24,9 +24,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { WizardFormProvider, useWizardForm } from "./wizard-form-context";
 import { StepNavigation, type FormStep } from "./step-navigation";
-import { WizardStep1 } from "./steps/step-1-project-type";
-import { WizardStep2 } from "./steps/step-2";
-import { WizardStep3 } from "./steps/step-3";
+import { WizardStep1 } from "./steps/step-1-basics";
+import { WizardStep2 } from "./steps/step-2-details";
+import { WizardStep3 } from "./steps/step-3-files";
 import { WizardStep4 } from "./steps/step-4-description";
 import { WizardStep5 } from "./steps/step-5-review";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";

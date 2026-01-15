@@ -320,7 +320,7 @@ export function WizardFormProvider({
           }
         );
 
-        // 2. Upload files in parallel (or sequential if preferred, parallel is usually better for small/medium sets)
+        // 2. Upload files in parallel with graceful error handling
         const uploadPromises = filesToUpload.map(async (clientFile) => {
           // If already has storageKey, use it
           if (clientFile.storageKey) {
@@ -335,40 +335,71 @@ export function WizardFormProvider({
           }
 
           // Otherwise, upload to MinIO
-          try {
-            const { uploadUrl, storageKey } = await generateUploadUrl({
-              projectId,
-              fileName: clientFile.fileName,
-              fileType: clientFile.fileType,
-            });
+          const { uploadUrl, storageKey } = await generateUploadUrl({
+            projectId,
+            fileName: clientFile.fileName,
+            fileType: clientFile.fileType,
+          });
 
-            const response = await fetch(uploadUrl, {
-              method: "PUT",
-              body: clientFile.file, // This is the actual File object
-              headers: {
-                "Content-Type": clientFile.fileType,
-              },
-            });
+          const response = await fetch(uploadUrl, {
+            method: "PUT",
+            body: clientFile.file, // This is the actual File object
+            headers: {
+              "Content-Type": clientFile.fileType,
+            },
+          });
 
-            if (!response.ok)
-              throw new Error(`Failed to transmit ${clientFile.fileName}`);
+          if (!response.ok)
+            throw new Error(`Failed to transmit ${clientFile.fileName}`);
 
-            return {
-              fileId: clientFile.id,
-              fileName: clientFile.fileName,
-              fileSize: clientFile.fileSize,
-              fileType: clientFile.fileType,
-              storageKey: storageKey,
-              previewUrl: clientFile.previewUrl || undefined,
-            };
-          } catch (err) {
-            console.error(`Upload error for ${clientFile.fileName}:`, err);
-            throw err;
+          return {
+            fileId: clientFile.id,
+            fileName: clientFile.fileName,
+            fileSize: clientFile.fileSize,
+            fileType: clientFile.fileType,
+            storageKey: storageKey,
+            previewUrl: clientFile.previewUrl || undefined,
+          };
+        });
+
+        // Use allSettled to handle partial failures gracefully
+        const results = await Promise.allSettled(uploadPromises);
+
+        const failedUploads: string[] = [];
+
+        results.forEach((result, index) => {
+          if (result.status === "fulfilled") {
+            uploadedFiles.push(result.value);
+          } else {
+            const fileName =
+              filesToUpload[index]?.fileName || `File ${index + 1}`;
+            failedUploads.push(fileName);
+            console.error(`Upload failed for ${fileName}:`, result.reason);
           }
         });
 
-        const results = await Promise.all(uploadPromises);
-        uploadedFiles.push(...results);
+        // Notify user of any failed uploads
+        if (failedUploads.length > 0) {
+          const allFailed =
+            uploadedFiles.length === 0 && filesToUpload.length > 0;
+          toast.warning(
+            allFailed
+              ? "Files could not be uploaded"
+              : `${failedUploads.length} file${
+                  failedUploads.length > 1 ? "s" : ""
+                } failed to upload`,
+            {
+              description: allFailed
+                ? "Your project will be created without files. You can upload them later from the project details."
+                : `Could not upload: ${failedUploads.slice(0, 3).join(", ")}${
+                    failedUploads.length > 3
+                      ? ` and ${failedUploads.length - 3} more`
+                      : ""
+                  }. You can upload missing files later.`,
+              duration: 6000,
+            }
+          );
+        }
       }
 
       // 3. Save final form data with updated storage keys

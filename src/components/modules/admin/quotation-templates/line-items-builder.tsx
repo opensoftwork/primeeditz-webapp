@@ -10,6 +10,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
+import { UNIT_OPTIONS } from "@/constants/units";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -42,16 +44,6 @@ interface LineItemsBuilderProps {
   sections: Section[];
 }
 
-const UNIT_OPTIONS = [
-  { value: "ls", label: "Lump Sum" },
-  { value: "hr", label: "Hour" },
-  { value: "min", label: "Minute" },
-  { value: "day", label: "Day" },
-  { value: "sqft", label: "Sq Ft" },
-  { value: "page", label: "Page" },
-  { value: "unit", label: "Unit" },
-];
-
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
@@ -70,7 +62,7 @@ export function LineItemsBuilder({
     onChange([
       ...lineItems,
       {
-        sectionId,
+        sectionId: sectionId as any,
         description: "",
         unit: "ls",
         unitPrice: 0,
@@ -85,7 +77,7 @@ export function LineItemsBuilder({
     value: string | number
   ) => {
     const updated = [...lineItems];
-    updated[index] = { ...updated[index], [field]: value } as LineItemData;
+    updated[index] = { ...updated[index], [field]: value } as any;
     onChange(updated);
   };
 
@@ -232,25 +224,11 @@ export function LineItemsBuilder({
                         <Label className="text-xs font-bold tracking-tight text-white/40 mb-3 block ml-1">
                           Unit
                         </Label>
-                        <Select
+                        <NestedUnitSelector
                           value={item.unit}
                           onValueChange={(v) => updateItem(index, "unit", v)}
-                        >
-                          <SelectTrigger className="bg-white/5 border-white/5 text-white h-12 rounded-xl text-sm font-medium px-4 transition-all hover:bg-white/8 hover:border-white/10">
-                            <SelectValue placeholder="Unit" />
-                          </SelectTrigger>
-                          <SelectContent className="bg-zinc-900/95 backdrop-blur-2xl border-white/10 text-white rounded-xl shadow-2xl">
-                            {UNIT_OPTIONS.map((opt) => (
-                              <SelectItem
-                                key={opt.value}
-                                value={opt.value}
-                                className="text-sm py-2.5"
-                              >
-                                {opt.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
+                          triggerClassName="h-12 w-full"
+                        />
                       </div>
 
                       <div className="w-40">

@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   FilesVaultDrawer,
-  VaultFile,
+  type VaultFile,
 } from "@/components/shared/files-vault/drawer";
 import { useReferenceFilesStore } from "@/stores/reference-files-store";
+import { toast } from "sonner";
 
 interface UploadedFilesDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoveFile: (fileId: string) => void;
+  initialTab?: "all" | "image" | "video" | "document";
 }
 
 /**
@@ -21,8 +23,9 @@ export function UploadedFilesDrawer({
   open,
   onOpenChange,
   onRemoveFile,
+  initialTab,
 }: UploadedFilesDrawerProps) {
-  const { files, isProcessing } = useReferenceFilesStore();
+  const { files, isProcessing, addFiles } = useReferenceFilesStore();
 
   // Map Zustand files to Vault normalized format
   const vaultFiles: VaultFile[] = useMemo(() => {
@@ -36,6 +39,27 @@ export function UploadedFilesDrawer({
     }));
   }, [files, isProcessing]);
 
+  // Handle adding files from the vault empty state
+  const handleAddFiles = useCallback(
+    (newFiles: File[]) => {
+      const result = addFiles(newFiles);
+      if (result.added > 0) {
+        toast.success(
+          `${result.added} asset${
+            result.added !== 1 ? "s" : ""
+          } successfully engaged`,
+          {
+            description: "Stored in local cache for final transmission.",
+            duration: 2500,
+          }
+        );
+      } else if (result.error) {
+        toast.error(result.error, { duration: 4000 });
+      }
+    },
+    [addFiles]
+  );
+
   return (
     <FilesVaultDrawer
       open={open}
@@ -44,6 +68,8 @@ export function UploadedFilesDrawer({
       subtitle={`Local Session • ${files.length} items staged`}
       files={vaultFiles}
       onRemoveFile={onRemoveFile}
+      onAddFiles={handleAddFiles}
+      initialTab={initialTab}
     />
   );
 }

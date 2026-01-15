@@ -13,12 +13,12 @@ import {
   filterAlbumFields,
   type FieldValue,
 } from "@/components/shared/dynamic-form-fields";
-import { FormFieldWrapper } from "../../projects/wizard/steps/step-2/form-field-wrapper";
-import { AlbumConfigSection } from "../../projects/wizard/steps/step-2/album-config-section";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { Id } from "@convex/_generated/dataModel";
 import Link from "next/link";
+import { FormFieldWrapper } from "../../projects/wizard/steps/step-2-details/form-field-wrapper";
+import { AlbumConfigSection } from "../../projects/wizard/steps/step-2-details/album-config-section";
 
 export function ProjectTypePreview() {
   const params = useParams();

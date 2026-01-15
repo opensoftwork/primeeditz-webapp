@@ -35,6 +35,7 @@ import {
 } from "@/stores/reference-files-store";
 import { FileUploadZone } from "./file-upload-zone";
 import { UploadedFilesDrawer } from "./uploaded-files-drawer";
+import { FileStatsCard } from "./file-stats-card";
 
 export function WizardStep3() {
   const {
@@ -58,6 +59,9 @@ export function WizardStep3() {
   } = useReferenceFilesStore();
 
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
+  const [vaultFilter, setVaultFilter] = useState<
+    "all" | "image" | "video" | "document"
+  >("all");
   const fileTypeCounts = useFileTypeCounts();
 
   const { projectId } = useWizardForm();
@@ -73,12 +77,12 @@ export function WizardStep3() {
           } successfully engaged`,
           {
             description: "Stored in local cache for final transmission.",
-            className: "bg-background border-white/10 text-white",
+            duration: 2500,
           }
         );
         setLastSynced(new Date());
       } else if (result.error) {
-        toast.error(result.error);
+        toast.error(result.error, { duration: 4000 });
       }
     },
     [addFiles]
@@ -136,17 +140,6 @@ export function WizardStep3() {
           <FieldLabel className="text-xs font-black uppercase tracking-[0.2em] text-white/60 mb-0">
             Intake Queue
           </FieldLabel>
-
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            onClick={() => setVaultDrawerOpen(true)}
-            className="h-8 px-4 rounded-lg border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest gap-2"
-          >
-            <Vault className="h-3 w-3" />
-            Manage Files ({storeFiles.length})
-          </Button>
         </div>
 
         <FieldContent>
@@ -156,45 +149,35 @@ export function WizardStep3() {
           />
 
           <div className="mt-8 grid grid-cols-1 md:grid-cols-4 gap-4">
-            {/* Quick Stats / Summary Cards */}
-            <div className="p-4 rounded-2xl bg-white/2 border border-white/5 space-y-2 group hover:bg-white/4 transition-colors">
-              <div className="flex items-center gap-2 text-primary">
-                <ImageIcon className="h-3 w-3" />
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  Images
-                </span>
-              </div>
-              <p className="text-xl font-black text-white">
-                {fileTypeCounts.image}
-              </p>
-            </div>
+            <FileStatsCard
+              type="image"
+              count={fileTypeCounts.image}
+              onClick={() => {
+                setVaultFilter("image");
+                setVaultDrawerOpen(true);
+              }}
+            />
 
-            <div className="p-4 rounded-2xl bg-white/2 border border-white/5 space-y-2 group hover:bg-white/4 transition-colors">
-              <div className="flex items-center gap-2 text-amber-500">
-                <Video className="h-3 w-3" />
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  Videos
-                </span>
-              </div>
-              <p className="text-xl font-black text-white">
-                {fileTypeCounts.video}
-              </p>
-            </div>
+            <FileStatsCard
+              type="video"
+              count={fileTypeCounts.video}
+              onClick={() => {
+                setVaultFilter("video");
+                setVaultDrawerOpen(true);
+              }}
+            />
 
-            <div className="p-4 rounded-2xl bg-white/2 border border-white/5 space-y-2 group hover:bg-white/4 transition-colors">
-              <div className="flex items-center gap-2 text-blue-500">
-                <FileText className="h-3 w-3" />
-                <span className="text-[10px] font-black uppercase tracking-widest">
-                  Documents
-                </span>
-              </div>
-              <p className="text-xl font-black text-white">
-                {fileTypeCounts.document}
-              </p>
-            </div>
+            <FileStatsCard
+              type="document"
+              count={fileTypeCounts.document}
+              onClick={() => {
+                setVaultFilter("document");
+                setVaultDrawerOpen(true);
+              }}
+            />
 
             {storeProcessing && (
-              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-1 animate-pulse">
+              <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 space-y-1 animate-pulse flex flex-col justify-center">
                 <div className="flex items-center gap-2 text-primary">
                   <Upload className="h-3 w-3 animate-bounce" />
                   <span className="text-[10px] font-black uppercase tracking-widest">
@@ -229,6 +212,7 @@ export function WizardStep3() {
         open={isVaultDrawerOpen}
         onOpenChange={setVaultDrawerOpen}
         onRemoveFile={removeFile}
+        initialTab={vaultFilter}
       />
     </div>
   );

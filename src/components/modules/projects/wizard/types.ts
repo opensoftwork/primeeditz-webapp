@@ -62,6 +62,22 @@ export function getProjectCategory(projectTypeName: string): ProjectCategory {
 }
 
 // ============================================================================
+// Project Type Definition
+// ============================================================================
+
+/** Project type from the database */
+export interface ProjectType {
+  _id: Id<'projectTypes'>
+  name: string
+  slug: string
+  description?: string
+  icon?: string
+  hasCustomFields: boolean
+  isActive: boolean
+  sortOrder?: number
+}
+
+// ============================================================================
 // Form Data Types
 // ============================================================================
 
@@ -97,8 +113,8 @@ export interface Step3Data {
 
 /** Step 4: Description & Notes */
 export interface Step4Data {
-  description: string
-  additionalNotes: string
+  description?: string
+  additionalNotes?: string
   preferredDeliveryDate: number | null
 }
 

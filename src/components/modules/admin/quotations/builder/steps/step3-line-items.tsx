@@ -33,6 +33,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
+import { UNIT_OPTIONS } from "@/constants/units";
 import {
   Drawer,
   DrawerContent,
@@ -273,7 +275,7 @@ export function Step3LineItems() {
                     addLineItem({
                       sectionId: section._id,
                       description: "",
-                      unit: "unit",
+                      unit: "ls",
                       rate: 0,
                       quantity: 1,
                       projectId: defaultProjectId,
@@ -468,10 +470,10 @@ function LineItemRow({
               Unit
             </FieldLabel>
             <FieldContent>
-              <Input
+              <NestedUnitSelector
                 value={item.unit}
-                onChange={(e) => handleUpdateItem(idx, "unit", e.target.value)}
-                className="h-11 bg-white/5 border-none rounded-xl text-xs font-black uppercase text-white text-center"
+                onValueChange={(val) => handleUpdateItem(idx, "unit", val)}
+                triggerClassName="h-11 w-full bg-white/5 border-none"
               />
             </FieldContent>
           </Field>
