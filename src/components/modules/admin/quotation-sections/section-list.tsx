@@ -12,6 +12,16 @@ import { SectionDrawer, type SectionFormValues } from "./section-drawer";
 import { Reorder } from "motion/react";
 import { Section } from "./types";
 import { Id } from "@convex/_generated/dataModel";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export function SectionList() {
   const sections = useQuery(
@@ -40,6 +50,7 @@ export function SectionList() {
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<Section | null>(null);
+  const [sectionToDelete, setSectionToDelete] = useState<string | null>(null);
 
   useEffect(() => {
     if (sections) {
@@ -113,16 +124,10 @@ export function SectionList() {
   };
 
   const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        "Are you sure you want to delete this section? This action cannot be undone."
-      )
-    ) {
-      return;
-    }
     try {
       await deleteSection({ sectionId: id as Id<"quotationSections"> });
       toast.success("Section deleted");
+      setSectionToDelete(null);
     } catch (error) {
       toast.error("Failed to delete section");
     }
@@ -210,7 +215,7 @@ export function SectionList() {
                   setIsDrawerOpen(true);
                 }}
                 onToggleActive={handleToggleActive}
-                onDelete={handleDelete}
+                onDelete={(id) => setSectionToDelete(id)}
               />
             ))}
           </Reorder.Group>
@@ -228,6 +233,34 @@ export function SectionList() {
         onSave={handleSave}
         initialData={editingSection}
       />
+
+      <AlertDialog
+        open={!!sectionToDelete}
+        onOpenChange={(open) => !open && setSectionToDelete(null)}
+      >
+        <AlertDialogContent className="bg-[#0A0A0B] border-white/10 rounded-[2rem]">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white font-black uppercase tracking-tight">
+              Delete Section?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              This action cannot be undone. All data related to this section
+              will be permanently removed.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-6">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-xl hover:bg-white/10 hover:text-white transition-all">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => sectionToDelete && handleDelete(sectionToDelete)}
+              className="bg-red-500 text-white font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-xl shadow-xl shadow-red-500/20 hover:bg-red-600 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

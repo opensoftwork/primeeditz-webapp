@@ -13,6 +13,7 @@ import {
   useState,
   useCallback,
   useMemo,
+  useEffect,
 } from "react";
 import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -169,6 +170,44 @@ export function QuotationBuilderProvider({
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
     null
   );
+
+  // Query existing quotation if editing
+  const existingQuotation = useQuery(
+    api.functions.quotations.queries.getQuotation,
+    initialQuotationId
+      ? { quotationId: initialQuotationId as Id<"quotations"> }
+      : "skip"
+  );
+
+  // Populate form data if editing
+  useEffect(() => {
+    if (existingQuotation && initialQuotationId) {
+      setFormDataState({
+        step1: {
+          clientId: existingQuotation.clientId || "",
+          projectId: existingQuotation.projectId || "",
+          projectIds: existingQuotation.projectIds || [],
+          validUntil: existingQuotation.validUntil
+            ? new Date(existingQuotation.validUntil)
+            : undefined,
+        },
+        step2: {
+          templateId: existingQuotation.templateId || "",
+        },
+        step3: {
+          lineItems: existingQuotation.lineItems.map((item: any) => ({
+            ...item,
+            id: item.id || crypto.randomUUID(),
+          })),
+        },
+        step4: {
+          terms: existingQuotation.terms || "",
+          taxRate: (existingQuotation.taxRate || 0.18) * 100, // API stores as decimal
+          discountAmount: existingQuotation.discountAmount || 0,
+        },
+      });
+    }
+  }, [existingQuotation, initialQuotationId]);
 
   // Queries - cast to proper types
   const clientsQuery = useQuery(api.admin.getClients);
@@ -400,7 +439,7 @@ export function QuotationBuilderProvider({
         const res = await createQuotation(payload);
         setQuotationId(res);
         toast.success("Quotation created successfully");
-        router.push(`/admin/quotations/${res}`);
+        router.push(`/quotations/${res}`);
       }
 
       setIsDirty(false);

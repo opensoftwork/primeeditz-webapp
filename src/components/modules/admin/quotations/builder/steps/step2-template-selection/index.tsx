@@ -25,9 +25,9 @@ export function Step2TemplateSelection() {
 
   // Register submit trigger - for this step, just move to next
   useEffect(() => {
-    setSubmitTrigger(() => handleStartFromScratch);
+    setSubmitTrigger(handleStartFromScratch);
     return () => setSubmitTrigger(null);
-  }, [setSubmitTrigger]);
+  }, [setSubmitTrigger, handleStartFromScratch]);
 
   return (
     <div className="w-full flex flex-col h-full">

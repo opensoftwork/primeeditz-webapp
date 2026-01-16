@@ -96,15 +96,14 @@ export const reorderSections = adminMutation({
 });
 
 /**
- * Delete a section (soft delete by setting isActive = false)
+ * Delete a section
  */
 export const deleteSection = adminMutation({
   args: {
     sectionId: v.id("quotationSections"),
   },
   handler: async (ctx, args) => {
-    // Soft delete
-    await ctx.db.patch(args.sectionId, { isActive: false });
+    await ctx.db.delete(args.sectionId);
     return null;
   },
 });

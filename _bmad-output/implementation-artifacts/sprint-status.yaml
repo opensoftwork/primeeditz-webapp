@@ -96,13 +96,13 @@ development_status:
   # Brainstorming: analysis/brainstorming-session-2026-01-13-quotation-architecture.md
   # Architecture: Standalone, modular, portable as Convex Component
   # =========================================
-  epic-4: backlog
+  epic-4: in-progress
 
   # Phase A: Foundation (MVP)
   4-1-quotation-sections-configuration: done # Completed: schema, queries, mutations, seed, UI
   4-2-quotation-templates-crud: see-3-8 # Covered by Story 3.8 in Epic 3
-  4-3-create-quotation-standalone: in-progress # Implementation started
-  4-4-quotation-line-items-nested: backlog
+  4-3-create-quotation-standalone: done # Completed: 4-step wizard, line items, terms & conditions
+  4-4-quotation-line-items-nested: backlog # Sub-items display done, CRUD deferred
   4-5-quotation-preview-print: backlog
 
   # Phase B: Client Workflow

@@ -25,7 +25,18 @@ export function QuotationList() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
 
   const quotations = useQuery(api.admin.getAdminQuotations, {
-    status: statusFilter === "all" ? undefined : statusFilter,
+    status:
+      statusFilter === "all"
+        ? undefined
+        : (statusFilter as
+            | "draft"
+            | "approved"
+            | "sent"
+            | "viewed"
+            | "changes_requested"
+            | "rejected"
+            | "expired"
+            | "superseded"),
   });
 
   const filteredQuotations = quotations?.filter((q) => {

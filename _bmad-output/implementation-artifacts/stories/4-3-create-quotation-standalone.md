@@ -1,7 +1,7 @@
 # Story 4-3: Create Quotation (Standalone)
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: in-progress  
+**Status**: done  
 **Complexity**: High (8 points)  
 **Created**: 2026-01-13  
 **Updated**: 2026-01-15  
@@ -105,10 +105,10 @@
 
 ### Terms & Conditions
 
-- [ ] **Given** I am editing a quotation
-- [ ] **When** I scroll to terms section
-- [ ] **Then** I can add/edit terms and conditions
-- [ ] **And** I can load default terms from a template
+- [x] **Given** I am editing a quotation
+- [x] **When** I go to Step 4 (Terms)
+- [x] **Then** I can add/edit terms and conditions
+- [x] **And** I can load default terms from quick templates (Standard, Simple, Detailed)
 
 ### Save & Status
 

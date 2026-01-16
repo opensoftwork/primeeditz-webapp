@@ -1,11 +1,11 @@
 "use client";
 
-import { QuotationBuilder } from "@/components/modules/admin/quotations/builder/quotation-builder";
+import { QuotationDetail } from "@/components/modules/admin/quotations/detail/quotation-detail";
 import { useParams } from "next/navigation";
 
-export default function EditQuotationPage() {
+export default function QuotationDetailPage() {
   const params = useParams();
   const quotationId = params.id as string;
 
-  return <QuotationBuilder quotationId={quotationId} />;
+  return <QuotationDetail quotationId={quotationId} />;
 }

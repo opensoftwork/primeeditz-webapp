@@ -72,7 +72,7 @@ export function Step3LineItems() {
 
   // Register submit trigger
   useEffect(() => {
-    setSubmitTrigger(() => nextStep);
+    setSubmitTrigger(nextStep);
     return () => setSubmitTrigger(null);
   }, [nextStep, setSubmitTrigger]);
 

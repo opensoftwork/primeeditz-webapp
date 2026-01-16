@@ -59,6 +59,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     subtotal,
     grandTotal,
     selectedClient,
+    goToStep,
   } = useQuotationBuilder();
 
   const handlePrimaryAction = () => {
@@ -132,14 +133,16 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
           const StepIcon = [User, Layout, Receipt, CheckCircle2][idx];
           return (
             <div key={step.id} className="flex-1 flex items-center gap-2">
-              <div
+              <button
+                type="button"
+                onClick={() =>
+                  (quotationId || currentStep > step.id) && goToStep(step.id)
+                }
                 className={cn(
-                  "group flex items-center gap-3 transition-all cursor-default",
-                  currentStep === step.id
-                    ? "opacity-100"
-                    : currentStep > step.id
-                    ? "opacity-60"
-                    : "opacity-30"
+                  "group flex items-center gap-3 transition-all text-left",
+                  quotationId || currentStep > step.id
+                    ? "cursor-pointer hover:opacity-100"
+                    : "cursor-default"
                 )}
               >
                 <div
@@ -154,7 +157,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                 >
                   <StepIcon className="h-4 w-4" />
                 </div>
-                <div className="flex flex-col text-left">
+                <div className="flex flex-col">
                   <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/30 leading-none mb-1">
                     Step 0{step.id}
                   </span>
@@ -162,7 +165,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                     {step.label}
                   </span>
                 </div>
-              </div>
+              </button>
               {idx < 3 && <div className="flex-1 h-px bg-white/5 mx-4" />}
             </div>
           );
