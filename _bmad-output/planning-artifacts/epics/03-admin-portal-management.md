@@ -225,3 +225,26 @@ src/app/(protected)
 - **Then** I must see all templates with Name and Folder Count.
 - **And** I can create/edit a template with: Name, Folders (list of folder names like "Ceremony", "Reception", "Candid").
 - **And** templates can be associated with Project Types.
+
+### Story 3.11: Admin-Initiated Project Creation with Client Selection
+
+**As an** Admin or Employee,
+**I want** to create a project request with an optional client selection step,
+**So that** I can handle walk-in clients, phone bookings, referrals, or internal projects without requiring the client to self-register.
+
+**Acceptance Criteria:**
+
+- **Given** I click "INITIATE PROJECT" on `/admin/projects`
+- **When** the project wizard loads
+- **Then** I see a 6-step wizard with **Step 1: Client Selection** as the first step.
+- **And** Step 1 offers three options: Select Existing Client, Create New Client, No Client (Internal).
+- **And** selecting an existing client opens a drawer with searchable client list showing: name, email, company, onboarding status, project count, last activity.
+- **And** creating a new client saves a draft profile (`onboardingComplete: false`) without sending an invite.
+- **And** in Step 2 (Basics), selected client fields are pre-populated and read-only.
+- **And** in Step 6 (Review), client information is displayed prominently at the top.
+
+**Technical Notes:**
+
+- Extends `project-wizard.tsx` with `mode: "client" | "admin"` prop
+- Creates new Step 0 component under `steps/step-0-client-selection/`
+- Full implementation details in `implementation-artifacts/stories/3-11-admin-initiated-project-creation.md`

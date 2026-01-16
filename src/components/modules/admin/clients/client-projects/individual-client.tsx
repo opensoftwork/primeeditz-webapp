@@ -351,141 +351,116 @@ export default function IndividualClient() {
         </Button>
       </motion.div>
 
-      {/* Page Header */}
+      {/* Page Header with Avatar on Left */}
       <motion.div
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-8"
       >
-        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-4">
           CLIENT PROFILE
         </span>
-        <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white mt-2">
-          {client.name}
-        </h1>
-        <p className="text-white/40 text-sm mt-1">
-          Client ID: {client._id.slice(-8).toUpperCase()}
-        </p>
-      </motion.div>
-
-      {/* Stats Grid */}
-     
-      {/* Client Details Card */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-        className="relative p-6 rounded-3xl bg-gradient-to-br from-white/[0.04] to-white/[0.01] border border-white/10 mb-10 overflow-hidden"
-      >
-        {/* Background decoration */}
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full translate-x-32 -translate-y-32" />
-        <div className="absolute bottom-0 left-0 w-48 h-48 bg-blue-500/5 blur-[80px] rounded-full -translate-x-24 translate-y-24" />
-
-        <div className="relative">
-          <div className="flex items-center gap-2 mb-6">
-            <Sparkles className="h-4 w-4 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
-              Client Information
-            </span>
+        
+        <div className="flex items-start gap-4">
+          {/* Left side - Avatar */}
+          <div className="flex-shrink-0">
+            <div className="w-20 h-20 xl:w-20 xl:h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+              <User className="h-10 w-10 xl:h-12 xl:w-12 text-primary" />
+            </div>
           </div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {/* Avatar & Name */}
-            <div className="flex items-start gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center flex-shrink-0">
-                <User className="h-7 w-7 text-primary" />
+          {/* Right side - Client Info */}
+          <div className="flex-1">
+            <div className="flex items-center gap-4">
+              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
+                {client.name}
+              </h1>
+              {/* Status Badge */}
+              {client.onboardingComplete ? (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle2 className="h-3 w-3" />
+                  Onboarded
+                </span>
+              ) : (
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                  <Clock className="h-3 w-3" />
+                  Pending
+                </span>
+              )}
+            </div>
+            <p className="text-white/40 text-sm mt-1">
+              Client ID: {client._id.slice(-8).toUpperCase()}
+            </p>
+          </div>
+        </div>
+
+        {/* Client Details - Aligned to left side */}
+        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6">
+          {/* Email */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+              <Mail className="h-3.5 w-3.5 text-white/40" />
+            </div>
+            <div>
+              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
+                Email
+              </span>
+              <span className="text-sm font-medium text-white/70">
+                {client.email}
+              </span>
+            </div>
+          </div>
+
+          {/* Phone */}
+          {client.phone && (
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Phone className="h-3.5 w-3.5 text-white/40" />
               </div>
               <div>
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                  Full Name
+                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
+                  Phone
                 </span>
-                <div className="text-xl font-black text-white uppercase tracking-tight mt-0.5">
-                  {client.name}
-                </div>
-                <div className="flex items-center gap-1.5 mt-2">
-                  {client.onboardingComplete ? (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <CheckCircle2 className="h-2.5 w-2.5" />
-                      Onboarded
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      <Clock className="h-2.5 w-2.5" />
-                      Pending
-                    </span>
-                  )}
-                </div>
+                <span className="text-sm font-mono text-white/70">
+                  {client.phone}
+                </span>
               </div>
             </div>
+          )}
 
-            {/* Contact Info */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                  <Mail className="h-4 w-4 text-white/40" />
-                </div>
-                <div>
-                  <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block">
-                    Email
-                  </span>
-                  <span className="text-sm font-medium text-white/70">
-                    {client.email}
-                  </span>
-                </div>
+          {/* Company */}
+          {client.company && (
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+                <Building className="h-3.5 w-3.5 text-white/40" />
               </div>
-
-              {client.phone && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                    <Phone className="h-4 w-4 text-white/40" />
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block">
-                      Phone
-                    </span>
-                    <span className="text-sm font-mono text-white/70">
-                      {client.phone}
-                    </span>
-                  </div>
-                </div>
-              )}
+              <div>
+                <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
+                  Company
+                </span>
+                <span className="text-sm font-bold text-white/70 uppercase">
+                  {client.company}
+                </span>
+              </div>
             </div>
+          )}
 
-            {/* Company & Dates */}
-            <div className="space-y-4">
-              {client.company && (
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                    <Building className="h-4 w-4 text-white/40" />
-                  </div>
-                  <div>
-                    <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block">
-                      Company
-                    </span>
-                    <span className="text-sm font-bold text-white/70 uppercase">
-                      {client.company}
-                    </span>
-                  </div>
-                </div>
-              )}
-
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
-                  <Calendar className="h-4 w-4 text-white/40" />
-                </div>
-                <div>
-                  <span className="text-[9px] font-black text-white/30 uppercase tracking-widest block">
-                    Member Since
-                  </span>
-                  <span className="text-sm font-medium text-white/70">
-                    {new Date(client.createdAt).toLocaleDateString("en-GB", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })}
-                  </span>
-                </div>
-              </div>
+          {/* Member Since */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+              <Calendar className="h-3.5 w-3.5 text-white/40" />
+            </div>
+            <div>
+              <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
+                Member Since
+              </span>
+              <span className="text-sm font-medium text-white/70">
+                {new Date(client.createdAt).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                })}
+              </span>
             </div>
           </div>
         </div>
@@ -506,10 +481,7 @@ export default function IndividualClient() {
               All Projects
             </h2>
           </div>
-          <Button className="h-10 px-5 rounded-xl font-black uppercase tracking-widest text-[10px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-primary/20">
-            <FolderKanban className="h-3.5 w-3.5 mr-2" />
-            New Project
-          </Button>
+        
         </div>
 
         {projects.length === 0 ? (
