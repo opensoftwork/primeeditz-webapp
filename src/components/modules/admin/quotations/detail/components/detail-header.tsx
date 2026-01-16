@@ -2,7 +2,15 @@
 
 import { motion } from "motion/react";
 import { format } from "date-fns";
-import { Receipt, Copy, ArrowLeft, Edit, Download, Send } from "lucide-react";
+import {
+  Receipt,
+  Copy,
+  ArrowLeft,
+  Edit,
+  Download,
+  Send,
+  FileText,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -86,14 +94,22 @@ export function DetailHeader({
 
         <Button
           variant="outline"
+          onClick={() => router.push(`/quotations/${quotationId}/preview`)}
+          className="h-10 px-4 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
+        >
+          <FileText className="h-4 w-4 mr-2" />
+          Preview
+        </Button>
+        <Button
+          variant="outline"
           onClick={() => router.push(`/quotations/${quotationId}/edit`)}
-          className="h-10 px-4 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs"
+          className="h-10 px-4 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
         >
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Button>
         <Button
-          onClick={() => toast.info("PDF generation coming soon!")}
+          onClick={() => router.push(`/quotations/${quotationId}/preview`)}
           className="h-10 px-4 rounded-xl font-bold text-xs"
         >
           <Download className="h-4 w-4 mr-2" />

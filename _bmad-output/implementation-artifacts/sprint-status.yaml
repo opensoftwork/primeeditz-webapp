@@ -102,7 +102,7 @@ development_status:
   4-2-quotation-templates-crud: backlog
   4-3-create-quotation-standalone: ready-for-dev
   4-4-quotation-line-items-nested-hierarchy: backlog
-  4-5-quotation-preview-print: backlog
+  4-5-quotation-preview-print: in-progress
   # Phase B: Client Workflow
   4-6-send-quotation-to-client: backlog
   4-7-client-view-quotation: backlog
