@@ -5,7 +5,14 @@
  */
 
 import { v } from 'convex/values'
-import { clientMutation, adminMutation } from '../../lib/customFunctions'
+import { mutation } from '../../_generated/server'
+import { authComponent } from '../../auth'
+import {
+  clientMutation,
+  adminMutation,
+  authenticatedMutation,
+  staffMutation,
+} from '../../lib/customFunctions'
 import { now } from '../../lib/helpers'
 
 // ============================================================================
@@ -50,18 +57,35 @@ async function generateProjectCode(
 }
 
 // ============================================================================
-// Client Mutations
+// Shared Project Mutations (Client & Admin)
 // ============================================================================
 
 /**
  * Create a new draft project.
- * Called when client starts the project request wizard.
+ * Called when client or admin starts the project request wizard.
  */
-export const createDraft = clientMutation({
+export const createDraft = mutation({
   args: {
     projectTypeId: v.optional(v.id('projectTypes')),
+    clientId: v.optional(v.id('profiles')),
   },
   handler: async (ctx, args) => {
+    // 1. Get authenticated user
+    const authUser = await authComponent.getAuthUser(ctx)
+    if (!authUser) {
+      throw new Error('Not authenticated')
+    }
+
+    // 2. Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', authUser._id))
+      .first()
+
+    if (!profile) {
+      throw new Error('Profile not found. Please complete onboarding.')
+    }
+
     const code = await generateProjectCode(ctx.db)
 
     // If no projectTypeId provided, we'll need a default or first one
@@ -72,7 +96,7 @@ export const createDraft = clientMutation({
         .query('projectTypes')
         .filter((q) => q.eq(q.field('isActive'), true))
         .first()
-      
+
       if (defaultType) {
         projectTypeId = defaultType._id
       } else {
@@ -80,11 +104,22 @@ export const createDraft = clientMutation({
       }
     }
 
+    // Determine clientId:
+    // 1. If provided (admin mode), use it
+    // 2. If not provided and caller is client, use caller's profileId
+    // 3. Otherwise null (internal project)
+    let clientId = args.clientId
+    if (!clientId && profile.role === 'client') {
+      clientId = profile._id
+    }
+
     const projectId = await ctx.db.insert('projects', {
       code,
       projectTypeId,
-      clientId: ctx.profile._id,
-      source: 'client_request',
+      clientId,
+      source: (profile.role === 'admin' || profile.role === 'employee')
+        ? 'admin_init'
+        : 'client_request',
       status: 'draft',
       lastStep: 1,
       storageUsed: 0,
@@ -95,13 +130,19 @@ export const createDraft = clientMutation({
   },
 })
 
+// I need to make these accessible to both clients and admins. 
+// I'll define a 'staffOrClientMutation' or just use authenticatedMutation and check.
+// Looking at customFunctions.ts, there isn't a staffOrClientMutation.
+// I'll use authenticatedMutation and manually verify projects.
+
 /**
  * Update a draft project.
  * Used by wizard to save progress on each step.
  */
-export const updateDraft = clientMutation({
+export const updateDraft = authenticatedMutation({
   args: {
     projectId: v.id('projects'),
+    clientId: v.optional(v.id('profiles')),
     // Step 1: Basic Info
     projectTypeId: v.optional(v.id('projectTypes')),
     endClientName: v.optional(v.string()),
@@ -130,7 +171,15 @@ export const updateDraft = clientMutation({
     lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { projectId, ...updates } = args
+    const { projectId, clientId: newClientId, ...updates } = args
+
+    // Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
+      .first()
+
+    if (!profile) throw new Error("Profile not found")
 
     // Get and verify project
     const project = await ctx.db.get(projectId)
@@ -138,9 +187,13 @@ export const updateDraft = clientMutation({
       throw new Error('Project not found')
     }
 
-    // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
-      throw new Error('Access denied')
+    // Verify ownership/permissions
+    // Admin can update any draft
+    // Client can only update their own draft
+    if (profile.role !== 'admin' && profile.role !== 'employee') {
+      if (project.clientId !== profile._id) {
+        throw new Error('Access denied')
+      }
     }
 
     // Only allow updates to drafts
@@ -156,6 +209,11 @@ export const updateDraft = clientMutation({
       }
     }
 
+    // Handle clientId update (only for admins)
+    if (newClientId !== undefined && profile.role === 'admin') {
+      filteredUpdates.clientId = newClientId
+    }
+
     await ctx.db.patch(projectId, filteredUpdates)
 
     return { success: true }
@@ -166,20 +224,30 @@ export const updateDraft = clientMutation({
  * Submit a draft project for review.
  * Changes status from 'draft' to 'pending_review'.
  */
-export const submitProject = clientMutation({
+export const submitProject = authenticatedMutation({
   args: {
     projectId: v.id('projects'),
   },
   handler: async (ctx, args) => {
+    // Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
+      .first()
+
+    if (!profile) throw new Error("Profile not found")
+
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
       throw new Error('Project not found')
     }
 
-    // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
-      throw new Error('Access denied')
+    // Verify ownership/permissions
+    if (profile.role !== 'admin' && profile.role !== 'employee') {
+      if (project.clientId !== profile._id) {
+        throw new Error('Access denied')
+      }
     }
 
     // Only drafts can be submitted
@@ -202,7 +270,7 @@ export const submitProject = clientMutation({
       projectId: args.projectId,
       previousStatus: 'draft',
       newStatus: 'pending_review',
-      changedBy: ctx.profile._id,
+      changedBy: profile._id,
       changedAt: now(),
     })
 
@@ -212,13 +280,20 @@ export const submitProject = clientMutation({
 
 /**
  * Delete a draft project.
- * Only drafts can be deleted by clients.
  */
-export const deleteDraft = clientMutation({
+export const deleteDraft = authenticatedMutation({
   args: {
     projectId: v.id('projects'),
   },
   handler: async (ctx, args) => {
+    // Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
+      .first()
+
+    if (!profile) throw new Error("Profile not found")
+
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
@@ -226,8 +301,10 @@ export const deleteDraft = clientMutation({
     }
 
     // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
-      throw new Error('Access denied')
+    if (profile.role !== 'admin' && profile.role !== 'employee') {
+      if (project.clientId !== profile._id) {
+        throw new Error('Access denied')
+      }
     }
 
     // Only drafts can be deleted

@@ -90,7 +90,7 @@ development_status:
   3-8-quotation-templates-management: ready-for-dev
   3-9-storage-pricing-tiers-configuration: backlog
   3-10-folder-templates-configuration: backlog
-  3-11-admin-initiated-project-creation: ready-for-dev
+  3-11-admin-initiated-project-creation: done
   epic-3-retrospective: optional
 
   # ============================================================================

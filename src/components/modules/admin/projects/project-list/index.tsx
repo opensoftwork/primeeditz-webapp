@@ -177,9 +177,11 @@ export default function ProjectList() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
-            INITIATE PROJECT
-          </Button>
+          <Link href="/projects/new">
+            <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+              INITIATE PROJECT
+            </Button>
+          </Link>
         </motion.div>
       </div>
 
@@ -205,12 +207,12 @@ export default function ProjectList() {
             },
             ...(typeOptions.length > 0
               ? [
-                  {
-                    column: "projectTypeName",
-                    title: "Type",
-                    options: typeOptions,
-                  },
-                ]
+                {
+                  column: "projectTypeName",
+                  title: "Type",
+                  options: typeOptions,
+                },
+              ]
               : []),
           ],
         }}

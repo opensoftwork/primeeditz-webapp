@@ -3,6 +3,7 @@
  *
  * Provides form state management across wizard steps using React Context.
  * Persists form data to Convex draft on step changes.
+ * Supports both client mode (5 steps) and admin mode (6 steps).
  */
 
 "use client";
@@ -22,9 +23,14 @@ import type { Id } from "@convex/_generated/dataModel";
 import {
   type WizardFormData,
   type WizardStepId,
+  type WizardMode,
   type ReferenceFile,
+  type SelectedClientData,
   INITIAL_FORM_DATA,
   WIZARD_STEPS,
+  getWizardSteps,
+  getFirstStepId,
+  getStepCount,
 } from "./types";
 
 // ============================================================================
@@ -33,6 +39,7 @@ import {
 
 interface WizardContextValue {
   // State
+  mode: WizardMode;
   projectId: Id<"projects"> | null;
   projectCode: string | null;
   currentStep: WizardStepId;
@@ -44,6 +51,8 @@ interface WizardContextValue {
   error: string | null;
   submitTrigger: (() => void) | null;
   projectTypes: any[] | undefined;
+  stepCount: number;
+  wizardSteps: readonly { id: number; title: string; description: string }[];
 
   // Actions
   setFormData: <K extends keyof WizardFormData>(
@@ -60,6 +69,7 @@ interface WizardContextValue {
   cancelWizard: () => Promise<void>;
   resetWizard: () => void;
   setSubmitTrigger: (fn: (() => void) | null) => void;
+  setClientData: (clientData: SelectedClientData | null) => void;
 }
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -82,6 +92,7 @@ export function useWizardForm() {
 
 interface WizardFormProviderProps {
   children: React.ReactNode;
+  mode?: WizardMode;
   initialProjectId?: Id<"projects">;
   initialProjectCode?: string;
   initialStep?: WizardStepId;
@@ -90,11 +101,17 @@ interface WizardFormProviderProps {
 
 export function WizardFormProvider({
   children,
+  mode = "client",
   initialProjectId,
   initialProjectCode,
-  initialStep = 1,
+  initialStep,
   initialFormData,
 }: WizardFormProviderProps) {
+  // Compute mode-based values
+  const firstStepId = getFirstStepId(mode);
+  const stepCount = getStepCount(mode);
+  const wizardSteps = getWizardSteps(mode);
+
   // State
   const [projectId, setProjectId] = useState<Id<"projects"> | null>(
     initialProjectId ?? null
@@ -102,7 +119,9 @@ export function WizardFormProvider({
   const [projectCode, setProjectCode] = useState<string | null>(
     initialProjectCode ?? null
   );
-  const [currentStep, setCurrentStep] = useState<WizardStepId>(initialStep);
+  const [currentStep, setCurrentStep] = useState<WizardStepId>(
+    initialStep ?? firstStepId
+  );
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
     null
   );
@@ -130,7 +149,8 @@ export function WizardFormProvider({
   );
 
   const existingDraft = useQuery(
-    api.functions.projects.queries.getMyActiveDraft
+    api.functions.projects.queries.getMyActiveDraft,
+    mode === "admin" ? "skip" : {}
   );
 
   // Fetch all active project types for logic and selection
@@ -141,7 +161,8 @@ export function WizardFormProvider({
   // Create or Resume draft on first load
   useEffect(() => {
     // Wait for existingDraft query to return (undefined means loading)
-    if (existingDraft === undefined) return;
+    // In admin mode, we skip this query so we don't wait for it
+    if (mode !== "admin" && existingDraft === undefined) return;
     if (projectId) return;
 
     const initDraft = async () => {
@@ -223,6 +244,7 @@ export function WizardFormProvider({
       try {
         await updateDraft({
           projectId,
+          clientId: formData.step0.clientId ?? undefined,
           // Step 1
           projectTypeId: formData.step1.projectTypeId ?? undefined,
           endClientName: formData.step1.endClientName || undefined,
@@ -271,11 +293,11 @@ export function WizardFormProvider({
   );
 
   const nextStep = useCallback(async () => {
-    const currentIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep);
+    const currentIndex = wizardSteps.findIndex((s) => s.id === currentStep);
     const nextIndex = currentIndex + 1;
 
-    if (nextIndex < WIZARD_STEPS.length) {
-      let nextStepId = WIZARD_STEPS[nextIndex].id;
+    if (nextIndex < wizardSteps.length) {
+      let nextStepId = wizardSteps[nextIndex].id as WizardStepId;
 
       // Logic: Skip Step 2 if project type has no custom fields
       if (nextStepId === 2) {
@@ -291,14 +313,14 @@ export function WizardFormProvider({
 
       await goToStep(nextStepId);
     }
-  }, [currentStep, goToStep, projectTypes, formData.step1.projectTypeId]);
+  }, [currentStep, goToStep, projectTypes, formData.step1.projectTypeId, wizardSteps]);
 
   const prevStep = useCallback(async () => {
-    const prevIndex = WIZARD_STEPS.findIndex((s) => s.id === currentStep) - 1;
+    const prevIndex = wizardSteps.findIndex((s) => s.id === currentStep) - 1;
     if (prevIndex >= 0) {
-      await goToStep(WIZARD_STEPS[prevIndex].id);
+      await goToStep(wizardSteps[prevIndex].id as WizardStepId);
     }
-  }, [currentStep, goToStep]);
+  }, [currentStep, goToStep, wizardSteps]);
 
   // Submit project
   const submitProject = useCallback(async (): Promise<boolean> => {
@@ -385,17 +407,15 @@ export function WizardFormProvider({
           toast.warning(
             allFailed
               ? "Files could not be uploaded"
-              : `${failedUploads.length} file${
-                  failedUploads.length > 1 ? "s" : ""
-                } failed to upload`,
+              : `${failedUploads.length} file${failedUploads.length > 1 ? "s" : ""
+              } failed to upload`,
             {
               description: allFailed
                 ? "Your project will be created without files. You can upload them later from the project details."
-                : `Could not upload: ${failedUploads.slice(0, 3).join(", ")}${
-                    failedUploads.length > 3
-                      ? ` and ${failedUploads.length - 3} more`
-                      : ""
-                  }. You can upload missing files later.`,
+                : `Could not upload: ${failedUploads.slice(0, 3).join(", ")}${failedUploads.length > 3
+                  ? ` and ${failedUploads.length - 3} more`
+                  : ""
+                }. You can upload missing files later.`,
               duration: 6000,
             }
           );
@@ -464,21 +484,36 @@ export function WizardFormProvider({
   const resetWizard = useCallback(() => {
     setProjectId(null);
     setProjectCode(null);
-    setCurrentStep(1);
+    setCurrentStep(firstStepId);
     setFormDataState(INITIAL_FORM_DATA);
     setIsDirty(false);
     setIsReviewing(false);
     setIsVaultDrawerOpen(false);
     setError(null);
-  }, []);
+  }, [firstStepId]);
 
   const setSubmitTrigger = useCallback((fn: (() => void) | null) => {
     setSubmitTriggerState(() => fn);
   }, []);
 
+  // Set client data (for admin mode client selection)
+  const setClientData = useCallback((clientData: SelectedClientData | null) => {
+    setFormDataState((prev) => ({
+      ...prev,
+      step0: {
+        ...prev.step0,
+        clientId: clientData?._id ?? null,
+        clientData,
+        selectionMode: clientData ? 'existing' : prev.step0.selectionMode,
+      },
+    }));
+    setIsDirty(true);
+  }, []);
+
   return (
     <WizardContext.Provider
       value={{
+        mode,
         projectId,
         projectCode,
         currentStep,
@@ -488,6 +523,8 @@ export function WizardFormProvider({
         isVaultDrawerOpen,
         isLoading,
         error,
+        stepCount,
+        wizardSteps,
         setFormData,
         setReviewing: setIsReviewing,
         setVaultDrawerOpen: setIsVaultDrawerOpen,
@@ -501,6 +538,7 @@ export function WizardFormProvider({
         submitTrigger,
         setSubmitTrigger,
         projectTypes,
+        setClientData,
       }}
     >
       {children}

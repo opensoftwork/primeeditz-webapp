@@ -1,7 +1,8 @@
 /**
  * Project Wizard Container
  *
- * Main container for the 5-step project request wizard.
+ * Main container for the project request wizard.
+ * Supports both client mode (5 steps) and admin mode (6 steps).
  * Uses the established pattern with premium UX animations.
  */
 
@@ -24,6 +25,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { WizardFormProvider, useWizardForm } from "./wizard-form-context";
 import { StepNavigation, type FormStep } from "./step-navigation";
+import { WizardStep0 } from "./steps/step-0-client-selection";
 import { WizardStep1 } from "./steps/step-1-basics";
 import { WizardStep2 } from "./steps/step-2-details";
 import { WizardStep3 } from "./steps/step-3-files";
@@ -33,9 +35,10 @@ import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { ArrowLeft, ArrowRight, Check, Loader2, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import type { WizardMode } from "./types";
 
-// Define the wizard steps
-const WIZARD_STEPS: FormStep[] = [
+// Step definitions for UI display (client mode - 5 steps)
+const CLIENT_FORM_STEPS: FormStep[] = [
   { id: "basic", title: "Basics" },
   { id: "details", title: "Details" },
   { id: "files", title: "Files", isOptional: true },
@@ -43,9 +46,23 @@ const WIZARD_STEPS: FormStep[] = [
   { id: "review", title: "Review" },
 ];
 
-export function ProjectWizard() {
+// Step definitions for UI display (admin mode - 6 steps)
+const ADMIN_FORM_STEPS: FormStep[] = [
+  { id: "client", title: "Client" },
+  { id: "basic", title: "Basics" },
+  { id: "details", title: "Details" },
+  { id: "files", title: "Files", isOptional: true },
+  { id: "description", title: "Description" },
+  { id: "review", title: "Review" },
+];
+
+interface ProjectWizardProps {
+  mode?: WizardMode;
+}
+
+export function ProjectWizard({ mode = "client" }: ProjectWizardProps) {
   return (
-    <WizardFormProvider>
+    <WizardFormProvider mode={mode}>
       <ProjectWizardContent />
     </WizardFormProvider>
   );
@@ -54,7 +71,9 @@ export function ProjectWizard() {
 function ProjectWizardContent() {
   const router = useRouter();
   const {
+    mode,
     currentStep,
+    formData,
     projectCode,
     isDirty,
     isLoading,
@@ -65,7 +84,13 @@ function ProjectWizardContent() {
     cancelWizard,
     submitTrigger,
     isReviewing,
+    stepCount,
   } = useWizardForm();
+
+  // Get the appropriate form steps based on mode
+  const formSteps = mode === "admin" ? ADMIN_FORM_STEPS : CLIENT_FORM_STEPS;
+  const firstStepId = mode === "admin" ? 0 : 1;
+  const lastStepId = 5; // Review is always step 5
 
   // Debounce the loading state and ensure a minimum display time to prevent flicker
   const [showSyncOverlay, setShowSyncOverlay] = useState(false);
@@ -102,8 +127,10 @@ function ProjectWizardContent() {
   }, [isLoading, showSyncOverlay]);
 
   // Track completed steps based on current progress
+  // For admin mode (0-5), completed = steps before current
+  // For client mode (1-5), completed = steps before current
   const completedSteps = new Set(
-    Array.from({ length: currentStep }, (_, i) => i)
+    Array.from({ length: currentStep - firstStepId }, (_, i) => i)
   );
 
   // Unsaved changes warning
@@ -125,10 +152,17 @@ function ProjectWizardContent() {
   };
 
   const handleStepClick = (stepIndex: number) => {
-    if (stepIndex < currentStep) {
-      goToStep((stepIndex + 1) as 1 | 2 | 3 | 4 | 5);
+    // stepIndex is 0-based UI index
+    // For admin mode: step 0 = index 0, step 1 = index 1, etc.
+    // For client mode: step 1 = index 0, step 2 = index 1, etc.
+    const targetStepId = firstStepId + stepIndex;
+    if (targetStepId < currentStep) {
+      goToStep(targetStepId as 0 | 1 | 2 | 3 | 4 | 5);
     }
   };
+
+  // Calculate current step index for UI (0-based)
+  const currentStepIndex = currentStep - firstStepId;
 
   return (
     <div className="dark flex flex-col h-screen bg-background overflow-hidden text-foreground selection:bg-primary/20">
@@ -205,8 +239,8 @@ function ProjectWizardContent() {
         {/* Step Navigation Sidebar */}
         <aside className="w-64 shrink-0 border-r bg-[#09090b] p-6 flex flex-col pt-10">
           <StepNavigation
-            steps={WIZARD_STEPS}
-            currentStep={currentStep - 1}
+            steps={formSteps}
+            currentStep={currentStepIndex}
             completedSteps={completedSteps}
             onStepClick={handleStepClick}
           />
@@ -255,6 +289,18 @@ function ProjectWizardContent() {
             {/* Step Form Container */}
             <div className="relative w-full">
               <AnimatePresence mode="wait">
+                {/* Step 0: Client Selection (Admin mode only) */}
+                {currentStep === 0 && mode === "admin" && (
+                  <motion.div
+                    key="step0"
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                  >
+                    <WizardStep0 />
+                  </motion.div>
+                )}
                 {currentStep === 1 && (
                   <motion.div
                     key="step1"
@@ -320,10 +366,10 @@ function ProjectWizardContent() {
               type="button"
               variant="outline"
               onClick={prevStep}
-              disabled={isLoading || currentStep === 1}
+              disabled={isLoading || currentStep === firstStepId}
               className={cn(
                 "h-12 px-8 rounded-2xl font-black uppercase tracking-widest text-[11px] border-white/10 hover:bg-white/5 transition-all duration-300 gap-3",
-                currentStep === 1 && "opacity-0 pointer-events-none"
+                currentStep === firstStepId && "opacity-0 pointer-events-none"
               )}
             >
               <ArrowLeft className="h-4 w-4" /> Go Back
@@ -331,7 +377,7 @@ function ProjectWizardContent() {
 
             <div className="flex items-center gap-4">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mr-4">
-                Step 0{currentStep} / 05
+                Step {String(currentStepIndex + 1).padStart(2, "0")} / {String(stepCount).padStart(2, "0")}
               </span>
               <Button
                 type="button"
@@ -342,7 +388,13 @@ function ProjectWizardContent() {
                     nextStep();
                   }
                 }}
-                disabled={isLoading}
+                disabled={
+                  isLoading ||
+                  (currentStep === 0 &&
+                    (!formData.step0.selectionMode ||
+                      (formData.step0.selectionMode !== "none" &&
+                        !formData.step0.clientData)))
+                }
                 className={cn(
                   "h-12 px-10 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] shadow-2xl transition-all duration-500 group min-w-[180px] gap-3",
                   "bg-white text-black hover:bg-white/90 shadow-white/10"
@@ -355,10 +407,10 @@ function ProjectWizardContent() {
                     {currentStep === 5
                       ? "Submit Project"
                       : isReviewing
-                      ? "Save & Return"
-                      : currentStep === 4
-                      ? "Review Order"
-                      : "Next Step"}
+                        ? "Save & Return"
+                        : currentStep === 4
+                          ? "Review Order"
+                          : "Next Step"}
                     {currentStep === 5 ? (
                       <Check className="h-4 w-4 group-hover:scale-125 transition-transform" />
                     ) : (
