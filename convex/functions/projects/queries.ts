@@ -6,6 +6,7 @@
  */
 
 import { v } from 'convex/values'
+import { query } from '../../_generated/server'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
 import type { Doc } from '../../_generated/dataModel'
@@ -154,6 +155,42 @@ export const getMyProjectsWithType = clientQuery({
 // ============================================================================
 
 /**
+ * Get the current active draft project for admin.
+ * Used to enforce "one draft at a time" rule for admin-initiated projects.
+ */
+export const getAdminActiveDraft = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    // Find any draft project created by admin (source: admin_init)
+    const draft = await ctx.db
+      .query('projects')
+      .filter((q) =>
+        q.and(
+          q.eq(q.field('status'), 'draft'),
+          q.eq(q.field('source'), 'admin_init')
+        )
+      )
+      .first()
+
+    if (!draft) {
+      return null
+    }
+
+    // Enrich with project type name
+    const projectType = await ctx.db.get(draft.projectTypeId)
+
+    // Get client info if exists
+    const client = draft.clientId ? await ctx.db.get(draft.clientId) : null
+
+    return {
+      ...draft,
+      projectTypeName: projectType?.name ?? 'Unknown',
+      clientName: client?.name ?? null,
+    }
+  },
+})
+
+/**
  * Get all projects (admin view).
  */
 export const getAllProjects = adminQuery({
@@ -227,5 +264,20 @@ export const getPendingProjects = adminQuery({
     )
 
     return enriched
+  },
+})
+
+// ============================================================================
+// Internal Queries
+// ============================================================================
+
+/**
+ * Get a project by ID without role-based access checks.
+ * FOR INTERNAL USE BY ACTIONS ONLY.
+ */
+export const internalGetProject = query({
+  args: { projectId: v.id('projects') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.projectId)
   },
 })

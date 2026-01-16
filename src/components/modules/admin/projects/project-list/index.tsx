@@ -2,17 +2,29 @@
 
 import { api } from "@convex/_generated/api";
 import type { ColumnDef } from "@tanstack/react-table";
-import { useQuery } from "convex/react";
-import { Calendar, Eye, Hash, User } from "lucide-react";
+import { useMutation, useQuery } from "convex/react";
+import { AlertTriangle, Calendar, Eye, FileEdit, Hash, Loader2, Trash2, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
 import { columns } from "./columns";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
+import { toast } from "sonner";
 
 // ============================================================================
 // Project Card Component (for card view)
@@ -86,17 +98,97 @@ function ProjectCard({ project }: { project: AdminProject }) {
 }
 
 // ============================================================================
+// Draft Banner Component
+// ============================================================================
+
+function DraftBanner({
+  draft,
+  onResume,
+  onDiscard,
+  isDiscarding,
+}: {
+  draft: {
+    _id: string;
+    code: string;
+    clientName?: string | null;
+    eventName?: string;
+  };
+  onResume: () => void;
+  onDiscard: () => void;
+  isDiscarding: boolean;
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="mb-8 p-5 rounded-2xl bg-amber-500/5 border border-amber-500/20 backdrop-blur-sm"
+    >
+      <div className="flex items-start gap-4">
+        <div className="shrink-0 p-3 rounded-xl bg-amber-500/10 border border-amber-500/20">
+          <AlertTriangle className="h-5 w-5 text-amber-500" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-sm font-black uppercase tracking-widest text-amber-500 mb-1">
+            Draft Project in Progress
+          </h3>
+          <p className="text-xs text-white/60 leading-relaxed mb-4">
+            You have an incomplete project draft{" "}
+            <span className="font-mono font-bold text-primary">{draft.code}</span>
+            {draft.clientName && (
+              <> for client <span className="font-bold text-white/80">{draft.clientName}</span></>
+            )}
+            {draft.eventName && (
+              <> ({draft.eventName})</>
+            )}
+            . Complete or discard it before creating a new project.
+          </p>
+          <div className="flex items-center gap-3">
+            <Button
+              onClick={onResume}
+              className="h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] bg-primary text-primary-foreground hover:bg-primary/90 gap-2"
+            >
+              <FileEdit className="h-3.5 w-3.5" />
+              Resume Draft
+            </Button>
+            <Button
+              onClick={onDiscard}
+              disabled={isDiscarding}
+              variant="outline"
+              className="h-10 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] border-destructive/30 text-destructive hover:bg-destructive/10 hover:border-destructive/50 gap-2"
+            >
+              {isDiscarding ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : (
+                <Trash2 className="h-3.5 w-3.5" />
+              )}
+              Discard Draft
+            </Button>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+// ============================================================================
 // Main Component
 // ============================================================================
 
 export default function ProjectList() {
+  const router = useRouter();
   const [pageSize, setPageSize] = useState(15);
   const [statusFilter, setStatusFilter] = useState<
     "draft" | "pending_review" | "active" | "in_progress" | "completed" | "archived" | undefined
   >(undefined);
   const [typeFilter, setTypeFilter] = useState<any>(undefined);
+  const [showDiscardDialog, setShowDiscardDialog] = useState(false);
+  const [isDiscarding, setIsDiscarding] = useState(false);
 
   const projectTypes = useQuery(api.admin.getProjectTypes);
+
+  // Query for existing admin draft
+  const existingDraft = useQuery(api.functions.projects.queries.getAdminActiveDraft);
+  const deleteDraftMutation = useMutation(api.functions.projects.mutations.deleteDraft);
 
   const query = useSimplePaginatedQuery(
     api.admin.getAdminProjectsPaginated,
@@ -134,6 +226,37 @@ export default function ProjectList() {
       value: t.name,
     }));
   }, [projectTypes]);
+
+  const handleResumeDraft = () => {
+    if (existingDraft) {
+      router.push("/projects/new");
+    }
+  };
+
+  const handleDiscardDraft = async () => {
+    if (!existingDraft) return;
+
+    setIsDiscarding(true);
+    try {
+      await deleteDraftMutation({ projectId: existingDraft._id as any });
+      toast.success("Draft discarded successfully");
+      setShowDiscardDialog(false);
+    } catch (error) {
+      toast.error("Failed to discard draft");
+      console.error("Failed to discard draft:", error);
+    } finally {
+      setIsDiscarding(false);
+    }
+  };
+
+  const handleInitiateProject = () => {
+    if (existingDraft) {
+      // If there's a draft, resume it instead
+      router.push("/projects/new");
+    } else {
+      router.push("/projects/new");
+    }
+  };
 
   if (query.status === "loading" && !projects.length) {
     return (
@@ -177,13 +300,34 @@ export default function ProjectList() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
         >
-          <Link href="/projects/new">
-            <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+          {existingDraft ? (
+            <Button
+              onClick={handleResumeDraft}
+              className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-amber-500 text-amber-950 hover:bg-amber-400 hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-amber-500/20 gap-2"
+            >
+              <FileEdit className="h-4 w-4" />
+              RESUME DRAFT
+            </Button>
+          ) : (
+            <Button
+              onClick={handleInitiateProject}
+              className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
+            >
               INITIATE PROJECT
             </Button>
-          </Link>
+          )}
         </motion.div>
       </div>
+
+      {/* Draft Banner - Show when there's an existing draft */}
+      {existingDraft && (
+        <DraftBanner
+          draft={existingDraft}
+          onResume={handleResumeDraft}
+          onDiscard={() => setShowDiscardDialog(true)}
+          isDiscarding={isDiscarding}
+        />
+      )}
 
       <DataTable
         columns={columns}
@@ -230,6 +374,38 @@ export default function ProjectList() {
           pageSize,
         }}
       />
+
+      {/* Discard Draft Confirmation Dialog */}
+      <AlertDialog open={showDiscardDialog} onOpenChange={setShowDiscardDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Discard Draft Project?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete the draft project{" "}
+              <span className="font-mono font-bold text-primary">{existingDraft?.code}</span>.
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDiscarding}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDiscardDraft}
+              disabled={isDiscarding}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDiscarding ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Discarding...
+                </>
+              ) : (
+                "Discard Draft"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
+

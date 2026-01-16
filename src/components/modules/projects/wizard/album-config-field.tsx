@@ -245,7 +245,14 @@ export function AlbumConfigField({
                     max={max}
                     className="w-16 bg-transparent border-none p-0 focus:ring-0 text-3xl font-black tracking-tighter text-foreground group-hover:text-primary transition-colors [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                   />
-                  <span className="text-[10px] font-black uppercase text-muted-foreground/20 tracking-widest group-hover:text-primary/40 transition-colors">
+                  <span
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-widest transition-colors",
+                      localSheets[index]
+                        ? "text-primary/70"
+                        : "text-white/20 group-hover:text-white/50"
+                    )}
+                  >
                     Sheets
                   </span>
                 </div>

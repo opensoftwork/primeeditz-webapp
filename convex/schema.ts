@@ -166,6 +166,9 @@ export default defineSchema({
     storageUsed: v.number(), // in bytes, default 0
     // Assignment
     assignedEmployeeId: v.optional(v.id('profiles')),
+    // Archive tracking
+    archivedAt: v.optional(v.number()),
+    archivedBy: v.optional(v.id('profiles')),
     // Timestamp (uses _creationTime for created)
     updatedAt: v.number(),
   })

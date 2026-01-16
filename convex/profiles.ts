@@ -83,3 +83,10 @@ export const getProfileByUserId = query({
       .first();
   },
 });
+// Helper for actions to lookup profile by ID
+export const getProfileById = query({
+  args: { profileId: v.id("profiles") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.profileId);
+  },
+});

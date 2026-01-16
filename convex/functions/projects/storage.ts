@@ -47,17 +47,14 @@ export const generateUploadUrl = action({
   handler: async (ctx, args): Promise<{ uploadUrl: string; storageKey: string }> => {
     // 1. Get current user's profile
     const profile = await ctx.runQuery(api.profiles.getMyProfile)
-    
+
     if (!profile) {
       throw new Error('Not authenticated')
     }
 
-    if (profile.role !== 'client') {
-      throw new Error('Access denied')
-    }
-
-    // 2. Get project and verify ownership
-    const project = await ctx.runQuery(api.functions.projects.queries.getProject, {
+    // 2. Get project and verify access
+    // Use internalGetProject to avoid role-restriction wrappers on the query itself
+    const project = await ctx.runQuery(api.functions.projects.queries.internalGetProject, {
       projectId: args.projectId,
     })
 
@@ -65,12 +62,34 @@ export const generateUploadUrl = action({
       throw new Error('Project not found')
     }
 
-    if (project.clientId !== profile._id) {
-      throw new Error('Access denied')
+    // Role-based access control
+    if (profile.role === 'client') {
+      // Clients can only upload to their own projects
+      if (project.clientId !== profile._id) {
+        throw new Error('Access denied: You do not own this project')
+      }
+    } else if (profile.role !== 'admin' && profile.role !== 'employee') {
+      // Only staff and clients can upload (rejects unknown roles)
+      throw new Error('Access denied: Insufficient permissions')
     }
 
     // 3. Prepare the storage key
-    const clientName: string = profile.name.replace(/\s+/g, '_').toLowerCase()
+    // We want the folder structure to be [clientName]/[projectCode]/[fileName]
+    // If uploader is admin/employee, we should still use the project's client name if available
+    let clientFolderName = 'internal'
+
+    if (project.clientId) {
+      const projectClient = await ctx.runQuery(api.profiles.getProfileById, {
+        profileId: project.clientId
+      })
+      if (projectClient) {
+        clientFolderName = projectClient.name
+      }
+    } else if (profile.role === 'client') {
+      clientFolderName = profile.name
+    }
+
+    const clientName: string = clientFolderName.replace(/\s+/g, '_').toLowerCase()
     const projectCode: string = project.code.toLowerCase()
     const sanitizedFileName: string = args.fileName.replace(/\s+/g, '_')
     const storageKey: string = `${clientName}/${projectCode}/${sanitizedFileName}`
