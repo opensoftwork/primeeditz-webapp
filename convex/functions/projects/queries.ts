@@ -6,6 +6,7 @@
  */
 
 import { v } from 'convex/values'
+import { query } from '../../_generated/server'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
 import type { Doc } from '../../_generated/dataModel'
@@ -227,5 +228,20 @@ export const getPendingProjects = adminQuery({
     )
 
     return enriched
+  },
+})
+
+// ============================================================================
+// Internal Queries
+// ============================================================================
+
+/**
+ * Get a project by ID without role-based access checks.
+ * FOR INTERNAL USE BY ACTIONS ONLY.
+ */
+export const internalGetProject = query({
+  args: { projectId: v.id('projects') },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.projectId)
   },
 })

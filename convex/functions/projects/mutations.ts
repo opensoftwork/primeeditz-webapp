@@ -392,3 +392,150 @@ export const assignEmployee = adminMutation({
     return { success: true }
   },
 })
+
+/**
+ * Archive a project (admin only).
+ * Sets the project status to 'archived' - data is preserved but not accessible.
+ */
+export const archiveProject = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    // Cannot archive already archived projects
+    if (project.status === 'archived') {
+      throw new Error('Project is already archived')
+    }
+
+    const previousStatus = project.status
+
+    await ctx.db.patch(args.projectId, {
+      status: 'archived',
+      archivedAt: now(),
+      archivedBy: ctx.profile._id,
+      updatedAt: now(),
+    })
+
+    // Record status change
+    await ctx.db.insert('statusHistory', {
+      projectId: args.projectId,
+      previousStatus,
+      newStatus: 'archived',
+      changedBy: ctx.profile._id,
+      changedAt: now(),
+    })
+
+    return { success: true }
+  },
+})
+
+/**
+ * Unarchive a project (admin only).
+ * Restores an archived project to 'active' status.
+ */
+export const unarchiveProject = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    // Can only unarchive archived projects
+    if (project.status !== 'archived') {
+      throw new Error('Project is not archived')
+    }
+
+    await ctx.db.patch(args.projectId, {
+      status: 'active',
+      archivedAt: undefined,
+      archivedBy: undefined,
+      updatedAt: now(),
+    })
+
+    // Record status change
+    await ctx.db.insert('statusHistory', {
+      projectId: args.projectId,
+      previousStatus: 'archived',
+      newStatus: 'active',
+      changedBy: ctx.profile._id,
+      changedAt: now(),
+    })
+
+    return { success: true }
+  },
+})
+
+/**
+ * Permanently delete a project (admin only).
+ * This removes the project and all related data.
+ */
+export const deleteProject = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    // Delete related data in order (children first)
+
+    // 1. Delete assets (belongs to folders and projects)
+    const assets = await ctx.db
+      .query('assets')
+      .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
+      .collect()
+
+    for (const asset of assets) {
+      await ctx.db.delete(asset._id)
+    }
+
+    // 2. Delete folders
+    const folders = await ctx.db
+      .query('folders')
+      .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
+      .collect()
+
+    for (const folder of folders) {
+      await ctx.db.delete(folder._id)
+    }
+
+    // 3. Delete deliverables
+    const deliverables = await ctx.db
+      .query('deliverables')
+      .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
+      .collect()
+
+    for (const deliverable of deliverables) {
+      await ctx.db.delete(deliverable._id)
+    }
+
+    // 4. Delete status history
+    const statusHistory = await ctx.db
+      .query('statusHistory')
+      .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
+      .collect()
+
+    for (const record of statusHistory) {
+      await ctx.db.delete(record._id)
+    }
+
+    // 5. Delete the project itself
+    await ctx.db.delete(args.projectId)
+
+    return { success: true }
+  },
+})
+

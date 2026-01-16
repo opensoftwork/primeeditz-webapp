@@ -1,12 +1,11 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Calendar, Eye, Hash, Pencil, Trash2, User } from "lucide-react";
+import { Calendar, Hash, User } from "lucide-react";
 import {
   DataTableColumnHeader,
-  DataTableRowActions,
-  type RowAction,
 } from "@/components/shared/data-table";
+import { ProjectActions } from "./project-actions";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
 
@@ -108,32 +107,8 @@ export const columns: ColumnDef<AdminProject>[] = [
     id: "actions",
     cell: ({ row }) => {
       const project = row.original;
-
-      const actions: RowAction<AdminProject>[] = [
-        {
-          label: "View Details",
-          icon: Eye,
-          href: `/projects/${project._id}`,
-        },
-        {
-          label: "Edit Project",
-          icon: Pencil,
-          onClick: () => {
-            // TODO: Implement edit
-          },
-        },
-        {
-          label: "Delete",
-          icon: Trash2,
-          variant: "destructive",
-          separator: true,
-          onClick: () => {
-            // TODO: Implement delete
-          },
-        },
-      ];
-
-      return <DataTableRowActions row={project} actions={actions} />;
+      return <ProjectActions project={project} />;
     },
   },
 ];
+
