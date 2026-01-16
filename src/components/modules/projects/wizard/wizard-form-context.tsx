@@ -148,10 +148,19 @@ export function WizardFormProvider({
     api.functions.projects.storage.generateUploadUrl
   );
 
-  const existingDraft = useQuery(
+  const existingClientDraft = useQuery(
     api.functions.projects.queries.getMyActiveDraft,
     mode === "admin" ? "skip" : {}
   );
+
+  // Query for admin draft when in admin mode
+  const existingAdminDraft = useQuery(
+    api.functions.projects.queries.getAdminActiveDraft,
+    mode === "admin" ? {} : "skip"
+  );
+
+  // Combined existing draft based on mode
+  const existingDraft = mode === "admin" ? existingAdminDraft : existingClientDraft;
 
   // Fetch all active project types for logic and selection
   const projectTypes = useQuery(
@@ -161,8 +170,7 @@ export function WizardFormProvider({
   // Create or Resume draft on first load
   useEffect(() => {
     // Wait for existingDraft query to return (undefined means loading)
-    // In admin mode, we skip this query so we don't wait for it
-    if (mode !== "admin" && existingDraft === undefined) return;
+    if (existingDraft === undefined) return;
     if (projectId) return;
 
     const initDraft = async () => {
@@ -178,6 +186,15 @@ export function WizardFormProvider({
         setFormDataState(
           (prev): WizardFormData => ({
             ...prev,
+            // Step 0 for admin mode - restore client selection
+            // Note: clientData is null because draft only stores clientId, not full profile data
+            // The UI can query full client data separately using the clientId if needed
+            step0: mode === "admin" && existingDraft.clientId ? {
+              clientId: existingDraft.clientId,
+              clientData: null,
+              selectionMode: 'existing' as const,
+              isNewClient: false,
+            } : prev.step0,
             step1: {
               projectTypeId: existingDraft.projectTypeId,
               endClientName: existingDraft.endClientName || "",
@@ -217,7 +234,7 @@ export function WizardFormProvider({
       }
     };
     initDraft();
-  }, [projectId, createDraft, existingDraft]);
+  }, [projectId, createDraft, existingDraft, mode]);
 
   // Update form data for a specific step
   const setFormData = useCallback(
