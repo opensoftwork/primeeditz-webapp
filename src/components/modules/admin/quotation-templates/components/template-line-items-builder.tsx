@@ -254,17 +254,72 @@ export function TemplateLineItemsBuilder({
       {/* Table Container */}
       <div className="p-1 rounded-[2.5rem] bg-white/2 border border-white/5 shadow-2xl relative overflow-hidden group/container">
         <div className="absolute inset-0 bg-linear-to-br from-primary/5 to-transparent pointer-events-none opacity-0 group-hover/container:opacity-100 transition-opacity" />
-        <div className="relative p-6">
-          <TemplateLineItemsTable
-            items={displayedItems}
-            section={{
-              _id: activeTab === "all" ? "" : activeTab,
-              name: activeTab === "all" ? "All" : activeSection?.name || "",
-            }}
-            onEditItem={openEditItemDrawer}
-            onRemoveItem={handleRemoveItem}
-            onAddItem={(sId) => openAddItemDrawer(sId)}
-          />
+        <div className="relative p-6 space-y-12">
+          {activeTab === "all" ? (
+            sections.map((section) => {
+              const sectionItems = allItemsWithIdx.filter(
+                (item) => item.sectionId === section._id
+              );
+              if (sectionItems.length === 0) return null;
+
+              return (
+                <div key={section._id} className="space-y-4">
+                  <div className="flex items-center gap-3 px-2">
+                    <div
+                      className={cn(
+                        "h-6 w-1 rounded-full",
+                        section.color === "blue"
+                          ? "bg-blue-500"
+                          : section.color === "purple"
+                          ? "bg-purple-500"
+                          : section.color === "green"
+                          ? "bg-emerald-500"
+                          : section.color === "amber"
+                          ? "bg-amber-500"
+                          : section.color === "red"
+                          ? "bg-red-500"
+                          : "bg-zinc-500"
+                      )}
+                    />
+                    <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">
+                      {section.name}
+                    </h4>
+                  </div>
+                  <TemplateLineItemsTable
+                    items={sectionItems}
+                    section={section}
+                    onEditItem={openEditItemDrawer}
+                    onRemoveItem={handleRemoveItem}
+                    onAddItem={(sId) => openAddItemDrawer(sId)}
+                  />
+                </div>
+              );
+            })
+          ) : (
+            <TemplateLineItemsTable
+              items={displayedItems}
+              section={activeSection || { _id: "", name: "" }}
+              onEditItem={openEditItemDrawer}
+              onRemoveItem={handleRemoveItem}
+              onAddItem={(sId) => openAddItemDrawer(sId)}
+            />
+          )}
+
+          {activeTab === "all" && allItemsWithIdx.length === 0 && (
+            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <Layers className="h-8 w-8 text-white/10" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                  Architecture is Empty
+                </p>
+                <p className="text-xs text-white/20 font-medium">
+                  Add items to your framework to see the breakdown.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

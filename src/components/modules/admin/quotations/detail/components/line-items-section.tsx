@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
@@ -26,11 +27,11 @@ export function LineItemsSection({
             className="rounded-2xl bg-white/2 border border-white/5 overflow-hidden"
           >
             {/* Section Header */}
-            <div className="px-5 py-4 border-b border-white/5 flex items-center justify-between">
+            <div className="px-5 py-4 bg-white/2 border-b border-white/5 flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <div
                   className={cn(
-                    "h-7 px-3 rounded-lg flex items-center justify-center border text-[9px] font-black uppercase tracking-widest",
+                    "h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest",
                     section.color === "blue"
                       ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
                       : section.color === "purple"
@@ -46,33 +47,38 @@ export function LineItemsSection({
                 >
                   {section.name}
                 </div>
-                <span className="text-[10px] font-bold text-white/20">
-                  {items.length} item{items.length !== 1 ? "s" : ""}
+                <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                  {items.length} Component{items.length !== 1 ? "s" : ""}
                 </span>
               </div>
-              <span className="text-sm font-black text-white">
-                {formatCurrency(
-                  items.reduce(
-                    (acc: number, item: any) =>
-                      acc +
-                      item.rate * item.quantity +
-                      (item.subItems?.reduce(
-                        (s: number, sub: any) => s + sub.rate * sub.quantity,
-                        0
-                      ) ?? 0),
-                    0
-                  )
-                )}
-              </span>
+              <div className="flex items-center gap-4">
+                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                  Section Aggregate
+                </span>
+                <span className="text-sm font-black text-white">
+                  {formatCurrency(
+                    items.reduce(
+                      (acc: number, item: any) =>
+                        acc +
+                        item.rate * item.quantity +
+                        (item.subItems?.reduce(
+                          (s: number, sub: any) => s + sub.rate * sub.quantity,
+                          0
+                        ) ?? 0),
+                      0
+                    )
+                  )}
+                </span>
+              </div>
             </div>
 
-            {/* Items Table */}
+            {/* Items Architecture */}
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-white/5">
                     <th className="text-left text-[9px] font-black uppercase tracking-widest text-white/20 px-5 py-3">
-                      Description
+                      Description & Architecture
                     </th>
                     <th className="text-center text-[9px] font-black uppercase tracking-widest text-white/20 px-3 py-3 w-20">
                       Unit
@@ -88,28 +94,66 @@ export function LineItemsSection({
                     </th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-white/2">
                   {items.map((item: any) => (
-                    <tr
-                      key={item.id}
-                      className="border-b border-white/5 last:border-b-0"
-                    >
-                      <td className="px-5 py-4 text-sm font-medium text-white">
-                        {item.description || "Untitled Item"}
-                      </td>
-                      <td className="px-3 py-4 text-center text-xs font-bold text-white/50 uppercase">
-                        {item.unit}
-                      </td>
-                      <td className="px-3 py-4 text-right text-sm font-mono font-bold text-white/70">
-                        {formatCurrency(item.rate)}
-                      </td>
-                      <td className="px-3 py-4 text-center text-sm font-bold text-white/70">
-                        {item.quantity}
-                      </td>
-                      <td className="px-5 py-4 text-right text-sm font-black text-white">
-                        {formatCurrency(item.rate * item.quantity)}
-                      </td>
-                    </tr>
+                    <React.Fragment key={item.id}>
+                      {/* Main Item Row */}
+                      <tr className="group hover:bg-white/1 transition-colors">
+                        <td className="px-5 py-3.5">
+                          <div className="flex flex-col gap-0.5">
+                            <span className="text-sm font-bold text-white tracking-tight">
+                              {item.description || "Untitled Component"}
+                            </span>
+                            {item.subItems?.length > 0 && (
+                              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+                                Includes {item.subItems.length} Sub-elements
+                              </span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-3 py-3.5 text-center text-[9px] font-black text-white/30 uppercase tracking-widest">
+                          {item.unit}
+                        </td>
+                        <td className="px-3 py-3.5 text-right text-xs font-mono font-bold text-white/60">
+                          {formatCurrency(item.rate)}
+                        </td>
+                        <td className="px-3 py-3.5 text-center text-xs font-bold text-white/60">
+                          {item.quantity}
+                        </td>
+                        <td className="px-5 py-3.5 text-right text-sm font-black text-white">
+                          {formatCurrency(item.rate * item.quantity)}
+                        </td>
+                      </tr>
+
+                      {/* Sub-items Breakdown */}
+                      {item.subItems?.map((sub: any, sIdx: number) => (
+                        <tr
+                          key={`${item.id}-sub-${sIdx}`}
+                          className="bg-white/1 border-b border-white/2 last:border-b-0"
+                        >
+                          <td className="px-5 py-2.5 pl-10">
+                            <div className="flex items-center gap-2">
+                              <div className="h-px w-3 bg-white/10" />
+                              <span className="text-xs font-medium text-white/40">
+                                {sub.description}
+                              </span>
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-[8px] font-bold text-white/20 uppercase">
+                            {sub.unit}
+                          </td>
+                          <td className="px-3 py-2.5 text-right text-[10px] font-mono text-white/30">
+                            {formatCurrency(sub.rate)}
+                          </td>
+                          <td className="px-3 py-2.5 text-center text-[10px] font-bold text-white/30">
+                            {sub.quantity}
+                          </td>
+                          <td className="px-5 py-2.5 text-right text-xs font-bold text-white/50">
+                            {formatCurrency(sub.rate * sub.quantity)}
+                          </td>
+                        </tr>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

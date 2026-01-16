@@ -15,37 +15,37 @@ export function ClientProjectInfo({ quotation }: ClientProjectInfoProps) {
       animate={{ opacity: 1, y: 0 }}
       className="p-5 rounded-2xl bg-white/2 border border-white/5"
     >
-      <div className="flex items-center gap-2 mb-4">
-        <User className="h-4 w-4 text-primary" />
-        <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">
-          Client Information
+      <div className="flex items-center gap-2 mb-6">
+        <div className="h-1.5 w-1 rounded-full bg-primary" />
+        <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+          Client & Intent
         </h3>
       </div>
-      <div className="grid grid-cols-2 gap-6">
-        <div>
-          <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider mb-1">
-            Client
+      <div className="grid grid-cols-2 gap-8">
+        <div className="space-y-1">
+          <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+            Strategic Client
           </p>
-          <p className="text-sm font-bold text-white">
-            {quotation.clientId || "Not specified"}
+          <p className="text-xs font-bold text-white uppercase tracking-tight">
+            {quotation.clientId || "Universal"}
           </p>
         </div>
         {quotation.projectId && (
-          <div>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider mb-1">
-              Project
+          <div className="space-y-1">
+            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+              Associated Project
             </p>
-            <p className="text-sm font-bold text-white">
+            <p className="text-xs font-bold text-white uppercase tracking-tight">
               {quotation.projectId}
             </p>
           </div>
         )}
         {quotation.validUntil && (
-          <div>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-wider mb-1">
-              Valid Until
+          <div className="space-y-1">
+            <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+              Proposal Validity
             </p>
-            <p className="text-sm font-bold text-white">
+            <p className="text-xs font-bold text-white uppercase tracking-tight">
               {format(quotation.validUntil, "MMM dd, yyyy")}
             </p>
           </div>

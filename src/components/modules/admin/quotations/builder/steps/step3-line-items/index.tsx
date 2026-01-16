@@ -344,65 +344,128 @@ export function Step3LineItems() {
         </div>
 
         {/* Active Tab Content */}
-        <div className="p-5 rounded-2xl bg-white/2 border border-white/5">
-          {/* Tab Header */}
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-            <div className="flex items-center gap-3">
-              {activeTab === "all" ? (
-                <div className="h-6 px-2.5 rounded-md flex items-center justify-center bg-primary/10 border border-primary/20 text-primary font-black uppercase tracking-widest text-[8px]">
-                  All Items
-                </div>
-              ) : (
-                <div
-                  className={cn(
-                    "h-6 px-2.5 rounded-md flex items-center justify-center border font-black uppercase tracking-widest text-[8px]",
-                    activeSection?.color === "blue"
-                      ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                      : activeSection?.color === "purple"
-                      ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                      : activeSection?.color === "green"
-                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                      : activeSection?.color === "amber"
-                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                      : activeSection?.color === "red"
-                      ? "bg-red-500/10 border-red-500/20 text-red-400"
-                      : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
-                  )}
-                >
-                  {activeSection?.name || "Section"}
-                </div>
-              )}
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
-                {displayedItems.length} item
-                {displayedItems.length !== 1 ? "s" : ""}
-              </span>
-            </div>
+        <div className="p-5 rounded-2xl bg-white/2 border border-white/5 space-y-12">
+          {activeTab === "all" ? (
+            sections.map((section) => {
+              const sectionItems = allItemsWithIdx.filter(
+                (item) => item.sectionId === section._id
+              );
+              if (sectionItems.length === 0) return null;
 
-            <div className="flex items-center gap-4">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                Total
-              </span>
-              <span className="text-lg font-black text-white">
-                {formatCurrency(
-                  activeTab === "all"
-                    ? sectionTotals.all
-                    : sectionTotals[activeTab] || 0
-                )}
-              </span>
-            </div>
-          </div>
+              return (
+                <div key={section._id} className="space-y-4">
+                  <div className="flex items-center justify-between px-1">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={cn(
+                          "h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest",
+                          section.color === "blue"
+                            ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                            : section.color === "purple"
+                            ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                            : section.color === "green"
+                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                            : section.color === "amber"
+                            ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                            : section.color === "red"
+                            ? "bg-red-500/10 border-red-500/20 text-red-400"
+                            : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
+                        )}
+                      >
+                        {section.name}
+                      </div>
+                      <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                        {sectionItems.length} Component
+                        {sectionItems.length !== 1 ? "s" : ""}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-4">
+                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                        Section Share
+                      </span>
+                      <span className="text-sm font-black text-white">
+                        {formatCurrency(sectionTotals[section._id] || 0)}
+                      </span>
+                    </div>
+                  </div>
+                  <LineItemsTable
+                    items={sectionItems}
+                    section={section}
+                    onEditItem={openEditItemDrawer}
+                    onRemoveItem={removeLineItem}
+                    onAddItem={(sectionId) =>
+                      openAddItemDrawer(sectionId || undefined)
+                    }
+                  />
+                </div>
+              );
+            })
+          ) : (
+            <>
+              {/* Tab Header */}
+              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
+                <div className="flex items-center gap-3">
+                  <div
+                    className={cn(
+                      "h-6 px-2.5 rounded-md flex items-center justify-center border font-black uppercase tracking-widest text-[8px]",
+                      activeSection?.color === "blue"
+                        ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                        : activeSection?.color === "purple"
+                        ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                        : activeSection?.color === "green"
+                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                        : activeSection?.color === "amber"
+                        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                        : activeSection?.color === "red"
+                        ? "bg-red-500/10 border-red-500/20 text-red-400"
+                        : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
+                    )}
+                  >
+                    {activeSection?.name || "Section"}
+                  </div>
+                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
+                    {displayedItems.length} item
+                    {displayedItems.length !== 1 ? "s" : ""}
+                  </span>
+                </div>
 
-          {/* Line Items Table */}
-          <LineItemsTable
-            items={displayedItems}
-            section={{
-              _id: activeTab === "all" ? "" : activeTab,
-              name: activeTab === "all" ? "All" : activeSection?.name || "",
-            }}
-            onEditItem={openEditItemDrawer}
-            onRemoveItem={removeLineItem}
-            onAddItem={(sectionId) => openAddItemDrawer(sectionId || undefined)}
-          />
+                <div className="flex items-center gap-4">
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
+                    Total
+                  </span>
+                  <span className="text-lg font-black text-white">
+                    {formatCurrency(sectionTotals[activeTab] || 0)}
+                  </span>
+                </div>
+              </div>
+
+              <LineItemsTable
+                items={displayedItems}
+                section={activeSection || { _id: "", name: "" }}
+                onEditItem={openEditItemDrawer}
+                onRemoveItem={removeLineItem}
+                onAddItem={(sectionId) =>
+                  openAddItemDrawer(sectionId || undefined)
+                }
+              />
+            </>
+          )}
+
+          {activeTab === "all" && allItemsWithIdx.length === 0 && (
+            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
+              <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                <Layers className="h-8 w-8 text-white/10" />
+              </div>
+              <div className="space-y-1">
+                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
+                  Worth is Uncalculated
+                </p>
+                <p className="text-xs text-white/20 font-medium">
+                  Add items to your proposal to see the architectural breakdown.
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

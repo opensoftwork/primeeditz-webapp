@@ -34,34 +34,36 @@ export function DetailHeader({
           variant="ghost"
           size="sm"
           onClick={() => router.push("/quotations")}
-          className="h-8 px-3 -ml-3 text-white/40 hover:text-white font-bold text-xs"
+          className="h-9 px-3 -ml-3 text-white/40 hover:text-white font-bold text-xs rounded-lg transition-colors"
         >
-          <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+          <ArrowLeft className="h-4 w-4 mr-2" />
           Back to Quotations
         </Button>
 
         <div className="flex items-center gap-4">
-          <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Receipt className="h-6 w-6 text-primary" />
+          <div className="h-10 w-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
+            <Receipt className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <div className="flex items-center gap-3 mb-1">
-              <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+            <div className="flex items-center gap-2 mb-0.5">
+              <h1 className="text-xl font-black text-white uppercase tracking-tight">
                 {quotation.code}
               </h1>
-              <button
-                onClick={copyCode}
-                className="p-1.5 rounded-lg hover:bg-white/5 text-white/20 hover:text-white transition-colors"
-                title="Copy code"
-              >
-                <Copy className="h-4 w-4" />
-              </button>
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/20 bg-white/5 px-2 py-1 rounded-lg">
-                v{quotation.version}
-              </span>
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={copyCode}
+                  className="p-1 rounded-lg hover:bg-white/5 text-white/20 hover:text-white transition-colors"
+                  title="Copy code"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                </button>
+                <span className="text-[8px] font-black uppercase tracking-widest text-primary/60 bg-primary/5 border border-primary/10 px-1.5 py-0.5 rounded">
+                  v{quotation.version}
+                </span>
+              </div>
             </div>
-            <p className="text-white/40 text-sm font-medium">
-              Created on {format(quotation._creationTime, "MMMM dd, yyyy")}
+            <p className="text-white/20 text-[10px] font-black uppercase tracking-widest">
+              Generated on {format(quotation._creationTime, "MMM dd, yyyy")}
             </p>
           </div>
         </div>
