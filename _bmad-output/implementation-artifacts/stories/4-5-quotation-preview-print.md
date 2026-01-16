@@ -1,9 +1,10 @@
 # Story 4-5: Quotation Preview & Print
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: in-progress  
+**Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-16  
+**Updated**: 2026-01-16  
 **Priority**: HIGH — Enables client-facing quotation delivery
 
 ---

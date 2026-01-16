@@ -86,8 +86,8 @@ development_status:
   3-4-project-stage-folder-setup: backlog
   3-5-update-project-status: backlog
   3-6-employee-management-crud: backlog
-  3-7-project-types-management: ready-for-dev
-  3-8-quotation-templates-management: ready-for-dev
+  3-7-project-types-management: done # Dynamic fields for project wizard
+  3-8-quotation-templates-management: done # Full editor, view, list with section-wise breakdown
   3-9-storage-pricing-tiers-configuration: backlog
   3-10-folder-templates-configuration: backlog
   3-11-admin-initiated-project-creation: done
@@ -97,12 +97,12 @@ development_status:
   # EPIC 4: Quotation System
   # ============================================================================
   epic-4: in-progress
-  # Phase A: Foundation (MVP)
-  4-1-quotation-sections-configuration: ready-for-dev
-  4-2-quotation-templates-crud: backlog
-  4-3-create-quotation-standalone: ready-for-dev
-  4-4-quotation-line-items-nested-hierarchy: backlog
-  4-5-quotation-preview-print: in-progress
+  # Phase A: Foundation (MVP) - COMPLETE
+  4-1-quotation-sections-configuration: done # Schema, queries, mutations, seed, UI
+  4-2-quotation-templates-crud: done # Covered by 3-8 (shared implementation)
+  4-3-create-quotation-standalone: done # 4-step wizard, line items, terms & conditions
+  4-4-quotation-line-items-nested-hierarchy: backlog # Display done, CRUD pending
+  4-5-quotation-preview-print: done # html-to-image + jsPDF, proper PDF generation
   # Phase B: Client Workflow
   4-6-send-quotation-to-client: backlog
   4-7-client-view-quotation: backlog
