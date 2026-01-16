@@ -104,7 +104,7 @@ development_status:
   4-4-quotation-line-items-nested-hierarchy: backlog # Display done, CRUD pending
   4-5-quotation-preview-print: done # html-to-image + jsPDF, proper PDF generation
   # Phase B: Client Workflow
-  4-6-send-quotation-to-client: backlog
+  4-6-send-quotation-to-client: in-progress
   4-7-client-view-quotation: backlog
   4-8-client-approve-quotation: backlog
   4-9-client-request-changes: backlog
