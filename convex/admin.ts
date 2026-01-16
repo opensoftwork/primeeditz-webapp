@@ -77,8 +77,10 @@ export const getPendingProjects = adminQuery({
         // Get project type
         const projectType = await ctx.db.get(project.projectTypeId);
 
-        // Get client profile
-        const client = await ctx.db.get(project.clientId);
+        // Get client profile (clientId is optional for admin-initiated projects)
+        const client = project.clientId
+          ? await ctx.db.get(project.clientId)
+          : null;
 
         return {
           _id: project._id,
@@ -110,14 +112,14 @@ export const getAdminProjectsPaginated = adminQuery({
     // Execute pagination - conditionally use index for status filtering
     const results = await (args.status
       ? ctx.db
-          .query("projects")
-          .withIndex("by_status", (q) => q.eq("status", args.status!))
-          .order("desc")
-          .paginate(args.paginationOpts)
+        .query("projects")
+        .withIndex("by_status", (q) => q.eq("status", args.status!))
+        .order("desc")
+        .paginate(args.paginationOpts)
       : ctx.db
-          .query("projects")
-          .order("desc")
-          .paginate(args.paginationOpts));
+        .query("projects")
+        .order("desc")
+        .paginate(args.paginationOpts));
     // Get all project types and clients for enrichment
     const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
     const projectTypeMap = new Map<Id<"projectTypes">, Doc<"projectTypes">>(
@@ -139,7 +141,7 @@ export const getAdminProjectsPaginated = adminQuery({
       )
       .map((project: Doc<"projects">) => {
         const projectType = projectTypeMap.get(project.projectTypeId);
-        const client = clientMap.get(project.clientId);
+        const client = project.clientId ? clientMap.get(project.clientId) : null;
 
         return {
           _id: project._id,
@@ -217,7 +219,7 @@ export const getAdminProjects = adminQuery({
     // Enrich projects with type and client names
     let enrichedProjects = allProjects.map((project: Doc<"projects">) => {
       const projectType = projectTypeMap.get(project.projectTypeId);
-      const client = clientMap.get(project.clientId);
+      const client = project.clientId ? clientMap.get(project.clientId) : null;
 
       return {
         _id: project._id,
@@ -436,8 +438,10 @@ export const getAdminProject = adminQuery({
       return null;
     }
 
-    // Get client profile
-    const client = await ctx.db.get(project.clientId);
+    // Get client profile (clientId is optional for admin-initiated projects)
+    const client = project.clientId
+      ? await ctx.db.get(project.clientId)
+      : null;
 
     // Get project type
     const projectType = await ctx.db.get(project.projectTypeId);
@@ -494,7 +498,7 @@ export const getAdminQuotations = query({
     const clientIds = quotations
       .map((q: Doc<"quotations">) => q.clientId)
       .filter((id: string | undefined): id is string => !!id);
-    
+
     const projectIds = quotations
       .map((q: Doc<"quotations">) => q.projectId)
       .filter((id: string | undefined): id is string => !!id);
@@ -537,6 +541,92 @@ export const getClients = adminQuery({
 });
 
 /**
+ * Get clients for selection in admin wizard.
+ * Returns clients with search, projectCount, and lastActivityDate.
+ * Optimized for the client selection drawer in admin project creation.
+ */
+export const getClientsForSelection = adminQuery({
+  args: {
+    search: v.optional(v.string()),
+    limit: v.optional(v.number()),
+    cursor: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const limit = args.limit ?? 20;
+    const searchTerm = args.search?.toLowerCase().trim();
+
+    // Get all clients
+    let clients = await ctx.db
+      .query("profiles")
+      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .order("desc")
+      .collect();
+
+    // Apply search filter in memory (search by name, email, company)
+    if (searchTerm && searchTerm.length > 0) {
+      clients = clients.filter((client) => {
+        const name = client.name?.toLowerCase() ?? "";
+        const email = client.email?.toLowerCase() ?? "";
+        const company = client.company?.toLowerCase() ?? "";
+        return (
+          name.includes(searchTerm) ||
+          email.includes(searchTerm) ||
+          company.includes(searchTerm)
+        );
+      });
+    }
+
+    // Get project counts and last activity for each client
+    const enrichedClients = await Promise.all(
+      clients.map(async (client) => {
+        // Get projects for this client
+        const projects = await ctx.db
+          .query("projects")
+          .withIndex("by_clientId", (q) => q.eq("clientId", client._id))
+          .collect();
+
+        // Calculate stats
+        const projectCount = projects.length;
+        const activeCount = projects.filter(
+          (p) => p.status === "active" || p.status === "in_progress"
+        ).length;
+
+        // Get last activity date (most recent project update or client update)
+        const lastProjectActivity = projects.length > 0
+          ? Math.max(...projects.map((p) => p.updatedAt))
+          : null;
+        const lastActivityDate = lastProjectActivity ?? client.updatedAt;
+
+        return {
+          _id: client._id,
+          name: client.name,
+          email: client.email,
+          phone: client.phone,
+          company: client.company,
+          onboardingComplete: client.onboardingComplete,
+          createdAt: client._creationTime,
+          projectCount,
+          activeProjectCount: activeCount,
+          lastActivityDate,
+        };
+      })
+    );
+
+    // Sort by last activity (most recent first)
+    enrichedClients.sort((a, b) => (b.lastActivityDate ?? 0) - (a.lastActivityDate ?? 0));
+
+    // Apply limit (simple pagination for now)
+    const paginatedClients = enrichedClients.slice(0, limit);
+
+    return {
+      clients: paginatedClients,
+      hasMore: enrichedClients.length > limit,
+      totalCount: enrichedClients.length,
+    };
+  },
+});
+
+/**
  * Get clients that have at least one project.
  * Used for quotation builder where only clients with projects should be selectable.
  */
@@ -573,7 +663,7 @@ export const getAdminProjectsSimple = adminQuery({
   },
   handler: async (ctx, args) => {
     let projects;
-    
+
     if (args.clientId) {
       projects = await ctx.db
         .query("projects")
@@ -582,7 +672,7 @@ export const getAdminProjectsSimple = adminQuery({
     } else {
       projects = await ctx.db.query("projects").order("desc").collect();
     }
-    
+
     return Promise.all(
       projects.map(async (p) => {
         const type = await ctx.db.get(p.projectTypeId);
@@ -608,7 +698,7 @@ export const getClientWithProjects = adminQuery({
   handler: async (ctx, args) => {
     // Get client profile
     const client = await ctx.db.get(args.clientId);
-    
+
     if (!client || client.role !== "client") {
       return null;
     }

@@ -134,7 +134,7 @@ export default defineSchema({
   projects: defineTable({
     code: v.string(),
     projectTypeId: v.id('projectTypes'),
-    clientId: v.id('profiles'),
+    clientId: v.optional(v.id('profiles')), // Optional for admin-initiated "No Client" projects
     source: projectSourceValidator,
     status: projectStatusValidator,
     lastStep: v.optional(v.number()), // To track wizard progress (1-5)

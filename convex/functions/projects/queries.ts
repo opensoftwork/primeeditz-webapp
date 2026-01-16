@@ -173,20 +173,20 @@ export const getAllProjects = adminQuery({
     // Build query based on filter
     const projects = args.status
       ? await ctx.db
-          .query('projects')
-          .withIndex('by_status', (q) => q.eq('status', args.status!))
-          .order('desc')
-          .collect()
+        .query('projects')
+        .withIndex('by_status', (q) => q.eq('status', args.status!))
+        .order('desc')
+        .collect()
       : await ctx.db
-          .query('projects')
-          .order('desc')
-          .collect()
+        .query('projects')
+        .order('desc')
+        .collect()
 
     // Enrich with client and project type info
     const enriched = await Promise.all(
       projects.map(async (project) => {
         const [client, projectType] = await Promise.all([
-          ctx.db.get(project.clientId),
+          project.clientId ? ctx.db.get(project.clientId) : null,
           ctx.db.get(project.projectTypeId),
         ])
         return {
@@ -213,10 +213,12 @@ export const getPendingProjects = adminQuery({
       .order('desc')
       .collect()
 
-    // Enrich with client info
+    // Enrich with client info (clientId is optional for admin-initiated projects)
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const client = await ctx.db.get(project.clientId)
+        const client = project.clientId
+          ? await ctx.db.get(project.clientId)
+          : null
         return {
           ...project,
           clientName: client?.name ?? 'Unknown',

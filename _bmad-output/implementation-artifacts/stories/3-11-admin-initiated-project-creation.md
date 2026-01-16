@@ -1,6 +1,100 @@
 # Story 3.11: Admin-Initiated Project Creation with Client Selection
 
-## Status: Draft
+## Status: Completed
+
+Route: `/projects/new` (accessible via "INITIATE PROJECT" button)
+---
+
+## Tasks/Subtasks
+
+### Task 1: Backend — Create Client Query & Mutation APIs [AC2, AC3, AC5]
+- [x] **1.1** Create `getClientsForSelection` query in `convex/admin.ts` — returns paginated clients with metadata
+- [x] **1.2** Add search functionality to query (search by name, email, company)
+- [x] **1.3** Create `createDraftClientProfile` mutation in `convex/functions/profiles/mutations.ts`
+
+### Task 2: Wizard Infrastructure — Add Mode Support [AC1, AC10, AC11]
+- [x] **2.1** Update `types.ts` — add `WizardMode` and `ADMIN_WIZARD_STEPS` (6 steps)
+- [x] **2.2** Update `WizardFormProvider` — add `mode` prop, and logic to initialize based on mode
+- [x] **2.3** Update `project-wizard.tsx` — accept `mode` prop, conditional Step 0 rendering, dynamic step count
+- [x] **2.4** Update `step-navigation.tsx` — correctly used in `ProjectWizard`
+
+### Task 3: Step 0 — Client Selection Component [AC2, AC3, AC4, AC5, AC6]
+- [x] **3.1** Create `steps/step-0-client-selection/index.tsx` — Main implementation with sub-components
+- [x] **3.2** Option cards (Existing | New | No Client)
+- [x] **3.3** Client drawer with search and selection
+- [x] **3.4** Client summary card and "Change Client" logic
+- [x] **3.5** New Client inline form
+
+### Task 4: Step 1 Basics — Read-Only Client Fields [AC7, AC8, AC9]
+- [x] **4.1** Update `step-1-basics/` to handle `mode` and `step0` data
+- [x] **4.2** Implement locked visual indicator and badges
+- [x] **4.3** Handle "No Client" / "New Client" messages
+
+### Task 5: Review Step — Add Client Information Section [AC12]
+- [x] **5.1** Create `ClientInfoReview` component
+- [x] **5.2** Integrate into `WizardStep5`
+- [x] **5.3** Update "Edit" logic to return to Step 0
+
+### Task 6: Admin Projects Entry Point [AC1]
+- [x] **6.1** Update Admin Project List "INITIATE PROJECT" button
+- [x] **6.2** Create `/admin/projects/new` page wrapper
+
+### Task 7: Integration & Polish
+- [x] **7.1** Ensure existing 5-step client flow remains unchanged (no regressions)
+- [x] **7.2** Verify mobile responsiveness
+- [x] **7.3** Ensure no TypeScript errors in wizard code
+- [x] **7.4** Run build and verify no errors (Completed type checks)
+
+
+---
+
+## Dev Notes
+
+### Architecture Requirements
+- The wizard currently uses `WizardFormProvider` for state management
+- Steps are 1-indexed in the context (1-5), but 0-indexed in UI display
+- Client fields are in `step-1-basics/client-event-fields.tsx`
+- Project creation goes through `createDraft` → `updateDraft` → `submitProject` flow
+
+### Key Files to Modify
+- `src/components/modules/projects/wizard/project-wizard.tsx` — main wizard container
+- `src/components/modules/projects/wizard/wizard-form-context.tsx` — form state management
+- `src/components/modules/projects/wizard/types.ts` — type definitions
+- `src/components/modules/projects/wizard/step-navigation.tsx` — step sidebar
+- `convex/profiles.ts` or new file — client queries/mutations
+- `convex/schema.ts` — may need to update projects table if clientId becomes optional
+
+### Schema Consideration
+- Current schema has `clientId: v.id('profiles')` as required
+- Story requires `clientId: null` for "No Client" projects
+- Need to update schema: `clientId: v.optional(v.id('profiles'))`
+
+---
+
+## Dev Agent Record
+
+### Implementation Plan
+*(To be filled during development)*
+
+### Debug Log
+*(To be filled during development)*
+
+### Completion Notes
+*(To be filled on completion)*
+
+---
+
+## File List
+
+*(Files created/modified during implementation will be listed here)*
+
+---
+
+## Change Log
+
+| Date | Change | Author |
+|------|--------|--------|
+| 2026-01-16 | Story prepared for development with task breakdown | Dev Agent |
 
 ## Story
 

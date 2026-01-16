@@ -11,6 +11,7 @@ import { UploadedFilesDrawer } from "../step-3-files/uploaded-files-drawer";
 
 // Components
 import { Step5Header } from "./header";
+import { ClientInfoReview } from "./sections/client-info";
 import { BasicInfoReview } from "./sections/basic-info";
 import { SpecificationsReview } from "./sections/specifications";
 import { DescriptionReview } from "./sections/description";
@@ -22,6 +23,7 @@ import { SubmissionCard } from "./submission-card";
 export function WizardStep5() {
   const router = useRouter();
   const {
+    mode,
     formData,
     projectCode,
     goToStep,
@@ -41,7 +43,7 @@ export function WizardStep5() {
       : "skip"
   ) as any;
 
-  const handleEdit = (step: 1 | 2 | 3 | 4) => {
+  const handleEdit = (step: 0 | 1 | 2 | 3 | 4) => {
     setReviewing(true);
     goToStep(step);
   };
@@ -69,6 +71,13 @@ export function WizardStep5() {
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-8 space-y-10">
+          {mode === "admin" && (
+            <ClientInfoReview
+              formData={formData}
+              onEdit={() => handleEdit(0)}
+            />
+          )}
+
           <BasicInfoReview
             formData={formData}
             projectType={projectType}

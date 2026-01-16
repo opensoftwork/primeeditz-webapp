@@ -14,6 +14,7 @@ import { DateVenueFields } from "./date-venue-fields";
 
 export function WizardStep1() {
   const {
+    mode,
     formData,
     setFormData,
     nextStep,
@@ -25,12 +26,23 @@ export function WizardStep1() {
   } = useWizardForm();
 
   const step1Data = formData.step1;
+  const step0Data = formData.step0;
   const [projectTypeDrawerOpen, setProjectTypeDrawerOpen] = useState(false);
+
+  // Pre-fill endClientName if client is selected in Step 0 (Admin Mode)
+  const isClientSelectedOrNew =
+    mode === "admin" &&
+    (step0Data.selectionMode === "existing" || step0Data.selectionMode === "new") &&
+    !!step0Data.clientData;
+
+  const preFilledEndClientName = isClientSelectedOrNew
+    ? step0Data.clientData?.name
+    : step1Data.endClientName;
 
   const form = useForm({
     defaultValues: {
       projectTypeId: (step1Data.projectTypeId as string) ?? "",
-      endClientName: step1Data.endClientName,
+      endClientName: preFilledEndClientName ?? "",
       eventName: step1Data.eventName,
       eventDate: step1Data.eventDate,
       venue: step1Data.venue,
@@ -51,6 +63,15 @@ export function WizardStep1() {
       }
     },
   });
+
+  // Sync endClientName if it changes in step0 (though step0 usually happens before step1)
+  useEffect(() => {
+    if (isClientSelectedOrNew && step0Data.clientData?.name) {
+      if (form.getFieldValue("endClientName") !== step0Data.clientData.name) {
+        form.setFieldValue("endClientName", step0Data.clientData.name);
+      }
+    }
+  }, [isClientSelectedOrNew, step0Data.clientData?.name, form]);
 
   const handleProjectTypeSelect = (projectTypeId: string) => {
     form.setFieldValue("projectTypeId", projectTypeId);
@@ -92,7 +113,12 @@ export function WizardStep1() {
                     )}
                   />
 
-                  <ClientEventFields form={form} />
+                  <ClientEventFields
+                    form={form}
+                    mode={mode}
+                    isClientSelectedOrNew={isClientSelectedOrNew}
+                    selectionMode={step0Data.selectionMode}
+                  />
                   <DateVenueFields form={form} />
                 </div>
               </FieldGroup>

@@ -88,3 +88,71 @@ export const updateProfile = authenticatedMutation({
     return profile._id
   },
 })
+
+/**
+ * Create a draft client profile (admin-initiated).
+ * Used when admin creates a project for a new client who hasn't registered.
+ * The client will receive an invitation to complete their profile later.
+ *
+ * @param name - Client's full name (required)
+ * @param email - Client's email address (required)
+ * @param phone - Client's phone number (optional)
+ * @param company - Client's company name (optional)
+ */
+export const createDraftClientProfile = authenticatedMutation({
+  args: {
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    company: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Verify the caller is an admin or employee (has permission to create clients)
+    const callerUserId = ctx.authUser._id
+
+    const callerProfile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', callerUserId))
+      .first()
+
+    if (!callerProfile) {
+      throw new Error('Caller profile not found')
+    }
+
+    if (callerProfile.role !== 'admin' && callerProfile.role !== 'employee') {
+      throw new Error('Only admins and employees can create client profiles')
+    }
+
+    // Check if a profile with this email already exists
+    const allProfiles = await ctx.db.query('profiles').collect()
+    const existingProfile = allProfiles.find(
+      (p) => p.email.toLowerCase() === args.email.toLowerCase()
+    )
+
+    if (existingProfile) {
+      throw new Error('A profile with this email already exists')
+    }
+
+    // Create the draft client profile
+    // Note: userId will be set when the client actually registers/logs in
+    // For now, we use a placeholder that can be linked later
+    const profileId = await ctx.db.insert('profiles', {
+      userId: `draft_${Date.now()}_${Math.random().toString(36).substring(7)}`, // Placeholder
+      email: args.email,
+      name: args.name,
+      phone: args.phone,
+      company: args.company,
+      role: 'client',
+      onboardingComplete: false, // Client hasn't completed onboarding
+      updatedAt: Date.now(),
+    })
+
+    return {
+      profileId,
+      name: args.name,
+      email: args.email,
+      phone: args.phone,
+      company: args.company,
+    }
+  },
+})

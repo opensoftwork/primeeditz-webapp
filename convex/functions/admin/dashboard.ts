@@ -74,8 +74,10 @@ export const getPendingProjects = adminQuery({
         // Get project type
         const projectType = await ctx.db.get(project.projectTypeId)
 
-        // Get client profile
-        const client = await ctx.db.get(project.clientId)
+        // Get client profile (clientId is optional for admin-initiated projects)
+        const client = project.clientId
+          ? await ctx.db.get(project.clientId)
+          : null
 
         return {
           _id: project._id,
