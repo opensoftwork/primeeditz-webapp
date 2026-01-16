@@ -8,10 +8,10 @@
 "use client";
 
 import React, { useRef } from "react";
-import { FileText, Printer, Download, ArrowLeft } from "lucide-react";
+import { FileText, Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotationDocument } from "./quotation-document";
-import { toast } from "sonner";
+import { DownloadQuotation } from "./download-quotation";
 
 // ============================================================================
 // Types
@@ -88,12 +88,6 @@ export function QuotationPreview({
     window.print();
   };
 
-  const handleDownload = () => {
-    // For now, trigger print with "Save as PDF" option
-    toast.info("Use 'Save as PDF' in the print dialog to download.");
-    window.print();
-  };
-
   return (
     <div className="min-h-screen bg-zinc-100 print:bg-white">
       {/* Control Panel - Hidden on Print */}
@@ -132,15 +126,16 @@ export function QuotationPreview({
           </div>
 
           <div className="flex items-center gap-3">
-            <Button
+            <DownloadQuotation
+              quotation={quotation}
+              sections={sections}
+              companyInfo={companyInfo}
+              clientName={clientName}
+              projectName={projectName}
               variant="outline"
               size="sm"
-              onClick={handleDownload}
               className="h-9 px-4 rounded-lg bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download PDF
-            </Button>
+            />
             <Button
               size="sm"
               onClick={handlePrint}
@@ -168,14 +163,67 @@ export function QuotationPreview({
       {/* Print Styles */}
       <style jsx global>{`
         @media print {
+          html,
           body {
             -webkit-print-color-adjust: exact !important;
             print-color-adjust: exact !important;
+            margin: 0 !important;
+            padding: 20 !important;
           }
 
           @page {
             size: A4;
-            margin: 10mm;
+            margin: 8mm 10mm 15mm 10mm;
+            padding: 20mm;
+          }
+
+          @page:first {
+            margin-top: 20;
+          }
+
+          /* Prevent orphans and widows */
+          p,
+          li,
+          tr {
+            orphans: 3;
+            widows: 3;
+          }
+
+          /* Keep section headers with content */
+          h1,
+          h2,
+          h3,
+          h4,
+          h5,
+          h6 {
+            page-break-after: avoid;
+            break-after: avoid;
+          }
+
+          /* Avoid breaking inside table rows */
+          tr {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          /* Keep tables together when possible */
+          table {
+            page-break-inside: auto;
+          }
+
+          thead {
+            display: table-header-group;
+          }
+
+          /* Section containers - avoid breaking */
+          .section-container {
+            page-break-inside: avoid;
+            break-inside: avoid;
+          }
+
+          /* Add padding at bottom of each page for clean breaks */
+          .print-page-padding {
+            padding-bottom: 20mm;
           }
         }
       `}</style>

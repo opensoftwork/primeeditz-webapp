@@ -195,9 +195,9 @@ export const QuotationDocument = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="bg-white text-slate-900 shadow-[0_30px_100px_rgba(0,0,0,0.12)] rounded-sm min-h-[1123px] w-full max-w-[900px] mx-auto overflow-hidden print:shadow-none print:m-0 print:max-w-none ring-1 ring-slate-100"
+      className="bg-white text-slate-900 shadow-[0_30px_100px_rgba(0,0,0,0.12)] rounded-sm min-h-[1123px] w-full max-w-[900px] mx-auto overflow-hidden print:shadow-none print:m-0 print:max-w-none print:rounded-none ring-1 ring-slate-100 print:ring-0"
     >
-      <div className="p-10 md:p-14 pt-8 md:pt-10 pb-20 md:pb-24 space-y-10 text-slate-900">
+      <div className="p-10 md:p-14 pt-8 md:pt-10 pb-20 md:pb-24 space-y-10 text-slate-900 print:p-8 print:pt-0 print:pb-16">
         {/* ================================================================ */}
         {/* Header: Branding & Quotation Info */}
         {/* ================================================================ */}
@@ -312,7 +312,10 @@ export const QuotationDocument = React.forwardRef<
           {groupedItems.map(
             ({ section, items }) =>
               items.length > 0 && (
-                <div key={section._id} className="space-y-3">
+                <div
+                  key={section._id}
+                  className="space-y-3 section-container print:mb-8"
+                >
                   <div className="flex items-center gap-3">
                     <div
                       className={cn(
