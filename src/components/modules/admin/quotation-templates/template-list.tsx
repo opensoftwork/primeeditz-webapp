@@ -20,18 +20,12 @@ import { Template, TemplateLineItem } from "../quotation-sections/types";
 import { Id } from "@convex/_generated/dataModel";
 
 import { TemplateCard } from "./template-card";
-import { TemplateViewDrawer } from "./template-view-drawer";
 import { motion, AnimatePresence } from "motion/react";
 
 export function TemplateList() {
   const router = useRouter();
   const [search, setSearch] = useState("");
   const [projectTypeFilter, setProjectTypeFilter] = useState<string>("all");
-
-  const [isViewOpen, setIsViewOpen] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<
-    (Template & { projectTypeName: string | null }) | null
-  >(null);
 
   const templates = useQuery(
     api.functions.quotations.templates.queries.getTemplates,
@@ -246,15 +240,11 @@ export function TemplateList() {
                       calculatedGst: gst,
                       calculatedTotal: total,
                     }}
-                    onView={(t: Template) => {
-                      setSelectedTemplate({
-                        ...t,
-                        projectTypeName: projectType?.name || null,
-                      });
-                      setIsViewOpen(true);
-                    }}
-                    onEdit={(t: Template) =>
+                    onView={(t: Template) =>
                       router.push(`/settings/quotation-templates/${t._id}`)
+                    }
+                    onEdit={(t: Template) =>
+                      router.push(`/settings/quotation-templates/${t._id}/edit`)
                     }
                     onToggleActive={handleToggleActive}
                     onDelete={handleDelete}
@@ -265,12 +255,6 @@ export function TemplateList() {
           </motion.div>
         )}
       </AnimatePresence>
-
-      <TemplateViewDrawer
-        open={isViewOpen}
-        onOpenChange={setIsViewOpen}
-        template={selectedTemplate}
-      />
     </div>
   );
 }

@@ -17,7 +17,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { LineItemsBuilder, type LineItemData } from "./line-items-builder";
+import { TemplateLineItemsBuilder } from "./components/template-line-items-builder";
+import type { TemplateLineItem as LineItemData } from "../quotations/builder/types";
 import { PricePreview } from "./price-preview";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Section, Template } from "../quotation-sections/types";
@@ -283,9 +284,9 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
         <div className="p-6 rounded-2xl bg-white/2 border border-white/5 shadow-xl">
           <form.Field name="lineItems">
             {(field) => (
-              <LineItemsBuilder
+              <TemplateLineItemsBuilder
                 lineItems={field.state.value}
-                onChange={(val) => field.handleChange(val)}
+                onChange={(val: LineItemData[]) => field.handleChange(val)}
                 sections={sections as Section[]}
               />
             )}

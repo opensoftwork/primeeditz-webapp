@@ -1,11 +1,11 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { TemplateEditor } from "@/components/modules/admin/quotation-templates/template-editor";
+import { TemplateDetail } from "@/components/modules/admin/quotation-templates/template-detail";
 
-export default function EditTemplatePage() {
+export default function ViewTemplatePage() {
   const params = useParams();
   const templateId = params.id as string;
 
-  return <TemplateEditor templateId={templateId} />;
+  return <TemplateDetail templateId={templateId} />;
 }
