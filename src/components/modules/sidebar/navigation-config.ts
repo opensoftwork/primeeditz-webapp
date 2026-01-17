@@ -8,6 +8,7 @@ import {
   ClipboardList,
   LayoutGrid,
   ClipboardCheck,
+  HardDrive,
 } from "lucide-react";
 
 export interface NavItem {
@@ -85,6 +86,11 @@ export const adminNavItems: NavItem[] = [
     title: "Quotation Templates",
     url: "/settings/quotation-templates",
     icon: ClipboardCheck,
+  },
+  {
+    title: "Storage Tiers",
+    url: "/settings/storage-tiers",
+    icon: HardDrive,
   },
 ];
 

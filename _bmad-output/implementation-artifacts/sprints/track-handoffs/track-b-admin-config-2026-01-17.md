@@ -217,11 +217,11 @@ npx convex dev
 
 ## 📊 Progress Tracker
 
-| Story                 | Status         | Started | Completed | Notes |
-| --------------------- | -------------- | ------- | --------- | ----- |
-| 3-9 Storage Tiers     | ⬜ Not Started |         |           |       |
-| 3-10 Folder Templates | ⬜ Not Started |         |           |       |
-| 3-4 Folder Setup      | ⬜ Not Started |         |           |       |
+| Story                 | Status         | Started    | Completed | Notes                          |
+| --------------------- | -------------- | ---------- | --------- | ------------------------------ |
+| 3-9 Storage Tiers     | 🟡 In Progress | 2026-01-17 |           | Backend & UI complete, testing |
+| 3-10 Folder Templates | ⬜ Not Started |            |           |                                |
+| 3-4 Folder Setup      | ⬜ Not Started |            |           |                                |
 
 **Update this table as you progress!**
 
