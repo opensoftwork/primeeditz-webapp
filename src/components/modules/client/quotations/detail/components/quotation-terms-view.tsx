@@ -26,8 +26,8 @@ export function QuotationTermsView({ terms }: QuotationTermsViewProps) {
       </div>
 
       <div className="rounded-[2rem] border border-white/5 bg-white/2 p-8 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 p-8 opacity-[0.02] group-hover:opacity-100 transition-opacity">
-          <Info className="h-32 w-32 rotate-12" />
+        <div className="absolute -top-12 -right-12 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity pointer-events-none">
+          <Info className="h-12 w-12 -rotate-12 text-white" />
         </div>
 
         <div className="relative z-10 text-xs text-white/60 leading-relaxed whitespace-pre-wrap columns-1 md:columns-2 gap-12 text-justify font-medium">

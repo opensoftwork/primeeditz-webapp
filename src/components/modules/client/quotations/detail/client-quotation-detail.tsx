@@ -93,7 +93,7 @@ export function ClientQuotationDetail() {
   }));
 
   return (
-    <div className="min-h-screen p-6 md:p-12 space-y-12 w-full max-w-7xl mx-auto">
+    <div className="min-h-screen p-6 md:p-12 space-y-12 w-full">
       <QuotationDetailHeader
         quotation={quotation as any}
         onPrint={() => window.print()}
@@ -130,7 +130,7 @@ export function ClientQuotationDetail() {
 
 function ClientQuotationSkeleton() {
   return (
-    <div className="min-h-screen p-8 md:p-12 space-y-12 max-w-7xl mx-auto">
+    <div className="min-h-screen p-8 md:p-12 space-y-12 w-full">
       <Skeleton className="h-20 w-full rounded-[2rem] bg-white/5" />
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-8">

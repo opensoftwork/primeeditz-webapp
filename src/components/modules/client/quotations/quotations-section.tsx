@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { QuotationCard } from "./quotation-card";
+import { QuotationCard } from "./shared/quotation-card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Receipt, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";

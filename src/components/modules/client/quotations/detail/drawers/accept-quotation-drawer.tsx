@@ -96,8 +96,8 @@ export function AcceptQuotationDrawer({
 
           {/* Quotation Summary Card */}
           <div className="rounded-[2rem] border border-white/5 bg-white/2 p-6 space-y-4 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity">
-              <ShieldCheck className="h-24 w-24 rotate-12" />
+            <div className="absolute -top-6 -right-6 p-4 opacity-[0.03] group-hover:opacity-10 transition-opacity pointer-events-none">
+              <ShieldCheck className="h-48 w-48 rotate-12 text-white" />
             </div>
             <div className="flex justify-between items-start relative z-10">
               <div className="space-y-1">

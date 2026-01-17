@@ -5,7 +5,7 @@ import { format } from "date-fns";
 import { Receipt, ArrowLeft, Download, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-import { QuotationStatusBadge } from "./quotation-status-badge";
+import { QuotationStatusBadge } from "../../shared/quotation-status-badge";
 
 interface QuotationDetailHeaderProps {
   quotation: {

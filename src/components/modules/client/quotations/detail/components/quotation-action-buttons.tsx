@@ -4,9 +4,9 @@ import { useState } from "react";
 import { CheckCircle2, MessageSquare, XCircle, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AcceptQuotationDrawer } from "./accept-quotation-drawer";
-import { RequestChangesDrawer } from "./request-changes-drawer";
-import { RejectQuotationDrawer } from "./reject-quotation-drawer";
+import { AcceptQuotationDrawer } from "../drawers/accept-quotation-drawer";
+import { RequestChangesDrawer } from "../drawers/request-changes-drawer";
+import { RejectQuotationDrawer } from "../drawers/reject-quotation-drawer";
 import { format } from "date-fns";
 
 interface QuotationActionButtonsProps {
