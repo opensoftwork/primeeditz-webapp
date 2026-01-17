@@ -1,7 +1,7 @@
 # Story 3-4: Project Stage/Folder Setup
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: in-dev  
+**Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Required for Epic 5 folder creation
