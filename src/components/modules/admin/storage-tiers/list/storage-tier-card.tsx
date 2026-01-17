@@ -53,7 +53,7 @@ export function StorageTierCard({
     >
       <Card className="group relative overflow-hidden border-white/5 bg-white/5 backdrop-blur-xl transition-all hover:bg-white/10 rounded-xl">
         {/* Glow Effect */}
-        <div className="absolute -right-20 -top-20 h-40 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
+        <div className="absolute -right-20 -top-20 h-30 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
 
         <CardContent className="p-5">
           <div className="flex items-center justify-between mb-4">

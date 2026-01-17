@@ -1,7 +1,7 @@
 # Story 3-10: Folder Templates Configuration
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-progress  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Required for Epic 5 folder structure

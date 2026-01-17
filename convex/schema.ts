@@ -194,7 +194,10 @@ export default defineSchema({
   folderTemplates: defineTable({
     name: v.string(),
     folders: v.array(v.string()),
-  }),
+    projectTypeId: v.optional(v.id("projectTypes")),
+    isDefault: v.optional(v.boolean()),
+    isActive: v.boolean(),
+  }).index("by_projectTypeId", ["projectTypeId"]),
 
   folders: defineTable({
     projectId: v.id('projects'),
