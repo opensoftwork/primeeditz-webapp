@@ -31,6 +31,8 @@ import type * as functions_quotations_templates_mutations from "../functions/quo
 import type * as functions_quotations_templates_queries from "../functions/quotations/templates/queries.js";
 import type * as functions_seed from "../functions/seed.js";
 import type * as functions_storage_actions from "../functions/storage/actions.js";
+import type * as functions_storageTiers_mutations from "../functions/storageTiers/mutations.js";
+import type * as functions_storageTiers_queries from "../functions/storageTiers/queries.js";
 import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
 import type * as lib_helpers from "../lib/helpers.js";
@@ -74,6 +76,8 @@ declare const fullApi: ApiFromModules<{
   "functions/quotations/templates/queries": typeof functions_quotations_templates_queries;
   "functions/seed": typeof functions_seed;
   "functions/storage/actions": typeof functions_storage_actions;
+  "functions/storageTiers/mutations": typeof functions_storageTiers_mutations;
+  "functions/storageTiers/queries": typeof functions_storageTiers_queries;
   http: typeof http;
   "lib/customFunctions": typeof lib_customFunctions;
   "lib/helpers": typeof lib_helpers;
