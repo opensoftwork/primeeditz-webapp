@@ -8,3 +8,4 @@ export * from "./quotation-action-buttons";
 export * from "./pricing-summary";
 export * from "./detail/client-quotation-detail";
 export * from "./public/public-quotation-view";
+export * from "./list";

@@ -103,7 +103,7 @@ export function RequestChangesDrawer({
               <SheetTitle className="text-2xl font-black text-white uppercase tracking-tighter">
                 Request Changes
               </SheetTitle>
-              <SheetDescription className="text-sm font-bold text-white/30 uppercase tracking-widest">
+              <SheetDescription className="text-sm font-bold text-white/50 uppercase tracking-widest">
                 Tell us what needs adjustment in {quotation.code}
               </SheetDescription>
             </div>
@@ -132,10 +132,10 @@ export function RequestChangesDrawer({
                       className="mt-1 border-white/20 data-[state=checked]:bg-indigo-500 data-[state=checked]:border-indigo-500"
                     />
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-white/80 group-hover:text-white transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-white transition-colors">
                         {reason.label}
                       </p>
-                      <p className="text-[9px] font-medium text-white/20 leading-relaxed uppercase tracking-widest">
+                      <p className="text-[9px] font-medium text-white/50 leading-relaxed uppercase tracking-widest">
                         {reason.description}
                       </p>
                     </div>

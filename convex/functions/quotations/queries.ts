@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { adminQuery, clientQuery } from "../../lib/customFunctions";
 import { QueryCtx, query } from "../../_generated/server";
-import { Doc } from "../../_generated/dataModel";
+import { Doc, Id } from "../../_generated/dataModel";
 
 /**
  * Get all quotations with optional filters
@@ -241,9 +241,22 @@ export const getMyQuotations = clientQuery({
     
     // Filter by status (visible to client)
     const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
-    
-    return quotations
-      .filter((q) => clientVisibleStatus.includes(q.status))
+    const visibleQuotations = quotations.filter((q) => clientVisibleStatus.includes(q.status));
+
+    // Get project names for enrichment
+    const projectIds = [...new Set(visibleQuotations.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projects = await Promise.all(
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+    );
+    const projectMap = new Map(
+      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+    );
+
+    return visibleQuotations
+      .map((q) => ({
+        ...q,
+        projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+      }))
       .sort((a, b) => b._creationTime - a._creationTime);
   },
 });

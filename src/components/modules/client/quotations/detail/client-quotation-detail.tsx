@@ -16,6 +16,7 @@ import {
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 export function ClientQuotationDetail() {
   const params = useParams();
@@ -30,12 +31,22 @@ export function ClientQuotationDetail() {
     api.functions.quotations.mutations.markQuotationViewed,
   );
 
-  // Mark as viewed on load
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  // Mark as viewed and set breadcrumbs on load
   useEffect(() => {
     if (data?.quotation?.status === "sent") {
       markViewed({ quotationId: quotationId as Id<"quotations"> });
     }
-  }, [data, quotationId, markViewed]);
+
+    if (data?.quotation?.code) {
+      setOverride(quotationId, data.quotation.code);
+    }
+
+    return () => {
+      removeOverride(quotationId);
+    };
+  }, [data, quotationId, markViewed, setOverride, removeOverride]);
 
   if (data === undefined) {
     return <ClientQuotationSkeleton />;

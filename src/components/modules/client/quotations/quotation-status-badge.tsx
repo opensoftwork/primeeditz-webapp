@@ -39,9 +39,9 @@ const statusConfig: Record<
   draft: {
     label: "Draft",
     icon: Clock,
-    color: "text-white/40",
+    color: "text-white/60",
     bgColor: "bg-white/5",
-    borderColor: "border-white/10",
+    borderColor: "border-white/20",
     glowColor: "bg-white/5",
   },
   sent: {
@@ -87,18 +87,18 @@ const statusConfig: Record<
   expired: {
     label: "Expired",
     icon: AlertCircle,
-    color: "text-zinc-500",
-    bgColor: "bg-zinc-500/10",
-    borderColor: "border-zinc-500/20",
-    glowColor: "bg-zinc-500/5",
+    color: "text-red-400/80",
+    bgColor: "bg-red-500/5",
+    borderColor: "border-red-500/10",
+    glowColor: "bg-red-500/5",
   },
   superseded: {
     label: "Superseded",
     icon: Clock,
-    color: "text-zinc-600",
-    bgColor: "bg-zinc-600/5",
-    borderColor: "border-zinc-600/10",
-    glowColor: "bg-zinc-600/5",
+    color: "text-white/40",
+    bgColor: "bg-white/3",
+    borderColor: "border-white/10",
+    glowColor: "bg-white/5",
   },
 };
 

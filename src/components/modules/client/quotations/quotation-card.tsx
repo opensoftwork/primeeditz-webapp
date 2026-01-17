@@ -35,7 +35,7 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
               <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
                 <Receipt className="h-4 w-4 text-primary" />
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
                 {quotation.code}
               </span>
             </div>
@@ -45,11 +45,11 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
 
         {/* Amount */}
         <div className="space-y-1">
-          <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
+          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
             Total Valuation
           </span>
           <div className="flex items-baseline gap-1">
-            <span className="text-sm font-bold text-white/40 tracking-tighter">
+            <span className="text-sm font-bold text-white/60 tracking-tighter">
               ₹
             </span>
             <span className="text-3xl font-black text-white tracking-tighter leading-none">
@@ -59,13 +59,13 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
         </div>
 
         {/* Divider */}
-        <div className="h-px w-full bg-linear-to-r from-transparent via-white/5 to-transparent" />
+        <div className="h-px w-full bg-linear-to-r from-transparent via-white/10 to-transparent" />
 
         {/* Footer */}
         <div className="flex items-center justify-between mt-auto">
           <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-white/20" />
-            <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+            <Calendar className="h-3.5 w-3.5 text-white/40" />
+            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
               {quotation.status === "approved"
                 ? `Accepted: ${format(quotation.approvedAt || quotation._creationTime, "MMM dd")}`
                 : `Valid: ${format(quotation.validUntil || quotation._creationTime + 30 * 24 * 60 * 60 * 1000, "MMM dd, yyyy")}`}

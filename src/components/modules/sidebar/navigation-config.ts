@@ -30,6 +30,11 @@ export const clientNavItems: NavItem[] = [
     url: "/projects",
     icon: FolderKanban,
   },
+  {
+    title: "Quotations",
+    url: "/quotations",
+    icon: FileText,
+  },
 ];
 
 // Employee Navigation - Task and work focused

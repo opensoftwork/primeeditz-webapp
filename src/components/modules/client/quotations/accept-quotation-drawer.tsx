@@ -88,7 +88,7 @@ export function AcceptQuotationDrawer({
               <SheetTitle className="text-2xl font-black text-white uppercase tracking-tighter">
                 Accept Quotation
               </SheetTitle>
-              <SheetDescription className="text-sm font-bold text-white/30 uppercase tracking-widest">
+              <SheetDescription className="text-sm font-bold text-white/50 uppercase tracking-widest">
                 Confirm your agreement to proceed
               </SheetDescription>
             </div>
@@ -109,7 +109,7 @@ export function AcceptQuotationDrawer({
                 </p>
               </div>
               <div className="text-right space-y-1">
-                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
+                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em]">
                   Total Amount
                 </span>
                 <p className="text-lg font-black text-primary tracking-tight">
@@ -144,11 +144,11 @@ export function AcceptQuotationDrawer({
                 <div className="space-y-1">
                   <Label
                     htmlFor="terms"
-                    className="text-xs font-bold text-white/80 cursor-pointer"
+                    className="text-xs font-bold text-white cursor-pointer"
                   >
                     I agree to the Terms and Conditions
                   </Label>
-                  <p className="text-[9px] font-medium text-white/30 leading-relaxed uppercase tracking-widest">
+                  <p className="text-[9px] font-medium text-white/50 leading-relaxed uppercase tracking-widest">
                     Acknowledging scope, pricing, and project timeline as stated
                     in proposal.
                   </p>
