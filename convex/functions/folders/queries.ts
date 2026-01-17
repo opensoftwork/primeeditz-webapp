@@ -115,10 +115,12 @@ export const canSetupFolders = adminQuery({
     }
 
     // Check for approved quotation
+    // Note: quotations.projectId is stored as v.optional(v.string())
+    const projectIdString = args.projectId as string;
     const approvedQuotation = await ctx.db
       .query("quotations")
       .withIndex("by_status", (q) => q.eq("status", "approved"))
-      .filter((q) => q.eq(q.field("projectId"), args.projectId))
+      .filter((q) => q.eq(q.field("projectId"), projectIdString))
       .first();
 
     if (!approvedQuotation) {
