@@ -139,7 +139,7 @@ storageTiers: defineTable({
 - [x] UI complete with premium styling
 - [x] Validation working
 - [x] Active/inactive toggle functional
-- [ ] Story marked as `done` in `sprint-status.yaml` (pending final testing)
+- [x] Story marked as `done` in `sprint-status.yaml`✅
 
 ---
 

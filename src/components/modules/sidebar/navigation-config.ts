@@ -9,6 +9,7 @@ import {
   LayoutGrid,
   ClipboardCheck,
   HardDrive,
+  FolderTree,
 } from "lucide-react";
 
 export interface NavItem {
@@ -91,6 +92,11 @@ export const adminNavItems: NavItem[] = [
     title: "Storage Tiers",
     url: "/settings/storage-tiers",
     icon: HardDrive,
+  },
+  {
+    title: "Folder Templates",
+    url: "/settings/folder-templates",
+    icon: FolderTree,
   },
 ];
 

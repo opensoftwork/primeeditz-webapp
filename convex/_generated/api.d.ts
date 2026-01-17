@@ -11,6 +11,8 @@
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
+import type * as functions_folderTemplates_mutations from "../functions/folderTemplates/mutations.js";
+import type * as functions_folderTemplates_queries from "../functions/folderTemplates/queries.js";
 import type * as functions_profiles_mutations from "../functions/profiles/mutations.js";
 import type * as functions_profiles_queries from "../functions/profiles/queries.js";
 import type * as functions_projectCategories_mutations from "../functions/projectCategories/mutations.js";
@@ -41,6 +43,7 @@ import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
 import type * as profiles from "../profiles.js";
 import type * as seed from "../seed.js";
+import type * as seeds_folderTemplates from "../seeds/folderTemplates.js";
 import type * as seeds_projectStructure from "../seeds/projectStructure.js";
 import type * as seeds_quotationLibraryItems from "../seeds/quotationLibraryItems.js";
 import type * as seeds_quotationSections from "../seeds/quotationSections.js";
@@ -56,6 +59,8 @@ declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
+  "functions/folderTemplates/mutations": typeof functions_folderTemplates_mutations;
+  "functions/folderTemplates/queries": typeof functions_folderTemplates_queries;
   "functions/profiles/mutations": typeof functions_profiles_mutations;
   "functions/profiles/queries": typeof functions_profiles_queries;
   "functions/projectCategories/mutations": typeof functions_projectCategories_mutations;
@@ -86,6 +91,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   profiles: typeof profiles;
   seed: typeof seed;
+  "seeds/folderTemplates": typeof seeds_folderTemplates;
   "seeds/projectStructure": typeof seeds_projectStructure;
   "seeds/quotationLibraryItems": typeof seeds_quotationLibraryItems;
   "seeds/quotationSections": typeof seeds_quotationSections;

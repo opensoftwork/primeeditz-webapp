@@ -1,0 +1,262 @@
+"use client";
+
+import { useForm } from "@tanstack/react-form";
+import { z } from "zod";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useEffect } from "react";
+import { FolderTree, Tag, Info, ArrowRight, Star } from "lucide-react";
+import { FolderListEditor } from "./folder-list-editor";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+
+const folderTemplateSchema = z.object({
+  name: z.string().min(2, "Name must be at least 2 characters"),
+  folders: z.array(z.string()).min(1, "At least one folder is required"),
+  projectTypeId: z.string().optional(),
+  isDefault: z.boolean().default(false),
+  isActive: z.boolean().default(true),
+});
+
+export type FolderTemplateFormValues = z.infer<typeof folderTemplateSchema>;
+
+interface FolderTemplate {
+  _id: string;
+  name: string;
+  folders: string[];
+  projectTypeId?: string;
+  isDefault?: boolean;
+  isActive: boolean;
+}
+
+interface FolderTemplateDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onSave: (values: FolderTemplateFormValues) => Promise<void>;
+  initialData?: FolderTemplate | null;
+}
+
+export function FolderTemplateDrawer({
+  open,
+  onOpenChange,
+  onSave,
+  initialData,
+}: FolderTemplateDrawerProps) {
+  const projectTypes = useQuery(api.functions.projectTypes.queries.getProjectTypes);
+
+  const form = useForm({
+    defaultValues: {
+      name: initialData?.name ?? "",
+      folders: initialData?.folders ?? [],
+      projectTypeId: initialData?.projectTypeId ?? undefined,
+      isDefault: initialData?.isDefault ?? false,
+      isActive: initialData?.isActive ?? true,
+    },
+    onSubmit: async ({ value }) => {
+      await onSave(value as FolderTemplateFormValues);
+    },
+  });
+
+  // Reset form when initialData or open changes
+  useEffect(() => {
+    if (open) {
+      form.reset();
+    }
+  }, [initialData, open, form]);
+
+  return (
+    <Drawer open={open} onOpenChange={onOpenChange} direction="right">
+      <DrawerContent className="bg-zinc-950 border-white/10 h-full max-sm:w-full ml-auto rounded-none flex flex-col">
+        <DrawerHeader className="border-b border-white/5 py-8">
+          <DrawerTitle className="text-3xl font-black text-white uppercase tracking-tighter">
+            {initialData ? "Edit Template" : "New Template"}
+          </DrawerTitle>
+          <DrawerDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+            {initialData
+              ? "Refine your folder template configuration."
+              : "Design a standardized folder structure for projects."}
+          </DrawerDescription>
+        </DrawerHeader>
+
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            form.handleSubmit();
+          }}
+          className="flex-1 overflow-y-auto p-8 space-y-10 custom-scrollbar"
+        >
+          <div className="space-y-8">
+            {/* Step 01: Basics */}
+            <div className="space-y-6">
+              <form.Field name="name">
+                {(field) => (
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                      Step 01 / Template Name
+                    </Label>
+                    <div className="relative">
+                      <FolderTree className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
+                      <Input
+                        value={field.state.value}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl pl-12 focus:ring-primary/20 font-bold"
+                        placeholder="e.g. Standard Wedding Workflow"
+                      />
+                    </div>
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field name="projectTypeId">
+                {(field) => (
+                  <div className="space-y-3">
+                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                      Step 02 / Project Type Association
+                    </Label>
+                    <Select
+                      value={field.state.value || "general"}
+                      onValueChange={(val) => field.handleChange(val === "general" ? undefined : val)}
+                    >
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-6 focus:ring-primary/20 font-bold">
+                        <div className="flex items-center gap-3">
+                          <Tag className="h-5 w-5 text-white/20" />
+                          <SelectValue placeholder="Select Project Type" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-2xl shadow-2xl">
+                        <SelectItem value="general" className="font-bold focus:bg-primary/20 focus:text-white rounded-xl py-3 cursor-pointer">
+                          General (All Projects)
+                        </SelectItem>
+                        {projectTypes?.map((type) => (
+                          <SelectItem 
+                            key={type._id} 
+                            value={type._id}
+                            className="font-bold focus:bg-primary/20 focus:text-white rounded-xl py-3 cursor-pointer"
+                          >
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <p className="text-[9px] text-white/20 font-medium px-1 leading-relaxed">
+                      General templates appear for all projects. Specific templates only show for projects of that type.
+                    </p>
+                  </div>
+                )}
+              </form.Field>
+            </div>
+
+            {/* Step 02: Folder Structure */}
+            <form.Field name="folders">
+              {(field) => (
+                <FolderListEditor 
+                  folders={field.state.value} 
+                  onChange={field.handleChange} 
+                />
+              )}
+            </form.Field>
+
+            {/* Step 03: Options */}
+            <div className="space-y-4 pt-4 border-t border-white/5">
+              <form.Field name="isDefault">
+                {(field) => (
+                  <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.03] border border-white/5 transition-colors hover:bg-white/[0.05]">
+                    <div className="flex gap-4">
+                      <div className="mt-1 p-2 rounded-xl bg-primary/10 border border-primary/20">
+                        <Star className="h-4 w-4 text-primary" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-white font-black uppercase tracking-tight text-xs">
+                          Set as Default
+                        </Label>
+                        <p className="text-[9px] text-white/20 uppercase tracking-widest font-black leading-relaxed">
+                          Auto-apply this template to new projects
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={field.state.value}
+                      onCheckedChange={field.handleChange}
+                    />
+                  </div>
+                )}
+              </form.Field>
+
+              <form.Field name="isActive">
+                {(field) => (
+                  <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.03] border border-white/5 transition-colors hover:bg-white/[0.05]">
+                    <div className="flex gap-4">
+                      <div className="mt-1 p-2 rounded-xl bg-white/5 border border-white/5">
+                        <Info className="h-4 w-4 text-white/40" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-white font-black uppercase tracking-tight text-xs">
+                          Active Status
+                        </Label>
+                        <p className="text-[9px] text-white/20 uppercase tracking-widest font-black leading-relaxed">
+                          Template remains available for selection
+                        </p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={field.state.value}
+                      onCheckedChange={field.handleChange}
+                    />
+                  </div>
+                )}
+              </form.Field>
+            </div>
+          </div>
+
+          <div className="pt-8 sticky bottom-0 bg-zinc-950 pb-2">
+            <form.Subscribe
+              selector={(state) => ({
+                canSubmit: state.canSubmit,
+                isSubmitting: state.isSubmitting,
+                name: state.values.name,
+                folders: state.values.folders,
+              })}
+            >
+              {({ canSubmit, isSubmitting, name, folders }) => (
+                <Button
+                  type="submit"
+                  disabled={!canSubmit || isSubmitting || !name || folders.length === 0}
+                  className="w-full h-16 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
+                >
+                  <div className="flex items-center gap-3">
+                    {isSubmitting ? (
+                      "Processing..."
+                    ) : (
+                      <>
+                        {initialData ? "Update Template" : "Confirm Template"}
+                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                      </>
+                    )}
+                  </div>
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </form>
+      </DrawerContent>
+    </Drawer>
+  );
+}
