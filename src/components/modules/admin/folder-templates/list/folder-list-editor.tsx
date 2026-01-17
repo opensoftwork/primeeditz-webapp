@@ -52,14 +52,14 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
             onChange={(e) => setNewFolder(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder="e.g. Raw Footage"
-            className="bg-white/5 border-white/10 text-white h-12 rounded-2xl pl-12 focus:ring-primary/20 font-bold text-sm"
+            className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold text-sm"
           />
         </div>
         <Button
           type="button"
           onClick={addFolder}
           disabled={!newFolder.trim() || folders.includes(newFolder.trim())}
-          className="bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-2xl transition-all"
+          className="bg-primary text-primary-foreground font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-xl transition-all"
         >
           <Plus className="h-4 w-4" />
         </Button>
@@ -80,7 +80,7 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, scale: 0.95 }}
-                className="group relative flex items-center gap-3 p-3 rounded-2xl bg-white/[0.03] border border-white/5 hover:bg-white/[0.06] hover:border-white/10 transition-all cursor-grab active:cursor-grabbing"
+                className="group relative flex items-center gap-3 p-3 rounded-xl bg-white/3 border border-white/5 hover:bg-white/6 hover:border-white/10 transition-all cursor-grab active:cursor-grabbing"
               >
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/5 group-hover:bg-primary/20 transition-colors">
                   <GripVertical className="h-4 w-4 text-white/20 group-hover:text-primary transition-colors" />
@@ -104,7 +104,7 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
         </Reorder.Group>
 
         {folders.length === 0 && (
-          <div className="flex flex-col items-center justify-center py-10 rounded-2xl border-2 border-dashed border-white/5 bg-white/[0.01]">
+          <div className="flex flex-col items-center justify-center py-10 rounded-xl border-2 border-dashed border-white/5 bg-white/1">
             <Folder className="h-10 w-10 text-white/5 mb-3" />
             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
               No folders added yet
@@ -114,7 +114,7 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
       </div>
       
       <p className="text-[9px] text-white/20 font-medium px-1">
-        Drag and drop folders to reorder. These will be created in the project root.
+        Drag and drop folders to reorder.
       </p>
     </div>
   );

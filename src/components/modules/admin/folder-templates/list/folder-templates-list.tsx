@@ -101,13 +101,13 @@ export function FolderTemplatesList() {
   }
 
   return (
-    <div className="space-y-12 pb-24 p-8 md:p-12 max-w-[1600px] mx-auto">
+    <div className="space-y-8 pb-24 p-8 md:p-12">
       <ListHeader onCreate={handleCreate} templateCount={templates.length} />
 
       {templates.length === 0 ? (
         <ListEmpty onCreate={handleCreate} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {templates.map((template) => (
             <FolderTemplateCard
               key={template._id}

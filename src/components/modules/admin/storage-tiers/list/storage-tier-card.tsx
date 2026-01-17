@@ -51,11 +51,11 @@ export function StorageTierCard({
       transition={{ duration: 0.3 }}
       whileHover={{ y: -5 }}
     >
-      <Card className="group relative overflow-hidden border-white/5 bg-white/5 backdrop-blur-xl transition-all hover:bg-white/10 rounded-xl">
+      <Card className="group relative overflow-hidden border-white/5 bg-white/5 backdrop-blur-xl transition-all hover:bg-white/10 rounded-xl p-0">
         {/* Glow Effect */}
         <div className="absolute -right-20 -top-20 h-30 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
 
-        <CardContent className="p-5">
+        <CardContent className="p-4">
           <div className="flex items-center justify-between mb-4">
             <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20">
               <HardDrive className="h-5 w-5 text-primary" />

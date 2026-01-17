@@ -83,7 +83,7 @@ export function FolderTemplateDrawer({
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
-      <DrawerContent className="bg-zinc-950 border-white/10 h-full max-sm:w-full ml-auto rounded-none flex flex-col">
+      <DrawerContent className="bg-zinc-950 border-white/10 h-full sm:max-w-2xl ml-auto rounded-none flex flex-col">
         <DrawerHeader className="border-b border-white/5 py-8">
           <DrawerTitle className="text-3xl font-black text-white uppercase tracking-tighter">
             {initialData ? "Edit Template" : "New Template"}
@@ -117,7 +117,7 @@ export function FolderTemplateDrawer({
                       <Input
                         value={field.state.value}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl pl-12 focus:ring-primary/20 font-bold"
+                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                         placeholder="e.g. Standard Wedding Workflow"
                       />
                     </div>
@@ -135,21 +135,21 @@ export function FolderTemplateDrawer({
                       value={field.state.value || "general"}
                       onValueChange={(val) => field.handleChange(val === "general" ? undefined : val)}
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-6 focus:ring-primary/20 font-bold">
+                      <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl px-4 focus:ring-primary/20 font-bold">
                         <div className="flex items-center gap-3">
                           <Tag className="h-5 w-5 text-white/20" />
                           <SelectValue placeholder="Select Project Type" />
                         </div>
                       </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-2xl shadow-2xl">
-                        <SelectItem value="general" className="font-bold focus:bg-primary/20 focus:text-white rounded-xl py-3 cursor-pointer">
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl shadow-2xl">
+                        <SelectItem value="general" className="font-bold focus:bg-primary/20 focus:text-white rounded-lg py-2.5 cursor-pointer">
                           General (All Projects)
                         </SelectItem>
                         {projectTypes?.map((type) => (
                           <SelectItem 
                             key={type._id} 
                             value={type._id}
-                            className="font-bold focus:bg-primary/20 focus:text-white rounded-xl py-3 cursor-pointer"
+                            className="font-bold focus:bg-primary/20 focus:text-white rounded-lg py-2.5 cursor-pointer"
                           >
                             {type.name}
                           </SelectItem>
@@ -178,7 +178,7 @@ export function FolderTemplateDrawer({
             <div className="space-y-4 pt-4 border-t border-white/5">
               <form.Field name="isDefault">
                 {(field) => (
-                  <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.03] border border-white/5 transition-colors hover:bg-white/[0.05]">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-white/3 border border-white/5 transition-colors hover:bg-white/5">
                     <div className="flex gap-4">
                       <div className="mt-1 p-2 rounded-xl bg-primary/10 border border-primary/20">
                         <Star className="h-4 w-4 text-primary" />
@@ -202,7 +202,7 @@ export function FolderTemplateDrawer({
 
               <form.Field name="isActive">
                 {(field) => (
-                  <div className="flex items-center justify-between p-5 rounded-2xl bg-white/[0.03] border border-white/5 transition-colors hover:bg-white/[0.05]">
+                  <div className="flex items-center justify-between p-4 rounded-xl bg-white/3 border border-white/5 transition-colors hover:bg-white/5">
                     <div className="flex gap-4">
                       <div className="mt-1 p-2 rounded-xl bg-white/5 border border-white/5">
                         <Info className="h-4 w-4 text-white/40" />
@@ -239,7 +239,7 @@ export function FolderTemplateDrawer({
                 <Button
                   type="submit"
                   disabled={!canSubmit || isSubmitting || !name || folders.length === 0}
-                  className="w-full h-16 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
+                  className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
                 >
                   <div className="flex items-center gap-3">
                     {isSubmitting ? (

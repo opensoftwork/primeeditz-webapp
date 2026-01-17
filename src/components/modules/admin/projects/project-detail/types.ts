@@ -11,6 +11,7 @@ export interface AdminProjectDetail {
   _creationTime: number;
   code: string;
   status: string;
+  projectTypeId: Id<"projectTypes">;
   clientName: string;
   clientEmail?: string;
   projectTypeName: string;
@@ -29,3 +30,4 @@ export interface AdminProjectDetail {
   statusHistory?: StatusHistoryEntry[];
   storageAllocated?: number;
 }
+

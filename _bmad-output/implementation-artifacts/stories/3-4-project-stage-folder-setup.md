@@ -1,7 +1,7 @@
 # Story 3-4: Project Stage/Folder Setup
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-dev  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Required for Epic 5 folder creation
@@ -39,36 +39,36 @@
 
 ### AC1: Folder Setup Trigger
 
-- [ ] Admin project detail shows "Setup Folders" button
-- [ ] Button enabled only when:
+- [x] Admin project detail shows "Setup Folders" button
+- [x] Button enabled only when:
   - Project has approved quotation (status = `approved`)
   - Folders not already created
 
 ### AC2: Folder Template Selection
 
-- [ ] Clicking "Setup Folders" opens drawer
-- [ ] Shows available folder templates
-- [ ] Templates filtered by project type (if associated)
-- [ ] Preview shows folder names
+- [x] Clicking "Setup Folders" opens drawer
+- [x] Shows available folder templates
+- [x] Templates filtered by project type (if associated)
+- [x] Preview shows folder names
 
 ### AC3: Folder Creation
 
-- [ ] Selecting template + confirming creates folder records
-- [ ] Folders created in `folders` table linked to project
-- [ ] Each folder has: name, path, status = `pending_upload`
+- [x] Selecting template + confirming creates folder records
+- [x] Folders created in `folders` table linked to project
+- [x] Each folder has: name, path, status = `pending_upload`
 
 ### AC4: Storage Tier Assignment
 
-- [ ] During setup, select/confirm storage tier
-- [ ] Storage tier from quotation pre-selected
-- [ ] Can override if needed
-- [ ] Project's `storageAllocated` updated
+- [x] During setup, select/confirm storage tier
+- [ ] Storage tier from quotation pre-selected (not yet implemented - no quotation linkage)
+- [x] Can override if needed
+- [x] Project's `storageAllocated` updated
 
 ### AC5: Post-Setup State
 
-- [ ] Project shows folder structure in detail view
-- [ ] Client can now see folders in their portal
-- [ ] "Setup Folders" button changes to "View Folders"
+- [x] Project shows folder structure in detail view
+- [ ] Client can now see folders in their portal (requires client portal update)
+- [x] "Setup Folders" button changes to "View Folders"
 
 ---
 
@@ -78,29 +78,29 @@
 
 **File**: `convex/functions/folders/mutations.ts`
 
-- [ ] `setupProjectFolders` mutation
+- [x] `setupProjectFolders` mutation
   - Input: projectId, templateId, storageTierId
   - Creates folder records from template
   - Updates project storageAllocated
 
 **File**: `convex/functions/folders/queries.ts`
 
-- [ ] `getProjectFolders` - Get folders for project
-- [ ] `canSetupFolders` - Check if setup allowed
+- [x] `getProjectFolders` - Get folders for project
+- [x] `canSetupFolders` - Check if setup allowed
 
 ### Phase B: UI (~3 points)
 
 **File**: `src/components/modules/admin/projects/folder-setup/`
 
-- [ ] `folder-setup-drawer.tsx` - Main drawer
-- [ ] `template-selector.tsx` - Template selection
-- [ ] `storage-tier-selector.tsx` - Tier selection
-- [ ] `folder-preview.tsx` - Preview before creation
+- [x] `folder-setup-drawer.tsx` - Main drawer
+- [x] `template-selector.tsx` - Template selection
+- [x] `storage-tier-selector.tsx` - Tier selection
+- [x] `folder-preview.tsx` - Preview before creation
 
-**File**: `src/app/(protected)/@admin/projects/[id]/page.tsx`
+**File**: `src/components/modules/admin/projects/project-detail/`
 
-- [ ] Add "Setup Folders" button to project detail
-- [ ] Show folder list after setup
+- [x] Add "Setup Folders" button to project detail (via system-controls.tsx)
+- [x] Show folder list after setup (via project-folders-list.tsx)
 
 ---
 

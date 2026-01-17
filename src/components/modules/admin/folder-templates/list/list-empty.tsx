@@ -13,7 +13,7 @@ export function ListEmpty({ onCreate }: ListEmptyProps) {
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="flex flex-col items-center justify-center p-12 md:p-24 border-2 border-dashed border-white/5 rounded-[40px] bg-white/[0.02] text-center space-y-6"
+      className="flex flex-col items-center justify-center p-12 md:p-24 border-2 border-dashed border-white/5 rounded-xl bg-white/2 text-center space-y-6"
     >
       <div className="relative">
         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />

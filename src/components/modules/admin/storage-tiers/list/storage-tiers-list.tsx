@@ -137,25 +137,27 @@ export function StorageTiersList() {
   // Loading State
   if (storageTiers === undefined) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-8 md:p-12">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton
-            key={i}
-            className="h-48 w-full bg-white/5 rounded-xl"
-          />
-        ))}
+      <div className="space-y-8 p-8 md:p-12 w-full">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton
+              key={i}
+              className="h-48 w-full bg-white/5 rounded-xl"
+            />
+          ))}
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-20 p-8 md:p-12">
+    <div className="space-y-8 pb-20 p-8 md:p-12 w-full">
       <ListHeader onCreate={handleCreate} tierCount={storageTiers.length} />
 
       {storageTiers.length === 0 ? (
         <ListEmpty onCreate={handleCreate} />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {storageTiers.map((tier) => (
             <StorageTierCard
               key={tier._id}

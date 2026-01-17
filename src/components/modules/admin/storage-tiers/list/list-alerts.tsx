@@ -13,9 +13,9 @@ import {
 
 interface ListAlertsProps {
   tierToToggle: { id: string; current: boolean; name: string } | null;
-  setTierToToggle: (tier: { id: string; current: boolean; name: string } | null) => void;
+  setTierToToggle: (val: null) => void;
   tierToDelete: { id: string; name: string } | null;
-  setTierToDelete: (tier: { id: string; name: string } | null) => void;
+  setTierToDelete: (val: null) => void;
   onToggleStatus: () => Promise<void>;
   onDelete: () => Promise<void>;
 }
@@ -30,63 +30,57 @@ export function ListAlerts({
 }: ListAlertsProps) {
   return (
     <>
-      {/* Toggle Status Confirmation */}
+      {/* Deactivation Alert */}
       <AlertDialog
         open={!!tierToToggle}
         onOpenChange={() => setTierToToggle(null)}
       >
-        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[2rem]">
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[2rem] p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black text-white uppercase tracking-tight">
-              {tierToToggle?.current ? "Deactivate Tier" : "Activate Tier"}
+            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Verify Deactivation
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/60">
-              {tierToToggle?.current
-                ? `Deactivating "${tierToToggle?.name}" will hide it from quotation selection. Existing projects with this tier will not be affected.`
-                : `Activating this tier will make it available for selection in quotations.`}
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              Are you sure you want to deactivate <span className="text-white">"{tierToToggle?.name}"</span>? 
+              This will hide the plan from new quotations.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl border-white/10 bg-white/5 text-white/40 hover:text-white">
+          <AlertDialogFooter className="mt-8 gap-3">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl hover:bg-white/10 transition-colors">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={onToggleStatus}
-              className={`rounded-xl font-black uppercase tracking-widest text-[10px] px-6 ${
-                tierToToggle?.current
-                  ? "bg-amber-500/20 text-amber-500 hover:bg-amber-500/30"
-                  : "bg-primary text-primary-foreground"
-              }`}
+              className="bg-amber-500 hover:bg-amber-600 text-black font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl transition-all"
             >
-              {tierToToggle?.current ? "Deactivate" : "Activate"}
+              Deactivate Plan
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete Confirmation */}
+      {/* Deletion Alert */}
       <AlertDialog
         open={!!tierToDelete}
         onOpenChange={() => setTierToDelete(null)}
       >
-        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[2rem]">
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[2rem] p-8">
           <AlertDialogHeader>
-            <AlertDialogTitle className="text-xl font-black text-white uppercase tracking-tight">
-              Delete Storage Tier
+            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Permanent Deletion
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/60">
-              Are you sure you want to permanently delete &quot;{tierToDelete?.name}&quot;?
-              This action cannot be undone. Tiers in use by projects cannot be
-              deleted.
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              Are you sure you want to remove <span className="text-white">"{tierToDelete?.name}"</span>? 
+              This action is permanent and cannot be reversed.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel className="rounded-xl border-white/10 bg-white/5 text-white/40 hover:text-white">
+          <AlertDialogFooter className="mt-8 gap-3">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl hover:bg-white/10 transition-colors">
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={onDelete}
-              className="rounded-xl bg-red-500/20 text-red-500 hover:bg-red-500/30 font-black uppercase tracking-widest text-[10px] px-6"
+              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl transition-all"
             >
               Delete Permanently
             </AlertDialogAction>

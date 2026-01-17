@@ -1,7 +1,7 @@
 "use client";
 
 import { useAction, useQuery } from "convex/react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { Package } from "lucide-react";
 import Link from "next/link";
 
@@ -17,6 +17,10 @@ import { ProjectHistory } from "./project-history";
 import { ClientCard } from "./client-card";
 import { SystemControls } from "./system-controls";
 import { ProjectDetailSkeleton } from "./skeleton";
+import {
+  FolderSetupDrawer,
+  ProjectFoldersList,
+} from "../folder-setup";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -24,6 +28,7 @@ interface ProjectDetailProps {
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {}
   );
@@ -31,6 +36,11 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   });
+
+  const folderSetupStatus = useQuery(
+    api.functions.folders.queries.canSetupFolders,
+    project ? { projectId: projectId as Id<"projects"> } : "skip"
+  );
 
   const getSignedUrlsAction = useAction(
     api.functions.storage.actions.getSignedFileUrls
@@ -69,6 +79,18 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         : undefined,
     }));
   }, [project?.referenceFiles, signedUrls]);
+
+  const handleFolderSetupSuccess = useCallback(() => {
+    // The queries will automatically refetch
+  }, []);
+
+  const handleViewFolders = useCallback(() => {
+    // Scroll to folders section
+    const foldersSection = document.getElementById("project-folders-section");
+    if (foldersSection) {
+      foldersSection.scrollIntoView({ behavior: "smooth" });
+    }
+  }, []);
 
   if (project === undefined) return <ProjectDetailSkeleton />;
 
@@ -109,6 +131,14 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
             vaultFiles={vaultFiles}
             onOpenVault={() => setIsVaultOpen(true)}
           />
+          
+          {/* Project Folders Section */}
+          {folderSetupStatus?.hasFolders && (
+            <div id="project-folders-section">
+              <ProjectFoldersList projectId={projectId as Id<"projects">} />
+            </div>
+          )}
+          
           <ProjectHistory history={project.statusHistory} />
         </div>
 
@@ -121,6 +151,11 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           <SystemControls
             storageAllocated={project.storageAllocated}
             status={project.status}
+            canSetupFolders={folderSetupStatus?.canSetup ?? false}
+            hasFolders={folderSetupStatus?.hasFolders ?? false}
+            folderSetupReason={folderSetupStatus?.reason}
+            onSetupFolders={() => setIsFolderSetupOpen(true)}
+            onViewFolders={handleViewFolders}
           />
         </div>
       </div>
@@ -133,6 +168,18 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         files={vaultFiles}
         primaryColor="amber-500"
       />
+
+      {/* Folder Setup Drawer */}
+      <FolderSetupDrawer
+        open={isFolderSetupOpen}
+        onOpenChange={setIsFolderSetupOpen}
+        projectId={projectId as Id<"projects">}
+        projectCode={project.code}
+        projectName={project.eventName}
+        projectTypeId={project.projectTypeId}
+        onSuccess={handleFolderSetupSuccess}
+      />
     </div>
   );
 }
+

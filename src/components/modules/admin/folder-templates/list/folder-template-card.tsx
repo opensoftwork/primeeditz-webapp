@@ -38,9 +38,9 @@ export function FolderTemplateCard({
       whileHover={{ y: -5 }}
       transition={{ duration: 0.2 }}
     >
-      <Card className="group relative overflow-hidden bg-zinc-900/50 border-white/5 p-6 rounded-[32px] transition-all hover:bg-white/[0.04] hover:border-white/10 hover:shadow-2xl hover:shadow-primary/5">
+      <Card className="group relative overflow-hidden bg-zinc-900/50 border-white/5 p-6 rounded-[24px] transition-all hover:bg-white/[0.04] hover:border-white/10 hover:shadow-2xl hover:shadow-primary/5">
         {/* Glow Effect */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 blur-[100px] rounded-full group-hover:bg-primary/10 transition-colors" />
+        <div className="absolute -top-24 -right-24 w-48 h-48 bg-primary/5 blur-[100px] rounded-[24px] group-hover:bg-primary/10 transition-colors" />
 
         <div className="relative z-10 space-y-6">
           {/* Header */}
