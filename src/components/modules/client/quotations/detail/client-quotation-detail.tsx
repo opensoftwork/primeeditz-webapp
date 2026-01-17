@@ -22,12 +22,9 @@ export function ClientQuotationDetail() {
   const router = useRouter();
   const quotationId = params.id as string;
 
-  const data = useQuery(
-    api.functions.quotations.queries.getQuotationWithSections,
-    {
-      quotationId: quotationId as Id<"quotations">,
-    },
-  );
+  const data = useQuery(api.functions.quotations.queries.getMyQuotationDetail, {
+    quotationId: quotationId as Id<"quotations">,
+  });
 
   const markViewed = useMutation(
     api.functions.quotations.mutations.markQuotationViewed,

@@ -247,3 +247,38 @@ export const getMyQuotations = clientQuery({
       .sort((a, b) => b._creationTime - a._creationTime);
   },
 });
+
+/**
+ * Get client's specific quotation with sections
+ */
+export const getMyQuotationDetail = clientQuery({
+  args: {
+    quotationId: v.id("quotations"),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) return null;
+
+    // Verify ownership
+    if (quotation.clientId !== ctx.profile._id) {
+      throw new Error("Access denied: Not your quotation");
+    }
+
+    // Status check
+    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    if (!clientVisibleStatus.includes(quotation.status)) {
+       return null;
+    }
+
+    // Get all sections used in this quotation
+    const sectionIds = [...new Set(quotation.lineItems.map((li) => li.sectionId))];
+    const sections = await Promise.all(
+      sectionIds.map((id) => id ? ctx.db.get(id) : null)
+    );
+
+    return {
+      quotation,
+      sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+    };
+  },
+});

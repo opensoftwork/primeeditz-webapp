@@ -32,7 +32,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
 import { cn } from "@/lib/utils";
-import { DEFAULT_UNIT } from "@/constants/units";
+import { DEFAULT_UNIT } from "@/lib/constants/units";
 import { SectionPickerDrawer } from "./section-picker-drawer";
 import { ProjectPickerDrawer } from "./project-picker-drawer";
 import type { QuotationLineItem, Section, Project } from "../../types";
@@ -134,7 +134,7 @@ export function LineItemDrawer({
                 "h-10 w-10 rounded-xl flex items-center justify-center border",
                 isEditing
                   ? "bg-amber-500/10 border-amber-500/20"
-                  : "bg-primary/10 border-primary/20"
+                  : "bg-primary/10 border-primary/20",
               )}
             >
               {isEditing ? (
@@ -282,7 +282,7 @@ export function LineItemDrawer({
               "p-4 rounded-xl border",
               isEditing
                 ? "bg-amber-500/5 border-amber-500/20"
-                : "bg-primary/5 border-primary/20"
+                : "bg-primary/5 border-primary/20",
             )}
           >
             <div className="flex items-center justify-between">
@@ -292,7 +292,7 @@ export function LineItemDrawer({
               <span
                 className={cn(
                   "text-2xl font-black tracking-tight",
-                  isEditing ? "text-amber-500" : "text-primary"
+                  isEditing ? "text-amber-500" : "text-primary",
                 )}
               >
                 {formatCurrency(calculatedTotal)}
@@ -321,7 +321,7 @@ export function LineItemDrawer({
               "flex-1 h-11 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2",
               isEditing
                 ? "bg-amber-500 hover:bg-amber-600 text-white"
-                : "bg-primary hover:bg-primary/90"
+                : "bg-primary hover:bg-primary/90",
             )}
           >
             {isSubmitting ? (

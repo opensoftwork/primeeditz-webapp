@@ -14,7 +14,7 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { UNITS } from "@/constants/units";
+import { UNITS } from "@/lib/constants/units";
 import { cn } from "@/lib/utils";
 
 interface NestedUnitSelectorProps {
@@ -63,7 +63,7 @@ export function NestedUnitSelector({
           disabled={disabled}
           className={cn(
             "h-11 bg-white/5 border-white/5 text-white hover:bg-white/10 hover:border-white/10 transition-all rounded-xl px-4 flex items-center justify-between min-w-[140px] group",
-            triggerClassName
+            triggerClassName,
           )}
         >
           <div className="flex items-center gap-2.5 overflow-hidden">
@@ -78,7 +78,7 @@ export function NestedUnitSelector({
       <DropdownMenuContent
         className={cn(
           "min-w-[220px] bg-zinc-900/95 backdrop-blur-3xl border-white/10 rounded-2xl shadow-2xl p-2",
-          className
+          className,
         )}
         align="start"
         sideOffset={8}
@@ -105,7 +105,7 @@ export function NestedUnitSelector({
                         "flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all",
                         value === unit
                           ? "bg-primary text-primary-foreground font-black"
-                          : "text-white/70 hover:bg-white/5 hover:text-white"
+                          : "text-white/70 hover:bg-white/5 hover:text-white",
                       )}
                     >
                       <span className="text-[11px] font-bold uppercase tracking-widest">

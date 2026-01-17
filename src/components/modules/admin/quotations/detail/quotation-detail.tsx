@@ -4,7 +4,15 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import {
+  ArrowLeft,
+  FileText,
+  ArrowRight,
+  ShieldCheck,
+  CheckCircle2,
+  Clock,
+  AlertCircle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { DetailHeader } from "./components/detail-header";
@@ -15,45 +23,82 @@ import { TermsConditions } from "./components/terms-conditions";
 import { QuickActions } from "./components/quick-actions";
 import { ClientFeedbackSection } from "./components/client-feedback-section";
 
-const statusConfig: Record<string, { label: string; color: string }> = {
+const statusConfig: Record<
+  string,
+  {
+    label: string;
+    icon: any;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+  }
+> = {
   draft: {
     label: "Draft",
-    color: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20",
+    icon: FileText,
+    color: "text-zinc-400",
+    bgColor: "bg-zinc-400/10",
+    borderColor: "border-zinc-400/20",
   },
   sent: {
     label: "Sent",
-    color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
+    icon: ArrowRight,
+    color: "text-blue-400",
+    bgColor: "bg-blue-400/10",
+    borderColor: "border-blue-400/20",
   },
   viewed: {
     label: "Viewed",
-    color: "text-indigo-400 bg-indigo-400/10 border-indigo-400/20",
+    icon: ShieldCheck,
+    color: "text-indigo-400",
+    bgColor: "bg-indigo-400/10",
+    borderColor: "border-indigo-400/20",
   },
   approved: {
     label: "Approved",
-    color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
+    icon: CheckCircle2,
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-400/10",
+    borderColor: "border-emerald-400/20",
   },
   changes_requested: {
     label: "Revisions",
-    color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
+    icon: Clock,
+    color: "text-amber-400",
+    bgColor: "bg-amber-400/10",
+    borderColor: "border-amber-400/20",
   },
   rejected: {
     label: "Declined",
-    color: "text-red-400 bg-red-400/10 border-red-400/20",
+    icon: AlertCircle,
+    color: "text-red-400",
+    bgColor: "bg-red-400/10",
+    borderColor: "border-red-400/20",
   },
   expired: {
     label: "Expired",
-    color: "text-red-400 bg-red-400/10 border-red-400/20",
+    icon: AlertCircle,
+    color: "text-red-400",
+    bgColor: "bg-red-400/10",
+    borderColor: "border-red-400/20",
   },
   superseded: {
     label: "Superseded",
-    color: "text-zinc-500 bg-zinc-500/10 border-zinc-500/20",
+    icon: FileText,
+    color: "text-zinc-500",
+    bgColor: "bg-zinc-500/10",
+    borderColor: "border-zinc-500/20",
   },
 };
 
-export default function QuotationDetail() {
+export function QuotationDetail({
+  quotationId: propQuotationId,
+}: {
+  quotationId?: string;
+}) {
   const params = useParams();
   const router = useRouter();
-  const quotationId = params.id as string;
+  const quotationId = propQuotationId || (params.id as string);
 
   const data = useQuery(
     api.functions.quotations.queries.getQuotationWithSections,
