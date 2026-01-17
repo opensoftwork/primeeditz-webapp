@@ -1,7 +1,7 @@
 # Story 3-15: Storage Pool Tracking
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-dev  
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-17  
 **Priority**: MEDIUM — Required for accurate storage management
@@ -69,9 +69,9 @@
 
 ## 📘 Implementation Tasks
 
-### Phase A: Storage Calculation (~1 point)
+### Phase A: Storage Calculation (~1 point) ✅
 
-**File**: `convex/functions/quotations/queries.ts`
+**File**: `convex/functions/quotations/queries.ts` - Added `getQuotationStorageSummary`
 
 - [ ] Add `getQuotationStorageSummary` query:
   - Input: quotationId

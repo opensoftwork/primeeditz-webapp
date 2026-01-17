@@ -1,7 +1,7 @@
 # Story 3-12: Link Project to Existing Quotation
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-dev  
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Required for folder setup workflow improvement
@@ -94,7 +94,7 @@
 
 ## 📘 Implementation Tasks
 
-### Phase A: Backend (~2 points)
+### Phase A: Backend (~2 points) ✅
 
 **File**: `convex/functions/quotations/queries.ts`
 

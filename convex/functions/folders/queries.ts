@@ -114,28 +114,68 @@ export const canSetupFolders = adminQuery({
       };
     }
 
-    // Check for approved quotation
+    // Check for approved quotation linked to this project
     // Note: quotations.projectId is stored as v.optional(v.string())
     const projectIdString = args.projectId as string;
-    const approvedQuotation = await ctx.db
+    
+    // Check single projectId field
+    let approvedQuotation = await ctx.db
       .query("quotations")
       .withIndex("by_status", (q) => q.eq("status", "approved"))
       .filter((q) => q.eq(q.field("projectId"), projectIdString))
       .first();
 
+    // Also check projectIds array (for multi-project quotations)
     if (!approvedQuotation) {
+      const allApprovedQuotations = await ctx.db
+        .query("quotations")
+        .withIndex("by_status", (q) => q.eq("status", "approved"))
+        .collect();
+      
+      approvedQuotation = allApprovedQuotations.find((q) => 
+        q.projectIds?.includes(projectIdString)
+      ) || null;
+    }
+
+    if (approvedQuotation) {
       return {
-        canSetup: false,
-        reason: "No approved quotation for this project",
-        hasApprovedQuotation: false,
+        canSetup: true,
+        reason: null,
+        hasApprovedQuotation: true,
         hasFolders: false,
       };
     }
 
+    // No direct quotation link - check if we can allow setup with quotation selection
+    // This enables the enhanced flow where admin can link to any client quotation
+    const clientId = project.clientId;
+    if (clientId) {
+      const clientIdString = clientId as string;
+      const clientQuotations = await ctx.db
+        .query("quotations")
+        .withIndex("by_clientId", (q) => q.eq("clientId", clientIdString))
+        .collect();
+      
+      const hasClientApprovedQuotation = clientQuotations.some(
+        (q) => q.status === "approved"
+      );
+
+      if (hasClientApprovedQuotation) {
+        // Client has approved quotations - allow setup with quotation selection step
+        return {
+          canSetup: true,
+          reason: null,
+          hasApprovedQuotation: false, // Not directly linked, but client has approved quotations
+          hasFolders: false,
+          needsQuotationSelection: true, // Flag for UI to show quotation selection
+        };
+      }
+    }
+
     return {
-      canSetup: true,
-      reason: null,
-      hasApprovedQuotation: true,
+      canSetup: false,
+      reason: "No approved quotation for this project",
+      hasApprovedQuotation: false,
       hasFolders: false,
     };
   },

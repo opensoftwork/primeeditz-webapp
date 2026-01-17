@@ -12,6 +12,7 @@ export interface AdminProjectDetail {
   code: string;
   status: string;
   projectTypeId: Id<"projectTypes">;
+  clientId?: Id<"profiles">;
   clientName: string;
   clientEmail?: string;
   projectTypeName: string;

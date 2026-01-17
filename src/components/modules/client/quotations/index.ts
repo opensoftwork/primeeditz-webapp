@@ -9,3 +9,5 @@ export * from "./detail/components/pricing-summary";
 export * from "./detail/client-quotation-detail";
 export * from "./public/public-quotation-view";
 export * from "./list";
+export { ClientQuotationsList } from "./quotations-list";
+

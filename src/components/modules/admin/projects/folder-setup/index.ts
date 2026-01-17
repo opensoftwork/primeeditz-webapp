@@ -3,3 +3,5 @@ export { TemplateSelector } from "./template-selector";
 export { StorageTierSelector } from "./storage-tier-selector";
 export { FolderPreview } from "./folder-preview";
 export { ProjectFoldersList } from "./project-folders-list";
+export { QuotationSelector } from "./quotation-selector";
+

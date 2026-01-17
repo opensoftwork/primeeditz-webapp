@@ -177,8 +177,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         projectCode={project.code}
         projectName={project.eventName}
         projectTypeId={project.projectTypeId}
+        clientId={project.clientId}
         onSuccess={handleFolderSetupSuccess}
       />
+      
     </div>
   );
 }

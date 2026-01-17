@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { useMutation } from "convex/react";
+import { useState, useEffect } from "react";
+import { useMutation, useQuery } from "convex/react";
 import { toast } from "sonner";
 import {
   Drawer,
@@ -17,12 +17,14 @@ import {
   ArrowRight,
   CheckCircle2,
   AlertCircle,
+  Link as LinkIcon,
 } from "lucide-react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { TemplateSelector } from "./template-selector";
 import { StorageTierSelector } from "./storage-tier-selector";
 import { FolderPreview } from "./folder-preview";
+import { QuotationSelector } from "./quotation-selector";
 
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
@@ -37,6 +39,20 @@ interface StorageTier {
   priceINR: number;
 }
 
+interface QuotationOption {
+  _id: Id<"quotations">;
+  code: string;
+  status: string;
+  total: number;
+  approvedAt?: number;
+  linkedProjectCount: number;
+  storageInfo: {
+    totalGB: number;
+    allocatedGB: number;
+    remainingGB: number;
+  };
+}
+
 interface FolderSetupDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -44,6 +60,8 @@ interface FolderSetupDrawerProps {
   projectCode: string;
   projectName?: string;
   projectTypeId: Id<"projectTypes">;
+  clientId?: Id<"profiles">;
+  linkedQuotationId?: Id<"quotations">;
   onSuccess?: () => void;
 }
 
@@ -54,22 +72,59 @@ export function FolderSetupDrawer({
   projectCode,
   projectName,
   projectTypeId,
+  clientId,
+  linkedQuotationId,
   onSuccess,
 }: FolderSetupDrawerProps) {
+  const [selectedQuotation, setSelectedQuotation] = useState<QuotationOption | null>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<FolderTemplate | null>(null);
   const [selectedTier, setSelectedTier] = useState<StorageTier | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const setupFolders = useMutation(api.functions.folders.mutations.setupProjectFolders);
+  const linkProject = useMutation(api.functions.projects.mutations.linkProjectToQuotation);
+
+  // Check if project already has a linked approved quotation
+  const hasLinkedQuotation = !!linkedQuotationId;
+  const needsQuotationStep = !hasLinkedQuotation && !!clientId;
+
+  // Calculate step numbers based on whether quotation selection is needed
+  const getStepNumber = (baseStep: number) => {
+    return needsQuotationStep ? baseStep : baseStep - 1;
+  };
 
   const handleSubmit = async () => {
-    if (!selectedTemplate || !selectedTier) {
-      toast.error("Please select a template and storage tier");
+    // Validate based on flow
+    if (needsQuotationStep && !selectedQuotation) {
+      toast.error("Please select a quotation");
+      return;
+    }
+    if (!selectedTemplate) {
+      toast.error("Please select a folder template");
+      return;
+    }
+    if (!selectedTier) {
+      toast.error("Please select a storage tier");
+      return;
+    }
+
+    // Validate storage allocation against quotation pool
+    if (selectedQuotation && selectedTier.sizeGB > selectedQuotation.storageInfo.remainingGB) {
+      toast.error(`Cannot allocate ${selectedTier.sizeGB} GB. Only ${selectedQuotation.storageInfo.remainingGB} GB remaining in quotation.`);
       return;
     }
 
     setIsSubmitting(true);
     try {
+      // Step 1: Link quotation if needed
+      if (needsQuotationStep && selectedQuotation) {
+        await linkProject({
+          projectId,
+          quotationId: selectedQuotation._id,
+        });
+      }
+
+      // Step 2: Create folders
       const result = await setupFolders({
         projectId,
         templateId: selectedTemplate._id,
@@ -90,13 +145,19 @@ export function FolderSetupDrawer({
 
   const handleClose = () => {
     if (!isSubmitting) {
+      setSelectedQuotation(null);
       setSelectedTemplate(null);
       setSelectedTier(null);
       onOpenChange(false);
     }
   };
 
-  const canSubmit = selectedTemplate && selectedTier && !isSubmitting;
+  // Determine if can submit
+  const canSubmit = 
+    (!needsQuotationStep || selectedQuotation) &&
+    selectedTemplate && 
+    selectedTier && 
+    !isSubmitting;
 
   return (
     <Drawer open={open} onOpenChange={handleClose} direction="right">
@@ -106,7 +167,10 @@ export function FolderSetupDrawer({
             Setup Project Folders
           </DrawerTitle>
           <DrawerDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-2">
-            Configure folder structure and storage allocation
+            {needsQuotationStep 
+              ? "Link quotation, configure folder structure and storage"
+              : "Configure folder structure and storage allocation"
+            }
           </DrawerDescription>
         </DrawerHeader>
 
@@ -126,11 +190,53 @@ export function FolderSetupDrawer({
             </div>
           </div>
 
-          {/* Step 1: Template Selection */}
+          {/* Step 0: Quotation Selection (if needed) */}
+          {needsQuotationStep && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
+                  <span className="text-primary text-xs font-black">1</span>
+                </div>
+                <h3 className="text-white font-black uppercase tracking-tight text-sm">
+                  Link to Quotation
+                </h3>
+                {selectedQuotation && (
+                  <CheckCircle2 className="h-4 w-4 text-emerald-500 ml-auto" />
+                )}
+              </div>
+              <QuotationSelector
+                clientId={clientId}
+                selectedQuotationId={selectedQuotation?._id ?? null}
+                onSelect={setSelectedQuotation}
+              />
+            </div>
+          )}
+
+          {/* Linked Quotation Info (if already linked) */}
+          {hasLinkedQuotation && (
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-emerald-500/20">
+                  <LinkIcon className="h-4 w-4 text-emerald-500" />
+                </div>
+                <div>
+                  <p className="text-emerald-400 font-bold text-sm">Quotation Linked</p>
+                  <p className="text-white/40 text-xs">
+                    This project is linked to an approved quotation
+                  </p>
+                </div>
+                <CheckCircle2 className="h-5 w-5 text-emerald-500 ml-auto" />
+              </div>
+            </div>
+          )}
+
+          {/* Step 1/2: Template Selection */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary text-xs font-black">1</span>
+                <span className="text-primary text-xs font-black">
+                  {getStepNumber(2)}
+                </span>
               </div>
               <h3 className="text-white font-black uppercase tracking-tight text-sm">
                 Select Folder Template
@@ -146,11 +252,13 @@ export function FolderSetupDrawer({
             />
           </div>
 
-          {/* Step 2: Storage Tier Selection */}
+          {/* Step 2/3: Storage Tier Selection */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary text-xs font-black">2</span>
+                <span className="text-primary text-xs font-black">
+                  {getStepNumber(3)}
+                </span>
               </div>
               <h3 className="text-white font-black uppercase tracking-tight text-sm">
                 Select Storage Tier
@@ -162,14 +270,28 @@ export function FolderSetupDrawer({
             <StorageTierSelector
               selectedTierId={selectedTier?._id ?? null}
               onSelect={setSelectedTier}
+              maxGB={selectedQuotation?.storageInfo.remainingGB}
             />
+            
+            {/* Storage warning if quotation selected */}
+            {selectedQuotation && selectedTier && 
+             selectedTier.sizeGB > selectedQuotation.storageInfo.remainingGB && (
+              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 text-red-500" />
+                <span className="text-red-400 text-xs">
+                  Selected tier exceeds quotation's remaining storage ({selectedQuotation.storageInfo.remainingGB} GB)
+                </span>
+              </div>
+            )}
           </div>
 
-          {/* Step 3: Preview */}
+          {/* Step 3/4: Preview */}
           <div className="space-y-4">
             <div className="flex items-center gap-3">
               <div className="w-6 h-6 rounded-full bg-primary/20 flex items-center justify-center">
-                <span className="text-primary text-xs font-black">3</span>
+                <span className="text-primary text-xs font-black">
+                  {getStepNumber(4)}
+                </span>
               </div>
               <h3 className="text-white font-black uppercase tracking-tight text-sm">
                 Preview Structure
@@ -184,15 +306,18 @@ export function FolderSetupDrawer({
           </div>
 
           {/* Summary */}
-          {selectedTemplate && selectedTier && (
+          {canSubmit && (
             <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5" />
                 <div className="space-y-1">
                   <p className="text-white font-bold text-sm">Ready to Create</p>
                   <p className="text-white/60 text-xs">
-                    {selectedTemplate.folders.length} folders will be created with{" "}
-                    {selectedTier.sizeGB} GB storage allocation.
+                    {needsQuotationStep && selectedQuotation && (
+                      <>Link to {selectedQuotation.code}, then </>
+                    )}
+                    {selectedTemplate?.folders.length} folders will be created with{" "}
+                    {selectedTier?.sizeGB} GB storage allocation.
                   </p>
                 </div>
               </div>
@@ -212,7 +337,7 @@ export function FolderSetupDrawer({
                 "Creating Folders..."
               ) : (
                 <>
-                  Create Folders
+                  {needsQuotationStep ? "Link & Create Folders" : "Create Folders"}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -232,3 +357,4 @@ export function FolderSetupDrawer({
     </Drawer>
   );
 }
+

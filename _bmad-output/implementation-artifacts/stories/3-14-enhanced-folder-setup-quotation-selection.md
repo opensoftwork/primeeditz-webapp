@@ -1,7 +1,7 @@
 # Story 3-14: Enhanced Folder Setup with Quotation Selection
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-dev  
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Improves folder setup UX significantly
@@ -94,7 +94,7 @@ Step 4: Preview & Confirm
 
 ## 📘 Implementation Tasks
 
-### Phase A: Update Folder Setup Drawer (~3 points)
+### Phase A: Update Folder Setup Drawer (~3 points) ✅
 
 **File**: `src/components/modules/admin/projects/folder-setup/folder-setup-drawer.tsx`
 

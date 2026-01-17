@@ -1,7 +1,7 @@
 # Story 3-13: Client Approved Quotations Query
 
 **Epic**: Epic 3 - Admin Portal & System Management  
-**Status**: ready-for-dev  
+**Status**: in-dev  
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-17  
 **Priority**: HIGH — Required for quotation linking and folder setup
@@ -68,7 +68,7 @@ Each quotation in result includes:
 
 ## 📘 Implementation Tasks
 
-### Phase A: Backend (~2 points)
+### Phase A: Backend (~2 points) ✅
 
 **File**: `convex/functions/quotations/queries.ts`
 

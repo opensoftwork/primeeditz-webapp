@@ -539,3 +539,104 @@ export const deleteProject = adminMutation({
   },
 })
 
+/**
+ * Link a project to an existing approved quotation.
+ * Story: 3-12
+ * This enables folder setup to use the quotation's storage pool.
+ */
+export const linkProjectToQuotation = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+    quotationId: v.id('quotations'),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get the project
+    const project = await ctx.db.get(args.projectId)
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    // 2. Get the quotation
+    const quotation = await ctx.db.get(args.quotationId)
+    if (!quotation) {
+      throw new Error('Quotation not found')
+    }
+
+    // 3. Validate quotation is approved
+    if (quotation.status !== 'approved') {
+      throw new Error('Quotation must be approved to link')
+    }
+
+    // 4. Validate client match
+    const projectClientId = project.clientId as string | undefined
+    const quotationClientId = quotation.clientId as string | undefined
+    
+    if (projectClientId && quotationClientId && projectClientId !== quotationClientId) {
+      throw new Error('Quotation belongs to a different client')
+    }
+
+    // 5. Update the quotation to include this project
+    // We use projectIds array for multi-project quotations
+    const projectIdString = args.projectId as string
+    const existingProjectIds = quotation.projectIds || []
+    
+    if (!existingProjectIds.includes(projectIdString)) {
+      // Add to projectIds array
+      await ctx.db.patch(args.quotationId, {
+        projectIds: [...existingProjectIds, projectIdString],
+        // Also set single projectId for backward compatibility if not set
+        projectId: quotation.projectId || projectIdString,
+      })
+    }
+
+    return { 
+      success: true,
+      quotationCode: quotation.code,
+      quotationTotal: quotation.total,
+    }
+  },
+})
+
+/**
+ * Unlink a project from a quotation.
+ * Story: 3-12
+ */
+export const unlinkProjectFromQuotation = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+    quotationId: v.id('quotations'),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId)
+    if (!quotation) {
+      throw new Error('Quotation not found')
+    }
+
+    const projectIdString = args.projectId as string
+    const existingProjectIds = quotation.projectIds || []
+    
+    // Remove from projectIds array
+    const updatedProjectIds = existingProjectIds.filter(id => id !== projectIdString)
+    
+    await ctx.db.patch(args.quotationId, {
+      projectIds: updatedProjectIds,
+      // Clear single projectId if it matches
+      projectId: quotation.projectId === projectIdString 
+        ? (updatedProjectIds[0] || undefined)
+        : quotation.projectId,
+    })
+
+    // Also reset project's storage allocation if it was from this quotation
+    const project = await ctx.db.get(args.projectId)
+    if (project && project.storageAllocated) {
+      await ctx.db.patch(args.projectId, {
+        storageAllocated: undefined,
+        updatedAt: now(),
+      })
+    }
+
+    return { success: true }
+  },
+})
+
+

@@ -96,10 +96,10 @@ development_status:
   3-6-employee-management-crud: backlog # Low priority, can defer
   # ── NEW: Quotation-Project Linking Enhancement ───────────────────────────────
   # Improves folder setup UX by allowing linking to existing approved quotations
-  3-12-link-project-to-quotation: ready-for-dev # HIGH: Admin can link project to existing quotation
-  3-13-client-approved-quotations-query: ready-for-dev # HIGH: Query for quotation selection
-  3-14-enhanced-folder-setup-quotation-selection: ready-for-dev # HIGH: Multi-step folder setup with quotation
-  3-15-storage-pool-tracking: ready-for-dev # MEDIUM: Track storage usage across quotations
+  3-12-link-project-to-quotation: in-dev # HIGH: Admin can link project to existing quotation
+  3-13-client-approved-quotations-query: in-dev # HIGH: Query for quotation selection
+  3-14-enhanced-folder-setup-quotation-selection: in-dev # HIGH: Multi-step folder setup with quotation
+  3-15-storage-pool-tracking: in-dev # MEDIUM: Track storage usage across quotations
   epic-3-retrospective: optional
 
   # ============================================================================
