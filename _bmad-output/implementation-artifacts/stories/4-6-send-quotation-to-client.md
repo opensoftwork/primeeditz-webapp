@@ -4,6 +4,7 @@
 **Status**: in-progress  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-16  
+**Updated**: 2026-01-17
 **Priority**: HIGH — Enables client delivery and approval workflow
 
 ---
@@ -11,8 +12,8 @@
 ## 📋 User Story
 
 **As an** Admin,  
-**I want** to send a quotation to a client via email or shareable link,  
-**So that** the client can review and approve the quotation.
+**I want** to mark a quotation as "sent" and make it visible to the client,  
+**So that** the client can review and respond to the quotation.
 
 ---
 
@@ -27,51 +28,59 @@
 
 ### Enables
 
-| Story                       | Notes                        |
-| --------------------------- | ---------------------------- |
-| 4-7 - Client View Quotation | Public URL for client access |
-| 4-8 - Client Approve        | Approval after viewing       |
+| Story                       | Notes                         |
+| --------------------------- | ----------------------------- |
+| 4-7 - Client View Quotation | Dashboard + public URL access |
+| 4-8 - Client Approve        | Approval after viewing        |
 
 ---
 
 ## ✅ Acceptance Criteria
 
-### Send Quotation Action
+### AC1: Send Quotation Action
 
 - [ ] **Given** I am viewing a quotation detail page
 - [ ] **When** I click "Send to Client"
-- [ ] **Then** a dialog/drawer opens with sending options
+- [ ] **Then** a confirmation dialog/drawer opens with sending options
 
-### Share Link Generation
+### AC2: Dashboard Delivery (Primary Channel)
+
+- [ ] **Given** the quotation has a linked `clientId`
+- [ ] **When** I confirm sending
+- [ ] **Then** quotation status changes from "draft" to "sent"
+- [ ] **And** quotation becomes visible in client's dashboard
+- [ ] **And** `sentAt` timestamp is recorded
+
+### AC3: Share Link Generation (Secondary Channel)
 
 - [ ] **Given** I am in the send dialog
-- [ ] **When** I click "Generate Link"
-- [ ] **Then** a unique shareable link is created
+- [ ] **When** I click "Generate Public Link"
+- [ ] **Then** a unique shareable token is created
 - [ ] **And** link is copied to clipboard
-- [ ] **And** link expiry can be set (optional)
+- [ ] **And** link expiry can be set (7, 14, 30, 90 days)
 
-### Email Sending
+### AC4: Schema Updates
 
-- [ ] **Given** I am in the send dialog
-- [ ] **When** I enter client email and click "Send"
-- [ ] **Then** an email is sent with quotation link
-- [ ] **And** email includes quotation summary
-- [ ] **And** status changes to "sent"
+- [ ] **Given** the quotations table
+- [ ] **Then** the following fields exist:
+  - `shareToken: v.optional(v.string())` — Unique token for public access
+  - `shareTokenExpiresAt: v.optional(v.number())` — Expiry timestamp
+  - `sentAt: v.optional(v.number())` — When quotation was sent
+  - `sentTo: v.optional(v.string())` — Email address (for email channel, future)
 
-### Status Update
+### AC5: Status Update
 
 - [ ] **Given** a quotation is sent
 - [ ] **When** the send action completes
 - [ ] **Then** quotation status changes from "draft" to "sent"
-- [ ] **And** sentAt timestamp is recorded
-- [ ] **And** activity log is updated
+- [ ] **And** activity log is updated (if implemented)
 
-### Resend Capability
+### AC6: Resend Capability
 
-- [ ] **Given** a quotation has been sent
-- [ ] **When** I want to resend
-- [ ] **Then** I can generate a new link or resend email
-- [ ] **And** previous links remain valid (or can be invalidated)
+- [ ] **Given** a quotation has already been sent
+- [ ] **When** I click "Resend" or "Generate New Link"
+- [ ] **Then** I can generate a new share token
+- [ ] **And** optionally invalidate previous links
 
 ---
 
@@ -90,26 +99,23 @@
 │                                                              │
 ├─────────────────────────────────────────────────────────────┤
 │                                                              │
-│  ┌─────────────────────────────────────────────────────────┐│
-│  │  SHARE LINK                                              ││
-│  │  ─────────────────────────────────────────────────────  ││
-│  │  🔗 https://app.primeeditz.com/q/abc123xyz               ││
-│  │                                                          ││
-│  │  [📋 Copy Link]              Valid for: [30 days ▼]      ││
-│  └─────────────────────────────────────────────────────────┘│
+│  ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓  │
+│  ┃  📊 DASHBOARD (Primary)                                ┃  │
+│  ┃  ─────────────────────────────────────────────────────  ┃  │
+│  ┃  ✅ Quotation will appear in client's dashboard         ┃  │
+│  ┃     Client can log in to view and respond               ┃  │
+│  ┃                                                         ┃  │
+│  ┃                         [✓ Mark as Sent]                ┃  │
+│  ┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛  │
 │                                                              │
 │  ─────────────────── OR ───────────────────                  │
 │                                                              │
 │  ┌─────────────────────────────────────────────────────────┐│
-│  │  SEND VIA EMAIL                                          ││
+│  │  🔗 SHARE LINK (For clients without account)            ││
 │  │  ─────────────────────────────────────────────────────  ││
-│  │  Email Address*                                          ││
-│  │  [client@acmeproductions.com                    ]        ││
+│  │  https://app.primeeditz.com/q/abc123xyz                 ││
 │  │                                                          ││
-│  │  Personal Message (optional)                             ││
-│  │  [Please review the attached quotation...        ]       ││
-│  │                                                          ││
-│  │                              [📧 Send Email]             ││
+│  │  [📋 Copy Link]              Valid for: [30 days ▼]      ││
 │  └─────────────────────────────────────────────────────────┘│
 │                                                              │
 ├─────────────────────────────────────────────────────────────┤
@@ -123,82 +129,74 @@
 
 ## 📘 Implementation Phases
 
-### Phase A: Share Token & Public Access (~2 points)
+### Phase A: Schema & Status Update (~2 points)
 
 #### Task A1: Schema Updates
 
 **File**: `convex/schema.ts`
 
-- [ ] A1.1 Add share token fields to quotations table:
+- [ ] A1.1 Add share token fields to quotations table (if not already present):
   ```typescript
   shareToken: v.optional(v.string()),      // Unique token for public access
   shareTokenExpiresAt: v.optional(v.number()), // Expiry timestamp
-  sentAt: v.optional(v.number()),          // When quotation was sent
-  sentTo: v.optional(v.string()),          // Email address sent to
   ```
+- [ ] A1.2 Verify `sentAt` field exists
+- [ ] A1.3 Add index `by_shareToken` for token lookup
 
-#### Task A2: Generate Share Token Mutation
+#### Task A2: Send Quotation Mutation
 
 **File**: `convex/functions/quotations/mutations.ts`
 
-- [ ] A2.1 Create `generateShareToken` mutation
-- [ ] A2.2 Generate secure random token (nanoid or uuid)
-- [ ] A2.3 Set expiry date (default 30 days)
-- [ ] A2.4 Return full public URL
+- [ ] A2.1 Create `sendQuotation` mutation
+- [ ] A2.2 Update status from `draft` to `sent`
+- [ ] A2.3 Set `sentAt` timestamp
+- [ ] A2.4 Generate and store share token (nanoid)
+- [ ] A2.5 Set token expiry based on validity selection
 
-#### Task A3: Public Quotation Query
+#### Task A3: Get Quotation by Share Token Query
 
 **File**: `convex/functions/quotations/queries.ts`
 
 - [ ] A3.1 Create `getQuotationByShareToken` query
-- [ ] A3.2 Validate token and check expiry
-- [ ] A3.3 Return quotation data (limited fields for security)
+- [ ] A3.2 Validate token exists and hasn't expired
+- [ ] A3.3 Return quotation data for client view
 
 ---
 
-### Phase B: Send UI & Status (~2 points)
+### Phase B: Send UI (~2 points)
 
 #### Task B1: Send Quotation Drawer
 
 **File**: `src/components/modules/admin/quotations/send/send-quotation-drawer.tsx`
 
-- [ ] B1.1 Create drawer component
-- [ ] B1.2 Display quotation summary (code, total, client)
-- [ ] B1.3 "Generate Link" section with copy button
-- [ ] B1.4 Email input with send button
-- [ ] B1.5 Link validity selector (7, 14, 30, 90 days)
+- [ ] B1.1 Create drawer component with Sheet from shadcn
+- [ ] B1.2 Display quotation summary (code, total, client name)
+- [ ] B1.3 Dashboard section with "Mark as Sent" button
+- [ ] B1.4 Share link section with copy functionality
+- [ ] B1.5 Link validity dropdown (7, 14, 30, 90 days)
+- [ ] B1.6 Copy to clipboard with toast notification
 
 #### Task B2: Update Quotation Detail Header
 
 **File**: `src/components/modules/admin/quotations/detail/components/detail-header.tsx`
 
-- [ ] B2.1 Add "Send to Client" button
-- [ ] B2.2 Open send drawer on click
-- [ ] B2.3 Show "Resend" for already-sent quotations
-
-#### Task B3: Status Update Mutation
-
-**File**: `convex/functions/quotations/mutations.ts`
-
-- [ ] B3.1 Create `sendQuotation` mutation
-- [ ] B3.2 Update status to "sent"
-- [ ] B3.3 Record sentAt timestamp
-- [ ] B3.4 Record sentTo email (if email sent)
+- [ ] B2.1 Add "Send to Client" button (for draft quotations)
+- [ ] B2.2 Add "Resend" button (for already-sent quotations)
+- [ ] B2.3 Show "Sent" status badge with timestamp
+- [ ] B2.4 Open send drawer on click
 
 ---
 
-### Phase C: Email Integration (Optional/Deferred) (~1 point)
+### Phase C: Client Query (~1 point)
 
-#### Task C1: Email Action
+#### Task C1: Client Quotations Query
 
-**File**: `convex/functions/quotations/actions.ts`
+**File**: `convex/functions/quotations/queries.ts`
 
-- [ ] C1.1 Create `sendQuotationEmail` action
-- [ ] C1.2 Use Resend/SendGrid/nodemailer
-- [ ] C1.3 Email template with quotation summary
-- [ ] C1.4 Include CTA button to view quotation
-
-> **Note**: For MVP, we can defer email and focus on share link functionality.
+- [ ] C1.1 Create `getMyQuotations` query for clients
+- [ ] C1.2 Filter by `clientId` matching current user's profile
+- [ ] C1.3 Filter by status (show `sent`, `viewed`, `approved`, `changes_requested`)
+- [ ] C1.4 Return quotation list for dashboard display
 
 ---
 
@@ -208,13 +206,14 @@
 src/components/modules/admin/quotations/send/
 ├── index.ts                     # Barrel exports
 ├── send-quotation-drawer.tsx    # Main send drawer
+├── dashboard-section.tsx        # Dashboard delivery option
 ├── share-link-section.tsx       # Link generation UI
-└── email-section.tsx            # Email form (optional)
+└── validity-selector.tsx        # Expiry dropdown
 ```
 
 ---
 
-## 📦 Public Route (Story 4-7 Dependency)
+## 📦 Public Route (Story 4-7)
 
 The public route for clients to view quotations will be:
 
@@ -231,35 +230,38 @@ This will be implemented in **Story 4-7**.
 ### Manual Testing
 
 - [ ] Click "Send to Client" → drawer opens
+- [ ] Click "Mark as Sent" → status changes to "sent"
 - [ ] Click "Generate Link" → link created and copied
-- [ ] Copy link to incognito → able to view (after 4-7)
-- [ ] Send with email → status changes to "sent"
 - [ ] View quotation detail → shows "Sent" status badge
+- [ ] Already sent quotation → shows "Resend" option
 
 ### Edge Cases
 
-- [ ] Already sent quotation → shows "Resend" option
-- [ ] Expired link → shows expiry message (4-7)
-- [ ] Invalid token → 404 page (4-7)
+- [ ] Quotation without client → warning shown
+- [ ] Already sent quotation → can still regenerate link
+- [ ] Draft quotation → "Send to Client" button visible
 
 ---
 
 ## 🚀 Definition of Done
 
+- [ ] `sendQuotation` mutation working
 - [ ] Share token generated and stored
 - [ ] Copy link functionality working
 - [ ] Status updates to "sent"
 - [ ] Send drawer UI complete
 - [ ] "Send to Client" button in detail header
+- [ ] Client query ready for 4-7
 - [ ] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status      | Notes                                  |
-| ---------- | ----------- | -------------------------------------- |
-| 2026-01-16 | in-progress | Story created, starting implementation |
+| Date       | Status      | Notes                                                 |
+| ---------- | ----------- | ----------------------------------------------------- |
+| 2026-01-16 | in-progress | Story created, starting implementation                |
+| 2026-01-17 | in-progress | Updated with dual-channel delivery (dashboard + link) |
 
 ---
 

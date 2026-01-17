@@ -80,17 +80,20 @@ development_status:
   # EPIC 3: Admin Portal — Project & System Management
   # ============================================================================
   epic-3: in-progress
+  # Completed Stories
   3-1-admin-dashboard-layout: done
   3-2-admin-project-listing-with-filters: done
   3-3-admin-project-detail-view: done
-  3-4-project-stage-folder-setup: backlog
-  3-5-update-project-status: backlog
-  3-6-employee-management-crud: backlog
   3-7-project-types-management: done # Dynamic fields for project wizard
   3-8-quotation-templates-management: done # Full editor, view, list with section-wise breakdown
-  3-9-storage-pricing-tiers-configuration: backlog
-  3-10-folder-templates-configuration: backlog
   3-11-admin-initiated-project-creation: done
+  # ── TRACK B: Kavya (Jr Dev) ─────────────────────────────────────────────────
+  # Parallel with Track A (Divya). See: sprints/track-handoffs/track-b-admin-config-2026-01-17.md
+  3-9-storage-pricing-tiers-configuration: ready-for-dev # HIGH: Required for Epic 5
+  3-10-folder-templates-configuration: ready-for-dev # HIGH: Required for Epic 5
+  3-4-project-stage-folder-setup: ready-for-dev # HIGH: Depends on 3-10, enables Epic 5
+  3-5-update-project-status: ready-for-dev # Medium: Can be parallel
+  3-6-employee-management-crud: backlog # Low priority, can defer
   epic-3-retrospective: optional
 
   # ============================================================================
@@ -103,17 +106,21 @@ development_status:
   4-3-create-quotation-standalone: done # 4-step wizard, line items, terms & conditions
   4-4-quotation-line-items-nested-hierarchy: backlog # Display done, CRUD pending
   4-5-quotation-preview-print: done # html-to-image + jsPDF, proper PDF generation
-  # Phase B: Client Workflow
-  4-6-send-quotation-to-client: in-progress
-  4-7-client-view-quotation: backlog
-  4-8-client-approve-quotation: backlog
-  4-9-client-request-changes: backlog
-  4-10-quotation-versioning-revision-history: backlog
-  # Phase C: Integration & Library
-  4-11-link-quotation-to-projects: backlog
-  4-12-item-library-crud: backlog
-  4-13-add-items-from-library-to-quotation: backlog
-  4-14-project-type-hints-for-templates: backlog
+  # ── TRACK A: Divya (Sr Dev) ─────────────────────────────────────────────────
+  # See: sprints/track-handoffs/track-a-client-quotation-2026-01-17.md
+  # Phase B: Client Workflow (CURRENT FOCUS)
+  4-6-send-quotation-to-client: in-progress # Dual-channel: Dashboard + Public Link
+  4-7-client-view-quotation: ready-for-dev # Dashboard listing + Public share view
+  4-8-client-approve-quotation: ready-for-dev # Accept flow → Gates Epic 5
+  4-9-client-request-changes: ready-for-dev # Structured feedback (checkboxes + comments)
+  4-9b-client-reject-quotation: ready-for-dev # Rejection with reason
+  # Phase B.2: Deferred (Another Developer / Phase 2)
+  4-10-quotation-versioning-revision-history: deferred # Complex, not blocking MVP
+  # Phase C: Integration & Library (Deferred)
+  4-11-link-quotation-to-projects: deferred
+  4-12-item-library-crud: deferred
+  4-13-add-items-from-library-to-quotation: deferred
+  4-14-project-type-hints-for-templates: deferred
   epic-4-retrospective: optional
 
   # ============================================================================
