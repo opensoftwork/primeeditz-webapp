@@ -36,7 +36,7 @@ export function ProjectHeader({ code, status }: ProjectHeaderProps) {
         </div>
       </motion.div>
 
-      <motion.div
+      {/* <motion.div
         className="flex items-center gap-3"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
@@ -53,7 +53,7 @@ export function ProjectHeader({ code, status }: ProjectHeaderProps) {
         >
           UPDATE STATUS
         </Button>
-      </motion.div>
+      </motion.div> */}
     </div>
   );
 }
