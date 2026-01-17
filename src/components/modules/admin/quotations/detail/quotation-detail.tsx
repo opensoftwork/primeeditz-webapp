@@ -1,152 +1,85 @@
-/**
- * Quotation Detail View
- *
- * Read-only detail view for a quotation with all line items,
- * pricing summary, and action buttons.
- */
-
 "use client";
 
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { useRouter } from "next/navigation";
-import { Receipt, ArrowLeft } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DetailHeader } from "./components/detail-header";
+import { ClientProjectInfo } from "./components/client-project-info";
+import { LineItemsSection } from "./components/line-items-section";
+import { PricingSummary } from "./components/pricing-summary";
+import { TermsConditions } from "./components/terms-conditions";
+import { QuickActions } from "./components/quick-actions";
+import { ClientFeedbackSection } from "./components/client-feedback-section";
 
-// Sub-components
-import {
-  DetailHeader,
-  ClientProjectInfo,
-  LineItemsSection,
-  PricingSummary,
-  TermsConditions,
-  QuickActions,
-} from "./components";
-
-// Icons for status config
-import {
-  FileText,
-  Send,
-  ExternalLink,
-  CheckCircle2,
-  Clock,
-  AlertCircle,
-} from "lucide-react";
-
-// ============================================================================
-// Status Config
-// ============================================================================
-
-const statusConfig: Record<
-  string,
-  {
-    label: string;
-    icon: any;
-    color: string;
-    bgColor: string;
-    borderColor: string;
-  }
-> = {
+const statusConfig: Record<string, { label: string; color: string }> = {
   draft: {
     label: "Draft",
-    icon: FileText,
-    color: "text-white/60",
-    bgColor: "bg-white/5",
-    borderColor: "border-white/10",
+    color: "text-zinc-400 bg-zinc-400/10 border-zinc-400/20",
   },
   sent: {
     label: "Sent",
-    icon: Send,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-    borderColor: "border-blue-400/20",
+    color: "text-blue-400 bg-blue-400/10 border-blue-400/20",
   },
   viewed: {
     label: "Viewed",
-    icon: ExternalLink,
-    color: "text-indigo-400",
-    bgColor: "bg-indigo-400/10",
-    borderColor: "border-indigo-400/20",
+    color: "text-indigo-400 bg-indigo-400/10 border-indigo-400/20",
   },
   approved: {
     label: "Approved",
-    icon: CheckCircle2,
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-    borderColor: "border-green-400/20",
+    color: "text-emerald-400 bg-emerald-400/10 border-emerald-400/20",
   },
   changes_requested: {
-    label: "Revisions Requested",
-    icon: Clock,
-    color: "text-orange-400",
-    bgColor: "bg-orange-400/10",
-    borderColor: "border-orange-400/20",
+    label: "Revisions",
+    color: "text-amber-400 bg-amber-400/10 border-amber-400/20",
   },
   rejected: {
-    label: "Rejected",
-    icon: AlertCircle,
-    color: "text-red-400",
-    bgColor: "bg-red-400/10",
-    borderColor: "border-red-400/20",
+    label: "Declined",
+    color: "text-red-400 bg-red-400/10 border-red-400/20",
   },
   expired: {
     label: "Expired",
-    icon: AlertCircle,
-    color: "text-zinc-500",
-    bgColor: "bg-zinc-500/10",
-    borderColor: "border-zinc-500/20",
+    color: "text-red-400 bg-red-400/10 border-red-400/20",
+  },
+  superseded: {
+    label: "Superseded",
+    color: "text-zinc-500 bg-zinc-500/10 border-zinc-500/20",
   },
 };
 
-// ============================================================================
-// Currency Formatter
-// ============================================================================
-
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
-
-// ============================================================================
-// Main Component
-// ============================================================================
-
-interface QuotationDetailProps {
-  quotationId: string;
-}
-
-export function QuotationDetail({ quotationId }: QuotationDetailProps) {
+export default function QuotationDetail() {
+  const params = useParams();
   const router = useRouter();
+  const quotationId = params.id as string;
 
-  // Fetch quotation with enriched data (including sections)
   const data = useQuery(
     api.functions.quotations.queries.getQuotationWithSections,
-    { quotationId: quotationId as Id<"quotations"> }
+    {
+      quotationId: quotationId as Id<"quotations">,
+    },
   );
 
-  // Loading state
   if (data === undefined) {
     return <QuotationDetailSkeleton />;
   }
 
-  // Not found
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: "INR",
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   if (data === null) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center p-8">
-        <div className="h-16 w-16 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
-          <Receipt className="h-8 w-8 text-white/20" />
-        </div>
-        <h2 className="text-xl font-black text-white uppercase tracking-tight mb-2">
-          Quotation Not Found
-        </h2>
-        <p className="text-sm text-white/40 mb-6">
-          The quotation you&apos;re looking for doesn&apos;t exist or has been
-          removed.
+      <div className="flex flex-col items-center justify-center p-12 space-y-4">
+        <h2 className="text-xl font-bold text-white">Quotation not found</h2>
+        <p className="text-zinc-400">
+          The quotation you are looking for does not exist or has been deleted.
         </p>
         <Button
           variant="outline"
@@ -169,7 +102,7 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
     const subItemsTotal =
       item.subItems?.reduce(
         (s: number, sub: any) => s + sub.rate * sub.quantity,
-        0
+        0,
       ) ?? 0;
     return acc + itemTotal + subItemsTotal;
   }, 0);
@@ -183,7 +116,7 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
   const groupedItems = sections.map((section: any) => ({
     section,
     items: quotation.lineItems.filter(
-      (item: any) => item.sectionId === section._id
+      (item: any) => item.sectionId === section._id,
     ),
   }));
 
@@ -206,6 +139,7 @@ export function QuotationDetail({ quotationId }: QuotationDetailProps) {
         </div>
 
         <div className="space-y-6">
+          <ClientFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}
             discountAmount={discountAmount}

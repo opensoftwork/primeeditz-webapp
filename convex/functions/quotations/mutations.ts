@@ -1,7 +1,7 @@
 import { v } from "convex/values";
-import { QueryCtx, MutationCtx } from "../../_generated/server";
+import { QueryCtx, MutationCtx, mutation } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
-import { adminMutation } from "../../lib/customFunctions";
+import { adminMutation, clientMutation } from "../../lib/customFunctions";
 
 /**
  * Line item input validator
@@ -192,17 +192,66 @@ export const updateQuotation = adminMutation({
 export const sendQuotation = adminMutation({
   args: {
     quotationId: v.id("quotations"),
+    validityDays: v.optional(v.number()), // 7, 14, 30, 90
+    sentTo: v.optional(v.string()), // Email address
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    if (quotation.status !== "draft") throw new Error("Can only send draft quotations");
+    
+    // Status can be draft (first time) or sent/viewed (resending)
+    const canSend = ["draft", "sent", "viewed", "changes_requested"].includes(quotation.status);
+    if (!canSend) throw new Error(`Cannot send quotation in ${quotation.status} status`);
+    
+    // Generate share token
+    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    let shareToken = "";
+    for (let i = 0; i < 16; i++) {
+      shareToken += characters.charAt(Math.floor(Math.random() * characters.length));
+    }
+    
+    // Calculate expiry
+    const validityDays = args.validityDays ?? 30;
+    const shareTokenExpiresAt = Date.now() + (validityDays * 24 * 60 * 60 * 1000);
     
     await ctx.db.patch(args.quotationId, {
       status: "sent",
       sentAt: Date.now(),
+      sentTo: args.sentTo,
+      shareToken,
+      shareTokenExpiresAt,
       updatedAt: Date.now(),
     });
+    
+    return { shareToken };
+  },
+});
+
+/**
+ * Mark quotation as viewed (Public)
+ */
+export const markQuotationViewed = mutation({
+  args: {
+    quotationId: v.id("quotations"),
+  },
+  handler: async (ctx: MutationCtx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) return null;
+    
+    // Only update viewedAt if it hasn't been set or if status is 'sent'
+    if (quotation.status === "sent") {
+      await ctx.db.patch(args.quotationId, {
+        status: "viewed",
+        viewedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    } else if (!quotation.viewedAt) {
+      await ctx.db.patch(args.quotationId, {
+        viewedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+    }
+    
     return null;
   },
 });
@@ -247,3 +296,110 @@ export const deleteQuotation = adminMutation({
     return null;
   },
 });
+
+/**
+ * Accept quotation (client-side)
+ */
+export const acceptQuotation = clientMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    clientSignature: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    // Verify ownership
+    if (quotation.clientId !== ctx.profile._id) {
+      throw new Error("Access denied: Not your quotation");
+    }
+
+    // Status check
+    const allowedStatuses = ["sent", "viewed", "changes_requested"];
+    if (!allowedStatuses.includes(quotation.status)) {
+      throw new Error(`Quotation cannot be accepted from status: ${quotation.status}`);
+    }
+
+    await ctx.db.patch(args.quotationId, {
+      status: "approved",
+      approvedAt: Date.now(),
+      clientSignature: args.clientSignature,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Request quotation changes (client-side)
+ */
+export const requestQuotationChanges = clientMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    reasons: v.array(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    // Verify ownership
+    if (quotation.clientId !== ctx.profile._id) {
+      throw new Error("Access denied: Not your quotation");
+    }
+
+    // Status check
+    const allowedStatuses = ["sent", "viewed", "changes_requested"];
+    if (!allowedStatuses.includes(quotation.status)) {
+      throw new Error(`Changes cannot be requested from status: ${quotation.status}`);
+    }
+
+    await ctx.db.patch(args.quotationId, {
+      status: "changes_requested",
+      changeRequestedAt: Date.now(),
+      changeReasons: args.reasons,
+      clientNotes: args.notes,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Reject quotation (client-side)
+ */
+export const rejectQuotation = clientMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    reason: v.string(),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    // Verify ownership
+    if (quotation.clientId !== ctx.profile._id) {
+      throw new Error("Access denied: Not your quotation");
+    }
+
+    // Status check
+    const allowedStatuses = ["sent", "viewed", "changes_requested"];
+    if (!allowedStatuses.includes(quotation.status)) {
+      throw new Error(`Quotation cannot be rejected from status: ${quotation.status}`);
+    }
+
+    await ctx.db.patch(args.quotationId, {
+      status: "rejected",
+      rejectedAt: Date.now(),
+      rejectionReason: args.reason,
+      clientNotes: args.notes,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+

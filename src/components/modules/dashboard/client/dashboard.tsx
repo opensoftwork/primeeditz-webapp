@@ -30,11 +30,12 @@ import {
 import { cn } from "@/lib/utils";
 import { DataTable } from "@/components/ui/data-table";
 import { format } from "date-fns";
+import { QuotationsSection } from "@/components/modules/client/quotations/quotations-section";
 
 export default function ClientDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);
   const projects = useQuery(
-    api.functions.projects.queries.getMyProjectsWithType
+    api.functions.projects.queries.getMyProjectsWithType,
   );
 
   // Calculate stats
@@ -44,7 +45,7 @@ export default function ClientDashboard() {
       (p) =>
         p.status === "in_progress" ||
         p.status === "active" ||
-        p.status === "pending_review"
+        p.status === "pending_review",
     ).length ?? 0;
   const completedCount =
     projects?.filter((p) => p.status === "completed").length ?? 0;
@@ -191,6 +192,9 @@ export default function ClientDashboard() {
         />
       </div>
 
+      {/* Quotations Section */}
+      <QuotationsSection />
+
       {/* Main Project List Section - Using Data Table */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -327,7 +331,7 @@ function StatusBadge({ status }: { status: string }) {
       variant="outline"
       className={cn(
         "uppercase text-[8px] tracking-[0.2em] font-black py-0.5 px-2 h-6 rounded-md border-2 whitespace-nowrap",
-        config.className
+        config.className,
       )}
     >
       <div className="flex items-center gap-1.5">
@@ -336,7 +340,7 @@ function StatusBadge({ status }: { status: string }) {
             "w-1 h-1 rounded-full",
             config.label === "Pending"
               ? "animate-pulse bg-amber-500"
-              : "bg-current"
+              : "bg-current",
           )}
         />
         {config.label}

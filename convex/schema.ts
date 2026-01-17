@@ -345,12 +345,20 @@ export default defineSchema({
     clientNotes: v.optional(v.string()),
     createdBy: v.string(),
     sentAt: v.optional(v.number()),
+    sentTo: v.optional(v.string()), // Email address sent to
+    shareToken: v.optional(v.string()), // Unique token for public access
+    shareTokenExpiresAt: v.optional(v.number()), // Expiry timestamp
     viewedAt: v.optional(v.number()),
     approvedAt: v.optional(v.number()),
     rejectedAt: v.optional(v.number()),
+    clientSignature: v.optional(v.string()),
+    changeReasons: v.optional(v.array(v.string())),
+    changeRequestedAt: v.optional(v.number()),
+    rejectionReason: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
   })
     .index('by_code', ['code'])
     .index('by_clientId', ['clientId'])
-    .index('by_status', ['status']),
+    .index('by_status', ['status'])
+    .index('by_shareToken', ['shareToken']),
 });

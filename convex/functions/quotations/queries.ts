@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { adminQuery } from "../../lib/customFunctions";
-import { QueryCtx } from "../../_generated/server";
+import { adminQuery, clientQuery } from "../../lib/customFunctions";
+import { QueryCtx, query } from "../../_generated/server";
 import { Doc } from "../../_generated/dataModel";
 
 /**
@@ -186,5 +186,64 @@ export const getLibraryItems = adminQuery({
       section,
       items: allItems.filter(item => item.sectionId === section._id)
     })).filter(group => group.items.length > 0);
+  },
+});
+
+/**
+ * Get quotation by share token (Public)
+ */
+export const getQuotationByShareToken = query({
+  args: {
+    shareToken: v.string(),
+  },
+  handler: async (ctx: QueryCtx, args) => {
+    const quotation = await ctx.db
+      .query("quotations")
+      .withIndex("by_shareToken", (q) => q.eq("shareToken", args.shareToken))
+      .unique();
+    
+    if (!quotation) return null;
+    
+    // Check expiry
+    if (quotation.shareTokenExpiresAt && Date.now() > quotation.shareTokenExpiresAt) {
+       return { error: "Link expired" };
+    }
+    
+    // Check status
+    const publicStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    if (!publicStatus.includes(quotation.status)) {
+       return { error: "Quotation no longer available" };
+    }
+    
+    // Get sections for detail view
+    const sectionIds = [...new Set(quotation.lineItems.map((li) => li.sectionId))];
+    const sections = await Promise.all(
+      sectionIds.map((id) => ctx.db.get(id))
+    );
+    
+    return {
+      quotation,
+      sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+    };
+  },
+});
+
+/**
+ * Get current client's quotations
+ */
+export const getMyQuotations = clientQuery({
+  args: {},
+  handler: async (ctx, args) => {
+    const quotations = await ctx.db
+      .query("quotations")
+      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .collect();
+    
+    // Filter by status (visible to client)
+    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    
+    return quotations
+      .filter((q) => clientVisibleStatus.includes(q.status))
+      .sort((a, b) => b._creationTime - a._creationTime);
   },
 });

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
 import { format } from "date-fns";
 import {
@@ -15,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { SendQuotationDrawer } from "../../send";
 
 interface DetailHeaderProps {
   quotation: any;
@@ -28,6 +30,7 @@ export function DetailHeader({
   quotationId,
 }: DetailHeaderProps) {
   const router = useRouter();
+  const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
   const StatusIcon = status.icon;
 
   const copyCode = async () => {
@@ -83,7 +86,7 @@ export function DetailHeader({
             "flex items-center gap-2 px-4 py-2 rounded-xl border",
             status.bgColor,
             status.borderColor,
-            status.color
+            status.color,
           )}
         >
           <StatusIcon className="h-4 w-4" />
@@ -115,6 +118,38 @@ export function DetailHeader({
           <Download className="h-4 w-4 mr-2" />
           Download PDF
         </Button>
+
+        <Button
+          onClick={() => setIsSendDrawerOpen(true)}
+          disabled={
+            !["draft", "sent", "viewed", "changes_requested"].includes(
+              quotation.status,
+            )
+          }
+          className={cn(
+            "h-10 px-6 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95",
+            quotation.status === "draft"
+              ? "bg-primary hover:bg-primary/90 text-zinc-950 shadow-primary/20"
+              : "bg-white/5 border border-white/10 text-white hover:bg-white/10",
+          )}
+        >
+          <Send className="h-4 w-4 mr-2" />
+          {quotation.status === "draft" ? "Send to Client" : "Resend"}
+        </Button>
+
+        <SendQuotationDrawer
+          isOpen={isSendDrawerOpen}
+          onClose={() => setIsSendDrawerOpen(false)}
+          quotation={{
+            _id: quotationId as any,
+            code: quotation.code,
+            total: quotation.total,
+            clientId: quotation.clientId,
+            clientName: quotation.clientName, // This might need to be resolved if not in quotation object
+            status: quotation.status,
+            shareToken: quotation.shareToken,
+          }}
+        />
       </div>
     </div>
   );
