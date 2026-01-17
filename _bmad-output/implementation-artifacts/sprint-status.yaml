@@ -125,8 +125,10 @@ development_status:
   # Phase C: Integration & Library (Deferred)
   4-11-link-quotation-to-projects: deferred
   4-12-item-library-crud: deferred
-  4-13-add-items-from-library-to-quota tion: deferred
+  4-13-add-items-from-library-to-quotation: deferred
   4-14-project-type-hints-for-templates: deferred
+  # Phase D: Enhancements
+  4-16-enhanced-quotation-pdf-download: done # MEDIUM: Section-specific PDF downloads
   epic-4-retrospective: optional
 
   # ============================================================================

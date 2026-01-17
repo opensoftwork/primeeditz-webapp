@@ -8,7 +8,6 @@ import {
   Copy,
   ArrowLeft,
   Edit,
-  Download,
   Send,
   FileText,
 } from "lucide-react";
@@ -17,15 +16,18 @@ import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { SendQuotationDrawer } from "../../send";
+import { DownloadQuotation } from "../../preview";
 
 interface DetailHeaderProps {
   quotation: any;
+  sections: any[];
   status: any;
   quotationId: string;
 }
 
 export function DetailHeader({
   quotation,
+  sections,
   status,
   quotationId,
 }: DetailHeaderProps) {
@@ -111,13 +113,13 @@ export function DetailHeader({
           <Edit className="h-4 w-4 mr-2" />
           Edit
         </Button>
-        <Button
-          onClick={() => router.push(`/quotations/${quotationId}/preview`)}
+        <DownloadQuotation
+          quotation={quotation}
+          sections={sections}
+          variant="default"
+          size="sm"
           className="h-10 px-4 rounded-xl font-bold text-xs"
-        >
-          <Download className="h-4 w-4 mr-2" />
-          Download PDF
-        </Button>
+        />
 
         <Button
           onClick={() => setIsSendDrawerOpen(true)}

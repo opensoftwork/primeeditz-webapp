@@ -59,6 +59,7 @@ interface QuotationData {
 interface DownloadQuotationProps {
   quotation: QuotationData;
   sections: Section[];
+  activeSection?: string; // Section name for filtered download
   companyInfo?: {
     name: string;
     tagline?: string;
@@ -81,6 +82,7 @@ interface DownloadQuotationProps {
 export function DownloadQuotation({
   quotation,
   sections,
+  activeSection,
   companyInfo,
   clientName,
   projectName,
@@ -117,12 +119,14 @@ export function DownloadQuotation({
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       const dataUrl = await htmlToImage.toPng(documentRef.current, {
-        quality: 0.95,
-        pixelRatio: 2,
+        quality: 1, // Maximum quality
+        pixelRatio: 4, // Higher resolution for crisp text
         backgroundColor: "#ffffff",
         width: 900,
         // Skip web font embedding to avoid parser crashes
         skipFonts: true,
+        // Use CORS to avoid tainted canvas
+        cacheBust: true,
       });
 
       // PDF Dimensions & Margins
@@ -170,7 +174,7 @@ export function DownloadQuotation({
           printableWidth,
           contentHeight,
           undefined,
-          "FAST"
+          "NONE" // No compression for maximum quality
         );
 
         // Apply masking for clean edges
@@ -184,7 +188,11 @@ export function DownloadQuotation({
         page++;
       }
 
-      const fileName = `Quotation_${quotation.code}_v${quotation.version}.pdf`;
+      // Generate filename with section name if applicable
+      const sanitizedSection = activeSection?.replace(/\s+/g, "_");
+      const fileName = activeSection
+        ? `Quotation_${quotation.code}_${sanitizedSection}.pdf`
+        : `Quotation_${quotation.code}_v${quotation.version}.pdf`;
       pdf.save(fileName);
 
       toast.success("PDF downloaded successfully", { id: toastId });
@@ -237,6 +245,7 @@ export function DownloadQuotation({
             ref={documentRef}
             quotation={quotation}
             sections={sections}
+            activeSection={activeSection}
             companyInfo={companyInfo}
             clientName={clientName}
             projectName={projectName}

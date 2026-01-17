@@ -65,6 +65,7 @@ interface QuotationData {
 interface QuotationDocumentProps {
   quotation: QuotationData;
   sections: Section[];
+  activeSection?: string; // Filter to show only this section
   companyInfo?: {
     name: string;
     tagline?: string;
@@ -163,24 +164,37 @@ function DocumentLineItem({
 export const QuotationDocument = React.forwardRef<
   HTMLDivElement,
   QuotationDocumentProps
->(({ quotation, sections, companyInfo, clientName, projectName }, ref) => {
-  // Calculate totals
-  const subtotal = quotation.lineItems.reduce((acc, item) => {
+>(({ quotation, sections, activeSection, companyInfo, clientName, projectName }, ref) => {
+  // Filter sections if activeSection is provided
+  const filteredSections = activeSection
+    ? sections.filter((s) => s.name === activeSection)
+    : sections;
+
+  // Filter line items if activeSection is provided
+  const filteredLineItems = activeSection
+    ? quotation.lineItems.filter((item) => {
+        const section = sections.find((s) => s._id === item.sectionId);
+        return section?.name === activeSection;
+      })
+    : quotation.lineItems;
+
+  // Calculate totals based on filtered items
+  const subtotal = filteredLineItems.reduce((acc, item) => {
     const itemTotal = item.rate * item.quantity;
     const subItemsTotal =
       item.subItems?.reduce((s, sub) => s + sub.rate * sub.quantity, 0) ?? 0;
     return acc + itemTotal + subItemsTotal;
   }, 0);
 
-  const discountAmount = quotation.discountAmount || 0;
+  const discountAmount = activeSection ? 0 : (quotation.discountAmount || 0); // No discount for single section
   const taxRate = quotation.taxRate || 0.18;
   const taxAmount = (subtotal - discountAmount) * taxRate;
   const grandTotal = subtotal - discountAmount + taxAmount;
 
-  // Group items by section
-  const groupedItems = sections.map((section) => ({
+  // Group items by section (using filtered sections)
+  const groupedItems = filteredSections.map((section) => ({
     section,
-    items: quotation.lineItems.filter((item) => item.sectionId === section._id),
+    items: filteredLineItems.filter((item) => item.sectionId === section._id),
   }));
 
   // Default company info for PrimeEditz

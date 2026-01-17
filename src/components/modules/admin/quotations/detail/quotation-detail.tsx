@@ -169,6 +169,7 @@ export function QuotationDetail({
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
       <DetailHeader
         quotation={quotation}
+        sections={sections}
         status={status}
         quotationId={quotationId}
       />
