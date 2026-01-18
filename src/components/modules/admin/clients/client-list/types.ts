@@ -9,6 +9,7 @@ export interface AdminClient {
   onboardingComplete: boolean;
   role: string;
   _creationTime: number;
+  deactivatedAt?: number;
 }
 
 // For component props that accept selection

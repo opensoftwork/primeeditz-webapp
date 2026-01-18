@@ -10,6 +10,7 @@
 
 import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
+import type * as crons from "../crons.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_folderTemplates_mutations from "../functions/folderTemplates/mutations.js";
 import type * as functions_folderTemplates_queries from "../functions/folderTemplates/queries.js";
@@ -35,6 +36,7 @@ import type * as functions_quotations_templates_mutations from "../functions/quo
 import type * as functions_quotations_templates_queries from "../functions/quotations/templates/queries.js";
 import type * as functions_seed from "../functions/seed.js";
 import type * as functions_storage_actions from "../functions/storage/actions.js";
+import type * as functions_storage_cleanup from "../functions/storage/cleanup.js";
 import type * as functions_storageTiers_mutations from "../functions/storageTiers/mutations.js";
 import type * as functions_storageTiers_queries from "../functions/storageTiers/queries.js";
 import type * as http from "../http.js";
@@ -60,6 +62,7 @@ import type {
 declare const fullApi: ApiFromModules<{
   admin: typeof admin;
   auth: typeof auth;
+  crons: typeof crons;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/folderTemplates/mutations": typeof functions_folderTemplates_mutations;
   "functions/folderTemplates/queries": typeof functions_folderTemplates_queries;
@@ -85,6 +88,7 @@ declare const fullApi: ApiFromModules<{
   "functions/quotations/templates/queries": typeof functions_quotations_templates_queries;
   "functions/seed": typeof functions_seed;
   "functions/storage/actions": typeof functions_storage_actions;
+  "functions/storage/cleanup": typeof functions_storage_cleanup;
   "functions/storageTiers/mutations": typeof functions_storageTiers_mutations;
   "functions/storageTiers/queries": typeof functions_storageTiers_queries;
   http: typeof http;

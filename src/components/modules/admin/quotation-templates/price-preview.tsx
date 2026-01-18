@@ -1,22 +1,14 @@
 "use client";
 
 import { Receipt, Info } from "lucide-react";
+import type { TemplateLineItem } from "@/components/modules/admin/quotations/types";
 
-interface LineItem {
-  description: string;
-  unit: string;
-  unitPrice: number;
-  defaultQuantity: number;
-  subItems?: {
-    description: string;
-    unit: string;
-    unitPrice: number;
-    defaultQuantity: number;
-  }[];
-}
+// ============================================================================
+// Component Props
+// ============================================================================
 
 interface PricePreviewProps {
-  lineItems: LineItem[];
+  lineItems: TemplateLineItem[];
   gstRate?: number;
 }
 

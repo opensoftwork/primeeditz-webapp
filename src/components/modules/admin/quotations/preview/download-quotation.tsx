@@ -14,60 +14,21 @@ import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import { QuotationDocument } from "./quotation-document";
 import { toast } from "sonner";
+import type {
+  QuotationData,
+  QuotationSection,
+  CompanyInfo,
+} from "../types";
 
 // ============================================================================
-// Types
+// Component Props
 // ============================================================================
-
-interface LineItem {
-  id: string;
-  description: string;
-  unit: string;
-  quantity: number;
-  rate: number;
-  sectionId?: string;
-  projectId?: string;
-  subItems?: {
-    description: string;
-    unit: string;
-    quantity: number;
-    rate: number;
-  }[];
-}
-
-interface Section {
-  _id: string;
-  name: string;
-  color?: string;
-  sequence?: number;
-}
-
-interface QuotationData {
-  code: string;
-  version: number;
-  status: string;
-  clientId?: string;
-  projectIds?: string[];
-  lineItems: LineItem[];
-  terms?: string;
-  validUntil?: number;
-  taxRate?: number;
-  discountAmount?: number;
-  _creationTime: number;
-}
 
 interface DownloadQuotationProps {
   quotation: QuotationData;
-  sections: Section[];
+  sections: QuotationSection[];
   activeSection?: string; // Section name for filtered download
-  companyInfo?: {
-    name: string;
-    tagline?: string;
-    address?: string;
-    phone?: string;
-    email?: string;
-    logoUrl?: string;
-  };
+  companyInfo?: CompanyInfo;
   clientName?: string;
   projectName?: string;
   variant?: "default" | "outline";

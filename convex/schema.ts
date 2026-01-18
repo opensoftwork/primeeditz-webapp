@@ -80,6 +80,8 @@ export default defineSchema({
     company: v.optional(v.string()),
     onboardingComplete: v.boolean(),
     updatedAt: v.number(),
+    deactivatedAt: v.optional(v.number()),
+    deactivatedBy: v.optional(v.id('profiles')),
   })
     .index('by_userId', ['userId'])
     .index('by_role', ['role']),
@@ -169,6 +171,9 @@ export default defineSchema({
     // Archive tracking
     archivedAt: v.optional(v.number()),
     archivedBy: v.optional(v.id('profiles')),
+    // Soft delete tracking
+    deletedAt: v.optional(v.number()),
+    deletedBy: v.optional(v.id('profiles')),
     // Timestamp (uses _creationTime for created)
     updatedAt: v.number(),
   })

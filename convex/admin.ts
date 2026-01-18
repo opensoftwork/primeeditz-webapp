@@ -6,7 +6,7 @@
  */
 
 import { paginationOptsValidator } from "convex/server";
-import { mutation, query } from "./_generated/server";
+import { mutation, query, internalQuery } from "./_generated/server";
 import { v } from "convex/values";
 import { adminMutation, adminQuery } from "./lib/customFunctions";
 import { api } from "./_generated/api";
@@ -31,10 +31,13 @@ export const getAdminDashboardStats = adminQuery({
     const activeProjects = await ctx.db
       .query("projects")
       .filter((q) =>
-        q.or(
-          q.eq(q.field("status"), "active"),
-          q.eq(q.field("status"), "in_progress"),
-        ),
+        q.and(
+          q.or(
+            q.eq(q.field("status"), "active"),
+            q.eq(q.field("status"), "in_progress"),
+          ),
+          q.eq(q.field("deletedAt"), undefined)
+        )
       )
       .collect();
     const activeProjectsCount = activeProjects.length;
@@ -43,7 +46,10 @@ export const getAdminDashboardStats = adminQuery({
     const teamMembers = await ctx.db
       .query("profiles")
       .filter((q) =>
-        q.or(q.eq(q.field("role"), "employee"), q.eq(q.field("role"), "admin")),
+        q.and(
+          q.or(q.eq(q.field("role"), "employee"), q.eq(q.field("role"), "admin")),
+          q.eq(q.field("deactivatedAt"), undefined)
+        )
       )
       .collect();
     const totalEmployeesCount = teamMembers.length;
@@ -107,6 +113,7 @@ export const getAdminProjectsPaginated = adminQuery({
     paginationOpts: paginationOptsValidator,
     status: v.optional(projectStatusValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
+    includeTrashed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Execute pagination - conditionally use index for status filtering
@@ -114,10 +121,12 @@ export const getAdminProjectsPaginated = adminQuery({
       ? ctx.db
         .query("projects")
         .withIndex("by_status", (q) => q.eq("status", args.status!))
+        .filter((q) => args.includeTrashed ? q.neq(q.field("deletedAt"), -1) : q.eq(q.field("deletedAt"), undefined))
         .order("desc")
         .paginate(args.paginationOpts)
       : ctx.db
         .query("projects")
+        .filter((q) => args.includeTrashed ? q.neq(q.field("deletedAt"), -1) : q.eq(q.field("deletedAt"), undefined))
         .order("desc")
         .paginate(args.paginationOpts));
     // Get all project types and clients for enrichment
@@ -156,6 +165,68 @@ export const getAdminProjectsPaginated = adminQuery({
           updatedAt: project.updatedAt,
         };
       });
+
+    return {
+      ...results,
+      page: enrichedPage,
+    };
+  },
+});
+
+/**
+ * Internal query to fetch projects that have been in trash for > 30 days.
+ * Used by automated cleanup cron.
+ */
+export const internalGetExpiredTrash = internalQuery({
+  handler: async (ctx) => {
+    const thirtyDaysAgo = Date.now() - 30 * 24 * 60 * 60 * 1000
+
+    return await ctx.db
+      .query('projects')
+      .filter((q) =>
+        q.and(
+          q.neq(q.field('deletedAt'), undefined),
+          q.lt(q.field('deletedAt'), thirtyDaysAgo)
+        )
+      )
+      .collect()
+  },
+})
+
+/**
+ * Get soft-deleted projects (trash view).
+ */
+export const getTrashedProjects = adminQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+  },
+  handler: async (ctx, args) => {
+    const results = await ctx.db
+      .query("projects")
+      .filter((q) => q.neq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .paginate(args.paginationOpts);
+
+    // Enrich with project type and client info
+    const enrichedPage = await Promise.all(
+      results.page.map(async (project: Doc<"projects">) => {
+        const [projectType, client] = await Promise.all([
+          ctx.db.get(project.projectTypeId),
+          project.clientId ? ctx.db.get(project.clientId) : null,
+        ]);
+
+        return {
+          _id: project._id,
+          code: project.code,
+          status: project.status,
+          projectTypeName: projectType?.name ?? "Unknown",
+          clientName: client?.name ?? "Unknown Client",
+          deletedAt: project.deletedAt,
+          eventName: project.eventName,
+          createdAt: project._creationTime,
+        };
+      })
+    );
 
     return {
       ...results,
@@ -531,11 +602,14 @@ export const getAdminQuotations = query({
  * Get all clients for selection.
  */
 export const getClients = adminQuery({
-  args: {},
-  handler: async (ctx) => {
+  args: {
+    includeDeactivated: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
     return await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "client"))
+      .filter((q) => args.includeDeactivated ? q.neq(q.field("deactivatedAt"), -1) : q.eq(q.field("deactivatedAt"), undefined))
       .collect();
   },
 });

@@ -20,60 +20,22 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { amountInWords } from "./utils/number-to-words";
+import type {
+  QuotationData,
+  QuotationSection,
+  QuotationLineItem,
+  CompanyInfo,
+} from "../types";
 
 // ============================================================================
-// Types
+// Component Props
 // ============================================================================
-
-interface LineItem {
-  id: string;
-  description: string;
-  unit: string;
-  quantity: number;
-  rate: number;
-  sectionId?: string;
-  projectId?: string;
-  subItems?: {
-    description: string;
-    unit: string;
-    quantity: number;
-    rate: number;
-  }[];
-}
-
-interface Section {
-  _id: string;
-  name: string;
-  color?: string;
-  sequence?: number;
-}
-
-interface QuotationData {
-  code: string;
-  version: number;
-  status: string;
-  clientId?: string;
-  projectIds?: string[];
-  lineItems: LineItem[];
-  terms?: string;
-  validUntil?: number;
-  taxRate?: number;
-  discountAmount?: number;
-  _creationTime: number;
-}
 
 interface QuotationDocumentProps {
   quotation: QuotationData;
-  sections: Section[];
+  sections: QuotationSection[];
   activeSection?: string; // Filter to show only this section
-  companyInfo?: {
-    name: string;
-    tagline?: string;
-    address?: string;
-    phone?: string;
-    email?: string;
-    logoUrl?: string;
-  };
+  companyInfo?: CompanyInfo;
   clientName?: string;
   projectName?: string;
 }
@@ -101,7 +63,7 @@ function DocumentLineItem({
   level = 0,
   parentNumber = "",
 }: {
-  item: LineItem & { subItems?: any[] };
+  item: QuotationLineItem;
   index: number;
   level?: number;
   parentNumber?: string;

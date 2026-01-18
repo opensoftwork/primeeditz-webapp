@@ -11,4 +11,5 @@ export interface AdminProject {
   eventDate?: number;
   createdAt: number;
   updatedAt: number;
+  deletedAt?: number;
 }

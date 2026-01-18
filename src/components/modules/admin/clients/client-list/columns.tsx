@@ -9,6 +9,7 @@ import {
 } from "@/components/shared/data-table";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminClient } from "./types";
+import { ClientActions } from "./client-actions";
 
 export const columns: ColumnDef<AdminClient>[] = [
   {
@@ -116,34 +117,6 @@ export const columns: ColumnDef<AdminClient>[] = [
   },
   {
     id: "actions",
-    cell: ({ row }) => {
-      const client = row.original;
-
-      const actions: RowAction<AdminClient>[] = [
-        {
-          label: "View Profile",
-          icon: Eye,
-          href: `/clients/${client._id}`,
-        },
-        {
-          label: "Edit Client",
-          icon: Pencil,
-          onClick: () => {
-            // TODO: Implement edit
-          },
-        },
-        {
-          label: "Delete",
-          icon: Trash2,
-          variant: "destructive",
-          separator: true,
-          onClick: () => {
-            // TODO: Implement delete
-          },
-        },
-      ];
-
-      return <DataTableRowActions row={client} actions={actions} />;
-    },
+    cell: ({ row }) => <ClientActions client={row.original} />,
   },
 ];
