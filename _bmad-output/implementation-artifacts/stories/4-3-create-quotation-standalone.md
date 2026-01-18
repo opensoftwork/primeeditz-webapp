@@ -271,9 +271,9 @@ export const DEFAULT_UNIT = "lumpsum";
 - [x] Matches premium dark theme aesthetic
 - [x] Drawer-based add/edit pattern (like Naksha)
 - [x] Section filter dropdown (not scrolling tabs)
-- [ ] Terms & conditions step
-- [ ] Drag-and-drop reorder
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Terms & conditions step (step4-terms)
+- [ ] Drag-and-drop reorder (deferred)
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
@@ -283,6 +283,7 @@ export const DEFAULT_UNIT = "lumpsum";
 | ---------- | ----------- | -------------------------------------------------------------------------------------- |
 | 2026-01-13 | in-progress | Implementation started                                                                 |
 | 2026-01-15 | in-progress | Step 3 (Line Items) completed: Table UI, drawer-based editing, section filter dropdown |
+| 2026-01-18 | done        | All steps implemented including Step 4 (Terms & Conditions)                            |
 
 ---
 

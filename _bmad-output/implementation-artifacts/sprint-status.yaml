@@ -105,16 +105,14 @@ development_status:
   # ============================================================================
   # EPIC 4: Quotation System
   # ============================================================================
-  epic-4: in-progress
-  # Phase A: Foundation (MVP) - COMPLETE
+  epic-4: in-progress # MVP complete (Phase A + B), Phase C deferred
+  # Phase A: Foundation (MVP) - ✅ COMPLETE
   4-1-quotation-sections-configuration: done # Schema, queries, mutations, seed, UI
   4-2-quotation-templates-crud: done # Covered by 3-8 (shared implementation)
   4-3-create-quotation-standalone: done # 4-step wizard, line items, terms & conditions
-  4-4-quotation-line-items-nested-hierarchy: backlog # Display done, CRUD pending
+  4-4-quotation-line-items-nested-hierarchy: backlog # Display done, CRUD pending (enhancement)
   4-5-quotation-preview-print: done # html-to-image + jsPDF, proper PDF generation
-  # ── TRACK A: Divya (Sr Dev) ─────────────────────────────────────────────────
-  # See: sprints/track-handoffs/track-a-client-quotation-2026-01-17.md
-  # Phase B: Client Workflow (CURRENT FOCUS)
+  # Phase B: Client Workflow - ✅ COMPLETE
   4-6-send-quotation-to-client: done # Dual-channel: Dashboard + Public Link
   4-7-client-view-quotation: done # Dashboard listing + Public share view
   4-8-client-approve-quotation: done # Accept flow → Gates Epic 5
@@ -129,19 +127,25 @@ development_status:
   4-14-project-type-hints-for-templates: deferred
   # Phase D: Enhancements
   4-16-enhanced-quotation-pdf-download: done # MEDIUM: Section-specific PDF downloads
-  epic-4-retrospective: optional
+  epic-4-retrospective: done # Completed 2026-01-18
 
   # ============================================================================
   # EPIC 5: Asset Upload & Folder Management
   # ============================================================================
-  epic-5: backlog
-  5-1-view-project-folders: backlog
-  5-2-gated-upload-enforcement: backlog
-  5-3-file-upload-with-signed-urls: backlog
-  5-4-upload-progress-validation: backlog
-  5-5-storage-limit-enforcement: backlog
-  5-6-mark-upload-complete: backlog
-  5-7-admin-asset-upload-internal-projects: backlog
+  epic-5: ready # Unblocked after Epic 4 completion
+  # Phase A: Core Upload Infrastructure (MUST)
+  5-1-view-project-folders: backlog # Folder cards with status indicators
+  5-2-gated-upload-enforcement: backlog # Lock uploads until quotation approved
+  5-3-file-upload-dual-strategy: backlog # Signed URL + tus for large files
+  5-4-upload-progress-validation: backlog # Progress bars, validation, retry
+  5-5-storage-limit-enforcement: backlog # Quota check, upgrade CTA
+  # Phase B: Completion & Admin (SHOULD)
+  5-6-mark-upload-complete: backlog # Client marks done, notify admin
+  5-7-admin-asset-upload-internal: backlog # Internal projects skip quotation
+  # Phase C: Enhancements (COULD - Backlog)
+  5-8-move-organize-files: deferred # Post-upload organization
+  5-9-file-preview-gallery: deferred # Image/video preview
+  5-10-upload-notifications: deferred # Real-time admin notifications
   epic-5-retrospective: optional
 
   # ============================================================================

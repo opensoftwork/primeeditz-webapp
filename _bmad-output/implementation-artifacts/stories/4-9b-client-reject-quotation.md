@@ -1,9 +1,10 @@
 # Story 4-9b: Client Reject Quotation
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-17  
+**Updated**: 2026-01-18  
 **Priority**: MEDIUM — Completes client response options
 
 ---
@@ -28,15 +29,15 @@
 
 ### AC1: Reject Button
 
-- [ ] Visible for `sent` or `viewed` quotations
-- [ ] Styled as destructive/warning action
+- [x] Visible for `sent` or `viewed` quotations
+- [x] Styled as destructive/warning action
 
 ### AC2: Rejection Confirmation
 
-- [ ] Clicking opens confirmation dialog
-- [ ] Required: Select rejection reason
-- [ ] Optional: Additional comments (300 chars)
-- [ ] Rejection reasons:
+- [x] Clicking opens confirmation dialog
+- [x] Required: Select rejection reason
+- [x] Optional: Additional comments (300 chars)
+- [x] Rejection reasons:
   - Budget constraints
   - Chose different vendor
   - Project cancelled
@@ -45,16 +46,16 @@
 
 ### AC3: Submission
 
-- [ ] Status changes to `rejected`
-- [ ] `rejectedAt` timestamp recorded
-- [ ] `rejectionReason` stored
-- [ ] `clientNotes` updated with comments
+- [x] Status changes to `rejected`
+- [x] `rejectedAt` timestamp recorded
+- [x] `rejectionReason` stored
+- [x] `clientNotes` updated with comments
 
 ### AC4: Post-Rejection UI
 
-- [ ] Status shows "REJECTED"
-- [ ] Action buttons hidden
-- [ ] Rejection reason displayed
+- [x] Status shows "REJECTED"
+- [x] Action buttons hidden
+- [x] Rejection reason displayed
 
 ---
 
@@ -84,17 +85,26 @@
 
 **File**: `src/lib/constants/quotation-rejection-reasons.ts`
 
-- [ ] Define REJECTION_REASONS constant
+- [x] Define REJECTION_REASONS constant
 
 ---
 
 ## 🚀 Definition of Done
 
-- [ ] `rejectQuotation` mutation working
-- [ ] Rejection dialog complete
-- [ ] Status updates to `rejected`
-- [ ] Admin sees rejection reason
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] `rejectQuotation` mutation working
+- [x] Rejection dialog complete
+- [x] Status updates to `rejected`
+- [x] Admin sees rejection reason
+- [x] Story marked as `done` in `sprint-status.yaml`
+
+---
+
+## 🔄 Status Updates
+
+| Date       | Status        | Notes                                             |
+| ---------- | ------------- | ------------------------------------------------- |
+| 2026-01-17 | ready-for-dev | Story created                                     |
+| 2026-01-18 | done          | reject-quotation-drawer.tsx and mutation complete |
 
 ---
 

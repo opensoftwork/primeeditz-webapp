@@ -4,7 +4,7 @@
 **Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-16  
-**Updated**: 2026-01-16  
+**Updated**: 2026-01-18  
 **Priority**: HIGH — Enables client-facing quotation delivery
 
 ---
@@ -59,56 +59,56 @@
 
 ### Preview Route
 
-- [ ] **Given** I am viewing a quotation at `/quotations/[id]`
-- [ ] **When** I click "Preview" or "Print"
-- [ ] **Then** I see a professional print-ready document layout
-- [ ] **And** the layout is optimized for A4 paper dimensions
+- [x] **Given** I am viewing a quotation at `/quotations/[id]`
+- [x] **When** I click "Preview" or "Print"
+- [x] **Then** I see a professional print-ready document layout
+- [x] **And** the layout is optimized for A4 paper dimensions
 
 ### Document Header
 
-- [ ] **Given** I am viewing the preview
-- [ ] **Then** I see:
-  - [ ] Company branding (logo placeholder, company name)
-  - [ ] Quotation reference number prominently displayed
-  - [ ] Issue date and validity period
-  - [ ] Contact information (address, phone, email)
+- [x] **Given** I am viewing the preview
+- [x] **Then** I see:
+  - [x] Company branding (logo placeholder, company name)
+  - [x] Quotation reference number prominently displayed
+  - [x] Issue date and validity period
+  - [x] Contact information (address, phone, email)
 
 ### Client & Project Info
 
-- [ ] **Given** the quotation is linked to a client
-- [ ] **Then** I see client details section
-- [ ] **And** if linked to projects, I see project context
+- [x] **Given** the quotation is linked to a client
+- [x] **Then** I see client details section
+- [x] **And** if linked to projects, I see project context
 
 ### Line Items Table
 
-- [ ] **Given** I have line items in the quotation
-- [ ] **When** viewing the preview
-- [ ] **Then** line items are grouped by section
-- [ ] **And** each section has a visual header
-- [ ] **And** columns shown: #, Description, Unit, Qty, Rate, Total
-- [ ] **And** nested sub-items are indented with parent numbering (1.1, 1.2)
+- [x] **Given** I have line items in the quotation
+- [x] **When** viewing the preview
+- [x] **Then** line items are grouped by section
+- [x] **And** each section has a visual header
+- [x] **And** columns shown: #, Description, Unit, Qty, Rate, Total
+- [x] **And** nested sub-items are indented with parent numbering (1.1, 1.2)
 
 ### Financial Summary
 
-- [ ] **Given** I am viewing the preview
-- [ ] **Then** I see:
-  - [ ] Subtotal
-  - [ ] GST rate and amount
-  - [ ] Grand Total (prominently styled)
-  - [ ] Amount in words (Indian Rupee format)
+- [x] **Given** I am viewing the preview
+- [x] **Then** I see:
+  - [x] Subtotal
+  - [x] GST rate and amount
+  - [x] Grand Total (prominently styled)
+  - [x] Amount in words (Indian Rupee format)
 
 ### Terms & Conditions
 
-- [ ] **Given** the quotation has terms
-- [ ] **Then** terms are displayed in a formatted section
-- [ ] **And** text is readable at print size
+- [x] **Given** the quotation has terms
+- [x] **Then** terms are displayed in a formatted section
+- [x] **And** text is readable at print size
 
 ### Print Functionality
 
-- [ ] **Given** I am viewing the preview
-- [ ] **When** I click "Print"
-- [ ] **Then** browser print dialog opens
-- [ ] **And** document prints cleanly without app chrome
+- [x] **Given** I am viewing the preview
+- [x] **When** I click "Print" or "Download"
+- [x] **Then** PDF is generated via html-to-image + jsPDF
+- [x] **And** document downloads cleanly with proper naming
 
 ---
 
@@ -185,19 +185,16 @@ src/components/modules/admin/quotations/preview/
 ### Key Features
 
 1. **Print-Optimized CSS**
-
    - Use `@media print` for clean output
    - Hide app chrome (headers, navigation)
    - A4 optimized dimensions
 
 2. **Sectioned Line Items**
-
    - Group by quotationSection
    - Recursive rendering for sub-items
    - Proper numbering (1, 1.1, 1.2, 2, etc.)
 
 3. **Amount in Words**
-
    - Indian numbering system (Lakh, Crore)
    - Format: "Twenty Five Lakh Rupees Only"
 

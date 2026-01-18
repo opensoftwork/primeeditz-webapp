@@ -1,6 +1,6 @@
 # Epic 5: Asset Upload & Folder Management
 
-**User Outcome:** Clients can upload their photos/videos to organized folders, and the studio has a structured asset management system.
+**User Outcome:** Clients can upload their photos/videos to organized folders with resumable upload support for large files, and the studio has a structured asset management system.
 
 **FRs covered:** FR7 (Folder Structure), FR8 (Asset Upload)
 
@@ -9,55 +9,114 @@
 - Folder template system
 - Automatic folder creation from templates
 - Folder listing within sessions
-- Direct upload to MinIO via signed URLs
+- Direct upload to MinIO via signed URLs (files <100MB)
+- **Resumable uploads via tus protocol (files >100MB)**
 - Batch upload with progress indicators
 - File validation (type, size)
+- Storage limit enforcement with upgrade prompts
 - Folder status tracking (pending → in_progress → completed)
 
 **Standalone:** ✅ Complete upload and folder management system.
 
 ---
 
-## 📘 Epic 2 Learnings Applied
+## 📘 Technical Stack (Updated 2026-01-18)
 
-**IMPORTANT**: Based on Epic 2 retrospective (2026-01-09), apply these corrections:
+**IMPORTANT**: Apply these corrections from Epic 4 retrospective:
 
-### Framework Corrections
-
-| Original Specification | Actual Implementation     |
-| ---------------------- | ------------------------- |
-| TanStack Start Router  | **Next.js 15 App Router** |
-| TanStack Form          | **React Hook Form + Zod** |
-
-### Critical Patterns from Epic 2
-
-1. **Pre-signed MinIO URLs**: Use `storage/actions:getSignedFileUrls` for download URLs
-2. **Upload URLs**: Create similar action for upload signed URLs
-3. **Deferred Upload Pattern**: Consider storing file metadata in Zustand until batch complete
-4. **FilesVaultDrawer**: Reuse for displaying uploaded assets
-5. **ImageSlider**: Reuse for image previews
+| Layer                 | Technology                                  |
+| --------------------- | ------------------------------------------- |
+| **Framework**         | Next.js 16 (App Router)                     |
+| **Forms**             | TanStack Form + Zod                         |
+| **State**             | Zustand (upload queue)                      |
+| **Storage**           | MinIO (S3-compatible)                       |
+| **Resumable Uploads** | @tus/server + @tus/s3-store + tus-js-client |
 
 ### Key Files to Reference
 
-- `convex/functions/storage/actions.ts` - MinIO signed URL generation
+- `convex/functions/storage/actions.ts` - MinIO signed URL generation (existing pattern)
 - `src/stores/reference-files-store.ts` - Zustand file management pattern
 - `src/components/shared/files-vault/drawer.tsx` - File display component
+- `_bmad-output/docs/tus/` - tus protocol documentation
+
+### MinIO Configuration (Verified Compatible)
+
+The existing S3 client configuration works with `@tus/s3-store`:
+
+```typescript
+{
+  endpoint: process.env.MINIO_ENDPOINT,
+  region: process.env.MINIO_REGION || 'us-east-1',
+  credentials: {
+    accessKeyId: process.env.MINIO_ACCESS_KEY,
+    secretAccessKey: process.env.MINIO_SECRET_KEY,
+  },
+  forcePathStyle: true, // Critical for MinIO
+}
+```
 
 ---
+
+## 📊 Story Summary
+
+### Phase A: Core Upload Infrastructure
+
+| Story | Title                          | Priority | Complexity |
+| ----- | ------------------------------ | -------- | ---------- |
+| 5.1   | View Project Folders           | MUST     | Medium     |
+| 5.2   | Gated Upload Enforcement       | MUST     | Low        |
+| 5.3   | File Upload with Dual Strategy | MUST     | High       |
+| 5.4   | Upload Progress & Validation   | MUST     | Medium     |
+| 5.5   | Storage Limit Enforcement      | MUST     | Medium     |
+
+### Phase B: Completion & Admin
+
+| Story | Title                                  | Priority | Complexity |
+| ----- | -------------------------------------- | -------- | ---------- |
+| 5.6   | Mark Upload Complete                   | SHOULD   | Low        |
+| 5.7   | Admin Asset Upload (Internal Projects) | SHOULD   | Medium     |
+
+### Phase C: Enhancements (Backlog)
+
+| Story | Title                               | Priority | Complexity |
+| ----- | ----------------------------------- | -------- | ---------- |
+| 5.8   | Move/Organize Files Between Folders | COULD    | Medium     |
+| 5.9   | File Preview Gallery                | COULD    | Medium     |
+| 5.10  | Upload Notifications to Admin       | COULD    | Low        |
+
+---
+
+## 📋 Detailed Stories
 
 ### Story 5.1: View Project Folders
 
 **As a** Client,
-**I want** to see the folder structure for my project,
-**So that** I know where to upload my assets.
+**I want** to see the folder structure for my project with status indicators,
+**So that** I know where to upload my assets and track progress.
 
 **Acceptance Criteria:**
 
 - **Given** my project has status `active` (quotation approved)
 - **When** I navigate to my project's Assets tab
 - **Then** I must see the folder structure created by the admin (e.g., Ceremony, Reception, Candid).
-- **And** each folder must show: Name, File Count, Status badge.
-- **And** I must see the storage usage (used / allocated).
+- **And** each folder must show:
+  - Folder name with icon
+  - File count badge
+  - Status indicator (Empty → Partial → Complete)
+  - Visual styling based on status
+- **And** I must see the storage usage bar with color coding:
+  - Green: <80% used
+  - Yellow/Amber: 80-95% used
+  - Red: >95% used
+- **And** clicking a folder opens its file listing
+
+**UX Enhancements:**
+
+- Folder cards with dashed border when empty, solid when has files
+- Hover state shows "Add files" prompt
+- Storage bar with `XX GB / YY GB` label
+
+---
 
 ### Story 5.2: Gated Upload Enforcement
 
@@ -69,23 +128,59 @@
 
 - **Given** a project with status `pending_review` or `pending_quotation`
 - **When** a client tries to access the upload section
-- **Then** the upload area must be locked with a message: "Approve quotation to unlock uploads."
+- **Then** the upload area must be locked with UI elements:
+  - Lock icon overlay on folders
+  - Message: "Approve quotation to unlock uploads"
+  - CTA button: "View Quotation"
 - **And** API calls to `getUploadUrl` must throw an error if quotation is not approved.
+- **And** the check must verify `quotation.status === 'approved'`
 
-### Story 5.3: File Upload with Signed URLs
+**Exception:**
+
+- Projects with `source = admin_init` (internal) skip quotation check
+
+---
+
+### Story 5.3: File Upload with Dual Strategy
 
 **As a** Client,
-**I want** to upload files directly to storage using secure signed URLs,
-**So that** my assets are uploaded efficiently without going through the server.
+**I want** to upload files with automatic handling of large files,
+**So that** my uploads don't fail for large video files.
 
 **Acceptance Criteria:**
 
-- **Given** I am on a project with unlocked uploads
-- **When** I drag-and-drop or select files (up to 50 per batch)
-- **Then** the system must generate signed upload URLs from MinIO.
-- **And** files must be uploaded directly from my browser to storage.
-- **And** metadata must be recorded in the `assets` table after successful upload.
-- **And** if metadata recording fails after successful upload, the system must retry 3 times before showing an error with 'Retry' option.
+**Standard Upload (files ≤100MB):**
+
+- **Given** I select files under 100MB
+- **When** I initiate upload
+- **Then** the system uses pre-signed MinIO URLs (existing pattern)
+- **And** files upload directly to MinIO
+
+**Resumable Upload (files >100MB - using tus):**
+
+- **Given** I select files over 100MB (typically videos)
+- **When** I initiate upload
+- **Then** the system uses tus protocol via `/api/upload` endpoint
+- **And** upload can be paused/resumed
+- **And** if browser closes, upload can resume from where it stopped
+- **And** progress is tracked in real-time
+
+**Common Behavior:**
+
+- **And** drag-and-drop targets specific folders
+- **And** file type validation occurs before upload
+- **And** metadata is recorded in `assets` table after successful upload
+- **And** upload queue is managed in Zustand store
+- **And** concurrent upload limit: 3 files at a time
+
+**Technical Implementation:**
+
+- Next.js API Route: `/api/upload/[...file]/route.ts`
+- Uses `@tus/server` with `@tus/s3-store` for MinIO
+- Same env vars as existing MinIO config
+- Client uses `tus-js-client` for files >100MB
+
+---
 
 ### Story 5.4: Upload Progress & Validation
 
@@ -95,28 +190,61 @@
 
 **Acceptance Criteria:**
 
-- **Given** I have initiated a batch upload
+- **Given** I have initiated uploads
 - **When** files are uploading
-- **Then** I must see a progress bar per file.
-- **And** file validation must occur before upload:
-  - File type determined by MIME type: `image/*` = photo, `video/*` = video
-  - Size limits: photos < 100MB, videos < 2GB
-  - Unknown MIME types must be rejected with error
-- **And** failed uploads must show an error message with retry option.
+- **Then** I must see:
+  - Individual progress bar per file
+  - File name and thumbnail (for images)
+  - Upload speed indicator
+  - Batch progress: "X of Y files complete"
+- **And** file validation must occur BEFORE upload:
+  - File type: `image/*` = photo, `video/*` = video
+  - Size limits: photos <100MB, videos <2GB
+  - Unknown MIME types rejected with clear error
+- **And** failed uploads show:
+  - Error message explaining failure
+  - Retry button with exponential backoff
+- **And** successful uploads show:
+  - Checkmark with "Complete" status
+  - Thumbnail preview (images only)
+
+**UX States:**
+
+```
+ 📁 ceremony_photo.jpg   ████████░░ 80%   12.5 MB/s
+ 🎬 highlight_reel.mp4   ██░░░░░░░░ 20%   Resumable
+ ✅ couple_portrait.jpg  Complete
+ ❌ corrupt_file.raw     Failed - Retry
+```
+
+---
 
 ### Story 5.5: Storage Limit Enforcement
 
 **As a** System,
-**I want** to enforce storage limits based on the selected tier,
+**I want** to enforce storage limits based on the quotation storage pool,
 **So that** clients do not exceed their allocated storage.
 
 **Acceptance Criteria:**
 
-- **Given** a project with a storage tier of 100GB and 98GB used
+- **Given** a project with storage limit of 100GB and 98GB used
 - **When** a client tries to upload 5GB more
-- **Then** the system must calculate `currentUsage + fileSize` BEFORE generating the signed URL.
-- **And** if calculation exceeds limit, reject immediately with error: "Storage limit exceeded."
-- **And** the UI must show current usage (98/100 GB) with a warning indicator.
+- **Then** the system must:
+  - Calculate `currentUsage + fileSize` BEFORE generating signed URL
+  - Reject immediately if exceeds limit
+  - Show error: "Storage limit exceeded. You have 2GB remaining."
+- **And** the UI must show:
+  - Current usage bar: `98GB / 100GB` with red styling
+  - Warning when >80% used
+  - Upgrade CTA when >95% used: "Need more space? Contact us."
+
+**Pre-flight Check:**
+
+- Before starting any upload, sum all pending file sizes
+- Validate total won't exceed limit
+- If exceeds, highlight which files won't fit
+
+---
 
 ### Story 5.6: Mark Upload Complete
 
@@ -128,22 +256,98 @@
 
 - **Given** I have uploaded files to at least one folder
 - **When** I click "Mark Upload Complete"
-- **Then** the project status must change to `in_progress`.
-- **And** the admin must be notified that assets are ready for editing.
+- **Then** confirmation dialog appears: "Are you sure? You can still upload more later."
+- **And** if confirmed:
+  - Project status changes to `in_progress`
+  - Admin receives notification
+  - `uploadCompletedAt` timestamp recorded
+- **And** I can still upload more files after marking complete
+
+---
 
 ### Story 5.7: Admin Asset Upload for Internal Projects
 
 **As an** Admin,
 **I want** to upload assets directly to internal projects,
-**So that** I can manage projects that don't have a client (portfolio, internal work).
+**So that** I can manage projects that don't have a client.
 
 **Acceptance Criteria:**
 
 - **Given** a project with `source = admin_init` (internal project)
 - **When** I navigate to the project's Assets section
-- **Then** the upload section must be unlocked WITHOUT requiring quotation approval.
-- **And** I can upload files using the same signed URL flow as clients.
-- **And** storage limits are based on the storage tier selected during project creation.
-- **And** I can mark the project as "Assets Ready" to move to `in_progress` status.
+- **Then** the upload section is unlocked WITHOUT quotation approval
+- **And** I can upload files using the same flow as clients
+- **And** storage limits are based on the storage tier selected during project creation
+- **And** I can mark the project as "Assets Ready" to move to `in_progress`
 
-**Note:** Internal projects skip the quotation workflow entirely.
+---
+
+## 🔗 Dependencies
+
+| Dependency                       | Status  | Notes                   |
+| -------------------------------- | ------- | ----------------------- |
+| Epic 4: Quotation Approval (4-8) | ✅ Done | Gates folder activation |
+| Epic 3: Storage Pool (3-15)      | ✅ Done | Quota enforcement       |
+| Epic 3: Folder Templates (3-10)  | ✅ Done | Folder structure        |
+| MinIO Configuration              | ✅ Done | S3-compatible storage   |
+
+---
+
+## 🏗️ Technical Architecture
+
+### Upload Flow Diagram
+
+```
+Client Browser
+     │
+     ├─── Files ≤100MB ──→ getUploadUrl (Convex Action)
+     │                          │
+     │                          ↓
+     │                     Pre-signed URL
+     │                          │
+     │                          ↓
+     │                     Direct to MinIO
+     │
+     └─── Files >100MB ──→ /api/upload (Next.js)
+                               │
+                               ↓
+                          @tus/server
+                               │
+                               ↓
+                          @tus/s3-store
+                               │
+                               ↓
+                             MinIO
+```
+
+### Zustand Upload Store
+
+```typescript
+interface UploadStore {
+  // Queue management
+  queue: UploadItem[];
+  addToQueue: (files: File[], folderId: string) => void;
+  removeFromQueue: (id: string) => void;
+
+  // Progress tracking
+  progress: Record<string, number>;
+  updateProgress: (id: string, progress: number) => void;
+
+  // Status
+  status: Record<string, "pending" | "uploading" | "complete" | "failed">;
+  setStatus: (id: string, status: UploadStatus) => void;
+
+  // tus instance tracking (for resumable)
+  tusInstances: Record<string, tus.Upload>;
+  pauseUpload: (id: string) => void;
+  resumeUpload: (id: string) => void;
+}
+```
+
+---
+
+## 📝 Notes
+
+- **Priority:** Epic 5 is now unblocked after Epic 4 completion
+- **Risk:** tus integration is new but low-risk (same MinIO config)
+- **Testing:** Include large file upload tests (500MB+)

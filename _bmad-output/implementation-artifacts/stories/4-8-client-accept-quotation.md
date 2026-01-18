@@ -1,9 +1,10 @@
 # Story 4-8: Client Accept Quotation
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-17  
+**Updated**: 2026-01-18  
 **Priority**: CRITICAL — Gates folder activation and asset upload (Epic 5)
 
 ---
@@ -64,15 +65,15 @@ Client Accepts Quotation
 
 ### AC1: Accept Button Visibility
 
-- [ ] **Given** I am viewing a quotation with status `sent` or `viewed`
-- [ ] **Then** I see an "Accept Quotation" button
-- [ ] **And** the button is prominently styled (primary action)
+- [x] **Given** I am viewing a quotation with status `sent` or `viewed`
+- [x] **Then** I see an "Accept Quotation" button
+- [x] **And** the button is prominently styled (primary action)
 
 ### AC2: Accept Confirmation Flow
 
-- [ ] **Given** I click "Accept Quotation"
-- [ ] **When** the confirmation drawer/dialog opens
-- [ ] **Then** I see:
+- [x] **Given** I click "Accept Quotation"
+- [x] **When** the confirmation drawer/dialog opens
+- [x] **Then** I see:
   - Quotation summary (code, total, validity)
   - Checkbox: "I agree to the terms and conditions"
   - Optional: Digital signature or acceptance text
@@ -80,32 +81,32 @@ Client Accepts Quotation
 
 ### AC3: Acceptance Processing
 
-- [ ] **Given** I confirm acceptance
-- [ ] **When** the mutation completes
-- [ ] **Then** quotation status changes to `approved`
-- [ ] **And** `approvedAt` timestamp is recorded
-- [ ] **And** `clientSignature` (if provided) is stored
-- [ ] **And** success message is shown
+- [x] **Given** I confirm acceptance
+- [x] **When** the mutation completes
+- [x] **Then** quotation status changes to `approved`
+- [x] **And** `approvedAt` timestamp is recorded
+- [x] **And** `clientSignature` (if provided) is stored
+- [x] **And** success message is shown
 
 ### AC4: Post-Acceptance UI
 
-- [ ] **Given** a quotation is approved
-- [ ] **When** I view the quotation
-- [ ] **Then** status shows "ACCEPTED ✅"
-- [ ] **And** accept button is replaced with "Accepted on [date]"
-- [ ] **And** reject/change request buttons are hidden
+- [x] **Given** a quotation is approved
+- [x] **When** I view the quotation
+- [x] **Then** status shows "ACCEPTED ✅"
+- [x] **And** accept button is replaced with "Accepted on [date]"
+- [x] **And** reject/change request buttons are hidden
 
 ### AC5: Admin Notification
 
-- [ ] **Given** a quotation is approved
-- [ ] **Then** the quotation appears in admin dashboard with "Approved" status
-- [ ] **And** admin can see the approval timestamp
-- [ ] **And** admin can proceed to folder setup
+- [x] **Given** a quotation is approved
+- [x] **Then** the quotation appears in admin dashboard with "Approved" status
+- [x] **And** admin can see the approval timestamp
+- [x] **And** admin can proceed to folder setup
 
 ### AC6: Schema Requirements
 
-- [ ] **Given** the quotations table
-- [ ] **Then** the following fields exist/work:
+- [x] **Given** the quotations table
+- [x] **Then** the following fields exist/work:
   - `status: 'approved'` — Approval status
   - `approvedAt: v.number()` — Timestamp of approval
   - `clientSignature: v.optional(v.string())` — Digital signature text
@@ -321,22 +322,23 @@ src/components/modules/client/quotations/
 
 ## 🚀 Definition of Done
 
-- [ ] `acceptQuotation` mutation working
-- [ ] Accept confirmation drawer complete
-- [ ] Terms checkbox validation working
-- [ ] Digital signature stored (if provided)
-- [ ] Status updates to `approved`
-- [ ] Post-acceptance UI shows success state
-- [ ] Admin can see approved quotations
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] `acceptQuotation` mutation working
+- [x] Accept confirmation drawer complete
+- [x] Terms checkbox validation working
+- [x] Digital signature stored (if provided)
+- [x] Status updates to `approved`
+- [x] Post-acceptance UI shows success state
+- [x] Admin can see approved quotations
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status        | Notes                            |
-| ---------- | ------------- | -------------------------------- |
-| 2026-01-17 | ready-for-dev | Story created as gate for Epic 5 |
+| Date       | Status        | Notes                                                             |
+| ---------- | ------------- | ----------------------------------------------------------------- |
+| 2026-01-17 | ready-for-dev | Story created as gate for Epic 5                                  |
+| 2026-01-18 | done          | accept-quotation-drawer.tsx and acceptQuotation mutation complete |
 
 ---
 

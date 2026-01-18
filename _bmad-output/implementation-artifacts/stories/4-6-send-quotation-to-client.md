@@ -1,10 +1,10 @@
 # Story 4-6: Send Quotation to Client
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: in-progress  
+**Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-16  
-**Updated**: 2026-01-17
+**Updated**: 2026-01-18
 **Priority**: HIGH — Enables client delivery and approval workflow
 
 ---
@@ -39,30 +39,30 @@
 
 ### AC1: Send Quotation Action
 
-- [ ] **Given** I am viewing a quotation detail page
-- [ ] **When** I click "Send to Client"
-- [ ] **Then** a confirmation dialog/drawer opens with sending options
+- [x] **Given** I am viewing a quotation detail page
+- [x] **When** I click "Send to Client"
+- [x] **Then** a confirmation dialog/drawer opens with sending options
 
 ### AC2: Dashboard Delivery (Primary Channel)
 
-- [ ] **Given** the quotation has a linked `clientId`
-- [ ] **When** I confirm sending
-- [ ] **Then** quotation status changes from "draft" to "sent"
-- [ ] **And** quotation becomes visible in client's dashboard
-- [ ] **And** `sentAt` timestamp is recorded
+- [x] **Given** the quotation has a linked `clientId`
+- [x] **When** I confirm sending
+- [x] **Then** quotation status changes from "draft" to "sent"
+- [x] **And** quotation becomes visible in client's dashboard
+- [x] **And** `sentAt` timestamp is recorded
 
 ### AC3: Share Link Generation (Secondary Channel)
 
-- [ ] **Given** I am in the send dialog
-- [ ] **When** I click "Generate Public Link"
-- [ ] **Then** a unique shareable token is created
-- [ ] **And** link is copied to clipboard
-- [ ] **And** link expiry can be set (7, 14, 30, 90 days)
+- [x] **Given** I am in the send dialog
+- [x] **When** I click "Generate Public Link"
+- [x] **Then** a unique shareable token is created
+- [x] **And** link is copied to clipboard
+- [x] **And** link expiry can be set (7, 14, 30, 90 days)
 
 ### AC4: Schema Updates
 
-- [ ] **Given** the quotations table
-- [ ] **Then** the following fields exist:
+- [x] **Given** the quotations table
+- [x] **Then** the following fields exist:
   - `shareToken: v.optional(v.string())` — Unique token for public access
   - `shareTokenExpiresAt: v.optional(v.number())` — Expiry timestamp
   - `sentAt: v.optional(v.number())` — When quotation was sent
@@ -70,17 +70,17 @@
 
 ### AC5: Status Update
 
-- [ ] **Given** a quotation is sent
-- [ ] **When** the send action completes
-- [ ] **Then** quotation status changes from "draft" to "sent"
-- [ ] **And** activity log is updated (if implemented)
+- [x] **Given** a quotation is sent
+- [x] **When** the send action completes
+- [x] **Then** quotation status changes from "draft" to "sent"
+- [x] **And** activity log is updated (if implemented)
 
 ### AC6: Resend Capability
 
-- [ ] **Given** a quotation has already been sent
-- [ ] **When** I click "Resend" or "Generate New Link"
-- [ ] **Then** I can generate a new share token
-- [ ] **And** optionally invalidate previous links
+- [x] **Given** a quotation has already been sent
+- [x] **When** I click "Resend" or "Generate New Link"
+- [x] **Then** I can generate a new share token
+- [x] **And** optionally invalidate previous links
 
 ---
 
@@ -252,16 +252,17 @@ This will be implemented in **Story 4-7**.
 - [ ] Send drawer UI complete
 - [ ] "Send to Client" button in detail header
 - [ ] Client query ready for 4-7
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status      | Notes                                                 |
-| ---------- | ----------- | ----------------------------------------------------- |
-| 2026-01-16 | in-progress | Story created, starting implementation                |
-| 2026-01-17 | in-progress | Updated with dual-channel delivery (dashboard + link) |
+| Date       | Status      | Notes                                                         |
+| ---------- | ----------- | ------------------------------------------------------------- |
+| 2026-01-16 | in-progress | Story created, starting implementation                        |
+| 2026-01-17 | in-progress | Updated with dual-channel delivery (dashboard + link)         |
+| 2026-01-18 | done        | send-quotation-drawer.tsx and sendQuotation mutation complete |
 
 ---
 

@@ -1,9 +1,10 @@
 # Story 4-7: Client View Quotation
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Medium (5 points)  
 **Created**: 2026-01-17  
+**Updated**: 2026-01-18  
 **Priority**: HIGH — Client must be able to view quotations to respond
 
 ---
@@ -38,16 +39,16 @@
 
 ### AC1: Dashboard Quotation Listing
 
-- [ ] **Given** I am a logged-in client
-- [ ] **When** I view my dashboard
-- [ ] **Then** I see a "Pending Quotations" section
-- [ ] **And** quotations with status `sent` or `viewed` appear here
-- [ ] **And** each quotation shows: code, total amount, status, validity date
+- [x] **Given** I am a logged-in client
+- [x] **When** I view my dashboard
+- [x] **Then** I see a "Pending Quotations" section
+- [x] **And** quotations with status `sent` or `viewed` appear here
+- [x] **And** each quotation shows: code, total amount, status, validity date
 
 ### AC2: Dashboard Quotation Card
 
-- [ ] **Given** I see a quotation in my dashboard
-- [ ] **Then** I see the following information:
+- [x] **Given** I see a quotation in my dashboard
+- [x] **Then** I see the following information:
   - Quotation code (e.g., QT-2026-00042)
   - Total amount with currency (₹2,45,000)
   - Status badge (AWAITING RESPONSE, ACCEPTED, CHANGES REQUESTED)
@@ -56,32 +57,32 @@
 
 ### AC3: Authenticated Quotation Detail View
 
-- [ ] **Given** I am a logged-in client
-- [ ] **When** I click "View" on a quotation card
-- [ ] **Then** I am taken to `/quotations/[id]`
-- [ ] **And** I see the full quotation with all line items
-- [ ] **And** I see Accept, Reject, and Request Changes buttons
+- [x] **Given** I am a logged-in client
+- [x] **When** I click "View" on a quotation card
+- [x] **Then** I am taken to `/quotations/[id]`
+- [x] **And** I see the full quotation with all line items
+- [x] **And** I see Accept, Reject, and Request Changes buttons
 
 ### AC4: Public Quotation View (Share Token)
 
-- [ ] **Given** I have a share link (e.g., `/q/abc123xyz`)
-- [ ] **When** I open the link (logged in or not)
-- [ ] **Then** I see the full quotation details
-- [ ] **And** if token is valid, the quotation displays
-- [ ] **And** if token is expired, I see an "Expired" message
-- [ ] **And** if token is invalid, I see a 404 page
+- [x] **Given** I have a share link (e.g., `/q/abc123xyz`)
+- [x] **When** I open the link (logged in or not)
+- [x] **Then** I see the full quotation details
+- [x] **And** if token is valid, the quotation displays
+- [x] **And** if token is expired, I see an "Expired" message
+- [x] **And** if token is invalid, I see a 404 page
 
 ### AC5: Mark as Viewed
 
-- [ ] **Given** a client views a quotation for the first time
-- [ ] **When** the quotation detail page loads
-- [ ] **Then** status changes from `sent` to `viewed`
-- [ ] **And** `viewedAt` timestamp is recorded
+- [x] **Given** a client views a quotation for the first time
+- [x] **When** the quotation detail page loads
+- [x] **Then** status changes from `sent` to `viewed`
+- [x] **And** `viewedAt` timestamp is recorded
 
 ### AC6: Status Badge Display
 
-- [ ] **Given** a quotation has any status
-- [ ] **Then** I see appropriate badge styling:
+- [x] **Given** a quotation has any status
+- [x] **Then** I see appropriate badge styling:
   - `sent` / `viewed` → Amber "AWAITING RESPONSE"
   - `approved` → Green "ACCEPTED ✅"
   - `changes_requested` → Purple "CHANGES REQUESTED"
@@ -337,21 +338,22 @@ src/app/q/
 
 ## 🚀 Definition of Done
 
-- [ ] Quotations section appears in client dashboard
-- [ ] Client can view quotation list
-- [ ] Client can view quotation details
-- [ ] Public share link works
-- [ ] Status updates to `viewed` on first view
-- [ ] Action buttons ready (wired in 4-8, 4-9)
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Quotations section appears in client dashboard
+- [x] Client can view quotation list
+- [x] Client can view quotation details
+- [x] Public share link works
+- [x] Status updates to `viewed` on first view
+- [x] Action buttons ready (wired in 4-8, 4-9)
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status        | Notes                                 |
-| ---------- | ------------- | ------------------------------------- |
-| 2026-01-17 | ready-for-dev | Story created with dual-view approach |
+| Date       | Status        | Notes                                                                    |
+| ---------- | ------------- | ------------------------------------------------------------------------ |
+| 2026-01-17 | ready-for-dev | Story created with dual-view approach                                    |
+| 2026-01-18 | done          | Client quotation view, dashboard section, and public share view complete |
 
 ---
 

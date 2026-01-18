@@ -1,9 +1,10 @@
 # Story 4-9: Client Request Changes (MVP)
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: ready-for-dev  
+**Status**: done  
 **Complexity**: Low (3 points)  
 **Created**: 2026-01-17  
+**Updated**: 2026-01-18  
 **Priority**: MEDIUM — Enables negotiation without full versioning
 
 ---
@@ -30,34 +31,34 @@
 
 ### AC1: Request Changes Button
 
-- [ ] Visible for quotations with status `sent` or `viewed`
-- [ ] Secondary styled (not primary like Accept)
+- [x] Visible for quotations with status `sent` or `viewed`
+- [x] Secondary styled (not primary like Accept)
 
 ### AC2: Structured Feedback Form
 
-- [ ] Checkboxes for common reasons:
-  - ☐ Pricing needs adjustment
-  - ☐ Missing items or services
-  - ☐ Timeline doesn't work for me
-  - ☐ Terms and conditions concerns
-  - ☐ Need more details on specific items
-  - ☐ Other (requires comment)
-- [ ] Optional textarea for additional comments (500 chars max)
+- [x] Checkboxes for common reasons:
+  - ☑ Pricing needs adjustment
+  - ☑ Missing items or services
+  - ☑ Timeline doesn't work for me
+  - ☑ Terms and conditions concerns
+  - ☑ Need more details on specific items
+  - ☑ Other (requires comment)
+- [x] Optional textarea for additional comments (500 chars max)
 
 ### AC3: Submission
 
-- [ ] At least one checkbox required
-- [ ] "Other" requires comment
-- [ ] Status changes to `changes_requested`
-- [ ] `clientNotes` populated with feedback
-- [ ] `changeRequestedAt` timestamp recorded
+- [x] At least one checkbox required
+- [x] "Other" requires comment
+- [x] Status changes to `changes_requested`
+- [x] `clientNotes` populated with feedback
+- [x] `changeRequestedAt` timestamp recorded
 
 ### AC4: Post-Request UI
 
-- [ ] Status shows "CHANGES REQUESTED"
-- [ ] Feedback displayed
-- [ ] Action buttons disabled
-- [ ] "Waiting for admin" message shown
+- [x] Status shows "CHANGES REQUESTED"
+- [x] Feedback displayed
+- [x] Action buttons disabled
+- [x] "Waiting for admin" message shown
 
 ---
 
@@ -106,12 +107,21 @@
 
 ## 🚀 Definition of Done
 
-- [ ] `requestQuotationChanges` mutation working
-- [ ] Request Changes drawer complete
-- [ ] Validation working (checkbox + comments)
-- [ ] Status updates correctly
-- [ ] Admin can see feedback
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] `requestQuotationChanges` mutation working
+- [x] Request Changes drawer complete
+- [x] Validation working (checkbox + comments)
+- [x] Status updates correctly
+- [x] Admin can see feedback
+- [x] Story marked as `done` in `sprint-status.yaml`
+
+---
+
+## 🔄 Status Updates
+
+| Date       | Status        | Notes                                            |
+| ---------- | ------------- | ------------------------------------------------ |
+| 2026-01-17 | ready-for-dev | Story created                                    |
+| 2026-01-18 | done          | request-changes-drawer.tsx and mutation complete |
 
 ---
 
