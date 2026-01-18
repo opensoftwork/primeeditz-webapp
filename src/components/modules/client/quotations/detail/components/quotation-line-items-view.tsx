@@ -2,32 +2,18 @@
 
 import { cn } from "@/lib/utils";
 import { Layers } from "lucide-react";
+import type {
+  QuotationLineItem,
+  QuotationSection,
+  GroupedLineItems,
+} from "@/components/modules/admin/quotations/types";
 
-interface LineItem {
-  id: string;
-  description: string;
-  unit: string;
-  quantity: number;
-  rate: number;
-  subItems?: {
-    description: string;
-    unit: string;
-    quantity: number;
-    rate: number;
-  }[];
-}
-
-interface Section {
-  _id: string;
-  name: string;
-  color?: string;
-}
+// ============================================================================
+// Component Props
+// ============================================================================
 
 interface QuotationLineItemsViewProps {
-  groupedItems: {
-    section: Section;
-    items: LineItem[];
-  }[];
+  groupedItems: GroupedLineItems[];
   formatCurrency: (amount: number) => string;
 }
 

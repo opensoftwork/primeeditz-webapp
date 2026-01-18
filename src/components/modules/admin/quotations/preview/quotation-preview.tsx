@@ -12,60 +12,21 @@ import { FileText, Printer, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotationDocument } from "./quotation-document";
 import { DownloadQuotation } from "./download-quotation";
+import type {
+  QuotationData,
+  QuotationSection,
+  CompanyInfo,
+} from "../types";
 
 // ============================================================================
-// Types
+// Component Props
 // ============================================================================
-
-interface LineItem {
-  id: string;
-  description: string;
-  unit: string;
-  quantity: number;
-  rate: number;
-  sectionId?: string;
-  projectId?: string;
-  subItems?: {
-    description: string;
-    unit: string;
-    quantity: number;
-    rate: number;
-  }[];
-}
-
-interface Section {
-  _id: string;
-  name: string;
-  color?: string;
-  sequence?: number;
-}
-
-interface QuotationData {
-  code: string;
-  version: number;
-  status: string;
-  clientId?: string;
-  projectIds?: string[];
-  lineItems: LineItem[];
-  terms?: string;
-  validUntil?: number;
-  taxRate?: number;
-  discountAmount?: number;
-  _creationTime: number;
-}
 
 interface QuotationPreviewProps {
   quotation: QuotationData;
-  sections: Section[];
+  sections: QuotationSection[];
   onBack?: () => void;
-  companyInfo?: {
-    name: string;
-    tagline?: string;
-    address?: string;
-    phone?: string;
-    email?: string;
-    logoUrl?: string;
-  };
+  companyInfo?: CompanyInfo;
   clientName?: string;
   projectName?: string;
 }

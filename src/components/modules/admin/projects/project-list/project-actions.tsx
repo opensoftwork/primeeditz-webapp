@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { useMutation } from "convex/react";
+import { useMutation, useAction } from "convex/react";
 import { Archive, ArchiveRestore, Eye, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -32,7 +32,10 @@ export function ProjectActions({ project }: ProjectActionsProps) {
 
     const archiveProject = useMutation(api.functions.projects.mutations.archiveProject);
     const unarchiveProject = useMutation(api.functions.projects.mutations.unarchiveProject);
-    const deleteProject = useMutation(api.functions.projects.mutations.deleteProject);
+    const softDeleteProject = useMutation(api.functions.projects.mutations.softDeleteProject);
+    const restoreProject = useMutation(api.functions.projects.mutations.restoreProject);
+    const permanentlyDeleteProject = useMutation(api.functions.projects.mutations.permanentlyDeleteProject);
+    const cleanupStorage = useAction(api.functions.storage.cleanup.cleanupProjectStorage);
 
     const handleArchive = async () => {
         setIsLoading(true);
@@ -59,13 +62,52 @@ export function ProjectActions({ project }: ProjectActionsProps) {
         }
     };
 
-    const handleDelete = async () => {
+    const handleSoftDelete = async () => {
         setIsLoading(true);
         try {
-            await deleteProject({ projectId: project._id });
-            toast.success(`Project ${project.code} has been permanently deleted.`);
+            await softDeleteProject({ projectId: project._id });
+            toast.success(`Project ${project.code} has been moved to trash.`);
         } catch (error) {
             toast.error(error instanceof Error ? error.message : "Failed to delete project");
+        } finally {
+            setIsLoading(false);
+            setShowDeleteDialog(false);
+        }
+    };
+
+    const handleRestore = async () => {
+        setIsLoading(true);
+        try {
+            await restoreProject({ projectId: project._id });
+            toast.success(`Project ${project.code} has been restored from trash.`);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to restore project");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    const handlePermanentDelete = async () => {
+        setIsLoading(true);
+        try {
+            const { fileKeys } = await permanentlyDeleteProject({ projectId: project._id });
+            
+            // Queue storage cleanup in background - don't block UI for this
+            if (fileKeys && fileKeys.length > 0) {
+                cleanupStorage({ fileKeys }).then((res: { success: boolean; deletedCount?: number; error?: string }) => {
+                    if (res.success) {
+                        console.log(`Cleaned up ${res.deletedCount} files from MinIO.`);
+                    } else {
+                        console.error("Storage cleanup failed:", res.error);
+                    }
+                }).catch((err: Error) => {
+                    console.error("Storage cleanup error:", err);
+                });
+            }
+
+            toast.success(`Project ${project.code} has been permanently deleted.`);
+        } catch (error) {
+            toast.error(error instanceof Error ? error.message : "Failed to permanently delete project");
         } finally {
             setIsLoading(false);
             setShowDeleteDialog(false);
@@ -100,12 +142,24 @@ export function ProjectActions({ project }: ProjectActionsProps) {
             },
         },
         {
-            label: "Delete",
+            label: project.deletedAt ? "Restore" : "Delete",
+            icon: project.deletedAt ? ArchiveRestore : Trash2,
+            variant: project.deletedAt ? "default" : "destructive",
+            onClick: () => {
+                if (project.deletedAt) {
+                    handleRestore();
+                } else {
+                    setShowDeleteDialog(true);
+                }
+            },
+        },
+        project.deletedAt ? {
+            label: "Delete Permanently",
             icon: Trash2,
             variant: "destructive",
             onClick: () => setShowDeleteDialog(true),
-        },
-    ];
+        } : null,
+    ].filter(Boolean) as RowAction<AdminProject>[];
 
     return (
         <>
@@ -147,15 +201,27 @@ export function ProjectActions({ project }: ProjectActionsProps) {
             <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
                 <AlertDialogContent className="bg-zinc-950 border-white/10">
                     <AlertDialogHeader>
-                        <AlertDialogTitle className="text-white font-black uppercase tracking-tight text-red-400">
-                            Delete Project Permanently
+                        <AlertDialogTitle className="font-black uppercase tracking-tight text-red-400">
+                            {project.deletedAt ? "Delete Project Permanently" : "Move to Trash"}
                         </AlertDialogTitle>
                         <AlertDialogDescription className="text-white/60">
-                            Are you sure you want to <strong className="text-red-400">permanently delete</strong> project <strong className="text-primary">{project.code}</strong>?
-                            <br /><br />
-                            <span className="text-red-400/80">
-                                ⚠️ This action cannot be undone. All project data, files, and history will be permanently removed.
-                            </span>
+                            {project.deletedAt ? (
+                                <>
+                                    Are you sure you want to <strong className="text-red-400">permanently delete</strong> project <strong className="text-primary">{project.code}</strong>?
+                                    <br /><br />
+                                    <span className="text-red-400/80">
+                                        ⚠️ This action cannot be undone. All project data, files, and history will be permanently removed.
+                                    </span>
+                                </>
+                            ) : (
+                                <>
+                                    Move project <strong className="text-primary">{project.code}</strong> to trash?
+                                    <br /><br />
+                                    This project will be moved to Trash for 30 days.
+                                    After that, it will be permanently deleted along with all files.
+                                    You can restore it anytime from the Trash view within this period.
+                                </>
+                            )}
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
@@ -166,11 +232,11 @@ export function ProjectActions({ project }: ProjectActionsProps) {
                             Cancel
                         </AlertDialogCancel>
                         <AlertDialogAction
-                            onClick={handleDelete}
+                            onClick={project.deletedAt ? handlePermanentDelete : handleSoftDelete}
                             disabled={isLoading}
                             className="bg-red-500/20 text-red-400 hover:bg-red-500/30 border border-red-500/30"
                         >
-                            {isLoading ? "Deleting..." : "Delete Permanently"}
+                            {isLoading ? (project.deletedAt ? "Deleting..." : "Moving...") : (project.deletedAt ? "Delete Permanently" : "Move to Trash")}
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

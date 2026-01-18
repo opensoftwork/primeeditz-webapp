@@ -476,10 +476,10 @@ export const unarchiveProject = adminMutation({
 })
 
 /**
- * Permanently delete a project (admin only).
- * This removes the project and all related data.
+ * Soft delete a project (move to trash).
+ * Sets deletedAt and deletedBy, making it invisible to standard queries.
  */
-export const deleteProject = adminMutation({
+export const softDeleteProject = adminMutation({
   args: {
     projectId: v.id('projects'),
   },
@@ -490,19 +490,137 @@ export const deleteProject = adminMutation({
       throw new Error('Project not found')
     }
 
-    // Delete related data in order (children first)
+    if (project.deletedAt) {
+      throw new Error('Project is already in trash')
+    }
 
-    // 1. Delete assets (belongs to folders and projects)
+    const previousStatus = project.status
+
+    await ctx.db.patch(args.projectId, {
+      deletedAt: now(),
+      deletedBy: ctx.profile._id,
+      updatedAt: now(),
+    })
+
+    // Record status change (optional but good for audit)
+    await ctx.db.insert('statusHistory', {
+      projectId: args.projectId,
+      previousStatus,
+      newStatus: 'deleted' as any, // Not a formal status, but useful for history
+      changedBy: ctx.profile._id,
+      changedAt: now(),
+    })
+
+    return { success: true }
+  },
+})
+
+/**
+ * Restore a soft-deleted project from trash.
+ */
+export const restoreProject = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    if (!project.deletedAt) {
+      throw new Error('Project is not in trash')
+    }
+
+    await ctx.db.patch(args.projectId, {
+      deletedAt: undefined,
+      deletedBy: undefined,
+      updatedAt: now(),
+    })
+
+    // Record status change
+    await ctx.db.insert('statusHistory', {
+      projectId: args.projectId,
+      previousStatus: 'deleted' as any,
+      newStatus: project.status,
+      changedBy: ctx.profile._id,
+      changedAt: now(),
+    })
+
+    return { success: true }
+  },
+})
+
+/**
+ * Permanently delete a project (admin only).
+ * This removes the project and all related data, and unlinks quotations.
+ */
+export const permanentlyDeleteProject = adminMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+
+    if (!project) {
+      throw new Error('Project not found')
+    }
+
+    // 1. Unlink quotations (Story C-1 Requirement D)
+    // NEVER cascade delete quotations (financial records)
+    const quotations = await ctx.db
+      .query('quotations')
+      .withIndex('by_clientId', (q) => q.eq('clientId', project.clientId as string))
+      .collect()
+
+    for (const quotation of quotations) {
+      const projectIdString = args.projectId as string
+      const projectIds = quotation.projectIds || []
+      
+      if (quotation.projectId === projectIdString || projectIds.includes(projectIdString)) {
+        const updatedProjectIds = projectIds.filter(id => id !== projectIdString)
+        const note = `Project ${project.code} deleted on ${new Date().toISOString()}`
+        
+        await ctx.db.patch(quotation._id, {
+          projectIds: updatedProjectIds,
+          projectId: quotation.projectId === projectIdString 
+            ? (updatedProjectIds[0] || undefined)
+            : quotation.projectId,
+          clientNotes: quotation.clientNotes 
+            ? `${quotation.clientNotes}\n[System Note: ${note}]`
+            : `[System Note: ${note}]`,
+        })
+      }
+    }
+
+    // 2. Collect MinIO keys for cleanup (to be used by action later)
+    // We'll return these for the caller to handle or we can queue a background action if supported.
+    // Since Convex actions are separate, the pattern usually involves returning them or 
+    // having the frontend call the action after the mutation succeeds.
+    const fileKeys: string[] = []
+
+    // 3. Delete related data in order (children first)
+
+    // A. Delete assets (belongs to folders and projects)
     const assets = await ctx.db
       .query('assets')
       .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
       .collect()
 
     for (const asset of assets) {
+      if (asset.minioKey) fileKeys.push(asset.minioKey)
       await ctx.db.delete(asset._id)
     }
 
-    // 2. Delete folders
+    // B. Delete reference files
+    if (project.referenceFiles) {
+      for (const file of project.referenceFiles) {
+        if (file.storageKey) fileKeys.push(file.storageKey)
+      }
+    }
+
+    // C. Delete folders
     const folders = await ctx.db
       .query('folders')
       .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
@@ -512,17 +630,18 @@ export const deleteProject = adminMutation({
       await ctx.db.delete(folder._id)
     }
 
-    // 3. Delete deliverables
+    // D. Delete deliverables
     const deliverables = await ctx.db
       .query('deliverables')
       .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
       .collect()
 
     for (const deliverable of deliverables) {
+      if (deliverable.minioKey) fileKeys.push(deliverable.minioKey)
       await ctx.db.delete(deliverable._id)
     }
 
-    // 4. Delete status history
+    // E. Delete status history
     const statusHistory = await ctx.db
       .query('statusHistory')
       .withIndex('by_projectId', (q) => q.eq('projectId', args.projectId))
@@ -532,10 +651,10 @@ export const deleteProject = adminMutation({
       await ctx.db.delete(record._id)
     }
 
-    // 5. Delete the project itself
+    // F. Delete the project itself
     await ctx.db.delete(args.projectId)
 
-    return { success: true }
+    return { success: true, fileKeys }
   },
 })
 

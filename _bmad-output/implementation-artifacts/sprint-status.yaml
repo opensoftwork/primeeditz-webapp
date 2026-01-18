@@ -100,6 +100,12 @@ development_status:
   3-13-client-approved-quotations-query: done # HIGH: Query for quotation selection
   3-14-enhanced-folder-setup-quotation-selection: done # HIGH: Multi-step folder setup with quotation
   3-15-storage-pool-tracking: done # MEDIUM: Track storage usage across quotations
+  # ── TRACK C: Junior Dev (Cleanup & Wind-Up) ──────────────────────────────────
+  # See: sprints/track-handoffs/track-c-cleanup-windup-2026-01-18.md
+  c-1-enhanced-project-deletion: ready-for-dev # CRITICAL: Soft delete + MinIO cleanup
+  c-2-client-edit-delete-actions: ready-for-dev # HIGH: Missing CRUD in client list
+  c-3-project-edit-action: ready-for-dev # HIGH: Missing edit in project list
+  c-4-type-consolidation-verification: ready-for-dev # MEDIUM: Verify type refactor (done 2026-01-18)
   epic-3-retrospective: optional
 
   # ============================================================================

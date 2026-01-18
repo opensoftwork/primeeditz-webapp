@@ -6,7 +6,7 @@
  */
 
 import { v } from 'convex/values'
-import { authenticatedMutation } from '../../lib/customFunctions'
+import { authenticatedMutation, adminMutation } from '../../lib/customFunctions'
 
 /**
  * Create a new profile for the authenticated user.
@@ -154,5 +154,78 @@ export const createDraftClientProfile = authenticatedMutation({
       phone: args.phone,
       company: args.company,
     }
+  },
+})
+
+/**
+ * Update a client profile (admin only).
+ */
+export const updateClientProfile = adminMutation({
+  args: {
+    profileId: v.id('profiles'),
+    name: v.optional(v.string()),
+    phone: v.optional(v.string()),
+    company: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { profileId, ...updates } = args
+
+    const targetProfile = await ctx.db.get(profileId)
+    if (!targetProfile) throw new Error('Client profile not found')
+    if (targetProfile.role !== 'client') throw new Error('Target profile is not a client')
+
+    const filteredUpdates: Record<string, any> = {
+      updatedAt: Date.now(),
+    }
+
+    if (updates.name !== undefined) filteredUpdates.name = updates.name
+    if (updates.phone !== undefined) filteredUpdates.phone = updates.phone
+    if (updates.company !== undefined) filteredUpdates.company = updates.company
+
+    await ctx.db.patch(profileId, filteredUpdates)
+
+    return profileId
+  },
+})
+
+/**
+ * Deactivate a client profile (soft delete).
+ */
+export const deactivateClient = adminMutation({
+  args: {
+    profileId: v.id('profiles'),
+  },
+  handler: async (ctx, args) => {
+    const targetProfile = await ctx.db.get(args.profileId)
+    if (!targetProfile) throw new Error('Client profile not found')
+
+    await ctx.db.patch(args.profileId, {
+      deactivatedAt: Date.now(),
+      deactivatedBy: ctx.profile._id,
+      updatedAt: Date.now(),
+    })
+
+    return args.profileId
+  },
+})
+
+/**
+ * Reactivate a deactivated client profile.
+ */
+export const reactivateClient = adminMutation({
+  args: {
+    profileId: v.id('profiles'),
+  },
+  handler: async (ctx, args) => {
+    const targetProfile = await ctx.db.get(args.profileId)
+    if (!targetProfile) throw new Error('Client profile not found')
+
+    await ctx.db.patch(args.profileId, {
+      deactivatedAt: undefined,
+      deactivatedBy: undefined,
+      updatedAt: Date.now(),
+    })
+
+    return args.profileId
   },
 })
