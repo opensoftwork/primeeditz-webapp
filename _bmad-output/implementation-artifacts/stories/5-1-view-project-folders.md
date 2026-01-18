@@ -188,30 +188,35 @@ Project Detail Page
 
 ## 📘 Implementation Phases
 
-### Phase A: Data Layer (~1.5 points)
+### Phase A: Data Layer (~1 point)
 
-#### Task A1: Convex Query - Get Project Folders
+#### Task A1: Extend Existing Query for Client Access
 
-**File**: `convex/functions/folders/queries.ts` (create or extend)
+**File**: `convex/functions/folders/queries.ts`
+
+**EXISTING**: `getProjectFolders` query already exists and works for admin!
+
+We need to either:
+
+- Create `clientQuery` wrapper: `getClientProjectFolders`
+- OR extend existing query with role-based access
 
 ```typescript
-export const getProjectFolders = clientQuery({
+export const getClientProjectFolders = clientQuery({
   args: {
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    // 1. Verify client owns project
-    // 2. Get folders for project
-    // 3. Get file counts per folder
-    // 4. Return enriched folder data
+    // 1. Verify client owns project (clientId from ctx)
+    // 2. Reuse existing folder fetch logic
+    // 3. Return same enriched folder data
   },
 });
 ```
 
-- [ ] A1.1 Create `getProjectFolders` query
-- [ ] A1.2 Include file count aggregation
-- [ ] A1.3 Include folder status logic
-- [ ] A1.4 Verify client ownership
+- [ ] A1.1 Create `getClientProjectFolders` clientQuery
+- [ ] A1.2 Verify client ownership via ctx.clientId
+- [ ] A1.3 Reuse existing folder aggregation logic
 
 #### Task A2: Convex Query - Get Project Storage Usage
 
@@ -236,46 +241,49 @@ export const getProjectStorageUsage = clientQuery({
 
 ---
 
-### Phase B: UI Components (~2.5 points)
+### Phase B: UI Components (~2 points)
 
-#### Task B1: Storage Usage Bar Component
+#### Task B1: Create Shared Folder Components
 
-**File**: `src/components/modules/client/assets/storage-usage-bar.tsx`
+**EXISTING PATTERN**: `src/components/modules/admin/projects/folder-setup/project-folders-list.tsx`
 
-- [ ] B1.1 Create progress bar component
-- [ ] B1.2 Implement color coding logic (green/amber/red)
-- [ ] B1.3 Add "used/allocated" label
-- [ ] B1.4 Add warning message when >95%
-- [ ] B1.5 Premium dark theme styling
+This component already has:
 
-#### Task B2: Folder Card Component
+- Folder grid layout
+- Status badges (pending_upload, in_progress, completed)
+- File count + size display
+- Premium styling
 
-**File**: `src/components/modules/client/assets/folder-card.tsx`
+**Approach**: Create a **shared** version that works for all roles:
 
-- [ ] B2.1 Create base folder card layout
-- [ ] B2.2 Implement status-based styling (empty/partial/complete)
-- [ ] B2.3 Add file count badge
-- [ ] B2.4 Add folder icon
-- [ ] B2.5 Add click handler for navigation
-- [ ] B2.6 Add hover state with "Add files" prompt
+**File**: `src/components/shared/project-folders/` (new shared location)
 
-#### Task B3: Folder Grid Component
+- [ ] B1.1 Create `src/components/shared/project-folders/folder-card.tsx` (extract from admin)
+- [ ] B1.2 Create `src/components/shared/project-folders/folder-grid.tsx`
+- [ ] B1.3 Create `src/components/shared/project-folders/index.ts` exports
+- [ ] B1.4 Update admin component to use shared version
 
-**File**: `src/components/modules/client/assets/folder-grid.tsx`
+#### Task B2: Storage Usage Bar Component
 
-- [ ] B3.1 Create responsive grid layout
-- [ ] B3.2 Map folders to FolderCard components
-- [ ] B3.3 Handle empty state (no folders)
-- [ ] B3.4 Add loading skeleton
+**File**: `src/components/shared/storage-usage-bar.tsx`
 
-#### Task B4: Assets Tab Container
+- [ ] B2.1 Create progress bar component
+- [ ] B2.2 Implement color coding logic (green/amber/red)
+- [ ] B2.3 Add "used/allocated" label
+- [ ] B2.4 Add warning message when >95%
+- [ ] B2.5 Premium dark theme styling
 
-**File**: `src/components/modules/client/projects/detail/assets-tab.tsx`
+#### Task B3: Client Assets Section
 
-- [ ] B4.1 Create Assets tab component
-- [ ] B4.2 Integrate StorageUsageBar
-- [ ] B4.3 Integrate FolderGrid
-- [ ] B4.4 Add to project detail tabs
+**File**: `src/components/modules/projects/detail/assets-section.tsx`
+
+Following client detail pattern (see `sidebar.tsx`, `specifications.tsx`):
+
+- [ ] B3.1 Create AssetsSection component
+- [ ] B3.2 Integrate StorageUsageBar
+- [ ] B3.3 Integrate shared FolderGrid
+- [ ] B3.4 Add to ProjectDetailView (between ReferenceMaterials and Sidebar)
+- [ ] B3.5 Conditionally show based on project status (only if quotation approved)
 
 ---
 

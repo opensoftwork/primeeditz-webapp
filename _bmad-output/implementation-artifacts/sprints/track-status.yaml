@@ -1,0 +1,57 @@
+# ============================================================================
+# TRACK STATUS - Parallel Development Tracking
+# ============================================================================
+# Tracks high-level parallel development work. For story details, see sprint-status.yaml
+# Last Updated: 2026-01-18
+# ============================================================================
+
+metadata:
+  sprint: "January 2026"
+  updated: 2026-01-18
+
+# ============================================================================
+# ACTIVE TRACKS
+# ============================================================================
+
+tracks:
+  # TRACK A: Epic 5 - Asset Upload
+  track-a-epic5: planned # Senior Dev, 2-3 weeks, 30 pts
+  track-a-5-1: ready-for-dev # View Project Folders (5 pts)
+  track-a-5-2: ready-for-dev # Gated Upload Enforcement (3 pts)
+  track-a-5-3: ready-for-dev # File Upload Dual Strategy (8 pts)
+  track-a-5-4: ready-for-dev # Upload Progress & Validation (5 pts)
+  track-a-5-5: ready-for-dev # Storage Limit Enforcement (4 pts)
+  track-a-5-6: ready-for-dev # Mark Upload Complete (2 pts)
+  track-a-5-7: ready-for-dev # Admin Asset Upload Internal (3 pts)
+
+  # TRACK B: Admin Detail Enhancement
+  track-b-admin-detail: planned # Mid Dev, 3-4 days, depends on track-a-5-1
+  track-b-tabbed-layout: not-started # Create tab container
+  track-b-overview-tab: not-started # Enhance with type-specific fields
+  track-b-assets-tab: not-started # Storage bar, folders (needs 5-1)
+  track-b-quotes-tab: not-started # Quotation link, version history
+  track-b-query-enhancement: not-started # getAdminProject enhanced
+
+  # TRACK C: Cleanup & Wind-Up (COMPLETE)
+  track-c-cleanup: done # Junior Dev, completed 2026-01-18
+  track-c-c-1: done # Enhanced Project Deletion (8 pts)
+  track-c-c-2: done # Client Edit/Delete Actions (3 pts)
+  track-c-c-3: done # Project Edit Action (3 pts)
+  track-c-c-4: done # Type Consolidation Verification (1 pt)
+
+# ============================================================================
+# COMPLETED TRACKS (Archive)
+# ============================================================================
+
+completed:
+  track-a-quotation-2026-01-17: done # Client Quotation Workflow (Epic 4B)
+  track-b-admin-config-2026-01-17: done # Admin Configuration
+
+# ============================================================================
+# SUMMARY
+# ============================================================================
+
+summary:
+  active: 2 # Track A, Track B
+  completed: 3 # Track C + 2 archived
+  next_action: "Start track-a-5-1 (enables both Track A and B)"
