@@ -27,108 +27,107 @@ type Client = Doc<"profiles">;
 // ============================================================================
 
 export function WizardStep0() {
-    const { formData, setFormData } = useWizardForm();
-    const { selectionMode, clientData, isNewClient, clientId } = formData.step0;
+  const { formData, setFormData } = useWizardForm();
+  const { selectionMode, clientData, isNewClient, clientId } = formData.step0;
 
-    const handleOptionSelect = (option: ClientSelectionMode) => {
-        setFormData("step0", {
-            selectionMode: option,
-            clientId: null,
-            clientData: null,
-            isNewClient: option === "new",
-        });
-    };
+  const handleOptionSelect = (option: ClientSelectionMode) => {
+    setFormData("step0", {
+      selectionMode: option,
+      clientId: null,
+      clientData: null,
+      isNewClient: option === "new",
+    });
+  };
 
-    const handleSelectExistingClient = (client: Client) => {
-        setFormData("step0", {
-            selectionMode: "existing",
-            clientId: client._id,
-            clientData: {
-                _id: client._id,
-                name: client.name,
-                email: client.email,
-                phone: client.phone,
-                company: client.company,
-                onboardingComplete: client.onboardingComplete,
-                projectCount: 0,
-                activeProjectCount: 0,
-            },
-            isNewClient: false,
-        });
-        toast.success(`Selected ${client.name}`);
-    };
+  const handleSelectExistingClient = (client: Client) => {
+    setFormData("step0", {
+      selectionMode: "existing",
+      clientId: client._id,
+      clientData: {
+        _id: client._id,
+        name: client.name,
+        email: client.email,
+        phone: client.phone,
+        company: client.company,
+        onboardingComplete: client.onboardingComplete,
+        projectCount: 0,
+        activeProjectCount: 0,
+      },
+      isNewClient: false,
+    });
+    toast.success(`Selected ${client.name}`);
+  };
 
-    const handleChangeClient = () => {
-        setFormData("step0", {
-            selectionMode: null,
-            clientId: null,
-            clientData: null,
-            isNewClient: false,
-        });
-    };
+  const handleChangeClient = () => {
+    setFormData("step0", {
+      selectionMode: null,
+      clientId: null,
+      clientData: null,
+      isNewClient: false,
+    });
+  };
 
-    return (
-        <div className="mx-auto">
-            {/* Header */}
-            <div className="mb-10">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">
-                    Client Selection
-                </span>
-                <h2 className="text-3xl font-black uppercase tracking-tight text-white mt-2">
-                    Choose how to associate a client
-                </h2>
-                <p className="text-white/40 mt-2 text-sm">
-                    Select an existing client, create a new one, or proceed without a
-                    client for internal projects.
-                </p>
-            </div>
+  return (
+    <div className="w-full flex flex-col h-full">
+      {/* Header - Matching Step 1 style */}
+      <div className="mb-8 space-y-1">
+        <h2 className="text-xl font-black tracking-tight uppercase text-white">
+          Client Selection
+        </h2>
+        <p className="text-sm text-white/40 font-medium">
+          Select an existing client, create a new one, or proceed without a
+          client
+        </p>
+      </div>
 
-            {/* Option Cards - Visible until a client is selected */}
-            {!clientData && (
-                <div className="grid grid-cols-3 gap-4">
-                    {SELECTION_OPTIONS.map((option) => (
-                        <SelectionOptionCard
-                            key={option.id}
-                            option={option}
-                            isSelected={selectionMode === option.id}
-                            onSelect={handleOptionSelect}
-                        />
-                    ))}
-                </div>
-            )}
+      <div className="flex-1">
+        {/* Option Cards - Visible until a client is selected */}
+        {!clientData && (
+          <div className="grid gap-x-8 gap-y-6 md:grid-cols-3">
+            {SELECTION_OPTIONS.map((option) => (
+              <SelectionOptionCard
+                key={option.id}
+                option={option}
+                isSelected={selectionMode === option.id}
+                onSelect={handleOptionSelect}
+              />
+            ))}
+          </div>
+        )}
 
-            {/* No Client Confirmation Content Area */}
-            {selectionMode === "none" && !clientData && (
-                <NoClientContent onCancel={handleChangeClient} />
-            )}
+        {/* No Client Confirmation Content Area */}
+        {selectionMode === "none" && !clientData && (
+          <NoClientContent onCancel={handleChangeClient} />
+        )}
 
-            {/* New Client Form Content Area */}
-            {selectionMode === "new" && !clientData && (
-                <NewClientContent
-                    onCancel={handleChangeClient}
-                    onSuccess={() => { }}
-                />
-            )}
+        {/* New Client Form Content Area */}
+        {selectionMode === "new" && !clientData && (
+          <NewClientContent
+            onCancel={handleChangeClient}
+            onSuccess={() => {}}
+          />
+        )}
 
-            {/* Existing Client Selection Table Area */}
-            {selectionMode === "existing" && !clientData && (
-                <ExistingClientContent
-                    onCancel={handleChangeClient}
-                    onSelectClient={handleSelectExistingClient}
-                    selectedId={clientId ?? undefined}
-                />
-            )}
+        {/* Existing Client Selection Table Area */}
+        {selectionMode === "existing" && !clientData && (
+          <ExistingClientContent
+            onCancel={handleChangeClient}
+            onSelectClient={handleSelectExistingClient}
+            selectedId={clientId ?? undefined}
+          />
+        )}
 
-            {/* Selected Client Summary Card */}
-            {clientData && (
-                <ClientSummaryCard
-                    client={clientData}
-                    isNewClient={isNewClient}
-                    onChangeClient={handleChangeClient}
-                />
-            )}
-        </div>
-    );
+        {/* Selected Client Summary Card */}
+        {clientData && (
+          <ClientSummaryCard
+            client={clientData}
+            isNewClient={isNewClient}
+            onChangeClient={handleChangeClient}
+          />
+        )}
+      </div>
+    </div>
+  );
 }
 
 // REMOVED: ClientSelectionDrawer (replaced by inline ClientDataTable)
