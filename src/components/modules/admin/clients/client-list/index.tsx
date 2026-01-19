@@ -106,7 +106,7 @@ export default function ClientList({
 }: ClientListProps) {
   const [showNewClientDrawer, setShowNewClientDrawer] = useState(false);
   // Fetch clients based on the filter prop
-  const allClients = useQuery(api.admin.getClients);
+  const allClients = useQuery(api.admin.getClients, {});
   const clientsWithProjects = useQuery(api.admin.getClientsWithProjects);
   
   const rawClients = onlyWithProjects ? clientsWithProjects : allClients;

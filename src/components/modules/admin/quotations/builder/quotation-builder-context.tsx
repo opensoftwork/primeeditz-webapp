@@ -210,7 +210,7 @@ export function QuotationBuilderProvider({
   }, [existingQuotation, initialQuotationId]);
 
   // Queries - cast to proper types
-  const clientsQuery = useQuery(api.admin.getClients);
+  const clientsQuery = useQuery(api.admin.getClients, {});
   const clients = clientsQuery as Client[] | undefined;
 
   const projectsQuery = useQuery(

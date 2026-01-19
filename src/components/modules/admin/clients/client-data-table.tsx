@@ -42,7 +42,7 @@ export function ClientDataTable({
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const allClients = useQuery(api.admin.getClients);
+  const allClients = useQuery(api.admin.getClients, {});
   const clientsWithProjects = useQuery(api.admin.getClientsWithProjects);
 
   // Use the appropriate client list based on the prop
