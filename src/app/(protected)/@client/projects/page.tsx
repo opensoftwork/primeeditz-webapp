@@ -1,5 +1,5 @@
-import ProjectCard from "@/components/modules/projects/project-details/project-card";
+import { ClientProjectList } from "@/components/modules/projects";
 
 export default function ProjectsPage() {
-  return <ProjectCard />;
+  return <ClientProjectList />;
 }

@@ -6,11 +6,13 @@
  */
 
 import { v } from 'convex/values'
+import { paginationOptsValidator } from 'convex/server'
 import { query } from '../../_generated/server'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
 import { checkUploadEligibility } from '../../lib/uploadGate'
 import type { Doc } from '../../_generated/dataModel'
+import { projectStatusValidator } from '../../schema'
 
 // ============================================================================
 // Client Queries
@@ -139,7 +141,7 @@ export const getProjectUploadEligibility = query({
 })
 
 /**
- * Get projects with their project type info.
+ * Get projects for the current client with their project type and category info.
  * Returns enriched project data for dashboard display.
  */
 export const getMyProjectsWithType = clientQuery({
@@ -151,7 +153,7 @@ export const getMyProjectsWithType = clientQuery({
       .filter((q) => 
         q.and(
           q.neq(q.field('status'), 'draft'),
-          q.eq(q.field('deletedAt'), undefined) // Exclude soft-deleted projects
+          q.eq(q.field('deletedAt'), undefined)
         )
       )
       .order('desc')
@@ -165,7 +167,7 @@ export const getMyProjectsWithType = clientQuery({
         const pt = projectType as Doc<"projectTypes"> | null;
         if (pt && pt.categoryId) {
           const category = await ctx.db.get(pt.categoryId)
-          categoryName = (category as Doc<"projectCategories"> | null)?.name || 'Other'
+          categoryName = (category as any)?.name || 'Other'
         }
         return {
           ...project,
@@ -178,6 +180,88 @@ export const getMyProjectsWithType = clientQuery({
     return enriched
   },
 })
+
+/**
+ * Get all projects for the current client with cursor-based pagination.
+ * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
+ */
+export const getClientProjectsPaginated = clientQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(projectStatusValidator),
+    projectTypeId: v.optional(v.id("projectTypes")),
+  },
+  handler: async (ctx, args) => {
+    // Execute pagination - conditionally use index for status filtering
+    // Clients only see their own projects and non-draft projects
+    let query = ctx.db
+      .query("projects")
+      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .filter((q) => q.and(
+        q.neq(q.field("status"), "draft"),
+        q.eq(q.field("deletedAt"), undefined)
+      ));
+
+    if (args.status) {
+      query = query.filter((q) => q.eq(q.field("status"), args.status!));
+    }
+
+    const results = await query.order("desc").paginate(args.paginationOpts);
+
+    // Get all project types for enrichment
+    const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
+    const projectTypeMap = new Map(
+      projectTypes.map((pt) => [pt._id, pt])
+    );
+
+    // Filter by projectTypeId in memory and enrich
+    const enrichedPage = results.page
+      .filter(
+        (p) => !args.projectTypeId || p.projectTypeId === args.projectTypeId,
+      )
+      .map((project) => {
+        const projectType = projectTypeMap.get(project.projectTypeId);
+
+        return {
+          _id: project._id,
+          code: project.code,
+          status: project.status,
+          projectTypeName: projectType?.name ?? "Unknown",
+          eventName: project.eventName,
+          eventDate: project.eventDate,
+          createdAt: project._creationTime,
+          updatedAt: project.updatedAt,
+        };
+      });
+
+    return {
+      ...results,
+      page: enrichedPage,
+    };
+  },
+});
+
+/**
+ * Get all project types for filter dropdown (Client View).
+ */
+export const getProjectTypes = clientQuery({
+  args: {},
+  handler: async (ctx) => {
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const enriched = await Promise.all(
+      projectTypes.map(async (pt) => {
+        const category = pt.categoryId ? await ctx.db.get(pt.categoryId) : null;
+        return {
+          _id: pt._id,
+          name: pt.name,
+          categoryName: (category as any)?.name || 'Uncategorized',
+          isActive: pt.isActive,
+        };
+      })
+    )
+    return enriched.filter(pt => pt.isActive);
+  },
+});
 
 // ============================================================================
 // Admin Queries
