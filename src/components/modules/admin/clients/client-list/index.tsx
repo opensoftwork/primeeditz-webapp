@@ -49,7 +49,9 @@ function ClientCard({ client }: { client: AdminClient }) {
           <div className="space-y-2 pt-2">
             <div className="flex items-center gap-2 text-white/50">
               <Mail className="h-3 w-3" />
-              <span className="text-xs font-medium truncate">{client.email}</span>
+              <span className="text-xs font-medium truncate">
+                {client.email}
+              </span>
             </div>
             {client.company && (
               <div className="flex items-center gap-2">
@@ -108,7 +110,7 @@ export default function ClientList({
   // Fetch clients based on the filter prop
   const allClients = useQuery(api.admin.getClients, {});
   const clientsWithProjects = useQuery(api.admin.getClientsWithProjects);
-  
+
   const rawClients = onlyWithProjects ? clientsWithProjects : allClients;
 
   // Transform the data to match AdminClient type
@@ -188,7 +190,7 @@ export default function ClientList({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <Button 
+            <Button
               onClick={() => setShowNewClientDrawer(true)}
               className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
             >
@@ -230,9 +232,9 @@ export default function ClientList({
         }}
       />
 
-      <NewClientDrawer 
-        open={showNewClientDrawer} 
-        onOpenChange={setShowNewClientDrawer} 
+      <NewClientDrawer
+        open={showNewClientDrawer}
+        onOpenChange={setShowNewClientDrawer}
       />
     </div>
   );

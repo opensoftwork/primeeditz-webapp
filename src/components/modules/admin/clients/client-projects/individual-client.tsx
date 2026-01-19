@@ -62,13 +62,13 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
       transition={{ delay }}
       className={cn(
         "relative p-5 rounded-2xl border overflow-hidden",
-        "bg-white/[0.02] border-white/5 hover:border-white/10 transition-all duration-300"
+        "bg-white/[0.02] border-white/5 hover:border-white/10 transition-all duration-300",
       )}
     >
       <div
         className={cn(
           "absolute top-0 right-0 w-24 h-24 blur-[50px] rounded-full -translate-y-8 translate-x-8",
-          color
+          color,
         )}
       />
       <div className="relative flex items-start justify-between">
@@ -83,7 +83,7 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
         <div
           className={cn(
             "w-10 h-10 rounded-xl flex items-center justify-center",
-            "bg-white/5 border border-white/10"
+            "bg-white/5 border border-white/10",
           )}
         >
           {icon}
@@ -141,7 +141,7 @@ function StatusBadge({ status }: { status: string }) {
       className={cn(
         "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border",
         config.bgColor,
-        config.color
+        config.color,
       )}
     >
       <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -360,7 +360,7 @@ export default function IndividualClient() {
         <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-4">
           CLIENT PROFILE
         </span>
-        
+
         <div className="flex items-start gap-4">
           {/* Left side - Avatar */}
           <div className="flex-shrink-0">
@@ -481,7 +481,6 @@ export default function IndividualClient() {
               All Projects
             </h2>
           </div>
-        
         </div>
 
         {projects.length === 0 ? (
