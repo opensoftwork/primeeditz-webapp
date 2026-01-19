@@ -1,6 +1,6 @@
 "use client";
 
-import AdminDashboard from "@/components/modules/dashboard/admin/dashboard";
+import AdminDashboard from "@/components/modules/admin/dashboard";
 
 /**
  * Admin Dashboard Page

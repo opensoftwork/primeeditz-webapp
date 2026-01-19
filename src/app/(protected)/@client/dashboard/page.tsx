@@ -1,4 +1,4 @@
-import ClientDashboard from "@/components/modules/dashboard/client/dashboard";
+import ClientDashboard from "@/components/modules/client/dashboard";
 
 /**
  * Client Dashboard Page
