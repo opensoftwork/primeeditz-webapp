@@ -403,3 +403,43 @@ export const rejectQuotation = clientMutation({
   },
 });
 
+/**
+ * Duplicate an existing quotation as a new draft
+ */
+export const duplicateQuotation = adminMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    createdBy: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const original = await ctx.db.get(args.quotationId);
+    if (!original) throw new Error("Original quotation not found");
+
+    const code = await generateQuotationCode(ctx);
+    
+    // Create new quotation as a copy of the original
+    const newQuotationId = await ctx.db.insert("quotations", {
+      ...original,
+      _id: undefined as any,
+      _creationTime: undefined as any,
+      code,
+      version: 1,
+      status: "draft",
+      createdBy: args.createdBy,
+      updatedAt: Date.now(),
+      sentAt: undefined,
+      viewedAt: undefined,
+      approvedAt: undefined,
+      rejectedAt: undefined,
+      changeRequestedAt: undefined,
+      shareToken: undefined,
+      shareTokenExpiresAt: undefined,
+      clientSignature: undefined,
+      changeReasons: undefined,
+      clientNotes: undefined,
+      rejectionReason: undefined,
+    } as any);
+
+    return newQuotationId;
+  },
+});

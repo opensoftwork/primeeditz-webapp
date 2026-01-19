@@ -1,9 +1,12 @@
 "use client";
 
-import { useQuery } from "convex/react";
+import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { SendQuotationDrawer } from "../send";
 import {
   ArrowLeft,
   FileText,
@@ -107,6 +110,11 @@ export function QuotationDetail({
     },
   );
 
+  const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
+  const duplicateMutation = useMutation(
+    api.functions.quotations.mutations.duplicateQuotation
+  );
+
   if (data === undefined) {
     return <QuotationDetailSkeleton />;
   }
@@ -165,6 +173,23 @@ export function QuotationDetail({
     ),
   }));
 
+
+  const handleDuplicate = async () => {
+    try {
+      const toastId = toast.loading("Duplicating quotation...");
+      const user = "Divya"; // This should ideally be from auth, but using the name from UI
+      const newId = await duplicateMutation({
+        quotationId: quotationId as Id<"quotations">,
+        createdBy: user,
+      });
+      toast.success("Quotation duplicated successfully!", { id: toastId });
+      router.push(`/quotations/${newId}`);
+    } catch (error) {
+      toast.error("Failed to duplicate quotation");
+      console.error(error);
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
       <DetailHeader
@@ -172,6 +197,7 @@ export function QuotationDetail({
         sections={sections}
         status={status}
         quotationId={quotationId}
+        onSend={() => setIsSendDrawerOpen(true)}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -194,9 +220,28 @@ export function QuotationDetail({
             grandTotal={grandTotal}
             formatCurrency={formatCurrency}
           />
-          <QuickActions />
+          <QuickActions 
+            quotation={quotation}
+            sections={sections}
+            onSend={() => setIsSendDrawerOpen(true)}
+            onDuplicate={handleDuplicate}
+          />
         </div>
       </div>
+
+      <SendQuotationDrawer
+        isOpen={isSendDrawerOpen}
+        onClose={() => setIsSendDrawerOpen(false)}
+        quotation={{
+          _id: quotationId as Id<"quotations">,
+          code: quotation.code,
+          total: quotation.total,
+          clientId: quotation.clientId,
+          clientName: quotation.clientName,
+          status: quotation.status,
+          shareToken: quotation.shareToken,
+        }}
+      />
     </div>
   );
 }

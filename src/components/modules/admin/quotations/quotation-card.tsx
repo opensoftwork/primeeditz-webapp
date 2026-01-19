@@ -1,197 +1,101 @@
 "use client";
 
 import { motion } from "motion/react";
-import { formatCurrency } from "@/lib/utils";
 import {
-  FileText,
+  Receipt,
   Calendar,
   User,
-  ArrowRight,
-  ShieldCheck,
-  Clock,
-  AlertCircle,
-  CheckCircle2,
+  Eye,
+  Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { QuotationStatusBadge } from "@/components/modules/client/quotations/shared/quotation-status-badge";
+import Link from "next/link";
+import { AdminQuotation } from "./list-types";
 
 interface QuotationCardProps {
-  quotation: {
-    _id: string;
-    code: string;
-    version: number;
-    status: string;
-    total: number;
-    _creationTime: number;
-    clientName?: string;
-    projectName?: string;
-  };
-  onView: (id: string) => void;
+  quotation: AdminQuotation;
 }
 
-const statusConfig: Record<
-  string,
-  { label: string; icon: any; color: string; bgColor: string }
-> = {
-  draft: {
-    label: "Draft",
-    icon: FileText,
-    color: "text-white/40",
-    bgColor: "bg-white/5",
-  },
-  sent: {
-    label: "Sent",
-    icon: ArrowRight,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-  },
-  viewed: {
-    label: "Viewed",
-    icon: ShieldCheck,
-    color: "text-indigo-400",
-    bgColor: "bg-indigo-400/10",
-  },
-  approved: {
-    label: "Approved",
-    icon: CheckCircle2,
-    color: "text-green-400",
-    bgColor: "bg-green-400/10",
-  },
-  changes_requested: {
-    label: "Revisions",
-    icon: Clock,
-    color: "text-orange-400",
-    bgColor: "bg-orange-400/10",
-  },
-  rejected: {
-    label: "Rejected",
-    icon: AlertCircle,
-    color: "text-red-400",
-    bgColor: "bg-red-400/10",
-  },
-  expired: {
-    label: "Expired",
-    icon: AlertCircle,
-    color: "text-zinc-500",
-    bgColor: "bg-zinc-500/10",
-  },
-  superseded: {
-    label: "Superseded",
-    icon: FileText,
-    color: "text-zinc-600",
-    bgColor: "bg-zinc-600/5",
-  },
-};
-
-export function QuotationCard({ quotation, onView }: QuotationCardProps) {
-  const status = statusConfig[quotation.status] || statusConfig.draft;
-  const StatusIcon = status.icon;
-
+export function QuotationCard({ quotation }: QuotationCardProps) {
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className="group relative overflow-hidden rounded-[2rem] border border-white/5 bg-white/2 p-1 transition-all hover:border-white/10 hover:bg-white/4"
-    >
-      {/* Visual Accent */}
-      <div
-        className={cn(
-          "absolute top-0 right-0 h-24 w-24 blur-3xl opacity-0 group-hover:opacity-10 transition-opacity rounded-full",
-          status.color.replace("text-", "bg-")
-        )}
-      />
+    <Link href={`/quotations/${quotation._id}`}>
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
-      <div className="relative h-full space-y-5 p-6 flex flex-col">
-        {/* Top Header */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
-                Ref: {quotation.code}
-              </span>
-              <span className="h-1 w-1 rounded-full bg-white/10" />
-              <span className="text-[10px] font-bold text-white/30 uppercase tracking-wider">
-                v{quotation.version}
-              </span>
-            </div>
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter leading-tight">
-              {quotation.projectName || "Standard Quotation"}
-            </h3>
-          </div>
-
-          <div
-            className={cn(
-              "flex items-center gap-1.5 px-3 py-1 rounded-full border border-white/5",
-              status.bgColor,
-              status.color
-            )}
-          >
-            <StatusIcon className="h-3 w-3" />
-            <span className="text-[10px] font-black uppercase tracking-widest leading-none mt-0.5">
-              {status.label}
-            </span>
-          </div>
-        </div>
-
-        {/* Client / Project Info */}
-        <div className="space-y-3 flex-1">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
-              <User className="h-4 w-4 text-white/40" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                Client
-              </span>
-              <span className="text-sm font-bold text-white/70 truncate max-w-[150px]">
-                {quotation.clientName || "Direct Inquiry"}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-white/5 flex items-center justify-center border border-white/5">
-              <Calendar className="h-4 w-4 text-white/40" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                Created
-              </span>
-              <span className="text-sm font-bold text-white/70">
-                {format(quotation._creationTime, "MMM dd, yyyy")}
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Pricing Summary */}
-        <div className="pt-5 border-t border-white/5">
-          <div className="flex items-end justify-between">
-            <div className="flex flex-col">
-              <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                Total Valuation
-              </span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-sm font-bold text-white/40 tracking-tighter">
-                  ₹
-                </span>
-                <span className="text-2xl font-black text-white tracking-tighter">
-                  {quotation.total.toLocaleString("en-IN")}
+        <div className="relative space-y-4 h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Hash className="h-3.5 w-3.5 text-primary/40" />
+                <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors uppercase">
+                  {quotation.code}
                 </span>
               </div>
+              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+                v{quotation.version} • Quotation
+              </span>
             </div>
+            <QuotationStatusBadge status={quotation.status as AdminQuotation["status"]} />
+          </div>
 
+          {/* Client Info */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors shrink-0">
+              <User className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
+            </div>
+            <span className="font-black text-white/80 uppercase tracking-tight text-sm truncate">
+              {quotation.clientName || "Direct Inquiry"}
+            </span>
+          </div>
+
+          {/* Project Name (if any) */}
+          {quotation.projectName && (
+            <div className="pt-3 border-t border-white/5">
+              <div className="font-bold text-white/50 truncate text-xs uppercase tracking-tight">
+                {quotation.projectName}
+              </div>
+            </div>
+          )}
+
+          <div className="flex-1 min-h-4" />
+
+          {/* Amount Section */}
+          <div className="pt-3 border-t border-white/5">
+            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">
+              Total Valuation
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-bold text-white/40 tracking-tighter">₹</span>
+              <span className="text-2xl font-black text-white tracking-tighter">
+                {quotation.total.toLocaleString("en-IN")}
+              </span>
+            </div>
+          </div>
+
+          {/* Footer Info */}
+          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+              <Calendar className="h-3 w-3" />
+              {format(quotation._creationTime, "MMM dd, yyyy")}
+            </div>
             <Button
               variant="ghost"
               size="sm"
-              onClick={() => onView(quotation._id)}
-              className="h-10 w-10 p-0 rounded-xl bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 transition-all hover:scale-105"
+              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
             >
-              <ArrowRight className="h-5 w-5" />
+              View <Eye className="h-3 w-3" />
             </Button>
           </div>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }

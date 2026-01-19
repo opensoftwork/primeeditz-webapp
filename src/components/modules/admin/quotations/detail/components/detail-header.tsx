@@ -15,7 +15,6 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { SendQuotationDrawer } from "../../send";
 import { DownloadQuotation } from "../../preview";
 
 interface DetailHeaderProps {
@@ -23,6 +22,7 @@ interface DetailHeaderProps {
   sections: any[];
   status: any;
   quotationId: string;
+  onSend: () => void;
 }
 
 export function DetailHeader({
@@ -30,9 +30,9 @@ export function DetailHeader({
   sections,
   status,
   quotationId,
+  onSend,
 }: DetailHeaderProps) {
   const router = useRouter();
-  const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
   const StatusIcon = status.icon;
 
   const copyCode = async () => {
@@ -122,7 +122,7 @@ export function DetailHeader({
         />
 
         <Button
-          onClick={() => setIsSendDrawerOpen(true)}
+          onClick={onSend}
           disabled={
             !["draft", "sent", "viewed", "changes_requested"].includes(
               quotation.status,
@@ -138,20 +138,6 @@ export function DetailHeader({
           <Send className="h-4 w-4 mr-2" />
           {quotation.status === "draft" ? "Send to Client" : "Resend"}
         </Button>
-
-        <SendQuotationDrawer
-          isOpen={isSendDrawerOpen}
-          onClose={() => setIsSendDrawerOpen(false)}
-          quotation={{
-            _id: quotationId as any,
-            code: quotation.code,
-            total: quotation.total,
-            clientId: quotation.clientId,
-            clientName: quotation.clientName, // This might need to be resolved if not in quotation object
-            status: quotation.status,
-            shareToken: quotation.shareToken,
-          }}
-        />
       </div>
     </div>
   );

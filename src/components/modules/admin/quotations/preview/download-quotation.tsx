@@ -34,6 +34,8 @@ interface DownloadQuotationProps {
   variant?: "default" | "outline";
   size?: "sm" | "default" | "lg";
   className?: string;
+  label?: string;
+  icon?: React.ReactNode;
 }
 
 // ============================================================================
@@ -50,6 +52,8 @@ export function DownloadQuotation({
   variant = "default",
   size = "sm",
   className,
+  label,
+  icon,
 }: DownloadQuotationProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
@@ -177,9 +181,9 @@ export function DownloadQuotation({
         {isGenerating ? (
           <Loader2 className="w-4 h-4 mr-2 animate-spin" />
         ) : (
-          <DownloadIcon className="w-4 h-4 mr-2" />
+          icon || <DownloadIcon className="w-4 h-4 mr-2" />
         )}
-        {isGenerating ? "Generating..." : "Download PDF"}
+        {isGenerating ? "Generating..." : (label || "Download PDF")}
       </Button>
 
       {/* Hidden container for PDF capture - Uses explicit HEX overrides */}

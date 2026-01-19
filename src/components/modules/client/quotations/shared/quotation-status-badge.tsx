@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Eye,
   Send,
+  type LucideIcon,
 } from "lucide-react";
 
 type QuotationStatus =
@@ -29,7 +30,7 @@ const statusConfig: Record<
   QuotationStatus,
   {
     label: string;
-    icon: any;
+    icon: LucideIcon;
     color: string;
     bgColor: string;
     borderColor: string;
@@ -112,7 +113,7 @@ export function QuotationStatusBadge({
   return (
     <div
       className={cn(
-        "relative flex items-center gap-1.5 px-3 py-1 rounded-full border transition-all duration-300 group",
+        "relative flex w-fit items-center gap-1.5 px-3 py-1 rounded-full border transition-all duration-300 group",
         config.bgColor,
         config.borderColor,
         config.color,

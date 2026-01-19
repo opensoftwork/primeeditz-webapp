@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { adminQuery, clientQuery } from "../../lib/customFunctions";
 import { QueryCtx, query } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
+import { paginationOptsValidator } from "convex/server";
+import { quotationStatusValidator } from "../../schema";
 
 /**
  * Get all quotations with optional filters
@@ -41,6 +43,54 @@ export const getQuotations = adminQuery({
     }
     
     return quotations;
+  },
+});
+
+/**
+ * Get all quotations for admin with cursor-based pagination.
+ */
+export const getAdminQuotationsPaginated = adminQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(quotationStatusValidator),
+  },
+  handler: async (ctx, args) => {
+    const query = args.status
+      ? ctx.db
+          .query("quotations")
+          .withIndex("by_status", (q) => q.eq("status", args.status as Doc<"quotations">["status"]))
+      : ctx.db.query("quotations");
+
+    const results = await query.order("desc").paginate(args.paginationOpts);
+
+    // Get all profiles for client name enrichment
+    const clientIds = [...new Set(results.page.map(q => q.clientId).filter((id): id is string => !!id))];
+    const clients = await Promise.all(
+      clientIds.map((id) => ctx.db.get(id as Id<"profiles">))
+    );
+    const clientNameMap = new Map(
+      clients.filter((c): c is Doc<"profiles"> => !!c).map((c) => [c._id as string, c.name])
+    );
+
+    // Get project names for enrichment
+    const projectIds = [...new Set(results.page.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projects = await Promise.all(
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+    );
+    const projectMap = new Map(
+      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+    );
+
+    const enrichedPage = results.page.map((q) => ({
+      ...q,
+      clientName: q.clientId ? clientNameMap.get(q.clientId) : undefined,
+      projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+    }));
+
+    return {
+      ...results,
+      page: enrichedPage,
+    };
   },
 });
 
@@ -112,9 +162,27 @@ export const getQuotationWithSections = adminQuery({
     const sections = await Promise.all(
       sectionIds.map((id) => ctx.db.get(id))
     );
+
+    // Get client name
+    let clientName = undefined;
+    if (quotation.clientId) {
+      const profile = await ctx.db.get(quotation.clientId as Id<"profiles">);
+      clientName = profile?.name;
+    }
+
+    // Get project name
+    let projectName = undefined;
+    if (quotation.projectId) {
+      const project = await ctx.db.get(quotation.projectId as Id<"projects">);
+      projectName = project?.eventName || project?.code;
+    }
     
     return {
-      quotation,
+      quotation: {
+        ...quotation,
+        clientName,
+        projectName,
+      },
       sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
     };
   },
@@ -258,6 +326,59 @@ export const getMyQuotations = clientQuery({
         projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
       }))
       .sort((a, b) => b._creationTime - a._creationTime);
+  },
+});
+
+/**
+ * Get all quotations for the current client with cursor-based pagination.
+ * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
+ */
+export const getMyQuotationsPaginated = clientQuery({
+  args: {
+    paginationOpts: paginationOptsValidator,
+    status: v.optional(quotationStatusValidator),
+  },
+  handler: async (ctx, args) => {
+    // Execute pagination - conditionally use index for status filtering
+    // Clients only see their own quotations and non-draft quotations
+    let query = ctx.db
+      .query("quotations")
+      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id));
+
+    // Filter by client visible status
+    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected", "expired", "superseded"];
+    
+    // Applying status filter if provided, otherwise filter by visible statuses
+    if (args.status) {
+      query = query.filter((q) => q.eq(q.field("status"), args.status!));
+    } else {
+      query = query.filter((q) => 
+        q.or(
+          ...clientVisibleStatus.map(status => q.eq(q.field("status"), status))
+        )
+      );
+    }
+
+    const results = await query.order("desc").paginate(args.paginationOpts);
+
+    // Get project names for enrichment
+    const projectIds = [...new Set(results.page.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projects = await Promise.all(
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+    );
+    const projectMap = new Map(
+      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+    );
+
+    const enrichedPage = results.page.map((q) => ({
+      ...q,
+      projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+    }));
+
+    return {
+      ...results,
+      page: enrichedPage,
+    };
   },
 });
 

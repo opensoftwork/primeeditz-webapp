@@ -2,10 +2,11 @@
 
 import { motion } from "motion/react";
 import { format } from "date-fns";
-import { Receipt, Calendar, ArrowUpRight } from "lucide-react";
+import { Receipt, Calendar, Eye, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotationStatusBadge } from "./quotation-status-badge";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 interface QuotationCardProps {
   quotation: {
@@ -13,6 +14,7 @@ interface QuotationCardProps {
     code: string;
     total: number;
     status: any;
+    projectName?: string;
     validUntil?: number;
     approvedAt?: number;
     _creationTime: number;
@@ -23,65 +25,74 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
   const router = useRouter();
 
   return (
-    <motion.div
-      whileHover={{ y: -4 }}
-      className="group relative overflow-hidden rounded-[2.5rem] border border-white/5 bg-white/2 p-6 transition-all hover:border-white/10 hover:bg-white/4"
-    >
-      <div className="flex flex-col h-full gap-6">
-        {/* Header */}
-        <div className="flex items-start justify-between">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <div className="h-8 w-8 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                <Receipt className="h-4 w-4 text-primary" />
+    <Link href={`/quotations/${quotation._id}`}>
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        whileTap={{ scale: 0.99 }}
+        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
+      >
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
+
+        <div className="relative space-y-4 h-full flex flex-col">
+          {/* Header */}
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <div className="flex items-center gap-2">
+                <Hash className="h-3.5 w-3.5 text-primary/40" />
+                <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors uppercase">
+                  {quotation.code}
+                </span>
               </div>
-              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/50">
-                {quotation.code}
+              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+                Quotation
+              </span>
+            </div>
+            <QuotationStatusBadge status={quotation.status} />
+          </div>
+
+          {/* Project Name (if any) */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors shrink-0">
+              <Receipt className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
+            </div>
+            <span className="font-black text-white/80 uppercase tracking-tight text-sm truncate">
+              {quotation.projectName || "Standard Quotation"}
+            </span>
+          </div>
+
+          <div className="flex-1 min-h-4" />
+
+          {/* Amount Section */}
+          <div className="pt-3 border-t border-white/5">
+            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">
+              Total Valuation
+            </div>
+            <div className="flex items-baseline gap-1">
+              <span className="text-sm font-bold text-white/40 tracking-tighter">₹</span>
+              <span className="text-2xl font-black text-white tracking-tighter">
+                {quotation.total.toLocaleString("en-IN")}
               </span>
             </div>
           </div>
-          <QuotationStatusBadge status={quotation.status} />
-        </div>
 
-        {/* Amount */}
-        <div className="space-y-1">
-          <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em]">
-            Total Valuation
-          </span>
-          <div className="flex items-baseline gap-1">
-            <span className="text-sm font-bold text-white/60 tracking-tighter">
-              ₹
-            </span>
-            <span className="text-3xl font-black text-white tracking-tighter leading-none">
-              {quotation.total.toLocaleString("en-IN")}
-            </span>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="h-px w-full bg-linear-to-r from-transparent via-white/10 to-transparent" />
-
-        {/* Footer */}
-        <div className="flex items-center justify-between mt-auto">
-          <div className="flex items-center gap-2">
-            <Calendar className="h-3.5 w-3.5 text-white/40" />
-            <span className="text-[10px] font-bold text-white/60 uppercase tracking-widest">
+          {/* Footer Info */}
+          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+              <Calendar className="h-3 w-3" />
               {quotation.status === "approved"
-                ? `Accepted: ${format(quotation.approvedAt || quotation._creationTime, "MMM dd")}`
-                : `Valid: ${format(quotation.validUntil || quotation._creationTime + 30 * 24 * 60 * 60 * 1000, "MMM dd, yyyy")}`}
-            </span>
+                ? `Accepted ${format(quotation.approvedAt || quotation._creationTime, "MMM dd, yyyy")}`
+                : `Issued ${format(quotation._creationTime, "MMM dd, yyyy")}`}
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
+            >
+              View <Eye className="h-3 w-3" />
+            </Button>
           </div>
-
-          <Button
-            size="sm"
-            onClick={() => router.push(`/quotations/${quotation._id}`)}
-            className="rounded-xl h-10 px-4 bg-white/5 border border-white/5 text-white/60 hover:text-white hover:bg-white/10 group/btn font-bold text-xs"
-          >
-            Review Details
-            <ArrowUpRight className="ml-2 h-3.5 w-3.5 transition-transform group-hover/btn:translate-x-0.5 group-hover/btn:-translate-y-0.5" />
-          </Button>
         </div>
-      </div>
-    </motion.div>
+      </motion.div>
+    </Link>
   );
 }
