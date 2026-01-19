@@ -6,10 +6,13 @@
 - **Status**: backlog
 - **Priority**: low
 - **Estimated Points**: 13
+- **Depends On**: Epic 8 (Admin Settings & Configuration)
 
 ## Business Value
 
 Enable sophisticated form field behaviors that adapt based on user input, reducing form complexity and improving data collection quality. This allows admins to create intelligent forms where fields appear conditionally, arrays are generated dynamically, and dependencies between fields are honored.
+
+---
 
 ## Background & Context
 
@@ -19,6 +22,8 @@ Building on Epic 8's basic field management, this epic introduces advanced behav
 - **Repeaters**: Users can add/remove items freely (e.g., multiple contact numbers)
 - **Conditionals**: Fields show/hide based on other field values
 - **Field dependencies**: Select options that change based on other selections
+
+---
 
 ## Functional Requirements
 
@@ -49,6 +54,8 @@ Building on Epic 8's basic field management, this epic introduces advanced behav
 - Cascading dropdowns (e.g., Category → Subcategory)
 - Reset child values when parent changes
 
+---
+
 ## Scope
 
 ### In Scope
@@ -64,6 +71,8 @@ Building on Epic 8's basic field management, this epic introduces advanced behav
 - AI-powered field suggestions
 - Form versioning
 - Multi-step conditional logic
+
+---
 
 ## Acceptance Criteria
 
@@ -97,6 +106,8 @@ Building on Epic 8's basic field management, this epic introduces advanced behav
 - [ ] Child options filter based on parent value
 - [ ] Cascading resets work correctly
 
+---
+
 ## Stories
 
 | Story ID | Title                           | Points | Status  |
@@ -106,9 +117,15 @@ Building on Epic 8's basic field management, this epic introduces advanced behav
 | 9-3      | Conditional Field Display       | 3      | backlog |
 | 9-4      | Cascading Field Dependencies    | 2      | backlog |
 
+---
+
 ## Dependencies
 
-- Epic 8: Admin Settings & Configuration (complete field CRUD)
+| Dependency             | Status   | Notes      |
+| ---------------------- | -------- | ---------- |
+| Epic 8: Admin Settings | Required | Field CRUD |
+
+---
 
 ## Technical Architecture
 
@@ -145,6 +162,8 @@ conditions: v.optional(v.string()),    // JSON condition expression
 - `generateArrayFields(template, count)` → FieldDefinition[]
 - `filterOptions(options, parentValue, mapping)` → Option[]
 
+---
+
 ## UX Design Notes
 
 - Use visual condition builder (not raw JSON)
@@ -153,8 +172,16 @@ conditions: v.optional(v.string()),    // JSON condition expression
 - Undo support for accidental changes
 - Test mode to simulate form behavior
 
+---
+
 ## Risk Mitigation
 
 - **Complexity creep**: Start with array-from-count only, add others incrementally
 - **Performance**: Lazy evaluate conditions, memoize results
 - **Data migration**: Existing forms continue to work without behaviors
+
+---
+
+## Note: No Status Workflow Changes
+
+Epic 9 focuses on form field behaviors and does not directly interact with the project status workflow from Epic 5A. However, the dynamic fields configured here may include fields that are relevant during different project phases.

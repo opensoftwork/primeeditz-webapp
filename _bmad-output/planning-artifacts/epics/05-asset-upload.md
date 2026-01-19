@@ -1,10 +1,20 @@
 # Epic 5: Asset Upload & Folder Management
 
-**User Outcome:** Clients can upload their photos/videos to organized folders with resumable upload support for large files, and the studio has a structured asset management system.
+## Epic Overview
+
+- **ID**: 05-asset-upload
+- **Status**: in-progress
+- **Priority**: high
+- **Estimated Points**: 30
+- **Depends On**: Epic 5A (Project Status Workflow System)
+
+## Business Value
+
+Clients can upload their photos/videos to organized folders with resumable upload support for large files, and the studio has a structured asset management system.
 
 **FRs covered:** FR7 (Folder Structure), FR8 (Asset Upload)
 
-**Scope:**
+## Scope
 
 - Folder template system
 - Automatic folder creation from templates
@@ -15,8 +25,42 @@
 - File validation (type, size)
 - Storage limit enforcement with upgrade prompts
 - Folder status tracking (pending → in_progress → completed)
+- **Status-based upload gating (Epic 5A integration)**
 
 **Standalone:** ✅ Complete upload and folder management system.
+
+---
+
+## Status Workflow Integration (Epic 5A)
+
+This epic uses the new Phase + ActionState model for upload gating:
+
+### Upload Permission Matrix
+
+| Project ActionState  | Client Can Upload | Admin Can Upload | Notes                   |
+| -------------------- | ----------------- | ---------------- | ----------------------- |
+| `draft`              | ❌                | ❌               | Project not submitted   |
+| `awaiting_quotation` | ❌                | ❌               | Quotation pending       |
+| `quotation_sent`     | ❌                | ❌               | Client reviewing quote  |
+| `quotation_approved` | ❌                | ❌               | Storage not allocated   |
+| `storage_allocated`  | ❌                | ✅               | Enable upload state     |
+| `awaiting_uploads`   | ✅                | ⚠️               | Client's turn to upload |
+| `uploads_complete`   | ✅                | ✅               | Can still add more      |
+| `work_in_progress`   | ❌                | ✅               | Employee working        |
+
+**Special Cases:**
+
+- `source: 'admin_init'` (internal projects): Admin can always upload
+- After `uploads_complete`: Both client and admin can add files
+
+### Status Transitions Triggered
+
+| Action                  | Triggers Transition                        |
+| ----------------------- | ------------------------------------------ |
+| Admin allocates storage | `quotation_approved` → `storage_allocated` |
+| Admin enables uploads   | `storage_allocated` → `awaiting_uploads`   |
+| Client first upload     | (No change, stays `awaiting_uploads`)      |
+| Client marks complete   | `awaiting_uploads` → `uploads_complete`    |
 
 ---
 
@@ -118,26 +162,41 @@ The existing S3 client configuration works with `@tus/s3-store`:
 
 ---
 
-### Story 5.2: Gated Upload Enforcement
+### Story 5.2: Gated Upload Enforcement (Epic 5A Integration)
 
 **As a** System,
-**I want** to enforce the upload gate so clients can only upload after quotation approval,
-**So that** storage abuse is prevented.
+**I want** to enforce upload permissions based on project status,
+**So that** only authorized actors can upload at the appropriate time.
 
 **Acceptance Criteria:**
 
-- **Given** a project with status `pending_review` or `pending_quotation`
-- **When** a client tries to access the upload section
-- **Then** the upload area must be locked with UI elements:
-  - Lock icon overlay on folders
-  - Message: "Approve quotation to unlock uploads"
-  - CTA button: "View Quotation"
-- **And** API calls to `getUploadUrl` must throw an error if quotation is not approved.
-- **And** the check must verify `quotation.status === 'approved'`
+**Given** a project with `actionState: 'awaiting_uploads'` and `awaitingActorRole: 'client'`
+**When** a client navigates to the upload section
+**Then** the upload area must be fully accessible with drag-and-drop enabled.
 
-**Exception:**
+**Given** a project with `actionState: 'storage_allocated'` (upload not yet enabled)
+**When** a client navigates to the upload section
+**Then** the upload area must be locked with UI elements:
 
-- Projects with `source = admin_init` (internal) skip quotation check
+- Lock icon overlay on folders
+- Message: "Your upload area is being prepared"
+- No action required from client
+
+**Given** a project with `actionState: 'awaiting_uploads'`
+**When** an admin navigates to the upload section
+**Then** an info banner must display: "Waiting for client to upload files"
+**And** admin upload controls must be hidden or show "Client is uploading"
+**And** admin can override with "Upload on behalf of client" (with confirmation)
+
+**Given** a project with `source: 'admin_init'` (internal project)
+**When** an admin navigates to the upload section
+**Then** the upload area must be fully accessible regardless of actionState.
+
+**Implementation:**
+
+- Use `canUpload(projectId, userRole)` from Epic 5A
+- Returns `{ allowed: boolean, reason: string }`
+- Check `awaitingActorRole` for proper gating
 
 ---
 
