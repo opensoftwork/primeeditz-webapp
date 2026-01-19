@@ -6,12 +6,13 @@
  */
 
 import { paginationOptsValidator } from "convex/server";
-import { mutation, query, internalQuery } from "./_generated/server";
+import { mutation, query, internalQuery, internalMutation } from "./_generated/server";
 import { v } from "convex/values";
 import { adminMutation, adminQuery } from "./lib/customFunctions";
 import { api } from "./_generated/api";
 import type { Doc, Id } from "./_generated/dataModel";
 import { projectStatusValidator, quotationStatusValidator } from "./schema";
+import { checkUploadEligibility } from "./lib/uploadGate";
 
 /**
  * Get admin dashboard statistics.
@@ -535,12 +536,16 @@ export const getAdminProject = adminQuery({
       }),
     );
 
+    // Enrich with upload eligibility
+    const uploadEligibility = await checkUploadEligibility(ctx, args.projectId);
+
     return {
       ...project,
       clientName: client?.name ?? "Unknown Client",
       clientEmail: client?.email ?? "Unknown Email",
       projectTypeName: projectType?.name ?? "Unknown",
       statusHistory: enrichedHistory,
+      uploadEligibility,
     };
   },
 });
@@ -829,5 +834,56 @@ export const getClientWithProjects = adminQuery({
       projects: enrichedProjects,
       stats,
     };
+  },
+});
+
+/**
+ * DEV ONLY: Delete all quotations for testing.
+ * Uses internal mutation (no auth required) - DO NOT USE IN PRODUCTION
+ */
+export const deleteAllQuotations = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const quotations = await ctx.db.query("quotations").collect();
+    for (const q of quotations) {
+      await ctx.db.delete(q._id);
+    }
+    return { deleted: quotations.length };
+  },
+});
+
+/**
+ * DEV ONLY: Permanently delete all soft-deleted projects.
+ */
+export const cleanupSoftDeletedProjects = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const allProjects = await ctx.db.query("projects").collect();
+    const softDeleted = allProjects.filter(p => p.deletedAt !== undefined);
+    
+    for (const project of softDeleted) {
+      // Delete related folders
+      const folders = await ctx.db
+        .query("folders")
+        .withIndex("by_projectId", q => q.eq("projectId", project._id))
+        .collect();
+      for (const folder of folders) {
+        await ctx.db.delete(folder._id);
+      }
+      
+      // Delete related assets
+      const assets = await ctx.db
+        .query("assets")
+        .withIndex("by_projectId", q => q.eq("projectId", project._id))
+        .collect();
+      for (const asset of assets) {
+        await ctx.db.delete(asset._id);
+      }
+      
+      // Delete the project
+      await ctx.db.delete(project._id);
+    }
+    
+    return { deleted: softDeleted.length };
   },
 });

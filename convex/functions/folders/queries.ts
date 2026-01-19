@@ -66,11 +66,14 @@ export const getMyProjectFolders = clientQuery({
           .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
           .collect();
 
+        const totalSize = assets.reduce((sum, asset) => sum + asset.sizeBytes, 0);
+
         return {
           _id: folder._id,
           name: folder.name,
           status: folder.status,
           assetCount: assets.length,
+          totalSize,
         };
       })
     );
@@ -111,6 +114,16 @@ export const canSetupFolders = adminQuery({
         reason: "Folders have already been set up",
         hasApprovedQuotation: true,
         hasFolders: true,
+      };
+    }
+
+    // Admin-initiated projects bypass the quotation check
+    if (project.source === "admin_init") {
+      return {
+        canSetup: true,
+        reason: null,
+        hasApprovedQuotation: true, // Treated as approved for lifecycle purposes
+        hasFolders: false,
       };
     }
 
@@ -220,5 +233,72 @@ export const getFolderSetupStatus = query({
       inProgressCount: statusCounts["in_progress"] || 0,
       completedCount: statusCounts["completed"] || 0,
     };
+  },
+});
+
+/**
+ * Get a single folder's details.
+ * Verifies ownership via project.
+ */
+export const getFolderDetails = clientQuery({
+  args: {
+    folderId: v.id("folders"),
+  },
+  handler: async (ctx, args) => {
+    const folder = await ctx.db.get(args.folderId);
+    if (!folder) throw new Error("Folder not found");
+
+    // Verify ownership via project
+    const project = await ctx.db.get(folder.projectId);
+    if (!project || project.clientId !== ctx.profile._id) {
+      throw new Error("Access denied");
+    }
+
+    return folder;
+  },
+});
+
+/**
+ * Get assets in a folder.
+ * Returns all files uploaded to this folder.
+ */
+export const getFolderAssets = clientQuery({
+  args: {
+    folderId: v.id("folders"),
+  },
+  handler: async (ctx, args) => {
+    const folder = await ctx.db.get(args.folderId);
+    if (!folder) throw new Error("Folder not found");
+
+    // Verify ownership via project
+    const project = await ctx.db.get(folder.projectId);
+    if (!project || project.clientId !== ctx.profile._id) {
+      throw new Error("Access denied");
+    }
+
+    const assets = await ctx.db
+      .query("assets")
+      .withIndex("by_folderId", (q) => q.eq("folderId", args.folderId))
+      .collect();
+
+    return assets;
+  },
+});
+
+/**
+ * Get assets in a folder for admins.
+ * No ownership check - admin access.
+ */
+export const getAdminFolderAssets = adminQuery({
+  args: {
+    folderId: v.id("folders"),
+  },
+  handler: async (ctx, args) => {
+    const assets = await ctx.db
+      .query("assets")
+      .withIndex("by_folderId", (q) => q.eq("folderId", args.folderId))
+      .collect();
+
+    return assets;
   },
 });

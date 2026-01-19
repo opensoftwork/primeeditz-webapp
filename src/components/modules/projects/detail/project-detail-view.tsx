@@ -20,6 +20,7 @@ import { motion } from "motion/react";
 import { ProjectHeader } from "./header";
 import { ProjectSpecifications } from "./specifications";
 import { ReferenceMaterials } from "./reference-materials";
+import { AssetsSection } from "./assets-section";
 import { DetailSidebar } from "./sidebar";
 
 interface ProjectDetailViewProps {
@@ -33,7 +34,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
 
   const fields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
-    project?.projectTypeId ? { projectTypeId: project.projectTypeId } : "skip"
+    project?.projectTypeId ? { projectTypeId: project.projectTypeId } : "skip",
   );
 
   if (project === undefined) {
@@ -94,6 +95,12 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
         >
           <ProjectSpecifications project={project} fields={fields} />
           <ReferenceMaterials files={project.referenceFiles} />
+
+          {(project.status === "active" ||
+            project.status === "in_progress" ||
+            project.status === "completed") && (
+            <AssetsSection projectId={projectId} />
+          )}
         </motion.div>
 
         {/* Sidebar Column */}

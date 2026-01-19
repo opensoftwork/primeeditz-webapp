@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { adminMutation } from "../../lib/customFunctions";
+import { adminMutation, clientMutation } from "../../lib/customFunctions";
 
 /**
  * Setup project folders from a template.
@@ -111,5 +111,53 @@ export const deleteProjectFolders = adminMutation({
       success: true,
       foldersDeleted: folders.length,
     };
+  },
+});
+
+/**
+ * Admin update folder status.
+ * Used by admins to mark folders as completed.
+ */
+export const adminUpdateFolderStatus = adminMutation({
+  args: {
+    folderId: v.id("folders"),
+    status: v.union(v.literal("in_progress"), v.literal("completed")),
+  },
+  handler: async (ctx, args) => {
+    const folder = await ctx.db.get(args.folderId);
+    if (!folder) throw new Error("Folder not found");
+
+    await ctx.db.patch(args.folderId, {
+      status: args.status,
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Update a folder's status.
+ * Used by clients to mark a folder as "completed" after they finish uploading.
+ */
+export const updateFolderStatus = clientMutation({
+  args: {
+    folderId: v.id("folders"),
+    status: v.union(v.literal("in_progress"), v.literal("completed")),
+  },
+  handler: async (ctx, args) => {
+    const folder = await ctx.db.get(args.folderId);
+    if (!folder) throw new Error("Folder not found");
+
+    // Verify ownership
+    const project = await ctx.db.get(folder.projectId);
+    if (!project || project.clientId !== ctx.profile._id) {
+      throw new Error("Access denied");
+    }
+
+    await ctx.db.patch(args.folderId, {
+      status: args.status,
+    });
+
+    return { success: true };
   },
 });

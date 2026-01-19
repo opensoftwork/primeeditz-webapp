@@ -9,8 +9,9 @@
 
 import { v } from 'convex/values'
 import { internalAction, action } from '../../_generated/server'
-import { S3Client, GetObjectCommand } from '@aws-sdk/client-s3'
+import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
+import { api } from '../../_generated/api'
 
 // Initialize S3 client for MinIO
 function getS3Client(): S3Client {
@@ -104,3 +105,92 @@ export const getSignedFileUrls = action({
     return results
   },
 })
+
+/**
+ * Generate a pre-signed PUT URL for uploading a small file.
+ * Small files (< 100MB) use direct S3 upload for simplicity.
+ */
+export const generateUploadUrl = action({
+  args: {
+    fileName: v.string(),
+    contentType: v.string(),
+    projectId: v.id("projects"),
+    folderId: v.id("folders"),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
+    // 1. Verify eligibility using role-agnostic query
+    const uploadEligibility = await ctx.runQuery(api.functions.projects.queries.getProjectUploadEligibility, {
+      projectId: args.projectId,
+    });
+
+    if (!uploadEligibility?.isAllowed) {
+      throw new Error(uploadEligibility?.reason || "Upload not allowed");
+    }
+
+    // 2. Storage Limit Check
+    const storageStats = await ctx.runQuery(api.functions.storage.queries.getProjectStorageUsage, {
+      projectId: args.projectId,
+    });
+
+    if (storageStats.used + args.fileSize > storageStats.allocated) {
+      throw new Error(`Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+    }
+
+    // 3. Generate unique storage key
+    const timestamp = Date.now();
+    const cleanName = args.fileName.replace(/\s+/g, "_");
+    const storageKey = `projects/${args.projectId}/assets/${args.folderId}/${timestamp}_${cleanName}`;
+
+    // 3. Generate pre-signed PUT URL
+    const s3Client = getS3Client();
+    const command = new PutObjectCommand({
+      Bucket: getBucket(),
+      Key: storageKey,
+      ContentType: args.contentType,
+    });
+
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600, // 1 hour
+    });
+
+    return { url, storageKey };
+  },
+});
+
+/**
+ * Get configuration for TUS resumable uploads.
+ * Used for large files (> 100MB).
+ */
+export const getTusConfig = action({
+  args: {
+    projectId: v.id("projects"),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args) => {
+    // Verify eligibility using role-agnostic query
+    const uploadEligibility = await ctx.runQuery(api.functions.projects.queries.getProjectUploadEligibility, {
+      projectId: args.projectId,
+    });
+
+    if (!uploadEligibility?.isAllowed) {
+      throw new Error(uploadEligibility?.reason || "Upload not allowed");
+    }
+
+    // Storage Limit Check
+    const storageStats = await ctx.runQuery(api.functions.storage.queries.getProjectStorageUsage, {
+      projectId: args.projectId,
+    });
+
+    if (storageStats.used + args.fileSize > storageStats.allocated) {
+      throw new Error(`Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+    }
+
+    return {
+      endpoint: `${process.env.APP_URL}/api/upload/tus`,
+      metadata: {
+        projectId: args.projectId,
+      },
+    };
+  },
+});

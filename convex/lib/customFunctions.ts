@@ -80,7 +80,7 @@ async function getAuthUser(
  * Throws "Not authenticated" if no session.
  * Throws "Profile not found" if profile doesn't exist.
  */
-async function getAuthUserWithProfile(
+export async function getAuthUserWithProfile(
   ctx: QueryCtx | MutationCtx
 ): Promise<{ authUser: AuthUser; profile: Profile }> {
   const authUser = await getAuthUser(ctx)

@@ -9,6 +9,7 @@ import { v } from 'convex/values'
 import { query } from '../../_generated/server'
 import { clientQuery, adminQuery } from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
+import { checkUploadEligibility } from '../../lib/uploadGate'
 import type { Doc } from '../../_generated/dataModel'
 
 // ============================================================================
@@ -106,11 +107,34 @@ export const getProject = clientQuery({
     // Enrich reference files with proper URLs
     const enrichedFiles = enrichReferenceFilesWithUrls(project.referenceFiles)
 
+    // Enrich with upload eligibility
+    const uploadEligibility = await checkUploadEligibility(ctx, args.projectId);
+
     return {
       ...project,
       projectTypeName: projectType?.name ?? 'Unknown',
       referenceFiles: enrichedFiles,
+      uploadEligibility,
     }
+  },
+})
+
+/**
+ * Internal query for upload eligibility check.
+ * Used by storage actions - no role restriction.
+ */
+export const getProjectUploadEligibility = query({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId)
+    if (!project) {
+      return { isAllowed: false, reason: "Project not found" };
+    }
+    
+    // Use the upload gate logic directly
+    return await checkUploadEligibility(ctx, args.projectId);
   },
 })
 
@@ -124,7 +148,12 @@ export const getMyProjectsWithType = clientQuery({
     const projects = await ctx.db
       .query('projects')
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.neq(q.field('status'), 'draft'))
+      .filter((q) => 
+        q.and(
+          q.neq(q.field('status'), 'draft'),
+          q.eq(q.field('deletedAt'), undefined) // Exclude soft-deleted projects
+        )
+      )
       .order('desc')
       .collect()
 

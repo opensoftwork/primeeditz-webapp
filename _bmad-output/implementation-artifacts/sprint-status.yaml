@@ -139,16 +139,15 @@ development_status:
   # ============================================================================
   # EPIC 5: Asset Upload & Folder Management
   # ============================================================================
-  epic-5: ready # Unblocked after Epic 4 completion
+  epic-5: in-progress # Unblocked after Epic 4 completion
   # Phase A: Core Upload Infrastructure (MUST)
-  5-1-view-project-folders: ready-for-dev # Story file created 2026-01-18
-  5-2-gated-upload-enforcement: ready-for-dev # Story file created 2026-01-18
-  5-3-file-upload-dual-strategy: ready-for-dev # Story file created 2026-01-18
-  5-4-upload-progress-validation: ready-for-dev # Story file created 2026-01-18
-  5-5-storage-limit-enforcement: ready-for-dev # Story file created 2026-01-18
-  # Phase B: Completion & Admin (SHOULD)
-  5-6-mark-upload-complete: ready-for-dev # Story file created 2026-01-18
-  5-7-admin-asset-upload-internal: ready-for-dev # Story file created 2026-01-18
+  5-1-view-project-folders: done # Folder cards with status indicators - COMPLETED 2026-01-18
+  5-2-gated-upload-enforcement: done # Backend & UI gates for unpaid projects - COMPLETED 2026-01-18
+  5-3-file-upload-dual-strategy: done # Pre-signed URLs + TUS implementation - COMPLETED 2026-01-18
+  5-4-upload-progress-validation: done # Upload center & progress indicators - COMPLETED 2026-01-18
+  5-5-storage-limit-enforcement: done # Backend enforcement & UX feedback - COMPLETED 2026-01-18
+  5-6-mark-upload-complete: done # Client action to finalize folder upload - COMPLETED 2026-01-18
+  5-7-admin-asset-upload-internal: done # Internal project upload bypass - COMPLETED 2026-01-18
   # Phase C: Enhancements (COULD - Backlog)
   5-8-move-organize-files: deferred # Post-upload organization
   5-9-file-preview-gallery: deferred # Image/video preview
