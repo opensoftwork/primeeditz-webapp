@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminClient } from "./types";
+import { NewClientDrawer } from "./new-client-drawer";
+import { useState } from "react";
 
 // ============================================================================
 // Client Card Component (for card view)
@@ -102,6 +104,7 @@ export default function ClientList({
   onlyWithProjects = false,
   showHeader = true,
 }: ClientListProps) {
+  const [showNewClientDrawer, setShowNewClientDrawer] = useState(false);
   // Fetch clients based on the filter prop
   const allClients = useQuery(api.admin.getClients);
   const clientsWithProjects = useQuery(api.admin.getClientsWithProjects);
@@ -185,7 +188,10 @@ export default function ClientList({
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
           >
-            <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
+            <Button 
+              onClick={() => setShowNewClientDrawer(true)}
+              className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
+            >
               ADD CLIENT
             </Button>
           </motion.div>
@@ -222,6 +228,11 @@ export default function ClientList({
               : []),
           ],
         }}
+      />
+
+      <NewClientDrawer 
+        open={showNewClientDrawer} 
+        onOpenChange={setShowNewClientDrawer} 
       />
     </div>
   );
