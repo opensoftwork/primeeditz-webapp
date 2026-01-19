@@ -1,7 +1,8 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import {
@@ -35,25 +36,55 @@ export default function DashboardLayout({
   client,
   employee,
 }: DashboardLayoutProps) {
-  const { isAuthenticated } = useConvexAuth();
+  const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
+  const router = useRouter();
 
   // Skip query if not authenticated - matches reference pattern
   const userProfile = useQuery(
     api.profiles.getMyProfile,
-    isAuthenticated ? {} : "skip"
+    isAuthenticated ? {} : "skip",
   );
 
   const pathname = usePathname();
   const { overrides } = useBreadcrumbStore();
   const isWizardPage =
     pathname?.includes("/projects/new") || pathname?.includes("/preview");
+  const isOnboardingPage = pathname === "/onboarding";
 
-  // Show loading state while profile is being fetched
-  if (!userProfile) {
+  // Redirect to onboarding if authenticated but no profile (and not already on onboarding)
+  useEffect(() => {
+    if (
+      !isAuthLoading &&
+      isAuthenticated &&
+      userProfile === null &&
+      !isOnboardingPage
+    ) {
+      router.push("/onboarding");
+    }
+  }, [isAuthLoading, isAuthenticated, userProfile, isOnboardingPage, router]);
+
+  // Allow onboarding page to render without a profile
+  if (isOnboardingPage) {
+    return <>{children}</>;
+  }
+
+  // Show loading state while auth or profile is being fetched
+  if (isAuthLoading || userProfile === undefined) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg text-muted-foreground animate-pulse font-medium">
           Loading your dashboard...
+        </div>
+      </div>
+    );
+  }
+
+  // Redirect to onboarding if no profile exists (handled by useEffect above)
+  if (!userProfile) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-lg text-muted-foreground animate-pulse font-medium">
+          Redirecting to onboarding...
         </div>
       </div>
     );
@@ -94,7 +125,7 @@ export default function DashboardLayout({
                     {pathname
                       .split("/")
                       .filter(
-                        (segment) => segment !== "" && segment !== "dashboard"
+                        (segment) => segment !== "" && segment !== "dashboard",
                       )
                       .map((segment, index, array) => {
                         const isLast = index === array.length - 1;
@@ -105,7 +136,7 @@ export default function DashboardLayout({
                             .split("-")
                             .map(
                               (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1)
+                                word.charAt(0).toUpperCase() + word.slice(1),
                             )
                             .join(" ");
 
