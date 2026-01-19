@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { mutation, query, internalQuery } from "./_generated/server";
+import { authComponent } from "./auth";
 
 // Check if this is the first user (for admin bootstrap)
 export const isFirstUser = query({
@@ -19,7 +20,7 @@ export const createProfile = mutation({
   },
   handler: async (ctx, args) => {
     // Get the current user from Better Auth
-    const user = await ctx.auth.getUserIdentity();
+    const user = await authComponent.getAuthUser(ctx);
     if (!user) {
       throw new Error("Not authenticated");
     }
@@ -27,7 +28,7 @@ export const createProfile = mutation({
     // Check if profile already exists
     const existingProfile = await ctx.db
       .query("profiles")
-      .withIndex("by_userId", (q) => q.eq("userId", user.subject))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
     if (existingProfile) {
@@ -41,8 +42,8 @@ export const createProfile = mutation({
 
     // Create the profile
     const profileId = await ctx.db.insert("profiles", {
-      userId: user.subject,
-      email: user.email!, // Email is usually present in identity
+      userId: user._id,
+      email: user.email, // Email from Better Auth user
       name: args.name,
       phone: args.phone,
       company: args.company,
@@ -59,14 +60,14 @@ export const createProfile = mutation({
 export const getMyProfile = query({
   args: {},
   handler: async (ctx) => {
-    const user = await ctx.auth.getUserIdentity();
+    const user = await authComponent.getAuthUser(ctx);
     if (!user) {
       return null;
     }
 
     const profile = await ctx.db
       .query("profiles")
-      .withIndex("by_userId", (q) => q.eq("userId", user.subject))
+      .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
     return profile;
