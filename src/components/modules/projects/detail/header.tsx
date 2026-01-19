@@ -47,19 +47,19 @@ export function ProjectHeader({
       </div>
 
       {/* Hero Header */}
-      <div className="space-y-3">
+      <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <div className="h-0.5 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.6)]" />
-          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">
+          <div className="h-0.5 w-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.6)]" />
+          <span className="text-[11px] font-black uppercase tracking-[0.4em] text-primary">
             Project Overview
           </span>
         </div>
-        <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tight text-white leading-[0.9] max-w-4xl">
+        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-[0.9] max-w-4xl">
           {title}
         </h1>
-        <p className="text-[11px] font-bold text-white/30 uppercase tracking-[0.3em]">
+        <p className="text-[11px] font-bold text-white/50 uppercase tracking-[0.4em]">
           Production Queue Status •{" "}
-          <span className="text-white/60">{status.replace("_", " ")}</span>
+          <span className="text-primary/80">{status.replace("_", " ")}</span>
         </p>
       </div>
     </div>
