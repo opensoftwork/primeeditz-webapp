@@ -86,6 +86,40 @@ export const createDraft = mutation({
       throw new Error('Profile not found. Please complete onboarding.')
     }
 
+    // Determine source
+    const source = (profile.role === 'admin' || profile.role === 'employee')
+      ? 'admin_init'
+      : 'client_request'
+
+    // 3. Enforce "one draft" rule to prevent duplicates (especially in Strict Mode)
+    // For admin, we find any admin_init draft (global for admin scope)
+    // For client, we find any draft for this specific client
+    if (source === 'admin_init') {
+      const existingAdminDraft = await ctx.db
+        .query('projects')
+        .filter((q) =>
+          q.and(
+            q.eq(q.field('status'), 'draft'),
+            q.eq(q.field('source'), 'admin_init')
+          )
+        )
+        .first()
+
+      if (existingAdminDraft) {
+        return { projectId: existingAdminDraft._id, code: existingAdminDraft.code }
+      }
+    } else {
+      const existingClientDraft = await ctx.db
+        .query('projects')
+        .withIndex('by_clientId', (q) => q.eq('clientId', profile._id))
+        .filter((q) => q.eq(q.field('status'), 'draft'))
+        .first()
+
+      if (existingClientDraft) {
+        return { projectId: existingClientDraft._id, code: existingClientDraft.code }
+      }
+    }
+
     const code = await generateProjectCode(ctx.db)
 
     // If no projectTypeId provided, we'll need a default or first one
@@ -117,9 +151,7 @@ export const createDraft = mutation({
       code,
       projectTypeId,
       clientId,
-      source: (profile.role === 'admin' || profile.role === 'employee')
-        ? 'admin_init'
-        : 'client_request',
+      source,
       status: 'draft',
       lastStep: 1,
       storageUsed: 0,

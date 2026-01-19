@@ -6,20 +6,17 @@ import { Receipt, ArrowLeft, Download, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { QuotationStatusBadge } from "../../shared/quotation-status-badge";
+import { DownloadQuotation } from "@/components/modules/admin/quotations/preview/download-quotation";
 
 interface QuotationDetailHeaderProps {
-  quotation: {
-    code: string;
-    version: number;
-    status: any;
-    _creationTime: number;
-    validUntil?: number;
-  };
+  quotation: any;
+  sections: any[];
   onPrint?: () => void;
 }
 
 export function QuotationDetailHeader({
   quotation,
+  sections,
   onPrint,
 }: QuotationDetailHeaderProps) {
   const router = useRouter();
@@ -70,14 +67,25 @@ export function QuotationDetailHeader({
       <div className="flex items-center gap-3 self-end md:self-center">
         <QuotationStatusBadge status={quotation.status} className="px-5 py-2" />
 
-        <Button
+        <DownloadQuotation
+          quotation={quotation}
+          sections={sections}
           variant="outline"
-          onClick={onPrint}
-          className="h-12 w-12 p-0 rounded-2xl bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
-          title="Print or Save PDF"
-        >
-          <Printer className="h-5 w-5" />
-        </Button>
+          label=""
+          icon={<Download className="h-4 w-4" />}
+          className="h-10 w-10 p-0 rounded-xl bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+        />
+
+        {/* {onPrint && (
+          <Button
+            variant="outline"
+            onClick={onPrint}
+            className="h-10 w-10 p-0 rounded-xl bg-white/5 border-white/10 text-white/40 hover:text-white hover:bg-white/10 transition-all"
+            title="Print Quotation"
+          >
+            <Printer className="h-4 w-4" />
+          </Button>
+        )} */}
       </div>
     </div>
   );

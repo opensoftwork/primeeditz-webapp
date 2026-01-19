@@ -14,6 +14,7 @@ import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import { QuotationDocument } from "./quotation-document";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import type {
   QuotationData,
   QuotationSection,
@@ -179,11 +180,11 @@ export function DownloadQuotation({
         className={className}
       >
         {isGenerating ? (
-          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+          <Loader2 className={cn("w-4 h-4 animate-spin", label !== "" && "mr-2")} />
         ) : (
-          icon || <DownloadIcon className="w-4 h-4 mr-2" />
+          icon || <DownloadIcon className={cn("w-4 h-4", label !== "" && "mr-2")} />
         )}
-        {isGenerating ? "Generating..." : (label || "Download PDF")}
+        {isGenerating ? (label === "" ? "" : "Generating...") : (label !== undefined ? label : "Download PDF")}
       </Button>
 
       {/* Hidden container for PDF capture - Uses explicit HEX overrides */}

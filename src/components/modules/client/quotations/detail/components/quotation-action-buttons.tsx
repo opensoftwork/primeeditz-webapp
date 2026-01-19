@@ -37,7 +37,7 @@ export function QuotationActionButtons({
     return (
       <div
         className={cn(
-          "p-8 rounded-[2.5rem] bg-green-500/5 border border-green-500/10 space-y-4 shadow-2xl shadow-green-500/5 relative overflow-hidden group",
+          "p-6 rounded-3xl bg-green-500/5 border border-green-500/10 space-y-4 shadow-2xl shadow-green-500/5 relative overflow-hidden group",
           className,
         )}
       >
@@ -74,7 +74,7 @@ export function QuotationActionButtons({
     return (
       <div
         className={cn(
-          "p-8 rounded-[2.5rem] bg-indigo-500/5 border border-indigo-500/10 space-y-4 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group",
+          "p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group",
           className,
         )}
       >
@@ -106,7 +106,7 @@ export function QuotationActionButtons({
     return (
       <div
         className={cn(
-          "p-8 rounded-[2.5rem] bg-red-500/5 border border-red-500/10 space-y-4 shadow-2xl shadow-red-500/5 relative overflow-hidden group",
+          "p-6 rounded-3xl bg-red-500/5 border border-red-500/10 space-y-4 shadow-2xl shadow-red-500/5 relative overflow-hidden group",
           className,
         )}
       >
@@ -161,15 +161,15 @@ export function QuotationActionButtons({
         {/* Accept Button */}
         <Button
           onClick={() => setIsAcceptDrawerOpen(true)}
-          className="group h-24 rounded-[2rem] bg-primary hover:bg-primary/90 text-zinc-950 flex flex-col items-center justify-center gap-1 shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
+          className="group h-16 rounded-2xl bg-primary hover:bg-primary/90 text-zinc-950 flex flex-col items-center justify-center gap-0.5 shadow-2xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-95"
         >
           <div className="flex items-center gap-2">
-            <CheckCircle2 className="h-5 w-5 stroke-[3px]" />
-            <span className="text-lg font-black uppercase tracking-tighter">
+            <CheckCircle2 className="h-4 w-4 stroke-[3px]" />
+            <span className="text-sm font-black uppercase tracking-tight">
               Accept Proposal
             </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest opacity-60">
+          <span className="text-[9px] font-bold uppercase tracking-widest opacity-60">
             Proceed to production
           </span>
         </Button>
@@ -178,15 +178,15 @@ export function QuotationActionButtons({
         <Button
           variant="outline"
           onClick={() => setIsRequestChangesDrawerOpen(true)}
-          className="group h-24 rounded-[2rem] bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] active:scale-95"
+          className="group h-16 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-[1.02] active:scale-95"
         >
           <div className="flex items-center gap-2">
-            <MessageSquare className="h-5 w-5" />
-            <span className="text-lg font-black uppercase tracking-tighter">
+            <MessageSquare className="h-4 w-4" />
+            <span className="text-sm font-black uppercase tracking-tight">
               Request Changes
             </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-white/40">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">
             Modify scope or pricing
           </span>
         </Button>
@@ -195,15 +195,15 @@ export function QuotationActionButtons({
         <Button
           variant="outline"
           onClick={() => setIsRejectDrawerOpen(true)}
-          className="group h-24 rounded-[2rem] bg-red-500/5 border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 text-red-400 flex flex-col items-center justify-center gap-1 transition-all hover:scale-[1.02] active:scale-95"
+          className="group h-16 rounded-2xl bg-red-500/5 border-red-500/10 hover:bg-red-500/10 hover:border-red-500/20 text-red-400 flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-[1.02] active:scale-95"
         >
           <div className="flex items-center gap-2">
-            <XCircle className="h-5 w-5" />
-            <span className="text-lg font-black uppercase tracking-tighter text-red-400">
+            <XCircle className="h-4 w-4" />
+            <span className="text-sm font-black uppercase tracking-tight text-red-400">
               Decline
             </span>
           </div>
-          <span className="text-[10px] font-bold uppercase tracking-widest text-red-500/40">
+          <span className="text-[9px] font-bold uppercase tracking-widest text-red-500/40">
             I don't wish to proceed
           </span>
         </Button>

@@ -8,7 +8,7 @@
 "use client";
 
 import React, { useRef } from "react";
-import { FileText, Printer, ArrowLeft } from "lucide-react";
+import { FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { QuotationDocument } from "./quotation-document";
 import { DownloadQuotation } from "./download-quotation";
@@ -44,10 +44,6 @@ export function QuotationPreview({
   projectName,
 }: QuotationPreviewProps) {
   const documentRef = useRef<HTMLDivElement>(null);
-
-  const handlePrint = () => {
-    window.print();
-  };
 
   return (
     <div className="min-h-screen bg-zinc-100 print:bg-white">
@@ -97,14 +93,6 @@ export function QuotationPreview({
               size="sm"
               className="h-9 px-4 rounded-lg bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
             />
-            <Button
-              size="sm"
-              onClick={handlePrint}
-              className="h-9 px-4 rounded-lg font-bold text-xs"
-            >
-              <Printer className="h-4 w-4 mr-2" />
-              Print
-            </Button>
           </div>
         </div>
       </div>

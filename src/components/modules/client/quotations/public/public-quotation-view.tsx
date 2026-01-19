@@ -94,6 +94,7 @@ export function PublicQuotationView() {
     <div className="max-w-7xl mx-auto px-6 space-y-12">
       <QuotationDetailHeader
         quotation={quotation as any}
+        sections={sections}
         onPrint={() => window.print()}
       />
 

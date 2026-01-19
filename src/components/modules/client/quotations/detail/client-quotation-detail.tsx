@@ -96,6 +96,7 @@ export function ClientQuotationDetail() {
     <div className="min-h-screen p-6 md:p-12 space-y-12 w-full">
       <QuotationDetailHeader
         quotation={quotation as any}
+        sections={sections}
         onPrint={() => window.print()}
       />
 

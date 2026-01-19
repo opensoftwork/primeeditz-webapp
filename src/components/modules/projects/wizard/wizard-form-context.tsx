@@ -14,6 +14,7 @@ import {
   useState,
   useCallback,
   useEffect,
+  useRef,
 } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
@@ -167,11 +168,14 @@ export function WizardFormProvider({
     api.functions.projectTypes.queries.getActiveProjectTypes
   );
 
+  // Ref to prevent double-initialization in Strict Mode
+  const hasInitialized = useRef(false);
+
   // Create or Resume draft on first load
   useEffect(() => {
     // Wait for existingDraft query to return (undefined means loading)
     if (existingDraft === undefined) return;
-    if (projectId) return;
+    if (projectId || hasInitialized.current) return;
 
     const initDraft = async () => {
       if (existingDraft) {
@@ -221,6 +225,7 @@ export function WizardFormProvider({
       }
 
       // No existing draft, create one
+      hasInitialized.current = true;
       setIsLoading(true);
       try {
         const result = await createDraft({});
@@ -228,6 +233,7 @@ export function WizardFormProvider({
         setProjectCode(result.code);
         setError(null);
       } catch (err) {
+        hasInitialized.current = false; // Allow retry on failure
         setError(err instanceof Error ? err.message : "Failed to create draft");
       } finally {
         setIsLoading(false);
