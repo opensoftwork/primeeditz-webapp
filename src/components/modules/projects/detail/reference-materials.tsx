@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from "react";
 import Image from "next/image";
-import { LayoutGrid, FileText, Eye, Loader2, ArrowRight } from "lucide-react";
+import { LayoutGrid, FileText, Eye, Loader2, ArrowRight, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { motion } from "motion/react";
 import { useAction } from "convex/react";
@@ -101,17 +101,31 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   }, [files, signedUrls, loading]);
 
   const hasFiles = files.length > 0;
-  const displayFiles = files.slice(0, 4);
-  const remainingCount = files.length - 4;
+  const displayFiles = files.slice(0, 5);
+  const remainingCount = files.length - 5;
 
   return (
     <DetailSection
       title="Reference Materials"
-      icon={<LayoutGrid className="h-4 w-4" />}
+      icon={<FileText className="h-5 w-5" />}
     >
       {hasFiles ? (
         <div className="space-y-8">
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          <div className="flex items-center justify-between">
+            <p className="text-[11px] font-black uppercase tracking-[0.2em] text-white/30">
+              {files.length} files provided by client
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              className="rounded-xl border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 font-black uppercase tracking-widest text-[10px] h-10 px-5 gap-2"
+              onClick={() => setIsDrawerOpen(true)}
+            >
+              OPEN VAULT <ExternalLink className="h-3.5 w-3.5" />
+            </Button>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
             {displayFiles.map((file, idx) => {
               const imageUrl = file.storageKey
                 ? signedUrls[file.storageKey]
@@ -126,7 +140,12 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.05, duration: 0.3 }}
-                  className="group relative aspect-square rounded-2xl bg-white/2 border border-white/5 overflow-hidden transition-all duration-500 hover:border-primary/30 shadow-lg"
+                  className="group relative aspect-square rounded-2xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer"
+                  onClick={() =>
+                    isImage
+                      ? handleImageClick(file.fileId)
+                      : setIsDrawerOpen(true)
+                  }
                 >
                   {isLoadingUrl ? (
                     <div className="flex items-center justify-center h-full">
@@ -149,31 +168,8 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                     </div>
                   )}
 
-                  <div
-                    className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col items-center justify-center p-4 gap-3 cursor-pointer"
-                    onClick={() =>
-                      isImage
-                        ? handleImageClick(file.fileId)
-                        : setIsDrawerOpen(true)
-                    }
-                  >
-                    <p className="text-[9px] font-black text-white text-center line-clamp-2 uppercase tracking-tight leading-relaxed">
-                      {file.fileName}
-                    </p>
-                    <div className="flex items-center gap-2">
-                      <Button
-                        size="icon"
-                        variant="outline"
-                        className="h-8 w-8 rounded-lg border-white/10 bg-white/5 hover:bg-primary hover:text-black transition-all"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (isImage) handleImageClick(file.fileId);
-                          else setIsDrawerOpen(true);
-                        }}
-                      >
-                        <Eye className="h-3.5 w-3.5" />
-                      </Button>
-                    </div>
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+                    <ExternalLink className="h-5 w-5 text-white" />
                   </div>
                 </motion.div>
               );
@@ -185,30 +181,16 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
                 onClick={() => setIsDrawerOpen(true)}
-                className="group relative aspect-square rounded-2xl bg-white/1 border border-dashed border-white/10 flex flex-col items-center justify-center gap-3 transition-all duration-500 hover:bg-white/3 hover:border-primary/40"
+                className="group relative aspect-square rounded-2xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-2 transition-all duration-500 hover:bg-white/10"
               >
-                <div className="p-3 rounded-full bg-white/5 border border-white/5 group-hover:scale-110 transition-transform">
-                  <span className="text-xl font-black text-white/40">
-                    +{remainingCount}
-                  </span>
-                </div>
-                <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary transition-colors">
-                  View All Assets
+                <span className="text-lg font-black text-white">
+                  +{remainingCount}
+                </span>
+                <span className="text-[8px] font-black uppercase tracking-widest text-white/30">
+                  More Files
                 </span>
               </motion.button>
             )}
-          </div>
-
-          <div className="flex justify-end">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsDrawerOpen(true)}
-              className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 hover:text-primary transition-all gap-3"
-            >
-              Enter Production Vault
-              <ArrowRight className="h-3 w-3" />
-            </Button>
           </div>
         </div>
       ) : (
