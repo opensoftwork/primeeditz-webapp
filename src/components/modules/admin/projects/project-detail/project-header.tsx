@@ -5,6 +5,7 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { StatusBadge } from "@/components/modules/projects/detail/shared";
+import { useRouter } from "next/navigation";
 
 interface ProjectHeaderProps {
   code: string;
@@ -12,6 +13,7 @@ interface ProjectHeaderProps {
 }
 
 export function ProjectHeader({ code, status }: ProjectHeaderProps) {
+  const router = useRouter();
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
       <motion.div
@@ -20,13 +22,11 @@ export function ProjectHeader({ code, status }: ProjectHeaderProps) {
       >
         <Button
           variant="ghost"
-          asChild
+          onClick={() => router.back()}
           className="mb-4 -ml-4 hover:bg-white/5 gap-2 group"
         >
-          <Link href="/projects">
-            <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            BACK TO PROJECTS
-          </Link>
+          <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+          BACK TO PROJECTS
         </Button>
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
