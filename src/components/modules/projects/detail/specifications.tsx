@@ -45,7 +45,7 @@ export function ProjectSpecifications({
       title="Production Specifications"
       icon={<Database className="h-4 w-4" />}
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
         {staticItems.map((item, idx) => (
           <motion.div
             key={item.label}
@@ -64,7 +64,7 @@ export function ProjectSpecifications({
 
       {/* Dynamic Fields */}
       {project.typeSpecificDetails && (
-        <div className="mt-10 pt-10 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-x-10 gap-y-8">
+        <div className="mt-10 pt-10 border-t border-white/5 grid grid-cols-1 md:grid-cols-2 gap-x-12 gap-y-10">
           {Object.entries(project.typeSpecificDetails).map(
             ([key, value], idx) => {
               const fieldDef = fields?.find((f) => f.name === key);

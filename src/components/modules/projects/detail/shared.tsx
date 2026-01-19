@@ -23,11 +23,11 @@ export function DetailSection({
         <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary">
           {icon}
         </div>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/50">
+        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/60">
           {title}
         </h3>
       </div>
-      <div className="p-8 md:p-10 rounded-[2.5rem] bg-white/3 border border-white/5 relative overflow-hidden">
+      <div className="p-10 md:p-14 rounded-[2.5rem] bg-white/3 border border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.005] bg-size-[40px_40px]" />
         <div className="relative z-10">{children}</div>
       </div>
@@ -48,7 +48,7 @@ export function DetailItem({
     <div className="space-y-2 group">
       <div className="flex items-center gap-2">
         {icon && <span className="text-primary/40 scale-75">{icon}</span>}
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
+        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/90">
           {label}
         </span>
       </div>
@@ -74,7 +74,7 @@ export function SidebarItem({
         <div className="text-white/20 p-1 rounded bg-white/5 group-hover:text-primary group-hover:bg-primary/10 transition-all">
           {icon}
         </div>
-        <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">
+        <span className="text-[11px] font-black uppercase tracking-[0.2em] text-white/80">
           {label}
         </span>
       </div>
