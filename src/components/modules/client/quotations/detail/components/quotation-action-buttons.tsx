@@ -175,7 +175,7 @@ export function QuotationActionButtons({
         </Button>
 
         {/* Request Changes Button */}
-        <Button
+        {/* <Button
           variant="outline"
           onClick={() => setIsRequestChangesDrawerOpen(true)}
           className="group h-16 rounded-2xl bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white flex flex-col items-center justify-center gap-0.5 transition-all hover:scale-[1.02] active:scale-95"
@@ -189,7 +189,7 @@ export function QuotationActionButtons({
           <span className="text-[9px] font-bold uppercase tracking-widest text-white/40">
             Modify scope or pricing
           </span>
-        </Button>
+        </Button> */}
 
         {/* Reject Button */}
         <Button
