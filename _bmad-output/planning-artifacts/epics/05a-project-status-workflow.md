@@ -171,4 +171,88 @@ Update dashboards to display phase + actionState with actor indicators.
 
 ## Stories
 
-<!-- Stories to be created in Step 3 -->
+| Story                                                            | Title                                        | Points | Status        | Depends On |
+| ---------------------------------------------------------------- | -------------------------------------------- | ------ | ------------- | ---------- |
+| [5A.1](../../stories/5a-1-schema-migration-phase-actionstate.md) | Schema Migration - Phase + ActionState Model | 8      | ready-for-dev | -          |
+| [5A.2](../../stories/5a-2-status-transition-utilities.md)        | Status Transition Utilities                  | 5      | blocked       | 5A.1       |
+| [5A.3](../../stories/5a-3-upload-gating-service.md)              | Upload Gating Service                        | 5      | blocked       | 5A.1, 5A.2 |
+| [5A.4](../../stories/5a-4-admin-action-guards.md)                | Admin Action Guards                          | 5      | blocked       | 5A.1, 5A.2 |
+| [5A.5](../../stories/5a-5-project-type-delivery-config.md)       | Project Type Delivery Configuration          | 3      | blocked       | 5A.1       |
+| [5A.6](../../stories/5a-6-status-history-enhancement.md)         | Status History Enhancement                   | 5      | blocked       | 5A.1       |
+| [5A.7](../../stories/5a-7-portal-specific-status-mapping.md)     | Portal-Specific Status Mapping               | 5      | blocked       | 5A.1       |
+
+**Total Points:** 36
+
+---
+
+## Implementation Order
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    IMPLEMENTATION SEQUENCE                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                  │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ PHASE 1: Foundation (Must Complete First)               │    │
+│  │                                                          │    │
+│  │   Story 5A.1: Schema Migration                           │    │
+│  │   - Add phase, actionState, awaitingActorRole           │    │
+│  │   - Remove old status field                              │    │
+│  │   - Create indexes                                       │    │
+│  │   - Fix all TypeScript errors                            │    │
+│  │                                                          │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ PHASE 2: Core Utilities (After 5A.1)                    │    │
+│  │                                                          │    │
+│  │   Story 5A.2: Status Transition Utilities                │    │
+│  │   - State machine implementation                         │    │
+│  │   - transitionProject mutation                           │    │
+│  │                                                          │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                              │                                   │
+│                              ▼                                   │
+│  ┌─────────────────────────────────────────────────────────┐    │
+│  │ PHASE 3: Parallel Implementation (After 5A.2)           │    │
+│  │                                                          │    │
+│  │   5A.3: Upload Gating      5A.4: Admin Action Guards    │    │
+│  │   5A.5: Delivery Config    5A.6: Status History         │    │
+│  │   5A.7: Portal Status Mapping                            │    │
+│  │                                                          │    │
+│  │   (These can be done in parallel)                        │    │
+│  └─────────────────────────────────────────────────────────┘    │
+│                                                                  │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Key Files Reference
+
+```
+convex/
+├── schema.ts                    # Phase, ActionState validators
+├── lib/
+│   ├── status-machine.ts        # State machine utilities (5A.2)
+│   ├── upload-gate.ts           # Upload permission logic (5A.3)
+│   └── delivery-config.ts       # Delivery config utils (5A.5)
+├── functions/
+│   └── projects/
+│       ├── queries.ts           # Updated for new status model
+│       └── mutations.ts         # transitionProject mutation
+
+src/
+├── lib/
+│   └── status-display.ts        # Portal-specific labels (5A.7)
+└── components/
+    └── modules/
+        ├── projects/
+        │   ├── phase-progress.tsx
+        │   └── status-badges.tsx
+        └── admin/projects/
+            └── project-detail/
+                ├── awaiting-actor-banner.tsx  # (5A.4)
+                └── admin-action-banner.tsx    # (5A.4)
+```

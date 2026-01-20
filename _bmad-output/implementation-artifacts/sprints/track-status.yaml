@@ -1,22 +1,54 @@
 tracks:
-  # TRACK A: Epic 5 - Asset Upload
-  track-a-epic5: in-progress # Senior Dev, 2-3 weeks, 30 pts
-  # Phase A: Core Upload Infrastructure (MUST)
-  track-a-5-1: done # View Project Folders (5 pts) - COMPLETED 2026-01-18
-  track-a-5-2: done # Gated Upload Enforcement (3 pts) - COMPLETED 2026-01-18
-  track-a-5-3: done # File Upload Dual Strategy (8 pts) - COMPLETED 2026-01-18
-  track-a-5-4: done # Upload Progress & Validation (5 pts) - COMPLETED 2026-01-18
-  track-a-5-5: done # Storage Limit Enforcement (4 pts) - COMPLETED 2026-01-18
-  track-a-5-6: done # Mark Upload Complete (2 pts) - COMPLETED 2026-01-18
-  track-a-5-7: done # Admin Asset Upload (3 pts) - COMPLETED 2026-01-18
+  # =========================================================================
+  # TRACK A: Epic 5A - Project Status Workflow System (NEW - Foundation)
+  # =========================================================================
+  track-a-epic5a: ready-for-dev # Foundation epic - must complete before other tracks
+  track-a-5a-1: ready-for-dev # Schema Migration - Phase + ActionState Model (8 pts)
+  track-a-5a-2: blocked # Status Transition Utilities (5 pts) - Depends on 5A.1
+  track-a-5a-3: blocked # Upload Gating Service (5 pts) - Depends on 5A.1, 5A.2
+  track-a-5a-4: blocked # Admin Action Guards (5 pts) - Depends on 5A.1, 5A.2
+  track-a-5a-5: blocked # Project Type Delivery Config (3 pts) - Depends on 5A.1
+  track-a-5a-6: blocked # Status History Enhancement (5 pts) - Depends on 5A.1
+  track-a-5a-7: blocked # Portal-Specific Status Mapping (5 pts) - Depends on 5A.1
 
-  # TRACK B: Admin Detail Enhancement
-  track-b-admin-detail: planned # Unblocked after Story 5-1 DONE
-  track-b-1: ready-for-dev # Enhanced Detail View (Tabs, Asset Counts, etc)
+  # =========================================================================
+  # TRACK B: Epic 5 - Asset Upload (REVISED - Depends on Epic 5A)
+  # =========================================================================
+  track-b-epic5: done # Senior Dev, 2-3 weeks, 30 pts - Stories completed
+  # Phase A: Core Upload Infrastructure (MUST) - ALL COMPLETED
+  track-b-5-1: done # View Project Folders (5 pts) - COMPLETED 2026-01-18
+  track-b-5-2: needs-revision # Gated Upload Enforcement (3 pts) - NEEDS Epic 5A integration
+  track-b-5-3: done # File Upload Dual Strategy (8 pts) - COMPLETED 2026-01-18
+  track-b-5-4: done # Upload Progress & Validation (5 pts) - COMPLETED 2026-01-18
+  track-b-5-5: done # Storage Limit Enforcement (4 pts) - COMPLETED 2026-01-18
+  track-b-5-6: done # Mark Upload Complete (2 pts) - COMPLETED 2026-01-18
+  track-b-5-7: needs-revision # Admin Asset Upload (3 pts) - NEEDS Epic 5A integration
 
-  # TRACK C: Cleanup & Wind-Up
-  track-c-cleanup: done # COMPLETED 2026-01-18
-  track-c-1: done
-  track-c-2: done
-  track-c-3: done
-  track-c-4: done
+  # =========================================================================
+  # TRACK C: Admin Detail Enhancement
+  # =========================================================================
+  track-c-admin-detail: planned # Unblocked after Epic 5A complete
+  track-c-1: ready-for-dev # Enhanced Detail View (Tabs, Asset Counts, etc)
+
+  # =========================================================================
+  # TRACK D: Cleanup & Wind-Up (COMPLETED)
+  # =========================================================================
+  track-d-cleanup: done # COMPLETED 2026-01-18
+  track-d-1: done
+  track-d-2: done
+  track-d-3: done
+  track-d-4: done
+
+# =========================================================================
+# IMPLEMENTATION ORDER
+# =========================================================================
+# 1. Epic 5A stories (5A.1 → 5A.2 → 5A.3-7 in parallel)
+# 2. Revise Epic 5 stories (5.2, 5.7) to use Epic 5A utilities
+# 3. Epic 6, 7 when needed
+
+# =========================================================================
+# NOTES
+# =========================================================================
+# - Epic 5A is the foundation for proper status workflow
+# - Stories 5.2 and 5.7 need revision to use canUpload() from Epic 5A
+# - Epic 6, 7, 8 depend on Epic 5A but are not in current sprint
