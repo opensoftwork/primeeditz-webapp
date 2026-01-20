@@ -37,6 +37,7 @@ export const projectActionStateValidator = v.union(
   v.literal('awaiting_quotation'),
   v.literal('quotation_sent'),
   v.literal('quotation_approved'),
+  v.literal('quotation_rejected'),
   v.literal('storage_allocated'),
   
   // Onboarding Phase

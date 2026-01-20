@@ -19,6 +19,7 @@ export type ActionState =
   | 'awaiting_quotation'
   | 'quotation_sent'
   | 'quotation_approved'
+  | 'quotation_rejected'
   | 'storage_allocated'
   | 'awaiting_uploads'
   | 'uploads_complete'
@@ -49,7 +50,7 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     bgColor: "bg-zinc-500/10 border-zinc-500/20",
   },
   awaiting_quotation: {
-    label: "Pending Review",
+    label: "Preparing Quote",
     color: "text-amber-400",
     bgColor: "bg-amber-500/10 border-amber-500/20",
   },
@@ -62,6 +63,11 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     label: "Quote Approved",
     color: "text-emerald-400",
     bgColor: "bg-emerald-500/10 border-emerald-500/20",
+  },
+  quotation_rejected: {
+    label: "Quote Rejected",
+    color: "text-red-400",
+    bgColor: "bg-red-500/10 border-red-500/20",
   },
   storage_allocated: {
     label: "Preparing",
@@ -211,6 +217,12 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "We're setting up your project",
     color: "text-emerald-400",
     isActionNeeded: false,
+  },
+  quotation_rejected: {
+    label: "Quote Rejected",
+    description: "Quotation declined or rejected",
+    color: "text-red-400",
+    isActionNeeded: true,
   },
   storage_allocated: {
     label: "Preparing",
