@@ -5,6 +5,7 @@ import { internalQuery } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
 import { projectPhaseValidator, projectActionStateValidator } from "../../schema";
 import { checkUploadEligibility } from "../../lib/uploadGate";
+import { getNextStates } from "../../lib/statusMachine";
 
 /**
  * Get all projects for admin listing with cursor-based pagination.
@@ -298,8 +299,6 @@ export const getPossibleTransitions = adminQuery({
     const project = await ctx.db.get(args.projectId);
     if (!project) return [];
 
-    // Import from status machine (dynamic import or just use helper)
-    const { getNextStates } = await import("../../lib/statusMachine");
     return getNextStates(project.actionState as any);
   },
 });
