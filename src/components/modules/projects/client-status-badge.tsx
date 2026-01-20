@@ -1,8 +1,8 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import { getClientStatusDisplay } from "@/lib/status-display";
-import { CircleDot, AlertCircle } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { getStatusConfig } from "@/lib/status-display";
 
 interface ClientStatusBadgeProps {
   status: string;
@@ -13,31 +13,30 @@ export function ClientStatusBadge({
   status,
   className,
 }: ClientStatusBadgeProps) {
-  const config = getClientStatusDisplay(status);
+  const config = getStatusConfig(status);
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
-      <div
+    <div className={cn("flex items-center gap-2", className)}>
+      <Badge
+        variant="outline"
         className={cn(
-          "inline-flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all duration-300",
-          config.isActionNeeded
-            ? "bg-primary/10 border-primary/20 text-primary shadow-[0_0_15px_rgba(255,255,255,0.05)]"
-            : "bg-white/5 border-white/10 text-white/60",
+          "uppercase text-[9px] tracking-[0.2em] font-black py-1 px-4 rounded-lg border-2 shadow-[0_5px_15px_rgba(0,0,0,0.2)]",
+          config.bgColor,
+          config.color,
         )}
       >
-        {config.isActionNeeded ? (
-          <AlertCircle className="h-3 w-3 animate-pulse" />
-        ) : (
-          <CircleDot className="h-3 w-3" />
-        )}
-        {config.label}
-      </div>
-
-      {config.description && (
-        <p className="text-[9px] font-bold text-white/30 uppercase tracking-tighter ml-1">
-          {config.description}
-        </p>
-      )}
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              status === "awaiting_quotation" || status === "awaiting_review"
+                ? "animate-pulse bg-amber-500"
+                : "bg-current",
+            )}
+          />
+          {config.label}
+        </div>
+      </Badge>
     </div>
   );
 }

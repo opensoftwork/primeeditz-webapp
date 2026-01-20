@@ -16,4 +16,6 @@ export interface ProjectData {
   code: string;
   phase: string;
   actionState: string;
+  eventDate?: number;
+  createdAt: number;
 }

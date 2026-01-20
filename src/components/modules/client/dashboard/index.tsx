@@ -28,7 +28,6 @@ export default function ClientDashboard() {
   const inProgressCount =
     projects?.filter(
       (p) =>
-        p.actionState !== "draft" &&
         p.phase !== "completed" &&
         p.phase !== "archived" &&
         p.actionState !== "cancelled",
