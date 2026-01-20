@@ -30,6 +30,7 @@ interface ProjectDetailProps {
 import { AdminProjectDetail } from "./types";
 import { getDeliveryPhaseLabel } from "@/lib/status-display";
 import { toast } from "sonner";
+import { QuotationCard } from "./quotation-card";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
