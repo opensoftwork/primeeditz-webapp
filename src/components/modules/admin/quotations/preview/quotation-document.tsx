@@ -209,7 +209,7 @@ export const QuotationDocument = React.forwardRef<
   return (
     <div
       ref={ref}
-      className="bg-white text-slate-900 shadow-[0_30px_100px_rgba(0,0,0,0.12)] rounded-sm min-h-[1123px] w-full max-w-[900px] mx-auto overflow-hidden print:shadow-none print:m-0 print:max-w-none print:rounded-none ring-1 ring-slate-100 print:ring-0"
+      className="bg-white text-slate-900 shadow-[0_30px_100px_rgba(0,0,0,0.12)] rounded-sm min-h-[1123px] w-full max-w-[900px] mx-auto overflow-visible print:shadow-none print:m-0 print:max-w-none print:rounded-none ring-1 ring-slate-100 print:ring-0"
     >
       <div className="p-10 md:p-14 pt-8 md:pt-10 pb-20 md:pb-24 space-y-10 text-slate-900 print:p-8 print:pt-0 print:pb-16">
         {/* ================================================================ */}
@@ -327,7 +327,7 @@ export const QuotationDocument = React.forwardRef<
             {groupedByProject.map(({ project, sectionGroups, total }) => (
               <div
                 key={project._id}
-                className="space-y-6 project-container print:mb-10"
+                className="space-y-6 project-container print:mb-10 break-inside-avoid page-break-inside-avoid relative block overflow-visible"
               >
                 {/* Project Header */}
                 <div className="flex items-center gap-3 pb-3 border-b-2 border-slate-950">
@@ -354,7 +354,7 @@ export const QuotationDocument = React.forwardRef<
                 {sectionGroups.map(({ section, items }) => (
                   <div
                     key={section._id}
-                    className="space-y-3 section-container print:mb-6 pl-4"
+                    className="space-y-3 section-container print:mb-6 pl-4 break-inside-avoid page-break-inside-avoid relative block overflow-visible"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -424,7 +424,7 @@ export const QuotationDocument = React.forwardRef<
                 items.length > 0 && (
                   <div
                     key={section._id}
-                    className="space-y-3 section-container print:mb-8"
+                    className="space-y-3 section-container print:mb-8 break-inside-avoid page-break-inside-avoid relative block overflow-visible"
                   >
                     <div className="flex items-center gap-3">
                       <div
@@ -490,7 +490,8 @@ export const QuotationDocument = React.forwardRef<
         {/* ================================================================ */}
         {/* Financial Summary */}
         {/* ================================================================ */}
-        <div className="flex flex-col md:flex-row justify-end pt-6 gap-10">
+        <div className="break-inside-avoid page-break-inside-avoid relative block overflow-visible">
+          <div className="flex flex-col md:flex-row justify-end pt-6 gap-10">
           <div className="w-full max-w-[320px] space-y-3">
             <div className="flex justify-between items-center px-4">
               <span className="text-slate-400 font-bold uppercase tracking-[0.15em] text-[10px]">
@@ -552,12 +553,13 @@ export const QuotationDocument = React.forwardRef<
             </div>
           </div>
         </div>
+      </div>
 
         {/* ================================================================ */}
         {/* Terms & Conditions */}
         {/* ================================================================ */}
         {quotation.terms && (
-          <div className="pt-10">
+          <div className="pt-10 break-inside-avoid page-break-inside-avoid relative block overflow-visible">
             <div className="flex items-center gap-3 mb-5">
               <ShieldCheck className="w-4 h-4 text-slate-900" />
               <div className="text-xs font-black uppercase tracking-[0.2em] text-slate-900">
@@ -574,7 +576,7 @@ export const QuotationDocument = React.forwardRef<
         {/* ================================================================ */}
         {/* Signature Section */}
         {/* ================================================================ */}
-        <div className="pt-14 grid grid-cols-2 gap-24">
+        <div className="pt-14 grid grid-cols-2 gap-24 break-inside-avoid page-break-inside-avoid">
           <div className="space-y-5">
             <div className="h-0.5 bg-slate-100 w-full" />
             <div className="space-y-1">

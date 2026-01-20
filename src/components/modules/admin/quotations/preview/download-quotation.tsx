@@ -98,42 +98,67 @@ export function DownloadQuotation({
         cacheBust: true,
       });
 
-      // PDF Dimensions & Margins
+      // ======================================================================
+      // Smart Slicing Logic
+      // Detects where components are cut and adjusts page breaks.
+      // ======================================================================
+      
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
         format: "a4",
       });
 
-      const margin = 10; // 10mm standard margin
+      const margin = 10;
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
       const printableWidth = pdfWidth - margin * 2;
+      const printableHeight = pdfHeight - margin * 2;
 
       const imgProps = pdf.getImageProperties(dataUrl);
       const contentHeight = (imgProps.height * printableWidth) / imgProps.width;
 
-      let heightLeft = contentHeight;
+      // Map browser pixels to PDF mm
+      const pxToMm = printableWidth / 900; 
+
+      // Find all elements that shouldn't be split
+      const avoidElements = Array.from(
+        documentRef.current.querySelectorAll(".break-inside-avoid")
+      ) as HTMLElement[];
+
+      const componentOffsets = avoidElements.map((el) => {
+        const rect = el.getBoundingClientRect();
+        const rootRect = documentRef.current!.getBoundingClientRect();
+        return {
+          top: (rect.top - rootRect.top) * pxToMm,
+          bottom: (rect.bottom - rootRect.top) * pxToMm,
+          height: rect.height * pxToMm,
+        };
+      });
+
+      let currentTopMm = 0;
       let page = 0;
 
-      while (heightLeft > 0) {
+      while (currentTopMm < contentHeight) {
         if (page > 0) pdf.addPage();
 
-        // For the first page, start at the very top (0 margin)
-        // For other pages, start with the standard top margin
-        const currentTopMargin = page === 0 ? 0 : margin;
-        const currentPrintableHeight = pdfHeight - currentTopMargin - margin;
+        // Calculate the "natural" bottom of this page in content coordinates
+        let pageBottomLimit = currentTopMm + printableHeight;
 
-        // Calculate where the image should be placed relative to this page's viewport
-        let topOffset;
-        if (page === 0) {
-          topOffset = 0;
-        } else {
-          // Skip the height already shown on page 0 and previous pages
-          const heightShownOnPage0 = pdfHeight - margin;
-          const heightShownOnOtherPages = (page - 1) * (pdfHeight - margin * 2);
-          topOffset = margin - (heightShownOnPage0 + heightShownOnOtherPages);
+        // Check if any "avoid" element is being cut by this page boundary
+        const cutoffElement = componentOffsets.find(
+          (off) => off.top < pageBottomLimit && off.bottom > pageBottomLimit
+        );
+
+        // If an element is cut, and it's not larger than a whole page,
+        // we move the boundary to the top of that element.
+        if (cutoffElement && cutoffElement.height < printableHeight) {
+          pageBottomLimit = cutoffElement.top;
         }
+
+        // Draw the slice of the image
+        // topOffset is negative because we're moving the content UP relative to the page
+        const topOffset = margin - currentTopMm;
 
         pdf.addImage(
           dataUrl,
@@ -143,17 +168,33 @@ export function DownloadQuotation({
           printableWidth,
           contentHeight,
           undefined,
-          "NONE" // No compression for maximum quality
+          "NONE"
         );
 
-        // Apply masking for clean edges
+        // Masking to clean up the edges (especially the overflow from currentTopMm)
         pdf.setFillColor(255, 255, 255);
-        if (page > 0) pdf.rect(0, 0, pdfWidth, margin, "F"); // Top mask only for p1+
-        pdf.rect(0, pdfHeight - margin, pdfWidth, margin, "F"); // Bottom mask
-        pdf.rect(0, 0, margin, pdfHeight, "F"); // Left mask
-        pdf.rect(pdfWidth - margin, 0, margin, pdfHeight, "F"); // Right mask
+        pdf.rect(0, 0, pdfWidth, margin, "F"); // Top
+        pdf.rect(0, pdfHeight - margin, pdfWidth, margin, "F"); // Bottom
+        pdf.rect(0, 0, margin, pdfHeight, "F"); // Left
+        pdf.rect(pdfWidth - margin, 0, margin, pdfHeight, "F"); // Right
 
-        heightLeft -= currentPrintableHeight;
+        // If we adjust pageBottomLimit, we might leave whitespace at the bottom.
+        // We need to mask it so the content from the next page doesn't bleed in.
+        const actualPageContentHeight = Math.min(
+          pageBottomLimit - currentTopMm,
+          printableHeight
+        );
+        if (actualPageContentHeight < printableHeight) {
+          pdf.rect(
+            margin,
+            margin + actualPageContentHeight,
+            printableWidth,
+            printableHeight - actualPageContentHeight,
+            "F"
+          );
+        }
+
+        currentTopMm = pageBottomLimit;
         page++;
       }
 
