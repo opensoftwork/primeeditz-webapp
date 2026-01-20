@@ -172,9 +172,11 @@ export const getQuotationWithSections = adminQuery({
 
     // Get project name(s)
     let projectName = undefined;
+    let projectCode = undefined;
     if (quotation.projectId) {
       const project = await ctx.db.get(quotation.projectId as Id<"projects">);
       projectName = project?.eventName || project?.code;
+      projectCode = project?.code;
     }
 
     // Get all projects linked to this quotation (for project-based grouping)
@@ -199,6 +201,7 @@ export const getQuotationWithSections = adminQuery({
         ...quotation,
         clientName,
         projectName,
+        projectCode,
       },
       sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),

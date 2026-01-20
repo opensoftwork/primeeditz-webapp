@@ -49,9 +49,9 @@ export function LineItemsSection({
             item.rate * item.quantity +
             (item.subItems?.reduce(
               (s: number, sub: any) => s + sub.rate * sub.quantity,
-              0
+              0,
             ) ?? 0),
-          0
+          0,
         )
       );
     }, 0);
@@ -63,7 +63,7 @@ export function LineItemsSection({
       key={section._id}
       className={cn(
         "rounded-2xl bg-white/2 border border-white/5 overflow-hidden",
-        isNested && "ml-0"
+        isNested && "ml-0",
       )}
     >
       {/* Section Header */}
@@ -75,14 +75,14 @@ export function LineItemsSection({
               section.color === "blue"
                 ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
                 : section.color === "purple"
-                ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                : section.color === "green"
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : section.color === "amber"
-                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                : section.color === "red"
-                ? "bg-red-500/10 border-red-500/20 text-red-400"
-                : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
+                  ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                  : section.color === "green"
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                    : section.color === "amber"
+                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                      : section.color === "red"
+                        ? "bg-red-500/10 border-red-500/20 text-red-400"
+                        : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400",
             )}
           >
             {section.name}
@@ -103,10 +103,10 @@ export function LineItemsSection({
                   item.rate * item.quantity +
                   (item.subItems?.reduce(
                     (s: number, sub: any) => s + sub.rate * sub.quantity,
-                    0
+                    0,
                   ) ?? 0),
-                0
-              )
+                0,
+              ),
             )}
           </span>
         </div>
@@ -212,10 +212,7 @@ export function LineItemsSection({
         // Project-based grouping
         <>
           {groupedByProject.map(({ project, sectionGroups }) => (
-            <div
-              key={project._id}
-              className="space-y-4"
-            >
+            <div key={project._id} className="space-y-4">
               {/* Project Header */}
               <div className="flex items-center justify-between p-4 rounded-2xl bg-white/3 border border-white/10">
                 <div className="flex items-center gap-4">
@@ -223,9 +220,14 @@ export function LineItemsSection({
                     <FolderOpen className="h-5 w-5 text-primary" />
                   </div>
                   <div>
-                    <h3 className="text-sm font-black text-white uppercase tracking-tight">
-                      {project.eventName || project.code}
-                    </h3>
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <h3 className="text-sm font-black text-white uppercase tracking-tight">
+                        {project.eventName || "General Project"}
+                      </h3>
+                      <span className="text-[8px] font-black uppercase tracking-widest text-primary/60 bg-primary/5 border border-primary/10 px-1.5 py-0.5 rounded">
+                        {project.code}
+                      </span>
+                    </div>
                     <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
                       {project.projectTypeName}
                     </span>
@@ -244,7 +246,7 @@ export function LineItemsSection({
               {/* Sections within Project */}
               <div className="space-y-4 pl-4 border-l-2 border-white/5">
                 {sectionGroups.map(({ section, items }) =>
-                  items.length > 0 ? renderSection(section, items, true) : null
+                  items.length > 0 ? renderSection(section, items, true) : null,
                 )}
               </div>
             </div>
@@ -254,7 +256,7 @@ export function LineItemsSection({
         // Fallback: Section-based grouping
         <>
           {groupedBySection.map(({ section, items }) =>
-            items.length > 0 ? renderSection(section, items) : null
+            items.length > 0 ? renderSection(section, items) : null,
           )}
         </>
       )}

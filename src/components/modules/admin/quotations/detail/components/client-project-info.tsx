@@ -35,9 +35,17 @@ export function ClientProjectInfo({ quotation }: ClientProjectInfoProps) {
             <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
               Associated Project
             </p>
-            <p className="text-xs font-bold text-white uppercase tracking-tight">
-              {quotation.projectId}
-            </p>
+            <div className="flex flex-col">
+              <p className="text-xs font-bold text-white uppercase tracking-tight">
+                {quotation.projectName || "General Project"}
+              </p>
+              {quotation.projectCode &&
+                quotation.projectName !== quotation.projectCode && (
+                  <span className="text-[9px] font-black text-primary/60 uppercase tracking-widest mt-0.5">
+                    {quotation.projectCode}
+                  </span>
+                )}
+            </div>
           </div>
         )}
         {quotation.validUntil && (
