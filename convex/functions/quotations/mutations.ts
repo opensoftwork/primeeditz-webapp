@@ -358,6 +358,22 @@ export const deleteQuotation = adminMutation({
       rejectedAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    // Record the deletion event for the project if linked
+    const projectId = quotation.projectId;
+    if (projectId) {
+      await ctx.db.insert("statusHistory", {
+        projectId: projectId as Id<"projects">,
+        previousPhase: "setup",
+        newPhase: "setup",
+        previousActionState: "quotation_sent",
+        newActionState: "awaiting_quotation",
+        changedBy: ctx.profile._id,
+        changedAt: Date.now(),
+        notes: "Quotation was deleted by admin",
+      });
+    }
+
     return null;
   },
 });
@@ -525,6 +541,37 @@ export const rejectQuotation = clientMutation({
       clientNotes: args.notes,
       updatedAt: Date.now(),
     });
+
+    // CRITICAL: Transition the linked project back to awaiting_quotation
+    const projectId = quotation.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId as Id<"projects">);
+      if (project && canTransition(project.actionState as ActionState, "awaiting_quotation")) {
+        const newPhase = getPhaseForState("awaiting_quotation");
+        const newActor = getActorForState("awaiting_quotation");
+        
+        await ctx.db.patch(projectId as Id<"projects">, {
+          phase: newPhase,
+          actionState: "awaiting_quotation",
+          awaitingActorRole: newActor,
+          updatedAt: Date.now(),
+        });
+
+        // Record status history
+        await ctx.db.insert("statusHistory", {
+          projectId: projectId as Id<"projects">,
+          previousPhase: project.phase,
+          newPhase: newPhase,
+          previousActionState: project.actionState,
+          newActionState: "awaiting_quotation",
+          previousAwaitingActorRole: project.awaitingActorRole,
+          newAwaitingActorRole: newActor,
+          changedBy: ctx.profile._id,
+          changedAt: Date.now(),
+          notes: `Client rejected the quotation. Reason: ${args.reason}`,
+        });
+      }
+    }
 
     return { success: true };
   },

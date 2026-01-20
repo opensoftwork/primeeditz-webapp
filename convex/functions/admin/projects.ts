@@ -285,3 +285,20 @@ export const getAdminProjects = adminQuery({
     };
   },
 });
+
+/**
+ * Get all valid next states for a project (Admin/Staff only).
+ */
+export const getPossibleTransitions = adminQuery({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return [];
+
+    // Import from status machine (dynamic import or just use helper)
+    const { getNextStates } = await import("../../lib/statusMachine");
+    return getNextStates(project.actionState as any);
+  },
+});

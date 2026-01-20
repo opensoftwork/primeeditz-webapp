@@ -21,6 +21,7 @@ import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
 import { PhaseProgress } from "@/components/modules/projects/phase-progress";
+import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface ProjectDetailProps {
@@ -36,6 +37,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
+  const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
@@ -144,6 +146,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         phase={project.phase}
         actionState={project.actionState}
         deliveryLabel={deliveryLabel}
+        onUpdateStatus={() => setIsStatusUpdateOpen(true)}
       />
 
       {/* Phase Progress Bar */}
@@ -223,6 +226,15 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         projectTypeId={project.projectTypeId}
         clientId={project.clientId}
         onSuccess={handleFolderSetupSuccess}
+      />
+
+      <StatusUpdateDrawer
+        open={isStatusUpdateOpen}
+        onOpenChange={setIsStatusUpdateOpen}
+        projectId={projectId as Id<"projects">}
+        currentStatus={project.actionState}
+        projectCode={project.code}
+        projectName={project.eventName}
       />
     </div>
   );

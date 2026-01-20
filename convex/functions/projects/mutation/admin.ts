@@ -99,10 +99,40 @@ export const assignEmployee = adminMutation({
       throw new Error('Invalid employee')
     }
 
-    await ctx.db.patch(args.projectId, {
-      assignedEmployeeId: args.employeeId,
-      updatedAt: now(),
-    })
+    // CRITICAL: Transition status to 'assigned'
+    if (canTransition(project.actionState, 'assigned')) {
+      const newPhase = getPhaseForState('assigned')
+      const newActor = getActorForState('assigned')
+
+      await ctx.db.patch(args.projectId, {
+        assignedEmployeeId: args.employeeId,
+        phase: newPhase,
+        actionState: 'assigned',
+        awaitingActorRole: newActor,
+        assignedAt: now(),
+        updatedAt: now(),
+      })
+
+      // Record status history
+      await ctx.db.insert('statusHistory', {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: newPhase,
+        previousActionState: project.actionState,
+        newActionState: 'assigned',
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: now(),
+        notes: `Project assigned to ${employee.name}`,
+      })
+    } else {
+      // Just update assignment if transition not allowed (though status machine should allow from uploads_complete)
+      await ctx.db.patch(args.projectId, {
+        assignedEmployeeId: args.employeeId,
+        updatedAt: now(),
+      })
+    }
 
     return { success: true }
   },
@@ -439,6 +469,34 @@ export const linkProjectToQuotation = adminMutation({
         projectIds: [...existingProjectIds, projectIdString],
         // Also set single projectId for backward compatibility if not set
         projectId: quotation.projectId || projectIdString,
+      })
+    }
+
+    // CRITICAL: If project is in awaiting_quotation, transition it to quotation_approved
+    if (project.actionState === 'awaiting_quotation' || project.actionState === 'draft') {
+      const newPhase = getPhaseForState('quotation_approved')
+      const newActor = getActorForState('quotation_approved')
+      
+      await ctx.db.patch(args.projectId, {
+        phase: newPhase,
+        actionState: 'quotation_approved',
+        awaitingActorRole: newActor,
+        quotationApprovedAt: now(),
+        updatedAt: now(),
+      })
+
+      // Record status history
+      await ctx.db.insert('statusHistory', {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: newPhase,
+        previousActionState: project.actionState,
+        newActionState: 'quotation_approved',
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: now(),
+        notes: `Linked project to approved quotation ${quotation.code}`,
       })
     }
 

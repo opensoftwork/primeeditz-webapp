@@ -12,6 +12,7 @@ interface ProjectHeaderProps {
   phase: string;
   actionState: string;
   deliveryLabel?: string;
+  onUpdateStatus?: () => void;
 }
 
 export function ProjectHeader({
@@ -19,6 +20,7 @@ export function ProjectHeader({
   phase,
   actionState,
   deliveryLabel,
+  onUpdateStatus,
 }: ProjectHeaderProps) {
   const router = useRouter();
   return (
@@ -48,24 +50,19 @@ export function ProjectHeader({
         </div>
       </motion.div>
 
-      {/* <motion.div
+      <motion.div
         className="flex items-center gap-3"
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
       >
         <Button
-          className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[11px] bg-amber-500 hover:bg-amber-600 text-black shadow-lg shadow-amber-500/20"
-          disabled={status !== "pending_review"}
-        >
-          CREATE QUOTATION
-        </Button>
-        <Button
           variant="outline"
           className="rounded-xl h-11 px-6 font-black uppercase tracking-widest text-[11px] border-white/10 hover:bg-white/5 text-white/60 hover:text-white"
+          onClick={onUpdateStatus}
         >
           UPDATE STATUS
         </Button>
-      </motion.div> */}
+      </motion.div>
     </div>
   );
 }

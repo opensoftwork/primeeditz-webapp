@@ -1,5 +1,8 @@
 import { v } from "convex/values";
 import { adminMutation, clientMutation } from "../../lib/customFunctions";
+import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
+import { ActionState } from "../../schema";
+import { Id } from "../../_generated/dataModel";
 
 /**
  * Setup project folders from a template.
@@ -54,10 +57,41 @@ export const setupProjectFolders = adminMutation({
 
     // Update project's storage allocation (convert GB to bytes)
     const storageInBytes = storageTier.sizeGB * 1024 * 1024 * 1024;
-    await ctx.db.patch(args.projectId, {
-      storageAllocated: storageInBytes,
-      updatedAt: Date.now(),
-    });
+    
+    // CRITICAL: Transition the project status to storage_allocated
+    // This unblocks the next steps in the pipeline (awaiting_uploads)
+    if (canTransition(project.actionState as ActionState, "storage_allocated")) {
+      const newPhase = getPhaseForState("storage_allocated");
+      const newActor = getActorForState("storage_allocated");
+
+      await ctx.db.patch(args.projectId, {
+        storageAllocated: storageInBytes,
+        phase: newPhase,
+        actionState: "storage_allocated",
+        awaitingActorRole: newActor,
+        updatedAt: Date.now(),
+      });
+
+      // Record status history
+      await ctx.db.insert("statusHistory", {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: newPhase,
+        previousActionState: project.actionState,
+        newActionState: "storage_allocated",
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: Date.now(),
+        notes: `Folders set up using template: ${template.name}. Storage allocated: ${storageTier.sizeGB}GB.`,
+      });
+    } else {
+      // Just update storage if transition isn't allowed (shouldn't happen in normal flow)
+      await ctx.db.patch(args.projectId, {
+        storageAllocated: storageInBytes,
+        updatedAt: Date.now(),
+      });
+    }
 
     return {
       success: true,
@@ -101,10 +135,22 @@ export const deleteProjectFolders = adminMutation({
       await ctx.db.delete(folder._id);
     }
 
-    // Reset storage allocation
+    // Reset storage allocation and potentially status
     await ctx.db.patch(args.projectId, {
       storageAllocated: 0,
       updatedAt: Date.now(),
+    });
+
+    // Record the removal in history
+    await ctx.db.insert("statusHistory", {
+      projectId: args.projectId,
+      previousPhase: "setup",
+      newPhase: "setup",
+      previousActionState: "storage_allocated",
+      newActionState: "quotation_approved", // Step back to approved but not yet allocated
+      changedBy: ctx.profile._id,
+      changedAt: Date.now(),
+      notes: "Project folders and storage allocation removed by admin.",
     });
 
     return {
@@ -130,6 +176,10 @@ export const adminUpdateFolderStatus = adminMutation({
     await ctx.db.patch(args.folderId, {
       status: args.status,
     });
+
+    if (args.status === "completed") {
+      await checkAndTransitionUploadsComplete(ctx, folder.projectId);
+    }
 
     return { success: true };
   },
@@ -158,6 +208,96 @@ export const updateFolderStatus = clientMutation({
       status: args.status,
     });
 
+    if (args.status === "completed") {
+      await checkAndTransitionUploadsComplete(ctx, folder.projectId);
+    }
+
     return { success: true };
+  },
+});
+
+/**
+ * Helper to check if all folders are complete and transition project to uploads_complete.
+ */
+async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projects">) {
+  const folders = await ctx.db
+    .query("folders")
+    .withIndex("by_projectId", (q: any) => q.eq("projectId", projectId))
+    .collect();
+
+  const allCompleted = folders.every((f: any) => f.status === "completed");
+
+  if (allCompleted) {
+    const project = await ctx.db.get(projectId);
+    if (project && project.actionState === "awaiting_uploads") {
+      const newPhase = getPhaseForState("uploads_complete");
+      const newActor = getActorForState("uploads_complete");
+
+      await ctx.db.patch(projectId, {
+        phase: newPhase,
+        actionState: "uploads_complete",
+        awaitingActorRole: newActor,
+        uploadsCompletedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      // Status history
+      await ctx.db.insert("statusHistory", {
+        projectId,
+        previousPhase: project.phase,
+        newPhase,
+        previousActionState: project.actionState,
+        newActionState: "uploads_complete",
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: Date.now(),
+        notes: "All folders marked as completed. Project is ready for assignment.",
+      });
+    }
+  }
+}
+
+/**
+ * Open project for client uploads.
+ * Transition project from storage_allocated to awaiting_uploads.
+ */
+export const openProjectForUpload = adminMutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    if (canTransition(project.actionState as ActionState, "awaiting_uploads")) {
+      const newPhase = getPhaseForState("awaiting_uploads");
+      const newActor = getActorForState("awaiting_uploads");
+
+      await ctx.db.patch(args.projectId, {
+        phase: newPhase,
+        actionState: "awaiting_uploads",
+        awaitingActorRole: newActor,
+        updatedAt: Date.now(),
+      });
+
+      // Record status history
+      await ctx.db.insert("statusHistory", {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: newPhase,
+        previousActionState: project.actionState,
+        newActionState: "awaiting_uploads",
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: Date.now(),
+        notes: "Project opened for client uploads.",
+      });
+
+      return { success: true };
+    }
+
+    throw new Error(`Cannot open project for upload from current state: ${project.actionState}`);
   },
 });
