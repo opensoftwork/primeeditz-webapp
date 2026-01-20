@@ -19,6 +19,7 @@ import type {
   QuotationData,
   QuotationSection,
   CompanyInfo,
+  Project,
 } from "../types";
 
 // ============================================================================
@@ -28,6 +29,7 @@ import type {
 interface DownloadQuotationProps {
   quotation: QuotationData;
   sections: QuotationSection[];
+  projects?: Project[];
   activeSection?: string; // Section name for filtered download
   companyInfo?: CompanyInfo;
   clientName?: string;
@@ -46,6 +48,7 @@ interface DownloadQuotationProps {
 export function DownloadQuotation({
   quotation,
   sections,
+  projects = [],
   activeSection,
   companyInfo,
   clientName,
@@ -211,6 +214,7 @@ export function DownloadQuotation({
             ref={documentRef}
             quotation={quotation}
             sections={sections}
+            projects={projects}
             activeSection={activeSection}
             companyInfo={companyInfo}
             clientName={clientName}

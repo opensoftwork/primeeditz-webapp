@@ -16,6 +16,7 @@ import type {
   QuotationData,
   QuotationSection,
   CompanyInfo,
+  Project,
 } from "../types";
 
 // ============================================================================
@@ -25,6 +26,7 @@ import type {
 interface QuotationPreviewProps {
   quotation: QuotationData;
   sections: QuotationSection[];
+  projects?: Project[];
   onBack?: () => void;
   companyInfo?: CompanyInfo;
   clientName?: string;
@@ -38,6 +40,7 @@ interface QuotationPreviewProps {
 export function QuotationPreview({
   quotation,
   sections,
+  projects = [],
   onBack,
   companyInfo,
   clientName,
@@ -86,6 +89,7 @@ export function QuotationPreview({
             <DownloadQuotation
               quotation={quotation}
               sections={sections}
+              projects={projects}
               companyInfo={companyInfo}
               clientName={clientName}
               projectName={projectName}
@@ -103,6 +107,7 @@ export function QuotationPreview({
           ref={documentRef}
           quotation={quotation}
           sections={sections}
+          projects={projects}
           companyInfo={companyInfo}
           clientName={clientName}
           projectName={projectName}

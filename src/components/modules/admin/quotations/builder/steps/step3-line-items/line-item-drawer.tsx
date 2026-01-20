@@ -56,6 +56,8 @@ interface LineItemDrawerProps {
   defaultProjectId?: string;
   onSave: (item: Omit<QuotationLineItem, "id">) => void;
   isSubmitting?: boolean;
+  /** If true, project selection is mandatory before adding items */
+  requireProject?: boolean;
 }
 
 export function LineItemDrawer({
@@ -68,6 +70,7 @@ export function LineItemDrawer({
   defaultProjectId,
   onSave,
   isSubmitting = false,
+  requireProject = false,
 }: LineItemDrawerProps) {
   const isEditing = !!item;
 
@@ -172,11 +175,11 @@ export function LineItemDrawer({
             </FieldContent>
           </Field>
 
-          {/* Project Association (if projects exist) */}
+          {/* Project Association */}
           {projects.length > 0 && (
             <Field>
               <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-                Associated Project
+                Associated Project {requireProject && "*"}
               </FieldLabel>
               <FieldContent>
                 <ProjectPickerDrawer
@@ -184,6 +187,11 @@ export function LineItemDrawer({
                   selectedProjectId={projectId}
                   onSelect={setProjectId}
                 />
+                {requireProject && !projectId && (
+                  <p className="text-[10px] text-amber-500/80 mt-1 font-medium">
+                    Please select a project before adding items
+                  </p>
+                )}
               </FieldContent>
             </Field>
           )}
@@ -316,7 +324,7 @@ export function LineItemDrawer({
           </DrawerClose>
           <Button
             onClick={handleSave}
-            disabled={!description.trim() || !sectionId || isSubmitting}
+            disabled={!description.trim() || !sectionId || isSubmitting || (requireProject && !projectId)}
             className={cn(
               "flex-1 h-11 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2",
               isEditing

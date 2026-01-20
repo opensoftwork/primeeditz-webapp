@@ -10,6 +10,8 @@ import {
   ChevronLeft,
   ChevronRight,
   Hash,
+  FolderOpen,
+  Check,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -24,14 +26,17 @@ import {
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "@/lib/utils";
+import type { Project } from "../../types";
 
 type TabType = "all" | "library" | "templates";
 
 interface LibraryItemsDrawerProps {
-  onSelect: (item: any) => void;
+  onSelect: (item: any, projectId?: string) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialSectionId?: string | null;
+  initialProjectId?: string;
+  projects?: Project[];
 }
 
 export function LibraryItemsDrawer({
@@ -39,11 +44,16 @@ export function LibraryItemsDrawer({
   open,
   onOpenChange,
   initialSectionId = null,
+  initialProjectId,
+  projects = [],
 }: LibraryItemsDrawerProps) {
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
     null
+  );
+  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
+    initialProjectId
   );
 
   const itemGroups =
@@ -53,10 +63,11 @@ export function LibraryItemsDrawer({
   useEffect(() => {
     if (open) {
       setSelectedSectionId(initialSectionId);
+      setSelectedProjectId(initialProjectId || (projects.length === 1 ? projects[0]._id : undefined));
       setSearch("");
       setActiveTab("all");
     }
-  }, [open, initialSectionId]);
+  }, [open, initialSectionId, initialProjectId, projects]);
 
   const selectedGroup = useMemo(() => {
     if (!selectedSectionId) return null;
@@ -80,6 +91,14 @@ export function LibraryItemsDrawer({
       return true;
     });
   }, [selectedGroup, search, activeTab]);
+
+  // Check if we need project selection
+  const needsProjectSelection = projects.length > 1 && !selectedProjectId;
+
+  // Handle item selection with project
+  const handleItemSelect = (item: any) => {
+    onSelect(item, selectedProjectId);
+  };
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -237,12 +256,53 @@ export function LibraryItemsDrawer({
           ) : (
             // ITEMS LIST VIEW
             <div className="space-y-4">
+              {/* Project Selector (when multiple projects exist) */}
+              {projects.length > 1 && (
+                <div className="p-4 rounded-2xl bg-amber-500/5 border border-amber-500/20 mb-4">
+                  <div className="flex items-center gap-2 mb-3">
+                    <FolderOpen className="h-4 w-4 text-amber-500" />
+                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-500">
+                      Select Target Project *
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {projects.map((project) => (
+                      <button
+                        key={project._id}
+                        type="button"
+                        onClick={() => setSelectedProjectId(project._id)}
+                        className={cn(
+                          "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all",
+                          selectedProjectId === project._id
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                        )}
+                      >
+                        {selectedProjectId === project._id && (
+                          <Check className="h-3 w-3" />
+                        )}
+                        {project.eventName || project.code}
+                      </button>
+                    ))}
+                  </div>
+                  {!selectedProjectId && (
+                    <p className="text-[10px] text-amber-500/80 mt-2">
+                      Please select a project before adding items
+                    </p>
+                  )}
+                </div>
+              )}
+
               <div className="grid grid-cols-1 gap-4">
                 {filteredItems.map((item: any) => (
                   <button
                     key={item._id}
-                    onClick={() => onSelect(item)}
-                    className="flex flex-col items-start p-5 rounded-3xl bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/5 transition-all text-left group relative overflow-hidden"
+                    onClick={() => handleItemSelect(item)}
+                    disabled={needsProjectSelection}
+                    className={cn(
+                      "flex flex-col items-start p-5 rounded-3xl bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/5 transition-all text-left group relative overflow-hidden",
+                      needsProjectSelection && "opacity-50 cursor-not-allowed hover:border-white/5 hover:bg-white/2"
+                    )}
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-12 -translate-y-12" />
 

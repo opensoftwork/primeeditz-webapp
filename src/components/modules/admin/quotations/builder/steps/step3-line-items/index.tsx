@@ -1,34 +1,17 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo } from "react";
-import { Plus, BookOpen, Layers, ChevronDown } from "lucide-react";
+import { Plus, BookOpen, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useQuotationBuilder } from "../../quotation-builder-context";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { cn } from "@/lib/utils";
 
 import { LibraryItemsDrawer } from "./library-items-drawer";
-import { LineItemsTable } from "./line-items-table";
 import { LineItemDrawer } from "./line-item-drawer";
 import { InvolvedProjects } from "./involved-projects";
+import { ProjectSectionItems } from "./project-section-items";
 import type { QuotationLineItem, Project, Section } from "../../types";
-
-// Currency formatter
-const formatCurrency = (amount: number): string => {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    maximumFractionDigits: 0,
-  }).format(amount);
-};
 
 export function Step3LineItems() {
   const {
@@ -54,12 +37,10 @@ export function Step3LineItems() {
       activeOnly: true,
     }) as Section[]) || [];
 
-  // Tab state - "all" or section._id
-  const [activeTab, setActiveTab] = useState<string>("all");
-
   // Library drawer state
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [targetSectionId, setTargetSectionId] = useState<string | null>(null);
+  const [targetProjectId, setTargetProjectId] = useState<string | undefined>();
 
   // Line item drawer state
   const [itemDrawerOpen, setItemDrawerOpen] = useState(false);
@@ -69,6 +50,9 @@ export function Step3LineItems() {
   const [defaultSectionForDrawer, setDefaultSectionForDrawer] = useState<
     string | undefined
   >();
+  const [defaultProjectForDrawer, setDefaultProjectForDrawer] = useState<
+    string | undefined
+  >();
 
   // Register submit trigger
   useEffect(() => {
@@ -76,22 +60,31 @@ export function Step3LineItems() {
     return () => setSubmitTrigger(null);
   }, [nextStep, setSubmitTrigger]);
 
-  // Open library for specific section
-  const openLibrary = useCallback((sectionId: string | null = null) => {
-    setTargetSectionId(sectionId);
-    setLibraryOpen(true);
-  }, []);
+  // Open library for specific section/project
+  const openLibrary = useCallback(
+    (sectionId: string | null = null, projectId?: string) => {
+      setTargetSectionId(sectionId);
+      setTargetProjectId(projectId);
+      setLibraryOpen(true);
+    },
+    []
+  );
 
-  // Open drawer to add new item
+  // Open drawer to add new item (with project and optional section)
   const openAddItemDrawer = useCallback(
-    (sectionId?: string) => {
+    (projectId?: string, sectionId?: string) => {
       setEditingItem(null);
-      const effectiveSectionId =
-        sectionId || (activeTab !== "all" ? activeTab : sections[0]?._id);
+      // Use provided projectId or default to first project if only one
+      const effectiveProjectId =
+        projectId ||
+        (filteredProjects.length === 1 ? filteredProjects[0]._id : undefined);
+      const effectiveSectionId = sectionId || sections[0]?._id;
+
+      setDefaultProjectForDrawer(effectiveProjectId);
       setDefaultSectionForDrawer(effectiveSectionId);
       setItemDrawerOpen(true);
     },
-    [activeTab, sections]
+    [filteredProjects, sections]
   );
 
   // Open drawer to edit existing item
@@ -99,6 +92,7 @@ export function Step3LineItems() {
     (item: QuotationLineItem & { originalIdx: number }) => {
       setEditingItem(item);
       setDefaultSectionForDrawer(item.sectionId);
+      setDefaultProjectForDrawer(item.projectId);
       setItemDrawerOpen(true);
     },
     []
@@ -106,9 +100,12 @@ export function Step3LineItems() {
 
   // Handle library item select
   const handleSelectFromLibrary = useCallback(
-    (item: any) => {
-      const defaultProjectId =
-        filteredProjects.length === 1 ? filteredProjects[0]._id : undefined;
+    (item: any, projectId?: string) => {
+      // Use the projectId from the library drawer, or fallback
+      const effectiveProjectId =
+        projectId ||
+        targetProjectId ||
+        (filteredProjects.length === 1 ? filteredProjects[0]._id : undefined);
 
       addLineItem({
         description: item.name,
@@ -116,10 +113,10 @@ export function Step3LineItems() {
         rate: item.unitPrice,
         quantity: 1,
         sectionId: item.sectionId as any,
-        projectId: defaultProjectId,
+        projectId: effectiveProjectId,
       });
     },
-    [addLineItem, filteredProjects]
+    [addLineItem, filteredProjects, targetProjectId]
   );
 
   // Handle save from drawer (add or update)
@@ -151,13 +148,14 @@ export function Step3LineItems() {
       setFormData("step1", {
         projectIds: selectedProjectIds.filter((id) => id !== projectId),
       });
+      // Also remove items associated with this project
       lineItems.forEach((li, idx) => {
         if ((li as QuotationLineItem).projectId === projectId) {
-          updateLineItem(idx, { projectId: undefined });
+          removeLineItem(idx);
         }
       });
     },
-    [setFormData, selectedProjectIds, lineItems, updateLineItem]
+    [setFormData, selectedProjectIds, lineItems, removeLineItem]
   );
 
   // All items with originalIdx
@@ -170,43 +168,8 @@ export function Step3LineItems() {
     [lineItems]
   );
 
-  // Calculate section counts
-  const sectionCounts = useMemo(() => {
-    const counts: Record<string, number> = { all: allItemsWithIdx.length };
-    sections.forEach((s) => {
-      counts[s._id] = allItemsWithIdx.filter(
-        (item) => item.sectionId === s._id
-      ).length;
-    });
-    return counts;
-  }, [allItemsWithIdx, sections]);
-
-  // Calculate section totals
-  const sectionTotals = useMemo(() => {
-    const totals: Record<string, number> = { all: 0 };
-    allItemsWithIdx.forEach((item) => {
-      const itemTotal =
-        item.rate * item.quantity +
-        (item.subItems || []).reduce(
-          (sum, sub) => sum + sub.rate * sub.quantity,
-          0
-        );
-      totals.all += itemTotal;
-      if (item.sectionId) {
-        totals[item.sectionId] = (totals[item.sectionId] || 0) + itemTotal;
-      }
-    });
-    return totals;
-  }, [allItemsWithIdx]);
-
-  // Filter items based on active tab
-  const displayedItems = useMemo(() => {
-    if (activeTab === "all") return allItemsWithIdx;
-    return allItemsWithIdx.filter((item) => item.sectionId === activeTab);
-  }, [activeTab, allItemsWithIdx]);
-
-  // Get active section for display
-  const activeSection = sections.find((s) => s._id === activeTab);
+  // Check if projects are selected
+  const hasProjects = filteredProjects.length > 0;
 
   return (
     <div className="w-full flex flex-col h-full">
@@ -226,7 +189,8 @@ export function Step3LineItems() {
               type="button"
               variant="outline"
               onClick={() => openLibrary()}
-              className="h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border-white/10 text-white font-bold uppercase tracking-widest text-[10px]"
+              disabled={!hasProjects}
+              className="h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border-white/10 text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <BookOpen className="h-4 w-4 mr-2 text-primary" />
               Library
@@ -234,7 +198,8 @@ export function Step3LineItems() {
             <Button
               type="button"
               onClick={() => openAddItemDrawer()}
-              className="h-10 px-4 rounded-xl font-bold uppercase tracking-widest text-[10px]"
+              disabled={!hasProjects}
+              className="h-10 px-4 rounded-xl font-bold uppercase tracking-widest text-[10px] disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Plus className="h-4 w-4 mr-2" />
               Add Item
@@ -252,220 +217,18 @@ export function Step3LineItems() {
           onRemoveProject={handleRemoveProject}
         />
 
-        {/* Section Filter - Dropdown */}
-        <div className="mt-6 mb-4 flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <Layers className="h-4 w-4 text-white/30" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-              Filter by Section
-            </span>
-          </div>
-          <Select value={activeTab} onValueChange={setActiveTab}>
-            <SelectTrigger className="w-[220px] h-10 bg-white/5 border-white/10 rounded-xl text-sm font-medium">
-              <SelectValue>
-                <div className="flex items-center gap-2">
-                  {activeTab === "all" ? (
-                    <>
-                      <div className="h-2 w-2 rounded-full bg-primary" />
-                      <span>All Items</span>
-                      <span className="text-[10px] text-white/30 font-bold">
-                        ({sectionCounts.all})
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <div
-                        className={cn(
-                          "h-2 w-2 rounded-full",
-                          activeSection?.color === "blue"
-                            ? "bg-blue-500"
-                            : activeSection?.color === "purple"
-                            ? "bg-purple-500"
-                            : activeSection?.color === "green"
-                            ? "bg-emerald-500"
-                            : activeSection?.color === "amber"
-                            ? "bg-amber-500"
-                            : activeSection?.color === "red"
-                            ? "bg-red-500"
-                            : "bg-zinc-500"
-                        )}
-                      />
-                      <span>{activeSection?.name}</span>
-                      <span className="text-[10px] text-white/30 font-bold">
-                        ({sectionCounts[activeTab] || 0})
-                      </span>
-                    </>
-                  )}
-                </div>
-              </SelectValue>
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10">
-              <SelectItem value="all" className="text-sm font-medium">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-primary" />
-                  All Items
-                  <span className="text-[10px] text-white/30 font-bold ml-2">
-                    {sectionCounts.all}
-                  </span>
-                </div>
-              </SelectItem>
-              {sections.map((section) => (
-                <SelectItem
-                  key={section._id}
-                  value={section._id}
-                  className="text-sm font-medium"
-                >
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={cn(
-                        "h-2 w-2 rounded-full",
-                        section.color === "blue"
-                          ? "bg-blue-500"
-                          : section.color === "purple"
-                          ? "bg-purple-500"
-                          : section.color === "green"
-                          ? "bg-emerald-500"
-                          : section.color === "amber"
-                          ? "bg-amber-500"
-                          : section.color === "red"
-                          ? "bg-red-500"
-                          : "bg-zinc-500"
-                      )}
-                    />
-                    {section.name}
-                    <span className="text-[10px] text-white/30 font-bold ml-2">
-                      {sectionCounts[section._id] || 0}
-                    </span>
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        {/* Active Tab Content */}
-        <div className="p-5 rounded-2xl bg-white/2 border border-white/5 space-y-12">
-          {activeTab === "all" ? (
-            sections.map((section) => {
-              const sectionItems = allItemsWithIdx.filter(
-                (item) => item.sectionId === section._id
-              );
-              if (sectionItems.length === 0) return null;
-
-              return (
-                <div key={section._id} className="space-y-4">
-                  <div className="flex items-center justify-between px-1">
-                    <div className="flex items-center gap-3">
-                      <div
-                        className={cn(
-                          "h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest",
-                          section.color === "blue"
-                            ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                            : section.color === "purple"
-                            ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                            : section.color === "green"
-                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                            : section.color === "amber"
-                            ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                            : section.color === "red"
-                            ? "bg-red-500/10 border-red-500/20 text-red-400"
-                            : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
-                        )}
-                      >
-                        {section.name}
-                      </div>
-                      <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                        {sectionItems.length} Component
-                        {sectionItems.length !== 1 ? "s" : ""}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4">
-                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                        Section Share
-                      </span>
-                      <span className="text-sm font-black text-white">
-                        {formatCurrency(sectionTotals[section._id] || 0)}
-                      </span>
-                    </div>
-                  </div>
-                  <LineItemsTable
-                    items={sectionItems}
-                    section={section}
-                    onEditItem={openEditItemDrawer}
-                    onRemoveItem={removeLineItem}
-                    onAddItem={(sectionId) =>
-                      openAddItemDrawer(sectionId || undefined)
-                    }
-                  />
-                </div>
-              );
-            })
-          ) : (
-            <>
-              {/* Tab Header */}
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-                <div className="flex items-center gap-3">
-                  <div
-                    className={cn(
-                      "h-6 px-2.5 rounded-md flex items-center justify-center border font-black uppercase tracking-widest text-[8px]",
-                      activeSection?.color === "blue"
-                        ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                        : activeSection?.color === "purple"
-                        ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                        : activeSection?.color === "green"
-                        ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                        : activeSection?.color === "amber"
-                        ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                        : activeSection?.color === "red"
-                        ? "bg-red-500/10 border-red-500/20 text-red-400"
-                        : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
-                    )}
-                  >
-                    {activeSection?.name || "Section"}
-                  </div>
-                  <span className="text-[10px] font-bold text-white/20 uppercase tracking-wider">
-                    {displayedItems.length} item
-                    {displayedItems.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                    Total
-                  </span>
-                  <span className="text-lg font-black text-white">
-                    {formatCurrency(sectionTotals[activeTab] || 0)}
-                  </span>
-                </div>
-              </div>
-
-              <LineItemsTable
-                items={displayedItems}
-                section={activeSection || { _id: "", name: "" }}
-                onEditItem={openEditItemDrawer}
-                onRemoveItem={removeLineItem}
-                onAddItem={(sectionId) =>
-                  openAddItemDrawer(sectionId || undefined)
-                }
-              />
-            </>
-          )}
-
-          {activeTab === "all" && allItemsWithIdx.length === 0 && (
-            <div className="py-20 flex flex-col items-center justify-center text-center space-y-4">
-              <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
-                <Layers className="h-8 w-8 text-white/10" />
-              </div>
-              <div className="space-y-1">
-                <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
-                  Worth is Uncalculated
-                </p>
-                <p className="text-xs text-white/20 font-medium">
-                  Add items to your proposal to see the architectural breakdown.
-                </p>
-              </div>
-            </div>
-          )}
+        {/* Project-based Items Display */}
+        <div className="mt-6 p-5 rounded-2xl bg-white/2 border border-white/5">
+          <ProjectSectionItems
+            projects={filteredProjects}
+            sections={sections}
+            items={allItemsWithIdx}
+            onEditItem={openEditItemDrawer}
+            onRemoveItem={removeLineItem}
+            onAddItem={(projectId, sectionId) =>
+              openAddItemDrawer(projectId, sectionId)
+            }
+          />
         </div>
       </div>
 
@@ -474,6 +237,8 @@ export function Step3LineItems() {
         open={libraryOpen}
         onOpenChange={setLibraryOpen}
         initialSectionId={targetSectionId}
+        initialProjectId={targetProjectId}
+        projects={filteredProjects}
         onSelect={handleSelectFromLibrary}
       />
 
@@ -488,10 +253,9 @@ export function Step3LineItems() {
         sections={sections}
         defaultSectionId={defaultSectionForDrawer}
         projects={filteredProjects}
-        defaultProjectId={
-          filteredProjects.length === 1 ? filteredProjects[0]._id : undefined
-        }
+        defaultProjectId={defaultProjectForDrawer}
         onSave={handleSaveItem}
+        requireProject={true}
       />
     </div>
   );
