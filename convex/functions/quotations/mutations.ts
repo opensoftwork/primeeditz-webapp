@@ -542,28 +542,28 @@ export const rejectQuotation = clientMutation({
       updatedAt: Date.now(),
     });
 
-    // CRITICAL: Transition the linked project back to awaiting_quotation
+    // CRITICAL: Transition the linked project to quotation_rejected
     const projectId = quotation.projectId;
     if (projectId) {
       const project = await ctx.db.get(projectId as Id<"projects">);
-      if (project && canTransition(project.actionState as ActionState, "awaiting_quotation")) {
-        const newPhase = getPhaseForState("awaiting_quotation");
-        const newActor = getActorForState("awaiting_quotation");
+      if (project && canTransition(project.actionState as ActionState, "quotation_rejected")) {
+        const newPhase = getPhaseForState("quotation_rejected");
+        const newActor = getActorForState("quotation_rejected");
         
         await ctx.db.patch(projectId as Id<"projects">, {
           phase: newPhase,
-          actionState: "awaiting_quotation",
+          actionState: "quotation_rejected",
           awaitingActorRole: newActor,
           updatedAt: Date.now(),
         });
-
+        
         // Record status history
         await ctx.db.insert("statusHistory", {
           projectId: projectId as Id<"projects">,
           previousPhase: project.phase,
           newPhase: newPhase,
           previousActionState: project.actionState,
-          newActionState: "awaiting_quotation",
+          newActionState: "quotation_rejected",
           previousAwaitingActorRole: project.awaitingActorRole,
           newAwaitingActorRole: newActor,
           changedBy: ctx.profile._id,

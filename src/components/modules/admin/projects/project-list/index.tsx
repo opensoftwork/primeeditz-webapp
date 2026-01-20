@@ -234,6 +234,7 @@ export default function ProjectList() {
     { label: "Awaiting Quotation", value: "awaiting_quotation" },
     { label: "Quotation Sent", value: "quotation_sent" },
     { label: "Quotation Approved", value: "quotation_approved" },
+    { label: "Quote Rejected", value: "quotation_rejected" },
     { label: "Awaiting Uploads", value: "awaiting_uploads" },
     { label: "Work In Progress", value: "work_in_progress" },
     { label: "Completed", value: "completed" },

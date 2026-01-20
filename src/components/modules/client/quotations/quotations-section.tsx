@@ -74,7 +74,7 @@ export function QuotationsSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <QuotationCard quotation={quotation as any} />
+            <QuotationCard quotation={quotation } />
           </motion.div>
         ))}
       </div>

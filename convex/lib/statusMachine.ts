@@ -12,8 +12,9 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   // Setup Phase
   draft: ["awaiting_quotation", "cancelled"],
   awaiting_quotation: ["quotation_sent", "cancelled"],
-  quotation_sent: ["quotation_approved", "awaiting_quotation", "cancelled"],
+  quotation_sent: ["quotation_approved", "quotation_rejected", "awaiting_quotation", "cancelled"],
   quotation_approved: ["storage_allocated", "cancelled"],
+  quotation_rejected: ["awaiting_quotation", "cancelled"],
   storage_allocated: ["awaiting_uploads"],
 
   // Onboarding Phase
@@ -48,6 +49,7 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   awaiting_quotation: "setup",
   quotation_sent: "setup",
   quotation_approved: "setup",
+  quotation_rejected: "setup",
   storage_allocated: "setup",
   
   awaiting_uploads: "onboarding",
@@ -77,6 +79,7 @@ const STATE_TO_ACTOR: Record<ActionState, Role> = {
   awaiting_quotation: "admin",
   quotation_sent: "client",
   quotation_approved: "admin",
+  quotation_rejected: "admin",
   storage_allocated: "admin",
   awaiting_uploads: "client",
   uploads_complete: "admin",

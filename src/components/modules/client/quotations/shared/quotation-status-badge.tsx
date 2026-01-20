@@ -54,7 +54,7 @@ const statusConfig: Record<
     glowColor: "bg-amber-400/10",
   },
   viewed: {
-    label: "Awaiting Response",
+    label: "Viewed",
     icon: Eye,
     color: "text-amber-400",
     bgColor: "bg-amber-400/10",
