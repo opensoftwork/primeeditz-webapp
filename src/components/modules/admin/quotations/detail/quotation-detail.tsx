@@ -4,9 +4,10 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { SendQuotationDrawer } from "../send";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import {
   ArrowLeft,
   FileText,
@@ -99,9 +100,10 @@ export function QuotationDetail({
 }: {
   quotationId?: string;
 }) {
-  const params = useParams();
+   const params = useParams();
   const router = useRouter();
   const quotationId = propQuotationId || (params.id as string);
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const data = useQuery(
     api.functions.quotations.queries.getQuotationWithSections,
@@ -109,6 +111,13 @@ export function QuotationDetail({
       quotationId: quotationId as Id<"quotations">,
     },
   );
+
+  useEffect(() => {
+    if (data?.quotation?.code) {
+      setOverride(quotationId, data.quotation.code);
+    }
+    return () => removeOverride(quotationId);
+  }, [quotationId, data?.quotation?.code, setOverride, removeOverride]);
 
   const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
   const duplicateMutation = useMutation(

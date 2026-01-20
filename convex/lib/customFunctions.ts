@@ -66,13 +66,15 @@ export type AuthContextWithProfile = AuthContext & {
 async function getAuthUser(
   ctx: QueryCtx | MutationCtx
 ): Promise<AuthUser> {
-  const user = await authComponent.getAuthUser(ctx)
-  
-  if (!user) {
+  try {
+    const user = await authComponent.getAuthUser(ctx)
+    if (!user) {
+      throw new Error('Not authenticated')
+    }
+    return user as unknown as AuthUser
+  } catch (e) {
     throw new Error('Not authenticated')
   }
-
-  return user as unknown as AuthUser
 }
 
 /**
@@ -294,7 +296,13 @@ export const staffMutation = customMutation(mutation, {
 export const clientAction = customAction(action, {
   args: {},
   input: async (ctx: ActionCtx): Promise<{ ctx: { profile: Profile } & ActionCtx; args: Record<string, unknown> }> => {
-    const authUser = await authComponent.getAuthUser(ctx)
+    let authUser;
+    try {
+      authUser = await authComponent.getAuthUser(ctx)
+    } catch (e) {
+      throw new Error('Not authenticated')
+    }
+    
     if (!authUser) {
       throw new Error('Not authenticated')
     }

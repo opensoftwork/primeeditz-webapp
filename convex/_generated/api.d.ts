@@ -31,6 +31,8 @@ import type * as functions_projectTypeFields_queries from "../functions/projectT
 import type * as functions_projectTypeFields_seed from "../functions/projectTypeFields/seed.js";
 import type * as functions_projectTypes_mutations from "../functions/projectTypes/mutations.js";
 import type * as functions_projectTypes_queries from "../functions/projectTypes/queries.js";
+import type * as functions_projects_mutation_admin from "../functions/projects/mutation/admin.js";
+import type * as functions_projects_mutation_shared from "../functions/projects/mutation/shared.js";
 import type * as functions_projects_mutations from "../functions/projects/mutations.js";
 import type * as functions_projects_queries from "../functions/projects/queries.js";
 import type * as functions_projects_storage from "../functions/projects/storage.js";
@@ -93,6 +95,8 @@ declare const fullApi: ApiFromModules<{
   "functions/projectTypeFields/seed": typeof functions_projectTypeFields_seed;
   "functions/projectTypes/mutations": typeof functions_projectTypes_mutations;
   "functions/projectTypes/queries": typeof functions_projectTypes_queries;
+  "functions/projects/mutation/admin": typeof functions_projects_mutation_admin;
+  "functions/projects/mutation/shared": typeof functions_projects_mutation_shared;
   "functions/projects/mutations": typeof functions_projects_mutations;
   "functions/projects/queries": typeof functions_projects_queries;
   "functions/projects/storage": typeof functions_projects_storage;

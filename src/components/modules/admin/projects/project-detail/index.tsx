@@ -21,6 +21,7 @@ import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
 import { PhaseProgress } from "@/components/modules/projects/phase-progress";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -31,6 +32,7 @@ import { getDeliveryPhaseLabel } from "@/lib/status-display";
 import { toast } from "sonner";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
+  const { setOverride, removeOverride } = useBreadcrumbStore();
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
@@ -40,6 +42,13 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
+
+  useEffect(() => {
+    if (project?.eventName) {
+      setOverride(projectId, project.eventName);
+    }
+    return () => removeOverride(projectId);
+  }, [projectId, project?.eventName, setOverride, removeOverride]);
 
   const deliveryLabel = useMemo(() => {
     return getDeliveryPhaseLabel(project?.deliveryConfig);

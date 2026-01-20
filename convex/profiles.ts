@@ -47,6 +47,7 @@ export const createProfile = mutation({
       name: args.name,
       phone: args.phone,
       company: args.company,
+      image: user.image || undefined,
       role,
       onboardingComplete: true,
       updatedAt: Date.now(),
@@ -60,7 +61,13 @@ export const createProfile = mutation({
 export const getMyProfile = query({
   args: {},
   handler: async (ctx) => {
-    const user = await authComponent.getAuthUser(ctx);
+    let user;
+    try {
+      user = await authComponent.getAuthUser(ctx);
+    } catch (e) {
+      return null;
+    }
+
     if (!user) {
       return null;
     }
@@ -70,7 +77,12 @@ export const getMyProfile = query({
       .withIndex("by_userId", (q) => q.eq("userId", user._id))
       .first();
 
-    return profile;
+    if (!profile) return null;
+
+    return {
+      ...profile,
+      image: profile.image || user.image, // Fallback to auth provider image
+    };
   },
 });
 

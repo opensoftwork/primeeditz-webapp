@@ -22,6 +22,7 @@ import {
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { UserNav } from "@/components/modules/header/user-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
@@ -162,21 +163,14 @@ export default function DashboardLayout({
 
             {/* Right side - Polished user info */}
             <div className="ml-auto flex items-center gap-3">
-              <div className="hidden md:flex items-center gap-3">
-                <div className="flex flex-col items-end">
-                  <span className="text-sm font-medium leading-none">
-                    {userProfile.name}
-                  </span>
-                  <span className="mt-1 inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium capitalize">
-                    {userProfile.role}
-                  </span>
-                </div>
-                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <span className="text-sm font-semibold">
-                    {userProfile.name.charAt(0).toUpperCase()}
-                  </span>
-                </div>
-              </div>
+              <UserNav 
+                user={{
+                  name: userProfile.name,
+                  email: userProfile.email,
+                  role: userProfile.role,
+                  image: userProfile.image
+                }} 
+              />
             </div>
           </header>
         )}
