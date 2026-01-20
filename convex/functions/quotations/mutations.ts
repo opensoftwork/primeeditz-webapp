@@ -2,6 +2,8 @@ import { v } from "convex/values";
 import { QueryCtx, MutationCtx, mutation } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
 import { adminMutation, clientMutation } from "../../lib/customFunctions";
+import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
+import type { ActionState } from "../../schema";
 
 /**
  * Line item input validator
@@ -222,6 +224,37 @@ export const sendQuotation = adminMutation({
       shareTokenExpiresAt,
       updatedAt: Date.now(),
     });
+
+    // CRITICAL: Transition the linked project to quotation_sent
+    const projectId = quotation.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId as Id<"projects">);
+      if (project && canTransition(project.actionState as ActionState, "quotation_sent")) {
+        const newPhase = getPhaseForState("quotation_sent");
+        const newActor = getActorForState("quotation_sent");
+        
+        await ctx.db.patch(projectId as Id<"projects">, {
+          phase: newPhase,
+          actionState: "quotation_sent",
+          awaitingActorRole: newActor,
+          updatedAt: Date.now(),
+        });
+
+        // Record status history
+        await ctx.db.insert("statusHistory", {
+          projectId: projectId as Id<"projects">,
+          previousPhase: project.phase,
+          newPhase: newPhase,
+          previousActionState: project.actionState,
+          newActionState: "quotation_sent",
+          previousAwaitingActorRole: project.awaitingActorRole,
+          newAwaitingActorRole: newActor,
+          changedBy: ctx.profile._id,
+          changedAt: Date.now(),
+          notes: "Quotation sent to client",
+        });
+      }
+    }
     
     return { shareToken };
   },
@@ -272,6 +305,38 @@ export const approveQuotation = adminMutation({
       approvedAt: Date.now(),
       updatedAt: Date.now(),
     });
+
+    // CRITICAL: Transition the linked project to quotation_approved
+    const projectId = quotation.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId as Id<"projects">);
+      if (project && canTransition(project.actionState as ActionState, "quotation_approved")) {
+        const newPhase = getPhaseForState("quotation_approved");
+        const newActor = getActorForState("quotation_approved");
+        
+        await ctx.db.patch(projectId as Id<"projects">, {
+          phase: newPhase,
+          actionState: "quotation_approved",
+          awaitingActorRole: newActor,
+          updatedAt: Date.now(),
+        });
+
+        // Record status history
+        await ctx.db.insert("statusHistory", {
+          projectId: projectId as Id<"projects">,
+          previousPhase: project.phase,
+          newPhase: newPhase,
+          previousActionState: project.actionState,
+          newActionState: "quotation_approved",
+          previousAwaitingActorRole: project.awaitingActorRole,
+          newAwaitingActorRole: newActor,
+          changedBy: ctx.profile._id,
+          changedAt: Date.now(),
+          notes: "Admin approved the quotation",
+        });
+      }
+    }
+
     return null;
   },
 });
@@ -327,6 +392,37 @@ export const acceptQuotation = clientMutation({
       updatedAt: Date.now(),
     });
 
+    // CRITICAL: Transition the linked project to quotation_approved
+    const projectId = quotation.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId as Id<"projects">);
+      if (project && canTransition(project.actionState as ActionState, "quotation_approved")) {
+        const newPhase = getPhaseForState("quotation_approved");
+        const newActor = getActorForState("quotation_approved");
+        
+        await ctx.db.patch(projectId as Id<"projects">, {
+          phase: newPhase,
+          actionState: "quotation_approved",
+          awaitingActorRole: newActor,
+          updatedAt: Date.now(),
+        });
+
+        // Record status history
+        await ctx.db.insert("statusHistory", {
+          projectId: projectId as Id<"projects">,
+          previousPhase: project.phase,
+          newPhase: newPhase,
+          previousActionState: project.actionState,
+          newActionState: "quotation_approved",
+          previousAwaitingActorRole: project.awaitingActorRole,
+          newAwaitingActorRole: newActor,
+          changedBy: ctx.profile._id,
+          changedAt: Date.now(),
+          notes: "Client approved the quotation",
+        });
+      }
+    }
+
     return { success: true };
   },
 });
@@ -362,6 +458,37 @@ export const requestQuotationChanges = clientMutation({
       clientNotes: args.notes,
       updatedAt: Date.now(),
     });
+
+    // CRITICAL: Transition the linked project back to awaiting_quotation
+    const projectId = quotation.projectId;
+    if (projectId) {
+      const project = await ctx.db.get(projectId as Id<"projects">);
+      if (project && canTransition(project.actionState as ActionState, "awaiting_quotation")) {
+        const newPhase = getPhaseForState("awaiting_quotation");
+        const newActor = getActorForState("awaiting_quotation");
+        
+        await ctx.db.patch(projectId as Id<"projects">, {
+          phase: newPhase,
+          actionState: "awaiting_quotation",
+          awaitingActorRole: newActor,
+          updatedAt: Date.now(),
+        });
+
+        // Record status history
+        await ctx.db.insert("statusHistory", {
+          projectId: projectId as Id<"projects">,
+          previousPhase: project.phase,
+          newPhase: newPhase,
+          previousActionState: project.actionState,
+          newActionState: "awaiting_quotation",
+          previousAwaitingActorRole: project.awaitingActorRole,
+          newAwaitingActorRole: newActor,
+          changedBy: ctx.profile._id,
+          changedAt: Date.now(),
+          notes: `Client requested changes: ${args.reasons.join(", ")}`,
+        });
+      }
+    }
 
     return { success: true };
   },

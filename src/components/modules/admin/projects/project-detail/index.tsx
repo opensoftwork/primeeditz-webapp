@@ -21,6 +21,7 @@ import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
 import { PhaseProgress } from "@/components/modules/projects/phase-progress";
+import { QuotationCard } from "./quotation-card";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -173,6 +174,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               clientName={project.clientName}
               clientEmail={project.clientEmail}
               submittedAt={project._creationTime}
+            />
+            <QuotationCard
+              quotation={project.quotation}
+              projectId={project._id}
             />
             <div id="system-controls-section">
               <SystemControls

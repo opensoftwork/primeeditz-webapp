@@ -187,6 +187,15 @@ export const getAdminProject = adminQuery({
       assignedEmployeeId: project.assignedEmployeeId,
       assignedEmployeeName: assignedEmployee?.name,
       quotationId: quotation?._id,
+      quotation: quotation ? {
+        _id: quotation._id,
+        code: quotation.code,
+        status: quotation.status,
+        total: quotation.total,
+        sentAt: quotation.sentAt,
+        viewedAt: quotation.viewedAt,
+        approvedAt: quotation.approvedAt,
+      } : undefined,
       statusHistory: enrichedHistory,
       uploadEligibility,
     };

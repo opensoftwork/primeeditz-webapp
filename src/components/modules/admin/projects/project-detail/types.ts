@@ -25,6 +25,15 @@ export interface AdminProjectDetail {
   assignedEmployeeId?: Id<"profiles">;
   assignedEmployeeName?: string;
   quotationId?: Id<"quotations">;
+  quotation?: {
+    _id: Id<"quotations">;
+    code: string;
+    status: string;
+    total: number;
+    sentAt?: number;
+    viewedAt?: number;
+    approvedAt?: number;
+  };
   projectTypeName: string;
   eventName?: string;
   eventDate?: number;
@@ -48,5 +57,6 @@ export interface AdminProjectDetail {
     requiresSignoff: boolean;
   };
 }
+
 
 

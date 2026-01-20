@@ -57,6 +57,7 @@ import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
 import type * as profiles from "../profiles.js";
 import type * as seed from "../seed.js";
+import type * as seeds_devUtils from "../seeds/devUtils.js";
 import type * as seeds_folderTemplates from "../seeds/folderTemplates.js";
 import type * as seeds_projectStructure from "../seeds/projectStructure.js";
 import type * as seeds_quotationLibraryItems from "../seeds/quotationLibraryItems.js";
@@ -119,6 +120,7 @@ declare const fullApi: ApiFromModules<{
   migrations: typeof migrations;
   profiles: typeof profiles;
   seed: typeof seed;
+  "seeds/devUtils": typeof seeds_devUtils;
   "seeds/folderTemplates": typeof seeds_folderTemplates;
   "seeds/projectStructure": typeof seeds_projectStructure;
   "seeds/quotationLibraryItems": typeof seeds_quotationLibraryItems;
