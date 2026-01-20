@@ -175,6 +175,7 @@ export const getMyProjectsWithType = clientQuery({
           ...project,
           projectTypeName: projectType?.name ?? 'Unknown',
           projectTypeCategory: categoryName,
+          createdAt: project._creationTime,
         }
       })
     )

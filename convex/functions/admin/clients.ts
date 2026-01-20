@@ -108,9 +108,13 @@ export const getClientsWithProjects = adminQuery({
 export const getAdminProjectsSimple = adminQuery({
   args: { clientId: v.optional(v.id("profiles")) },
   handler: async (ctx, args) => {
-    const projects = args.clientId
+    let projects = args.clientId
       ? await ctx.db.query("projects").withIndex("by_clientId", (q) => q.eq("clientId", args.clientId!)).collect()
       : await ctx.db.query("projects").order("desc").collect();
+
+    // Filter out projects that already have an approved quotation or are past the setup/quotation phase
+    const allowedStates = ["draft", "awaiting_quotation", "quotation_sent", "quotation_rejected"];
+    projects = projects.filter(p => allowedStates.includes(p.actionState) && !p.deletedAt);
 
     return Promise.all(
       projects.map(async (p) => {

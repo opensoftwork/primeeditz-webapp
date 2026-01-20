@@ -70,37 +70,37 @@ export function QuotationActionButtons({
     );
   }
 
-  if (status === "changes_requested") {
-    return (
-      <div
-        className={cn(
-          "p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group",
-          className,
-        )}
-      >
-        <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity">
-          <MessageSquare className="h-32 w-32 rotate-12" />
-        </div>
-        <div className="flex items-center gap-3 relative z-10">
-          <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-            <MessageSquare className="h-5 w-5 text-indigo-400" />
-          </div>
-          <div className="flex flex-col">
-            <h3 className="text-sm font-black text-white uppercase tracking-widest">
-              Changes Requested
-            </h3>
-            <p className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-[0.2em]">
-              Waiting for studio to revise the proposal
-            </p>
-          </div>
-        </div>
-        <p className="text-[10px] font-medium text-white/30 leading-relaxed italic relative z-10">
-          The studio has been notified of your concerns. You will receive an
-          update once the proposal is revised.
-        </p>
-      </div>
-    );
-  }
+  // if (status === "changes_requested") {
+  //   return (
+  //     <div
+  //       className={cn(
+  //         "p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 space-y-4 shadow-2xl shadow-indigo-500/5 relative overflow-hidden group",
+  //         className,
+  //       )}
+  //     >
+  //       <div className="absolute top-0 right-0 p-8 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+  //         <MessageSquare className="h-32 w-32 rotate-12" />
+  //       </div>
+  //       <div className="flex items-center gap-3 relative z-10">
+  //         <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+  //           <MessageSquare className="h-5 w-5 text-indigo-400" />
+  //         </div>
+  //         <div className="flex flex-col">
+  //           <h3 className="text-sm font-black text-white uppercase tracking-widest">
+  //             Changes Requested
+  //           </h3>
+  //           <p className="text-[10px] font-bold text-indigo-400/60 uppercase tracking-[0.2em]">
+  //             Waiting for studio to revise the proposal
+  //           </p>
+  //         </div>
+  //       </div>
+  //       <p className="text-[10px] font-medium text-white/30 leading-relaxed italic relative z-10">
+  //         The studio has been notified of your concerns. You will receive an
+  //         update once the proposal is revised.
+  //       </p>
+  //     </div>
+  //   );
+  // }
 
   if (status === "rejected") {
     return (

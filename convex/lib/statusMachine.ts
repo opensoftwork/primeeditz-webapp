@@ -10,7 +10,7 @@ import { ActionState, ProjectPhase, Role } from "../schema";
 // Transition map defining allowed target states for each current state
 const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   // Setup Phase
-  draft: ["awaiting_quotation", "cancelled"],
+  draft: ["awaiting_quotation", "quotation_sent", "quotation_approved", "cancelled"],
   awaiting_quotation: ["quotation_sent", "cancelled"],
   quotation_sent: ["quotation_approved", "quotation_rejected", "awaiting_quotation", "cancelled"],
   quotation_approved: ["storage_allocated", "cancelled"],

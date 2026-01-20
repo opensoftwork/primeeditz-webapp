@@ -56,8 +56,8 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
   },
   quotation_sent: {
     label: "Quote Sent",
-    color: "text-amber-400",
-    bgColor: "bg-amber-500/10 border-amber-500/20",
+    color: "text-blue-400",
+    bgColor: "bg-blue-500/10 border-blue-500/20",
   },
   quotation_approved: {
     label: "Quote Approved",
@@ -206,9 +206,9 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     isActionNeeded: false,
   },
   quotation_sent: {
-    label: "Quote Ready",
+    label: "Quotation Sent",
     description: "Review and approve your quotation",
-    color: "text-amber-400",
+    color: "text-blue-400",
     isActionNeeded: true,
     cta: { label: "View Quotation", href: (id) => `/projects/${id}/quotation` },
   },

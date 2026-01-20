@@ -29,7 +29,9 @@ export function ClientStatusBadge({
           <div
             className={cn(
               "w-1.5 h-1.5 rounded-full",
-              status === "awaiting_quotation" || status === "awaiting_review"
+              status === "awaiting_quotation" || 
+              status === "quotation_sent" || 
+              status === "awaiting_review"
                 ? "animate-pulse bg-amber-500"
                 : "bg-current",
             )}
