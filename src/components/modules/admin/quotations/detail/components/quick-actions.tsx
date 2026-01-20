@@ -5,9 +5,36 @@ import { Send, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DownloadQuotation } from "../../preview";
 
+interface QuotationLineItem {
+  id: string;
+  description: string;
+  rate: number;
+  quantity: number;
+  unit: string;
+  sectionId: string;
+  projectId?: string;
+  subItems?: {
+    description: string;
+    rate: number;
+    quantity: number;
+    unit: string;
+  }[];
+}
+
 interface QuickActionsProps {
-  quotation: any;
-  sections: any[];
+  quotation: {
+    status: string;
+    code: string;
+    version: number;
+    lineItems: QuotationLineItem[];
+    taxRate?: number;
+    discountAmount?: number;
+    terms?: string;
+    validUntil?: number;
+    _creationTime: number;
+  };
+  sections: { _id: string; name: string; color?: string }[];
+  projects?: { _id: string; code: string; eventName?: string; projectTypeName?: string }[];
   onSend: () => void;
   onDuplicate: () => void;
 }
@@ -15,6 +42,7 @@ interface QuickActionsProps {
 export function QuickActions({
   quotation,
   sections,
+  projects = [],
   onSend,
   onDuplicate,
 }: QuickActionsProps) {
@@ -42,6 +70,7 @@ export function QuickActions({
         <DownloadQuotation
           quotation={quotation}
           sections={sections}
+          projects={projects}
           variant="outline"
           label="Download Quotation"
           icon={<Download className="h-4 w-4 mr-2 text-white/40" />}

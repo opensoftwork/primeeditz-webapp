@@ -68,7 +68,7 @@ export function QuotationPreviewClient({
     );
   }
 
-  const { quotation, sections } = data;
+  const { quotation, sections, projects = [] } = data;
 
   return (
     <QuotationPreview
@@ -78,7 +78,7 @@ export function QuotationPreviewClient({
         status: quotation.status,
         clientId: quotation.clientId,
         projectIds: quotation.projectIds,
-        lineItems: quotation.lineItems as any,
+        lineItems: quotation.lineItems,
         terms: quotation.terms,
         validUntil: quotation.validUntil,
         taxRate: quotation.taxRate,
@@ -86,6 +86,7 @@ export function QuotationPreviewClient({
         _creationTime: quotation._creationTime,
       }}
       sections={sections}
+      projects={projects}
       onBack={() => router.push(`/quotations/${quotationId}`)}
     />
   );

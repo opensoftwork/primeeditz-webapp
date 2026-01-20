@@ -75,7 +75,7 @@ export function ClientQuotationDetail() {
     );
   }
 
-  const { quotation, sections } = data;
+  const { quotation, sections, projects = [] } = data;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -85,17 +85,42 @@ export function ClientQuotationDetail() {
     }).format(amount);
   };
 
-  const groupedItems = sections.map((section: any) => ({
+  // Group line items by project, then by section (new project-based grouping)
+  const groupedByProject = projects.map((project: {
+    _id: string;
+    code: string;
+    eventName?: string;
+    projectTypeName?: string;
+  }) => {
+    const projectItems = quotation.lineItems.filter(
+      (item: { projectId?: string }) => item.projectId === project._id
+    );
+    const sectionGroups = sections
+      .map((section: { _id: string; name: string; color?: string }) => ({
+        section,
+        items: projectItems.filter(
+          (item: { sectionId?: string }) => item.sectionId === section._id
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+    return {
+      project,
+      sectionGroups,
+    };
+  }).filter((pg) => pg.sectionGroups.length > 0);
+
+  // Fallback: group by section only (for backward compatibility)
+  const groupedBySection = sections.map((section: { _id: string; name: string; color?: string }) => ({
     section,
     items: quotation.lineItems.filter(
-      (item: any) => item.sectionId === section._id,
+      (item: { sectionId?: string }) => item.sectionId === section._id,
     ),
   }));
 
   return (
     <div className="min-h-screen p-6 md:p-12 space-y-12 w-full">
       <QuotationDetailHeader
-        quotation={quotation as any}
+        quotation={quotation}
         sections={sections}
         onPrint={() => window.print()}
       />
@@ -103,7 +128,9 @@ export function ClientQuotationDetail() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-12">
           <QuotationLineItemsView
-            groupedItems={groupedItems}
+            groupedByProject={groupedByProject}
+            groupedBySection={groupedBySection}
+            projects={projects}
             formatCurrency={formatCurrency}
           />
           <QuotationTermsView terms={quotation.terms} />

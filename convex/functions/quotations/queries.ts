@@ -170,12 +170,29 @@ export const getQuotationWithSections = adminQuery({
       clientName = profile?.name;
     }
 
-    // Get project name
+    // Get project name(s)
     let projectName = undefined;
     if (quotation.projectId) {
       const project = await ctx.db.get(quotation.projectId as Id<"projects">);
       projectName = project?.eventName || project?.code;
     }
+
+    // Get all projects linked to this quotation (for project-based grouping)
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const projectIds = quotation.projectIds || (quotation.projectId ? [quotation.projectId] : []);
+    const projects = await Promise.all(
+      projectIds.map(async (id) => {
+        const project = await ctx.db.get(id as Id<"projects">);
+        if (!project) return null;
+        const projectType = projectTypes.find((pt) => pt._id === project.projectTypeId);
+        return {
+          _id: project._id,
+          code: project.code,
+          eventName: project.eventName,
+          projectTypeName: projectType?.name || "Unknown",
+        };
+      })
+    );
     
     return {
       quotation: {
@@ -184,6 +201,7 @@ export const getQuotationWithSections = adminQuery({
         projectName,
       },
       sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+      projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
 });
@@ -410,9 +428,27 @@ export const getMyQuotationDetail = clientQuery({
       sectionIds.map((id) => id ? ctx.db.get(id) : null)
     );
 
+    // Get all projects linked to this quotation (for project-based grouping)
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const projectIds = quotation.projectIds || (quotation.projectId ? [quotation.projectId] : []);
+    const projects = await Promise.all(
+      projectIds.map(async (id) => {
+        const project = await ctx.db.get(id as Id<"projects">);
+        if (!project) return null;
+        const projectType = projectTypes.find((pt) => pt._id === project.projectTypeId);
+        return {
+          _id: project._id,
+          code: project.code,
+          eventName: project.eventName,
+          projectTypeName: projectType?.name || "Unknown",
+        };
+      })
+    );
+
     return {
       quotation,
       sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+      projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
 });

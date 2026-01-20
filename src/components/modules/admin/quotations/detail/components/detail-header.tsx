@@ -18,9 +18,31 @@ import { useRouter } from "next/navigation";
 import { DownloadQuotation } from "../../preview";
 
 interface DetailHeaderProps {
-  quotation: any;
-  sections: any[];
-  status: any;
+  quotation: {
+    code: string;
+    version: number;
+    status: string;
+    _creationTime: number;
+    lineItems: {
+      id: string;
+      description: string;
+      rate: number;
+      quantity: number;
+      unit: string;
+      sectionId?: string;
+      projectId?: string;
+    }[];
+    [key: string]: unknown;
+  };
+  sections: { _id: string; name: string; color?: string }[];
+  projects?: { _id: string; code: string; eventName?: string; projectTypeName?: string }[];
+  status: {
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    color: string;
+    bgColor: string;
+    borderColor: string;
+  };
   quotationId: string;
   onSend: () => void;
 }
@@ -28,6 +50,7 @@ interface DetailHeaderProps {
 export function DetailHeader({
   quotation,
   sections,
+  projects = [],
   status,
   quotationId,
   onSend,
@@ -116,6 +139,7 @@ export function DetailHeader({
         <DownloadQuotation
           quotation={quotation}
           sections={sections}
+          projects={projects}
           variant="default"
           size="sm"
           className="h-10 px-4 rounded-xl font-bold text-xs"

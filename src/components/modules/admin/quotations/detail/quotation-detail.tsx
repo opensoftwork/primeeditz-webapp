@@ -146,7 +146,7 @@ export function QuotationDetail({
     );
   }
 
-  const { quotation, sections } = data;
+  const { quotation, sections, projects = [] } = data;
   const status = statusConfig[quotation.status] || statusConfig.draft;
 
   // Calculate totals
@@ -165,8 +165,27 @@ export function QuotationDetail({
   const taxAmount = (subtotal - discountAmount) * taxRate;
   const grandTotal = subtotal - discountAmount + taxAmount;
 
-  // Group line items by section
-  const groupedItems = sections.map((section: any) => ({
+  // Group line items by project, then by section (new project-based grouping)
+  const groupedByProject = projects.map((project: any) => {
+    const projectItems = quotation.lineItems.filter(
+      (item: any) => item.projectId === project._id
+    );
+    const sectionGroups = sections
+      .map((section: any) => ({
+        section,
+        items: projectItems.filter(
+          (item: any) => item.sectionId === section._id
+        ),
+      }))
+      .filter((g: any) => g.items.length > 0);
+    return {
+      project,
+      sectionGroups,
+    };
+  }).filter((pg: any) => pg.sectionGroups.length > 0);
+
+  // Fallback: group by section only (for backward compatibility)
+  const groupedBySection = sections.map((section: any) => ({
     section,
     items: quotation.lineItems.filter(
       (item: any) => item.sectionId === section._id,
@@ -195,6 +214,7 @@ export function QuotationDetail({
       <DetailHeader
         quotation={quotation}
         sections={sections}
+        projects={projects}
         status={status}
         quotationId={quotationId}
         onSend={() => setIsSendDrawerOpen(true)}
@@ -204,7 +224,9 @@ export function QuotationDetail({
         <div className="lg:col-span-2 space-y-6">
           <ClientProjectInfo quotation={quotation} />
           <LineItemsSection
-            groupedItems={groupedItems}
+            groupedByProject={groupedByProject}
+            groupedBySection={groupedBySection}
+            projects={projects}
             formatCurrency={formatCurrency}
           />
           <TermsConditions terms={quotation.terms} />
@@ -223,6 +245,7 @@ export function QuotationDetail({
           <QuickActions 
             quotation={quotation}
             sections={sections}
+            projects={projects}
             onSend={() => setIsSendDrawerOpen(true)}
             onDuplicate={handleDuplicate}
           />

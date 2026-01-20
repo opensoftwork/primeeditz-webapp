@@ -83,17 +83,18 @@ export function PublicQuotationView() {
     }).format(amount);
   };
 
-  const groupedItems = sections.map((section: any) => ({
+  // Group by section (public view doesn't have project data)
+  const groupedBySection = sections.map((section: { _id: string; name: string; color?: string }) => ({
     section,
     items: quotation.lineItems.filter(
-      (item: any) => item.sectionId === section._id,
+      (item: { sectionId?: string }) => item.sectionId === section._id,
     ),
   }));
 
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-12">
       <QuotationDetailHeader
-        quotation={quotation as any}
+        quotation={quotation}
         sections={sections}
         onPrint={() => window.print()}
       />
@@ -146,7 +147,7 @@ export function PublicQuotationView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-12">
           <QuotationLineItemsView
-            groupedItems={groupedItems}
+            groupedBySection={groupedBySection}
             formatCurrency={formatCurrency}
           />
           <QuotationTermsView terms={quotation.terms} />

@@ -158,10 +158,10 @@ export interface QuotationBuilderState {
 export type Client = Doc<"profiles">;
 
 export interface Project {
-  _id: Id<"projects">;
+  _id: Id<"projects"> | string;
   code: string;
   eventName?: string;
-  projectTypeName: string;
+  projectTypeName?: string;
 }
 
 export type Template = Doc<"quotationTemplates">;
