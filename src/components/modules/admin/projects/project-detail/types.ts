@@ -22,6 +22,9 @@ export interface AdminProjectDetail {
   clientEmail?: string;
   awaitingActorRole?: string;
   awaitingActorId?: Id<"profiles">;
+  assignedEmployeeId?: Id<"profiles">;
+  assignedEmployeeName?: string;
+  quotationId?: Id<"quotations">;
   projectTypeName: string;
   eventName?: string;
   eventDate?: number;
@@ -45,4 +48,5 @@ export interface AdminProjectDetail {
     requiresSignoff: boolean;
   };
 }
+
 

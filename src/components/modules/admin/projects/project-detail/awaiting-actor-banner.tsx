@@ -9,13 +9,17 @@ interface AwaitingActorBannerProps {
 }
 
 export function AwaitingActorBanner({ project }: AwaitingActorBannerProps) {
-  const { awaitingActorRole, actionState } = project;
+  const { awaitingActorRole, actionState, assignedEmployeeName } = project;
 
   if (!awaitingActorRole || awaitingActorRole === "admin") {
     return null;
   }
 
-  const config = getAwaitingConfig(awaitingActorRole, actionState);
+  const config = getAwaitingConfig(
+    awaitingActorRole,
+    actionState,
+    assignedEmployeeName,
+  );
 
   return (
     <motion.div
@@ -27,10 +31,17 @@ export function AwaitingActorBanner({ project }: AwaitingActorBannerProps) {
         <div className="p-2 rounded-xl bg-amber-500/10 mt-0.5">
           <config.icon className="h-5 w-5 text-amber-500" />
         </div>
-        <div>
-          <h4 className="text-xs font-black uppercase tracking-tight text-amber-500">
-            {config.title}
-          </h4>
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <h4 className="text-xs font-black uppercase tracking-tight text-amber-500">
+              {config.title}
+            </h4>
+            {config.actorName && (
+              <span className="text-[10px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md bg-amber-500/10 text-amber-400">
+                {config.actorName}
+              </span>
+            )}
+          </div>
           <p className="text-xs font-bold text-white/50 mt-1 uppercase tracking-widest leading-relaxed">
             {config.message}
           </p>
@@ -40,7 +51,7 @@ export function AwaitingActorBanner({ project }: AwaitingActorBannerProps) {
   );
 }
 
-function getAwaitingConfig(role: string, state: string) {
+function getAwaitingConfig(role: string, state: string, employeeName?: string) {
   if (role === "client") {
     const messages: Record<string, { title: string; message: string }> = {
       quotation_sent: {
@@ -66,6 +77,7 @@ function getAwaitingConfig(role: string, state: string) {
     };
     return {
       icon: User,
+      actorName: null,
       ...(messages[state] || {
         title: "Waiting for Client",
         message: "Client action is required to move this project forward.",
@@ -76,21 +88,27 @@ function getAwaitingConfig(role: string, state: string) {
   if (role === "employee") {
     const messages: Record<string, { title: string; message: string }> = {
       assigned: {
-        title: "Employee Action",
-        message:
-          "An employee has been assigned. They are expected to start work soon.",
+        title: "Employee Assigned",
+        message: employeeName
+          ? `${employeeName} has been assigned and is expected to start work soon.`
+          : "An employee has been assigned. They are expected to start work soon.",
       },
       work_in_progress: {
         title: "Work In Progress",
-        message: "Employee is currently active on deliverables.",
+        message: employeeName
+          ? `${employeeName} is currently active on deliverables.`
+          : "Employee is currently active on deliverables.",
       },
       revisions_requested: {
         title: "Revisions In Progress",
-        message: "Employee is working on the requested revisions.",
+        message: employeeName
+          ? `${employeeName} is working on the requested revisions.`
+          : "Employee is working on the requested revisions.",
       },
     };
     return {
       icon: UserCog,
+      actorName: employeeName || null,
       ...(messages[state] || {
         title: "Employee Active",
         message: "An employee is currently handling this phase.",
@@ -98,5 +116,10 @@ function getAwaitingConfig(role: string, state: string) {
     };
   }
 
-  return { icon: Clock, title: "Pending", message: "Waiting for next action." };
+  return {
+    icon: Clock,
+    title: "Pending",
+    message: "Waiting for next action.",
+    actorName: null,
+  };
 }

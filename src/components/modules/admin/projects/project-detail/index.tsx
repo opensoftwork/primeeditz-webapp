@@ -20,6 +20,7 @@ import { ProjectDetailSkeleton } from "./skeleton";
 import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
+import { PhaseProgress } from "@/components/modules/projects/phase-progress";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -27,6 +28,7 @@ interface ProjectDetailProps {
 
 import { AdminProjectDetail } from "./types";
 import { getDeliveryPhaseLabel } from "@/lib/status-display";
+import { toast } from "sonner";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
@@ -87,7 +89,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   }, [project?.referenceFiles, signedUrls]);
 
   const handleFolderSetupSuccess = useCallback(() => {
-    // The queries will automatically refetch
+    toast.success("Project folders configured successfully!");
   }, []);
 
   const handleViewFolders = useCallback(() => {
@@ -134,6 +136,11 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         deliveryLabel={deliveryLabel}
       />
 
+      {/* Phase Progress Bar */}
+      <div className="max-w-[1600px] mx-auto">
+        <PhaseProgress currentPhase={project.phase} />
+      </div>
+
       <div className="max-w-[1600px] mx-auto">
         <AdminActionBanner
           project={project}
@@ -167,16 +174,18 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               clientEmail={project.clientEmail}
               submittedAt={project._creationTime}
             />
-            <SystemControls
-              storageAllocated={project.storageAllocated}
-              actionState={project.actionState}
-              awaitingActorRole={project.awaitingActorRole}
-              canSetupFolders={folderSetupStatus?.canSetup ?? false}
-              hasFolders={folderSetupStatus?.hasFolders ?? false}
-              folderSetupReason={folderSetupStatus?.reason}
-              onSetupFolders={() => setIsFolderSetupOpen(true)}
-              onViewFolders={handleViewFolders}
-            />
+            <div id="system-controls-section">
+              <SystemControls
+                storageAllocated={project.storageAllocated}
+                actionState={project.actionState}
+                awaitingActorRole={project.awaitingActorRole}
+                canSetupFolders={folderSetupStatus?.canSetup ?? false}
+                hasFolders={folderSetupStatus?.hasFolders ?? false}
+                folderSetupReason={folderSetupStatus?.reason}
+                onSetupFolders={() => setIsFolderSetupOpen(true)}
+                onViewFolders={handleViewFolders}
+              />
+            </div>
           </div>
         </div>
       </div>

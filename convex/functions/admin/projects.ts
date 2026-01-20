@@ -149,13 +149,21 @@ export const getAdminProject = adminQuery({
     const project = await ctx.db.get(args.projectId);
     if (!project) return null;
 
-    const [client, projectType, history] = await Promise.all([
+    const [client, projectType, history, quotation, assignedEmployee] = await Promise.all([
       project.clientId ? ctx.db.get(project.clientId as Id<"profiles">) : null,
       ctx.db.get(project.projectTypeId),
       ctx.db.query("statusHistory")
         .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
         .order("desc")
-        .collect()
+        .collect(),
+      // Find the quotation associated with this project
+      ctx.db.query("quotations")
+        .filter((q) => q.eq(q.field("projectId"), args.projectId))
+        .first(),
+      // Get assigned employee if there is one
+      project.assignedEmployeeId 
+        ? ctx.db.get(project.assignedEmployeeId as Id<"profiles">) 
+        : null,
     ]);
 
     const enrichedHistory = await Promise.all(
@@ -176,11 +184,15 @@ export const getAdminProject = adminQuery({
       clientEmail: client?.email ?? "Unknown Email",
       projectTypeName: projectType?.name ?? "Unknown",
       deliveryConfig: projectType?.deliveryConfig,
+      assignedEmployeeId: project.assignedEmployeeId,
+      assignedEmployeeName: assignedEmployee?.name,
+      quotationId: quotation?._id,
       statusHistory: enrichedHistory,
       uploadEligibility,
     };
   },
 });
+
 
 /**
  * @deprecated Use getAdminProjectsPaginated

@@ -1,6 +1,13 @@
 "use client";
 
-import { Shield, Settings, Users, FolderTree, Eye } from "lucide-react";
+import {
+  Shield,
+  Settings,
+  Users,
+  FolderTree,
+  Eye,
+  HardDrive,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 interface SystemControlsProps {
@@ -12,6 +19,12 @@ interface SystemControlsProps {
   folderSetupReason?: string | null;
   onSetupFolders?: () => void;
   onViewFolders?: () => void;
+}
+
+function formatBytes(bytes: number): string {
+  if (bytes === 0) return "0 GB";
+  const gb = bytes / (1024 * 1024 * 1024);
+  return `${gb.toFixed(0)} GB`;
 }
 
 export function SystemControls({
@@ -28,7 +41,6 @@ export function SystemControls({
   // Determine folder button state
   const showViewFolders = hasFolders;
   const showSetupFolders = !hasFolders && canSetupFolders && isAdminActive;
-  const disableSetupButton = !canSetupFolders && !hasFolders;
 
   return (
     <div className="p-8 rounded-[2.5rem] bg-zinc-900/50 border border-white/5 space-y-8">
@@ -40,6 +52,23 @@ export function SystemControls({
           System Control
         </h3>
       </div>
+
+      {/* Storage Allocation Status */}
+      {storageAllocated && storageAllocated > 0 && (
+        <div className="p-4 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <HardDrive className="h-4 w-4 text-emerald-500" />
+              <span className="text-[10px] font-black uppercase tracking-widest text-emerald-500">
+                Storage Allocated
+              </span>
+            </div>
+            <span className="text-sm font-black text-emerald-400">
+              {formatBytes(storageAllocated)}
+            </span>
+          </div>
+        </div>
+      )}
 
       <div className="space-y-4">
         {showViewFolders ? (
@@ -99,7 +128,7 @@ export function SystemControls({
           <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-widest text-center leading-relaxed">
             SYSTEM LOCKED
             <br />
-            WAITING FOR {awaitingActorRole}
+            WAITING FOR {awaitingActorRole?.toUpperCase()}
           </p>
         </div>
       )}
