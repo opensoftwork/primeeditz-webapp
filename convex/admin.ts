@@ -5,9 +5,9 @@
  * in seeds/admin/ to maintain backwards compatibility while organizing the codebase.
  */
 
-export * from "./seeds/admin/dashboard";
-export * from "./seeds/admin/projects";
-export * from "./seeds/admin/projectTypes";
-export * from "./seeds/admin/clients";
-export * from "./seeds/admin/quotations";
-export * from "./seeds/admin/maintenance";
+export * from "./functions/admin/dashboard";
+export * from "./functions/admin/projects";
+export * from "./functions/admin/projectTypes";
+export * from "./functions/admin/clients";
+export * from "./functions/admin/quotations";
+export * from "./functions/admin/maintenance";

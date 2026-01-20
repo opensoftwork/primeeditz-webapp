@@ -8,11 +8,16 @@
 import { v } from 'convex/values'
 import { paginationOptsValidator } from 'convex/server'
 import { query } from '../../_generated/server'
-import { clientQuery, adminQuery } from '../../lib/customFunctions'
+import {
+  clientQuery,
+  adminQuery,
+  staffQuery,
+  authenticatedWithProfileQuery,
+} from '../../lib/customFunctions'
 import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
 import { checkUploadEligibility } from '../../lib/uploadGate'
 import type { Doc } from '../../_generated/dataModel'
-import { projectStatusValidator } from '../../schema'
+import { projectPhaseValidator, projectActionStateValidator } from '../../schema'
 
 // ============================================================================
 // Client Queries
@@ -28,7 +33,7 @@ export const getMyProjects = clientQuery({
     const projects = await ctx.db
       .query('projects')
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.neq(q.field('status'), 'draft'))
+      .filter((q) => q.neq(q.field('actionState'), 'draft'))
       .order('desc')
       .collect()
 
@@ -57,7 +62,7 @@ export const getDraft = clientQuery({
     }
 
     // Only return if it's a draft
-    if (project.status !== 'draft') {
+    if (project.actionState !== 'draft') {
       throw new Error('Project is not a draft')
     }
 
@@ -75,7 +80,7 @@ export const getMyActiveDraft = clientQuery({
     const draft = await ctx.db
       .query('projects')
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.eq(q.field('status'), 'draft'))
+      .filter((q) => q.eq(q.field('actionState'), 'draft'))
       .first()
 
     return draft
@@ -123,9 +128,9 @@ export const getProject = clientQuery({
 
 /**
  * Internal query for upload eligibility check.
- * Used by storage actions - no role restriction.
+ * Used by storage actions to verify permissions with user context.
  */
-export const getProjectUploadEligibility = query({
+export const getProjectUploadEligibility = authenticatedWithProfileQuery({
   args: {
     projectId: v.id('projects'),
   },
@@ -152,7 +157,7 @@ export const getMyProjectsWithType = clientQuery({
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
       .filter((q) => 
         q.and(
-          q.neq(q.field('status'), 'draft'),
+          q.neq(q.field('actionState'), 'draft'),
           q.eq(q.field('deletedAt'), undefined)
         )
       )
@@ -188,7 +193,8 @@ export const getMyProjectsWithType = clientQuery({
 export const getClientProjectsPaginated = clientQuery({
   args: {
     paginationOpts: paginationOptsValidator,
-    status: v.optional(projectStatusValidator),
+    phase: v.optional(projectPhaseValidator),
+    actionState: v.optional(projectActionStateValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
   },
   handler: async (ctx, args) => {
@@ -198,12 +204,16 @@ export const getClientProjectsPaginated = clientQuery({
       .query("projects")
       .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
       .filter((q) => q.and(
-        q.neq(q.field("status"), "draft"),
+        q.neq(q.field("actionState"), "draft"),
         q.eq(q.field("deletedAt"), undefined)
       ));
 
-    if (args.status) {
-      query = query.filter((q) => q.eq(q.field("status"), args.status!));
+    if (args.phase) {
+      query = query.filter((q) => q.eq(q.field("phase"), args.phase!));
+    }
+    
+    if (args.actionState) {
+      query = query.filter((q) => q.eq(q.field("actionState"), args.actionState!));
     }
 
     const results = await query.order("desc").paginate(args.paginationOpts);
@@ -225,7 +235,9 @@ export const getClientProjectsPaginated = clientQuery({
         return {
           _id: project._id,
           code: project.code,
-          status: project.status,
+          phase: project.phase,
+          actionState: project.actionState,
+          awaitingActorRole: project.awaitingActorRole,
           projectTypeName: projectType?.name ?? "Unknown",
           eventName: project.eventName,
           eventDate: project.eventDate,
@@ -279,7 +291,7 @@ export const getAdminActiveDraft = adminQuery({
       .query('projects')
       .filter((q) =>
         q.and(
-          q.eq(q.field('status'), 'draft'),
+          q.eq(q.field('actionState'), 'draft'),
           q.eq(q.field('source'), 'admin_init')
         )
       )
@@ -308,29 +320,21 @@ export const getAdminActiveDraft = adminQuery({
  */
 export const getAllProjects = adminQuery({
   args: {
-    status: v.optional(
-      v.union(
-        v.literal('draft'),
-        v.literal('pending_review'),
-        v.literal('active'),
-        v.literal('in_progress'),
-        v.literal('completed'),
-        v.literal('archived')
-      )
-    ),
+    phase: v.optional(projectPhaseValidator),
+    actionState: v.optional(projectActionStateValidator),
   },
   handler: async (ctx, args) => {
-    // Build query based on filter
-    const projects = args.status
-      ? await ctx.db
-        .query('projects')
-        .withIndex('by_status', (q) => q.eq('status', args.status!))
-        .order('desc')
-        .collect()
-      : await ctx.db
-        .query('projects')
-        .order('desc')
-        .collect()
+    let query;
+
+    if (args.phase) {
+      query = ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', args.phase!));
+    } else if (args.actionState) {
+      query = ctx.db.query('projects').withIndex('by_actionState', (q) => q.eq('actionState', args.actionState!));
+    } else {
+      query = ctx.db.query('projects');
+    }
+
+    const projects = await query.order('desc').collect();
 
     // Enrich with client and project type info
     const enriched = await Promise.all(
@@ -359,7 +363,7 @@ export const getPendingProjects = adminQuery({
   handler: async (ctx) => {
     const projects = await ctx.db
       .query('projects')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_review'))
+      .withIndex('by_actionState', (q) => q.eq('actionState', 'awaiting_quotation'))
       .order('desc')
       .collect()
 

@@ -8,12 +8,23 @@ import { v } from 'convex/values'
 import { mutation } from '../../_generated/server'
 import { authComponent } from '../../auth'
 import {
+  projectPhaseValidator,
+  projectActionStateValidator,
+  roleValidator,
+} from '../../schema'
+import {
   clientMutation,
   adminMutation,
   authenticatedMutation,
+  authenticatedWithProfileMutation,
   staffMutation,
 } from '../../lib/customFunctions'
 import { now } from '../../lib/helpers'
+import {
+  canTransition,
+  getPhaseForState,
+  getActorForState,
+} from '../../lib/statusMachine'
 
 // ============================================================================
 // Project Code Generation
@@ -99,7 +110,7 @@ export const createDraft = mutation({
         .query('projects')
         .filter((q) =>
           q.and(
-            q.eq(q.field('status'), 'draft'),
+            q.eq(q.field('actionState'), 'draft'),
             q.eq(q.field('source'), 'admin_init')
           )
         )
@@ -112,7 +123,7 @@ export const createDraft = mutation({
       const existingClientDraft = await ctx.db
         .query('projects')
         .withIndex('by_clientId', (q) => q.eq('clientId', profile._id))
-        .filter((q) => q.eq(q.field('status'), 'draft'))
+        .filter((q) => q.eq(q.field('actionState'), 'draft'))
         .first()
 
       if (existingClientDraft) {
@@ -152,7 +163,9 @@ export const createDraft = mutation({
       projectTypeId,
       clientId,
       source,
-      status: 'draft',
+      phase: 'setup',
+      actionState: 'draft',
+      awaitingActorRole: 'client',
       lastStep: 1,
       storageUsed: 0,
       updatedAt: now(),
@@ -229,7 +242,7 @@ export const updateDraft = authenticatedMutation({
     }
 
     // Only allow updates to drafts
-    if (project.status !== 'draft') {
+    if (project.actionState !== 'draft') {
       throw new Error('Cannot update a submitted project')
     }
 
@@ -283,7 +296,7 @@ export const submitProject = authenticatedMutation({
     }
 
     // Only drafts can be submitted
-    if (project.status !== 'draft') {
+    if (project.actionState !== 'draft') {
       throw new Error('Project already submitted')
     }
 
@@ -293,17 +306,23 @@ export const submitProject = authenticatedMutation({
     }
 
     await ctx.db.patch(args.projectId, {
-      status: 'pending_review',
+      actionState: 'awaiting_quotation',
+      awaitingActorRole: 'admin',
       updatedAt: now(),
     })
 
     // Record status change
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus: 'draft',
-      newStatus: 'pending_review',
+      previousPhase: 'setup',
+      newPhase: 'setup',
+      previousActionState: 'draft',
+      newActionState: 'awaiting_quotation',
+      previousAwaitingActorRole: 'client',
+      newAwaitingActorRole: 'admin',
       changedBy: profile._id,
       changedAt: now(),
+      notes: 'Project request submitted',
     })
 
     return { success: true }
@@ -340,7 +359,7 @@ export const deleteDraft = authenticatedMutation({
     }
 
     // Only drafts can be deleted
-    if (project.status !== 'draft') {
+    if (project.actionState !== 'draft') {
       throw new Error('Cannot delete a submitted project')
     }
 
@@ -355,43 +374,63 @@ export const deleteDraft = authenticatedMutation({
 // ============================================================================
 
 /**
- * Update project status (admin only).
+ * Transition a project to a new action state.
+ * Validates the transition using the status machine and auto-assigns phases/actors.
  */
-export const updateStatus = adminMutation({
+export const transitionProject = authenticatedWithProfileMutation({
   args: {
     projectId: v.id('projects'),
-    status: v.union(
-      v.literal('pending_review'),
-      v.literal('active'),
-      v.literal('in_progress'),
-      v.literal('completed'),
-      v.literal('archived')
-    ),
+    newState: projectActionStateValidator,
+    notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
+    // 1. Get project
     const project = await ctx.db.get(args.projectId)
+    if (!project) throw new Error('Project not found')
 
-    if (!project) {
-      throw new Error('Project not found')
+    // 2. Security Check: Only admins, workers, or the project owner can transition
+    const isOwner = project.clientId === ctx.profile._id
+    const isAdmin = ctx.profile.role === 'admin'
+    const isEmployee = ctx.profile.role === 'employee'
+
+    if (!isAdmin && !isEmployee && !isOwner) {
+      throw new Error('Unauthorized to transition this project')
     }
 
-    const previousStatus = project.status
+    // 3. Validation: Use status machine to check if transition is allowed
+    if (!canTransition(project.actionState, args.newState)) {
+      throw new Error(
+        `Invalid transition: ${project.actionState} -> ${args.newState}`
+      )
+    }
 
+    // 4. Auto-determine new phase and awaiting actor
+    const newPhase = getPhaseForState(args.newState)
+    const newActor = getActorForState(args.newState)
+
+    // 5. Update Project
     await ctx.db.patch(args.projectId, {
-      status: args.status,
+      phase: newPhase,
+      actionState: args.newState,
+      awaitingActorRole: newActor,
       updatedAt: now(),
     })
 
-    // Record status change
+    // 6. Record in Status History
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus,
-      newStatus: args.status,
+      previousPhase: project.phase,
+      newPhase: newPhase,
+      previousActionState: project.actionState,
+      newActionState: args.newState,
+      previousAwaitingActorRole: project.awaitingActorRole,
+      newAwaitingActorRole: newActor,
       changedBy: ctx.profile._id,
       changedAt: now(),
+      notes: args.notes,
     })
 
-    return { success: true }
+    return { success: true, phase: newPhase }
   },
 })
 
@@ -441,14 +480,16 @@ export const archiveProject = adminMutation({
     }
 
     // Cannot archive already archived projects
-    if (project.status === 'archived') {
+    if (project.phase === 'archived') {
       throw new Error('Project is already archived')
     }
 
-    const previousStatus = project.status
+    const previousPhase = project.phase
+    const previousActionState = project.actionState
+    const previousActor = project.awaitingActorRole
 
     await ctx.db.patch(args.projectId, {
-      status: 'archived',
+      phase: 'archived',
       archivedAt: now(),
       archivedBy: ctx.profile._id,
       updatedAt: now(),
@@ -457,10 +498,15 @@ export const archiveProject = adminMutation({
     // Record status change
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus,
-      newStatus: 'archived',
+      previousPhase,
+      newPhase: 'archived',
+      previousActionState,
+      newActionState: previousActionState, // State remains the same, but phase is archived
+      previousAwaitingActorRole: previousActor,
+      newAwaitingActorRole: undefined,
       changedBy: ctx.profile._id,
       changedAt: now(),
+      notes: 'Project archived',
     })
 
     return { success: true }
@@ -483,12 +529,15 @@ export const unarchiveProject = adminMutation({
     }
 
     // Can only unarchive archived projects
-    if (project.status !== 'archived') {
+    if (project.phase !== 'archived') {
       throw new Error('Project is not archived')
     }
 
+    const previousPhase = project.phase
+    const previousActionState = project.actionState
+
     await ctx.db.patch(args.projectId, {
-      status: 'active',
+      phase: 'setup', // Default back to setup or keep previous? For now 'setup'
       archivedAt: undefined,
       archivedBy: undefined,
       updatedAt: now(),
@@ -497,10 +546,13 @@ export const unarchiveProject = adminMutation({
     // Record status change
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus: 'archived',
-      newStatus: 'active',
+      previousPhase,
+      newPhase: 'setup',
+      previousActionState,
+      newActionState: previousActionState,
       changedBy: ctx.profile._id,
       changedAt: now(),
+      notes: 'Project unarchived',
     })
 
     return { success: true }
@@ -526,7 +578,9 @@ export const softDeleteProject = adminMutation({
       throw new Error('Project is already in trash')
     }
 
-    const previousStatus = project.status
+    const previousPhase = project.phase
+    const previousActionState = project.actionState
+    const previousActor = project.awaitingActorRole
 
     await ctx.db.patch(args.projectId, {
       deletedAt: now(),
@@ -537,10 +591,15 @@ export const softDeleteProject = adminMutation({
     // Record status change (optional but good for audit)
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus,
-      newStatus: 'deleted' as any, // Not a formal status, but useful for history
+      previousPhase,
+      newPhase: previousPhase,
+      previousActionState,
+      newActionState: previousActionState,
+      previousAwaitingActorRole: previousActor,
+      newAwaitingActorRole: previousActor,
       changedBy: ctx.profile._id,
       changedAt: now(),
+      notes: 'Project moved to trash',
     })
 
     return { success: true }
@@ -571,13 +630,15 @@ export const restoreProject = adminMutation({
       updatedAt: now(),
     })
 
-    // Record status change
     await ctx.db.insert('statusHistory', {
       projectId: args.projectId,
-      previousStatus: 'deleted' as any,
-      newStatus: project.status,
+      previousPhase: project.phase,
+      newPhase: project.phase,
+      previousActionState: project.actionState,
+      newActionState: project.actionState,
       changedBy: ctx.profile._id,
       changedAt: now(),
+      notes: 'Project restored from trash',
     })
 
     return { success: true }

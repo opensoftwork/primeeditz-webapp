@@ -17,6 +17,35 @@ export const seedAll = mutation({
   handler: async (ctx, args) => {
     console.log("Starting modular seed process...");
 
+    if (args.clearFirst) {
+      console.log("Clearing existing data...");
+      const tables = [
+        "projects",
+        "profiles",
+        "statusHistory",
+        "projectCategories",
+        "projectTypes",
+        "projectTypeFields",
+        "storageTiers",
+        "folderTemplates",
+        "folders",
+        "assets",
+        "deliverables",
+        "quotationSections",
+        "quotationTemplates",
+        "quotationLibraryItems",
+        "quotations",
+      ] as const;
+
+      for (const table of tables) {
+        const docs = await ctx.db.query(table).collect();
+        console.log(`Deleting ${docs.length} from ${table}...`);
+        for (const doc of docs) {
+          await ctx.db.delete(doc._id);
+        }
+      }
+    }
+
     // 1. Seed Projects (Categories & Types)
     const { typeMap } = await seedProjectStructure(ctx);
     console.log("Project structure seeded.");

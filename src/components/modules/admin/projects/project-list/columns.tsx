@@ -2,9 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { Calendar, Hash, User } from "lucide-react";
-import {
-  DataTableColumnHeader,
-} from "@/components/shared/data-table";
+import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { ProjectActions } from "./project-actions";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
@@ -83,11 +81,11 @@ export const columns: ColumnDef<AdminProject>[] = [
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "actionState",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+    cell: ({ row }) => <StatusBadge status={row.getValue("actionState")} />,
     filterFn: (row, id, value) => {
       return (value as string[]).includes(row.getValue(id));
     },
@@ -111,4 +109,3 @@ export const columns: ColumnDef<AdminProject>[] = [
     },
   },
 ];
-

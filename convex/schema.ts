@@ -1,5 +1,12 @@
 import { defineSchema, defineTable } from 'convex/server'
-import { v } from 'convex/values'
+import { v, Infer } from 'convex/values'
+
+/**
+ * INFERRED TYPES
+ */
+export type Role = Infer<typeof roleValidator>;
+export type ProjectPhase = Infer<typeof projectPhaseValidator>;
+export type ActionState = Infer<typeof projectActionStateValidator>;
 
 // ============================================================================
 // Reusable Validators
@@ -12,14 +19,49 @@ export const roleValidator = v.union(
   v.literal('admin')
 )
 
-// Project status flow: draft → pending_review → active → in_progress → completed → archived
-export const projectStatusValidator = v.union(
+// Project phases: high-level lifecycle stages
+export const projectPhaseValidator = v.union(
+  v.literal('setup'),       // Project creation and quotation
+  v.literal('onboarding'),  // Asset upload and preparation
+  v.literal('production'),  // Employee work on deliverables
+  v.literal('review'),      // Client/Admin review cycle
+  v.literal('delivery'),    // Final delivery preparation
+  v.literal('completed'),   // Project finished
+  v.literal('archived')     // Historical record
+)
+
+// Project action states: granular workflow steps
+export const projectActionStateValidator = v.union(
+  // Setup Phase
   v.literal('draft'),
-  v.literal('pending_review'),
-  v.literal('active'),
-  v.literal('in_progress'),
+  v.literal('awaiting_quotation'),
+  v.literal('quotation_sent'),
+  v.literal('quotation_approved'),
+  v.literal('storage_allocated'),
+  
+  // Onboarding Phase
+  v.literal('awaiting_uploads'),
+  v.literal('uploads_complete'),
+  v.literal('awaiting_assignment'),
+  
+  // Production Phase
+  v.literal('assigned'),
+  v.literal('work_in_progress'),
+  v.literal('deliverables_ready'),
+  
+  // Review Phase
+  v.literal('awaiting_review'),
+  v.literal('revisions_requested'),
+  v.literal('review_approved'),
+  
+  // Delivery Phase
+  v.literal('preparing_delivery'),
+  v.literal('ready_for_delivery'),
+  
+  // Terminal States
+  v.literal('delivered'),
   v.literal('completed'),
-  v.literal('archived')
+  v.literal('cancelled')
 )
 
 // Project source: client_request vs admin_init
@@ -101,6 +143,16 @@ export default defineSchema({
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()), // For ordering in UI
     defaultFolderTemplateId: v.optional(v.id('folderTemplates')),
+    // Delivery configuration for customizing the 'delivery' phase labels/behavior
+    deliveryConfig: v.optional(
+      v.object({
+        hasPhysicalDelivery: v.boolean(), // Album, prints, USB
+        physicalDeliveryLabel: v.optional(v.string()), // e.g., "Album Production"
+        hasDigitalDelivery: v.boolean(), // Download links
+        digitalDeliveryLabel: v.optional(v.string()), // e.g., "Video Rendering"
+        requiresSignoff: v.boolean(), // Client must sign for delivery
+      })
+    ),
   })
     .index('by_categoryId', ['categoryId'])
     .index('by_isActive', ['isActive']),
@@ -138,7 +190,11 @@ export default defineSchema({
     projectTypeId: v.id('projectTypes'),
     clientId: v.optional(v.id('profiles')), // Optional for admin-initiated "No Client" projects
     source: projectSourceValidator,
-    status: projectStatusValidator,
+    // NEW: Multi-dimensional status
+    phase: projectPhaseValidator,
+    actionState: projectActionStateValidator,
+    awaitingActorRole: v.optional(roleValidator), // client | admin | employee
+    awaitingActorId: v.optional(v.id('profiles')), // Specific person assigned for next action
     lastStep: v.optional(v.number()), // To track wizard progress (1-5)
     // Event/project details
     endClientName: v.optional(v.string()),
@@ -148,6 +204,13 @@ export default defineSchema({
     description: v.optional(v.string()),
     additionalNotes: v.optional(v.string()),
     preferredDeliveryDate: v.optional(v.number()),
+    // NEW: Key milestone timestamps
+    quotationApprovedAt: v.optional(v.number()),
+    storageAllocatedAt: v.optional(v.number()),
+    uploadsCompletedAt: v.optional(v.number()),
+    assignedAt: v.optional(v.number()),
+    deliverablesReadyAt: v.optional(v.number()),
+    reviewApprovedAt: v.optional(v.number()),
     // Reference files (uploaded during wizard)
     referenceFiles: v.optional(
       v.array(
@@ -178,7 +241,9 @@ export default defineSchema({
     updatedAt: v.number(),
   })
     .index('by_clientId', ['clientId'])
-    .index('by_status', ['status'])
+    .index('by_phase', ['phase'])
+    .index('by_actionState', ['actionState'])
+    .index('by_awaitingActorRole', ['awaitingActorRole'])
     .index('by_code', ['code'])
     .index('by_projectTypeId', ['projectTypeId'])
     .index('by_assignedEmployeeId', ['assignedEmployeeId']),
@@ -249,10 +314,16 @@ export default defineSchema({
   // --------------------------------------------------------------------------
   statusHistory: defineTable({
     projectId: v.id('projects'),
-    previousStatus: v.optional(v.string()),
-    newStatus: v.string(),
+    // Enhanced status history tracking
+    previousPhase: v.optional(projectPhaseValidator),
+    newPhase: projectPhaseValidator,
+    previousActionState: v.optional(projectActionStateValidator),
+    newActionState: projectActionStateValidator,
+    previousAwaitingActorRole: v.optional(roleValidator),
+    newAwaitingActorRole: v.optional(roleValidator),
     changedBy: v.id('profiles'),
     changedAt: v.number(),
+    notes: v.optional(v.string()),
   }).index('by_projectId', ['projectId']),
 
   // --------------------------------------------------------------------------

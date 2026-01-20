@@ -48,10 +48,10 @@ export function PipelineTable({ projects }: PipelineTableProps) {
       ),
     },
     {
-      accessorKey: "status",
+      accessorKey: "actionState",
       header: "Current Status",
       cell: ({ row }: CellContext<ProjectData, any>) => (
-        <StatusBadge status={row.getValue("status")} />
+        <StatusBadge status={row.getValue("actionState")} />
       ),
     },
     {

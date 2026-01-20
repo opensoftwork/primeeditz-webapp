@@ -9,10 +9,15 @@ import { useRouter } from "next/navigation";
 
 interface ProjectHeaderProps {
   code: string;
-  status: string;
+  phase: string;
+  actionState: string;
 }
 
-export function ProjectHeader({ code, status }: ProjectHeaderProps) {
+export function ProjectHeader({
+  code,
+  phase,
+  actionState,
+}: ProjectHeaderProps) {
   const router = useRouter();
   return (
     <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
@@ -32,7 +37,7 @@ export function ProjectHeader({ code, status }: ProjectHeaderProps) {
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
             {code}
           </h1>
-          <StatusBadge status={status} />
+          <StatusBadge status={actionState} phase={phase} showPhase={true} />
         </div>
       </motion.div>
 

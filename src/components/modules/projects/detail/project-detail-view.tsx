@@ -80,7 +80,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           code={project.code}
           eventName={project.eventName}
           endClientName={project.endClientName}
-          status={project.status}
+          status={project.actionState}
         />
       </motion.div>
 
@@ -96,11 +96,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           <ProjectSpecifications project={project} fields={fields} />
           <ReferenceMaterials files={project.referenceFiles} />
 
-          {(project.status === "active" ||
-            project.status === "in_progress" ||
-            project.status === "completed") && (
-            <AssetsSection projectId={projectId} />
-          )}
+          {project.phase !== "setup" && <AssetsSection projectId={projectId} />}
         </motion.div>
 
         {/* Sidebar Column */}

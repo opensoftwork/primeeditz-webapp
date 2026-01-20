@@ -32,7 +32,9 @@ import { cn } from "@/lib/utils";
 interface ClientProject {
   _id: Id<"projects">;
   code: string;
-  status: string;
+  phase: string;
+  actionState: string;
+  status: string; // compatibility
   projectTypeName: string;
   eventName?: string;
   eventDate?: number;
@@ -62,7 +64,7 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
       transition={{ delay }}
       className={cn(
         "relative p-5 rounded-2xl border overflow-hidden",
-        "bg-white/[0.02] border-white/5 hover:border-white/10 transition-all duration-300",
+        "bg-white/2 border-white/5 hover:border-white/10 transition-all duration-300",
       )}
     >
       <div
@@ -97,44 +99,10 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
 // Status Badge Component
 // ============================================================================
 
-function StatusBadge({ status }: { status: string }) {
-  const statusConfig: Record<
-    string,
-    { label: string; color: string; bgColor: string }
-  > = {
-    draft: {
-      label: "Draft",
-      color: "text-zinc-400",
-      bgColor: "bg-zinc-500/10 border-zinc-500/20",
-    },
-    pending_review: {
-      label: "Pending",
-      color: "text-amber-400",
-      bgColor: "bg-amber-500/10 border-amber-500/20",
-    },
-    active: {
-      label: "Active",
-      color: "text-emerald-400",
-      bgColor: "bg-emerald-500/10 border-emerald-500/20",
-    },
-    in_progress: {
-      label: "In Progress",
-      color: "text-blue-400",
-      bgColor: "bg-blue-500/10 border-blue-500/20",
-    },
-    completed: {
-      label: "Completed",
-      color: "text-primary",
-      bgColor: "bg-primary/10 border-primary/20",
-    },
-    archived: {
-      label: "Archived",
-      color: "text-zinc-500",
-      bgColor: "bg-zinc-500/5 border-zinc-500/10",
-    },
-  };
+import { getStatusConfig } from "@/lib/status-display";
 
-  const config = statusConfig[status] || statusConfig.draft;
+function StatusBadge({ status }: { status: string }) {
+  const config = getStatusConfig(status);
 
   return (
     <span
@@ -169,7 +137,7 @@ function ProjectCard({
         transition={{ delay: 0.1 * index }}
         whileHover={{ scale: 1.01, y: -2 }}
         whileTap={{ scale: 0.99 }}
-        className="group p-5 rounded-2xl bg-white/[0.02] border border-white/5 hover:bg-white/[0.04] hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        className="group p-5 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/4 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
       >
         {/* Glow effect */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
@@ -190,12 +158,12 @@ function ProjectCard({
                 </span>
               </div>
             </div>
-            <StatusBadge status={project.status} />
+            <StatusBadge status={project.actionState} />
           </div>
 
           {/* Event Details */}
           {project.eventName && (
-            <div className="p-3 rounded-xl bg-white/[0.02] border border-white/5">
+            <div className="p-3 rounded-xl bg-white/2 border border-white/5">
               <div className="font-bold text-white/70 text-sm truncate">
                 {project.eventName}
               </div>
@@ -267,20 +235,20 @@ function LoadingSkeleton() {
         {[...Array(4)].map((_, i) => (
           <div
             key={i}
-            className="h-28 rounded-2xl bg-white/[0.02] border border-white/5"
+            className="h-28 rounded-2xl bg-white/2 border border-white/5"
           />
         ))}
       </div>
 
       {/* Client Card Skeleton */}
-      <div className="h-48 rounded-2xl bg-white/[0.02] border border-white/5 mb-10" />
+      <div className="h-48 rounded-2xl bg-white/2 border border-white/5 mb-10" />
 
       {/* Projects Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {[...Array(6)].map((_, i) => (
           <div
             key={i}
-            className="h-44 rounded-2xl bg-white/[0.02] border border-white/5"
+            className="h-44 rounded-2xl bg-white/2 border border-white/5"
           />
         ))}
       </div>
@@ -363,8 +331,8 @@ export default function IndividualClient() {
 
         <div className="flex items-start gap-4">
           {/* Left side - Avatar */}
-          <div className="flex-shrink-0">
-            <div className="w-20 h-20 xl:w-20 xl:h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+          <div className="shrink-0">
+            <div className="w-20 h-20 xl:w-20 xl:h-20 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
               <User className="h-10 w-10 xl:h-12 xl:w-12 text-primary" />
             </div>
           </div>
@@ -398,7 +366,7 @@ export default function IndividualClient() {
         <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6">
           {/* Email */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
               <Mail className="h-3.5 w-3.5 text-white/40" />
             </div>
             <div>
@@ -414,7 +382,7 @@ export default function IndividualClient() {
           {/* Phone */}
           {client.phone && (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                 <Phone className="h-3.5 w-3.5 text-white/40" />
               </div>
               <div>
@@ -431,7 +399,7 @@ export default function IndividualClient() {
           {/* Company */}
           {client.company && (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+              <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
                 <Building className="h-3.5 w-3.5 text-white/40" />
               </div>
               <div>
@@ -447,7 +415,7 @@ export default function IndividualClient() {
 
           {/* Member Since */}
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center flex-shrink-0">
+            <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
               <Calendar className="h-3.5 w-3.5 text-white/40" />
             </div>
             <div>
@@ -455,7 +423,7 @@ export default function IndividualClient() {
                 Member Since
               </span>
               <span className="text-sm font-medium text-white/70">
-                {new Date(client.createdAt).toLocaleDateString("en-GB", {
+                {new Date(client._creationTime).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "long",
                   year: "numeric",
@@ -484,7 +452,7 @@ export default function IndividualClient() {
         </div>
 
         {projects.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 rounded-3xl bg-white/[0.02] border border-white/5">
+          <div className="flex flex-col items-center justify-center py-16 rounded-3xl bg-white/2 border border-white/5">
             <div className="w-16 h-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-4">
               <FolderKanban className="h-8 w-8 text-white/20" />
             </div>

@@ -28,12 +28,13 @@ export default function ClientDashboard() {
   const inProgressCount =
     projects?.filter(
       (p) =>
-        p.status === "in_progress" ||
-        p.status === "active" ||
-        p.status === "pending_review",
+        p.actionState !== "draft" &&
+        p.phase !== "completed" &&
+        p.phase !== "archived" &&
+        p.actionState !== "cancelled",
     ).length ?? 0;
   const completedCount =
-    projects?.filter((p) => p.status === "completed").length ?? 0;
+    projects?.filter((p) => p.phase === "completed").length ?? 0;
 
   if (!profile) {
     return (

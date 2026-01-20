@@ -1,96 +1,78 @@
-/**
- * Admin Dashboard Queries
- *
- * Provides real-time dashboard statistics and pending projects list
- * for the admin portal.
- */
-
-import { adminQuery } from '../../lib/customFunctions'
+import { v } from "convex/values";
+import { adminQuery } from "../../lib/customFunctions";
+import { Doc, Id } from "../../_generated/dataModel";
 
 /**
  * Get admin dashboard statistics.
- * Returns counts for pending requests, active projects, and team members.
  */
 export const getAdminDashboardStats = adminQuery({
   args: {},
   handler: async (ctx) => {
-    // Count pending requests (status: pending_review)
+    // Count pending requests (actionState: awaiting_quotation)
     const pendingProjects = await ctx.db
-      .query('projects')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_review'))
-      .collect()
-    const pendingRequestsCount = pendingProjects.length
+      .query("projects")
+      .withIndex("by_actionState", (q) => q.eq("actionState", "awaiting_quotation"))
+      .collect();
+    const pendingRequestsCount = pendingProjects.length;
 
-    // Count active projects (status: active or in_progress)
-    const activeProjects = await ctx.db
-      .query('projects')
-      .filter((q) =>
-        q.or(
-          q.eq(q.field('status'), 'active'),
-          q.eq(q.field('status'), 'in_progress')
-        )
-      )
-      .collect()
-    const activeProjectsCount = activeProjects.length
+    // Count active projects (phases: onboarding, production, review, delivery)
+    const onboarding = await ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', 'onboarding')).collect();
+    const production = await ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', 'production')).collect();
+    const review = await ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', 'review')).collect();
+    const delivery = await ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', 'delivery')).collect();
 
-    // Count team members (role: employee or admin)
+    const activeProjectsCount = onboarding.length + production.length + review.length + delivery.length;
+
     const teamMembers = await ctx.db
-      .query('profiles')
+      .query("profiles")
       .filter((q) =>
-        q.or(
-          q.eq(q.field('role'), 'employee'),
-          q.eq(q.field('role'), 'admin')
+        q.and(
+          q.or(q.eq(q.field("role"), "employee"), q.eq(q.field("role"), "admin")),
+          q.eq(q.field("deactivatedAt"), undefined)
         )
       )
-      .collect()
-    const totalEmployeesCount = teamMembers.length
+      .collect();
+    const totalEmployeesCount = teamMembers.length;
 
     return {
       pendingRequestsCount,
       activeProjectsCount,
       totalEmployeesCount,
-    }
+    };
   },
-})
+});
 
 /**
  * Get pending projects list for admin dashboard.
- * Returns up to 10 most recent projects with status 'pending_review',
- * including project type and client information.
  */
 export const getPendingProjects = adminQuery({
   args: {},
   handler: async (ctx) => {
-    // Get pending projects sorted by creation time (newest first)
     const pendingProjects = await ctx.db
-      .query('projects')
-      .withIndex('by_status', (q) => q.eq('status', 'pending_review'))
-      .order('desc')
-      .take(10)
+      .query("projects")
+      .withIndex("by_actionState", (q) => q.eq("actionState", "awaiting_quotation"))
+      .order("desc")
+      .take(10);
 
-    // Enrich with project type and client information
     const enrichedProjects = await Promise.all(
       pendingProjects.map(async (project) => {
-        // Get project type
-        const projectType = await ctx.db.get(project.projectTypeId)
-
-        // Get client profile (clientId is optional for admin-initiated projects)
+        const projectType = await ctx.db.get(project.projectTypeId);
         const client = project.clientId
           ? await ctx.db.get(project.clientId)
-          : null
+          : null;
 
         return {
           _id: project._id,
           code: project.code,
-          projectTypeName: projectType?.name ?? 'Unknown',
-          clientName: client?.name ?? 'Unknown Client',
+          projectTypeName: projectType?.name ?? "Unknown",
+          clientName: client?.name ?? "Unknown Client",
           eventName: project.eventName,
           eventDate: project.eventDate,
           createdAt: project._creationTime,
-        }
-      })
-    )
+        };
+      }),
+    );
 
-    return enrichedProjects
+    return enrichedProjects;
   },
-})
+});

@@ -2,7 +2,10 @@ import type { Id } from "@convex/_generated/dataModel";
 
 export interface StatusHistoryEntry {
   changedAt: number;
-  newStatus: string;
+  previousPhase?: string;
+  newPhase: string;
+  previousActionState?: string;
+  newActionState: string;
   actorName: string;
 }
 
@@ -10,11 +13,15 @@ export interface AdminProjectDetail {
   _id: Id<"projects">;
   _creationTime: number;
   code: string;
-  status: string;
+  phase: string;
+  actionState: string;
+  status: string; // compatibility
   projectTypeId: Id<"projectTypes">;
   clientId?: Id<"profiles">;
   clientName: string;
   clientEmail?: string;
+  awaitingActorRole?: string;
+  awaitingActorId?: Id<"profiles">;
   projectTypeName: string;
   eventName?: string;
   eventDate?: number;

@@ -26,14 +26,90 @@ export async function seedProjectStructure(ctx: MutationCtx) {
   }
 
   const projectTypes = [
-    { name: "Wedding Photography", category: "Photography" },
-    { name: "Pre-Wedding Shoot", category: "Photography" },
-    { name: "Maternity Session", category: "Photography" },
-    { name: "Wedding Film", category: "Videography" },
-    { name: "YouTube Video Edit", category: "Videography" },
-    { name: "Instagram Reels Bundle", category: "Videography" },
-    { name: "Premium Coffee Table Album", category: "Design & Post" },
-    { name: "Commercial Ad Film", category: "Corporate" },
+    { 
+      name: "Wedding Photography", 
+      category: "Photography",
+      deliveryConfig: {
+        hasPhysicalDelivery: true,
+        physicalDeliveryLabel: "Album Production",
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Photo Delivery",
+        requiresSignoff: true,
+      }
+    },
+    { 
+      name: "Pre-Wedding Shoot", 
+      category: "Photography",
+      deliveryConfig: {
+        hasPhysicalDelivery: true,
+        physicalDeliveryLabel: "Print Package",
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Photo Delivery",
+        requiresSignoff: true,
+      }
+    },
+    { 
+      name: "Maternity Session", 
+      category: "Photography",
+      deliveryConfig: {
+        hasPhysicalDelivery: true,
+        physicalDeliveryLabel: "Framed Prints",
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Digital Gallery",
+        requiresSignoff: true,
+      }
+    },
+    { 
+      name: "Wedding Film", 
+      category: "Videography",
+      deliveryConfig: {
+        hasPhysicalDelivery: false,
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Video Delivery",
+        requiresSignoff: false,
+      }
+    },
+    { 
+      name: "YouTube Video Edit", 
+      category: "Videography",
+      deliveryConfig: {
+        hasPhysicalDelivery: false,
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Final Render Delivery",
+        requiresSignoff: false,
+      }
+    },
+    { 
+      name: "Instagram Reels Bundle", 
+      category: "Videography",
+      deliveryConfig: {
+        hasPhysicalDelivery: false,
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Reels Pack Handover",
+        requiresSignoff: false,
+      }
+    },
+    { 
+      name: "Premium Coffee Table Album", 
+      category: "Design & Post",
+      deliveryConfig: {
+        hasPhysicalDelivery: true,
+        physicalDeliveryLabel: "Premium Album Printing",
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Digital Proofs",
+        requiresSignoff: true,
+      }
+    },
+    { 
+      name: "Commercial Ad Film", 
+      category: "Corporate",
+      deliveryConfig: {
+        hasPhysicalDelivery: false,
+        hasDigitalDelivery: true,
+        digitalDeliveryLabel: "Master Delivery",
+        requiresSignoff: false,
+      }
+    },
   ];
 
   const typeMap: Record<string, Id<"projectTypes">> = {};
@@ -46,12 +122,15 @@ export async function seedProjectStructure(ctx: MutationCtx) {
     
     if (existing) {
       typeMap[type.name] = existing._id;
+      // Also update existing with the new config if needed, or if we want to ensure fresh seed
+      await ctx.db.patch(existing._id, { deliveryConfig: type.deliveryConfig });
     } else {
       const id = await ctx.db.insert("projectTypes", {
         name: type.name,
         categoryId: categoryMap[type.category],
         isActive: true,
         displayOrder: 0,
+        deliveryConfig: type.deliveryConfig,
       });
       typeMap[type.name] = id;
     }

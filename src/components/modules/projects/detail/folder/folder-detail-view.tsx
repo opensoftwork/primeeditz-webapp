@@ -33,7 +33,9 @@ export function FolderDetailView({
   // State
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
+  const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
+    {},
+  );
 
   // Queries & Mutations
   const folder = isAdmin

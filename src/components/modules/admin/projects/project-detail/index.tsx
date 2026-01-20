@@ -17,33 +17,34 @@ import { ProjectHistory } from "./project-history";
 import { ClientCard } from "./client-card";
 import { SystemControls } from "./system-controls";
 import { ProjectDetailSkeleton } from "./skeleton";
-import {
-  FolderSetupDrawer,
-  ProjectFoldersList,
-} from "../folder-setup";
+import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
+import { AdminActionBanner } from "./admin-action-banner";
+import { AwaitingActorBanner } from "./awaiting-actor-banner";
 
 interface ProjectDetailProps {
   projectId: string;
 }
 
+import { AdminProjectDetail } from "./types";
+
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
-    {}
+    {},
   );
 
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
-  });
+  }) as AdminProjectDetail | null | undefined;
 
   const folderSetupStatus = useQuery(
     api.functions.folders.queries.canSetupFolders,
-    project ? { projectId: projectId as Id<"projects"> } : "skip"
+    project ? { projectId: projectId as Id<"projects"> } : "skip",
   );
 
   const getSignedUrlsAction = useAction(
-    api.functions.storage.actions.getSignedFileUrls
+    api.functions.storage.actions.getSignedFileUrls,
   );
 
   useEffect(() => {
@@ -121,42 +122,56 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
 
   return (
     <div className="flex-1 space-y-10 p-8 md:p-12 w-full transition-all duration-700 animate-in fade-in slide-in-from-bottom-5">
-      <ProjectHeader code={project.code} status={project.status} />
+      <ProjectHeader
+        code={project.code}
+        phase={project.phase}
+        actionState={project.actionState}
+      />
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
-        <div className="lg:col-span-8 space-y-12">
-          <ProjectSpecs project={project} />
-          <ProjectReferenceFiles
-            referenceFilesCount={project.referenceFiles?.length || 0}
-            vaultFiles={vaultFiles}
-            onOpenVault={() => setIsVaultOpen(true)}
-          />
-          
-          {/* Project Folders Section */}
-          {folderSetupStatus?.hasFolders && (
-            <div id="project-folders-section">
-              <ProjectFoldersList projectId={projectId as Id<"projects">} />
-            </div>
-          )}
-          
-          <ProjectHistory history={project.statusHistory} />
-        </div>
+      <div className="max-w-[1600px] mx-auto">
+        <AdminActionBanner
+          project={project}
+          onSetIsFolderSetupOpen={setIsFolderSetupOpen}
+          onViewFolders={handleViewFolders}
+        />
+        <AwaitingActorBanner project={project} />
 
-        <div className="lg:col-span-4 space-y-10">
-          <ClientCard
-            clientName={project.clientName}
-            clientEmail={project.clientEmail}
-            submittedAt={project._creationTime}
-          />
-          <SystemControls
-            storageAllocated={project.storageAllocated}
-            status={project.status}
-            canSetupFolders={folderSetupStatus?.canSetup ?? false}
-            hasFolders={folderSetupStatus?.hasFolders ?? false}
-            folderSetupReason={folderSetupStatus?.reason}
-            onSetupFolders={() => setIsFolderSetupOpen(true)}
-            onViewFolders={handleViewFolders}
-          />
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+          <div className="lg:col-span-8 space-y-12">
+            <ProjectSpecs project={project} />
+            <ProjectReferenceFiles
+              referenceFilesCount={project.referenceFiles?.length || 0}
+              vaultFiles={vaultFiles}
+              onOpenVault={() => setIsVaultOpen(true)}
+            />
+
+            {/* Project Folders Section */}
+            {folderSetupStatus?.hasFolders && (
+              <div id="project-folders-section">
+                <ProjectFoldersList projectId={projectId as Id<"projects">} />
+              </div>
+            )}
+
+            <ProjectHistory history={project.statusHistory} />
+          </div>
+
+          <div className="lg:col-span-4 space-y-10">
+            <ClientCard
+              clientName={project.clientName}
+              clientEmail={project.clientEmail}
+              submittedAt={project._creationTime}
+            />
+            <SystemControls
+              storageAllocated={project.storageAllocated}
+              actionState={project.actionState}
+              awaitingActorRole={project.awaitingActorRole}
+              canSetupFolders={folderSetupStatus?.canSetup ?? false}
+              hasFolders={folderSetupStatus?.hasFolders ?? false}
+              folderSetupReason={folderSetupStatus?.reason}
+              onSetupFolders={() => setIsFolderSetupOpen(true)}
+              onViewFolders={handleViewFolders}
+            />
+          </div>
         </div>
       </div>
 
@@ -180,8 +195,6 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         clientId={project.clientId}
         onSuccess={handleFolderSetupSuccess}
       />
-      
     </div>
   );
 }
-

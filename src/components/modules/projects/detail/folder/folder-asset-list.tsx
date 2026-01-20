@@ -17,7 +17,7 @@ interface Asset {
 
 interface FolderAssetListProps {
   assets: Asset[] | undefined;
-  signedUrls: Record<string, string>;
+  signedUrls: Record<string, string | null>;
   isLoading?: boolean;
 }
 

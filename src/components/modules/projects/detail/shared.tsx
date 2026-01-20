@@ -85,54 +85,54 @@ export function SidebarItem({
   );
 }
 
-export function StatusBadge({ status }: { status: string }) {
-  const statusConfig: Record<string, { label: string; className: string }> = {
-    pending_review: {
-      label: "Pending",
-      className:
-        "border-amber-500/40 text-amber-500 bg-amber-500/10 shadow-[0_5px_15px_rgba(245,158,11,0.1)]",
-    },
-    active: {
-      label: "Active",
-      className:
-        "border-blue-500/40 text-blue-500 bg-blue-500/10 shadow-[0_5px_15px_rgba(59,130,246,0.1)]",
-    },
-    in_progress: {
-      label: "In Progress",
-      className:
-        "border-purple-500/40 text-purple-500 bg-purple-500/10 shadow-[0_5px_15px_rgba(168,85,247,0.1)]",
-    },
-    completed: {
-      label: "Completed",
-      className:
-        "border-emerald-500/40 text-emerald-500 bg-emerald-500/10 shadow-[0_5px_15px_rgba(16,185,129,0.1)]",
-    },
-  };
+import { getStatusConfig, getPhaseConfig } from "@/lib/status-display";
 
-  const config = statusConfig[status] ?? {
-    label: (status || "Unknown").replace("_", " "),
-    className: "border-white/20 text-white/70 bg-white/10",
-  };
+export function StatusBadge({
+  status,
+  phase,
+  showPhase = false,
+}: {
+  status: string;
+  phase?: string;
+  showPhase?: boolean;
+}) {
+  const config = getStatusConfig(status);
+  const phaseConfig = phase ? getPhaseConfig(phase) : null;
 
   return (
-    <Badge
-      variant="outline"
-      className={cn(
-        "uppercase text-[9px] tracking-[0.2em] font-black py-1 px-4 rounded-lg border-2 shadow-[0_5px_15px_rgba(0,0,0,0.2)]",
-        config.className
-      )}
-    >
-      <div className="flex items-center gap-2">
-        <div
+    <div className="flex items-center gap-2">
+      {showPhase && phaseConfig && (
+        <Badge
+          variant="outline"
           className={cn(
-            "w-1.5 h-1.5 rounded-full",
-            config.label === "Pending"
-              ? "animate-pulse bg-amber-500"
-              : "bg-current"
+            "uppercase text-[9px] tracking-[0.2em] font-black py-1 px-4 rounded-lg border-2 shadow-[0_5px_15px_rgba(0,0,0,0.2)]",
+            phaseConfig.bgColor,
+            phaseConfig.color,
           )}
-        />
-        {config.label}
-      </div>
-    </Badge>
+        >
+          {phaseConfig.label}
+        </Badge>
+      )}
+      <Badge
+        variant="outline"
+        className={cn(
+          "uppercase text-[9px] tracking-[0.2em] font-black py-1 px-4 rounded-lg border-2 shadow-[0_5px_15px_rgba(0,0,0,0.2)]",
+          config.bgColor,
+          config.color,
+        )}
+      >
+        <div className="flex items-center gap-2">
+          <div
+            className={cn(
+              "w-1.5 h-1.5 rounded-full",
+              status === "awaiting_quotation" || status === "awaiting_review"
+                ? "animate-pulse bg-amber-500"
+                : "bg-current",
+            )}
+          />
+          {config.label}
+        </div>
+      </Badge>
+    </div>
   );
 }

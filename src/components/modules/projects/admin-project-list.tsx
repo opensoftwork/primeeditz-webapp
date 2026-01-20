@@ -33,29 +33,12 @@ import {
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Status badge colors
-const statusColors: Record<string, string> = {
-  draft: "bg-muted text-muted-foreground",
-  pending_review: "bg-amber-500/10 text-amber-600 border-amber-500/20",
-  active: "bg-blue-500/10 text-blue-600 border-blue-500/20",
-  in_progress: "bg-purple-500/10 text-purple-600 border-purple-500/20",
-  completed: "bg-green-500/10 text-green-600 border-green-500/20",
-  archived: "bg-slate-500/10 text-slate-600 border-slate-500/20",
-};
-
-// Status labels for display
-const statusLabels: Record<string, string> = {
-  draft: "Draft",
-  pending_review: "Pending Review",
-  active: "Active",
-  in_progress: "In Progress",
-  completed: "Completed",
-  archived: "Archived",
-};
+import { StatusBadge } from "@/components/modules/projects/detail/shared";
 
 export function AdminProjectList() {
   // Filter state
-  const [status, setStatus] = useState<string | undefined>(undefined);
+  const [phase, setPhase] = useState<string | undefined>(undefined);
+  const [actionState, setActionState] = useState<string | undefined>(undefined);
   const [projectTypeId, setProjectTypeId] = useState<
     Id<"projectTypes"> | undefined
   >(undefined);
@@ -69,7 +52,8 @@ export function AdminProjectList() {
 
   // Fetch projects with filters
   const projectsData = useQuery(api.admin.getAdminProjects, {
-    status: status,
+    phase: phase as any,
+    actionState: actionState as any,
     projectTypeId: projectTypeId,
     clientSearch: debouncedSearch || undefined,
     sortBy: sortBy,
@@ -92,14 +76,14 @@ export function AdminProjectList() {
   };
 
   // Handle filter changes
-  const handleStatusChange = (value: string) => {
-    setStatus(value === "all" ? undefined : value);
+  const handleActionStateChange = (value: string) => {
+    setActionState(value === "all" ? undefined : value);
     setPage(1);
   };
 
   const handleTypeChange = (value: string) => {
     setProjectTypeId(
-      value === "all" ? undefined : (value as Id<"projectTypes">)
+      value === "all" ? undefined : (value as Id<"projectTypes">),
     );
     setPage(1);
   };
@@ -176,18 +160,25 @@ export function AdminProjectList() {
             </div>
 
             {/* Status Filter */}
-            <Select value={status ?? "all"} onValueChange={handleStatusChange}>
+            <Select
+              value={actionState ?? "all"}
+              onValueChange={handleActionStateChange}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="All Statuses" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="pending_review">Pending Review</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="in_progress">In Progress</SelectItem>
+                <SelectItem value="draft">Draft</SelectItem>
+                <SelectItem value="awaiting_quotation">
+                  Awaiting Quotation
+                </SelectItem>
+                <SelectItem value="work_in_progress">
+                  Work In Progress
+                </SelectItem>
+                <SelectItem value="deliverables_ready">QC Pending</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="archived">Archived</SelectItem>
-                <SelectItem value="draft">Draft</SelectItem>
               </SelectContent>
             </Select>
 
@@ -308,17 +299,15 @@ export function AdminProjectList() {
                   </div>
 
                   {/* Status */}
-                  <div>
+                  <div className="flex items-center">
                     <span className="md:hidden text-muted-foreground mr-2">
                       Status:
                     </span>
-                    <span
-                      className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium border ${
-                        statusColors[project.status]
-                      }`}
-                    >
-                      {statusLabels[project.status] || project.status}
-                    </span>
+                    <StatusBadge
+                      status={project.actionState}
+                      phase={project.phase}
+                      showPhase={false} // List is crowded, maybe just actionState is fine, or small phase
+                    />
                   </div>
 
                   {/* Actions */}

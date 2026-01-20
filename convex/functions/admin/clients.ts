@@ -53,7 +53,7 @@ export const getClientsForSelection = adminQuery({
           .collect();
 
         const projectCount = projects.length;
-        const activeCount = projects.filter((p) => p.status === "active" || p.status === "in_progress").length;
+        const activeCount = projects.filter((p) => p.phase !== 'completed' && p.phase !== 'archived' && p.actionState !== 'draft' && p.actionState !== 'cancelled').length;
         const lastProjectActivity = projects.length > 0 ? Math.max(...projects.map((p) => p.updatedAt)) : null;
         const lastActivityDate = lastProjectActivity ?? client.updatedAt;
 
@@ -147,7 +147,9 @@ export const getClientWithProjects = adminQuery({
     const enrichedProjects = projects.map((project) => ({
       _id: project._id,
       code: project.code,
-      status: project.status,
+      phase: project.phase,
+      actionState: project.actionState,
+      status: project.actionState, // Compatibility
       projectTypeName: projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
       eventName: project.eventName,
       eventDate: project.eventDate,
@@ -159,9 +161,9 @@ export const getClientWithProjects = adminQuery({
 
     const stats = {
       totalProjects: projects.length,
-      activeProjects: projects.filter(p => p.status === "active" || p.status === "in_progress").length,
-      completedProjects: projects.filter(p => p.status === "completed").length,
-      pendingProjects: projects.filter(p => p.status === "pending_review" || p.status === "draft").length,
+      activeProjects: projects.filter(p => !['completed', 'archived'].includes(p.phase) && p.actionState !== 'draft').length,
+      completedProjects: projects.filter(p => p.phase === "completed").length,
+      pendingProjects: projects.filter(p => p.actionState === "awaiting_quotation").length,
     };
 
     return { client, projects: enrichedProjects, stats };

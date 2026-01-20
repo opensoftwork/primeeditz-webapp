@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
 import { StatusBadge } from "./shared";
 
+import { getStatusConfig } from "@/lib/status-display";
+
 interface ProjectHeaderProps {
   code: string;
   eventName?: string;
@@ -18,6 +20,7 @@ export function ProjectHeader({
   status,
 }: ProjectHeaderProps) {
   const title = eventName || endClientName || "Untitled Project";
+  const statusInfo = getStatusConfig(status);
 
   return (
     <div className="space-y-10">
@@ -59,7 +62,7 @@ export function ProjectHeader({
         </h1>
         <p className="text-[11px] font-bold text-white/50 uppercase tracking-[0.4em]">
           Production Queue Status •{" "}
-          <span className="text-primary/80">{status.replace("_", " ")}</span>
+          <span className="text-primary/80">{statusInfo.label}</span>
         </p>
       </div>
     </div>

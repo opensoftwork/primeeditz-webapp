@@ -5,7 +5,8 @@ import { Button } from "@/components/ui/button";
 
 interface SystemControlsProps {
   storageAllocated?: number;
-  status: string;
+  actionState: string;
+  awaitingActorRole?: string;
   canSetupFolders?: boolean;
   hasFolders?: boolean;
   folderSetupReason?: string | null;
@@ -15,16 +16,18 @@ interface SystemControlsProps {
 
 export function SystemControls({
   storageAllocated,
-  status,
+  actionState,
+  awaitingActorRole,
   canSetupFolders = false,
   hasFolders = false,
   folderSetupReason,
   onSetupFolders,
   onViewFolders,
 }: SystemControlsProps) {
+  const isAdminActive = awaitingActorRole === "admin";
   // Determine folder button state
   const showViewFolders = hasFolders;
-  const showSetupFolders = !hasFolders && canSetupFolders;
+  const showSetupFolders = !hasFolders && canSetupFolders && isAdminActive;
   const disableSetupButton = !canSetupFolders && !hasFolders;
 
   return (
@@ -67,9 +70,11 @@ export function SystemControls({
               <span>SETUP FOLDERS</span>
               <Settings className="h-4 w-4 opacity-30" />
             </Button>
-            {folderSetupReason && (
+            {(folderSetupReason || !isAdminActive) && (
               <p className="text-white/30 text-[9px] font-medium px-1">
-                {folderSetupReason}
+                {!isAdminActive && !hasFolders
+                  ? "Awaiting client interaction"
+                  : folderSetupReason}
               </p>
             )}
           </div>
@@ -77,13 +82,27 @@ export function SystemControls({
         <Button
           variant="outline"
           className="w-full justify-between rounded-xl h-12 border-white/5 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest group"
-          disabled={status === "pending_review" || status === "draft"}
+          disabled={
+            !isAdminActive ||
+            ["draft", "awaiting_quotation", "quotation_sent"].includes(
+              actionState,
+            )
+          }
         >
           <span>ASSIGN TEAM</span>
           <Users className="h-4 w-4 opacity-30 group-hover:opacity-100 transition-opacity" />
         </Button>
       </div>
+
+      {!isAdminActive && (
+        <div className="pt-2">
+          <p className="text-[10px] font-bold text-amber-500/50 uppercase tracking-widest text-center leading-relaxed">
+            SYSTEM LOCKED
+            <br />
+            WAITING FOR {awaitingActorRole}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
-

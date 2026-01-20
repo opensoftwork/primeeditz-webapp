@@ -90,7 +90,7 @@ export default function AdminDashboard() {
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <ActionButton
-              href="/projects?status=pending_review"
+              href="/projects?actionState=awaiting_quotation"
               icon={<AlertCircle className="h-4 w-4" />}
               label="Review Pending"
               sublabel="Process incoming requests"
@@ -132,7 +132,9 @@ export default function AdminDashboard() {
             className="text-[9px] font-black uppercase tracking-widest text-cyan-400/60 hover:text-cyan-400 transition-colors"
             asChild
           >
-            <Link href="/projects?status=pending_review">View Full List</Link>
+            <Link href="/projects?actionState=awaiting_quotation">
+              View Full List
+            </Link>
           </Button>
         </div>
 

@@ -3,7 +3,7 @@ import { paginationOptsValidator } from "convex/server";
 import { adminQuery, adminMutation } from "../../lib/customFunctions";
 import { internalQuery } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
-import { projectStatusValidator } from "../../schema";
+import { projectPhaseValidator, projectActionStateValidator } from "../../schema";
 import { checkUploadEligibility } from "../../lib/uploadGate";
 
 /**
@@ -12,23 +12,25 @@ import { checkUploadEligibility } from "../../lib/uploadGate";
 export const getAdminProjectsPaginated = adminQuery({
   args: {
     paginationOpts: paginationOptsValidator,
-    status: v.optional(projectStatusValidator),
+    phase: v.optional(projectPhaseValidator),
+    actionState: v.optional(projectActionStateValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
     includeTrashed: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const results = await (args.status
-      ? ctx.db
-        .query("projects")
-        .withIndex("by_status", (q) => q.eq("status", args.status!))
-        .filter((q) => args.includeTrashed ? q.neq(q.field("deletedAt"), -1) : q.eq(q.field("deletedAt"), undefined))
-        .order("desc")
-        .paginate(args.paginationOpts)
-      : ctx.db
-        .query("projects")
-        .filter((q) => args.includeTrashed ? q.neq(q.field("deletedAt"), -1) : q.eq(q.field("deletedAt"), undefined))
-        .order("desc")
-        .paginate(args.paginationOpts));
+    let query;
+    if (args.phase) {
+      query = ctx.db.query("projects").withIndex("by_phase", (q) => q.eq("phase", args.phase!));
+    } else if (args.actionState) {
+      query = ctx.db.query("projects").withIndex("by_actionState", (q) => q.eq("actionState", args.actionState!));
+    } else {
+      query = ctx.db.query("projects");
+    }
+
+    const results = await query
+      .filter((q) => args.includeTrashed ? q.neq(q.field("deletedAt"), -1) : q.eq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .paginate(args.paginationOpts);
 
     const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
     const projectTypeMap = new Map<Id<"projectTypes">, Doc<"projectTypes">>(
@@ -54,7 +56,9 @@ export const getAdminProjectsPaginated = adminQuery({
         return {
           _id: project._id,
           code: project.code,
-          status: project.status,
+          phase: project.phase,
+          actionState: project.actionState,
+          status: project.actionState, // Compatibility
           projectTypeName: projectType?.name ?? "Unknown",
           clientName: client?.name ?? "Unknown Client",
           clientId: project.clientId,
@@ -114,7 +118,9 @@ export const getTrashedProjects = adminQuery({
         return {
           _id: project._id,
           code: project.code,
-          status: project.status,
+          phase: project.phase,
+          actionState: project.actionState,
+          status: project.actionState, // Compatibility
           projectTypeName: projectType?.name ?? "Unknown",
           clientName: client?.name ?? "Unknown Client",
           deletedAt: project.deletedAt,
@@ -179,7 +185,8 @@ export const getAdminProject = adminQuery({
  */
 export const getAdminProjects = adminQuery({
   args: {
-    status: v.optional(projectStatusValidator),
+    phase: v.optional(projectPhaseValidator),
+    actionState: v.optional(projectActionStateValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
     clientSearch: v.optional(v.string()),
     sortBy: v.optional(v.union(v.literal("date"), v.literal("status"))),
@@ -192,16 +199,16 @@ export const getAdminProjects = adminQuery({
     const pageSize = args.pageSize ?? 20;
     const sortOrder = args.sortOrder ?? "desc";
 
-    let allProjects: Doc<"projects">[];
-    if (args.status) {
-      allProjects = await ctx.db
-        .query("projects")
-        .withIndex("by_status", (q) => q.eq("status", args.status!))
-        .order(sortOrder)
-        .collect();
+    let query;
+    if (args.phase) {
+      query = ctx.db.query("projects").withIndex("by_phase", (q) => q.eq("phase", args.phase!));
+    } else if (args.actionState) {
+      query = ctx.db.query("projects").withIndex("by_actionState", (q) => q.eq("actionState", args.actionState!));
     } else {
-      allProjects = await ctx.db.query("projects").order(sortOrder).collect();
+      query = ctx.db.query("projects");
     }
+    
+    let allProjects = await query.order(sortOrder).collect();
 
     if (args.projectTypeId) {
       allProjects = allProjects.filter((p) => p.projectTypeId === args.projectTypeId);
@@ -218,7 +225,9 @@ export const getAdminProjects = adminQuery({
     let enrichedProjects = allProjects.map((project) => ({
       _id: project._id,
       code: project.code,
-      status: project.status,
+      phase: project.phase,
+      actionState: project.actionState,
+      status: project.actionState, // Compatibility
       projectTypeName: projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
       clientName: (project.clientId ? clientMap.get(project.clientId) : null)?.name ?? "Unknown Client",
       clientId: project.clientId,
@@ -236,10 +245,10 @@ export const getAdminProjects = adminQuery({
     }
 
     if (args.sortBy === "status") {
-      const statusOrder = ["pending_review", "active", "in_progress", "completed", "archived", "draft"];
+      const statusOrder = ["draft", "awaiting_quotation", "quotation_sent", "active", "in_progress", "completed", "archived"];
       enrichedProjects.sort((a, b) => {
-        const aIndex = statusOrder.indexOf(a.status);
-        const bIndex = statusOrder.indexOf(b.status);
+        const aIndex = statusOrder.indexOf(a.actionState);
+        const bIndex = statusOrder.indexOf(b.actionState);
         return sortOrder === "asc" ? aIndex - bIndex : bIndex - aIndex;
       });
     }

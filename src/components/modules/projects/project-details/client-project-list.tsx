@@ -2,7 +2,16 @@
 
 import { api } from "@convex/_generated/api";
 import { useQuery, useMutation } from "convex/react";
-import { AlertTriangle, Calendar, Eye, FileEdit, Hash, Loader2, Trash2, User } from "lucide-react";
+import {
+  AlertTriangle,
+  Calendar,
+  Eye,
+  FileEdit,
+  Hash,
+  Loader2,
+  Trash2,
+  User,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -52,7 +61,7 @@ function ProjectCard({ project }: { project: ClientProject }) {
                 {project.projectTypeName}
               </span>
             </div>
-            <StatusBadge status={project.status} />
+            <StatusBadge status={project.actionState} />
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -96,7 +105,6 @@ function ProjectCard({ project }: { project: ClientProject }) {
   );
 }
 
-
 // ============================================================================
 // Draft Banner Component
 // ============================================================================
@@ -132,11 +140,11 @@ function DraftBanner({
           </h3>
           <p className="text-xs text-white/60 leading-relaxed mb-4">
             You have an incomplete project draft{" "}
-            <span className="font-mono font-bold text-primary">{draft.code}</span>
-            {draft.eventName && (
-              <> ({draft.eventName})</>
-            )}
-            . Complete or discard it before creating a new project.
+            <span className="font-mono font-bold text-primary">
+              {draft.code}
+            </span>
+            {draft.eventName && <> ({draft.eventName})</>}. Complete or discard
+            it before creating a new project.
           </p>
           <div className="flex items-center gap-3">
             <Button
@@ -181,16 +189,20 @@ export function ClientProjectList() {
   const projectTypes = useQuery(api.functions.projects.queries.getProjectTypes);
 
   // Query for existing client draft
-  const existingDraft = useQuery(api.functions.projects.queries.getMyActiveDraft);
-  const deleteDraftMutation = useMutation(api.functions.projects.mutations.deleteDraft);
+  const existingDraft = useQuery(
+    api.functions.projects.queries.getMyActiveDraft,
+  );
+  const deleteDraftMutation = useMutation(
+    api.functions.projects.mutations.deleteDraft,
+  );
 
   const query = useSimplePaginatedQuery(
     api.functions.projects.queries.getClientProjectsPaginated,
     {
-      status: statusFilter,
+      actionState: statusFilter,
       projectTypeId: typeFilter,
     },
-    { initialNumItems: pageSize }
+    { initialNumItems: pageSize },
   );
 
   const projects: ClientProject[] = useMemo(() => {
@@ -205,9 +217,12 @@ export function ClientProjectList() {
   }, [query]);
 
   const statusOptions = [
-    { label: "Pending Review", value: "pending_review" },
-    { label: "Active", value: "active" },
-    { label: "In Progress", value: "in_progress" },
+    { label: "Draft", value: "draft" },
+    { label: "Awaiting Quotation", value: "awaiting_quotation" },
+    { label: "Quotation Sent", value: "quotation_sent" },
+    { label: "Quotation Approved", value: "quotation_approved" },
+    { label: "Awaiting Uploads", value: "awaiting_uploads" },
+    { label: "Work In Progress", value: "work_in_progress" },
     { label: "Completed", value: "completed" },
     { label: "Archived", value: "archived" },
   ];
@@ -294,9 +309,7 @@ export function ClientProjectList() {
             </Button>
           ) : (
             <Link href="/projects/new">
-              <Button
-                className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
-              >
+              <Button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20">
                 NEW PROJECT
               </Button>
             </Link>
@@ -330,18 +343,18 @@ export function ClientProjectList() {
           },
           filters: [
             {
-              column: "status",
+              column: "actionState",
               title: "Status",
               options: statusOptions,
             },
             ...(typeOptions.length > 0
               ? [
-                {
-                  column: "projectTypeName",
-                  title: "Type",
-                  options: typeOptions,
-                },
-              ]
+                  {
+                    column: "projectTypeName",
+                    title: "Type",
+                    options: typeOptions,
+                  },
+                ]
               : []),
           ],
         }}

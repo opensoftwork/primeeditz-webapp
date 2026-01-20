@@ -139,6 +139,30 @@ export const authenticatedMutation = customMutation(mutation, {
   },
 })
 
+/**
+ * Mutation wrapper that requires authentication AND profile.
+ * Adds `ctx.authUser` and `ctx.profile`.
+ */
+export const authenticatedWithProfileMutation = customMutation(mutation, {
+  args: {},
+  input: async (ctx) => {
+    const { authUser, profile } = await getAuthUserWithProfile(ctx)
+    return { ctx: { ...ctx, authUser, profile }, args: {} }
+  },
+})
+
+/**
+ * Query wrapper that requires authentication AND profile.
+ * Adds `ctx.authUser` and `ctx.profile`.
+ */
+export const authenticatedWithProfileQuery = customQuery(query, {
+  args: {},
+  input: async (ctx) => {
+    const { authUser, profile } = await getAuthUserWithProfile(ctx)
+    return { ctx: { ...ctx, authUser, profile }, args: {} }
+  },
+})
+
 // ============================================================================
 // Admin Wrappers
 // ============================================================================
