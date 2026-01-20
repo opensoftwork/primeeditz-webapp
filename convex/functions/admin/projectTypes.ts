@@ -49,6 +49,15 @@ export const createProjectType = adminMutation({
     categoryId: v.id("projectCategories"),
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()),
+    deliveryConfig: v.optional(
+      v.object({
+        hasPhysicalDelivery: v.boolean(),
+        physicalDeliveryLabel: v.optional(v.string()),
+        hasDigitalDelivery: v.boolean(),
+        digitalDeliveryLabel: v.optional(v.string()),
+        requiresSignoff: v.boolean(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     return await ctx.db.insert("projectTypes", { ...args });
@@ -65,6 +74,15 @@ export const updateProjectType = adminMutation({
     categoryId: v.optional(v.id("projectCategories")),
     isActive: v.optional(v.boolean()),
     displayOrder: v.optional(v.number()),
+    deliveryConfig: v.optional(
+      v.object({
+        hasPhysicalDelivery: v.boolean(),
+        physicalDeliveryLabel: v.optional(v.string()),
+        hasDigitalDelivery: v.boolean(),
+        digitalDeliveryLabel: v.optional(v.string()),
+        requiresSignoff: v.boolean(),
+      })
+    ),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args;

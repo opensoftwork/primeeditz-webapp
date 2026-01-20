@@ -171,15 +171,15 @@ Update dashboards to display phase + actionState with actor indicators.
 
 ## Stories
 
-| Story                                                            | Title                                        | Points | Status        | Depends On |
-| ---------------------------------------------------------------- | -------------------------------------------- | ------ | ------------- | ---------- |
-| [5A.1](../../stories/5a-1-schema-migration-phase-actionstate.md) | Schema Migration - Phase + ActionState Model | 8      | ready-for-dev | -          |
-| [5A.2](../../stories/5a-2-status-transition-utilities.md)        | Status Transition Utilities                  | 5      | blocked       | 5A.1       |
-| [5A.3](../../stories/5a-3-upload-gating-service.md)              | Upload Gating Service                        | 5      | blocked       | 5A.1, 5A.2 |
-| [5A.4](../../stories/5a-4-admin-action-guards.md)                | Admin Action Guards                          | 5      | blocked       | 5A.1, 5A.2 |
-| [5A.5](../../stories/5a-5-project-type-delivery-config.md)       | Project Type Delivery Configuration          | 3      | blocked       | 5A.1       |
-| [5A.6](../../stories/5a-6-status-history-enhancement.md)         | Status History Enhancement                   | 5      | blocked       | 5A.1       |
-| [5A.7](../../stories/5a-7-portal-specific-status-mapping.md)     | Portal-Specific Status Mapping               | 5      | blocked       | 5A.1       |
+| Story                                                            | Title                                        | Points | Status | Depends On |
+| ---------------------------------------------------------------- | -------------------------------------------- | ------ | ------ | ---------- |
+| [5A.1](../../stories/5a-1-schema-migration-phase-actionstate.md) | Schema Migration - Phase + ActionState Model | 8      | done   | -          |
+| [5A.2](../../stories/5a-2-status-transition-utilities.md)        | Status Transition Utilities                  | 5      | done   | 5A.1       |
+| [5A.3](../../stories/5a-3-upload-gating-service.md)              | Upload Gating Service                        | 5      | done   | 5A.1, 5A.2 |
+| [5A.4](../../stories/5a-4-admin-action-guards.md)                | Admin Action Guards                          | 5      | done   | 5A.1, 5A.2 |
+| [5A.5](../../stories/5a-5-project-type-delivery-config.md)       | Project Type Delivery Configuration          | 3      | done   | 5A.1       |
+| [5A.6](../../stories/5a-6-status-history-enhancement.md)         | Status History Enhancement                   | 5      | done   | 5A.1       |
+| [5A.7](../../stories/5a-7-portal-specific-status-mapping.md)     | Portal-Specific Status Mapping               | 5      | done   | 5A.1       |
 
 **Total Points:** 36
 

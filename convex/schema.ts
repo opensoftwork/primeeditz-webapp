@@ -61,7 +61,8 @@ export const projectActionStateValidator = v.union(
   // Terminal States
   v.literal('delivered'),
   v.literal('completed'),
-  v.literal('cancelled')
+  v.literal('cancelled'),
+  v.literal('archived')
 )
 
 // Project source: client_request vs admin_init

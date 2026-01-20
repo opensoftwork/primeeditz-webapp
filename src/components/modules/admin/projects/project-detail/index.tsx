@@ -26,6 +26,7 @@ interface ProjectDetailProps {
 }
 
 import { AdminProjectDetail } from "./types";
+import { getDeliveryPhaseLabel } from "@/lib/status-display";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
@@ -37,6 +38,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
+
+  const deliveryLabel = useMemo(() => {
+    return getDeliveryPhaseLabel(project?.deliveryConfig);
+  }, [project?.deliveryConfig]);
 
   const folderSetupStatus = useQuery(
     api.functions.folders.queries.canSetupFolders,
@@ -126,6 +131,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         code={project.code}
         phase={project.phase}
         actionState={project.actionState}
+        deliveryLabel={deliveryLabel}
       />
 
       <div className="max-w-[1600px] mx-auto">

@@ -39,6 +39,7 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   delivered: ["completed"],
   completed: ["archived"],
   cancelled: [],
+  archived: [],
 };
 
 // State to phase mapping for automatic phase updates
@@ -48,25 +49,26 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   quotation_sent: "setup",
   quotation_approved: "setup",
   storage_allocated: "setup",
-
+  
   awaiting_uploads: "onboarding",
   uploads_complete: "onboarding",
   awaiting_assignment: "onboarding",
-
+  
   assigned: "production",
   work_in_progress: "production",
   deliverables_ready: "production",
-
+  
   awaiting_review: "review",
   revisions_requested: "review",
   review_approved: "review",
-
+  
   preparing_delivery: "delivery",
   ready_for_delivery: "delivery",
-
+  
   delivered: "completed",
   completed: "completed",
   cancelled: "archived",
+  archived: "archived",
 };
 
 // Role mapping: who is responsible for the project in this state
@@ -90,6 +92,7 @@ const STATE_TO_ACTOR: Record<ActionState, Role> = {
   delivered: "client",
   completed: "admin",
   cancelled: "admin",
+  archived: "admin",
 };
 
 /**

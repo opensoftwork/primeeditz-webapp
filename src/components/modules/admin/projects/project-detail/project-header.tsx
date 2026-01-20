@@ -11,12 +11,14 @@ interface ProjectHeaderProps {
   code: string;
   phase: string;
   actionState: string;
+  deliveryLabel?: string;
 }
 
 export function ProjectHeader({
   code,
   phase,
   actionState,
+  deliveryLabel,
 }: ProjectHeaderProps) {
   const router = useRouter();
   return (
@@ -37,7 +39,12 @@ export function ProjectHeader({
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
             {code}
           </h1>
-          <StatusBadge status={actionState} phase={phase} showPhase={true} />
+          <StatusBadge
+            status={actionState}
+            phase={phase}
+            showPhase={true}
+            deliveryLabel={deliveryLabel}
+          />
         </div>
       </motion.div>
 

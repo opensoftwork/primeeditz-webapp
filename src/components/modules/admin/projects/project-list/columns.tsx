@@ -7,6 +7,8 @@ import { ProjectActions } from "./project-actions";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
 
+import { getDeliveryPhaseLabel } from "@/lib/status-display";
+
 export const columns: ColumnDef<AdminProject>[] = [
   {
     accessorKey: "code",
@@ -85,7 +87,15 @@ export const columns: ColumnDef<AdminProject>[] = [
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <StatusBadge status={row.getValue("actionState")} />,
+    cell: ({ row }) => {
+      const deliveryLabel = getDeliveryPhaseLabel(row.original.deliveryConfig);
+      return (
+        <StatusBadge
+          status={row.getValue("actionState")}
+          deliveryLabel={deliveryLabel}
+        />
+      );
+    },
     filterFn: (row, id, value) => {
       return (value as string[]).includes(row.getValue(id));
     },

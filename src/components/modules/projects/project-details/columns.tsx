@@ -2,10 +2,9 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { Calendar, Hash, Eye } from "lucide-react";
-import {
-  DataTableColumnHeader,
-} from "@/components/shared/data-table";
-import { StatusBadge } from "./status-badge";
+import { DataTableColumnHeader } from "@/components/shared/data-table";
+import { ClientStatusBadge } from "../client-status-badge";
+import { PhaseProgress } from "../phase-progress";
 import type { ClientProject } from "./types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -65,14 +64,25 @@ export const columns: ColumnDef<ClientProject>[] = [
     ),
   },
   {
-    accessorKey: "status",
+    accessorKey: "actionState",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
-    cell: ({ row }) => <StatusBadge status={row.getValue("status")} />,
+    cell: ({ row }) => (
+      <ClientStatusBadge status={row.getValue("actionState")} />
+    ),
     filterFn: (row, id, value) => {
       return (value as string[]).includes(row.getValue(id));
     },
+  },
+  {
+    accessorKey: "phase",
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title="Progress" />
+    ),
+    cell: ({ row }) => (
+      <PhaseProgress currentPhase={row.getValue("phase")} compact={true} />
+    ),
   },
   {
     accessorKey: "createdAt",

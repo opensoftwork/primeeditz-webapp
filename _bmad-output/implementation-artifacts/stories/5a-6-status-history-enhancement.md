@@ -2,7 +2,7 @@
 id: 5a-6
 title: Status History Enhancement
 epic: 05a-project-status-workflow
-status: blocked
+status: done
 priority: medium
 points: 5
 assignee: null

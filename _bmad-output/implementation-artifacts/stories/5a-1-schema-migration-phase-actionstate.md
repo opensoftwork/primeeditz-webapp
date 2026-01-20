@@ -2,7 +2,7 @@
 id: 5a-1
 title: Schema Migration - Phase + ActionState Model
 epic: 05a-project-status-workflow
-status: ready-for-dev
+status: done
 priority: critical
 points: 8
 assignee: null

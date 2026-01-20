@@ -91,12 +91,14 @@ export function StatusBadge({
   status,
   phase,
   showPhase = false,
+  deliveryLabel,
 }: {
   status: string;
   phase?: string;
   showPhase?: boolean;
+  deliveryLabel?: string;
 }) {
-  const config = getStatusConfig(status);
+  const config = getStatusConfig(status, deliveryLabel);
   const phaseConfig = phase ? getPhaseConfig(phase) : null;
 
   return (

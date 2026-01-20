@@ -14,4 +14,11 @@ export interface AdminProject {
   createdAt: number;
   updatedAt: number;
   deletedAt?: number;
+  deliveryConfig?: {
+    hasPhysicalDelivery: boolean;
+    physicalDeliveryLabel?: string;
+    hasDigitalDelivery: boolean;
+    digitalDeliveryLabel?: string;
+    requiresSignoff: boolean;
+  };
 }

@@ -48,6 +48,7 @@ import type * as functions_storageTiers_mutations from "../functions/storageTier
 import type * as functions_storageTiers_queries from "../functions/storageTiers/queries.js";
 import type * as http from "../http.js";
 import type * as lib_customFunctions from "../lib/customFunctions.js";
+import type * as lib_deliveryConfig from "../lib/deliveryConfig.js";
 import type * as lib_helpers from "../lib/helpers.js";
 import type * as lib_statusMachine from "../lib/statusMachine.js";
 import type * as lib_storageUtils from "../lib/storageUtils.js";
@@ -109,6 +110,7 @@ declare const fullApi: ApiFromModules<{
   "functions/storageTiers/queries": typeof functions_storageTiers_queries;
   http: typeof http;
   "lib/customFunctions": typeof lib_customFunctions;
+  "lib/deliveryConfig": typeof lib_deliveryConfig;
   "lib/helpers": typeof lib_helpers;
   "lib/statusMachine": typeof lib_statusMachine;
   "lib/storageUtils": typeof lib_storageUtils;

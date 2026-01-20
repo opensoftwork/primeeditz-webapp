@@ -7,10 +7,11 @@ import { getStatusConfig } from "@/lib/status-display";
 
 interface StatusBadgeProps {
   status: string;
+  deliveryLabel?: string;
 }
 
-export function StatusBadge({ status }: StatusBadgeProps) {
-  const config = getStatusConfig(status);
+export function StatusBadge({ status, deliveryLabel }: StatusBadgeProps) {
+  const config = getStatusConfig(status, deliveryLabel);
 
   return (
     <span

@@ -160,10 +160,181 @@ export const PHASE_CONFIG: Record<ProjectPhase, StatusConfig> = {
   archived: { label: "Archived", color: "text-zinc-500", bgColor: "bg-zinc-500/5 border-zinc-500/10" },
 };
 
-export function getStatusConfig(state: string): StatusConfig {
-  return ACTION_STATE_CONFIG[state as ActionState] || ACTION_STATE_CONFIG.draft;
+export function getStatusConfig(state: string, deliveryLabel?: string): StatusConfig {
+  const config = ACTION_STATE_CONFIG[state as ActionState] || ACTION_STATE_CONFIG.draft;
+  
+  // Override label for preparing_delivery if project-specific label exists
+  if (state === 'preparing_delivery' && deliveryLabel) {
+    return {
+      ...config,
+      label: deliveryLabel
+    };
+  }
+
+  return config;
+}
+
+export interface ClientStatusDisplay {
+  label: string;
+  description: string;
+  color: string;
+  isActionNeeded: boolean;
+  cta?: {
+    label: string;
+    href: (projectId: string) => string;
+  };
+}
+
+export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
+  draft: {
+    label: "Draft",
+    description: "Complete your project request",
+    color: "text-zinc-400",
+    isActionNeeded: true,
+    cta: { label: "Continue Request", href: (id) => `/projects/wizard?projectId=${id}` },
+  },
+  awaiting_quotation: {
+    label: "Preparing Quote",
+    description: "Our team is reviewing your request",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  quotation_sent: {
+    label: "Quote Ready",
+    description: "Review and approve your quotation",
+    color: "text-amber-400",
+    isActionNeeded: true,
+    cta: { label: "View Quotation", href: (id) => `/projects/${id}/quotation` },
+  },
+  quotation_approved: {
+    label: "Preparing",
+    description: "We're setting up your project",
+    color: "text-emerald-400",
+    isActionNeeded: false,
+  },
+  storage_allocated: {
+    label: "Preparing",
+    description: "Almost ready for your files",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  awaiting_uploads: {
+    label: "Upload Files",
+    description: "We're ready for your photos/videos",
+    color: "text-primary",
+    isActionNeeded: true,
+    cta: { label: "Upload Files", href: (id) => `/projects/${id}` },
+  },
+  uploads_complete: {
+    label: "Processing",
+    description: "We've received your files",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  awaiting_assignment: {
+    label: "Processing",
+    description: "Assigning your project",
+    color: "text-zinc-400",
+    isActionNeeded: false,
+  },
+  assigned: {
+    label: "In Production",
+    description: "Work has started on your project",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  work_in_progress: {
+    label: "In Production",
+    description: "Our team is working on your project",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  deliverables_ready: {
+    label: "Quality Check",
+    description: "Reviewing your deliverables",
+    color: "text-purple-400",
+    isActionNeeded: false,
+  },
+  awaiting_review: {
+    label: "Review Ready",
+    description: "Your deliverables are ready for review",
+    color: "text-amber-400",
+    isActionNeeded: true,
+    cta: { label: "Review Deliverables", href: (id) => `/projects/${id}/review` }, // Hypothetical review page
+  },
+  revisions_requested: {
+    label: "Making Changes",
+    description: "Working on your requested changes",
+    color: "text-amber-400",
+    isActionNeeded: false,
+  },
+  review_approved: {
+    label: "Approved",
+    description: "Preparing for delivery",
+    color: "text-emerald-400",
+    isActionNeeded: false,
+  },
+  preparing_delivery: {
+    label: "Preparing Delivery",
+    description: "Finalizing your files",
+    color: "text-blue-400",
+    isActionNeeded: false,
+  },
+  ready_for_delivery: {
+    label: "Ready",
+    description: "Your project is ready for delivery",
+    color: "text-emerald-400",
+    isActionNeeded: false,
+  },
+  delivered: {
+    label: "Delivered",
+    description: "Confirm receipt of your project",
+    color: "text-primary",
+    isActionNeeded: true,
+  },
+  completed: {
+    label: "Complete",
+    description: "Project completed successfully!",
+    color: "text-primary",
+    isActionNeeded: false,
+  },
+  cancelled: {
+    label: "Cancelled",
+    description: "This project was cancelled",
+    color: "text-zinc-500",
+    isActionNeeded: false,
+  },
+};
+
+export function getClientStatusDisplay(state: string): ClientStatusDisplay {
+  return CLIENT_STATUS_MAP[state as ActionState] || {
+    label: state.replace("_", " "),
+    description: "",
+    color: "text-zinc-400",
+    isActionNeeded: false,
+  };
 }
 
 export function getPhaseConfig(phase: string): StatusConfig {
   return PHASE_CONFIG[phase as ProjectPhase] || PHASE_CONFIG.setup;
+}
+
+export function getDeliveryPhaseLabel(deliveryConfig?: {
+  hasPhysicalDelivery: boolean;
+  physicalDeliveryLabel?: string;
+  hasDigitalDelivery: boolean;
+  digitalDeliveryLabel?: string;
+}): string {
+  if (!deliveryConfig) return "Preparing Delivery";
+
+  const labels: string[] = [];
+
+  if (deliveryConfig.hasPhysicalDelivery) {
+    labels.push(deliveryConfig.physicalDeliveryLabel || "Physical Delivery");
+  }
+  if (deliveryConfig.hasDigitalDelivery) {
+    labels.push(deliveryConfig.digitalDeliveryLabel || "Digital Delivery");
+  }
+
+  return labels.join(" & ") || "Preparing Delivery";
 }

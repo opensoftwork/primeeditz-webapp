@@ -2,7 +2,7 @@
 id: 5a-5
 title: Project Type Delivery Configuration
 epic: 05a-project-status-workflow
-status: blocked
+status: done
 priority: medium
 points: 3
 assignee: null

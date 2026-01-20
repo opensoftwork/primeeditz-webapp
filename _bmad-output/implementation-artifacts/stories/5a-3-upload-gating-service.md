@@ -2,7 +2,7 @@
 id: 5a-3
 title: Upload Gating Service
 epic: 05a-project-status-workflow
-status: blocked
+status: done
 priority: high
 points: 5
 assignee: null

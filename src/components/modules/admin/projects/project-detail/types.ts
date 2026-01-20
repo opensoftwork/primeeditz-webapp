@@ -37,5 +37,12 @@ export interface AdminProjectDetail {
   }>;
   statusHistory?: StatusHistoryEntry[];
   storageAllocated?: number;
+  deliveryConfig?: {
+    hasPhysicalDelivery: boolean;
+    physicalDeliveryLabel?: string;
+    hasDigitalDelivery: boolean;
+    digitalDeliveryLabel?: string;
+    requiresSignoff: boolean;
+  };
 }
 

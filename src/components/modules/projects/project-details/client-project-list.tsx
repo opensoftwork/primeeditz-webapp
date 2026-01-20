@@ -33,6 +33,8 @@ import { toast } from "sonner";
 import { columns } from "./columns";
 import { StatusBadge } from "./status-badge";
 import type { ClientProject } from "./types";
+import { ClientStatusBadge } from "../client-status-badge";
+import { PhaseProgress } from "../phase-progress";
 
 // ============================================================================
 // Project Card Component (for card view)
@@ -44,24 +46,24 @@ function ProjectCard({ project }: { project: ClientProject }) {
       <motion.div
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
-        <div className="relative space-y-4">
+        <div className="relative flex-1 flex flex-col space-y-4">
           <div className="flex items-start justify-between">
-            <div>
+            <div className="space-y-1">
               <div className="flex items-center gap-2">
                 <Hash className="h-3.5 w-3.5 text-primary/40" />
                 <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors">
                   {project.code}
                 </span>
               </div>
-              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+              <div className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
                 {project.projectTypeName}
-              </span>
+              </div>
             </div>
-            <StatusBadge status={project.actionState} />
+            <ClientStatusBadge status={project.actionState} />
           </div>
 
           <div className="flex items-center gap-2.5">
@@ -75,7 +77,7 @@ function ProjectCard({ project }: { project: ClientProject }) {
 
           {project.eventName && (
             <div className="pt-3 border-t border-white/5">
-              <div className="font-bold text-white/50 truncate">
+              <div className="font-bold text-white/50 truncate text-[13px]">
                 {project.eventName}
               </div>
               {project.eventDate && (
@@ -87,17 +89,20 @@ function ProjectCard({ project }: { project: ClientProject }) {
             </div>
           )}
 
-          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+          <div className="flex-1" />
+
+          {/* Progress Bar */}
+          <div className="pt-4 mt-auto border-t border-white/5">
+            <PhaseProgress currentPhase={project.phase} compact={true} />
+          </div>
+
+          <div className="pt-3 flex items-center justify-between">
             <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
               {new Date(project.createdAt).toLocaleDateString()}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
-            >
-              View <Eye className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-1 text-[9px] font-black uppercase tracking-widest text-primary/60 group-hover:text-primary transition-colors">
+              VIEW DETAILS <Eye className="h-3 w-3" />
+            </div>
           </div>
         </div>
       </motion.div>

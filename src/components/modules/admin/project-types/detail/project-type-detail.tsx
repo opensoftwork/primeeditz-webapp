@@ -13,6 +13,7 @@ import Link from "next/link";
 import { FieldList, FieldDrawer } from "./index";
 import { type FieldFormValues } from "./field-drawer";
 import { DetailHeader, DetailStats, DetailAlerts } from "./index";
+import { DeliveryConfigForm } from "./delivery-config-form";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import type { Doc, Id } from "@convex/_generated/dataModel";
 
@@ -23,22 +24,22 @@ export function ProjectTypeDetail() {
   // Queries & Mutations
   const projectType = useQuery(
     api.functions.projectTypes.queries.getProjectTypeWithFields,
-    { projectTypeId: id }
+    { projectTypeId: id },
   );
   const createField = useMutation(
-    api.functions.projectTypeFields.mutations.createField
+    api.functions.projectTypeFields.mutations.createField,
   );
   const updateField = useMutation(
-    api.functions.projectTypeFields.mutations.updateField
+    api.functions.projectTypeFields.mutations.updateField,
   );
   const reorderFields = useMutation(
-    api.functions.projectTypeFields.mutations.reorderFields
+    api.functions.projectTypeFields.mutations.reorderFields,
   );
   const toggleFieldStatus = useMutation(
-    api.functions.projectTypeFields.mutations.toggleFieldActive
+    api.functions.projectTypeFields.mutations.toggleFieldActive,
   );
   const hardDeleteField = useMutation(
-    api.functions.projectTypeFields.mutations.hardDeleteField
+    api.functions.projectTypeFields.mutations.hardDeleteField,
   );
 
   // State
@@ -46,16 +47,16 @@ export function ProjectTypeDetail() {
   const [editingField, setEditingField] =
     useState<Doc<"projectTypeFields"> | null>(null);
   const [localFields, setLocalFields] = useState<Doc<"projectTypeFields">[]>(
-    []
+    [],
   );
   const [fieldToDeactivate, setFieldToDeactivate] = useState<string | null>(
-    null
+    null,
   );
   const [fieldToReactivate, setFieldToReactivate] = useState<string | null>(
-    null
+    null,
   );
   const [fieldToHardDelete, setFieldToHardDelete] = useState<string | null>(
-    null
+    null,
   );
   const isSyncingOrder = useRef(false);
   const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -208,6 +209,10 @@ export function ProjectTypeDetail() {
           <DetailStats
             projectType={projectType}
             fieldCount={localFields.length}
+          />
+          <DeliveryConfigForm
+            projectTypeId={id}
+            initialConfig={projectType.deliveryConfig}
           />
         </div>
 
