@@ -62,6 +62,7 @@ export const getAdminProjectsPaginated = adminQuery({
           projectTypeName: projectType?.name ?? "Unknown",
           clientName: client?.name ?? "Unknown Client",
           clientId: project.clientId,
+          source: project.source,
           eventName: project.eventName,
           eventDate: project.eventDate,
           deliveryConfig: projectType?.deliveryConfig,

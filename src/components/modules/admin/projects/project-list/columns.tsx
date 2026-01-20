@@ -92,6 +92,7 @@ export const columns: ColumnDef<AdminProject>[] = [
       return (
         <StatusBadge
           status={row.getValue("actionState")}
+          source={row.original.source}
           deliveryLabel={deliveryLabel}
         />
       );

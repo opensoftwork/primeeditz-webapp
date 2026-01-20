@@ -33,7 +33,7 @@ export const getMyProjects = clientQuery({
     const projects = await ctx.db
       .query('projects')
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.neq(q.field('actionState'), 'draft'))
+      .filter((q) => q.eq(q.field('deletedAt'), undefined))
       .order('desc')
       .collect()
 
@@ -156,10 +156,7 @@ export const getMyProjectsWithType = clientQuery({
       .query('projects')
       .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
       .filter((q) => 
-        q.and(
-          q.neq(q.field('actionState'), 'draft'),
           q.eq(q.field('deletedAt'), undefined)
-        )
       )
       .order('desc')
       .collect()
@@ -203,10 +200,7 @@ export const getClientProjectsPaginated = clientQuery({
     let query = ctx.db
       .query("projects")
       .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
-      .filter((q) => q.and(
-        q.neq(q.field("actionState"), "draft"),
-        q.eq(q.field("deletedAt"), undefined)
-      ));
+      .filter((q) => q.eq(q.field("deletedAt"), undefined));
 
     if (args.phase) {
       query = query.filter((q) => q.eq(q.field("phase"), args.phase!));
@@ -237,6 +231,7 @@ export const getClientProjectsPaginated = clientQuery({
           code: project.code,
           phase: project.phase,
           actionState: project.actionState,
+          source: project.source,
           awaitingActorRole: project.awaitingActorRole,
           projectTypeName: projectType?.name ?? "Unknown",
           eventName: project.eventName,

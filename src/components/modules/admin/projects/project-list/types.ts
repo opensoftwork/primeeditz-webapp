@@ -8,7 +8,8 @@ export interface AdminProject {
   status: string; // compatibility
   projectTypeName: string;
   clientName: string;
-  clientId: Id<"profiles">;
+  clientId?: Id<"profiles">;
+  source: "client_request" | "admin_init";
   eventName?: string;
   eventDate?: number;
   createdAt: number;

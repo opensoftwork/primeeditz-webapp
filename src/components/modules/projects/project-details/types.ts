@@ -9,6 +9,7 @@ export type ClientProject = {
   projectTypeName: string;
   eventName?: string;
   eventDate?: number;
+  source: Doc<"projects">["source"];
   createdAt: number;
   updatedAt: number;
 };
