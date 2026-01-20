@@ -7,6 +7,7 @@
  * Refactored into modular sub-components for better maintainability.
  */
 
+import { useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Database } from "lucide-react";
@@ -22,15 +23,24 @@ import { ProjectSpecifications } from "./specifications";
 import { ReferenceMaterials } from "./reference-materials";
 import { AssetsSection } from "./assets-section";
 import { DetailSidebar } from "./sidebar";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface ProjectDetailViewProps {
   projectId: string;
 }
 
 export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
+  const { setOverride, removeOverride } = useBreadcrumbStore();
   const project = useQuery(api.functions.projects.queries.getProject, {
     projectId: projectId as Id<"projects">,
   });
+
+  useEffect(() => {
+    if (project?.eventName) {
+      setOverride(projectId, project.eventName);
+    }
+    return () => removeOverride(projectId);
+  }, [projectId, project?.eventName, setOverride, removeOverride]);
 
   const fields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,

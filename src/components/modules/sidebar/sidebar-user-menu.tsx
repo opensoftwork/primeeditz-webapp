@@ -5,6 +5,7 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useState } from "react";
 import {
   SidebarFooter,
   SidebarMenu,
@@ -30,7 +31,10 @@ export function SidebarUserMenu({
   userRole,
   isLoading = false,
 }: SidebarUserMenuProps) {
+  const [isSignOutLoading, setIsSignOutLoading] = useState(false);
+
   const handleSignOut = async () => {
+    setIsSignOutLoading(true);
     try {
       await authClient.signOut({
         fetchOptions: {
@@ -39,11 +43,16 @@ export function SidebarUserMenu({
             // Full page reload to clear all state
             window.location.href = "/sign-in";
           },
+          onError: (ctx) => {
+            setIsSignOutLoading(false);
+            toast.error(ctx.error.message || "Failed to sign out");
+          }
         },
       });
     } catch (error) {
       console.error("Sign out error:", error);
       toast.error("Failed to sign out. Please try again.");
+      setIsSignOutLoading(false);
     }
   };
 
@@ -111,10 +120,11 @@ export function SidebarUserMenu({
               <DropdownMenuSeparator className="bg-white/10 my-1" />
               <DropdownMenuItem
                 onClick={handleSignOut}
+                disabled={isSignOutLoading}
                 className="rounded-lg py-2.5 focus:bg-destructive/10 focus:text-destructive transition-colors text-destructive"
               >
-                <LogOut className="mr-2 size-4" />
-                <span className="font-bold text-sm">Sign out</span>
+                <LogOut className={`mr-2 size-4 ${isSignOutLoading ? 'animate-pulse' : ''}`} />
+                <span className="font-bold text-sm">{isSignOutLoading ? "Signing out..." : "Sign out"}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

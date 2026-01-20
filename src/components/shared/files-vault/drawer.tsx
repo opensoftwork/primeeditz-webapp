@@ -144,7 +144,7 @@ export function FilesVaultDrawer({
             />
 
             {/* Content Area */}
-            <div className="flex-1 overflow-y-auto custom-scrollbar p-10 space-y-12">
+            <div className="flex-1 overflow-y-auto custom-scrollbar p-6 space-y-6">
               {filteredFiles.length === 0 ? (
                 <VaultEmptyState
                   activeTab={activeTab}
@@ -152,7 +152,7 @@ export function FilesVaultDrawer({
                   hasUploadCapability={!!onAddFiles}
                 />
               ) : (
-                <div className="space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-700">
                   <div className="grid grid-cols-1 gap-4">
                     {filteredFiles.map((file, idx) => (
                       <VaultFileItem

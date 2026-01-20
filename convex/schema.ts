@@ -122,6 +122,7 @@ export default defineSchema({
     phone: v.optional(v.string()),
     company: v.optional(v.string()),
     onboardingComplete: v.boolean(),
+    image: v.optional(v.string()), // Profile picture from auth provider
     updatedAt: v.number(),
     deactivatedAt: v.optional(v.number()),
     deactivatedBy: v.optional(v.id('profiles')),

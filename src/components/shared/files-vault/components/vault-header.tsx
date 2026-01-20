@@ -35,7 +35,7 @@ export function VaultHeader({
   onClose,
 }: VaultHeaderProps) {
   return (
-    <div className="shrink-0 px-10 py-12 border-b border-white/5 relative overflow-hidden bg-white/2">
+    <div className="shrink-0 px-6 py-8 border-b border-white/5 relative overflow-hidden bg-white/2">
       <div
         className={cn(
           "absolute top-0 right-0 w-80 h-80 blur-[120px] rounded-full -mr-40 -mt-40 animate-pulse duration-5000",
@@ -67,7 +67,7 @@ export function VaultHeader({
                 Vault Protocol
               </span>
             </div>
-            <h2 className="text-4xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
+            <h2 className="text-2xl font-black uppercase tracking-tighter text-white mb-2 leading-none">
               {title}
             </h2>
           </motion.div>
