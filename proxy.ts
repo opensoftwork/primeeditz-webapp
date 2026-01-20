@@ -1,28 +1,27 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { getSessionCookie } from "better-auth/cookies";
+import { isAuthenticated } from "@/lib/auth-server";
 
 export async function proxy(request: NextRequest) {
 	const { pathname } = request.nextUrl;
 	
-	// Check for session cookie from Better Auth
-	// This is a fast, cookie-only check (not database verification)
-	const sessionCookie = getSessionCookie(request);
+	// Perform authentication check using Convex Better Auth helper
+	// This uses internal Next.js headers() and is designed for middleware/proxy.
+	const isAuthed = await isAuthenticated();
 
-	// If authenticated user tries to access auth pages, redirect to dashboard
-	if (sessionCookie && (pathname === '/sign-in' || pathname === '/sign-up')) {
+	// Protect auth pages: If authenticated, redirect to dashboard
+	if (isAuthed && (pathname === '/sign-in' || pathname === '/sign-up')) {
 		return NextResponse.redirect(new URL("/dashboard", request.url));
 	}
 
-	// If accessing protected route without session, redirect to sign-in
-	if (!sessionCookie) {
+	// Protect dashboard and projects: If NOT authenticated, redirect to sign-in
+	if (!isAuthed && pathname !== '/sign-in' && pathname !== '/sign-up') {
 		const signInUrl = new URL("/sign-in", request.url);
-		// Preserve the original URL as a redirect parameter
+		// Preserve the original URL as a redirect parameter for post-login redirection
 		signInUrl.searchParams.set("redirect", pathname);
 		return NextResponse.redirect(signInUrl);
 	}
 
-	// Session cookie exists, allow request to proceed
-	// Full auth verification happens in protected layout
+	// Flow remains authenticated or accessing public route
 	return NextResponse.next();
 }
 

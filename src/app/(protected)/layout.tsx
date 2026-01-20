@@ -52,25 +52,36 @@ export default function DashboardLayout({
     pathname?.includes("/projects/new") || pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
 
-  // Redirect to onboarding if authenticated but no profile (and not already on onboarding)
+  // Redirect to onboarding or sign-in based on auth state
   useEffect(() => {
-    if (
-      !isAuthLoading &&
-      isAuthenticated &&
-      userProfile === null &&
-      !isOnboardingPage
-    ) {
+    if (isAuthLoading) return;
+
+    if (!isAuthenticated) {
+      const signInUrl = new URL("/sign-in", window.location.origin);
+      signInUrl.searchParams.set("redirect", pathname);
+      router.push(signInUrl.pathname + signInUrl.search);
+      return;
+    }
+
+    if (userProfile === null && !isOnboardingPage) {
       router.push("/onboarding");
     }
-  }, [isAuthLoading, isAuthenticated, userProfile, isOnboardingPage, router]);
+  }, [
+    isAuthLoading,
+    isAuthenticated,
+    userProfile,
+    isOnboardingPage,
+    router,
+    pathname,
+  ]);
 
   // Allow onboarding page to render without a profile
   if (isOnboardingPage) {
     return <>{children}</>;
   }
 
-  // Show loading state while auth or profile is being fetched
-  if (isAuthLoading || userProfile === undefined) {
+  // Show loading state while auth is loading OR (authenticated AND profile is loading)
+  if (isAuthLoading || (isAuthenticated && userProfile === undefined)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg text-muted-foreground animate-pulse font-medium">
@@ -78,6 +89,12 @@ export default function DashboardLayout({
         </div>
       </div>
     );
+  }
+
+  // If not authenticated, the useEffect will handle redirection
+  // We return null to prevent rendering protected content while redirecting
+  if (!isAuthenticated) {
+    return null;
   }
 
   // Redirect to onboarding if no profile exists (handled by useEffect above)
@@ -163,13 +180,13 @@ export default function DashboardLayout({
 
             {/* Right side - Polished user info */}
             <div className="ml-auto flex items-center gap-3">
-              <UserNav 
+              <UserNav
                 user={{
                   name: userProfile.name,
                   email: userProfile.email,
                   role: userProfile.role,
-                  image: userProfile.image
-                }} 
+                  image: userProfile.image,
+                }}
               />
             </div>
           </header>
