@@ -112,7 +112,7 @@ interface QuotationBuilderContextValue {
   // Actions
   setFormData: <K extends keyof QuotationFormData>(
     step: K,
-    data: Partial<QuotationFormData[K]>
+    data: Partial<QuotationFormData[K]>,
   ) => void;
   goToStep: (step: QuotationStepId) => void;
   nextStep: () => void;
@@ -136,7 +136,7 @@ export function useQuotationBuilder() {
   const context = useContext(QuotationBuilderContext);
   if (!context) {
     throw new Error(
-      "useQuotationBuilder must be used within QuotationBuilderProvider"
+      "useQuotationBuilder must be used within QuotationBuilderProvider",
     );
   }
   return context;
@@ -159,7 +159,7 @@ export function QuotationBuilderProvider({
 
   // State
   const [quotationId, setQuotationId] = useState<string | null>(
-    initialQuotationId ?? null
+    initialQuotationId ?? null,
   );
   const [currentStep, setCurrentStep] = useState<QuotationStepId>(1);
   const [formData, setFormDataState] =
@@ -168,7 +168,7 @@ export function QuotationBuilderProvider({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
-    null
+    null,
   );
 
   // Query existing quotation if editing
@@ -176,7 +176,7 @@ export function QuotationBuilderProvider({
     api.functions.quotations.queries.getQuotation,
     initialQuotationId
       ? { quotationId: initialQuotationId as Id<"quotations"> }
-      : "skip"
+      : "skip",
   );
 
   // Populate form data if editing
@@ -217,14 +217,14 @@ export function QuotationBuilderProvider({
     api.admin.getAdminProjectsSimple,
     formData.step1.clientId
       ? { clientId: formData.step1.clientId as Id<"profiles"> }
-      : "skip"
+      : "skip",
   );
 
   const templatesQuery = useQuery(
     api.functions.quotations.templates.queries.getTemplates,
     {
       activeOnly: true,
-    }
+    },
   );
   const templates = templatesQuery as Template[] | undefined;
 
@@ -232,22 +232,22 @@ export function QuotationBuilderProvider({
     api.functions.quotations.sections.queries.getSections,
     {
       activeOnly: true,
-    }
+    },
   );
   const sections = sectionsQuery as Section[] | undefined;
 
   // Mutations
   const createQuotation = useMutation(
-    api.functions.quotations.mutations.createQuotation
+    api.functions.quotations.mutations.createQuotation,
   );
   const updateQuotation = useMutation(
-    api.functions.quotations.mutations.updateQuotation
+    api.functions.quotations.mutations.updateQuotation,
   );
 
   // Computed
   const selectedClient = useMemo(
     () => clients?.find((c) => c._id === formData.step1.clientId),
-    [clients, formData.step1.clientId]
+    [clients, formData.step1.clientId],
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -261,7 +261,7 @@ export function QuotationBuilderProvider({
       const subItemsTotal =
         item.subItems?.reduce(
           (s: number, sub: QuotationSubItem) => s + sub.rate * sub.quantity,
-          0
+          0,
         ) ?? 0;
       return acc + itemTotal + subItemsTotal;
     }, 0);
@@ -275,7 +275,7 @@ export function QuotationBuilderProvider({
   const setFormData = useCallback(
     <K extends keyof QuotationFormData>(
       step: K,
-      data: Partial<QuotationFormData[K]>
+      data: Partial<QuotationFormData[K]>,
     ) => {
       setFormDataState((prev) => ({
         ...prev,
@@ -283,7 +283,7 @@ export function QuotationBuilderProvider({
       }));
       setIsDirty(true);
     },
-    []
+    [],
   );
 
   // Navigation
@@ -325,13 +325,13 @@ export function QuotationBuilderProvider({
             rate: si.unitPrice,
             quantity: si.defaultQuantity,
           })),
-        })
+        }),
       );
 
       setFormData("step3", { lineItems: mappedItems });
       setCurrentStep(3);
     },
-    [templates, setFormData]
+    [templates, setFormData],
   );
 
   // Line Item management
@@ -351,7 +351,7 @@ export function QuotationBuilderProvider({
         lineItems: [...formData.step3.lineItems, newItem],
       });
     },
-    [sections, formData.step3.lineItems, setFormData]
+    [sections, formData.step3.lineItems, setFormData],
   );
 
   const updateLineItem = useCallback(
@@ -360,7 +360,7 @@ export function QuotationBuilderProvider({
       newItems[idx] = { ...newItems[idx], ...updates };
       setFormData("step3", { lineItems: newItems });
     },
-    [formData.step3.lineItems, setFormData]
+    [formData.step3.lineItems, setFormData],
   );
 
   const removeLineItem = useCallback(
@@ -368,7 +368,7 @@ export function QuotationBuilderProvider({
       const newItems = formData.step3.lineItems.filter((_, i) => i !== idx);
       setFormData("step3", { lineItems: newItems });
     },
-    [formData.step3.lineItems, setFormData]
+    [formData.step3.lineItems, setFormData],
   );
 
   // Save quotation
@@ -443,9 +443,44 @@ export function QuotationBuilderProvider({
       }
 
       setIsDirty(false);
-    } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Failed to save quotation";
+    } catch (err: unknown) {
+      // Extract user-friendly error message from Convex errors
+      let message = "Failed to save quotation";
+
+      if (err instanceof Error) {
+        // Check for Convex error patterns
+        const errorMessage = err.message;
+
+        // Handle specific business logic errors with friendly messages
+        if (errorMessage.includes("Can only edit draft quotations")) {
+          message =
+            "This quotation can no longer be edited. Only draft quotations can be modified.";
+          toast.error(message, {
+            description: "Redirecting to quotation details...",
+            duration: 3000,
+          });
+          // Redirect back to detail page after a short delay
+          setTimeout(() => {
+            router.push(`/quotations/${quotationId}`);
+          }, 1500);
+          setIsLoading(false);
+          return;
+        }
+
+        // Handle other known error patterns
+        if (errorMessage.includes("Quotation not found")) {
+          message = "This quotation no longer exists.";
+        } else if (errorMessage.includes("Server Error")) {
+          // Generic Convex server error - extract the meaningful part
+          const match = errorMessage.match(/Uncaught Error: (.+?)(?:\n|$)/);
+          message =
+            match?.[1] || "An unexpected error occurred. Please try again.";
+        } else {
+          // Use original message if it's already user-friendly
+          message = errorMessage;
+        }
+      }
+
       setError(message);
       toast.error(message);
     } finally {

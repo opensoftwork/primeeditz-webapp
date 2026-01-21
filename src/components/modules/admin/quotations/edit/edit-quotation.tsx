@@ -11,17 +11,16 @@ import {
   QuotationBuilderProvider,
   useQuotationBuilder,
 } from "../builder/quotation-builder-context";
-import { DetailHeader } from "../detail/components/detail-header";
 import { PricingSummary } from "../detail/components/pricing-summary";
 import {
-  EditorClientSection,
+  EditorClientCard,
+  EditorValiditySection,
   EditorLineItemsSection,
   EditorTermsSection,
 } from "./components";
 import { Button } from "@/components/ui/button";
 import { Save, ArrowLeft, Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { cn } from "@/lib/utils";
 
 export function EditQuotation({ quotationId }: { quotationId: string }) {
   return (
@@ -40,10 +39,9 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
     grandTotal,
     formData,
     taxAmount,
-    sections,
+    selectedClient,
   } = useQuotationBuilder();
 
-  // For the editor, we want a simplified header
   return (
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
       {/* Header */}
@@ -65,7 +63,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
           </div>
           <p className="text-white/50 text-xs font-medium ml-12">
             Modifying quotation details for{" "}
-            {formData.step1.clientId ? "selected client" : "inquiry"}.
+            {selectedClient?.name || "selected client"}.
           </p>
         </div>
 
@@ -89,24 +87,28 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-        <div className="lg:col-span-2 space-y-12 pb-20">
-          <section className="space-y-4">
-            <EditorClientSection />
+        {/* Main Content Area */}
+        <div className="lg:col-span-2 space-y-8 pb-20">
+          {/* Client Info (Read-only) */}
+          <section>
+            <EditorClientCard />
           </section>
 
           {/* Line Items Section */}
-          <section className="space-y-4">
+          <section>
             <EditorLineItemsSection />
           </section>
 
           {/* Terms Section */}
-          <section className="space-y-4">
+          <section>
             <EditorTermsSection />
           </section>
         </div>
 
+        {/* Sidebar */}
         <div className="lg:col-span-1">
           <div className="sticky top-8 space-y-6">
+            {/* Financial Summary */}
             <PricingSummary
               subtotal={subtotal}
               discountAmount={formData.step4.discountAmount}
@@ -122,6 +124,10 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
               }
             />
 
+            {/* Validity Settings (Moved from main content) */}
+            <EditorValiditySection />
+
+            {/* Editor Mode Warning */}
             <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 space-y-3">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500/60">
                 Editor Mode
