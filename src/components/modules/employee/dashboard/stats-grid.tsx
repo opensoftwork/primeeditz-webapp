@@ -1,0 +1,137 @@
+"use client";
+
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { 
+  LayoutGrid, 
+  Clock, 
+  Zap, 
+  CheckCircle2 
+} from "lucide-react";
+import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
+import { Skeleton } from "@/components/ui/skeleton";
+
+interface StatCardProps {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  description: string;
+  index: number;
+  color: string;
+  glowColor: string;
+}
+
+function StatCard({
+  icon,
+  label,
+  value,
+  description,
+  index,
+  color,
+  glowColor,
+}: StatCardProps) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.4 }}
+      className={cn(
+        "p-6 rounded-[1.5rem] bg-white/3 border border-white/5 relative group hover:bg-white/5 hover:border-white/10 transition-all duration-500 overflow-hidden shadow-2xl",
+        "before:absolute before:inset-0 before:bg-linear-to-b before:from-white/2 before:to-transparent"
+      )}
+    >
+      <div
+        className={cn(
+          "absolute -top-4 -right-4 p-6 opacity-[0.03] group-hover:opacity-[0.07] group-hover:rotate-12 transition-all duration-700",
+          color
+        )}
+      >
+        <div className="scale-[3]">{icon}</div>
+      </div>
+
+      <div className="relative z-10 flex flex-col h-full justify-between space-y-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "p-1.5 rounded-lg bg-white/5 border border-white/10 shadow-lg transition-transform duration-500 group-hover:scale-110",
+              color,
+              glowColor
+            )}
+          >
+            {icon}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+            {label}
+          </span>
+        </div>
+
+        <div className="space-y-0.5">
+          <h4 className="text-3xl font-black text-white tracking-tighter">
+            {value.toString().padStart(2, "0")}
+          </h4>
+          <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+            {description}
+          </p>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export function StatsGrid() {
+  const stats = useQuery(api.employees.getEmployeeDashboardStats);
+
+  if (stats === undefined) {
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Skeleton key={i} className="h-40 rounded-[1.5rem] bg-white/5 animate-pulse" />
+        ))}
+      </div>
+    );
+  }
+
+  const items = [
+    {
+      label: "Total Projects",
+      value: stats.totalAssigned,
+      icon: <LayoutGrid className="h-4 w-4" />,
+      description: "Assigned Assignments",
+      color: "text-indigo-400",
+      glowColor: "shadow-indigo-500/20",
+    },
+    {
+      label: "Active Tasks",
+      value: stats.activeProjects,
+      icon: <Clock className="h-4 w-4" />,
+      description: "In Production",
+      color: "text-amber-400",
+      glowColor: "shadow-amber-500/20",
+    },
+    {
+      label: "In Progress",
+      value: stats.inProgress,
+      icon: <Zap className="h-4 w-4" />,
+      description: "Current Editing",
+      color: "text-blue-400",
+      glowColor: "shadow-blue-500/20",
+    },
+    {
+      label: "Delivered",
+      value: stats.delivered,
+      icon: <CheckCircle2 className="h-4 w-4" />,
+      description: "Final Exports",
+      color: "text-emerald-400",
+      glowColor: "shadow-emerald-500/20",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {items.map((item, i) => (
+        <StatCard key={item.label} {...item} index={i} />
+      ))}
+    </div>
+  );
+}

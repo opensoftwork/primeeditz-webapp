@@ -11,6 +11,7 @@ import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
 import {
   Field,
   FieldError,
@@ -25,7 +26,10 @@ const onboardingSchema = z.object({
     .string()
     .min(1, "Full name is required")
     .min(2, "Name must be at least 2 characters"),
-  phone: z.string().optional(),
+  phone: z.string().optional().refine(
+    (val) => !val || isValidPhoneNumber(val),
+    { message: "Phone number must be 10 digits" }
+  ),
   company: z.string().optional(),
 });
 
@@ -236,17 +240,14 @@ export default function OnboardingForm() {
                         >
                           Phone number
                         </FieldLabel>
-                        <Input
+                        <PhoneInput
                           id={field.name}
-                          type="tel"
-                          placeholder="+91 98765 43210"
                           value={field.state.value}
                           onBlur={field.handleBlur}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            field.handleChange(e.target.value)
-                          }
-                          className="h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+                          onChange={(value) => field.handleChange(value)}
+                          placeholder="98765 43210"
                           disabled={isLoading}
+                          className="w-full"
                         />
                         <FieldError errors={field.state.meta.errors} />
                       </Field>

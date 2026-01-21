@@ -28,6 +28,9 @@ import { Card } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { OnboardingBadge } from "../employees-list/status-badge";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
+import { EmployeeEditDrawer } from "./employee-edit-drawer";
 
 // ============================================================================
 // Types
@@ -69,6 +72,15 @@ function StatCard({ label, value, icon: Icon, color }: { label: string; value: n
 export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
   const data = useQuery(api.admin.getEmployeeWithProjects, { employeeId });
   const [isCopying, setIsCopying] = useState(false);
+  const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    if (data?.employee?.name) {
+      setOverride(employeeId, data.employee.name);
+    }
+    return () => removeOverride(employeeId);
+  }, [data?.employee?.name, employeeId, setOverride, removeOverride]);
 
   const getOnboardingUrl = () => {
     if (typeof window === "undefined") return "";
@@ -119,6 +131,13 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
 
   return (
     <div className="flex-1 p-8 md:p-12 space-y-12">
+      {/* Edit Drawer */}
+      <EmployeeEditDrawer 
+        open={isEditDrawerOpen} 
+        onOpenChange={setIsEditDrawerOpen} 
+        employee={employee} 
+      />
+
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <motion.div
@@ -143,7 +162,8 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
         <div className="flex items-center gap-3">
           <Button
             variant="outline"
-            className="h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] border-white/10 hover:bg-white/5"
+            onClick={() => setIsEditDrawerOpen(true)}
+            className="h-12 px-6 rounded-xl font-black uppercase tracking-widest text-[10px] border-white/10 hover:bg-white/5 active:scale-[0.98] transition-all"
           >
             EDIT PROFILE
           </Button>

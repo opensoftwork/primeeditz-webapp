@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { User, Mail, Phone, Building, ArrowRight, X } from "lucide-react";
+import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
 import { useEffect } from "react";
 import type { AdminClient } from "./client-list/types";
 
@@ -126,21 +127,34 @@ export function ClientEditDrawer({
             </form.Field>
 
             {/* Phone */}
-            <form.Field name="phone">
+            <form.Field 
+              name="phone"
+              validators={{
+                onChange: ({ value }) => {
+                  if (value && !isValidPhoneNumber(value)) {
+                    return "Phone number must be 10 digits";
+                  }
+                  return undefined;
+                }
+              }}
+            >
               {(field) => (
                 <div className="space-y-3">
                   <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
                     Phone Number
                   </Label>
-                  <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
-                    <Input
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
-                    />
-                  </div>
+                  <PhoneInput
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(value) => field.handleChange(value)}
+                    placeholder="98765 43210"
+                    className="[&_button]:bg-white/5 [&_button]:border-white/10 [&_button]:text-white [&_button]:h-12 [&_button]:rounded-xl [&_button]:hover:bg-white/10 [&_input]:bg-white/5 [&_input]:border-white/10 [&_input]:text-white [&_input]:h-12 [&_input]:rounded-xl [&_input]:font-bold"
+                  />
+                  {field.state.meta.errors ? (
+                    <em className="text-[10px] text-destructive font-bold uppercase tracking-widest px-1">
+                      {field.state.meta.errors.join(", ")}
+                    </em>
+                  ) : null}
                 </div>
               )}
             </form.Field>
