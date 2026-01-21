@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { Plus, BookOpen, FolderOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationBuilder } from "../../quotation-builder-context";
@@ -53,6 +53,60 @@ export function Step3LineItems() {
   const [defaultProjectForDrawer, setDefaultProjectForDrawer] = useState<
     string | undefined
   >();
+
+  // Expanded projects state
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const seenProjectsRef = useRef<Set<string>>(new Set());
+
+  // Auto-expand new projects
+  useEffect(() => {
+    let changed = false;
+    // We using functional update to access latest state without adding it to deps if possible,
+    // but better to just compare with current state logic
+    const newSeen = new Set(seenProjectsRef.current);
+    
+    // Check for new projects
+    const projectsToExpand: string[] = [];
+    
+    filteredProjects.forEach((p) => {
+      if (!newSeen.has(p._id)) {
+        newSeen.add(p._id);
+        projectsToExpand.push(p._id);
+      }
+    });
+
+    if (projectsToExpand.length > 0) {
+      seenProjectsRef.current = newSeen;
+      setExpandedProjects((prev) => {
+        const next = new Set(prev);
+        projectsToExpand.forEach((id) => next.add(id));
+        return next;
+      });
+    }
+  }, [filteredProjects]);
+
+  // Toggle project expansion
+  const handleToggleProject = useCallback((projectId: string) => {
+    setExpandedProjects((prev) => {
+      const next = new Set(prev);
+      if (next.has(projectId)) {
+        next.delete(projectId);
+      } else {
+        next.add(projectId);
+      }
+      return next;
+    });
+  }, []);
+
+  // Helper to ensure project is expanded
+  const ensureProjectExpanded = useCallback((projectId: string) => {
+    setExpandedProjects((prev) => {
+      if (prev.has(projectId)) return prev;
+      const next = new Set(prev);
+      next.add(projectId);
+      return next;
+    });
+  }, []);
 
   // Register submit trigger
   useEffect(() => {
@@ -115,8 +169,12 @@ export function Step3LineItems() {
         sectionId: item.sectionId as any,
         projectId: effectiveProjectId,
       });
+
+      if (effectiveProjectId) {
+        ensureProjectExpanded(effectiveProjectId);
+      }
     },
-    [addLineItem, filteredProjects, targetProjectId]
+    [addLineItem, filteredProjects, targetProjectId, ensureProjectExpanded]
   );
 
   // Handle save from drawer (add or update)
@@ -126,11 +184,14 @@ export function Step3LineItems() {
         updateLineItem(editingItem.originalIdx, itemData);
       } else {
         addLineItem(itemData);
+        if (itemData.projectId) {
+          ensureProjectExpanded(itemData.projectId);
+        }
       }
       setItemDrawerOpen(false);
       setEditingItem(null);
     },
-    [editingItem, addLineItem, updateLineItem]
+    [editingItem, addLineItem, updateLineItem, ensureProjectExpanded]
   );
 
   // Handle project management
@@ -223,10 +284,15 @@ export function Step3LineItems() {
             projects={filteredProjects}
             sections={sections}
             items={allItemsWithIdx}
+            expandedProjects={expandedProjects}
+            onToggleProject={handleToggleProject}
             onEditItem={openEditItemDrawer}
             onRemoveItem={removeLineItem}
             onAddItem={(projectId, sectionId) =>
               openAddItemDrawer(projectId, sectionId)
+            }
+            onAddFromLibrary={(projectId, sectionId) =>
+              openLibrary(sectionId || null, projectId)
             }
           />
         </div>
