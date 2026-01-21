@@ -19,6 +19,7 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
+import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
 
 interface NewClientDrawerProps {
   open: boolean;
@@ -41,6 +42,12 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
 
     if (!name.trim() || !email.trim()) {
       toast.error("Name and email are required");
+      return;
+    }
+
+    // Validate phone number if provided
+    if (phone && !isValidPhoneNumber(phone)) {
+      toast.error("Phone number must be 10 digits");
       return;
     }
 
@@ -156,18 +163,14 @@ export function NewClientDrawer({ open, onOpenChange }: NewClientDrawerProps) {
                 Phone (Optional)
               </FieldLabel>
               <FieldContent>
-                <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
-                  <InputGroupAddon align="inline-start" className="pl-4">
-                    <Phone className="h-4 w-4 text-white/10" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="client-phone"
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g., +91 98765 43210"
-                    className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
-                  />
-                </InputGroup>
+                <PhoneInput
+                  id="client-phone"
+                  value={phone}
+                  onChange={(value) => setPhone(value)}
+                  placeholder="98765 43210"
+                  className="bg-white/3 border-white/10 [&_button]:bg-white/3 [&_button]:border-white/10 [&_button]:text-white [&_button]:hover:bg-white/5 [&_input]:bg-white/3 [&_input]:border-white/10 [&_input]:text-white [&_input]:placeholder:text-white/20"
+                  inputClassName="text-[15px] font-black uppercase tracking-wider placeholder:text-white/10"
+                />
               </FieldContent>
             </Field>
 

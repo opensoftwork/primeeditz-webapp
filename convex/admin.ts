@@ -9,5 +9,6 @@ export * from "./functions/admin/dashboard";
 export * from "./functions/admin/projects";
 export * from "./functions/admin/projectTypes";
 export * from "./functions/admin/clients";
+export * from "./functions/admin/employees";
 export * from "./functions/admin/quotations";
 export * from "./functions/admin/maintenance";

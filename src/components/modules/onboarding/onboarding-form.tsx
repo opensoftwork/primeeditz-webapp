@@ -1,15 +1,17 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
 import { Loader2, Sparkles, UserCircle, Shield } from "lucide-react";
 import { useMutation, useQuery } from "convex/react";
+import { motion } from "motion/react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
 import {
   Field,
   FieldError,
@@ -24,17 +26,46 @@ const onboardingSchema = z.object({
     .string()
     .min(1, "Full name is required")
     .min(2, "Name must be at least 2 characters"),
-  phone: z.string().optional(),
+  phone: z.string().optional().refine(
+    (val) => !val || isValidPhoneNumber(val),
+    { message: "Phone number must be 10 digits" }
+  ),
   company: z.string().optional(),
 });
 
 export default function OnboardingForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
+  const [isClaiming, setIsClaiming] = useState(false);
 
   const createProfile = useMutation(api.profiles.createProfile);
+  const claimProfile = useMutation(api.profiles.claimDraftProfile);
   const isFirstUser = useQuery(api.profiles.isFirstUser);
   const myProfile = useQuery(api.profiles.getMyProfile);
+
+  const profileId = searchParams.get("profileId");
+
+  // Handle automatic profile claiming if profileId is present
+  useEffect(() => {
+    const autoClaim = async () => {
+      if (profileId && !myProfile && !isClaiming) {
+        setIsClaiming(true);
+        try {
+          await claimProfile({ profileId: profileId as any });
+          toast.success("Profile linked successfully!");
+          router.push("/dashboard");
+        } catch (error: any) {
+          console.error("Failed to claim profile:", error);
+          // Don't show toast if it's already claimed or invalid, 
+          // just let them fill the form
+        } finally {
+          setIsClaiming(false);
+        }
+      }
+    };
+    autoClaim();
+  }, [profileId, myProfile, claimProfile, router, isClaiming]);
 
   // Redirect if profile already exists
   useEffect(() => {
@@ -94,6 +125,35 @@ export default function OnboardingForm() {
   }
 
   const willBeAdmin = isFirstUser === true;
+
+  // Show specialized setup state for employees claiming a draft profile
+  if (profileId && !myProfile) {
+    return (
+      <div className="min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="w-full max-w-md p-12 rounded-[2.5rem] border border-white/5 bg-white/2 backdrop-blur-3xl text-center space-y-6"
+        >
+          <div className="relative mx-auto w-20 h-20">
+            <div className="absolute inset-0 bg-indigo-500/20 blur-2xl rounded-full animate-pulse" />
+            <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
+              <Loader2 className="w-8 h-8 text-indigo-400 animate-spin" />
+            </div>
+          </div>
+          <div className="space-y-2">
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+              Setting up your account
+            </h2>
+            <p className="text-white/40 text-sm font-medium">
+              We're linking your credentials to your new team profile. 
+              This will only take a moment...
+            </p>
+          </div>
+        </motion.div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/20 to-background">
@@ -180,17 +240,14 @@ export default function OnboardingForm() {
                         >
                           Phone number
                         </FieldLabel>
-                        <Input
+                        <PhoneInput
                           id={field.name}
-                          type="tel"
-                          placeholder="+91 98765 43210"
                           value={field.state.value}
                           onBlur={field.handleBlur}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            field.handleChange(e.target.value)
-                          }
-                          className="h-11 bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+                          onChange={(value) => field.handleChange(value)}
+                          placeholder="98765 43210"
                           disabled={isLoading}
+                          className="w-full"
                         />
                         <FieldError errors={field.state.meta.errors} />
                       </Field>

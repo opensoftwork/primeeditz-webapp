@@ -46,7 +46,7 @@ export const employeeNavItems: NavItem[] = [
   },
   {
     title: "Assigned Work",
-    url: "/work",
+    url: "/assigned-work",
     icon: ClipboardList,
   },
 ];

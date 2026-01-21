@@ -122,6 +122,7 @@ export default defineSchema({
     name: v.string(),
     phone: v.optional(v.string()),
     company: v.optional(v.string()),
+    designation: v.optional(v.string()), // Employee job title/role
     onboardingComplete: v.boolean(),
     image: v.optional(v.string()), // Profile picture from auth provider
     updatedAt: v.number(),

@@ -229,3 +229,49 @@ export const reactivateClient = adminMutation({
     return args.profileId
   },
 })
+
+/**
+ * Claim a draft profile (onboarding).
+ * Links the current authenticated user to a pre-created draft profile.
+ */
+export const claimDraftProfile = authenticatedMutation({
+  args: {
+    profileId: v.id('profiles'),
+  },
+  handler: async (ctx, args) => {
+    const userId = ctx.authUser._id
+    const userEmail = ctx.authUser.email
+
+    // Check if user already has a profile (other than the draft one they are claiming)
+    const existingProfile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', userId))
+      .first()
+
+    if (existingProfile && existingProfile._id !== args.profileId) {
+      throw new Error('User already has an active profile')
+    }
+
+    // Get the draft profile
+    const draftProfile = await ctx.db.get(args.profileId)
+    if (!draftProfile) {
+      throw new Error('Profile not found')
+    }
+
+    // Verify it is a draft
+    if (!draftProfile.userId.startsWith('draft_')) {
+      throw new Error('This profile has already been claimed')
+    }
+
+    // Update the profile to link to the real user
+    await ctx.db.patch(args.profileId, {
+      userId: userId,
+      email: userEmail,
+      onboardingComplete: true,
+      updatedAt: Date.now(),
+    })
+
+    return args.profileId
+  },
+})
+

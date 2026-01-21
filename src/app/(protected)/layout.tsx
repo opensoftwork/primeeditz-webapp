@@ -58,13 +58,14 @@ export default function DashboardLayout({
 
     if (!isAuthenticated) {
       const signInUrl = new URL("/sign-in", window.location.origin);
-      signInUrl.searchParams.set("redirect", pathname);
+      signInUrl.searchParams.set("redirect", pathname + window.location.search);
       router.push(signInUrl.pathname + signInUrl.search);
       return;
     }
 
     if (userProfile === null && !isOnboardingPage) {
-      router.push("/onboarding");
+      const searchParams = window.location.search;
+      router.push(`/onboarding${searchParams}`);
     }
   }, [
     isAuthLoading,
