@@ -7,7 +7,7 @@
 
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ChevronDown,
@@ -15,6 +15,7 @@ import {
   FolderOpen,
   Plus,
   Layers,
+  BookOpen,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -39,9 +40,12 @@ interface ProjectSectionItemsProps {
   projects: Project[];
   sections: Section[];
   items: LineItemWithIdx[];
+  expandedProjects: Set<string>;
+  onToggleProject: (projectId: string) => void;
   onEditItem: (item: LineItemWithIdx) => void;
   onRemoveItem: (idx: number) => void;
   onAddItem: (projectId: string, sectionId?: string) => void;
+  onAddFromLibrary: (projectId: string, sectionId?: string) => void;
 }
 
 /** Calculate total for a set of items */
@@ -60,27 +64,13 @@ export function ProjectSectionItems({
   projects,
   sections,
   items,
+  expandedProjects,
+  onToggleProject,
   onEditItem,
   onRemoveItem,
   onAddItem,
+  onAddFromLibrary,
 }: ProjectSectionItemsProps) {
-  // Track expanded projects
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
-    () => new Set(projects.map((p) => p._id))
-  );
-
-  // Toggle project expansion
-  const toggleProject = (projectId: string) => {
-    setExpandedProjects((prev) => {
-      const next = new Set(prev);
-      if (next.has(projectId)) {
-        next.delete(projectId);
-      } else {
-        next.add(projectId);
-      }
-      return next;
-    });
-  };
 
   // Group items by project, then by section
   const groupedByProject = useMemo(() => {
@@ -157,7 +147,7 @@ export function ProjectSectionItems({
                 {/* Project Header */}
                 <button
                   type="button"
-                  onClick={() => toggleProject(project._id)}
+                  onClick={() => onToggleProject(project._id)}
                   className="w-full p-4 flex items-center justify-between hover:bg-white/3 transition-colors"
                 >
                   <div className="flex items-center gap-3">
@@ -295,16 +285,28 @@ export function ProjectSectionItems({
                                   Add items to this project
                                 </p>
                               </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                size="sm"
-                                onClick={() => onAddItem(project._id)}
-                                className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide"
-                              >
-                                <Plus className="h-3 w-3 mr-1.5" />
-                                Add First Item
-                              </Button>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onAddFromLibrary(project._id)}
+                                  className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide bg-white/5 border-white/10 text-white hover:bg-white/10"
+                                >
+                                  <BookOpen className="h-3 w-3 mr-1.5" />
+                                  Library
+                                </Button>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => onAddItem(project._id)}
+                                  className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide"
+                                >
+                                  <Plus className="h-3 w-3 mr-1.5" />
+                                  Add First Item
+                                </Button>
+                              </div>
                             </div>
                           )}
                       </div>
