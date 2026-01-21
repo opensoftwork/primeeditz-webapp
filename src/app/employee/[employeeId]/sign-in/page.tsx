@@ -5,8 +5,8 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { motion } from "motion/react";
-import { Loader2, UserCheck, AlertCircle, ArrowRight, Users } from "lucide-react";
-import { useState } from "react";
+import { Loader2, UserCheck, AlertCircle, ArrowRight } from "lucide-react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
@@ -31,14 +31,12 @@ export default function EmployeeSignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  // Fetch employee profile to verify it exists and get their name (public query)
+  // Fetch employee profile
   const employee = useQuery(api.employees.getEmployeeForOnboarding, { employeeId });
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
-      // Sign in with Google and redirect to dashboard
-      // The auth system will need to link this to the employee profile
       await authClient.signIn.social({
         provider: "google",
         callbackURL: `/dashboard?onboarding=employee&profileId=${employeeId}`,
@@ -59,7 +57,6 @@ export default function EmployeeSignInPage() {
 
     setIsLoading(true);
     try {
-      // Try to sign in first
       const result = await authClient.signIn.email({
         email,
         password,
@@ -67,7 +64,6 @@ export default function EmployeeSignInPage() {
       });
 
       if (result.error) {
-        // If sign in fails, try to sign up (assuming they are creating their account)
         const signUpResult = await authClient.signUp.email({
           email,
           password,
@@ -78,7 +74,6 @@ export default function EmployeeSignInPage() {
         if (signUpResult.error) {
           throw new Error(signUpResult.error.message || "Authentication failed");
         }
-        
         toast.success("Account created! Redirecting...");
       } else {
         toast.success("Signed in successfully! Redirecting...");
@@ -91,38 +86,36 @@ export default function EmployeeSignInPage() {
     }
   };
 
-  // Loading state
   if (employee === undefined) {
     return (
-      <div className="max-w-2xl mx-auto px-6">
-        <div className="flex flex-col items-center justify-center py-20">
+      <div className="flex-1 flex items-center justify-center py-20 bg-[#050507]">
+        <div className="flex flex-col items-center">
           <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mb-4" />
-          <p className="text-white/40 text-sm font-bold uppercase tracking-widest">
-            Loading...
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">
+            Loading Portal...
           </p>
         </div>
       </div>
     );
   }
 
-  // Employee not found
   if (employee === null) {
     return (
-      <div className="max-w-2xl mx-auto px-6">
+      <div className="flex-1 flex items-center justify-center p-6 bg-[#050507]">
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-[2rem] border border-red-500/20 bg-red-500/5 p-12 text-center"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="max-w-md w-full rounded-[2.5rem] border border-red-500/20 bg-red-500/5 p-12 text-center"
         >
-          <div className="w-16 h-16 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
+          <div className="w-16 h-16 rounded-3xl bg-red-500/10 border border-red-500/20 flex items-center justify-center mx-auto mb-6">
             <AlertCircle className="h-8 w-8 text-red-400" />
           </div>
           <h2 className="text-2xl font-black text-white uppercase tracking-tight mb-2">
             Invalid Link
           </h2>
-          <p className="text-white/50 max-w-md mx-auto">
+          <p className="text-white/40 text-sm font-medium leading-relaxed">
             This onboarding link is invalid or has expired. Please contact your
-            administrator for a new invitation.
+            administrator.
           </p>
         </motion.div>
       </div>
@@ -131,108 +124,79 @@ export default function EmployeeSignInPage() {
 
   const isAlreadyOnboarded = employee.employee.onboardingComplete;
 
-  // Main onboarding view
   return (
-    <div className="max-w-2xl mx-auto px-6">
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="space-y-8"
-      >
-        {/* Welcome Card */}
-        <div className="rounded-[2rem] border border-indigo-500/20 bg-indigo-500/5 p-8 md:p-12 text-center relative overflow-hidden">
-          <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 blur-[100px] rounded-full translate-x-32 -translate-y-32" />
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/10 blur-[100px] rounded-full -translate-x-32 translate-y-32" />
-          
-          <div className="relative z-10 w-full max-w-sm mx-auto">
-            <div className="w-20 h-20 rounded-full bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center mx-auto mb-6">
-              <Users className="h-10 w-10 text-indigo-400" />
-            </div>
-            
-            <div className="space-y-3 mb-8">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
-                {isAlreadyOnboarded ? "Welcome Back" : "Welcome to the Team"}
-              </span>
-              <h1 className="text-3xl md:text-4xl font-black text-white uppercase tracking-tight">
-                Hello, {employee.employee.name}!
-              </h1>
-              <p className="text-white/50 max-w-md mx-auto">
-                {isAlreadyOnboarded 
-                  ? "Sign in to access your projects and task dashboard."
-                  : "You've been invited to join PrimeEditz as a team member. Complete your registration to start collaborating."}
-              </p>
+    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#050507]">
+      {/* Left Column: Form */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-12 xl:px-24 overflow-y-auto custom-scrollbar relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-sm mx-auto my-auto space-y-10"
+        >
+            {/* Header */}
+            <div className="space-y-6 text-center lg:text-left">
+                <div className="w-16 h-16 rounded-2xl bg-[#13141A] border border-white/5 flex items-center justify-center mx-auto lg:mx-0 shadow-inner">
+                    <UserCheck className="h-8 w-8 text-indigo-400" />
+                </div>
+                
+                <div className="space-y-3">
+                    <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400 block">
+                        {isAlreadyOnboarded ? "WELCOME BACK" : "WELCOME TO THE TEAM"}
+                    </span>
+                    <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">
+                        HELLO, {employee.employee.name.split(" ")[0]}!
+                    </h1>
+                    <p className="text-sm font-medium text-white/40 leading-relaxed">
+                        {isAlreadyOnboarded 
+                        ? "Sign in to access your projects."
+                        : "Complete your registration to join the dashboard."}
+                    </p>
+                </div>
             </div>
 
-            {/* Employee Info */}
-            <div className="bg-black/20 rounded-2xl border border-white/5 p-6 mb-8 text-left space-y-3">
-              {employee.employee.designation && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    Designation
-                  </span>
-                  <span className="text-sm font-bold text-indigo-400">
-                    {employee.employee.designation}
-                  </span>
+             {/* Designation Badge */}
+             {employee.employee.designation && (
+                <div className="bg-[#111116] rounded-xl border border-white/5 p-4 flex items-center justify-between shadow-sm">
+                   <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                     Designation
+                   </span>
+                   <span className="text-[11px] font-bold text-indigo-400 uppercase tracking-wider">
+                     {employee.employee.designation}
+                   </span>
                 </div>
               )}
-              {employee.employee.company && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    Company
-                  </span>
-                  <span className="text-sm font-bold text-white/70">
-                    {employee.employee.company}
-                  </span>
-                </div>
-              )}
-              {employee.employee.phone && (
-                <div className="flex items-center justify-between">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    Phone
-                  </span>
-                  <span className="text-sm font-mono text-white/60">
-                    {employee.employee.phone}
-                  </span>
-                </div>
-              )}
-            </div>
 
             <div className="space-y-6">
-              {/* Google Sign In Button */}
-              <Button
+               <Button
                 onClick={handleGoogleSignIn}
                 disabled={isLoading}
-                className="w-full h-14 rounded-2xl bg-white text-zinc-900 font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-white/20 group"
+                className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg active:scale-[0.98] group"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                    Connecting...
-                  </>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  <>
-                    <GoogleIcon className="mr-3 h-5 w-5" />
-                    Continue with Google
-                    <ArrowRight className="ml-3 h-4 w-4 group-hover:translate-x-1 transition-transform" />
-                  </>
+                  <div className="flex items-center justify-center w-full">
+                    <GoogleIcon className="mr-3 h-4 w-4" />
+                    <span className="flex-1 text-center">Continue with Google</span>
+                  </div>
                 )}
               </Button>
 
-              <div className="relative">
+              <div className="relative py-2">
                 <div className="absolute inset-0 flex items-center">
                   <div className="w-full border-t border-white/5" />
                 </div>
-                <div className="relative flex justify-center text-[10px]">
-                  <span className="bg-[#0c0c0e] px-4 text-white/20 font-black uppercase tracking-widest">
+                <div className="relative flex justify-center text-[9px]">
+                  <span className="bg-[#050507] px-3 text-white/20 font-black uppercase">
                     OR
                   </span>
                 </div>
               </div>
 
-              {/* Email Sign In Form */}
-              <form onSubmit={handleEmailSignIn} className="space-y-4 text-left">
+              <form onSubmit={handleEmailSignIn} className="space-y-4">
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1">
                     Work Email
                   </Label>
                   <Input
@@ -241,11 +205,11 @@ export default function EmployeeSignInPage() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     disabled={isLoading}
-                    className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500/20 font-bold"
+                    className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">
+                  <Label className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1">
                     Password
                   </Label>
                   <PasswordInput
@@ -253,62 +217,68 @@ export default function EmployeeSignInPage() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     disabled={isLoading}
-                    className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-indigo-500/20 font-bold"
+                    className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs"
                   />
                 </div>
                 <Button
                   type="submit"
                   disabled={isLoading || !email || !password}
-                  className="w-full h-12 rounded-xl bg-indigo-500 text-white font-black uppercase tracking-widest text-[11px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-lg shadow-indigo-500/10"
+                  className="w-full h-12 rounded-xl bg-[#4F46E5] hover:bg-[#4338ca] text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98]"
                 >
                   {isLoading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
-                    isAlreadyOnboarded ? "Sign In to Portal" : "Complete Registration"
+                    isAlreadyOnboarded ? "COMPLETE LOGIN" : "COMPLETE REGISTRATION"
                   )}
                 </Button>
               </form>
             </div>
 
-            <p className="text-[10px] text-white/30 mt-4 max-w-xs mx-auto">
-              By continuing, you agree to our terms of service and privacy policy
-            </p>
-          </div>
-        </div>
+            {/* Sub-Info */}
+            <div className="pt-8 border-t border-white/5 grid grid-cols-2 gap-8">
+                <div className="space-y-2">
+                    <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Included</h4>
+                    <ul className="text-[9px] text-white/30 space-y-1 font-medium">
+                        <li>• Projects Dashboard</li>
+                        <li>• Asset Management</li>
+                    </ul>
+                </div>
+                <div className="space-y-2">
+                    <h4 className="text-[10px] font-black text-white uppercase tracking-widest">Support</h4>
+                    <p className="text-[9px] text-white/30 leading-relaxed font-medium">
+                        Contact admin for help.
+                    </p>
+                </div>
+            </div>
+        </motion.div>
+      </div>
 
-        {/* Info Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="rounded-2xl border border-white/5 bg-white/2 p-6 space-y-2">
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
-              What you'll get
-            </h3>
-            <ul className="text-xs text-white/50 space-y-1.5">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                Access to assigned projects
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                Task management dashboard
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400" />
-                File upload & management
-              </li>
-            </ul>
-          </div>
-
-          <div className="rounded-2xl border border-white/5 bg-white/2 p-6 space-y-2">
-            <h3 className="text-sm font-black text-white uppercase tracking-wider">
-              Need help?
-            </h3>
-            <p className="text-xs text-white/50">
-              Contact your administrator if you're having trouble completing your
-              registration or if this invitation was sent to you by mistake.
-            </p>
-          </div>
+      {/* Right Column: Image */}
+      <div className="hidden lg:block lg:w-1/2 relative bg-zinc-950 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-l from-transparent to-[#050507] z-10" />
+        <img 
+            src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2670&auto=format&fit=crop" 
+            alt="Post Production Studio" 
+            className="absolute inset-0 w-full h-full object-cover"
+            loading="eager"
+        />
+        <div className="absolute bottom-16 right-16 z-20 text-right max-w-sm">
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+            >
+                <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-3 leading-none">PrimeEditz Studio</h2>
+                <div className="flex items-center justify-end gap-3">
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Edit</span>
+                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Grade</span>
+                    <div className="w-1 h-1 rounded-full bg-white/20" />
+                    <span className="text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Deliver</span>
+                </div>
+            </motion.div>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

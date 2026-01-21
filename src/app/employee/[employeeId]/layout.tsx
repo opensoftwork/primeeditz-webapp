@@ -10,7 +10,7 @@ export default function EmployeeOnboardingLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen bg-zinc-950 text-white selection:bg-indigo-500 selection:text-zinc-950">
+    <div className="flex flex-col min-h-screen bg-zinc-950 text-white selection:bg-indigo-500 selection:text-zinc-950">
       {/* Background Gradients */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-indigo-500/5 blur-[120px] rounded-full" />
@@ -18,7 +18,7 @@ export default function EmployeeOnboardingLayout({
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-50 border-b border-white/5 bg-zinc-950/50 backdrop-blur-xl">
+      <header className="sticky top-0 z-50 border-b border-white/5 bg-zinc-950/50 backdrop-blur-xl shrink-0">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3 group">
             <div className="h-10 w-10 rounded-xl bg-white border border-white/10 flex items-center justify-center shadow-2xl group-hover:scale-110 transition-transform">
@@ -46,18 +46,14 @@ export default function EmployeeOnboardingLayout({
       </header>
 
       {/* Main Content */}
-      <main className="relative z-10 py-12">{children}</main>
+      <main className="flex-1 relative z-10 flex flex-col">{children}</main>
 
       {/* Footer */}
-      <footer className="border-t border-white/5 py-12 relative z-10">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-4">
-          <div className="text-[10px] font-black text-white/10 uppercase tracking-[0.5em]">
+      <footer className="border-t border-white/5 py-4 shrink-0 relative z-10">
+        <div className="max-w-7xl mx-auto px-6 flex flex-col items-center gap-1">
+          <div className="text-[8px] font-black text-white/5 uppercase tracking-[0.4em]">
             PRIMEEDITZ POST-PRODUCTION STUDIO
           </div>
-          <p className="text-[9px] font-medium text-white/20 max-w-md text-center">
-            Welcome to the team! Complete your onboarding to access projects and
-            start collaborating with the studio.
-          </p>
         </div>
       </footer>
     </div>

@@ -44,30 +44,74 @@ interface EmployeeDetailProps {
 // Helper Components
 // ============================================================================
 
-function StatCard({ label, value, icon: Icon, color }: { label: string; value: number | string; icon: any; color: string }) {
+
+// Replicated StatCard from Dashboard to ensure exact matching style
+function StatCard({
+  icon,
+  label,
+  value,
+  description,
+  index,
+  color,
+  glowColor,
+}: {
+  icon: React.ReactNode;
+  label: string;
+  value: number;
+  description: string;
+  index: number;
+  color: string;
+  glowColor: string;
+}) {
   return (
-    <Card className="p-6 bg-white/2 border-white/5 relative overflow-hidden group">
-      <div className={cn("absolute top-0 right-0 w-24 h-24 blur-[40px] rounded-full translate-x-12 -translate-y-12 opacity-20", color)} />
-      <div className="relative flex items-center gap-4">
-        <div className={cn("w-12 h-12 rounded-2xl flex items-center justify-center border", color.replace('bg-', 'bg-').replace('/10', '/20').replace('blur-', 'border-'))}>
-          <Icon className={cn("h-6 w-6", color.replace('bg-', 'text-').replace('/10', ''))} />
-        </div>
-        <div>
-          <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 mb-0.5">
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.1, duration: 0.4 }}
+      className={cn(
+        "p-6 rounded-[1.5rem] bg-white/3 border border-white/5 relative group hover:bg-white/5 hover:border-white/10 transition-all duration-500 overflow-hidden shadow-2xl",
+        "before:absolute before:inset-0 before:bg-linear-to-b before:from-white/2 before:to-transparent"
+      )}
+    >
+      <div
+        className={cn(
+          "absolute -top-4 -right-4 p-6 opacity-[0.03] group-hover:opacity-[0.07] group-hover:rotate-12 transition-all duration-700",
+          color
+        )}
+      >
+        <div className="scale-[3]">{icon}</div>
+      </div>
+
+      <div className="relative z-10 flex flex-col h-full justify-between space-y-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={cn(
+              "p-1.5 rounded-lg bg-white/5 border border-white/10 shadow-lg transition-transform duration-500 group-hover:scale-110",
+              color,
+              glowColor
+            )}
+          >
+            {icon}
+          </div>
+          <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
             {label}
-          </div>
-          <div className="text-2xl font-black text-white leading-none">
-            {value}
-          </div>
+          </span>
+        </div>
+
+        <div className="space-y-0.5">
+          <h4 className="text-3xl font-black text-white tracking-tighter">
+            {value.toString().padStart(2, "0")}
+          </h4>
+          <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+            {description}
+          </p>
         </div>
       </div>
-    </Card>
+    </motion.div>
   );
 }
 
-// ============================================================================
-// Main Component
-// ============================================================================
+
 
 export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
   const data = useQuery(api.admin.getEmployeeWithProjects, { employeeId });
@@ -154,7 +198,7 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
           <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
             {employee.name}
           </h1>
-          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 tracking-[0.1em] uppercase">
+          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 tracking-widest uppercase">
             Joined {new Date(employee._creationTime).toLocaleDateString()} • ID: {employee._id.slice(-6).toUpperCase()}
           </div>
         </motion.div>
@@ -178,123 +222,45 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
       {/* Stats Quick View */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <StatCard 
+          icon={<LayoutGrid className="h-4 w-4" />}
           label="Total Projects" 
           value={stats.totalProjects} 
-          icon={LayoutGrid} 
-          color="bg-indigo-500/10 text-indigo-400 border-indigo-500/20" 
+          description="Lifetime Assigned"
+          index={0}
+          color="text-indigo-400"
+          glowColor="shadow-indigo-400/20"
         />
         <StatCard 
+          icon={<Clock className="h-4 w-4" />}
           label="Active Projects" 
           value={stats.activeProjects} 
-          icon={Clock} 
-          color="bg-amber-500/10 text-amber-400 border-amber-500/20" 
+          description="Currently Active"
+          index={1}
+          color="text-amber-400"
+          glowColor="shadow-amber-400/20"
         />
         <StatCard 
+          icon={<CheckCircle2 className="h-4 w-4" />}
           label="In Progress" 
           value={stats.inProgressProjects} 
-          icon={CheckCircle2} 
-          color="bg-blue-500/10 text-blue-400 border-blue-500/20" 
+          description="In Production"
+          index={2}
+          color="text-cyan-400"
+          glowColor="shadow-cyan-400/20"
         />
         <StatCard 
+          icon={<ShieldCheck className="h-4 w-4" />}
           label="Completed" 
           value={stats.completedProjects} 
-          icon={ShieldCheck} 
-          color="bg-emerald-500/10 text-emerald-400 border-emerald-500/20" 
+          description="Delivered"
+          index={3}
+          color="text-emerald-400"
+          glowColor="shadow-emerald-400/20"
         />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Left Column: Profile Info & Onboarding */}
-        <div className="space-y-8 lg:col-span-1">
-          {/* Detailed Info Card */}
-          <Card className="rounded-[2.5rem] bg-indigo-500/5 border-white/5 p-8 space-y-8">
-            <div className="space-y-6">
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Designation</span>
-                <div className="flex items-center gap-3">
-                  <Briefcase className="h-4 w-4 text-indigo-400" />
-                  <span className="text-lg font-bold text-white">{employee.designation || "Not Specified"}</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Contact Email</span>
-                <div className="flex items-center gap-3">
-                  <Mail className="h-4 w-4 text-indigo-400" />
-                  <span className="text-base font-bold text-white/80">{employee.email}</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Phone Number</span>
-                <div className="flex items-center gap-3">
-                  <Phone className="h-4 w-4 text-indigo-400" />
-                  <span className="text-base font-mono text-white/70">{employee.phone || "No phone added"}</span>
-                </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Company</span>
-                <div className="flex items-center gap-3">
-                  <Building className="h-4 w-4 text-indigo-400" />
-                  <span className="text-lg font-bold text-white">{employee.company || "Individual"}</span>
-                </div>
-              </div>
-            </div>
-          </Card>
-
-          {/* Onboarding Link Card (Only if not complete or for convenience) */}
-          <Card className="rounded-[2.5rem] bg-amber-500/5 border-amber-500/10 p-8 space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-[60px] rounded-full translate-x-16 -translate-y-16" />
-            
-            <div className="relative space-y-4">
-              <div className="flex items-center gap-2">
-                <ShieldCheck className="h-5 w-5 text-amber-400" />
-                <h3 className="text-sm font-black text-white uppercase tracking-widest">Onboarding Access</h3>
-              </div>
-              
-              <p className="text-xs text-white/40 leading-relaxed font-medium">
-                {employee.onboardingComplete 
-                  ? "This employee has completed registration. The link below can be used for reference."
-                  : "Send this invitation link to the employee so they can complete their registration and access the portal."}
-              </p>
-
-              <div className="space-y-3">
-                <div className="p-3 bg-black/40 border border-white/10 rounded-xl flex items-center justify-between group">
-                  <span className="text-[9px] font-mono text-white/30 truncate mr-4">
-                    {getOnboardingUrl()}
-                  </span>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={copyToClipboard}
-                    className="h-8 w-8 text-white/40 hover:text-white"
-                  >
-                    <Copy className="h-4 w-4" />
-                  </Button>
-                </div>
-
-                <Button
-                  onClick={copyToClipboard}
-                  className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl font-black uppercase tracking-widest text-[10px]"
-                >
-                  {isCopying ? "COPIED!" : "COPY LINK"}
-                </Button>
-                
-                <Link href={getOnboardingUrl()} target="_blank" className="block">
-                  <Button
-                    variant="ghost"
-                    className="w-full h-12 rounded-xl text-white/40 hover:text-amber-400 hover:bg-amber-400/10 font-black uppercase tracking-widest text-[9px] gap-2"
-                  >
-                    PREVIEW PAGE <ExternalLink className="h-3 w-3" />
-                  </Button>
-                </Link>
-              </div>
-            </div>
-          </Card>
-        </div>
-
-        {/* Right Column: Projects List */}
+        {/* Left Column: Projects List */}
         <div className="lg:col-span-2 space-y-6">
           <div className="flex items-center justify-between mb-4">
             <h2 className="text-xl font-black text-white uppercase tracking-tight">Assigned Projects</h2>
@@ -364,6 +330,90 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                 </Link>
               ))}
             </div>
+          )}
+        </div>
+
+        {/* Right Column: Profile Info & Onboarding */}
+        <div className="space-y-8 lg:col-span-1">
+          {/* Detailed Info Card */}
+          <Card className="rounded-[2.5rem] bg-indigo-500/5 border-white/5 p-8 space-y-8">
+            <div className="space-y-6">
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Designation</span>
+                <div className="flex items-center gap-3">
+                  <Briefcase className="h-4 w-4 text-indigo-400" />
+                  <span className="text-lg font-bold text-white">{employee.designation || "Not Specified"}</span>
+                </div>
+              </div>
+
+
+
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Phone Number</span>
+                <div className="flex items-center gap-3">
+                  <Phone className="h-4 w-4 text-indigo-400" />
+                  <span className="text-base font-mono text-white/70">{employee.phone || "No phone added"}</span>
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">Company</span>
+                <div className="flex items-center gap-3">
+                  <Building className="h-4 w-4 text-indigo-400" />
+                  <span className="text-base font-mono text-white/70">{employee.company || "No company name added"}</span>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          {/* Onboarding Link Card (Only if not complete) */}
+          {!employee.onboardingComplete && (
+            <Card className="rounded-[2.5rem] bg-amber-500/5 border-amber-500/10 p-8 space-y-6 relative overflow-hidden">
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-[60px] rounded-full translate-x-16 -translate-y-16" />
+              
+              <div className="relative space-y-4">
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="h-5 w-5 text-amber-400" />
+                  <h3 className="text-sm font-black text-white uppercase tracking-widest">Onboarding Access</h3>
+                </div>
+                
+                <p className="text-xs text-white/40 leading-relaxed font-medium">
+                  Send this invitation link to the employee so they can complete their registration and access the portal.
+                </p>
+
+                <div className="space-y-3">
+                  <div className="p-3 bg-black/40 border border-white/10 rounded-xl flex items-center justify-between group">
+                    <span className="text-[9px] font-mono text-white/30 truncate mr-4">
+                      {getOnboardingUrl()}
+                    </span>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={copyToClipboard}
+                      className="h-8 w-8 text-white/40 hover:text-white"
+                    >
+                      <Copy className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <Button
+                    onClick={copyToClipboard}
+                    className="w-full h-12 bg-white text-black hover:bg-white/90 rounded-xl font-black uppercase tracking-widest text-[10px]"
+                  >
+                    {isCopying ? "COPIED!" : "COPY LINK"}
+                  </Button>
+                  
+                  <Link href={getOnboardingUrl()} target="_blank" className="block">
+                    <Button
+                      variant="ghost"
+                      className="w-full h-12 rounded-xl text-white/40 hover:text-amber-400 hover:bg-amber-400/10 font-black uppercase tracking-widest text-[9px] gap-2"
+                    >
+                      PREVIEW PAGE <ExternalLink className="h-3 w-3" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </Card>
           )}
         </div>
       </div>

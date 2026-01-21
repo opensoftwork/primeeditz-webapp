@@ -13,16 +13,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { useEffect } from "react";
-import { FolderTree, Tag, Info, ArrowRight, Star } from "lucide-react";
+import { useEffect, useState } from "react";
+import { FolderTree, Tag, Info, ArrowRight, Star, ChevronRight, Globe } from "lucide-react";
 import { FolderListEditor } from "./folder-list-editor";
+import { ProjectTypePickerDrawer } from "./project-type-picker-drawer";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
@@ -60,6 +54,7 @@ export function FolderTemplateDrawer({
   initialData,
 }: FolderTemplateDrawerProps) {
   const projectTypes = useQuery(api.functions.projectTypes.queries.getProjectTypes);
+  const [isProjectTypePickerOpen, setIsProjectTypePickerOpen] = useState(false);
 
   const form = useForm({
     defaultValues: {
@@ -80,6 +75,13 @@ export function FolderTemplateDrawer({
       form.reset();
     }
   }, [initialData, open, form]);
+
+  // Get the selected project type name
+  const getSelectedTypeName = (typeId: string | undefined) => {
+    if (!typeId) return "General (All Projects)";
+    const type = projectTypes?.find((t) => t._id === typeId);
+    return type?.name ?? "Select Project Type";
+  };
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
@@ -131,34 +133,32 @@ export function FolderTemplateDrawer({
                     <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
                       Step 02 / Project Type Association
                     </Label>
-                    <Select
-                      value={field.state.value || "general"}
-                      onValueChange={(val) => field.handleChange(val === "general" ? undefined : val)}
+                    <button
+                      type="button"
+                      onClick={() => setIsProjectTypePickerOpen(true)}
+                      className="w-full flex items-center gap-3 bg-white/5 border border-white/10 text-white h-12 rounded-xl px-4 hover:bg-white/8 hover:border-white/15 transition-all group"
                     >
-                      <SelectTrigger className="bg-white/5 border-white/10 text-white h-12 rounded-xl px-4 focus:ring-primary/20 font-bold">
-                        <div className="flex items-center gap-3">
-                          <Tag className="h-5 w-5 text-white/20" />
-                          <SelectValue placeholder="Select Project Type" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl shadow-2xl">
-                        <SelectItem value="general" className="font-bold focus:bg-primary/20 focus:text-white rounded-lg py-2.5 cursor-pointer">
-                          General (All Projects)
-                        </SelectItem>
-                        {projectTypes?.map((type) => (
-                          <SelectItem 
-                            key={type._id} 
-                            value={type._id}
-                            className="font-bold focus:bg-primary/20 focus:text-white rounded-lg py-2.5 cursor-pointer"
-                          >
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                      {field.state.value ? (
+                        <Tag className="h-5 w-5 text-primary" />
+                      ) : (
+                        <Globe className="h-5 w-5 text-white/20" />
+                      )}
+                      <span className="flex-1 text-left font-bold">
+                        {getSelectedTypeName(field.state.value)}
+                      </span>
+                      <ChevronRight className="h-4 w-4 text-white/30 group-hover:text-white/50 transition-colors" />
+                    </button>
                     <p className="text-[9px] text-white/20 font-medium px-1 leading-relaxed">
                       General templates appear for all projects. Specific templates only show for projects of that type.
                     </p>
+                    
+                    {/* Project Type Picker Drawer */}
+                    <ProjectTypePickerDrawer
+                      open={isProjectTypePickerOpen}
+                      onOpenChange={setIsProjectTypePickerOpen}
+                      selectedTypeId={field.state.value}
+                      onSelect={(typeId) => field.handleChange(typeId)}
+                    />
                   </div>
                 )}
               </form.Field>
