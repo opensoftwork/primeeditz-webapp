@@ -111,8 +111,8 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
             {/* Financial Summary */}
             <PricingSummary
               subtotal={subtotal}
-              discountAmount={formData.step4.discountAmount}
-              taxRate={formData.step4.taxRate / 100}
+              discountAmount={formData.step5.discountAmount}
+              taxRate={formData.step5.taxRate / 100}
               taxAmount={taxAmount}
               grandTotal={grandTotal}
               formatCurrency={(val) =>

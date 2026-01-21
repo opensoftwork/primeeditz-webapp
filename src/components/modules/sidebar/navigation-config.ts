@@ -10,12 +10,13 @@ import {
   ClipboardCheck,
   HardDrive,
   FolderTree,
+  type LucideIcon,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
   url: string;
-  icon: React.ElementType;
+  icon: LucideIcon;
 }
 
 // Client Navigation - Simple, focused on their projects

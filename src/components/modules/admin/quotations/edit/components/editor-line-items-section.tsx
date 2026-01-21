@@ -14,12 +14,17 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { cn } from "@/lib/utils";
 
-import { LibraryItemsDrawer } from "../../builder/steps/step3-line-items/library-items-drawer";
-import { LineItemsTable } from "../../builder/steps/step3-line-items/line-items-table";
-import { LineItemDrawer } from "../../builder/steps/step3-line-items/line-item-drawer";
-import { InvolvedProjects } from "../../builder/steps/step3-line-items/involved-projects";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
-import type { QuotationLineItem, Project, Section } from "../../builder/types";
+import { InvolvedProjects } from "../../builder/steps/step3-line-items/involved-projects";
+import { LibraryItemsDrawer } from "../../builder/steps/step3-line-items/library-items-drawer";
+import { LineItemDrawer } from "../../builder/steps/step3-line-items/line-item-drawer";
+import { LineItemsTable } from "../../builder/steps/step3-line-items/line-items-table";
+import type {
+  LibraryItem,
+  Project,
+  QuotationLineItem,
+  Section,
+} from "../../builder/types";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
@@ -40,11 +45,11 @@ export function EditorLineItemsSection() {
     setFormData,
   } = useQuotationBuilder();
 
-  const { lineItems } = formData.step3;
+  const { lineItems } = formData.step4;
   const selectedProjectIds = formData.step1.projectIds;
   const filteredProjects =
     (projects as Project[])?.filter((p) =>
-      selectedProjectIds.includes(p._id)
+      selectedProjectIds.includes(p._id),
     ) || [];
 
   const sections =
@@ -76,7 +81,7 @@ export function EditorLineItemsSection() {
       setDefaultSectionForDrawer(effectiveSectionId);
       setItemDrawerOpen(true);
     },
-    [activeTab, sections]
+    [activeTab, sections],
   );
 
   const openEditItemDrawer = useCallback(
@@ -85,11 +90,11 @@ export function EditorLineItemsSection() {
       setDefaultSectionForDrawer(item.sectionId);
       setItemDrawerOpen(true);
     },
-    []
+    [],
   );
 
   const handleSelectFromLibrary = useCallback(
-    (item: any) => {
+    (item: LibraryItem) => {
       const defaultProjectId =
         filteredProjects.length === 1 ? filteredProjects[0]._id : undefined;
 
@@ -98,11 +103,11 @@ export function EditorLineItemsSection() {
         unit: item.unit,
         rate: item.unitPrice,
         quantity: 1,
-        sectionId: item.sectionId as any,
+        sectionId: item.sectionId,
         projectId: defaultProjectId,
       });
     },
-    [addLineItem, filteredProjects]
+    [addLineItem, filteredProjects],
   );
 
   const handleSaveItem = useCallback(
@@ -115,7 +120,7 @@ export function EditorLineItemsSection() {
       setItemDrawerOpen(false);
       setEditingItem(null);
     },
-    [editingItem, addLineItem, updateLineItem]
+    [editingItem, addLineItem, updateLineItem],
   );
 
   const handleAddProject = useCallback(
@@ -124,7 +129,7 @@ export function EditorLineItemsSection() {
         projectIds: [...selectedProjectIds, val],
       });
     },
-    [setFormData, selectedProjectIds]
+    [setFormData, selectedProjectIds],
   );
 
   const handleRemoveProject = useCallback(
@@ -133,12 +138,13 @@ export function EditorLineItemsSection() {
         projectIds: selectedProjectIds.filter((id) => id !== projectId),
       });
       lineItems.forEach((li, idx) => {
-        if ((li as QuotationLineItem).projectId === projectId) {
+        const item = li as QuotationLineItem;
+        if (item.projectId === projectId) {
           updateLineItem(idx, { projectId: undefined });
         }
       });
     },
-    [setFormData, selectedProjectIds, lineItems, updateLineItem]
+    [setFormData, selectedProjectIds, lineItems, updateLineItem],
   );
 
   const allItemsWithIdx = useMemo(
@@ -147,14 +153,14 @@ export function EditorLineItemsSection() {
         ...(item as QuotationLineItem),
         originalIdx,
       })),
-    [lineItems]
+    [lineItems],
   );
 
   const sectionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: allItemsWithIdx.length };
     sections.forEach((s) => {
       counts[s._id] = allItemsWithIdx.filter(
-        (item) => item.sectionId === s._id
+        (item) => item.sectionId === s._id,
       ).length;
     });
     return counts;
@@ -167,7 +173,7 @@ export function EditorLineItemsSection() {
         item.rate * item.quantity +
         (item.subItems || []).reduce(
           (sum, sub) => sum + sub.rate * sub.quantity,
-          0
+          0,
         );
       totals.all += itemTotal;
       if (item.sectionId) {
@@ -246,7 +252,7 @@ export function EditorLineItemsSection() {
                         <div
                           className={cn(
                             "h-2 w-2 rounded-full",
-                            s.color ? `bg-${s.color}-500` : "bg-zinc-500"
+                            s.color ? `bg-${s.color}-500` : "bg-zinc-500",
                           )}
                         />
                         {s.name} ({sectionCounts[s._id] || 0})
@@ -265,7 +271,7 @@ export function EditorLineItemsSection() {
                 {formatCurrency(
                   activeTab === "all"
                     ? sectionTotals.all
-                    : sectionTotals[activeTab] || 0
+                    : sectionTotals[activeTab] || 0,
                 )}
               </span>
             </div>

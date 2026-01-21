@@ -2,12 +2,12 @@
  * Types and Constants for Step 0: Client Selection
  */
 
-import { Users, UserPlus, FolderOpen } from "lucide-react";
+import { LucideIcon, Users, UserPlus, FolderOpen } from "lucide-react";
 import type { ClientSelectionMode } from "../../types";
 
 export interface SelectionOption {
     id: ClientSelectionMode;
-    icon: React.ElementType;
+    icon: LucideIcon;
     title: string;
     description: string;
 }
