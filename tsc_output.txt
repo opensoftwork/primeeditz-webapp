@@ -1,2 +1,0 @@
-src/components/modules/projects/wizard/steps/step-0-client-selection/selection-option-card.tsx(59,17): error TS2322: Type 'string' is not assignable to type 'never'.
-src/components/modules/sidebar/sidebar-nav-group.tsx(55,23): error TS2322: Type 'string' is not assignable to type 'never'.
