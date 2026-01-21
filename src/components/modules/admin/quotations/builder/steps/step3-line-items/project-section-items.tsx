@@ -244,6 +244,9 @@ export function ProjectSectionItems({
                               onAddItem={() =>
                                 onAddItem(project._id, section._id)
                               }
+                              onAddFromLibrary={() =>
+                                onAddFromLibrary(project._id, section._id)
+                              }
                             />
                           </div>
                         ))}
@@ -268,6 +271,7 @@ export function ProjectSectionItems({
                               onEditItem={onEditItem}
                               onRemoveItem={onRemoveItem}
                               onAddItem={() => onAddItem(project._id)}
+                              onAddFromLibrary={() => onAddFromLibrary(project._id)}
                             />
                           </div>
                         )}
