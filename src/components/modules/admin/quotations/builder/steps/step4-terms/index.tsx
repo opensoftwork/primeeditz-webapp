@@ -101,21 +101,21 @@ export function Step4Terms() {
   const { formData, setFormData, saveQuotation, setSubmitTrigger, isLoading } =
     useQuotationBuilder();
 
-  const [terms, setTerms] = useState(formData.step4.terms);
+  const [terms, setTerms] = useState(formData.step5.terms);
   const [copied, setCopied] = useState(false);
   const [hasError, setHasError] = useState(false);
 
   // Sync with context when it changes
   useEffect(() => {
-    if (formData.step4.terms !== terms) {
-      setTerms(formData.step4.terms);
+    if (formData.step5.terms !== terms) {
+      setTerms(formData.step5.terms);
     }
-  }, [formData.step4.terms]);
+  }, [formData.step5.terms]);
 
   // Update context when terms change
   const handleTermsChange = (value: string) => {
     setTerms(value);
-    setFormData("step4", { terms: value });
+    setFormData("step5", { terms: value });
     setHasError(false);
   };
 
@@ -140,7 +140,7 @@ export function Step4Terms() {
       setHasError(true);
       return;
     }
-    setFormData("step4", { terms });
+    setFormData("step5", { terms });
     await saveQuotation();
   };
 

@@ -34,22 +34,29 @@ import type {
 // Types
 // ============================================================================
 
-export type QuotationStepId = 1 | 2 | 3 | 4;
+export type QuotationStepId = 1 | 2 | 3 | 4 | 5;
 
 export interface QuotationFormData {
   step1: {
     clientId: string;
-    projectId: string;
-    projectIds: string[];
+    projectId: string; // Left for compatibility
+    projectIds: string[]; // Master list, but we sync with step2
     validUntil: Date | undefined;
   };
   step2: {
-    templateId: string;
+    // Project Selection
+    projectIds: string[];
   };
   step3: {
-    lineItems: QuotationLineItem[];
+    // Template Selection (Per Project)
+    projectTemplates: Record<string, string>; // projectId -> templateId
   };
   step4: {
+    // Calculate Worth
+    lineItems: QuotationLineItem[];
+  };
+  step5: {
+    // Terms
     terms: string;
     taxRate: number;
     discountAmount: number;
@@ -64,12 +71,15 @@ export const INITIAL_FORM_DATA: QuotationFormData = {
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   },
   step2: {
-    templateId: "",
+    projectIds: [],
   },
   step3: {
-    lineItems: [],
+    projectTemplates: {},
   },
   step4: {
+    lineItems: [],
+  },
+  step5: {
     terms: "",
     taxRate: 18,
     discountAmount: 0,
@@ -78,9 +88,10 @@ export const INITIAL_FORM_DATA: QuotationFormData = {
 
 export const QUOTATION_STEPS = [
   { id: 1 as const, label: "Client & Context" },
-  { id: 2 as const, label: "Template Selection" },
-  { id: 3 as const, label: "Calculate Worth" },
-  { id: 4 as const, label: "Terms & Conditions" },
+  { id: 2 as const, label: "Projects" },
+  { id: 3 as const, label: "Template Selection" },
+  { id: 4 as const, label: "Calculate Worth" },
+  { id: 5 as const, label: "Terms & Conditions" },
 ];
 
 // ============================================================================
@@ -112,12 +123,12 @@ interface QuotationBuilderContextValue {
   // Actions
   setFormData: <K extends keyof QuotationFormData>(
     step: K,
-    data: Partial<QuotationFormData[K]>,
+    data: Partial<QuotationFormData[K]>
   ) => void;
   goToStep: (step: QuotationStepId) => void;
   nextStep: () => void;
   prevStep: () => void;
-  applyTemplate: (templateId: string) => void;
+  applyTemplate: (templateId: string, projectId: string) => void;
   addLineItem: (initialData?: Partial<QuotationLineItem>) => void;
   updateLineItem: (idx: number, updates: Partial<QuotationLineItem>) => void;
   removeLineItem: (idx: number) => void;
@@ -136,7 +147,7 @@ export function useQuotationBuilder() {
   const context = useContext(QuotationBuilderContext);
   if (!context) {
     throw new Error(
-      "useQuotationBuilder must be used within QuotationBuilderProvider",
+      "useQuotationBuilder must be used within QuotationBuilderProvider"
     );
   }
   return context;
@@ -159,7 +170,7 @@ export function QuotationBuilderProvider({
 
   // State
   const [quotationId, setQuotationId] = useState<string | null>(
-    initialQuotationId ?? null,
+    initialQuotationId ?? null
   );
   const [currentStep, setCurrentStep] = useState<QuotationStepId>(1);
   const [formData, setFormDataState] =
@@ -168,7 +179,7 @@ export function QuotationBuilderProvider({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
-    null,
+    null
   );
 
   // Query existing quotation if editing
@@ -176,7 +187,7 @@ export function QuotationBuilderProvider({
     api.functions.quotations.queries.getQuotation,
     initialQuotationId
       ? { quotationId: initialQuotationId as Id<"quotations"> }
-      : "skip",
+      : "skip"
   );
 
   // Populate form data if editing
@@ -192,15 +203,18 @@ export function QuotationBuilderProvider({
             : undefined,
         },
         step2: {
-          templateId: existingQuotation.templateId || "",
+          projectIds: existingQuotation.projectIds || [],
         },
         step3: {
+          projectTemplates: {}, // TODO: Can we infer this from existing items? For now start empty or rely on stored separate field if we add one
+        },
+        step4: {
           lineItems: existingQuotation.lineItems.map((item: any) => ({
             ...item,
             id: item.id || crypto.randomUUID(),
           })),
         },
-        step4: {
+        step5: {
           terms: existingQuotation.terms || "",
           taxRate: (existingQuotation.taxRate || 0.18) * 100, // API stores as decimal
           discountAmount: existingQuotation.discountAmount || 0,
@@ -217,14 +231,14 @@ export function QuotationBuilderProvider({
     api.admin.getAdminProjectsSimple,
     formData.step1.clientId
       ? { clientId: formData.step1.clientId as Id<"profiles"> }
-      : "skip",
+      : "skip"
   );
 
   const templatesQuery = useQuery(
     api.functions.quotations.templates.queries.getTemplates,
     {
       activeOnly: true,
-    },
+    }
   );
   const templates = templatesQuery as Template[] | undefined;
 
@@ -232,22 +246,22 @@ export function QuotationBuilderProvider({
     api.functions.quotations.sections.queries.getSections,
     {
       activeOnly: true,
-    },
+    }
   );
   const sections = sectionsQuery as Section[] | undefined;
 
   // Mutations
   const createQuotation = useMutation(
-    api.functions.quotations.mutations.createQuotation,
+    api.functions.quotations.mutations.createQuotation
   );
   const updateQuotation = useMutation(
-    api.functions.quotations.mutations.updateQuotation,
+    api.functions.quotations.mutations.updateQuotation
   );
 
   // Computed
   const selectedClient = useMemo(
     () => clients?.find((c) => c._id === formData.step1.clientId),
-    [clients, formData.step1.clientId],
+    [clients, formData.step1.clientId]
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -256,26 +270,26 @@ export function QuotationBuilderProvider({
   }, [projectsQuery]);
 
   const subtotal = useMemo(() => {
-    return formData.step3.lineItems.reduce((acc, item) => {
+    return formData.step4.lineItems.reduce((acc, item) => {
       const itemTotal = item.rate * item.quantity;
       const subItemsTotal =
         item.subItems?.reduce(
           (s: number, sub: QuotationSubItem) => s + sub.rate * sub.quantity,
-          0,
+          0
         ) ?? 0;
       return acc + itemTotal + subItemsTotal;
     }, 0);
-  }, [formData.step3.lineItems]);
+  }, [formData.step4.lineItems]);
 
   const taxAmount =
-    (subtotal - formData.step4.discountAmount) * (formData.step4.taxRate / 100);
-  const grandTotal = subtotal - formData.step4.discountAmount + taxAmount;
+    (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
+  const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
   // Update form data for a specific step
   const setFormData = useCallback(
     <K extends keyof QuotationFormData>(
       step: K,
-      data: Partial<QuotationFormData[K]>,
+      data: Partial<QuotationFormData[K]>
     ) => {
       setFormDataState((prev) => ({
         ...prev,
@@ -283,16 +297,26 @@ export function QuotationBuilderProvider({
       }));
       setIsDirty(true);
     },
-    [],
+    []
   );
 
   // Navigation
+  // Update step1.projectIds whenever step2 changes for syncing
+  useEffect(() => {
+    if (
+      JSON.stringify(formData.step2.projectIds) !==
+      JSON.stringify(formData.step1.projectIds)
+    ) {
+      setFormData("step1", { projectIds: formData.step2.projectIds });
+    }
+  }, [formData.step2.projectIds, formData.step1.projectIds, setFormData]);
+
   const goToStep = useCallback((step: QuotationStepId) => {
     setCurrentStep(step);
   }, []);
 
   const nextStep = useCallback(() => {
-    const nextStepId = Math.min(currentStep + 1, 4) as QuotationStepId;
+    const nextStepId = Math.min(currentStep + 1, 5) as QuotationStepId;
     setCurrentStep(nextStepId);
   }, [currentStep]);
 
@@ -303,12 +327,63 @@ export function QuotationBuilderProvider({
 
   // Template application
   const applyTemplate = useCallback(
-    (templateId: string) => {
+    (templateId: string, projectId: string) => {
+      // Logic for "Start from Scratch" (empty templateId)
+      if (!templateId) {
+        setFormDataState((prev) => {
+          const currentItems = prev.step4.lineItems;
+          // Remove items for this project
+          const filteredItems = currentItems.filter(
+            (item) => item.projectId !== projectId
+          );
+          return {
+            ...prev,
+            step3: {
+              ...prev.step3,
+              projectTemplates: {
+                ...prev.step3.projectTemplates,
+                [projectId]: "",
+              },
+            },
+            step4: {
+              ...prev.step4,
+              lineItems: filteredItems,
+            },
+          };
+        });
+        return;
+      }
+
       const template = templates?.find((t) => t._id === templateId);
       if (!template) return;
 
-      setFormData("step2", { templateId });
-      setFormData("step4", { terms: template.terms || "" });
+      // Update project template mapping
+      setFormDataState((prev) => ({
+        ...prev,
+        step3: {
+          ...prev.step3,
+          projectTemplates: {
+            ...prev.step3.projectTemplates,
+            [projectId]: templateId,
+          },
+        },
+      }));
+
+      // Append terms if they are not already there (simple logic for now)
+      setFormDataState((prev) => {
+        const currentTerms = prev.step5.terms;
+        const newTerms = template.terms || "";
+        // Only add if not present to avoid duplication on re-select
+        const combinedTerms = currentTerms.includes(newTerms.substring(0, 20))
+          ? currentTerms
+          : currentTerms
+          ? `${currentTerms}\n\n${newTerms}`
+          : newTerms;
+        return {
+          ...prev,
+          step5: { ...prev.step5, terms: combinedTerms },
+        };
+      });
 
       const mappedItems: QuotationLineItem[] = template.lineItems.map(
         (li: TemplateLineItem) => ({
@@ -318,6 +393,7 @@ export function QuotationBuilderProvider({
           unit: li.unit,
           rate: li.unitPrice,
           quantity: li.defaultQuantity,
+          projectId: projectId, // Assign to specific project
           subItems: li.subItems?.map((si) => ({
             id: crypto.randomUUID(),
             description: si.description,
@@ -325,13 +401,24 @@ export function QuotationBuilderProvider({
             rate: si.unitPrice,
             quantity: si.defaultQuantity,
           })),
-        }),
+        })
       );
 
-      setFormData("step3", { lineItems: mappedItems });
-      setCurrentStep(3);
+      // Merge items: Remove old items for this project, add new ones
+      setFormDataState((prev) => {
+        const otherItems = prev.step4.lineItems.filter(
+          (item) => item.projectId !== projectId
+        );
+        return {
+          ...prev,
+          step4: {
+            ...prev.step4,
+            lineItems: [...otherItems, ...mappedItems],
+          },
+        };
+      });
     },
-    [templates, setFormData],
+    [templates]
   );
 
   // Line Item management
@@ -347,28 +434,28 @@ export function QuotationBuilderProvider({
         quantity: initialData?.quantity || 1,
         projectId: initialData?.projectId,
       };
-      setFormData("step3", {
-        lineItems: [...formData.step3.lineItems, newItem],
+      setFormData("step4", {
+        lineItems: [...formData.step4.lineItems, newItem],
       });
     },
-    [sections, formData.step3.lineItems, setFormData],
+    [sections, formData.step4.lineItems, setFormData]
   );
 
   const updateLineItem = useCallback(
     (idx: number, updates: Partial<QuotationLineItem>) => {
-      const newItems = [...formData.step3.lineItems];
+      const newItems = [...formData.step4.lineItems];
       newItems[idx] = { ...newItems[idx], ...updates };
-      setFormData("step3", { lineItems: newItems });
+      setFormData("step4", { lineItems: newItems });
     },
-    [formData.step3.lineItems, setFormData],
+    [formData.step4.lineItems, setFormData]
   );
 
   const removeLineItem = useCallback(
     (idx: number) => {
-      const newItems = formData.step3.lineItems.filter((_, i) => i !== idx);
-      setFormData("step3", { lineItems: newItems });
+      const newItems = formData.step4.lineItems.filter((_, i) => i !== idx);
+      setFormData("step4", { lineItems: newItems });
     },
-    [formData.step3.lineItems, setFormData],
+    [formData.step4.lineItems, setFormData]
   );
 
   // Save quotation
@@ -377,13 +464,13 @@ export function QuotationBuilderProvider({
     setError(null);
 
     try {
-      const { step1, step3, step4 } = formData;
+      const { step1, step2, step3, step4, step5 } = formData;
 
       if (!step1.clientId) throw new Error("Please select a client");
-      if (step3.lineItems.length === 0)
+      if (step4.lineItems.length === 0)
         throw new Error("Please add at least one line item");
 
-      const lineItemsPayload = step3.lineItems.map((item) => ({
+      const lineItemsPayload = step4.lineItems.map((item) => ({
         id: item.id || crypto.randomUUID(),
         sectionId: (item.sectionId ||
           sections?.[0]?._id ||
@@ -402,20 +489,29 @@ export function QuotationBuilderProvider({
         })),
       }));
 
+      // Prefer step2 projectIds, fallback to step1 if sync failed
+      const projectIds =
+        step2.projectIds.length > 0
+          ? step2.projectIds
+          : step1.projectIds.length > 0
+            ? step1.projectIds
+            : undefined;
+
       const payload = {
         clientId: step1.clientId,
         projectId:
           step1.projectId && step1.projectId !== "none"
             ? step1.projectId
             : undefined,
-        projectIds: step1.projectIds.length > 0 ? step1.projectIds : undefined,
-        templateId: formData.step2.templateId
-          ? (formData.step2.templateId as Id<"quotationTemplates">)
-          : undefined,
+        projectIds: projectIds,
+
+        // Template ID is ambiguous with multiple projects, passing undefined or we could pass a primary one.
+        // For now, let's omit it as the source of truth is the line items.
+        templateId: undefined,
         lineItems: lineItemsPayload,
-        terms: step4.terms,
-        taxRate: step4.taxRate / 100, // API expects decimal
-        discountAmount: step4.discountAmount,
+        terms: step5.terms,
+        taxRate: step5.taxRate / 100, // API expects decimal
+        discountAmount: step5.discountAmount,
         validUntil: step1.validUntil?.getTime(),
         createdBy: "ADMIN",
       };
@@ -424,14 +520,15 @@ export function QuotationBuilderProvider({
         await updateQuotation({
           quotationId: quotationId as Id<"quotations">,
           lineItems: lineItemsPayload,
-          terms: step4.terms,
-          taxRate: step4.taxRate / 100,
-          discountAmount: step4.discountAmount,
+          terms: step5.terms,
+          taxRate: step5.taxRate / 100,
+          discountAmount: step5.discountAmount,
           clientId: step1.clientId,
           projectId:
             step1.projectId && step1.projectId !== "none"
               ? step1.projectId
               : undefined,
+          projectIds: projectIds,
           validUntil: step1.validUntil?.getTime(),
         });
         toast.success("Quotation updated successfully");

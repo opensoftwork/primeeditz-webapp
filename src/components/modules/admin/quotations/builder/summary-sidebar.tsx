@@ -28,9 +28,9 @@ export function SummarySidebar({
   selectedClient: { _id: string; name: string; company?: string } | undefined;
 }) {
   const { formData, setFormData, taxAmount, projects } = useQuotationBuilder();
-  const { taxRate, discountAmount } = formData.step4;
+  const { taxRate, discountAmount } = formData.step5;
   const selectedProjects = projects?.filter((p) =>
-    formData.step1.projectIds.includes(p._id)
+    formData.step2.projectIds.includes(p._id)
   );
 
   return (
@@ -72,7 +72,7 @@ export function SummarySidebar({
                 type="number"
                 value={discountAmount}
                 onChange={(e) =>
-                  setFormData("step4", {
+                  setFormData("step5", {
                     discountAmount: Number(e.target.value),
                   })
                 }
@@ -88,7 +88,7 @@ export function SummarySidebar({
             <Select
               value={taxRate.toString()}
               onValueChange={(v) =>
-                setFormData("step4", { taxRate: Number(v) })
+                setFormData("step5", { taxRate: Number(v) })
               }
             >
               <SelectTrigger className="h-8 w-20 bg-white/5 border-none rounded-lg font-bold text-xs text-center justify-center">

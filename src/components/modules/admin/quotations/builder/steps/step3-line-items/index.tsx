@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { Plus, BookOpen, FolderOpen } from "lucide-react";
+import { Plus, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuotationBuilder } from "../../quotation-builder-context";
 import { useQuery } from "convex/react";
@@ -9,7 +9,6 @@ import { api } from "@convex/_generated/api";
 
 import { LibraryItemsDrawer } from "./library-items-drawer";
 import { LineItemDrawer } from "./line-item-drawer";
-import { InvolvedProjects } from "./involved-projects";
 import { ProjectSectionItems } from "./project-section-items";
 import type { QuotationLineItem, Project, Section } from "../../types";
 
@@ -22,11 +21,12 @@ export function Step3LineItems() {
     nextStep,
     setSubmitTrigger,
     projects,
-    setFormData,
   } = useQuotationBuilder();
 
-  const { lineItems } = formData.step3;
-  const selectedProjectIds = formData.step1.projectIds;
+  // Access step4 for lineItems (Calculate Worth)
+  const { lineItems } = formData.step4;
+  // Access step2 for projectIds (Project Selection)
+  const selectedProjectIds = formData.step2.projectIds;
   const filteredProjects =
     (projects as Project[])?.filter((p) =>
       selectedProjectIds.includes(p._id)
@@ -194,30 +194,7 @@ export function Step3LineItems() {
     [editingItem, addLineItem, updateLineItem, ensureProjectExpanded]
   );
 
-  // Handle project management
-  const handleAddProject = useCallback(
-    (val: string) => {
-      setFormData("step1", {
-        projectIds: [...selectedProjectIds, val],
-      });
-    },
-    [setFormData, selectedProjectIds]
-  );
-
-  const handleRemoveProject = useCallback(
-    (projectId: string) => {
-      setFormData("step1", {
-        projectIds: selectedProjectIds.filter((id) => id !== projectId),
-      });
-      // Also remove items associated with this project
-      lineItems.forEach((li, idx) => {
-        if ((li as QuotationLineItem).projectId === projectId) {
-          removeLineItem(idx);
-        }
-      });
-    },
-    [setFormData, selectedProjectIds, lineItems, removeLineItem]
-  );
+  
 
   // All items with originalIdx
   const allItemsWithIdx = useMemo(
@@ -268,15 +245,7 @@ export function Step3LineItems() {
           </div>
         </div>
 
-        {/* Projects Section */}
-        <InvolvedProjects
-          projects={projects as Project[]}
-          selectedProjectIds={selectedProjectIds}
-          filteredProjects={filteredProjects}
-          clientId={formData.step1.clientId}
-          onAddProject={handleAddProject}
-          onRemoveProject={handleRemoveProject}
-        />
+        
 
         {/* Project-based Items Display */}
         <div className="mt-6 p-5 rounded-2xl bg-white/2 border border-white/5">

@@ -33,6 +33,7 @@ interface ProjectListingDrawerProps {
   selectedProjectIds: string[];
   onAddProject: (projectId: string) => void;
   onRemoveProject: (projectId: string) => void;
+  children?: React.ReactNode;
 }
 
 export function ProjectListingDrawer({
@@ -40,6 +41,7 @@ export function ProjectListingDrawer({
   selectedProjectIds,
   onAddProject,
   onRemoveProject,
+  children,
 }: ProjectListingDrawerProps) {
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -73,15 +75,17 @@ export function ProjectListingDrawer({
   return (
     <Sheet>
       <SheetTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="h-9 bg-white/5 border-white/5 rounded-xl px-4 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white/10 transition-colors"
-          disabled={!clientId}
-        >
-          <Plus className="h-3.5 w-3.5 mr-2 text-primary" />
-          Add Projects
-        </Button>
+        {children || (
+          <Button
+            type="button"
+            variant="outline"
+            className="h-9 bg-white/5 border-white/5 rounded-xl px-4 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white/10 transition-colors"
+            disabled={!clientId}
+          >
+            <Plus className="h-3.5 w-3.5 mr-2 text-primary" />
+            Add Projects
+          </Button>
+        )}
       </SheetTrigger>
       <SheetContent
         side="right"

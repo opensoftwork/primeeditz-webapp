@@ -225,6 +225,7 @@ export const updateQuotation = adminMutation({
     discountAmount: v.optional(v.number()),
     clientId: v.optional(v.string()),
     projectId: v.optional(v.string()),
+    projectIds: v.optional(v.array(v.string())),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);

@@ -16,8 +16,10 @@ import {
   Save,
   ArrowLeft,
   Loader2,
+  FolderOpen,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useMemo } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   QuotationBuilderProvider,
@@ -26,6 +28,7 @@ import {
 } from "./quotation-builder-context";
 import {
   Step1ClientContext,
+  Step2ProjectSelection,
   Step2TemplateSelection,
   Step3LineItems,
   Step4Terms,
@@ -65,15 +68,27 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
   const handlePrimaryAction = () => {
     if (submitTrigger) {
       submitTrigger();
-    } else if (currentStep === 4) {
+    } else if (currentStep === 5) {
       saveQuotation();
     }
   };
 
-  const canSubmit =
-    currentStep < 3
-      ? !!formData.step1.clientId
-      : !!formData.step1.clientId && formData.step3.lineItems.length > 0;
+  const canSubmit = useMemo(() => {
+    switch (currentStep) {
+      case 1:
+        return !!formData.step1.clientId;
+      case 2:
+        return formData.step2.projectIds.length > 0;
+      case 3:
+        return true; // Template can be skipped or is handled by component
+      case 4:
+        return formData.step4.lineItems.length > 0;
+      case 5:
+        return true;
+      default:
+        return false;
+    }
+  }, [currentStep, formData]);
 
   return (
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
@@ -118,7 +133,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                 <Save className="h-4 w-4 mr-2" />
                 {quotationId
                   ? "Save Changes"
-                  : currentStep === 4
+                  : currentStep === 5
                   ? "Finalize & Preview"
                   : "Next Step"}
               </>
@@ -130,7 +145,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
       {/* Steps Indicator */}
       <div className="flex items-center gap-1">
         {QUOTATION_STEPS.map((step, idx) => {
-          const StepIcon = [User, Layout, Receipt, CheckCircle2][idx];
+          const StepIcon = [User, FolderOpen, Layout, Receipt, CheckCircle2][idx];
           return (
             <div key={step.id} className="flex-1 flex items-center gap-2">
               <button
@@ -166,7 +181,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   </span>
                 </div>
               </button>
-              {idx < 3 && <div className="flex-1 h-px bg-white/5 mx-4" />}
+              {idx < 4 && <div className="flex-1 h-px bg-white/5 mx-4" />}
             </div>
           );
         })}
@@ -184,9 +199,10 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
               {currentStep === 1 && <Step1ClientContext />}
-              {currentStep === 2 && <Step2TemplateSelection />}
-              {currentStep === 3 && <Step3LineItems />}
-              {currentStep === 4 && <Step4Terms />}
+              {currentStep === 2 && <Step2ProjectSelection />}
+              {currentStep === 3 && <Step2TemplateSelection />}
+              {currentStep === 4 && <Step3LineItems />}
+              {currentStep === 5 && <Step4Terms />}
             </motion.div>
           </AnimatePresence>
         </div>
