@@ -29,6 +29,7 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { Label } from "@/components/ui/label";
 
 // Google Icon Component
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -155,8 +156,13 @@ export default function SignUpForm() {
 
   if (isFirstUser === undefined) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex-1 flex items-center justify-center bg-[#050507]">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mb-4" />
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">
+            Initializing Portal...
+          </p>
+        </div>
       </div>
     );
   }
@@ -164,97 +170,65 @@ export default function SignUpForm() {
   const isSetupMode = isFirstUser === true;
 
   return (
-    <div
-      className={`min-h-screen w-full flex items-center justify-center p-4 ${isSetupMode ? "bg-zinc-950" : "bg-linear-to-br from-background via-muted/20 to-background"}`}
-    >
-      {/* Background Effects for Setup Mode */}
-      {isSetupMode && (
-        <>
-          <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent pointer-events-none" />
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[128px] pointer-events-none" />
-        </>
-      )}
+    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#050507]">
+      {/* Left Column: Form */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-12 xl:px-24 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-sm mx-auto my-auto space-y-10"
+        >
+          {/* Setup Badge */}
+          {isSetupMode && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-[9px] font-black uppercase tracking-widest"
+            >
+              <Crown className="w-3 h-3" />
+              <span>Initial Admin Setup</span>
+            </motion.div>
+          )}
 
-      <div
-        className={`w-full max-w-5xl grid lg:grid-cols-5 gap-0 overflow-hidden rounded-[2.5rem] border ${isSetupMode ? "border-white/5 bg-white/2 backdrop-blur-3xl" : "border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl shadow-primary/5"}`}
-      >
-        {/* Left Side: Form */}
-        <div className="lg:col-span-3 p-6 md:p-10 lg:p-12 flex flex-col justify-center relative">
-          <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+          {/* Header */}
+          <div className="space-y-3 text-center lg:text-left">
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400 block">
+              {isSetupMode ? "FOUNDATION SETUP" : "START YOUR JOURNEY"}
+            </span>
+            <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">
+              {isSetupMode ? "INITIALIZE" : "JOIN STUDIO"}
+            </h1>
+            <p className="text-sm font-medium text-white/40 leading-relaxed max-w-[360px] mx-auto lg:mx-0">
+              {isSetupMode
+                ? "Create the master admin account to initialize your PrimeEditz studio instance."
+                : "Create your account to start managing projects and collaborating with the team."}
+            </p>
+          </div>
 
-          <div className="w-full max-w-sm mx-auto space-y-6 relative z-10">
-            {/* Admin Badge */}
-            {isSetupMode && (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-black uppercase tracking-widest mb-4"
-              >
-                <Crown className="w-3.5 h-3.5" />
-                <span>Initial Admin Setup</span>
-              </motion.div>
-            )}
-
-            {/* Header */}
-            <div className="space-y-3">
-              <div
-                className={`inline-flex items-center justify-center w-14 h-14 rounded-2xl ${isSetupMode ? "bg-primary/20 border border-primary/30" : "bg-primary/10 border border-primary/20"} mb-4`}
-              >
-                {isSetupMode ? (
-                  <Shield className="w-7 h-7 text-primary" />
-                ) : (
-                  <Sparkles className="w-7 h-7 text-primary" />
-                )}
-              </div>
-              <h1
-                className={`text-3xl font-black tracking-tight uppercase ${isSetupMode ? "text-white" : "bg-linear-to-br from-foreground to-foreground/70 bg-clip-text"}`}
-              >
-                {isSetupMode ? "Setup Studio" : "Create Account"}
-              </h1>
-              <p
-                className={`${isSetupMode ? "text-white/40" : "text-muted-foreground"} text-base font-medium`}
-              >
-                {isSetupMode
-                  ? "Create the master admin account to initialize PrimeEditz."
-                  : "Join PrimeEditz and transform your workflow"}
-              </p>
-            </div>
-
-            {/* Google Sign-up Button */}
+          <div className="space-y-6">
             <Button
-              type="button"
-              variant="outline"
-              className={`w-full h-12 ${isSetupMode ? "bg-white/5 border-white/5 hover:bg-white/10 text-white rounded-xl" : "bg-background/50 border-border/50 hover:bg-muted/50 hover:border-border rounded-xl"} transition-all duration-200 font-bold group`}
               onClick={handleGoogleSignUp}
               disabled={isLoading || isGoogleLoading}
+              className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg active:scale-[0.98] group"
             >
               {isGoogleLoading ? (
-                <>
-                  <Loader2 className="mr-3 h-5 w-5 animate-spin" />
-                  Connecting to Google...
-                </>
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
-                  <GoogleIcon className="mr-3 h-5 w-5" />
-                  {isSetupMode
-                    ? "Initialize with Google"
-                    : "Sign up with Google"}
-                </>
+                <div className="flex items-center justify-center w-full">
+                  <GoogleIcon className="mr-3 h-4 w-4" />
+                  <span className="flex-1 text-center">Continue with Google</span>
+                </div>
               )}
             </Button>
 
-            {/* Divider */}
-            <div className="relative">
+            <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <div
-                  className={`w-full border-t ${isSetupMode ? "border-white/5" : "border-border/50"}`}
-                />
+                <div className="w-full border-t border-white/5" />
               </div>
-              <div className="relative flex justify-center text-xs">
-                <span
-                  className={`${isSetupMode ? "bg-zinc-950 px-4 text-white/20" : "bg-background px-4 text-muted-foreground"} uppercase font-black tracking-widest`}
-                >
-                  Or use email
+              <div className="relative flex justify-center text-[9px]">
+                <span className="bg-[#050507] px-3 text-white/20 font-black uppercase">
+                  OR
                 </span>
               </div>
             </div>
@@ -266,56 +240,52 @@ export default function SignUpForm() {
               }}
               className="space-y-6"
             >
-              <FieldGroup>
+              <FieldGroup className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <form.Field
                     name="firstName"
                     children={(field) => (
-                      <Field>
-                        <FieldLabel
+                      <div className="space-y-2">
+                        <Label
                           htmlFor={field.name}
-                          className={`text-xs font-black uppercase tracking-widest ${isSetupMode ? "text-white/40" : ""}`}
+                          className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                         >
                           First name
-                        </FieldLabel>
+                        </Label>
                         <Input
                           id={field.name}
                           placeholder="John"
                           value={field.state.value}
                           onBlur={field.handleBlur}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            field.handleChange(e.target.value)
-                          }
-                          className={`h-11 ${isSetupMode ? "bg-white/5 border-white/5 text-white placeholder:text-white/20 rounded-xl" : "bg-background/50 border-border/50 focus:border-primary/50"}`}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="bg-[#0A0A0C] border-white/5 text-white h-11 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                           disabled={isLoading}
                         />
-                        <FieldError errors={field.state.meta.errors} />
-                      </Field>
+                        <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                      </div>
                     )}
                   />
                   <form.Field
                     name="lastName"
                     children={(field) => (
-                      <Field>
-                        <FieldLabel
+                      <div className="space-y-2">
+                        <Label
                           htmlFor={field.name}
-                          className={`text-xs font-black uppercase tracking-widest ${isSetupMode ? "text-white/40" : ""}`}
+                          className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                         >
                           Last name
-                        </FieldLabel>
+                        </Label>
                         <Input
                           id={field.name}
                           placeholder="Doe"
                           value={field.state.value}
                           onBlur={field.handleBlur}
-                          onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                            field.handleChange(e.target.value)
-                          }
-                          className={`h-11 ${isSetupMode ? "bg-white/5 border-white/5 text-white placeholder:text-white/20 rounded-xl" : "bg-background/50 border-border/50 focus:border-primary/50"}`}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="bg-[#0A0A0C] border-white/5 text-white h-11 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                           disabled={isLoading}
                         />
-                        <FieldError errors={field.state.meta.errors} />
-                      </Field>
+                        <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                      </div>
                     )}
                   />
                 </div>
@@ -323,203 +293,152 @@ export default function SignUpForm() {
                 <form.Field
                   name="email"
                   children={(field) => (
-                    <Field>
-                      <FieldLabel
+                    <div className="space-y-2">
+                      <Label
                         htmlFor={field.name}
-                        className={`text-xs font-black uppercase tracking-widest ${isSetupMode ? "text-white/40" : ""}`}
+                        className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                       >
                         Email address
-                      </FieldLabel>
+                      </Label>
                       <Input
                         id={field.name}
                         type="email"
-                        placeholder="admin@primeeditz.com"
+                        placeholder="you@company.com"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className={`h-12 ${isSetupMode ? "bg-white/5 border-white/5 text-white placeholder:text-white/20 rounded-xl" : "bg-background/50 border-border/50 focus:border-primary/50"}`}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
+                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                    </div>
                   )}
                 />
 
                 <form.Field
                   name="password"
                   children={(field) => (
-                    <Field>
-                      <FieldLabel
+                    <div className="space-y-2">
+                      <Label
                         htmlFor={field.name}
-                        className={`text-xs font-black uppercase tracking-widest ${isSetupMode ? "text-white/40" : ""}`}
+                        className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                       >
                         Password
-                      </FieldLabel>
+                      </Label>
                       <PasswordInput
                         id={field.name}
-                        placeholder="Create a strong password"
+                        placeholder="••••••••"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className={`h-12 ${isSetupMode ? "bg-white/5 border-white/5 text-white placeholder:text-white/20 rounded-xl" : "bg-background/50 border-border/50 focus:border-primary/50"}`}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
+                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                    </div>
                   )}
                 />
 
                 <form.Field
                   name="confirmPassword"
                   children={(field) => (
-                    <Field>
-                      <FieldLabel
+                    <div className="space-y-2">
+                      <Label
                         htmlFor={field.name}
-                        className={`text-xs font-black uppercase tracking-widest ${isSetupMode ? "text-white/40" : ""}`}
+                        className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                       >
-                        Confirm password
-                      </FieldLabel>
+                        Confirm Password
+                      </Label>
                       <PasswordInput
                         id={field.name}
-                        placeholder="Confirm your password"
+                        placeholder="••••••••"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className={`h-12 ${isSetupMode ? "bg-white/5 border-white/5 text-white placeholder:text-white/20 rounded-xl" : "bg-background/50 border-border/50 focus:border-primary/50"}`}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
+                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                    </div>
                   )}
                 />
               </FieldGroup>
 
               <Button
                 type="submit"
-                className={`w-full h-12 font-black uppercase tracking-widest text-sm shadow-xl transition-all ${isSetupMode ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 rounded-xl" : "bg-primary hover:bg-primary/90 text-primary-foreground shadow-primary/25 rounded-xl"}`}
                 disabled={isLoading}
+                className="w-full h-12 rounded-xl bg-[#4F46E5] hover:bg-[#4338ca] text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] mt-4"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Initializing...
-                  </>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
                     {isSetupMode ? "Initialize Studio" : "Create account"}{" "}
-                    <ArrowRight className="ml-2 h-5 w-5" />
+                    <ArrowRight className="ml-2 h-4 w-4" />
                   </>
                 )}
               </Button>
             </form>
+          </div>
 
-            <div className="text-center pt-4">
+          {/* Footer Info */}
+          <div className="pt-8 border-t border-white/5 grid grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">
+                Account
+              </h4>
               <Link
                 href="/sign-in"
-                className={`inline-flex items-center gap-2 text-sm font-bold uppercase tracking-wider ${isSetupMode ? "text-white/40 hover:text-white" : "text-foreground hover:text-primary"} transition-colors group`}
+                className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-indigo-400 transition-colors group"
               >
-                Sign in instead
-                <ArrowRight className="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+                Sign In Instead
+                <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
-        </div>
-
-        {/* Right Side: Visual */}
-        <div
-          className={`hidden lg:flex lg:col-span-2 flex-col justify-between p-8 lg:p-12 border-l relative overflow-hidden ${isSetupMode ? "bg-zinc-900/50 border-white/5" : "bg-linear-to-br from-muted/50 via-muted/30 to-muted/50 border-border/30"}`}
-        >
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="space-y-4 relative z-10">
-            <div
-              className={`inline-flex items-center gap-2 px-4 py-2 rounded-full ${isSetupMode ? "bg-primary/10 border border-primary/20 text-primary" : "bg-primary/10 border border-primary/20 text-primary"} text-sm font-bold uppercase tracking-wider`}
-            >
-              <Sparkles className="w-4 h-4" />
-              <span>{isSetupMode ? "Step 1 of Setup" : "Join the studio"}</span>
-            </div>
-            <h2
-              className={`text-2xl font-black uppercase tracking-tight leading-tight ${isSetupMode ? "text-white" : "text-foreground"}`}
-            >
-              {isSetupMode ? "Production Empire" : "Professional Management"}
-            </h2>
-            <p
-              className={`${isSetupMode ? "text-white/40" : "text-muted-foreground"} leading-relaxed font-medium`}
-            >
-              {isSetupMode
-                ? "Setup the master control center for your editing services and client collaborations."
-                : "Streamline collaboration, organize assets, and deliver projects on time."}
-            </p>
-          </div>
-
-          <div className="space-y-4 relative z-10">
-            {(isSetupMode
-              ? [
-                  "Master Admin Control",
-                  "B2B Rate Card Integration",
-                  "Custom Workflow Engine",
-                  "Scaleable Cloud Storage",
-                ]
-              : [
-                  "Real-time team collaboration",
-                  "Smart asset organization",
-                  "Client review workflows",
-                  "Automated delivery tracking",
-                ]
-            ).map((feature, i) => (
-              <div
-                key={i}
-                className={`flex items-center gap-3 p-4 rounded-2xl border backdrop-blur-sm ${isSetupMode ? "bg-white/5 border-white/5" : "bg-card/30 border-border/30"}`}
-              >
-                <div className="w-6 h-6 rounded-lg bg-primary/20 flex items-center justify-center shrink-0">
-                  <div className="w-2 h-2 rounded-full bg-primary" />
-                </div>
-                <span
-                  className={`text-sm font-bold uppercase tracking-wider ${isSetupMode ? "text-white/60" : "text-foreground/90"}`}
-                >
-                  {feature}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          <div className="relative z-10">
-            <div
-              className={`rounded-3xl border p-6 shadow-xl ${isSetupMode ? "bg-white/2 border-white/5" : "bg-card/50 border-border/50 backdrop-blur-sm"}`}
-            >
-              <p
-                className={`italic text-sm mb-4 font-medium ${isSetupMode ? "text-white/60" : "text-foreground/90"}`}
-              >
-                {isSetupMode
-                  ? "The foundation for your digital production house starts here."
-                  : '"A game changer for our post-production workflow. It brings clarity to chaos."'}
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">
+                Support
+              </h4>
+              <p className="text-[9px] text-white/30 leading-relaxed font-medium">
+                PrimeEditz Studio Help Center
               </p>
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-10 h-10 rounded-xl bg-linear-to-br from-primary/20 to-primary/10 border ${isSetupMode ? "border-primary/30" : "border-primary/20"}`}
-                />
-                <div>
-                  <p
-                    className={`font-black uppercase tracking-widest text-xs ${isSetupMode ? "text-white" : "text-foreground"}`}
-                  >
-                    {isSetupMode ? "PRIME EDITZ" : "Alex Chen"}
-                  </p>
-                  <p
-                    className={`text-[10px] uppercase font-black tracking-widest ${isSetupMode ? "text-primary" : "text-muted-foreground"}`}
-                  >
-                    {isSetupMode ? "SYSTEM CORE" : "Creative Director"}
-                  </p>
-                </div>
-              </div>
             </div>
           </div>
+        </motion.div>
+      </div>
+
+      {/* Right Column: Image */}
+      <div className="hidden lg:block lg:w-3/5 relative bg-zinc-950 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-l from-transparent to-[#050507] z-10" />
+        <img
+          src="https://images.unsplash.com/photo-1590602847861-f357a9332bbc?q=80&w=2574&auto=format&fit=crop"
+          alt="Post Production Studio"
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute bottom-16 right-16 z-20 text-right max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-3 leading-none">
+              {isSetupMode ? "Admin Control" : "Creative Freedom"}
+            </h2>
+            <div className="flex items-center justify-end gap-3 text-indigo-400/60">
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Collaborate
+              </span>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Organize
+              </span>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Scale
+              </span>
+            </div>
+          </motion.div>
         </div>
       </div>
     </div>

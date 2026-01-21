@@ -10,7 +10,7 @@
 
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
-import { Plus, ChevronRight, ChevronDown, Trash2, Edit2 } from "lucide-react";
+import { Plus, ChevronRight, ChevronDown, Trash2, Edit2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { QuotationLineItem, QuotationSubItem } from "../../types";
@@ -36,6 +36,7 @@ interface LineItemsTableProps {
   onEditItem: (item: QuotationLineItem & { originalIdx: number }) => void;
   onRemoveItem: (idx: number) => void;
   onAddItem: (sectionId: string) => void;
+  onAddFromLibrary: (sectionId: string) => void;
   onAddSubItem?: (parentIdx: number) => void;
 }
 
@@ -45,6 +46,7 @@ export function LineItemsTable({
   onEditItem,
   onRemoveItem,
   onAddItem,
+  onAddFromLibrary,
   onAddSubItem,
 }: LineItemsTableProps) {
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
@@ -212,16 +214,28 @@ export function LineItemsTable({
 
       {/* Section Footer */}
       <div className="flex items-center justify-between mt-4 pt-4 border-t border-white/10">
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          onClick={() => onAddItem(section._id)}
-          className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide text-white/40 hover:text-white hover:bg-white/5"
-        >
-          <Plus className="h-3 w-3 mr-1.5" />
-          Add Item
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onAddFromLibrary(section._id)}
+            className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide text-white/40 hover:text-white hover:bg-white/5"
+          >
+            <BookOpen className="h-3 w-3 mr-1.5" />
+            Library
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={() => onAddItem(section._id)}
+            className="h-8 px-3 rounded-lg text-[10px] font-bold uppercase tracking-wide text-white/40 hover:text-white hover:bg-white/5"
+          >
+            <Plus className="h-3 w-3 mr-1.5" />
+            Add Item
+          </Button>
+        </div>
         <div className="flex items-center gap-4">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
             Section Total

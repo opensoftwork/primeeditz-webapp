@@ -83,22 +83,14 @@ export function RejectQuotationDrawer({
           <SheetHeader className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="h-12 w-12 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center justify-center shadow-lg shadow-red-500/5">
-                <XCircle className="h-6 w-6 text-red-400" />
+                <XCircle className="h-6 w-6 text-red-500" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
             <div className="space-y-1">
               <SheetTitle className="text-2xl font-black text-white uppercase tracking-tighter">
                 Decline Proposal
               </SheetTitle>
-              <SheetDescription className="text-sm font-bold text-white/30 uppercase tracking-widest">
+              <SheetDescription className="text-sm font-bold text-white/70 uppercase tracking-widest">
                 We're sorry to see you go. Help us improve.
               </SheetDescription>
             </div>
@@ -106,7 +98,7 @@ export function RejectQuotationDrawer({
 
           <div className="space-y-6">
             <div className="space-y-4">
-              <Label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
+              <Label className="text-[10px] font-black text-white/70 uppercase tracking-[0.3em]">
                 Reason for declining
               </Label>
               <RadioGroup
@@ -130,10 +122,10 @@ export function RejectQuotationDrawer({
                       className="mt-1 border-white/20 text-red-500"
                     />
                     <div className="space-y-1">
-                      <p className="text-xs font-bold text-white/80 group-hover:text-white transition-colors">
+                      <p className="text-xs font-bold text-white group-hover:text-white transition-colors">
                         {r.label}
                       </p>
-                      <p className="text-[9px] font-medium text-white/20 leading-relaxed uppercase tracking-widest">
+                      <p className="text-[9px] font-medium text-white/50 leading-relaxed uppercase tracking-widest">
                         {r.description}
                       </p>
                     </div>
@@ -146,7 +138,7 @@ export function RejectQuotationDrawer({
               <div className="flex items-center justify-between px-1">
                 <Label
                   htmlFor="notes"
-                  className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]"
+                  className="text-[10px] font-black text-white/70 uppercase tracking-[0.3em]"
                 >
                   Additional Comments
                 </Label>
@@ -163,7 +155,7 @@ export function RejectQuotationDrawer({
                 placeholder="Optional feedback..."
                 value={notes}
                 onChange={(e) => setNotes(e.target.value.slice(0, 300))}
-                className="min-h-[100px] bg-white/2 border-white/5 rounded-2xl text-sm font-bold text-white focus:bg-white/5 focus:border-red-500/20 transition-all placeholder:text-white/10 resize-none p-4"
+                className="min-h-[100px] bg-white/2 border-white/5 rounded-2xl text-sm font-bold text-white focus:bg-white/5 focus:border-red-500/20 transition-all placeholder:text-white/40 resize-none p-4"
               />
               {reason === "other" && notes.length === 0 && (
                 <div className="flex items-center gap-2 text-red-400/60 mt-2 px-1">

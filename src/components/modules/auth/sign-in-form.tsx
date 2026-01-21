@@ -8,6 +8,8 @@ import * as z from "zod";
 import { Loader2, ArrowRight, Sparkles } from "lucide-react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { motion } from "motion/react";
+import { Label } from "@/components/ui/label";
 
 // Google Icon Component
 const GoogleIcon = ({ className }: { className?: string }) => (
@@ -116,62 +118,63 @@ export default function SignInForm() {
 
   if (isFirstUser === undefined || isFirstUser === true) {
     return (
-      <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      <div className="flex-1 flex items-center justify-center bg-[#050507]">
+        <div className="flex flex-col items-center">
+          <Loader2 className="h-8 w-8 animate-spin text-indigo-400 mb-4" />
+          <p className="text-white/40 text-[10px] font-black uppercase tracking-widest">
+            Loading Portal...
+          </p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-linear-to-br from-background via-muted/20 to-background">
-      <div className="w-full max-w-5xl grid lg:grid-cols-5 gap-0 overflow-hidden rounded-[2.5rem] border border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl shadow-primary/5">
-        {/* Left Side: Form */}
-        <div className="lg:col-span-2 p-6 md:p-10 lg:p-12 flex flex-col justify-center relative">
-          <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+    <div className="flex-1 flex flex-col lg:flex-row overflow-hidden bg-[#050507]">
+      {/* Left Column: Form */}
+      <div className="flex-1 flex flex-col justify-center px-6 py-12 lg:px-12 xl:px-24 relative z-10">
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5 }}
+          className="w-full max-w-sm mx-auto my-auto space-y-10"
+        >
+          {/* Header */}
+          <div className="space-y-3 text-center lg:text-left">
+            <span className="text-[10px] font-bold uppercase tracking-[0.3em] text-indigo-400 block">
+              WELCOME BACK
+            </span>
+            <h1 className="text-4xl lg:text-5xl font-black text-white uppercase tracking-tighter leading-none">
+              SIGN IN
+            </h1>
+            <p className="text-sm font-medium text-white/40 leading-relaxed max-w-[360px] mx-auto lg:mx-0">
+              Access your studio dashboard and manage your creative production pipeline.
+            </p>
+          </div>
 
-          <div className="w-full max-w-sm mx-auto space-y-6 relative z-10">
-            {/* Header */}
-            <div className="space-y-3">
-              <div className="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-primary/10 border border-primary/20 mb-2">
-                <Sparkles className="w-6 h-6 text-primary" />
-              </div>
-              <h1 className="text-3xl font-black tracking-tight uppercase bg-linear-to-br from-foreground to-foreground/70 bg-clip-text">
-                Welcome back
-              </h1>
-              <p className="text-muted-foreground text-sm font-medium">
-                Sign in to continue to your workspace
-              </p>
-            </div>
-
-            {/* Google Sign-in Button */}
+          <div className="space-y-6">
             <Button
-              type="button"
-              variant="outline"
-              className="w-full h-11 bg-background/50 border-border/50 hover:bg-muted/50 hover:border-border transition-all duration-200 font-bold group rounded-lg"
               onClick={handleGoogleSignIn}
               disabled={isLoading || isGoogleLoading}
+              className="w-full h-12 rounded-xl bg-white text-black hover:bg-white/90 font-bold uppercase tracking-widest text-[10px] transition-all shadow-lg active:scale-[0.98] group"
             >
               {isGoogleLoading ? (
-                <>
-                  <Loader2 className="mr-3 h-4 w-4 animate-spin" />
-                  Connecting...
-                </>
+                <Loader2 className="h-4 w-4 animate-spin" />
               ) : (
-                <>
+                <div className="flex items-center justify-center w-full">
                   <GoogleIcon className="mr-3 h-4 w-4" />
-                  Continue with Google
-                </>
+                  <span className="flex-1 text-center">Continue with Google</span>
+                </div>
               )}
             </Button>
 
-            {/* Divider */}
-            <div className="relative">
+            <div className="relative py-2">
               <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-border/50" />
+                <div className="w-full border-t border-white/5" />
               </div>
-              <div className="relative flex justify-center text-[10px]">
-                <span className="bg-background px-4 text-muted-foreground uppercase font-black tracking-widest">
-                  Or continue with email
+              <div className="relative flex justify-center text-[9px]">
+                <span className="bg-[#050507] px-3 text-white/20 font-black uppercase">
+                  OR
                 </span>
               </div>
             </div>
@@ -183,48 +186,46 @@ export default function SignInForm() {
               }}
               className="space-y-4"
             >
-              <FieldGroup>
+              <FieldGroup className="space-y-4">
                 <form.Field
                   name="email"
                   children={(field) => (
-                    <Field>
-                      <FieldLabel
+                    <div className="space-y-2">
+                      <Label
                         htmlFor={field.name}
-                        className="text-[10px] font-black uppercase tracking-widest"
+                        className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                       >
                         Email address
-                      </FieldLabel>
+                      </Label>
                       <Input
                         id={field.name}
                         type="email"
                         placeholder="you@company.com"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className="h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
+                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                    </div>
                   )}
                 />
 
                 <form.Field
                   name="password"
                   children={(field) => (
-                    <Field>
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <FieldLabel
+                        <Label
                           htmlFor={field.name}
-                          className="text-[10px] font-black uppercase tracking-widest"
+                          className="text-[9px] font-black uppercase tracking-widest text-white/30 ml-1"
                         >
                           Password
-                        </FieldLabel>
+                        </Label>
                         <Link
                           href="/forgot-password"
-                          className="text-[10px] text-primary hover:text-primary/80 transition-colors uppercase font-black"
+                          className="text-[9px] text-indigo-400 hover:text-indigo-300 transition-colors uppercase font-black"
                         >
                           Forgot?
                         </Link>
@@ -234,28 +235,23 @@ export default function SignInForm() {
                         placeholder="••••••••"
                         value={field.state.value}
                         onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className="h-10 bg-background/50 border-border/50 focus:border-primary/50 transition-colors"
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
+                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                    </div>
                   )}
                 />
               </FieldGroup>
 
               <Button
                 type="submit"
-                className="w-full h-11 bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-widest text-xs shadow-lg shadow-primary/25 transition-all rounded-lg"
                 disabled={isLoading}
+                className="w-full h-12 rounded-xl bg-[#4F46E5] hover:bg-[#4338ca] text-white font-black uppercase tracking-widest text-[10px] transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.98] mt-4"
               >
                 {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
-                  </>
+                  <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
                   <>
                     Sign in <ArrowRight className="ml-2 h-4 w-4" />
@@ -263,89 +259,66 @@ export default function SignInForm() {
                 )}
               </Button>
             </form>
+          </div>
 
-            <div className="text-center pt-2">
+          {/* Footer Info */}
+          <div className="pt-8 border-t border-white/5 grid grid-cols-2 gap-8">
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">
+                Account
+              </h4>
               <Link
                 href="/sign-up"
-                className="inline-flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-foreground hover:text-primary transition-colors group"
+                className="inline-flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-indigo-400 transition-colors group"
               >
-                Create an account
-                <ArrowRight className="h-3 w-3 group-hover:translate-x-1 transition-transform" />
+                Create Account
+                <ArrowRight className="h-2.5 w-2.5 group-hover:translate-x-1 transition-transform" />
               </Link>
             </div>
-          </div>
-        </div>
-
-        {/* Right Side: Visual */}
-        <div className="hidden lg:flex lg:col-span-3 flex-col justify-between bg-linear-to-br from-muted/50 via-muted/30 to-muted/50 p-8 lg:p-12 border-l border-border/30 relative overflow-hidden gap-3">
-          <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-
-          <div className="space-y-3 relative z-10">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest">
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Creative Production</span>
+            <div className="space-y-2">
+              <h4 className="text-[10px] font-black text-white uppercase tracking-widest">
+                Support
+              </h4>
+              <p className="text-[9px] text-white/30 leading-relaxed font-medium">
+                PrimeEditz Studio Help Center
+              </p>
             </div>
-            <h2 className="text-3xl font-black uppercase tracking-tight text-foreground max-w-lg leading-tight">
-              Streamline your workflow
+          </div>
+        </motion.div>
+      </div>
+
+      {/* Right Column: Image */}
+      <div className="hidden lg:block lg:w-3/5 relative bg-zinc-950 overflow-hidden">
+        <div className="absolute inset-0 bg-linear-to-l from-transparent to-[#050507] z-10" />
+        <img
+          src="https://images.unsplash.com/photo-1598488035139-bdbb2231ce04?q=80&w=2670&auto=format&fit=crop"
+          alt="Post Production Studio"
+          className="absolute inset-0 w-full h-full object-cover"
+          loading="eager"
+        />
+        <div className="absolute bottom-16 right-16 z-20 text-right max-w-sm">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+          >
+            <h2 className="text-4xl font-black text-white uppercase tracking-tighter mb-3 leading-none">
+              PrimeEditz Studio
             </h2>
-            <p className="text-muted-foreground text-sm max-w-md leading-relaxed font-medium">
-              Join thousands of professionals managing their projects with
-              clarity and precision.
-            </p>
-          </div>
-
-          <div className="grid grid-cols-2 gap-4 relative z-10">
-            <div className="space-y-2 p-4 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/70 transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <div className="w-4 h-4 rounded-md bg-primary/20" />
-              </div>
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground mb-1">
-                  Collaboration
-                </h3>
-                <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
-                  Work together seamlessly
-                </p>
-              </div>
+            <div className="flex items-center justify-end gap-3 text-indigo-400/60">
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Edit
+              </span>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Grade
+              </span>
+              <div className="w-1 h-1 rounded-full bg-white/20" />
+              <span className="text-[10px] font-bold uppercase tracking-widest">
+                Deliver
+              </span>
             </div>
-
-            <div className="space-y-2 p-4 rounded-2xl bg-card/50 border border-border/50 backdrop-blur-sm hover:bg-card/70 transition-colors">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
-                <div className="w-4 h-4 rounded-md bg-primary/20" />
-              </div>
-              <div>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-foreground mb-1">
-                  Organization
-                </h3>
-                <p className="text-[10px] text-muted-foreground leading-relaxed font-medium">
-                  Keep assets accessible
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10">
-            <div className="rounded-2xl border border-border/50 bg-card/50 backdrop-blur-sm p-6 shadow-xl">
-              <div className="space-y-3">
-                <p className="text-foreground/90 leading-relaxed italic text-sm font-medium">
-                  "PrimeEditz transformed how we manage our post-production
-                  pipeline. A game changer."
-                </p>
-                <div className="flex items-center gap-3 pt-1">
-                  <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary/20 to-primary/10 border border-primary/20" />
-                  <div>
-                    <p className="font-black uppercase tracking-widest text-[10px] text-foreground">
-                      Sarah Chen
-                    </p>
-                    <p className="text-[9px] uppercase font-black tracking-widest text-muted-foreground">
-                      Pixel Studios
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>
