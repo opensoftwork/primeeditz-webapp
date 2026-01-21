@@ -1,6 +1,5 @@
 "use client";
 
-import EmployeeDashboard from "@/components/modules/dashboard/employee/dashboard";
 
 /**
  * Employee Dashboard Page
@@ -9,5 +8,5 @@ import EmployeeDashboard from "@/components/modules/dashboard/employee/dashboard
  * Renders the EmployeeDashboard component with a placeholder for upcoming tools.
  */
 export default function EmployeeDashboardPage() {
-  return <EmployeeDashboard />;
+  return <div>Employee Dashboard Page</div>;
 }
