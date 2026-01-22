@@ -19,7 +19,7 @@
   background: black;
   transform: scaleY(0);
   transform-origin: bottom;
-  transition: transform 0.5s cubic-bezier(0.76, 0, 0.24, 1);
+  /* transition removed to allow GSAP to handle animations alone */
 }
 
 .transition-overlay.entering {
