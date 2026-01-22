@@ -7,8 +7,15 @@ import {
   ProblemSolutionSection, 
   FeaturesShowcaseSection, 
   WorkflowDemoSection,
-  WhoItsForSection
+  WhoItsForSection,
+  PricingSection,
+  FAQSection,
+  CTABannerSection,
+  FooterSection,
+  TestimonialsSection
 } from "@/components/modules/landing/sections";
+
+import { AnimatedSection } from "@/components/modules/landing/animated-section";
 
 export default function Home() {
   return (
@@ -16,11 +23,40 @@ export default function Home() {
       <div className="relative z-10 min-h-screen">
         <main className="max-w-full mx-auto relative overflow-visible">
           <Hero />
-          <ProblemSolutionSection />
-          <WorkflowDemoSection />
-          <FeaturesShowcaseSection />
+          
+          <AnimatedSection id="problems">
+            <ProblemSolutionSection />
+          </AnimatedSection>
 
-          <WhoItsForSection />
+          <AnimatedSection id="workflow">
+            <WorkflowDemoSection />
+          </AnimatedSection>
+          
+          <AnimatedSection id="features">
+            <FeaturesShowcaseSection />
+          </AnimatedSection>
+
+          <AnimatedSection id="audience">
+            <WhoItsForSection />
+          </AnimatedSection>
+
+          <AnimatedSection id="testimonials">
+            <TestimonialsSection />
+          </AnimatedSection>
+
+          <AnimatedSection id="pricing">
+            <PricingSection />
+          </AnimatedSection>
+
+          <AnimatedSection id="faq">
+            <FAQSection />
+          </AnimatedSection>
+
+          <AnimatedSection>
+            <CTABannerSection />
+          </AnimatedSection>
+
+          <FooterSection />
           <Leva hidden />
         </main>
       </div>

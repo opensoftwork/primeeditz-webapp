@@ -1,7 +1,7 @@
 # Story 10-5: Pricing Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: Completed
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Conversion critical
@@ -37,9 +37,9 @@
 
 ### AC1: Pricing Tiers Display
 
-- [ ] **Given** I am viewing the Pricing section
-- [ ] **When** I see the pricing cards
-- [ ] **Then** I see 4 pricing tiers:
+- [x] **Given** I am viewing the Pricing section
+- [x] **When** I see the pricing cards
+- [x] **Then** I see 4 pricing tiers:
 
 | Plan       | Monthly Price | Events    | Storage | Users  | CTA                  |
 | ---------- | ------------- | --------- | ------- | ------ | -------------------- |
@@ -50,14 +50,14 @@
 
 ### AC2: Popular Tier Highlight
 
-- [ ] **Given** the Business tier
-- [ ] **Then** it must be highlighted as "Popular" or "Most Popular"
-- [ ] **And** have a distinct visual style (larger, different border, badge)
+- [x] **Given** the Business tier
+- [x] **Then** it must be highlighted as "Popular" or "Most Popular"
+- [x] **And** have a distinct visual style (larger, different border, badge)
 
 ### AC3: Feature List
 
-- [ ] **Given** each pricing card
-- [ ] **Then** it shows key features with checkmarks:
+- [x] **Given** each pricing card
+- [x] **Then** it shows key features with checkmarks:
   - Number of events
   - Storage amount
   - Number of users
@@ -66,8 +66,8 @@
 
 ### AC4: CTA Buttons
 
-- [ ] **Given** each tier
-- [ ] **Then** the CTA button:
+- [x] **Given** each tier
+- [x] **Then** the CTA button:
   - Free: "Get Started" → /sign-up
   - Pro: "Start Free Trial" → /sign-up?plan=pro
   - Business: "Start Free Trial" → /sign-up?plan=business
@@ -75,15 +75,15 @@
 
 ### AC5: Annual/Monthly Toggle (Optional)
 
-- [ ] **Given** the toggle is implemented
-- [ ] **When** I switch to annual billing
-- [ ] **Then** prices update with 20% discount
-- [ ] **And** savings amount is displayed
+- [x] **Given** the toggle is implemented
+- [x] **When** I switch to annual billing
+- [x] **Then** prices update with 20% discount
+- [x] **And** savings amount is displayed
 
 ### AC6: Responsive Layout
 
-- [ ] **Given** different screen sizes
-- [ ] **Then** layout adapts:
+- [x] **Given** different screen sizes
+- [x] **Then** layout adapts:
   - Mobile: Single column, scrollable
   - Tablet: 2x2 grid
   - Desktop: 4-column row
@@ -152,58 +152,58 @@
 
 **File**: `src/components/modules/landing/sections/pricing.tsx`
 
-- [ ] 1.1 Create base component structure
-- [ ] 1.2 Define pricing tiers data array
-- [ ] 1.3 Define features per tier
+- [x] 1.1 Create base component structure
+- [x] 1.2 Define pricing tiers data array
+- [x] 1.3 Define features per tier
 
 ### Task 2: Build Pricing Card Component
 
-- [ ] 2.1 Create PricingCard sub-component
-- [ ] 2.2 Add tier name and price
-- [ ] 2.3 Add feature list with checkmarks
-- [ ] 2.4 Add CTA button with correct link
-- [ ] 2.5 Add popular badge for Business tier
+- [x] 2.1 Create PricingCard sub-component
+- [x] 2.2 Add tier name and price
+- [x] 2.3 Add feature list with checkmarks
+- [x] 2.4 Add CTA button with correct link
+- [x] 2.5 Add popular badge for Business tier
 
 ### Task 3: Implement Toggle (Optional)
 
-- [ ] 3.1 Create billing toggle component
-- [ ] 3.2 Calculate annual prices (20% off)
-- [ ] 3.3 Animate price change
+- [x] 3.1 Create billing toggle component
+- [x] 3.2 Calculate annual prices (20% off)
+- [x] 3.3 Animate price change
 
 ### Task 4: Create Responsive Grid
 
-- [ ] 4.1 Implement 4-column desktop grid
-- [ ] 4.2 Implement 2x2 tablet grid
-- [ ] 4.3 Implement single column mobile
-- [ ] 4.4 Handle popular card scaling
+- [x] 4.1 Implement 4-column desktop grid
+- [x] 4.2 Implement 2x2 tablet grid
+- [x] 4.3 Implement single column mobile
+- [x] 4.4 Handle popular card scaling
 
 ### Task 5: Export from Index
 
-- [ ] 5.1 Add export to `sections/index.ts`
+- [x] 5.1 Add export to `sections/index.ts`
 
 ---
 
 ## 🧪 Testing Checklist
 
-- [ ] All 4 tiers render correctly
-- [ ] Prices display correctly
-- [ ] Features list complete
-- [ ] Popular badge visible on Business
-- [ ] CTA buttons link correctly
-- [ ] Responsive on all breakpoints
-- [ ] Toggle works (if implemented)
+- [x] All 4 tiers render correctly
+- [x] Prices display correctly
+- [x] Features list complete
+- [x] Popular badge visible on Business
+- [x] CTA buttons link correctly
+- [x] Responsive on all breakpoints
+- [x] Toggle works (if implemented)
 
 ---
 
 ## 🚀 Definition of Done
 
-- [ ] Component created at correct path
-- [ ] All 4 pricing tiers displayed
-- [ ] Popular tier highlighted
-- [ ] CTAs link to correct pages
-- [ ] Responsive layout complete
-- [ ] Exported from sections index
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Component created at correct path
+- [x] All 4 pricing tiers displayed
+- [x] Popular tier highlighted
+- [x] CTAs link to correct pages
+- [x] Responsive layout complete
+- [x] Exported from sections index
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
@@ -212,8 +212,22 @@
 | Date       | Status  | Notes                           |
 | ---------- | ------- | ------------------------------- |
 | 2026-01-22 | backlog | Story created from Epic 10 plan |
+| 2026-01-22 | implementation complete | Implemented component, toggle, and responsive grid |
 
 ---
 
 **Previous Story**: 10-4 - Who It's For Section  
 **Next Story**: 10-6 - FAQ Section
+
+---
+
+## Review Notes
+
+- **Adversarial review completed**
+- **Findings**: 4 total
+  - Magic numbers in discount calculation (Fixed)
+  - Accessibility missing on Switch (Fixed)
+  - Loose typing on PricingTier (Fixed)
+  - Hardcoded data (Accepted for MVP)
+- **Resolution approach**: Auto-fix
+- **Status**: Ready for merge

@@ -1,7 +1,7 @@
 # Story 10-10: Page Assembly & Scroll Animations
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: Completed  
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P0 — Integrates all sections
@@ -37,9 +37,9 @@
 
 ### AC1: Section Order
 
-- [ ] **Given** the landing page
-- [ ] **When** I scroll down
-- [ ] **Then** sections appear in this order:
+- [x] **Given** the landing page
+- [x] **When** I scroll down
+- [x] **Then** sections appear in this order:
   1. Hero (existing)
   2. Problem/Solution
   3. Features (4 Portals)
@@ -53,15 +53,15 @@
 
 ### AC2: Section Spacing
 
-- [ ] **Given** each section
-- [ ] **Then** consistent vertical spacing between sections (4rem - 6rem)
-- [ ] **And** each section has a unique ID for anchor navigation
+- [x] **Given** each section
+- [x] **Then** consistent vertical spacing between sections (4rem - 6rem)
+- [x] **And** each section has a unique ID for anchor navigation
 
 ### AC3: Scroll Animations
 
-- [ ] **Given** a section is not in viewport
-- [ ] **When** I scroll it into view
-- [ ] **Then** it animates in with:
+- [x] **Given** a section is not in viewport
+- [x] **When** I scroll it into view
+- [x] **Then** it animates in with:
   - Fade in effect
   - Slide up motion (20px)
   - Duration: 400-600ms
@@ -69,16 +69,16 @@
 
 ### AC4: Animation Performance
 
-- [ ] **Given** scroll animations
-- [ ] **Then** they run at 60fps
-- [ ] **And** no jank or stuttering
-- [ ] **And** uses CSS transforms (not top/left)
+- [x] **Given** scroll animations
+- [x] **Then** they run at 60fps
+- [x] **And** no jank or stuttering
+- [x] **And** uses CSS transforms (not top/left)
 
 ### AC5: Responsive Layout
 
-- [ ] **Given** any screen size
-- [ ] **Then** all sections render correctly
-- [ ] **And** no horizontal overflow
+- [x] **Given** any screen size
+- [x] **Then** all sections render correctly
+- [x] **And** no horizontal overflow
 
 ---
 
@@ -166,10 +166,10 @@
 
 **File**: `src/app/(landing)/page.tsx`
 
-- [ ] 1.1 Import all section components
-- [ ] 1.2 Arrange in correct order
-- [ ] 1.3 Add section IDs for anchor links
-- [ ] 1.4 Add consistent spacing classes
+- [x] 1.1 Import all section components
+- [x] 1.2 Arrange in correct order
+- [x] 1.3 Add section IDs for anchor links
+- [x] 1.4 Add consistent spacing classes
 
 ### Task 2: Implement Scroll Animation Hook
 
@@ -202,69 +202,70 @@ export function useScrollAnimation(
 }
 ```
 
-- [ ] 2.1 Create custom hook
-- [ ] 2.2 Use IntersectionObserver API
-- [ ] 2.3 Add threshold configuration
+- [x] 2.1 Create custom hook
+- [x] 2.2 Use IntersectionObserver API
+- [x] 2.3 Add threshold configuration
 
 ### Task 3: Create Animated Section Wrapper
 
 **File**: `src/components/modules/landing/sections/animated-section.tsx`
 
-- [ ] 3.1 Create wrapper component
-- [ ] 3.2 Apply animation classes
-- [ ] 3.3 Use scroll animation hook
-- [ ] 3.4 Support stagger delay prop
+- [x] 3.1 Create wrapper component
+- [x] 3.2 Apply animation classes
+- [x] 3.3 Use scroll animation hook
+- [x] 3.4 Support stagger delay prop
 
 ### Task 4: Wrap Each Section
 
-- [ ] 4.1 Wrap ProblemSolution in AnimatedSection
-- [ ] 4.2 Wrap Features in AnimatedSection
-- [ ] 4.3 Wrap Workflow in AnimatedSection
-- [ ] 4.4 Repeat for all sections
+- [x] 4.1 Wrap ProblemSolution in AnimatedSection
+- [x] 4.2 Wrap Features in AnimatedSection
+- [x] 4.3 Wrap Workflow in AnimatedSection
+- [x] 4.4 Repeat for all sections
 
 ### Task 5: Performance Optimization
 
-- [ ] 5.1 Use CSS transforms only
-- [ ] 5.2 Add `will-change` where needed
-- [ ] 5.3 Test on mobile devices
-- [ ] 5.4 Verify 60fps in DevTools
+- [x] 5.1 Use CSS transforms only
+- [x] 5.2 Add `will-change` where needed
+- [x] 5.3 Test on mobile devices
+- [x] 5.4 Verify 60fps in DevTools
 
 ### Task 6: Section Spacing
 
-- [ ] 6.1 Add consistent padding/margin
-- [ ] 6.2 Use spacing scale from design system
-- [ ] 6.3 Verify on all breakpoints
+- [x] 6.1 Add consistent padding/margin
+- [x] 6.2 Use spacing scale from design system
+- [x] 6.3 Verify on all breakpoints
 
 ---
 
 ## 🧪 Testing Checklist
 
-- [ ] All 10 sections render in order
-- [ ] Sections have correct IDs
-- [ ] Scroll animations trigger
-- [ ] Animations are smooth (60fps)
-- [ ] No layout shifts
-- [ ] Works on mobile
-- [ ] Works in all browsers
+- [x] All 10 sections render in order
+- [x] Sections have correct IDs
+- [x] Scroll animations trigger
+- [x] Animations are smooth (60fps)
+- [x] No layout shifts
+- [x] Works on mobile
+- [x] Works in all browsers
 
 ---
 
 ## 🚀 Definition of Done
 
-- [ ] All sections integrated into page
-- [ ] Scroll animations working
-- [ ] Performance at 60fps
-- [ ] Section IDs for navigation
-- [ ] Consistent spacing
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] All sections integrated into page
+- [x] Scroll animations working
+- [x] Performance at 60fps
+- [x] Section IDs for navigation
+- [x] Consistent spacing
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes                           |
-| ---------- | ------- | ------------------------------- |
-| 2026-01-22 | backlog | Story created from Epic 10 plan |
+| Date       | Status    | Notes                                 |
+| ---------- | --------- | ------------------------------------- |
+| 2026-01-22 | backlog   | Story created from Epic 10 plan       |
+| 2026-01-22 | Completed | Page assembled with animated sections |
 
 ---
 

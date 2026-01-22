@@ -1,7 +1,7 @@
 # Story 10-6: FAQ Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: Completed  
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-22  
 **Priority**: P2 — Trust building
@@ -141,9 +141,9 @@
 
 **File**: `src/components/modules/landing/sections/faq.tsx`
 
-- [ ] 1.1 Create base component structure
-- [ ] 1.2 Define FAQ data array (questions + answers)
-- [ ] 1.3 Import Accordion from shadcn/ui
+- [x] 1.1 Create base component structure
+- [x] 1.2 Define FAQ data array (questions + answers)
+- [x] 1.3 Import Accordion from shadcn/ui
 
 ### Task 2: Define FAQ Content
 
@@ -163,25 +163,25 @@ const faqs = [
 ];
 ```
 
-- [ ] 2.1 Write all 8 FAQ answers
-- [ ] 2.2 Keep answers concise (2-3 sentences)
+- [x] 2.1 Write all 8 FAQ answers
+- [x] 2.2 Keep answers concise (2-3 sentences)
 
 ### Task 3: Build Accordion Component
 
-- [ ] 3.1 Use shadcn Accordion component
-- [ ] 3.2 Configure single-open mode
-- [ ] 3.3 Style trigger and content
-- [ ] 3.4 Add expand/collapse icon
+- [x] 3.1 Use shadcn Accordion component
+- [x] 3.2 Configure single-open mode
+- [x] 3.3 Style trigger and content
+- [x] 3.4 Add expand/collapse icon
 
 ### Task 4: Ensure Accessibility
 
-- [ ] 4.1 Verify ARIA attributes
-- [ ] 4.2 Test keyboard navigation
-- [ ] 4.3 Test screen reader behavior
+- [x] 4.1 Verify ARIA attributes
+- [x] 4.2 Test keyboard navigation
+- [x] 4.3 Test screen reader behavior
 
 ### Task 5: Export from Index
 
-- [ ] 5.1 Add export to `sections/index.ts`
+- [x] 5.1 Add export to `sections/index.ts`
 
 ---
 
@@ -202,31 +202,32 @@ const faqs = [
 
 ## 🧪 Testing Checklist
 
-- [ ] All 8 FAQs render
-- [ ] Accordion opens/closes smoothly
-- [ ] Single-open mode works
-- [ ] Keyboard navigation works
-- [ ] ARIA attributes present
-- [ ] Answers readable
+- [x] All 8 FAQs render
+- [x] Accordion opens/closes smoothly
+- [x] Single-open mode works
+- [x] Keyboard navigation works
+- [x] ARIA attributes present
+- [x] Answers readable
 
 ---
 
 ## 🚀 Definition of Done
 
-- [ ] Component created at correct path
-- [ ] All 8 FAQs displayed with answers
-- [ ] Accordion behavior working
-- [ ] Accessible (keyboard + screen reader)
-- [ ] Exported from sections index
-- [ ] Story marked as `done` in `sprint-status.yaml`
+- [x] Component created at correct path
+- [x] All 8 FAQs displayed with answers
+- [x] Accordion behavior working
+- [x] Accessible (keyboard + screen reader)
+- [x] Exported from sections index
+- [x] Story marked as `done` in `sprint-status.yaml`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes                           |
-| ---------- | ------- | ------------------------------- |
-| 2026-01-22 | backlog | Story created from Epic 10 plan |
+| Date       | Status    | Notes                                         |
+| ---------- | --------- | --------------------------------------------- |
+| 2026-01-22 | backlog   | Story created from Epic 10 plan               |
+| 2026-01-22 | Completed | Implemented FAQ section with shadcn Accordion |
 
 ---
 

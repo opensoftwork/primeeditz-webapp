@@ -100,9 +100,10 @@ function AudienceCard({ item, index }: { item: AudienceType; index: number }) {
 
 export function WhoItsForSection() {
   return (
-    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-       {/* Background Elements */}
-       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
+    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-background border-y border-white/5 overflow-hidden">
+      {/* Background Ambience - matches workflow section */}
+      <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
         
