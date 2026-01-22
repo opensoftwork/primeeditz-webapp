@@ -184,12 +184,12 @@ development_status:
   # Estimated Time: ~15 hours (2-3 days)
   epic-10: backlog
   # Phase 1: Foundation
-  10-0-landing-page-foundation-assets: ready-for-dev # P0 - Directory structure, hero image
+  10-0-landing-page-foundation-assets: review # P0 - Directory structure, hero image
   # Phase 2: Core Sections
-  10-1-problem-solution-section: backlog # P0 - Pain points showcase
-  10-2-features-showcase-section: backlog # P0 - 4-portal feature cards
-  10-3-workflow-demo-section: backlog # P1 - Visual workflow timeline
-  10-4-who-its-for-section: backlog # P1 - Target audience cards
+  10-1-problem-solution-section: review # P0 - Pain points showcase
+  10-2-features-showcase-section: review # P0 - 4-portal feature cards
+  10-3-workflow-demo-section: review # P1 - Visual workflow timeline
+  10-4-who-its-for-section: review # P1 - Target audience cards
   10-5-pricing-section: backlog # P1 - Pricing tiers display
   10-6-faq-section: backlog # P2 - Accordion FAQ
   10-7-cta-banner-section: backlog # P0 - Conversion CTA

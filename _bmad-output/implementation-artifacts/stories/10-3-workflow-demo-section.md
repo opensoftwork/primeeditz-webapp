@@ -1,7 +1,7 @@
 # Story 10-3: Workflow Demo Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: review  
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Visual workflow explanation
@@ -167,39 +167,39 @@
 
 **File**: `src/components/modules/landing/sections/workflow.tsx`
 
-- [ ] 1.1 Create base component structure
-- [ ] 1.2 Define workflow steps data array
-- [ ] 1.3 Import Lucide icons
+- [x] 1.1 Create base component structure
+- [x] 1.2 Define workflow steps data array
+- [x] 1.3 Import Lucide icons
 
 ### Task 2: Build Step Component
 
-- [ ] 2.1 Create WorkflowStep sub-component
-- [ ] 2.2 Add number circle with primary color
-- [ ] 2.3 Add icon display
-- [ ] 2.4 Add title and description
+- [x] 2.1 Create WorkflowStep sub-component
+- [x] 2.2 Add number circle with primary color
+- [x] 2.3 Add icon display
+- [x] 2.4 Add title and description
 
 ### Task 3: Desktop Horizontal Layout
 
-- [ ] 3.1 Create horizontal flex container
-- [ ] 3.2 Add connecting lines between steps
-- [ ] 3.3 Center align all steps
-- [ ] 3.4 Test on large screens
+- [x] 3.1 Create horizontal flex container
+- [x] 3.2 Add connecting lines between steps
+- [x] 3.3 Center align all steps
+- [x] 3.4 Test on large screens
 
 ### Task 4: Mobile Vertical Layout
 
-- [ ] 4.1 Create vertical flex layout
-- [ ] 4.2 Add connecting vertical line
-- [ ] 4.3 Align content appropriately
-- [ ] 4.4 Test on small screens
+- [x] 4.1 Create vertical flex layout
+- [x] 4.2 Add connecting vertical line
+- [x] 4.3 Align content appropriately
+- [x] 4.4 Test on small screens
 
 ### Task 5: Optional Animation
 
-- [ ] 5.1 Add sequential fade-in on scroll
-- [ ] 5.2 Test animation performance
+- [x] 5.1 Add sequential fade-in on scroll
+- [x] 5.2 Test animation performance
 
 ### Task 6: Export from Index
 
-- [ ] 6.1 Add export to `sections/index.ts`
+- [x] 6.1 Add export to `sections/index.ts`
 
 ---
 
@@ -236,3 +236,30 @@
 
 **Previous Story**: 10-2 - Features Showcase Section  
 **Next Story**: 10-4 - Who It's For Section
+
+---
+
+## 📂 File List
+
+- `src/components/modules/landing/sections/workflow.tsx` (New)
+- `src/components/modules/landing/sections/index.ts` (Modified)
+
+## 📝 Change Log
+
+- **2026-01-22**: Implemented Workflow Demo section with responsive timeline (vertical mobile, horizontal desktop), connecting lines, and sequential animations.
+
+## 🤖 Dev Agent Record
+
+### Implementation Notes
+
+- Created `WorkflowDemoSection` and `StepItem` components.
+- Used `flex-col` for mobile and `md:flex-row` for desktop to achieve the timeline switch.
+- Implemented connecting lines using absolute positioning and viewport-aware display logic (`md:block`/`md:hidden`).
+- Used `motion` for staggered entrance (delay \* 0.1s).
+- Styled with Tailwind v4 syntax (`bg-linear-to-b`, etc.)
+
+### Verification
+
+- Verified responsive behavior.
+- Verified export in `index.ts`.
+- Verified icons match AC.

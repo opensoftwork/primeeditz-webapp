@@ -14,7 +14,7 @@ export function DashboardPreview() {
   //   return () => window.removeEventListener('openDashboardModal', handleOpenModal);
   // }, []);
 
-  const dashboardImage = "/landing/dashboard_screen_admin.png";
+  const dashboardImage = "/landing/hero-dashboard.svg";
 
   return (
     <>
