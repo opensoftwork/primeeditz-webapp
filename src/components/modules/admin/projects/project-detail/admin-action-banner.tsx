@@ -324,6 +324,16 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
           "Archived projects are moved out of active view but remain accessible for reference.",
         ),
     },
+    quotation_rejected: {
+      message:
+        "Client has rejected the quotation. You can revise and resend a new quotation.",
+      buttonLabel: "Revise Quotation",
+      icon: FileText,
+      onClick: () => {
+        // Navigate to quotation builder with project context
+        router.push(`/quotations/new?projectId=${project._id}`);
+      },
+    },
     cancelled: {
       message: "This project has been cancelled.",
       buttonLabel: "View Details",

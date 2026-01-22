@@ -285,7 +285,8 @@ export function EditorLineItemsSection() {
             }}
             onEditItem={openEditItemDrawer}
             onRemoveItem={removeLineItem}
-            onAddItem={(sectionId) => openAddItemDrawer(sectionId || undefined)}
+            onAddItem={(sectionId) => openAddItemDrawer(sectionId)}
+            onAddFromLibrary={(sectionId) => openLibrary(sectionId)}
           />
         </div>
       </div>

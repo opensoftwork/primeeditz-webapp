@@ -117,6 +117,11 @@ export const canSetupFolders = adminQuery({
       };
     }
 
+    // Validate action state - folder setup is only allowed in quotation_approved state
+    // This ensures proper workflow progression
+    const validSetupStates = ["quotation_approved"];
+    const isValidState = validSetupStates.includes(project.actionState);
+
     // Admin-initiated projects bypass the quotation check
     if (project.source === "admin_init") {
       return {
@@ -151,6 +156,15 @@ export const canSetupFolders = adminQuery({
     }
 
     if (approvedQuotation) {
+      // Check if project is in the correct state for folder setup
+      if (!isValidState) {
+        return {
+          canSetup: false,
+          reason: `Project is in "${project.actionState}" state. Folder setup is only available after quotation approval and before storage allocation.`,
+          hasApprovedQuotation: true,
+          hasFolders: false,
+        };
+      }
       return {
         canSetup: true,
         reason: null,
@@ -174,6 +188,15 @@ export const canSetupFolders = adminQuery({
       );
 
       if (hasClientApprovedQuotation) {
+        // Check if project is in the correct state for folder setup
+        if (!isValidState) {
+          return {
+            canSetup: false,
+            reason: `Project is in "${project.actionState}" state. Folder setup is only available after quotation approval.`,
+            hasApprovedQuotation: false,
+            hasFolders: false,
+          };
+        }
         // Client has approved quotations - allow setup with quotation selection step
         return {
           canSetup: true,
