@@ -17,8 +17,9 @@ export default function Home() {
         <main className="max-w-full mx-auto relative overflow-visible">
           <Hero />
           <ProblemSolutionSection />
-          <FeaturesShowcaseSection />
           <WorkflowDemoSection />
+          <FeaturesShowcaseSection />
+
           <WhoItsForSection />
           <Leva hidden />
         </main>

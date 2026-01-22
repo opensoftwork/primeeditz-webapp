@@ -138,7 +138,7 @@ function PortalCard({ feature, index }: { feature: PortalFeature; index: number 
 
 export function FeaturesShowcaseSection() {
   return (
-    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-black/20">
+    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8">
       <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
         
         {/* Section Heading */}
@@ -147,7 +147,7 @@ export function FeaturesShowcaseSection() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[10px] uppercase font-black tracking-[0.3em] text-white/60"
+            className="text-[10px] uppercase font-black tracking-[0.3em] text-white/60 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-3 py-1"
           >
             One Platform, Four Experiences
           </motion.span>

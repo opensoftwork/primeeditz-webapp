@@ -137,7 +137,7 @@ export function WorkflowDemoSection() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[10px] uppercase font-black tracking-[0.3em] text-primary"
+            className="text-[10px] uppercase font-black tracking-[0.3em] text-primary  "
           >
             How It Works
           </motion.span>
