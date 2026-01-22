@@ -24,6 +24,7 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 - [Epic 5: Asset Upload & Folder Management](./05-asset-upload.md)
 - [Epic 6: Deliverables & QC Workflow](./06-deliverables-qc.md)
 - [Epic 7: Status Tracking & Dashboards](./07-status-tracking.md)
+- [Epic 10: Landing Page — Marketing & Conversion](./10-landing-page.md)
 
 ---
 

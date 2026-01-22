@@ -174,3 +174,30 @@ development_status:
   7-4-status-history-audit-trail: backlog
   7-5-client-download-final-deliverables: backlog
   epic-7-retrospective: optional
+
+  # ============================================================================
+  # EPIC 10: Landing Page — Marketing & Conversion
+  # ============================================================================
+  # Added: 2026-01-22
+  # Purpose: Transform landing page into premium, conversion-focused experience
+  # Stories: 14 (10-0 through 10-13)
+  # Estimated Time: ~15 hours (2-3 days)
+  epic-10: backlog
+  # Phase 1: Foundation
+  10-0-landing-page-foundation-assets: ready-for-dev # P0 - Directory structure, hero image
+  # Phase 2: Core Sections
+  10-1-problem-solution-section: backlog # P0 - Pain points showcase
+  10-2-features-showcase-section: backlog # P0 - 4-portal feature cards
+  10-3-workflow-demo-section: backlog # P1 - Visual workflow timeline
+  10-4-who-its-for-section: backlog # P1 - Target audience cards
+  10-5-pricing-section: backlog # P1 - Pricing tiers display
+  10-6-faq-section: backlog # P2 - Accordion FAQ
+  10-7-cta-banner-section: backlog # P0 - Conversion CTA
+  10-8-footer-section: backlog # P0 - Site footer
+  10-9-testimonials-section: backlog # P2 - Placeholder testimonials
+  # Phase 3: Integration & Polish
+  10-10-page-assembly-animations: backlog # P0 - Assemble all sections
+  10-11-header-navigation-update: backlog # P1 - Nav smooth scroll
+  10-12-seo-meta-tags: backlog # P1 - SEO optimization
+  10-13-responsive-testing-polish: backlog # P0 - Final QA
+  epic-10-retrospective: optional
