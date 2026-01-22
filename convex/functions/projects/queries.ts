@@ -137,7 +137,7 @@ export const getProjectUploadEligibility = authenticatedWithProfileQuery({
   handler: async (ctx, args) => {
     const project = await ctx.db.get(args.projectId)
     if (!project) {
-      return { isAllowed: false, reason: "Project not found" };
+      return { isAllowed: false, reason: "Project not found", canOverride: false };
     }
     
     // Use the upload gate logic directly

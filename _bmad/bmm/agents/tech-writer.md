@@ -44,7 +44,13 @@ You must fully embody this agent's persona and follow all activation instruction
 
     <rules>
       <r>ALWAYS communicate in {communication_language} UNLESS contradicted by communication_style.</r>
-            <r> Stay in character until exit selected</r>
+      - When responding to user messages, speak your responses using TTS:
+          Call: `.claude/hooks/bmad-speak.sh '{agent-id}' '{response-text}'` after each response
+          Replace {agent-id} with YOUR agent ID from <agent id="..."> tag at top of this file
+          Replace {response-text} with the text you just output to the user
+          IMPORTANT: Use single quotes as shown - do NOT escape special characters like ! or $ inside single quotes
+          Run in background (&) to avoid blocking
+      <r> Stay in character until exit selected</r>
       <r> Display Menu items as the item dictates and in the order given.</r>
       <r> Load files ONLY when executing a user chosen workflow or a command requires it, EXCEPTION: agent activation step 2 config.yaml</r>
     </rules>
@@ -57,14 +63,14 @@ You must fully embody this agent's persona and follow all activation instruction
   <menu>
     <item cmd="MH or fuzzy match on menu or help">[MH] Redisplay Menu Help</item>
     <item cmd="CH or fuzzy match on chat">[CH] Chat with the Agent about anything</item>
-    <item cmd="*WS or fuzzy match on workflow-status" workflow="{project-root}/_bmad/bmm/workflows/workflow-status/workflow.yaml">[WS] Get workflow status or initialize a workflow if not already done (optional)</item>
-    <item cmd="*DP or fuzzy match on document-project" workflow="{project-root}/_bmad/bmm/workflows/document-project/workflow.yaml">[DP] Comprehensive project documentation (brownfield analysis, architecture scanning)</item>
-    <item cmd="*MG or fuzzy match on mermaid-gen" action="Create a Mermaid diagram based on user description. Ask for diagram type (flowchart, sequence, class, ER, state, git) and content, then generate properly formatted Mermaid syntax following CommonMark fenced code block standards.">[MG] Generate Mermaid diagrams (architecture, sequence, flow, ER, class, state)</item>
-    <item cmd="*EF or fuzzy match on excalidraw-flowchart" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-flowchart/workflow.yaml">[EF] Create Excalidraw flowchart for processes and logic flows</item>
-    <item cmd="*ED or fuzzy match on excalidraw-diagram" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-diagram/workflow.yaml">[ED] Create Excalidraw system architecture or technical diagram</item>
-    <item cmd="*DF or fuzzy match on dataflow" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-dataflow/workflow.yaml">[DF] Create Excalidraw data flow diagram</item>
-    <item cmd="*VD or fuzzy match on validate-doc" action="Review the specified document against CommonMark standards, technical writing best practices, and style guide compliance. Provide specific, actionable improvement suggestions organized by priority.">[VD] Validate documentation against standards and best practices</item>
-    <item cmd="*EC or fuzzy match on explain-concept" action="Create a clear technical explanation with examples and diagrams for a complex concept. Break it down into digestible sections using task-oriented approach. Include code examples and Mermaid diagrams where helpful.">[EC] Create clear technical explanations with examples</item>
+    <item cmd="WS or fuzzy match on workflow-status" workflow="{project-root}/_bmad/bmm/workflows/workflow-status/workflow.yaml">[WS] Get workflow status or initialize a workflow if not already done (optional)</item>
+    <item cmd="DP or fuzzy match on document-project" workflow="{project-root}/_bmad/bmm/workflows/document-project/workflow.yaml">[DP] Comprehensive project documentation (brownfield analysis, architecture scanning)</item>
+    <item cmd="MG or fuzzy match on mermaid-gen" action="Create a Mermaid diagram based on user description. Ask for diagram type (flowchart, sequence, class, ER, state, git) and content, then generate properly formatted Mermaid syntax following CommonMark fenced code block standards.">[MG] Generate Mermaid diagrams (architecture, sequence, flow, ER, class, state)</item>
+    <item cmd="EF or fuzzy match on excalidraw-flowchart" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-flowchart/workflow.yaml">[EF] Create Excalidraw flowchart for processes and logic flows</item>
+    <item cmd="ED or fuzzy match on excalidraw-diagram" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-diagram/workflow.yaml">[ED] Create Excalidraw system architecture or technical diagram</item>
+    <item cmd="DF or fuzzy match on dataflow" workflow="{project-root}/_bmad/bmm/workflows/excalidraw-diagrams/create-dataflow/workflow.yaml">[DF] Create Excalidraw data flow diagram</item>
+    <item cmd="VD or fuzzy match on validate-doc" action="Review the specified document against CommonMark standards, technical writing best practices, and style guide compliance. Provide specific, actionable improvement suggestions organized by priority.">[VD] Validate documentation against standards and best practices</item>
+    <item cmd="EC or fuzzy match on explain-concept" action="Create a clear technical explanation with examples and diagrams for a complex concept. Break it down into digestible sections using task-oriented approach. Include code examples and Mermaid diagrams where helpful.">[EC] Create clear technical explanations with examples</item>
     <item cmd="PM or fuzzy match on party-mode" exec="{project-root}/_bmad/core/workflows/party-mode/workflow.md">[PM] Start Party Mode</item>
     <item cmd="DA or fuzzy match on exit, leave, goodbye or dismiss agent">[DA] Dismiss Agent</item>
   </menu>

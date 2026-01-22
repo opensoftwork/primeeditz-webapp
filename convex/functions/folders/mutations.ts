@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { adminMutation, clientMutation } from "../../lib/customFunctions";
+import { adminMutation, clientMutation, authenticatedWithProfileMutation } from "../../lib/customFunctions";
 import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
 import { ActionState } from "../../schema";
 import { Id } from "../../_generated/dataModel";
@@ -217,6 +217,69 @@ export const updateFolderStatus = clientMutation({
 });
 
 /**
+ * Mark all folders in a project as complete and transition project to uploads_complete.
+ * Triggered by the "I'm done uploading" button in the UI.
+ */
+export const markAllUploadsComplete = authenticatedWithProfileMutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Get project and folders
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // Security check: only client owner or admin/employee can trigger
+    const isOwner = project.clientId === ctx.profile._id;
+    const isStaff = ctx.profile.role === "admin" || ctx.profile.role === "employee";
+    if (!isOwner && !isStaff) throw new Error("Permission denied");
+
+    // 2. Get all folders
+    const folders = await ctx.db
+      .query("folders")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    // 3. Mark all as completed
+    for (const folder of folders) {
+      if (folder.status !== "completed") {
+        await ctx.db.patch(folder._id, { status: "completed" });
+      }
+    }
+
+    // 4. Force transition project
+    const newPhase = getPhaseForState("uploads_complete");
+    const newActor = getActorForState("uploads_complete");
+
+    if (project.actionState === "awaiting_uploads") {
+      await ctx.db.patch(args.projectId, {
+        phase: newPhase,
+        actionState: "uploads_complete",
+        awaitingActorRole: newActor,
+        uploadsCompletedAt: Date.now(),
+        updatedAt: Date.now(),
+      });
+
+      // Status history for audit
+      await ctx.db.insert("statusHistory", {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase,
+        previousActionState: project.actionState,
+        newActionState: "uploads_complete",
+        previousAwaitingActorRole: project.awaitingActorRole,
+        newAwaitingActorRole: newActor,
+        changedBy: ctx.profile._id,
+        changedAt: Date.now(),
+        notes: `Uploads marked as complete by ${ctx.profile.name} (${ctx.profile.role}).`,
+      });
+    }
+
+    return { success: true };
+  },
+});
+
+/**
  * Helper to check if all folders are complete and transition project to uploads_complete.
  */
 async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projects">) {
@@ -252,7 +315,7 @@ async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projec
         newAwaitingActorRole: newActor,
         changedBy: ctx.profile._id,
         changedAt: Date.now(),
-        notes: "All folders marked as completed. Project is ready for assignment.",
+        notes: `All folders marked as completed. Ready for assignment. (Auto-triggered by ${ctx.profile.role} ${ctx.profile.name})`,
       });
     }
   }

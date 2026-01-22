@@ -288,6 +288,7 @@ export default defineSchema({
     mimeType: v.string(),
     sizeBytes: v.number(),
     minioKey: v.string(),
+    uploadedBy: v.id('profiles'),
     // Uses _creationTime as upload timestamp
   })
     .index('by_projectId', ['projectId'])

@@ -1,7 +1,7 @@
 installation:
-  version: 6.0.0-alpha.21
-  installDate: 2025-12-27T06:57:44.402Z
-  lastUpdated: 2025-12-27T06:57:44.402Z
+  version: 6.0.0-alpha.23
+  installDate: 2026-01-22T09:28:07.854Z
+  lastUpdated: 2026-01-22T09:28:07.854Z
 modules:
   - core
   - bmm
@@ -9,3 +9,4 @@ ides:
   - claude-code
   - cursor
   - antigravity
+  - gemini

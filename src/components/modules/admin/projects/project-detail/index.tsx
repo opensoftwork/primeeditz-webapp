@@ -32,8 +32,10 @@ import { AdminProjectDetail } from "./types";
 import { getDeliveryPhaseLabel } from "@/lib/status-display";
 import { toast } from "sonner";
 import { QuotationCard } from "./quotation-card";
+import { useRouter } from "next/navigation";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
+  const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
@@ -105,12 +107,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   }, []);
 
   const handleViewFolders = useCallback(() => {
-    // Scroll to folders section
-    const foldersSection = document.getElementById("project-folders-section");
-    if (foldersSection) {
-      foldersSection.scrollIntoView({ behavior: "smooth" });
-    }
-  }, []);
+    router.push(`/projects/${projectId}/folders`);
+  }, [projectId, router]);
 
   if (project === undefined) return <ProjectDetailSkeleton />;
 

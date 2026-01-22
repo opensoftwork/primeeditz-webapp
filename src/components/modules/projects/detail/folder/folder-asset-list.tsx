@@ -13,6 +13,8 @@ interface Asset {
   minioKey: string;
   sizeBytes: number;
   mimeType: string;
+  uploaderName?: string;
+  uploaderRole?: string;
 }
 
 interface FolderAssetListProps {
@@ -88,8 +90,13 @@ export function FolderAssetList({
                   <p className="text-sm font-bold text-white truncate">
                     {asset.filename}
                   </p>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
                     {formatBytes(asset.sizeBytes)} • {asset.mimeType}
+                    {asset.uploaderName && (
+                      <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-white/30 border border-white/5">
+                        Uploaded by {asset.uploaderName} ({asset.uploaderRole})
+                      </span>
+                    )}
                   </p>
                 </div>
                 {hasSignedUrl && (

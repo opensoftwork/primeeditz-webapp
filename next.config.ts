@@ -38,6 +38,7 @@ const remotePatterns = minioHost
   : [];
 
 const nextConfig: NextConfig = {
+  output: "standalone",
   reactCompiler: true,
   images: {
     remotePatterns,

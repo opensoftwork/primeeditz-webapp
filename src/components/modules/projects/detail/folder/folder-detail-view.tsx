@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useQuery, useMutation, useAction } from "convex/react";
-import { ArrowLeft, CheckCircle2, Loader2, HardDrive } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, HardDrive, Eye } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 
@@ -58,6 +58,13 @@ export function FolderDetailView({
     isAdmin
       ? api.functions.folders.mutations.adminUpdateFolderStatus
       : api.functions.folders.mutations.updateFolderStatus,
+  );
+
+  const uploadEligibility = useQuery(
+    api.functions.projects.queries.getProjectUploadEligibility,
+    {
+      projectId: projectId as Id<"projects">,
+    },
   );
 
   const generateUploadUrl = useAction(
@@ -284,32 +291,70 @@ export function FolderDetailView({
         </div>
       </motion.div>
 
-      {/* Drop Zone */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <FolderDropZone
-          onFilesSelected={handleFilesSelected}
-          disabled={isUploading}
-        />
-      </motion.div>
+      {/* Drop Zone - Only show if allowed */}
+      {uploadEligibility?.isAllowed && (
+        <>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+          >
+            <FolderDropZone
+              onFilesSelected={handleFilesSelected}
+              disabled={isUploading}
+            />
+          </motion.div>
 
-      {/* Staged Upload Queue */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-      >
-        <StagedUploadQueue
-          stagedFiles={stagedFiles}
-          onRemove={handleRemoveStaged}
-          onStartUpload={handleStartUpload}
-          onClearAll={handleClearAll}
-          isUploading={isUploading}
-        />
-      </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.15 }}
+          >
+            <StagedUploadQueue
+              stagedFiles={stagedFiles}
+              onRemove={handleRemoveStaged}
+              onStartUpload={handleStartUpload}
+              onClearAll={handleClearAll}
+              isUploading={isUploading}
+            />
+          </motion.div>
+        </>
+      )}
+
+      {/* View Only Badge for Admin */}
+      {!uploadEligibility?.isAllowed && isAdmin && (
+        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="h-8 w-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <Eye className="h-4 w-4 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white">
+                View Only Mode
+              </p>
+              <p className="text-[9px] font-bold text-amber-500/60 uppercase tracking-widest">
+                {uploadEligibility?.reason || "Client Upload Phase"}
+              </p>
+            </div>
+          </div>
+          {uploadEligibility?.canOverride && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white"
+              onClick={() => {
+                // We could add a local state to override this if needed,
+                // but for now let's just show it.
+                toast.info(
+                  "Admin override available if required. Use System Controls to manage project state.",
+                );
+              }}
+            >
+              Admin Override Enabled
+            </Button>
+          )}
+        </div>
+      )}
 
       {/* Asset List */}
       <motion.div

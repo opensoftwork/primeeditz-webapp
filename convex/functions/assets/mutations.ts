@@ -38,6 +38,7 @@ export const createAsset = mutation({
       minioKey: args.minioKey,
       sizeBytes: args.sizeBytes,
       mimeType: args.mimeType,
+      uploadedBy: profile._id,
     });
 
     // 4. Update folder status if it was pending

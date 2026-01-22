@@ -114,7 +114,7 @@ export async function canUpload(
 export async function checkUploadEligibility(
   ctx: QueryCtx | MutationCtx,
   projectId: Id<"projects">
-) {
+): Promise<{ isAllowed: boolean; reason: string; canOverride: boolean }> {
   const profile = (ctx as any).profile;
   const permission = await canUpload(
     ctx,
@@ -126,6 +126,6 @@ export async function checkUploadEligibility(
   return {
     isAllowed: permission.allowed,
     reason: permission.reason,
-    canOverride: permission.canOverride,
+    canOverride: !!permission.canOverride,
   };
 }

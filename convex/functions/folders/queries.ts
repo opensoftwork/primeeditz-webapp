@@ -304,7 +304,15 @@ export const getFolderAssets = clientQuery({
       .withIndex("by_folderId", (q) => q.eq("folderId", args.folderId))
       .collect();
 
-    return assets;
+    // Enrich with uploader info
+    return await Promise.all(assets.map(async (asset) => {
+      const uploader = asset.uploadedBy ? await ctx.db.get(asset.uploadedBy) : null;
+      return {
+        ...asset,
+        uploaderName: uploader?.name || "Unknown",
+        uploaderRole: uploader?.role || "client",
+      };
+    }));
   },
 });
 
@@ -322,6 +330,14 @@ export const getAdminFolderAssets = adminQuery({
       .withIndex("by_folderId", (q) => q.eq("folderId", args.folderId))
       .collect();
 
-    return assets;
+    // Enrich with uploader info
+    return await Promise.all(assets.map(async (asset) => {
+      const uploader = asset.uploadedBy ? await ctx.db.get(asset.uploadedBy) : null;
+      return {
+        ...asset,
+        uploaderName: uploader?.name || "Unknown",
+        uploaderRole: uploader?.role || "client",
+      };
+    }));
   },
 });

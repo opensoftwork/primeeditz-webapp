@@ -19,7 +19,7 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
 
   // Onboarding Phase
   awaiting_uploads: ["uploads_complete"],
-  uploads_complete: ["awaiting_assignment"],
+  uploads_complete: ["awaiting_assignment", "assigned"],
   awaiting_assignment: ["assigned"],
 
   // Production Phase
