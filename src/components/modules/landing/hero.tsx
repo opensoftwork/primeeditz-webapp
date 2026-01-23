@@ -24,7 +24,7 @@ export function Hero() {
               {/* Hero Content Card - Left Section (1/3 on desktop) */}
               <div className="w-full lg:w-1/3 shrink-0 flex flex-col justify-center">
                 <Pill className="mb-6 sm:mb-7 md:mb-8">BETA RELEASE</Pill>
-                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-6xl font-sentient leading-[1.1] tracking-tight mb-4 sm:mb-5 md:mb-6">
+                <h1 className="text-4xl sm:text-5xl md:text-6xl lg:text-6xl xl:text-6xl font-sentient leading-[1.1] tracking-tight mb-4 sm:mb-5 md:mb-6 text-white text-balance">
                   Unlock your <br />
                   Next efficiency hit
                 </h1>
@@ -48,7 +48,7 @@ export function Hero() {
               {/* Dashboard Preview - Right Section (2/3 on desktop) */}
               <div className="w-full lg:w-2/3 shrink-0 flex flex-col justify-center">
                 <div className="mb-5 sm:mb-6 md:mb-8 flex items-center justify-between lg:justify-start gap-3">
-                  <p className="text-xs sm:text-sm md:text-base lg:text-lg font-mono text-foreground/60 uppercase tracking-wider">
+                  <p className="text-[10px] sm:text-[11px] font-black text-cyan-400 uppercase tracking-[0.3em]">
                     Platform Preview
                   </p>
                   {/* Mobile View Button - Commented out for now */}

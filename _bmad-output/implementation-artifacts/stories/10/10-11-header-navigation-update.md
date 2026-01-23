@@ -1,7 +1,7 @@
 # Story 10-11: Header Navigation Update
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: deferred
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Navigation enhancement

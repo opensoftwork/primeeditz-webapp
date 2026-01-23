@@ -1,7 +1,7 @@
 # Story 10-13: Responsive Testing & Polish
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: deferred
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P0 — Quality assurance

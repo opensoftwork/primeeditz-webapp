@@ -38,10 +38,9 @@ export function CTABannerSection() {
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
               viewport={{ once: true }}
-              className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20"
+              className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10"
             >
-              <Sparkles className="w-4 h-4 text-primary" />
-              <span className="text-xs font-semibold text-primary uppercase tracking-wider">
+              <span className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400">
                 Start Today
               </span>
             </motion.div>
@@ -52,10 +51,10 @@ export function CTABannerSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.1 }}
-              className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-white tracking-tight"
+              className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white tracking-tight"
             >
               Ready to Transform Your{" "}
-              <span className="bg-clip-text text-transparent bg-linear-to-r from-primary via-blue-400 to-primary">
+              <span className="text-transparent bg-clip-text bg-linear-to-r from-blue-400 via-purple-400 to-pink-400">
                 Workflow
               </span>
               ?
@@ -67,7 +66,7 @@ export function CTABannerSection() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2 }}
-              className="text-base sm:text-lg text-muted-foreground max-w-xl"
+              className="text-base text-muted-foreground max-w-xl mx-auto"
             >
               Join creative studios saving hours every week with streamlined
               post-production management.

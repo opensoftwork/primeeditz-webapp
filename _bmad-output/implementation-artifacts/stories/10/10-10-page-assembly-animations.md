@@ -1,7 +1,7 @@
 # Story 10-10: Page Assembly & Scroll Animations
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: Completed  
+**Status**: done
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P0 — Integrates all sections

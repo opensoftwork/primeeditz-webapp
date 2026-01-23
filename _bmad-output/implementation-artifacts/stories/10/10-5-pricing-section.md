@@ -1,7 +1,7 @@
 # Story 10-5: Pricing Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: Completed
+**Status**: done
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Conversion critical
@@ -230,4 +230,4 @@
   - Loose typing on PricingTier (Fixed)
   - Hardcoded data (Accepted for MVP)
 - **Resolution approach**: Auto-fix
-- **Status**: Ready for merge
+- **Status**: done

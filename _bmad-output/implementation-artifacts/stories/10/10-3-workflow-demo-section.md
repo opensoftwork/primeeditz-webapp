@@ -1,7 +1,7 @@
 # Story 10-3: Workflow Demo Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: review  
+**Status**: done
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Visual workflow explanation

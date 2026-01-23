@@ -131,18 +131,17 @@ export function ProblemSolutionSection() {
   initial={{ opacity: 0, y: 10 }}
   whileInView={{ opacity: 1, y: 0 }}
   viewport={{ once: true }}
-  className="
-    inline-flex items-center justify-center
-    px-4 py-2
-    text-[10px] uppercase font-black tracking-[0.3em]
-    text-[#ede0d4]
-    rounded-full
-
-    bg-white/10
-    backdrop-blur-md
-    border border-white/20
-    shadow-[0_8px_32px_rgba(0,0,0,0.35)]
-  "
+  className={cn(
+    "inline-flex items-center justify-center",
+    "px-4 py-2",
+    "text-[10px] uppercase font-black tracking-[0.3em]",
+    "text-cyan-400",
+    "rounded-full",
+    "bg-white/10",
+    "backdrop-blur-md",
+    "border border-white/20",
+    "shadow-[0_8px_32px_rgba(0,0,0,0.35)]"
+  )}
 >
   The Chaos We Fix
 </motion.span>
@@ -153,7 +152,7 @@ export function ProblemSolutionSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-white/60"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white"
           >
             From Friction to Flow
           </motion.h2>

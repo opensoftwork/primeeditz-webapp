@@ -1,7 +1,7 @@
 # Story 10-6: FAQ Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: Completed  
+**Status**: done
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-22  
 **Priority**: P2 — Trust building

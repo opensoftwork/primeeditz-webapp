@@ -147,7 +147,7 @@ export function FeaturesShowcaseSection() {
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[10px] uppercase font-black tracking-[0.3em] text-white/60 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-3 py-1"
+            className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-4 py-2"
           >
             One Platform, Four Experiences
           </motion.span>
@@ -157,7 +157,7 @@ export function FeaturesShowcaseSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-white/60"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white"
           >
             Built for Every Role
           </motion.h2>
@@ -167,7 +167,7 @@ export function FeaturesShowcaseSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-muted-foreground max-w-2xl text-lg"
+            className="text-muted-foreground max-w-2xl text-base leading-relaxed"
           >
             A cohesive ecosystem that connects clients, editors, and admins in one seamless workflow.
           </motion.p>

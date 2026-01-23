@@ -1,7 +1,7 @@
 # Story 10-2: Features Showcase Section (4 Portals)
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: review  
+**Status**: done
 **Complexity**: Medium (3 points)  
 **Created**: 2026-01-22  
 **Priority**: P0 — Core value proposition display

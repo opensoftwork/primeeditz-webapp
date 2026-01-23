@@ -1,7 +1,7 @@
 # Story 10-9: Testimonials Section (Placeholder)
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: Completed  
+**Status**: done
 **Complexity**: Low (1 point)  
 **Created**: 2026-01-22  
 **Priority**: P2 — Future social proof

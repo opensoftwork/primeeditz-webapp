@@ -65,79 +65,83 @@ const faqs: FAQItem[] = [
 
 export function FAQSection() {
   return (
-    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-background border-y border-white/5 overflow-hidden">
+    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Ambience */}
       <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="relative max-w-3xl mx-auto flex flex-col gap-12">
-        {/* Header */}
-        <div className="flex flex-col items-center gap-4 text-center">
-          <motion.span
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-[10px] uppercase font-black tracking-[0.3em] text-primary"
-          >
-            Got Questions?
-          </motion.span>
-
-          <motion.h2
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold"
-          >
-            Frequently Asked Questions
-          </motion.h2>
-
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.2 }}
-            className="text-muted-foreground text-lg max-w-xl"
-          >
-            Everything you need to know about PrimeEditz. Can't find your
-            answer? Contact our support team.
-          </motion.p>
-        </div>
-
-        {/* FAQ Accordion */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-50px" }}
-          transition={{ delay: 0.3 }}
-        >
-          <Accordion type="single" collapsible className="w-full space-y-3">
-            {faqs.map((faq, index) => (
-              <AccordionItem
-                key={index}
-                value={`item-${index}`}
-                className={cn(
-                  "rounded-xl border border-white/5 bg-white/2 px-6",
-                  "data-[state=open]:bg-white/5 data-[state=open]:border-white/10",
-                  "transition-all duration-300"
-                )}
+      <div className="relative  mx-auto">
+        <div className="backdrop-blur-sm bg-background/5 border border-white/10 shadow-2xl rounded-3xl p-8 md:p-16">
+          <div className="flex flex-col gap-12">
+            {/* Header */}
+            <div className="flex flex-col items-center gap-4 text-center">
+              <motion.span
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400"
               >
-                <AccordionTrigger
-                  className={cn(
-                    "text-left font-semibold text-white py-5",
-                    "hover:no-underline hover:text-primary transition-colors",
-                    "[&[data-state=open]>svg]:rotate-180"
-                  )}
-                >
-                  {faq.question}
-                </AccordionTrigger>
-                <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
-                  {faq.answer}
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
-        </motion.div>
+                Got Questions?
+              </motion.span>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.1 }}
+                className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white"
+              >
+                Frequently Asked Questions
+              </motion.h2>
+
+              <motion.p
+                initial={{ opacity: 0, y: 10 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ delay: 0.2 }}
+                className="text-muted-foreground text-base max-w-xl mx-auto"
+              >
+                Everything you need to know about PrimeEditz. Can't find your
+                answer? Contact our support team.
+              </motion.p>
+            </div>
+
+            {/* FAQ Accordion */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-50px" }}
+              transition={{ delay: 0.3 }}
+            >
+              <Accordion type="single" collapsible className="w-full space-y-3">
+                {faqs.map((faq, index) => (
+                  <AccordionItem
+                    key={index}
+                    value={`item-${index}`}
+                    className={cn(
+                      "rounded-xl border border-white/5 bg-white/2 px-6",
+                      "data-[state=open]:bg-white/5 data-[state=open]:border-white/10",
+                      "transition-all duration-300"
+                    )}
+                  >
+                    <AccordionTrigger
+                      className={cn(
+                        "text-left font-semibold text-white py-5",
+                        "hover:no-underline hover:text-primary transition-colors",
+                        "[&[data-state=open]>svg]:rotate-180"
+                      )}
+                    >
+                      {faq.question}
+                    </AccordionTrigger>
+                    <AccordionContent className="text-muted-foreground pb-5 leading-relaxed">
+                      {faq.answer}
+                    </AccordionContent>
+                  </AccordionItem>
+                ))}
+              </Accordion>
+            </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   );

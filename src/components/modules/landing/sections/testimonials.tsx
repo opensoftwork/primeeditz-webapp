@@ -52,9 +52,9 @@ function TestimonialCard({ item, index }: { item: Testimonial; index: number }) 
       transition={{ duration: 0.5, delay: index * 0.1 }}
       className={cn(
         "group relative flex flex-col p-8 rounded-3xl",
-        "bg-white/2 border border-white/5",
-        "hover:bg-white/5 hover:border-white/10",
-        "transition-all duration-300 backdrop-blur-sm"
+        "bg-white/5 border border-white/5 backdrop-blur-md",
+        "hover:bg-white/10 hover:border-white/10 hover:translate-y-[-4px]",
+        "transition-all duration-500 ease-out shadow-lg shadow-black/20"
       )}
     >
       {/* Quote Icon */}
@@ -104,16 +104,16 @@ function TestimonialCard({ item, index }: { item: Testimonial; index: number }) 
 export function TestimonialsSection() {
   return (
     <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
-
-
-      <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
+      {/* Background Ambience - matches other premium sections */}
+      <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none" />
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />      <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
         {/* Header */}
         <div className="flex flex-col items-center gap-4 text-center">
           <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-[10px] uppercase font-black tracking-[0.3em] text-primary"
+            className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400 bg-white/5 border border-white/10 backdrop-blur-sm rounded-full px-4 py-2"
           >
             Social Proof
           </motion.span>
@@ -123,7 +123,7 @@ export function TestimonialsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-3xl md:text-4xl lg:text-5xl font-bold"
+            className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white"
           >
             Trusted by Creative Studios
           </motion.h2>
@@ -133,7 +133,7 @@ export function TestimonialsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.2 }}
-            className="text-muted-foreground text-lg max-w-2xl"
+            className="text-muted-foreground text-base max-w-2xl"
           >
             See how PrimeEditz is helping studios streamline their workflow.
           </motion.p>
@@ -148,7 +148,7 @@ export function TestimonialsSection() {
 
         {/* Placeholder Note */}
         <div className="text-center">
-             <p className="text-xs text-muted-foreground/30 uppercase tracking-widest">
+             <p className="text-xs text-white/50 uppercase tracking-widest ">
                 * Beta Program Feedback
              </p>
         </div>
