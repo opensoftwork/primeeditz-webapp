@@ -68,6 +68,12 @@ export default function OnboardingForm() {
           router.push("/dashboard");
         } catch (error: any) {
           console.error("Failed to claim profile:", error);
+          // Extract the message from ConvexError if it exists
+          const message =
+            error.data || error.message || "Failed to link profile.";
+          toast.error(message);
+          // If claiming fails, we don't clear profileId from URL here (client might want to retry),
+          // but we do stop the claiming loader so they can see the fallback or try again.
         } finally {
           setIsClaiming(false);
         }
@@ -114,7 +120,9 @@ export default function OnboardingForm() {
         toast.success(roleMessage);
         router.push("/dashboard");
       } catch (error: any) {
-        toast.error(error.message || "Failed to create profile.");
+        const message =
+          error.data || error.message || "Failed to create profile.";
+        toast.error(message);
         setIsLoading(false);
       }
     },
@@ -206,7 +214,7 @@ export default function OnboardingForm() {
             <div className="text-center space-y-4">
               <div className="relative mx-auto w-20 h-20">
                 <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-gradient-to-br from-primary/20 to-amber-500/10 border border-primary/20">
+                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-primary/20 to-amber-500/10 border border-primary/20">
                   <Shield className="w-10 h-10 text-primary" />
                 </div>
               </div>
@@ -358,12 +366,12 @@ export default function OnboardingForm() {
   // REGULAR USER (CLIENT) - Standard Onboarding
   // ==========================================================================
   return (
-    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-gradient-to-br from-background via-muted/20 to-background">
+    <div className="min-h-screen w-full flex items-center justify-center p-4 bg-linear-to-br from-background via-muted/20 to-background">
       <div className="w-full max-w-4xl overflow-hidden rounded-3xl border border-border/50 bg-background/95 backdrop-blur-xl shadow-2xl shadow-primary/5">
         <div className="grid lg:grid-cols-2 gap-0">
           {/* Left Side: Form */}
           <div className="p-8 md:p-12 lg:p-16 flex flex-col justify-center relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-linear-to-br from-primary/5 via-transparent to-transparent pointer-events-none" />
 
             <div className="w-full max-w-md mx-auto space-y-8 relative z-10">
               {/* Header */}
@@ -373,7 +381,7 @@ export default function OnboardingForm() {
                 </div>
 
                 <div className="space-y-2">
-                  <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-br from-foreground to-foreground/70 bg-clip-text">
+                  <h1 className="text-4xl font-bold tracking-tight bg-linear-to-br from-foreground to-foreground/70 bg-clip-text">
                     Complete your profile
                   </h1>
                   <p className="text-muted-foreground text-base">
@@ -488,7 +496,7 @@ export default function OnboardingForm() {
           </div>
 
           {/* Right Side: Visual */}
-          <div className="hidden lg:flex flex-col justify-between bg-gradient-to-br from-muted/50 via-muted/30 to-muted/50 p-12 lg:p-16 border-l border-border/30 relative overflow-hidden">
+          <div className="hidden lg:flex flex-col justify-between bg-linear-to-br from-muted/50 via-muted/30 to-muted/50 p-12 lg:p-16 border-l border-border/30 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
             <div className="absolute bottom-0 left-0 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
 

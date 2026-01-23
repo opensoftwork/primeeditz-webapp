@@ -5,7 +5,7 @@
  * Uses clientQuery for client-owned project access.
  */
 
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { paginationOptsValidator } from 'convex/server'
 import { query } from '../../_generated/server'
 import {
@@ -53,17 +53,17 @@ export const getDraft = clientQuery({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify ownership
     if (project.clientId !== ctx.profile._id) {
-      throw new Error('Access denied')
+      throw new ConvexError('Access denied')
     }
 
     // Only return if it's a draft
     if (project.actionState !== 'draft') {
-      throw new Error('Project is not a draft')
+      throw new ConvexError('Project is not a draft')
     }
 
     return project
@@ -100,12 +100,12 @@ export const getProject = clientQuery({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify ownership
     if (project.clientId !== ctx.profile._id) {
-      throw new Error('Access denied')
+      throw new ConvexError('Access denied')
     }
 
     // Enrich with project type

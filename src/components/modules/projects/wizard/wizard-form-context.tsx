@@ -17,6 +17,7 @@ import {
   useRef,
 } from "react";
 import { useMutation, useQuery, useAction } from "convex/react";
+import { ConvexError } from "convex/values";
 import { api } from "@convex/_generated/api";
 import { useReferenceFilesStore } from "@/stores/reference-files-store";
 import { toast } from "sonner";
@@ -58,7 +59,7 @@ interface WizardContextValue {
   // Actions
   setFormData: <K extends keyof WizardFormData>(
     step: K,
-    data: Partial<WizardFormData[K]>
+    data: Partial<WizardFormData[K]>,
   ) => void;
   setReviewing: (isReviewing: boolean) => void;
   setVaultDrawerOpen: (open: boolean) => void;
@@ -115,16 +116,16 @@ export function WizardFormProvider({
 
   // State
   const [projectId, setProjectId] = useState<Id<"projects"> | null>(
-    initialProjectId ?? null
+    initialProjectId ?? null,
   );
   const [projectCode, setProjectCode] = useState<string | null>(
-    initialProjectCode ?? null
+    initialProjectCode ?? null,
   );
   const [currentStep, setCurrentStep] = useState<WizardStepId>(
-    initialStep ?? firstStepId
+    initialStep ?? firstStepId,
   );
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
-    null
+    null,
   );
   const [formData, setFormDataState] = useState<WizardFormData>({
     ...INITIAL_FORM_DATA,
@@ -140,32 +141,33 @@ export function WizardFormProvider({
   const createDraft = useMutation(api.functions.projects.mutations.createDraft);
   const updateDraft = useMutation(api.functions.projects.mutations.updateDraft);
   const deleteDraftMutation = useMutation(
-    api.functions.projects.mutations.deleteDraft
+    api.functions.projects.mutations.deleteDraft,
   );
   const submitProjectMutation = useMutation(
-    api.functions.projects.mutations.submitProject
+    api.functions.projects.mutations.submitProject,
   );
   const generateUploadUrl = useAction(
-    api.functions.projects.storage.generateUploadUrl
+    api.functions.projects.storage.generateUploadUrl,
   );
 
   const existingClientDraft = useQuery(
     api.functions.projects.queries.getMyActiveDraft,
-    mode === "admin" ? "skip" : {}
+    mode === "admin" ? "skip" : {},
   );
 
   // Query for admin draft when in admin mode
   const existingAdminDraft = useQuery(
     api.functions.projects.queries.getAdminActiveDraft,
-    mode === "admin" ? {} : "skip"
+    mode === "admin" ? {} : "skip",
   );
 
   // Combined existing draft based on mode
-  const existingDraft = mode === "admin" ? existingAdminDraft : existingClientDraft;
+  const existingDraft =
+    mode === "admin" ? existingAdminDraft : existingClientDraft;
 
   // Fetch all active project types for logic and selection
   const projectTypes = useQuery(
-    api.functions.projectTypes.queries.getActiveProjectTypes
+    api.functions.projectTypes.queries.getActiveProjectTypes,
   );
 
   // Ref to prevent double-initialization in Strict Mode
@@ -193,12 +195,15 @@ export function WizardFormProvider({
             // Step 0 for admin mode - restore client selection
             // Note: clientData is null because draft only stores clientId, not full profile data
             // The UI can query full client data separately using the clientId if needed
-            step0: mode === "admin" && existingDraft.clientId ? {
-              clientId: existingDraft.clientId,
-              clientData: null,
-              selectionMode: 'existing' as const,
-              isNewClient: false,
-            } : prev.step0,
+            step0:
+              mode === "admin" && existingDraft.clientId
+                ? {
+                    clientId: existingDraft.clientId,
+                    clientData: null,
+                    selectionMode: "existing" as const,
+                    isNewClient: false,
+                  }
+                : prev.step0,
             step1: {
               projectTypeId: existingDraft.projectTypeId,
               endClientName: existingDraft.endClientName || "",
@@ -219,7 +224,7 @@ export function WizardFormProvider({
               preferredDeliveryDate:
                 existingDraft.preferredDeliveryDate ?? null,
             },
-          })
+          }),
         );
         return;
       }
@@ -234,7 +239,17 @@ export function WizardFormProvider({
         setError(null);
       } catch (err) {
         hasInitialized.current = false; // Allow retry on failure
-        setError(err instanceof Error ? err.message : "Failed to create draft");
+        const errorMessage =
+          err instanceof ConvexError
+            ? (err.data as string)
+            : err instanceof Error
+              ? err.message
+              : "Failed to create draft";
+
+        setError(errorMessage);
+        toast.error("Wizard Initialization Failed", {
+          description: errorMessage,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -246,7 +261,7 @@ export function WizardFormProvider({
   const setFormData = useCallback(
     <K extends keyof WizardFormData>(
       step: K,
-      data: Partial<WizardFormData[K]>
+      data: Partial<WizardFormData[K]>,
     ) => {
       setFormDataState((prev) => ({
         ...prev,
@@ -254,7 +269,7 @@ export function WizardFormProvider({
       }));
       setIsDirty(true);
     },
-    []
+    [],
   );
 
   // Save current form data to Convex draft
@@ -290,13 +305,20 @@ export function WizardFormProvider({
         });
         setIsDirty(false);
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to save draft");
+        const errorMessage =
+          err instanceof ConvexError
+            ? (err.data as string)
+            : err instanceof Error
+              ? err.message
+              : "Failed to save draft";
+
+        setError(errorMessage);
         throw err;
       } finally {
         setIsLoading(false);
       }
     },
-    [projectId, formData, updateDraft]
+    [projectId, formData, updateDraft],
   );
 
   // Navigation
@@ -312,7 +334,7 @@ export function WizardFormProvider({
         // Error is handled inside saveDraft (sets state.error)
       }
     },
-    [saveDraft]
+    [saveDraft],
   );
 
   const nextStep = useCallback(async () => {
@@ -325,7 +347,7 @@ export function WizardFormProvider({
       // Logic: Skip Step 2 if project type has no custom fields
       if (nextStepId === 2) {
         const selectedType = projectTypes?.find(
-          (pt) => pt._id === formData.step1.projectTypeId
+          (pt) => pt._id === formData.step1.projectTypeId,
         );
 
         if (selectedType && !selectedType.hasCustomFields) {
@@ -336,7 +358,13 @@ export function WizardFormProvider({
 
       await goToStep(nextStepId);
     }
-  }, [currentStep, goToStep, projectTypes, formData.step1.projectTypeId, wizardSteps]);
+  }, [
+    currentStep,
+    goToStep,
+    projectTypes,
+    formData.step1.projectTypeId,
+    wizardSteps,
+  ]);
 
   const prevStep = useCallback(async () => {
     const prevIndex = wizardSteps.findIndex((s) => s.id === currentStep) - 1;
@@ -362,7 +390,7 @@ export function WizardFormProvider({
           `Transmitting ${filesToUpload.length} assets to cloud storage...`,
           {
             duration: 5000,
-          }
+          },
         );
 
         // 2. Upload files in parallel with graceful error handling
@@ -430,17 +458,19 @@ export function WizardFormProvider({
           toast.warning(
             allFailed
               ? "Files could not be uploaded"
-              : `${failedUploads.length} file${failedUploads.length > 1 ? "s" : ""
-              } failed to upload`,
+              : `${failedUploads.length} file${
+                  failedUploads.length > 1 ? "s" : ""
+                } failed to upload`,
             {
               description: allFailed
                 ? "Your project will be created without files. You can upload them later from the project details."
-                : `Could not upload: ${failedUploads.slice(0, 3).join(", ")}${failedUploads.length > 3
-                  ? ` and ${failedUploads.length - 3} more`
-                  : ""
-                }. You can upload missing files later.`,
+                : `Could not upload: ${failedUploads.slice(0, 3).join(", ")}${
+                    failedUploads.length > 3
+                      ? ` and ${failedUploads.length - 3} more`
+                      : ""
+                  }. You can upload missing files later.`,
               duration: 6000,
-            }
+            },
           );
         }
       }
@@ -471,10 +501,17 @@ export function WizardFormProvider({
       return true;
     } catch (err) {
       console.error("Submission error:", err);
-      setError(err instanceof Error ? err.message : "Failed to submit project");
-      toast.error(
-        err instanceof Error ? err.message : "Failed to finalize project"
-      );
+      const errorMessage =
+        err instanceof ConvexError
+          ? (err.data as string)
+          : err instanceof Error
+            ? err.message
+            : "Failed to submit project";
+
+      setError(errorMessage);
+      toast.error("Submission Failed", {
+        description: errorMessage,
+      });
       return false;
     } finally {
       setIsLoading(false);
@@ -496,6 +533,15 @@ export function WizardFormProvider({
         await deleteDraftMutation({ projectId });
       } catch (err) {
         console.error("Failed to delete draft:", err);
+        const errorMessage =
+          err instanceof ConvexError
+            ? (err.data as string)
+            : err instanceof Error
+              ? err.message
+              : "Failed to delete draft";
+        toast.error("Cleanup Failed", {
+          description: errorMessage,
+        });
       } finally {
         setIsLoading(false);
       }
@@ -527,7 +573,7 @@ export function WizardFormProvider({
         ...prev.step0,
         clientId: clientData?._id ?? null,
         clientData,
-        selectionMode: clientData ? 'existing' : prev.step0.selectionMode,
+        selectionMode: clientData ? "existing" : prev.step0.selectionMode,
       },
     }));
     setIsDirty(true);

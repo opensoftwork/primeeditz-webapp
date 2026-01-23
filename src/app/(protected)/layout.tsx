@@ -76,11 +76,6 @@ export default function DashboardLayout({
     pathname,
   ]);
 
-  // Allow onboarding page to render without a profile
-  if (isOnboardingPage) {
-    return <>{children}</>;
-  }
-
   // Show loading state while auth is loading OR (authenticated AND profile is loading)
   if (isAuthLoading || (isAuthenticated && userProfile === undefined)) {
     return (
@@ -96,6 +91,21 @@ export default function DashboardLayout({
   // We return null to prevent rendering protected content while redirecting
   if (!isAuthenticated) {
     return null;
+  }
+
+  // If we are on the onboarding page, allow rendering children ONLY IF authenticated
+  if (isOnboardingPage) {
+    // If user already has a profile, don't show onboarding, redirect handled by useEffect
+    if (userProfile) {
+      return (
+        <div className="flex min-h-screen items-center justify-center">
+          <div className="text-lg text-muted-foreground animate-pulse font-medium">
+            Redirecting to dashboard...
+          </div>
+        </div>
+      );
+    }
+    return <>{children}</>;
   }
 
   // Redirect to onboarding if no profile exists (handled by useEffect above)

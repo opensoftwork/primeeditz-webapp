@@ -1,4 +1,4 @@
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { mutation } from '../../../_generated/server'
 import { authComponent } from '../../../auth'
 import {
@@ -60,7 +60,7 @@ export const createDraft = mutation({
     // 1. Get authenticated user
     const authUser = await authComponent.getAuthUser(ctx)
     if (!authUser) {
-      throw new Error('Not authenticated')
+      throw new ConvexError('Not authenticated')
     }
 
     // 2. Get profile
@@ -70,7 +70,7 @@ export const createDraft = mutation({
       .first()
 
     if (!profile) {
-      throw new Error('Profile not found. Please complete onboarding.')
+      throw new ConvexError('Profile not found. Please complete onboarding.')
     }
 
     // Determine source
@@ -121,7 +121,7 @@ export const createDraft = mutation({
       if (defaultType) {
         projectTypeId = defaultType._id
       } else {
-        throw new Error('No active project types configured')
+        throw new ConvexError('No active project types configured')
       }
     }
 
@@ -195,12 +195,12 @@ export const updateDraft = authenticatedMutation({
       .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
       .first()
 
-    if (!profile) throw new Error("Profile not found")
+    if (!profile) throw new ConvexError("Profile not found")
 
     // Get and verify project
     const project = await ctx.db.get(projectId)
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify ownership/permissions
@@ -208,13 +208,13 @@ export const updateDraft = authenticatedMutation({
     // Client can only update their own draft
     if (profile.role !== 'admin' && profile.role !== 'employee') {
       if (project.clientId !== profile._id) {
-        throw new Error('Access denied')
+        throw new ConvexError('Access denied')
       }
     }
 
     // Only allow updates to drafts
     if (project.actionState !== 'draft') {
-      throw new Error('Cannot update a submitted project')
+      throw new ConvexError('Cannot update a submitted project')
     }
 
     // Filter out undefined values
@@ -251,29 +251,29 @@ export const submitProject = authenticatedMutation({
       .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
       .first()
 
-    if (!profile) throw new Error("Profile not found")
+    if (!profile) throw new ConvexError("Profile not found")
 
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify ownership/permissions
     if (profile.role !== 'admin' && profile.role !== 'employee') {
       if (project.clientId !== profile._id) {
-        throw new Error('Access denied')
+        throw new ConvexError('Access denied')
       }
     }
 
     // Only drafts can be submitted
     if (project.actionState !== 'draft') {
-      throw new Error('Project already submitted')
+      throw new ConvexError('Project already submitted')
     }
 
     // Validate required fields
     if (!project.eventName) {
-      throw new Error('Event name is required')
+      throw new ConvexError('Event name is required')
     }
 
     await ctx.db.patch(args.projectId, {
@@ -314,24 +314,24 @@ export const deleteDraft = authenticatedMutation({
       .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
       .first()
 
-    if (!profile) throw new Error("Profile not found")
+    if (!profile) throw new ConvexError("Profile not found")
 
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify ownership
     if (profile.role !== 'admin' && profile.role !== 'employee') {
       if (project.clientId !== profile._id) {
-        throw new Error('Access denied')
+        throw new ConvexError('Access denied')
       }
     }
 
     // Only drafts can be deleted
     if (project.actionState !== 'draft') {
-      throw new Error('Cannot delete a submitted project')
+      throw new ConvexError('Cannot delete a submitted project')
     }
 
     await ctx.db.delete(args.projectId)

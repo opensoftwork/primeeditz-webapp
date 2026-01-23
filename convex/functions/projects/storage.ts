@@ -7,7 +7,7 @@
  * Uses "use node" directive for AWS SDK compatibility.
  */
 
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import { action } from '../../_generated/server'
 import { api } from '../../_generated/api'
 import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3'
@@ -49,7 +49,7 @@ export const generateUploadUrl = action({
     const profile = await ctx.runQuery(api.profiles.getMyProfile)
 
     if (!profile) {
-      throw new Error('Not authenticated')
+      throw new ConvexError('Not authenticated')
     }
 
     // 2. Get project and verify access
@@ -59,18 +59,18 @@ export const generateUploadUrl = action({
     })
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Role-based access control
     if (profile.role === 'client') {
       // Clients can only upload to their own projects
       if (project.clientId !== profile._id) {
-        throw new Error('Access denied: You do not own this project')
+        throw new ConvexError('Access denied: You do not own this project')
       }
     } else if (profile.role !== 'admin' && profile.role !== 'employee') {
       // Only staff and clients can upload (rejects unknown roles)
-      throw new Error('Access denied: Insufficient permissions')
+      throw new ConvexError('Access denied: Insufficient permissions')
     }
 
     // 3. Prepare the storage key

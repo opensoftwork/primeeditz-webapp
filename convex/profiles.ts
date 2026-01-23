@@ -1,4 +1,4 @@
-import { v } from "convex/values";
+import { ConvexError, v } from "convex/values";
 import { mutation, query, internalQuery } from "./_generated/server";
 import { authComponent } from "./auth";
 
@@ -6,8 +6,8 @@ import { authComponent } from "./auth";
 export const isFirstUser = query({
   args: {},
   handler: async (ctx) => {
-    const profiles = await ctx.db.query("profiles").collect();
-    return profiles.length === 0;
+    const firstProfile = await ctx.db.query("profiles").first();
+    return firstProfile === null;
   },
 });
 
@@ -22,7 +22,7 @@ export const createProfile = mutation({
     // Get the current user from Better Auth
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
-      throw new Error("Not authenticated");
+      throw new ConvexError("Not authenticated");
     }
 
     // Check if profile already exists
@@ -32,12 +32,12 @@ export const createProfile = mutation({
       .first();
 
     if (existingProfile) {
-      throw new Error("Profile already exists");
+      throw new ConvexError("Profile already exists");
     }
 
     // Check if this is the first user
-    const profiles = await ctx.db.query("profiles").collect();
-    const isFirst = profiles.length === 0;
+    const firstProfile = await ctx.db.query("profiles").first();
+    const isFirst = firstProfile === null;
     const role = isFirst ? ("admin" as const) : ("client" as const);
 
     // Create the profile
@@ -112,7 +112,7 @@ export const claimDraftProfile = mutation({
   handler: async (ctx, args) => {
     const user = await authComponent.getAuthUser(ctx);
     if (!user) {
-      throw new Error("Not authenticated");
+      throw new ConvexError("Not authenticated");
     }
 
     const userId = user._id;
@@ -125,18 +125,24 @@ export const claimDraftProfile = mutation({
       .first();
 
     if (existingProfile && existingProfile._id !== args.profileId) {
-      throw new Error("User already has an active profile");
+      throw new ConvexError("User already has an active profile");
     }
 
     // Get the draft profile
     const draftProfile = await ctx.db.get(args.profileId);
     if (!draftProfile) {
-      throw new Error("Profile not found");
+      throw new ConvexError("Profile not found");
     }
 
     // Verify it is a draft
     if (!draftProfile.userId || !draftProfile.userId.startsWith("draft_")) {
-      throw new Error("This profile has already been claimed or is invalid");
+      throw new ConvexError("This profile has already been claimed or is invalid");
+    }
+
+    // Security Check: Verify email if it's not a placeholder
+    const isPlaceholderEmail = draftProfile.email?.endsWith("@pending.primeeditz.com");
+    if (draftProfile.email && !isPlaceholderEmail && draftProfile.email !== userEmail) {
+      throw new ConvexError("You are not authorized to claim this profile");
     }
 
     // Update the profile to link to the real user

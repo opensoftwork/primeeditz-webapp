@@ -5,7 +5,7 @@
  * Uses authenticatedMutation wrapper from customFunctions.
  */
 
-import { v } from 'convex/values'
+import { ConvexError, v } from 'convex/values'
 import { authenticatedMutation, adminMutation } from '../../lib/customFunctions'
 
 /**
@@ -249,18 +249,24 @@ export const claimDraftProfile = authenticatedMutation({
       .first()
 
     if (existingProfile && existingProfile._id !== args.profileId) {
-      throw new Error('User already has an active profile')
+      throw new ConvexError('User already has an active profile')
     }
 
     // Get the draft profile
     const draftProfile = await ctx.db.get(args.profileId)
     if (!draftProfile) {
-      throw new Error('Profile not found')
+      throw new ConvexError('Profile not found')
     }
 
     // Verify it is a draft
     if (!draftProfile.userId.startsWith('draft_')) {
-      throw new Error('This profile has already been claimed')
+      throw new ConvexError('This profile has already been claimed')
+    }
+
+    // Security Check: Verify email if it's not a placeholder
+    const isPlaceholderEmail = draftProfile.email?.endsWith("@pending.primeeditz.com");
+    if (draftProfile.email && !isPlaceholderEmail && draftProfile.email !== userEmail) {
+      throw new ConvexError("You are not authorized to claim this profile");
     }
 
     // Update the profile to link to the real user

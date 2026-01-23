@@ -1,7 +1,18 @@
 "use client";
 
 import { useState } from "react";
-import { User, Phone, Building2, Briefcase, X, Plus, Link as LinkIcon, Copy, Check } from "lucide-react";
+import {
+  User,
+  Phone,
+  Building2,
+  Briefcase,
+  X,
+  Plus,
+  Link as LinkIcon,
+  Copy,
+  Check,
+  Mail,
+} from "lucide-react";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
@@ -33,13 +44,18 @@ interface CreatedEmployee {
   name: string;
 }
 
-export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps) {
+export function NewEmployeeDrawer({
+  open,
+  onOpenChange,
+}: NewEmployeeDrawerProps) {
   const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [company, setCompany] = useState("");
   const [designation, setDesignation] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [createdEmployee, setCreatedEmployee] = useState<CreatedEmployee | null>(null);
+  const [createdEmployee, setCreatedEmployee] =
+    useState<CreatedEmployee | null>(null);
   const [copied, setCopied] = useState(false);
 
   const createEmployeeProfile = useMutation(
@@ -70,6 +86,7 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
     try {
       const result = await createEmployeeProfile({
         name: name.trim(),
+        email: email.trim() || undefined,
         phone: phone.trim() || undefined,
         company: company.trim() || undefined,
         designation: designation.trim() || undefined,
@@ -100,6 +117,7 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
 
   const resetForm = () => {
     setName("");
+    setEmail("");
     setPhone("");
     setCompany("");
     setDesignation("");
@@ -142,10 +160,9 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
             {createdEmployee ? "Employee Created" : "Add New Employee"}
           </DrawerTitle>
           <DrawerDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-2">
-            {createdEmployee 
+            {createdEmployee
               ? "Share the onboarding link with your new team member"
-              : "Enter the employee details below to create a new profile"
-            }
+              : "Enter the employee details below to create a new profile"}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -197,7 +214,8 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
                     onClick={handleCopyLink}
                     className={cn(
                       "h-12 w-12 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/10 transition-all",
-                      copied && "border-green-500/50 bg-green-500/10 text-green-400",
+                      copied &&
+                        "border-green-500/50 bg-green-500/10 text-green-400",
                     )}
                   >
                     {copied ? (
@@ -209,7 +227,8 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
                 </div>
 
                 <p className="text-xs text-white/30 mt-2">
-                  The employee will use this link to complete their onboarding and set up their account.
+                  The employee will use this link to complete their onboarding
+                  and set up their account.
                 </p>
               </div>
             </div>
@@ -240,7 +259,8 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
               {/* Name Field */}
               <Field>
                 <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
-                  Employee Name <span className="text-indigo-400 ml-1.5">*</span>
+                  Employee Name{" "}
+                  <span className="text-indigo-400 ml-1.5">*</span>
                 </FieldLabel>
                 <FieldContent>
                   <InputGroup className="bg-white/3 border-white/10 focus-within:border-indigo-500/40 transition-all duration-500 rounded-xl h-12">
@@ -256,6 +276,31 @@ export function NewEmployeeDrawer({ open, onOpenChange }: NewEmployeeDrawerProps
                       className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
                     />
                   </InputGroup>
+                </FieldContent>
+              </Field>
+
+              {/* Email Field */}
+              <Field>
+                <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
+                  Work Email (Optional)
+                </FieldLabel>
+                <FieldContent>
+                  <InputGroup className="bg-white/3 border-white/10 focus-within:border-indigo-500/40 transition-all duration-500 rounded-xl h-12">
+                    <InputGroupAddon align="inline-start" className="pl-4">
+                      <Mail className="h-4 w-4 text-white/10" />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      id="employee-email"
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="e.g., employee@primeeditz.com"
+                      className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
+                    />
+                  </InputGroup>
+                  <p className="text-[10px] text-white/20 mt-2 font-medium uppercase tracking-wider">
+                    If provided, only this email can claim the profile.
+                  </p>
                 </FieldContent>
               </Field>
 

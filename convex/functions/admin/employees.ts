@@ -141,6 +141,7 @@ export const getEmployeeWithProjects = adminQuery({
 export const createDraftEmployeeProfile = adminMutation({
   args: {
     name: v.string(),
+    email: v.optional(v.string()), // Optional: if provided, only this email can claim
     phone: v.optional(v.string()),
     company: v.optional(v.string()),
     designation: v.optional(v.string()),
@@ -149,10 +150,13 @@ export const createDraftEmployeeProfile = adminMutation({
     // Generate a unique identifier for this draft employee
     const draftId = `draft_emp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
     
+    // If no email provided, use a placeholder that bypasses strict email check during claiming
+    const email = args.email || `${draftId}@pending.primeeditz.com`;
+
     // Create the draft employee profile
     const profileId = await ctx.db.insert("profiles", {
       userId: draftId, // Placeholder until employee completes onboarding
-      email: `${draftId}@pending.primeeditz.com`, // Placeholder email
+      email: email, 
       name: args.name,
       phone: args.phone,
       company: args.company,

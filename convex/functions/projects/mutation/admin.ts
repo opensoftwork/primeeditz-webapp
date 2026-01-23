@@ -1,4 +1,4 @@
-import { v } from 'convex/values'
+import { v, ConvexError } from 'convex/values'
 import {
   projectActionStateValidator,
 } from '../../../schema'
@@ -30,7 +30,7 @@ export const transitionProject = authenticatedWithProfileMutation({
   handler: async (ctx, args) => {
     // 1. Get project
     const project = await ctx.db.get(args.projectId)
-    if (!project) throw new Error('Project not found')
+    if (!project) throw new ConvexError('Project not found')
 
     // 2. Security Check: Only admins, workers, or the project owner can transition
     const isOwner = project.clientId === ctx.profile._id
@@ -38,12 +38,12 @@ export const transitionProject = authenticatedWithProfileMutation({
     const isEmployee = ctx.profile.role === 'employee'
 
     if (!isAdmin && !isEmployee && !isOwner) {
-      throw new Error('Unauthorized to transition this project')
+      throw new ConvexError('Unauthorized to transition this project')
     }
 
     // 3. Validation: Use status machine to check if transition is allowed
     if (!canTransition(project.actionState, args.newState)) {
-      throw new Error(
+      throw new ConvexError(
         `Invalid transition: ${project.actionState} -> ${args.newState}`
       )
     }
@@ -90,13 +90,13 @@ export const assignEmployee = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Verify employee exists and has employee role
     const employee = await ctx.db.get(args.employeeId)
     if (!employee || employee.role !== 'employee') {
-      throw new Error('Invalid employee')
+      throw new ConvexError('Invalid employee')
     }
 
     // CRITICAL: Transition status to 'assigned'
@@ -150,12 +150,12 @@ export const archiveProject = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Cannot archive already archived projects
     if (project.phase === 'archived') {
-      throw new Error('Project is already archived')
+      throw new ConvexError('Project is already archived')
     }
 
     const previousPhase = project.phase
@@ -199,12 +199,12 @@ export const unarchiveProject = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // Can only unarchive archived projects
     if (project.phase !== 'archived') {
-      throw new Error('Project is not archived')
+      throw new ConvexError('Project is not archived')
     }
 
     const previousPhase = project.phase
@@ -245,11 +245,11 @@ export const softDeleteProject = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     if (project.deletedAt) {
-      throw new Error('Project is already in trash')
+      throw new ConvexError('Project is already in trash')
     }
 
     const previousPhase = project.phase
@@ -291,11 +291,11 @@ export const restoreProject = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     if (!project.deletedAt) {
-      throw new Error('Project is not in trash')
+      throw new ConvexError('Project is not in trash')
     }
 
     await ctx.db.patch(args.projectId, {
@@ -331,7 +331,7 @@ export const permanentlyDeleteProject = adminMutation({
     const project = await ctx.db.get(args.projectId)
 
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // 1. Unlink quotations (Story C-1 Requirement D)
@@ -436,18 +436,18 @@ export const linkProjectToQuotation = adminMutation({
     // 1. Get the project
     const project = await ctx.db.get(args.projectId)
     if (!project) {
-      throw new Error('Project not found')
+      throw new ConvexError('Project not found')
     }
 
     // 2. Get the quotation
     const quotation = await ctx.db.get(args.quotationId)
     if (!quotation) {
-      throw new Error('Quotation not found')
+      throw new ConvexError('Quotation not found')
     }
 
     // 3. Validate quotation is approved
     if (quotation.status !== 'approved') {
-      throw new Error('Quotation must be approved to link')
+      throw new ConvexError('Quotation must be approved to link')
     }
 
     // 4. Validate client match
@@ -455,7 +455,7 @@ export const linkProjectToQuotation = adminMutation({
     const quotationClientId = quotation.clientId as string | undefined
     
     if (projectClientId && quotationClientId && projectClientId !== quotationClientId) {
-      throw new Error('Quotation belongs to a different client')
+      throw new ConvexError('Quotation belongs to a different client')
     }
 
     // 5. Update the quotation to include this project
@@ -520,7 +520,7 @@ export const unlinkProjectFromQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId)
     if (!quotation) {
-      throw new Error('Quotation not found')
+      throw new ConvexError('Quotation not found')
     }
 
     const projectIdString = args.projectId as string
