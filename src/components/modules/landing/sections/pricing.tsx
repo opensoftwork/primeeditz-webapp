@@ -272,11 +272,19 @@ export function PricingSection() {
         
         {/* Header */}
         <div className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto">
+          <motion.span
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400"
+          >
+            Pricing Strategy
+          </motion.span>
           <motion.h2 
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
-            className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-linear-to-b from-white to-white/60 tracking-tight"
+            className="text-3xl md:text-5xl font-bold tracking-tight text-white"
           >
             Choose Your Perfect Package
           </motion.h2>
@@ -285,10 +293,10 @@ export function PricingSection() {
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
-            className="text-muted-foreground text-lg"
+            className="text-muted-foreground text-base max-w-xl mx-auto"
           >
             Professional post-production services tailored to your needs.
-            <br className="hidden sm:block" /> From essential editing to cinematic masterpieces.
+            From essential editing to cinematic masterpieces.
           </motion.p>
         </div>
 

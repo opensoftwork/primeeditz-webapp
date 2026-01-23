@@ -1,7 +1,7 @@
 # Story 10-4: Who It's For Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: review  
+**Status**: done
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Target audience validation

@@ -100,46 +100,48 @@ function AudienceCard({ item, index }: { item: AudienceType; index: number }) {
 
 export function WhoItsForSection() {
   return (
-    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 bg-background border-y border-white/5 overflow-hidden">
+    <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Ambience - matches workflow section */}
       <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none" />
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
-      <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
-        
-        {/* Header */}
-        <div className="flex flex-col items-center gap-4 text-center">
-          <motion.span 
-             initial={{ opacity: 0, y: 10 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true }}
-             className="text-[10px] uppercase font-black tracking-[0.3em] text-white/60"
-          >
-            Built for Creative Professionals
-          </motion.span>
-          
-          <motion.h2 
-            initial={{ opacity: 0, y: 10 }}
-             whileInView={{ opacity: 1, y: 0 }}
-             viewport={{ once: true }}
-             transition={{ delay: 0.1 }}
-             className="text-3xl md:text-4xl lg:text-5xl font-bold"
-          >
-            Scales With Your Business
-          </motion.h2>
-        </div>
+      <div className="relative max-w-7xl mx-auto">
+        <div className="backdrop-blur-sm bg-background/5 border border-white/10 shadow-2xl rounded-3xl p-8 md:p-16">
+          <div className="flex flex-col gap-16">
+            {/* Header */}
+            <div className="flex flex-col items-center gap-4 text-center">
+              <motion.span 
+                 initial={{ opacity: 0, y: 10 }}
+                 whileInView={{ opacity: 1, y: 0 }}
+                 viewport={{ once: true }}
+                 className="text-[10px] uppercase font-black tracking-[0.3em] text-cyan-400"
+              >
+                Built for Creative Professionals
+              </motion.span>
+              
+              <motion.h2 
+                initial={{ opacity: 0, y: 10 }}
+                 whileInView={{ opacity: 1, y: 0 }}
+                 viewport={{ once: true }}
+                 transition={{ delay: 0.1 }}
+                 className="text-3xl md:text-4xl lg:text-5xl font-bold tracking-tight text-white"
+              >
+                Scales With Your Business
+              </motion.h2>
+            </div>
 
-        {/* Audience Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {audienceData.map((item, index) => (
-            <AudienceCard 
-              key={index} 
-              item={item} 
-              index={index} 
-            />
-          ))}
+            {/* Audience Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {audienceData.map((item, index) => (
+                <AudienceCard 
+                  key={index} 
+                  item={item} 
+                  index={index} 
+                />
+              ))}
+            </div>
+          </div>
         </div>
-
       </div>
     </section>
   );

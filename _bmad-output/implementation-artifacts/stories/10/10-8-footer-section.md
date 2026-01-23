@@ -1,7 +1,7 @@
 # Story 10-8: Footer Section
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: Completed  
+**Status**: done
 **Complexity**: Low (2 points)  
 **Created**: 2026-01-22  
 **Priority**: P0 — Essential page element

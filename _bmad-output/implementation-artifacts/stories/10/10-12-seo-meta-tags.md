@@ -1,7 +1,7 @@
 # Story 10-12: SEO & Meta Tags
 
 **Epic**: Epic 10 - Landing Page — Marketing & Conversion  
-**Status**: backlog  
+**Status**: deferred
 **Complexity**: Low (1 point)  
 **Created**: 2026-01-22  
 **Priority**: P1 — Search visibility
