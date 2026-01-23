@@ -16,7 +16,21 @@ import {
 import { SidebarBrand } from "./sidebar-brand";
 import { SidebarNavGroup } from "./sidebar-nav-group";
 import { SidebarUserMenu } from "./sidebar-user-menu";
-import { getNavItemsForRole, commonNavItems } from "./navigation-config";
+import {
+  getNavItemsForRole,
+  commonNavGroup,
+  type NavItem,
+  type NavGroup,
+} from "./navigation-config";
+
+// Type guard for NavGroup
+function isNavGroup(item: any): item is NavGroup {
+  return item && typeof item === "object" && "label" in item && "items" in item;
+}
+
+function isNavGroupArray(items: (NavItem | NavGroup)[]): items is NavGroup[] {
+  return Array.isArray(items) && items.length > 0 && isNavGroup(items[0]);
+}
 
 export function AppSidebar() {
   // Fetch current user's profile
@@ -38,7 +52,10 @@ export function AppSidebar() {
   const isLoading = profile === undefined;
 
   return (
-    <Sidebar collapsible="icon">
+    <Sidebar
+      collapsible="icon"
+      className="border-r-white/5 bg-background/50 backdrop-blur-3xl"
+    >
       <SidebarBrand />
 
       <SidebarContent>
@@ -59,11 +76,29 @@ export function AppSidebar() {
           </SidebarGroup>
         ) : (
           <>
-            {/* Main Navigation - Role-specific */}
-            <SidebarNavGroup label="Navigation" items={mainNavItems} />
+            {/* Role-specific Navigation */}
+            {isNavGroupArray(mainNavItems) ? (
+              mainNavItems.map((group) => (
+                <SidebarNavGroup
+                  key={group.label}
+                  label={group.label}
+                  items={group.items}
+                />
+              ))
+            ) : (
+              <SidebarNavGroup
+                label="Navigation"
+                items={mainNavItems as NavItem[]}
+              />
+            )}
 
-            {/* System/Settings - Common for all roles */}
-            <SidebarNavGroup label="System" items={commonNavItems} />
+            {/* System/Settings - Only for non-admins (Admins have it in Configuration group) */}
+            {profile?.role !== "admin" && (
+              <SidebarNavGroup
+                label={commonNavGroup.label}
+                items={commonNavGroup.items}
+              />
+            )}
           </>
         )}
       </SidebarContent>

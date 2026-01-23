@@ -4,14 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { useState, useMemo, useEffect } from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import {
-  Search,
-  User,
-  Mail,
-  Building,
-  Phone,
-  ArrowUpDown,
-} from "lucide-react";
+import { Search, User, Mail, Building, Phone, ArrowUpDown } from "lucide-react";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -122,7 +115,7 @@ export function ClientDataTable({
               "text-[8px] font-black uppercase tracking-widest",
               row.original.onboardingComplete
                 ? "border-green-500/20 text-green-500 bg-green-500/5"
-                : "border-amber-500/20 text-amber-500 bg-amber-500/5"
+                : "border-amber-500/20 text-amber-500 bg-amber-500/5",
             )}
           >
             {row.original.onboardingComplete ? "Complete" : "Pending"}
@@ -130,7 +123,7 @@ export function ClientDataTable({
         ),
       },
     ],
-    []
+    [],
   );
 
   const filteredData = useMemo(() => {
@@ -141,7 +134,7 @@ export function ClientDataTable({
       (c: Client) =>
         c.name.toLowerCase().includes(lowerSearch) ||
         c.email.toLowerCase().includes(lowerSearch) ||
-        c.company?.toLowerCase().includes(lowerSearch)
+        c.company?.toLowerCase().includes(lowerSearch),
     );
   }, [clients, search]);
 
@@ -191,14 +184,14 @@ export function ClientDataTable({
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-8 p-4">
       <div className="relative group">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-primary transition-colors" />
+        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/10 group-focus-within:text-primary group-focus-within:scale-110 transition-all duration-300" />
         <Input
           placeholder="Filter by name, email or company..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="pl-11 h-12 bg-white/2 border-white/5 rounded-2xl text-sm font-bold placeholder:text-white/10 focus:border-primary/50 transition-all shadow-inner"
+          className="pl-12 h-14 bg-white/2 border-white/5 rounded-2xl text-sm font-bold placeholder:text-white/10 focus:bg-white/5 focus:border-primary/30 transition-all shadow-inner"
         />
       </div>
 
@@ -206,7 +199,10 @@ export function ClientDataTable({
         columns={columns}
         data={paginatedData}
         onRowClick={onSelect}
-        className={cn("border-white/5", selectedId && "ring-1 ring-primary/20")}
+        className={cn(
+          "border-white/5",
+          selectedId && "ring-1 ring-primary/20 bg-primary/1",
+        )}
       />
 
       {/* Pagination Controls */}
@@ -220,4 +216,3 @@ export function ClientDataTable({
     </div>
   );
 }
-

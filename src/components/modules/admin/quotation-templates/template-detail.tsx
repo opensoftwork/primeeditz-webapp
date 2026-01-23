@@ -24,6 +24,8 @@ import { Id } from "@convex/_generated/dataModel";
 import { TemplateLineItem } from "../quotation-sections/types";
 import { TemplateLineItemsTable } from "./components/template-line-items-table";
 import { PricePreview } from "./price-preview";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
 
 interface TemplateDetailProps {
   templateId: string;
@@ -34,12 +36,24 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
 
   const template = useQuery(
     api.functions.quotations.templates.queries.getTemplate,
-    { templateId: templateId as Id<"quotationTemplates"> }
+    { templateId: templateId as Id<"quotationTemplates"> },
   );
+
+  const setOverride = useBreadcrumbStore((state) => state.setOverride);
+  const removeOverride = useBreadcrumbStore((state) => state.removeOverride);
+
+  useEffect(() => {
+    if (template?.name) {
+      setOverride(templateId, template.name);
+    }
+    return () => {
+      removeOverride(templateId);
+    };
+  }, [templateId, template?.name, setOverride, removeOverride]);
 
   const sections = useQuery(
     api.functions.quotations.sections.queries.getSections,
-    { activeOnly: false }
+    { activeOnly: false },
   );
 
   if (template === undefined || sections === undefined) {
@@ -106,7 +120,7 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
                       "px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest border",
                       template.isActive
                         ? "bg-green-500/10 text-green-500 border-green-500/20"
-                        : "bg-white/5 text-white/40 border-white/10"
+                        : "bg-white/5 text-white/40 border-white/10",
                     )}
                   >
                     {template.isActive ? "Active" : "Draft"}
@@ -203,10 +217,10 @@ export function TemplateDetail({ templateId }: TemplateDetailProps) {
                       group.section.color === "blue"
                         ? "bg-blue-500"
                         : group.section.color === "purple"
-                        ? "bg-purple-500"
-                        : group.section.color === "green"
-                        ? "bg-emerald-500"
-                        : "bg-zinc-500"
+                          ? "bg-purple-500"
+                          : group.section.color === "green"
+                            ? "bg-emerald-500"
+                            : "bg-zinc-500",
                     )}
                   />
                   <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">

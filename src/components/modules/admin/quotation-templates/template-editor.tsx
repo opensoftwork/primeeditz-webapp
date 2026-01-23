@@ -23,6 +23,7 @@ import { PricePreview } from "./price-preview";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import { Section, Template } from "../quotation-sections/types";
 import { Id } from "@convex/_generated/dataModel";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface TemplateEditorProps {
   templateId?: string;
@@ -35,20 +36,36 @@ export function TemplateEditor({ templateId }: TemplateEditorProps) {
   // Queries
   const existingTemplate = useQuery(
     api.functions.quotations.templates.queries.getTemplate,
-    templateId ? { templateId: templateId as Id<"quotationTemplates"> } : "skip"
+    templateId
+      ? { templateId: templateId as Id<"quotationTemplates"> }
+      : "skip",
   );
   const projectTypes = useQuery(api.admin.getProjectTypes);
   const sections = useQuery(
     api.functions.quotations.sections.queries.getSections,
-    { activeOnly: true }
+    { activeOnly: true },
   );
+
+  const setOverride = useBreadcrumbStore((state) => state.setOverride);
+  const removeOverride = useBreadcrumbStore((state) => state.removeOverride);
+
+  useEffect(() => {
+    if (templateId && existingTemplate?.name) {
+      setOverride(templateId, existingTemplate.name);
+    }
+    return () => {
+      if (templateId) {
+        removeOverride(templateId);
+      }
+    };
+  }, [templateId, existingTemplate?.name, setOverride, removeOverride]);
 
   // Mutations
   const createTemplate = useMutation(
-    api.functions.quotations.templates.mutations.createTemplate
+    api.functions.quotations.templates.mutations.createTemplate,
   );
   const updateTemplate = useMutation(
-    api.functions.quotations.templates.mutations.updateTemplate
+    api.functions.quotations.templates.mutations.updateTemplate,
   );
 
   const form = useForm({

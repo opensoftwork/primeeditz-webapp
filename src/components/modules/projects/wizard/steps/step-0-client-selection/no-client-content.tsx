@@ -15,7 +15,7 @@ interface NoClientContentProps {
 
 export function NoClientContent({ onCancel }: NoClientContentProps) {
   return (
-    <div className="mt-10 space-y-8">
+    <div className="mt-10 space-y-8 px-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-lg font-black uppercase tracking-tight text-white">
@@ -29,9 +29,9 @@ export function NoClientContent({ onCancel }: NoClientContentProps) {
           variant="ghost"
           size="sm"
           onClick={onCancel}
-          className="text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white"
+          className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all"
         >
-          <X className="h-3 w-3 mr-1.5" /> Cancel
+          <X className="h-4 w-4 mr-2" /> Cancel
         </Button>
       </div>
 

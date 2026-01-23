@@ -43,7 +43,7 @@ export function UserNav({ user }: UserNavProps) {
           onError: (ctx) => {
             setIsSignOutLoading(false);
             toast.error(ctx.error.message || "Failed to sign out");
-          }
+          },
         },
       });
     } catch (error) {
@@ -56,16 +56,19 @@ export function UserNav({ user }: UserNavProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" className="relative h-10 w-auto gap-3 px-2 hover:bg-muted/50 rounded-full transition-all duration-300">
+        <Button
+          variant="ghost"
+          className="relative h-12 w-auto gap-4 pl-5 pr-1.5 hover:bg-primary/10 rounded-full transition-all duration-300 group border border-transparent hover:border-primary/20"
+        >
           <div className="flex-col items-end hidden md:flex">
-            <span className="text-sm font-bold leading-none tracking-tight">
+            <span className="text-sm font-bold leading-none tracking-tight group-hover:text-primary transition-colors">
               {user.name}
             </span>
-            <span className="mt-1 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-2 py-0.5 text-[9px] font-black uppercase tracking-widest text-primary">
+            <span className="mt-1.5 inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-2.5 py-0.5 text-[10px] font-black uppercase tracking-widest text-primary group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300 shadow-sm">
               {user.role}
             </span>
           </div>
-          <Avatar className="h-9 w-9 border-2 border-background shadow-lg shadow-primary/10 transition-transform active:scale-95">
+          <Avatar className="h-9 w-9 border-2 border-background shadow-lg shadow-primary/10 transition-all duration-300 group-hover:scale-105 group-hover:border-primary/20 group-active:scale-95">
             {user.image && <AvatarImage src={user.image} alt={user.name} />}
             <AvatarFallback className="bg-linear-to-br from-primary to-primary/80 text-primary-foreground font-bold text-sm">
               {user.name.charAt(0).toUpperCase()}
@@ -73,7 +76,12 @@ export function UserNav({ user }: UserNavProps) {
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64 p-2 bg-popover/80 backdrop-blur-xl border-white/10 shadow-2xl" align="end" forceMount sideOffset={10}>
+      <DropdownMenuContent
+        className="w-64 p-2 bg-popover/80 backdrop-blur-xl border-white/10 shadow-2xl"
+        align="end"
+        forceMount
+        sideOffset={10}
+      >
         <DropdownMenuLabel className="font-normal p-3">
           <div className="flex flex-col space-y-1">
             <p className="text-sm font-bold leading-none">{user.name}</p>
@@ -98,7 +106,9 @@ export function UserNav({ user }: UserNavProps) {
           <div className="rounded-xl bg-linear-to-br from-primary/10 to-transparent p-3 border border-primary/10 mb-2">
             <div className="flex items-center gap-2 mb-1">
               <Sparkles className="h-3 w-3 text-primary" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">Pro Account</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-primary">
+                Pro Account
+              </span>
             </div>
             <p className="text-[11px] text-muted-foreground leading-relaxed">
               Managing all your creative projects in one place.
@@ -106,13 +116,17 @@ export function UserNav({ user }: UserNavProps) {
           </div>
         </div>
         <DropdownMenuSeparator className="bg-white/5" />
-        <DropdownMenuItem 
+        <DropdownMenuItem
           onClick={handleSignOut}
           disabled={isSignOutLoading}
           className="rounded-lg py-2.5 focus:bg-destructive/10 focus:text-destructive transition-colors text-destructive cursor-pointer group m-1"
         >
-          <LogOut className={`mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1 ${isSignOutLoading ? 'animate-pulse' : ''}`} />
-          <span className="font-bold text-sm">{isSignOutLoading ? "Signing out..." : "Sign out"}</span>
+          <LogOut
+            className={`mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1 ${isSignOutLoading ? "animate-pulse" : ""}`}
+          />
+          <span className="font-bold text-sm">
+            {isSignOutLoading ? "Signing out..." : "Sign out"}
+          </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>

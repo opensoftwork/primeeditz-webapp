@@ -46,7 +46,7 @@ export function SidebarUserMenu({
           onError: (ctx) => {
             setIsSignOutLoading(false);
             toast.error(ctx.error.message || "Failed to sign out");
-          }
+          },
         },
       });
     } catch (error) {
@@ -64,7 +64,7 @@ export function SidebarUserMenu({
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
                 size="lg"
-                className="h-14 rounded-xl border border-white/5 bg-white/2 px-3 transition-all duration-300 hover:bg-white/5 hover:border-white/10 data-[state=open]:bg-white/5 shadow-sm group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto"
+                className="h-16 rounded-2xl border border-white/5 bg-white/2 px-3 transition-all duration-500 hover:bg-white/5 hover:border-white/10 data-[state=open]:bg-white/10 shadow-[0_4px_20px_rgba(0,0,0,0.1)] group-data-[collapsible=icon]:size-12 group-data-[collapsible=icon]:p-0! group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:mx-auto overflow-hidden group/user-btn"
               >
                 {isLoading ? (
                   <>
@@ -77,18 +77,18 @@ export function SidebarUserMenu({
                   </>
                 ) : (
                   <>
-                    <div className="flex aspect-square size-10 items-center justify-center rounded-lg bg-linear-to-br from-white/10 to-white/5 text-foreground/80 shadow-inner ring-1 ring-white/10 shrink-0 group-data-[collapsible=icon]:size-10">
-                      <User2 className="size-6 group-data-[collapsible=icon]:size-6" />
+                    <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-linear-to-br from-white/10 to-transparent text-foreground/80 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] ring-1 ring-white/10 shrink-0 group-data-[collapsible=icon]:size-10 transition-transform duration-500 group-hover/user-btn:scale-110">
+                      <User2 className="size-5 group-data-[collapsible=icon]:size-5" />
                     </div>
-                    <div className="grid flex-1 text-left leading-tight ml-2 group-data-[collapsible=icon]:hidden">
-                      <span className="truncate text-sm font-bold tracking-tight">
+                    <div className="grid flex-1 text-left leading-tight ml-3 group-data-[collapsible=icon]:hidden">
+                      <span className="truncate text-[15px] font-bold tracking-tight">
                         {userName}
                       </span>
-                      <span className="truncate text-[10px] uppercase tracking-widest font-black opacity-30 mt-0.5">
+                      <span className="truncate text-[10px] uppercase tracking-[0.2em] font-black text-primary filter drop-shadow-[0_0_4px_rgba(var(--primary-rgb),0.5)] mt-1">
                         {userRole}
                       </span>
                     </div>
-                    <ChevronUp className="ml-auto size-4 opacity-30 group-data-[collapsible=icon]:hidden" />
+                    <ChevronUp className="ml-auto size-4 opacity-20 group-hover/user-btn:opacity-60 transition-opacity group-data-[collapsible=icon]:hidden" />
                   </>
                 )}
               </SidebarMenuButton>
@@ -123,8 +123,12 @@ export function SidebarUserMenu({
                 disabled={isSignOutLoading}
                 className="rounded-lg py-2.5 focus:bg-destructive/10 focus:text-destructive transition-colors text-destructive"
               >
-                <LogOut className={`mr-2 size-4 ${isSignOutLoading ? 'animate-pulse' : ''}`} />
-                <span className="font-bold text-sm">{isSignOutLoading ? "Signing out..." : "Sign out"}</span>
+                <LogOut
+                  className={`mr-2 size-4 ${isSignOutLoading ? "animate-pulse" : ""}`}
+                />
+                <span className="font-bold text-sm">
+                  {isSignOutLoading ? "Signing out..." : "Sign out"}
+                </span>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

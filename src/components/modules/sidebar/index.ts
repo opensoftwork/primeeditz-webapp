@@ -5,9 +5,9 @@ export { SidebarUserMenu } from "./sidebar-user-menu";
 export { SidebarLoading } from "./sidebar-loading";
 export {
   getNavItemsForRole,
-  adminNavItems,
+  adminNavGroups,
   employeeNavItems,
   clientNavItems,
-  commonNavItems,
+  commonNavGroup,
   type NavItem,
 } from "./navigation-config";
