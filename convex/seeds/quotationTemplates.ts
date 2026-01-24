@@ -44,6 +44,8 @@ DELIVERABLES
           unit: "lot",
           unitPrice: 2500,
           defaultQuantity: 1,
+          spawnsProject: true,
+          projectType: "Wedding Photography",
         },
         {
           section: "Album Design",
@@ -51,6 +53,8 @@ DELIVERABLES
           unit: "lot",
           unitPrice: 900,
           defaultQuantity: 1,
+          spawnsProject: true,
+          projectType: "Album Design - Traditional",
         },
         {
           section: "Video Editing",
@@ -58,6 +62,8 @@ DELIVERABLES
           unit: "lot",
           unitPrice: 5100,
           defaultQuantity: 1,
+          spawnsProject: true,
+          projectType: "Traditional Video Edit",
         },
       ]
     },
@@ -635,6 +641,8 @@ DELIVERABLES
         unit: li.unit,
         unitPrice: li.unitPrice,
         defaultQuantity: li.defaultQuantity,
+        spawnsProject: (li as any).spawnsProject,
+        projectTypeId: (li as any).projectType ? typeMap[(li as any).projectType] : undefined,
       };
     }).filter(li => li.sectionId);
 

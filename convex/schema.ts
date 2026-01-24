@@ -15,6 +15,7 @@ export type ActionState = Infer<typeof projectActionStateValidator>;
 // Role validator for profiles
 export const roleValidator = v.union(
   v.literal('client'),
+  v.literal('studio'), // NEW: Gradual migration
   v.literal('employee'),
   v.literal('admin')
 )
@@ -269,6 +270,8 @@ export default defineSchema({
   // --------------------------------------------------------------------------
   folderTemplates: defineTable({
     name: v.string(),
+    variant: v.optional(v.string()), // NEW: e.g. "South Indian", "Christian", etc.
+    description: v.optional(v.string()), // NEW: Detailed info about this structure
     folders: v.array(v.string()),
     projectTypeId: v.optional(v.id("projectTypes")),
     isDefault: v.optional(v.boolean()),
@@ -359,6 +362,9 @@ export default defineSchema({
         unit: v.string(),
         unitPrice: v.number(),
         defaultQuantity: v.number(),
+        spawnsProject: v.optional(v.boolean()), // NEW: Spawns a project on approval
+        projectTypeId: v.optional(v.id('projectTypes')), // NEW: Link to project type
+        selectedFolderTemplateId: v.optional(v.id('folderTemplates')), // NEW: Link to folder template
         subItems: v.optional(
           v.array(
             v.object({
@@ -401,6 +407,9 @@ export default defineSchema({
         id: v.string(),
         sectionId: v.id('quotationSections'),
         projectId: v.optional(v.string()), // Associated project for this line item
+        spawnsProject: v.optional(v.boolean()), // NEW: Spawns a project on approval
+        projectTypeId: v.optional(v.id('projectTypes')), // NEW: Link to project type
+        selectedFolderTemplateId: v.optional(v.id('folderTemplates')), // NEW: Link to folder template
         description: v.string(),
         unit: v.string(),
         rate: v.number(),

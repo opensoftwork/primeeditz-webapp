@@ -9,12 +9,13 @@ export const ROLES = {
   admin: 'admin',
   employee: 'employee',
   client: 'client',
+  studio: 'studio', // NEW: Transition role
 } as const
 
 export type Role = (typeof ROLES)[keyof typeof ROLES]
 
 // Role hierarchy (higher index = higher privilege)
-const ROLE_HIERARCHY: Role[] = ['client', 'employee', 'admin']
+const ROLE_HIERARCHY: Role[] = ['client', 'studio', 'employee', 'admin']
 
 /**
  * Check if user has a specific role
@@ -60,7 +61,7 @@ export function isEmployee(role: Role | undefined): boolean {
  * Check if user is a client
  */
 export function isClient(role: Role | undefined): boolean {
-  return role === ROLES.client
+  return role === ROLES.client || role === ROLES.studio
 }
 
 /**
@@ -80,6 +81,7 @@ export function getDashboardPath(role: Role | undefined): string {
     case ROLES.employee:
       return '/dashboard'
     case ROLES.client:
+    case ROLES.studio:
       return '/dashboard'
     default:
       return '/'

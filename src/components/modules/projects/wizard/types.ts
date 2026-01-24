@@ -12,7 +12,7 @@ import type { Id } from '@convex/_generated/dataModel'
 // ============================================================================
 
 /** Wizard mode: client-initiated (5 steps) or admin-initiated (6 steps) */
-export type WizardMode = 'client' | 'admin'
+export type WizardMode = 'client' | 'studio' | 'admin'
 
 // ============================================================================
 // Step Definitions

@@ -1,6 +1,6 @@
 # Story 11A.3: Add Variant Metadata to Folder Templates
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -17,8 +17,30 @@ so that I can distinguish between "Hindu Wedding", "Christian Wedding", etc.
 
 ## Tasks / Subtasks
 
-- [ ] Update `folderTemplates` definition in `convex/schema.ts`
-- [ ] Run `npx convex dev` to apply/verify
+- [x] Update `folderTemplates` definition in `convex/schema.ts`
+- [x] Run `npx convex dev` to apply/verify
+
+## Dev Agent Record
+
+### Agent Model Used
+
+Antigravity (thinking)
+
+### Debug Log References
+
+- Step 7: `npx convex dev --once` verified schema addition of variant and description.
+
+### Completion Notes List
+
+- Added `variant` (optional string) to `folderTemplates` in `convex/schema.ts`.
+- Added `description` (optional string) to `folderTemplates` in `convex/schema.ts`.
+- Verified schema update with local deployment.
+
+### File List
+
+- `convex/schema.ts`
+- `_bmad-output/implementation-artifacts/stories/11a-3-add-folder-template-variants.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Dev Notes
 

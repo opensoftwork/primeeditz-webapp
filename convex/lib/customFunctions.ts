@@ -39,7 +39,7 @@ export type AuthUser = {
 export type Profile = {
   _id: Id<'profiles'>
   userId: string // Better Auth user ID
-  role: 'client' | 'employee' | 'admin'
+  role: 'client' | 'studio' | 'employee' | 'admin'
   name: string
   phone?: string
   company?: string
@@ -106,7 +106,7 @@ export async function getAuthUserWithProfile(
  */
 function requireRole(
   profile: Profile,
-  allowedRoles: Array<'client' | 'employee' | 'admin'>
+  allowedRoles: Array<'client' | 'studio' | 'employee' | 'admin'>
 ): void {
   if (!allowedRoles.includes(profile.role)) {
     throw new Error('Access denied')
@@ -207,7 +207,7 @@ export const clientQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
     const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client'])
+    requireRole(profile, ['client', 'studio'])
     return { ctx: { ...ctx, authUser, profile }, args: {} }
   },
 })
@@ -220,7 +220,7 @@ export const clientMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
     const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client'])
+    requireRole(profile, ['client', 'studio'])
     return { ctx: { ...ctx, authUser, profile }, args: {} }
   },
 })
@@ -313,7 +313,7 @@ export const clientAction = customAction(action, {
       throw new Error('Profile not found')
     }
 
-    if (profile.role !== 'client') {
+    if (profile.role !== 'client' && profile.role !== 'studio') {
       throw new Error('Access denied')
     }
 

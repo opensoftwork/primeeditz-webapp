@@ -1,6 +1,6 @@
 # Story 11A.2: Enhance Quotation Template Line Items
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -20,11 +20,34 @@ so that the system knows which items should spawn projects.
 
 ## Tasks / Subtasks
 
-- [ ] Locate `quotationTemplates` definition in `convex/schema.ts`
-- [ ] Add `spawnsProject`, `projectTypeId`, `selectedFolderTemplateId` to the line item validator
-- [ ] Check `quotations` table schema - if it copies the structure, update it too
-- [ ] Update `convex/seeds/quotationTemplates.ts` to use new fields
-- [ ] Verify with `npx convex dev`
+- [x] Locate `quotationTemplates` definition in `convex/schema.ts`
+- [x] Add `spawnsProject`, `projectTypeId`, `selectedFolderTemplateId` to the line item validator
+- [x] Check `quotations` table schema - if it copies the structure, update it too
+- [x] Update `convex/seeds/quotationTemplates.ts` to use new fields
+- [x] Verify with `npx convex dev`
+
+## Dev Agent Record
+
+### Agent Model Used
+
+Antigravity (thinking)
+
+### Debug Log References
+
+- Step 7: `npx convex dev --once` verified schema and seed mapping logic.
+
+### Completion Notes List
+
+- Added `spawnsProject`, `projectTypeId`, `selectedFolderTemplateId` to `quotationTemplates.lineItems` and `quotations.lineItems` in `convex/schema.ts`.
+- Updated `seedQuotationTemplates` loop in `convex/seeds/quotationTemplates.ts` to map new fields.
+- Seeded "Silver Package" with example spawning rules for Photo, Album, and Video items.
+
+### File List
+
+- `convex/schema.ts`
+- `convex/seeds/quotationTemplates.ts`
+- `_bmad-output/implementation-artifacts/stories/11a-2-enhance-quotation-templates.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Dev Notes
 

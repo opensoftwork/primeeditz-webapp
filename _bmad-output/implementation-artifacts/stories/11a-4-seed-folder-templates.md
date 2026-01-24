@@ -1,6 +1,6 @@
 # Story 11A.4: Event-Based Folder Template Seeding
 
-Status: ready-for-dev
+Status: review
 
 ## Story
 
@@ -21,9 +21,34 @@ so that the system starts with realistic templates.
 
 ## Tasks / Subtasks
 
-- [ ] Modify `convex/seeds/folderTemplates.ts` with new data structure
-- [ ] Ensure `variant` field is populated
-- [ ] Run `npx convex dev` to trigger seed (if auto-seed is enabled) or run the seed function manually via dashboard/CLI
+- [x] Modify `convex/seeds/folderTemplates.ts` with new data structure
+- [x] Ensure `variant` field is populated
+- [x] Run `npx convex dev` to trigger seed (if auto-seed is enabled) or run the seed function manually via dashboard/CLI
+
+## Dev Agent Record
+
+### Agent Model Used
+
+Antigravity (thinking)
+
+### Debug Log References
+
+- Step 7: `npx convex dev --once` verified seed execution for new fields and templates.
+
+### Completion Notes List
+
+- Updated `convex/seeds/folderTemplates.ts` with new event-based structures:
+  - Hindu Wedding - Brahmin (South Indian variant)
+  - Christian Wedding (General variant)
+  - YouTube Content (Social Media variant)
+- Applied `variant` and `description` to all existing templates.
+- Verified successful seeding with Convex.
+
+### File List
+
+- `convex/seeds/folderTemplates.ts`
+- `_bmad-output/implementation-artifacts/stories/11a-4-seed-folder-templates.md`
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
 
 ## Dev Notes
 

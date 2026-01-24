@@ -27,6 +27,7 @@ import type * as functions_folderTemplates_mutations from "../functions/folderTe
 import type * as functions_folderTemplates_queries from "../functions/folderTemplates/queries.js";
 import type * as functions_folders_mutations from "../functions/folders/mutations.js";
 import type * as functions_folders_queries from "../functions/folders/queries.js";
+import type * as functions_migrations from "../functions/migrations.js";
 import type * as functions_profiles_mutations from "../functions/profiles/mutations.js";
 import type * as functions_profiles_queries from "../functions/profiles/queries.js";
 import type * as functions_projectCategories_mutations from "../functions/projectCategories/mutations.js";
@@ -99,6 +100,7 @@ declare const fullApi: ApiFromModules<{
   "functions/folderTemplates/queries": typeof functions_folderTemplates_queries;
   "functions/folders/mutations": typeof functions_folders_mutations;
   "functions/folders/queries": typeof functions_folders_queries;
+  "functions/migrations": typeof functions_migrations;
   "functions/profiles/mutations": typeof functions_profiles_mutations;
   "functions/profiles/queries": typeof functions_profiles_queries;
   "functions/projectCategories/mutations": typeof functions_projectCategories_mutations;
