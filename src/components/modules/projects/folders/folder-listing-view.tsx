@@ -51,10 +51,12 @@ export function FolderListingView({
 
   const handleFolderClick = (folder: any) => {
     // Navigate to dedicated folder upload page
-    const baseRoute = isAdmin
-      ? `/projects/${projectId}/folders`
-      : `/projects/${projectId}/folders`;
-    // Wait, let's make sure the path is correct
+    let baseRoute = `/projects/${projectId}/folders`;
+    
+    if (isEmployee) {
+      baseRoute = `/assigned-work/${projectId}/folders`;
+    }
+    
     router.push(`${baseRoute}/${folder._id}`);
   };
 
@@ -82,7 +84,7 @@ export function FolderListingView({
     project.actionState === "awaiting_uploads" && folders.length > 0;
 
   return (
-    <div className="space-y-10">
+    <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="flex items-center gap-4">

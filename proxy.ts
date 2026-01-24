@@ -73,6 +73,8 @@ export const config = {
 		"/settings/:path*",
 		"/onboarding/:path*",
 		"/onboarding",
+		"/assigned-work/:path*",
+		"/assigned-work",
 		// Auth routes (for redirect when authenticated)
 		"/sign-in",
 		"/sign-up",

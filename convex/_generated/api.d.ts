@@ -21,6 +21,7 @@ import type * as functions_admin_projects from "../functions/admin/projects.js";
 import type * as functions_admin_quotations from "../functions/admin/quotations.js";
 import type * as functions_admin_squads from "../functions/admin/squads.js";
 import type * as functions_assets_mutations from "../functions/assets/mutations.js";
+import type * as functions_deliverables_mutations from "../functions/deliverables/mutations.js";
 import type * as functions_employees_dashboard from "../functions/employees/dashboard.js";
 import type * as functions_employees_index from "../functions/employees/index.js";
 import type * as functions_employees_projects from "../functions/employees/projects.js";
@@ -95,6 +96,7 @@ declare const fullApi: ApiFromModules<{
   "functions/admin/quotations": typeof functions_admin_quotations;
   "functions/admin/squads": typeof functions_admin_squads;
   "functions/assets/mutations": typeof functions_assets_mutations;
+  "functions/deliverables/mutations": typeof functions_deliverables_mutations;
   "functions/employees/dashboard": typeof functions_employees_dashboard;
   "functions/employees/index": typeof functions_employees_index;
   "functions/employees/projects": typeof functions_employees_projects;

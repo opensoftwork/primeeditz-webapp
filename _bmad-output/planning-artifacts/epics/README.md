@@ -25,6 +25,7 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 - [Epic 6: Deliverables & QC Workflow](./06-deliverables-qc.md)
 - [Epic 7: Status Tracking & Dashboards](./07-status-tracking.md)
 - [Epic 10: Landing Page — Marketing & Conversion](./10-landing-page.md)
+- [Epic 12: Employee Assignment & Team Management](./12-employee-assignment-team-management.md)
 
 ---
 

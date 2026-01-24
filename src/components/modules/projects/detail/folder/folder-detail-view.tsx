@@ -249,7 +249,7 @@ export function FolderDetailView({
   const totalSize = assets?.reduce((sum, a) => sum + a.sizeBytes, 0) || 0;
 
   return (
-    <div className="space-y-8">
+    <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

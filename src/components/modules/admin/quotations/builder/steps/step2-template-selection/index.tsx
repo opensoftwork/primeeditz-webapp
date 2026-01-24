@@ -11,7 +11,7 @@ import { useQuotationBuilder } from "../../quotation-builder-context";
 import { cn } from "@/lib/utils";
 import type { Template, Project } from "../../types";
 
-import { TemplatePickerDrawer } from "./template-picker-drawer";
+import { TemplatePickerInline } from "./template-picker-inline";
 
 // ... existing imports
 
@@ -37,6 +37,8 @@ export function Step2TemplateSelection() {
     filteredProjects[0]?._id || null
   );
 
+  const [selectionMode, setSelectionMode] = useState<"scratch" | "template" | null>(null);
+
   // Sync active project if selection changes or initially null
   useEffect(() => {
     if (!activeProjectId && filteredProjects.length > 0) {
@@ -57,11 +59,11 @@ export function Step2TemplateSelection() {
   const handleSelectTemplate = (templateId: string) => {
     if (!activeProjectId) return;
     applyTemplate(templateId, activeProjectId);
+    setSelectionMode(null); // Close the inline picker after selection
     
     // Auto-advance to next project
     const currentIndex = filteredProjects.findIndex(p => p._id === activeProjectId);
     if (currentIndex < filteredProjects.length - 1) {
-       // Optional: small delay or immediate
        setTimeout(() => {
           setActiveProjectId(filteredProjects[currentIndex + 1]._id);
        }, 500); 
@@ -71,6 +73,7 @@ export function Step2TemplateSelection() {
   const handleStartFromScratch = () => {
     if (!activeProjectId) return;
     applyTemplate("", activeProjectId); // Explicitly clear template for this project
+    setSelectionMode("scratch");
     
     // Auto-advance
     const currentIndex = filteredProjects.findIndex(p => p._id === activeProjectId);
@@ -159,13 +162,13 @@ export function Step2TemplateSelection() {
               type="button"
               onClick={handleStartFromScratch}
               className={cn(
-                "p-8 rounded-[2rem] border transition-all text-center group relative overflow-hidden",
-                isScratchSelected
+                "p-8 rounded-4xl border transition-all text-center group relative overflow-hidden",
+                isScratchSelected || selectionMode === "scratch"
                    ? "bg-primary/10 border-primary shadow-lg shadow-primary/10" 
                    : "border-white/10 bg-white/2 hover:bg-white/4 hover:border-white/20"
               )}
             >
-               {isScratchSelected && (
+               {(isScratchSelected || selectionMode === "scratch") && (
                   <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
                       <Check className="h-3 w-3 text-white" />
                   </div>
@@ -182,21 +185,17 @@ export function Step2TemplateSelection() {
             </button>
 
              {/* Option 2: Select Template */}
-            <TemplatePickerDrawer
-                templates={templates}
-                selectedTemplateId={selectedTemplateId}
-                onSelectTemplate={handleSelectTemplate}
-            >
-                <button
+            <button
                 type="button"
+                onClick={() => setSelectionMode("template")}
                 className={cn(
-                    "p-8 rounded-[2rem] border transition-all text-center group relative overflow-hidden",
-                    isTemplateSelected
+                    "p-8 rounded-4xl border transition-all text-center group relative overflow-hidden",
+                    selectionMode === "template" || isTemplateSelected
                     ? "bg-primary/10 border-primary shadow-lg shadow-primary/10" 
                     : "border-white/10 bg-white/2 hover:bg-white/4 hover:border-white/20"
                 )}
-                >
-                {isTemplateSelected && (
+            >
+                {(selectionMode === "template" || isTemplateSelected) && (
                     <div className="absolute top-4 right-4 h-6 w-6 rounded-full bg-primary flex items-center justify-center">
                         <Check className="h-3 w-3 text-white" />
                     </div>
@@ -210,9 +209,18 @@ export function Step2TemplateSelection() {
                 <p className="text-[10px] text-white/30 font-bold uppercase tracking-widest px-4">
                     Choose from pre-configured packages
                 </p>
-                </button>
-            </TemplatePickerDrawer>
+            </button>
          </div>
+
+         {/* Inline Template Selection Area */}
+         {selectionMode === "template" && (
+            <TemplatePickerInline 
+                templates={templates}
+                selectedTemplateId={selectedTemplateId}
+                onSelectTemplate={handleSelectTemplate}
+                onCancel={() => setSelectionMode(null)}
+            />
+         )}
       </div>
     </div>
   );

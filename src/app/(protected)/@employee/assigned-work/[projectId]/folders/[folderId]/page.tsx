@@ -3,18 +3,16 @@
 import { use } from "react";
 import { FolderDetailView } from "@/components/modules/projects/detail/folder";
 
-interface EmployeeFolderPageProps {
+interface EmployeeFolderDetailPageProps {
   params: Promise<{
     projectId: string;
     folderId: string;
   }>;
 }
 
-/**
- * Employee Folder Detail Page
- * Enables creative staff to view and manage specific project folders.
- */
-export default function EmployeeFolderPage({ params }: EmployeeFolderPageProps) {
+export default function EmployeeFolderDetailPage({
+  params,
+}: EmployeeFolderDetailPageProps) {
   const { projectId, folderId } = use(params);
 
   return <FolderDetailView projectId={projectId} folderId={folderId} isEmployee />;

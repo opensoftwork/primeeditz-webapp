@@ -369,6 +369,19 @@
   background-clip: text;
 }
 
+@keyframes scan {
+  from {
+    background-position: 0 0;
+  }
+  to {
+    background-position: 0 100%;
+  }
+}
+
+.animate-scan {
+  animation: scan 8s linear infinite;
+}
+
 @utility container {
   margin-inline: auto;
   padding-inline: 1rem;

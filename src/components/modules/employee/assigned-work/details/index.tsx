@@ -8,18 +8,18 @@ import {
   Users, 
   MessageSquare, 
   Shield, 
-  ChevronLeft,
   ArrowRight,
-  FolderOpen
+  FolderOpen,
+  ChevronLeft,
+  CheckCheck
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 import { ProjectSpecs } from "@/components/modules/admin/projects/project-detail/project-specs";
-import { ProjectReferenceFiles } from "@/components/modules/admin/projects/project-detail/project-reference-files";
+import { ReferenceMaterials } from "@/components/modules/projects/detail/reference-materials";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SquadMemberCard } from "./squad-member-card";
-import { HandoffPanel } from "./handoff-panel";
-import { FilesVaultDrawer } from "@/components/shared/files-vault/drawer";
+import { FinalizeWorkDrawer } from "./finalize-work-drawer";
 
 interface EmployeeProjectDetailProps {
   projectId: string;
@@ -27,7 +27,7 @@ interface EmployeeProjectDetailProps {
 
 export default function EmployeeProjectDetail({ projectId }: EmployeeProjectDetailProps) {
   const router = useRouter();
-  const [isVaultOpen, setIsVaultOpen] = useState(false);
+  const [isFinalizeOpen, setIsFinalizeOpen] = useState(false);
 
   const project = useQuery(api.employees.getEmployeeProject, { 
     projectId: projectId as Id<"projects"> 
@@ -80,13 +80,22 @@ export default function EmployeeProjectDetail({ projectId }: EmployeeProjectDeta
         </div>
 
         <div className="flex gap-4">
+           <Button 
+             variant="outline" 
+             className="rounded-2xl h-14 border-white/5 bg-white/2 gap-3 px-6 hover:bg-white/5"
+             onClick={() => setIsFinalizeOpen(true)}
+           >
+             <CheckCheck className="h-4 w-4 text-white/40" />
+             <span className="text-[10px] font-black uppercase tracking-widest">Finalize Work</span>
+           </Button>
+
            <Button variant="outline" className="rounded-2xl h-14 border-white/5 bg-white/2 gap-3 px-6 hover:bg-white/5">
              <MessageSquare className="h-4 w-4 text-white/40" />
              <span className="text-[10px] font-black uppercase tracking-widest">Squad Chat</span>
            </Button>
            <Button 
              className="rounded-2xl h-14 bg-indigo-600 hover:bg-indigo-500 text-white gap-3 px-8 shadow-lg shadow-indigo-600/20"
-             onClick={() => router.push(`/projects/${projectId}/folders`)}
+             onClick={() => router.push(`/assigned-work/${projectId}/folders`)}
            >
              <FolderOpen className="h-4 w-4" />
              <span className="text-[10px] font-black uppercase tracking-widest">Open Assets</span>
@@ -99,16 +108,21 @@ export default function EmployeeProjectDetail({ projectId }: EmployeeProjectDeta
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Production Feed */}
           <div className="lg:col-span-8 space-y-12">
-             <HandoffPanel project={project} isLead={isLead} />
-             
-             <div className="space-y-6">
-                <div className="flex items-center gap-3 px-6">
-                  <div className="h-1 w-8 bg-indigo-500 rounded-full" />
-                  <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/20">Technical Scope</h3>
-                </div>
-                <ProjectSpecs project={project as any} />
+             <div className="p-8 rounded-[2.5rem] bg-zinc-900/50 border border-white/5 relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
+                 <Shield className="h-24 w-24" />
+               </div>
+               <div className="relative z-10 space-y-2">
+                 <div className="flex items-center gap-2">
+                   <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                   <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">Production Live</h4>
+                 </div>
+                 <h2 className="text-2xl font-black uppercase tracking-tight text-white">Active Stage: {project.actionState.replace(/_/g, ' ')}</h2>
+                 <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed max-w-md">
+                   You are currently in the product feed. Use the control center in the header to manage transitions or finalize your work.
+                 </p>
+               </div>
              </div>
-
           </div>
 
           {/* Squad Sidebar */}
@@ -130,22 +144,23 @@ export default function EmployeeProjectDetail({ projectId }: EmployeeProjectDeta
                 ))}
               </div>
             </div>
-
-            <ProjectReferenceFiles 
-              referenceFilesCount={project.referenceFiles?.length || 0}
-              vaultFiles={project.referenceFiles as any}
-              onOpenVault={() => setIsVaultOpen(true)}
-            />
           </div>
         </div>
+
+        {/* Full-Width Project Specs */}
+        <ProjectSpecs project={project as any} />
+
+        {/* Standardized Project Reference - Full Width with signing capability */}
+        <ReferenceMaterials 
+          files={project.referenceFiles as any}
+        />
       </div>
 
-      <FilesVaultDrawer
-        open={isVaultOpen}
-        onOpenChange={setIsVaultOpen}
-        title="Reference Materials"
-        subtitle="Assets provided by the client"
-        files={project.referenceFiles as any}
+      <FinalizeWorkDrawer 
+        open={isFinalizeOpen}
+        onOpenChange={setIsFinalizeOpen}
+        projectId={projectId}
+        projectName={project.eventName || project.code}
       />
     </div>
   );
