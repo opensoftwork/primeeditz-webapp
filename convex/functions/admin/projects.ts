@@ -159,9 +159,20 @@ export const getAdminProject = adminQuery({
         .order("desc")
         .collect(),
       // Find the quotation associated with this project
-      ctx.db.query("quotations")
-        .filter((q) => q.eq(q.field("projectId"), args.projectId))
-        .first(),
+      // Check both projectId (single) and projectIds (array) since quotations can be linked via either
+      (async () => {
+        // First try to find by single projectId
+        const byProjectId = await ctx.db.query("quotations")
+          .filter((q) => q.eq(q.field("projectId"), args.projectId))
+          .first();
+        if (byProjectId) return byProjectId;
+        
+        // If not found, search through projectIds array
+        const allQuotations = await ctx.db.query("quotations").collect();
+        return allQuotations.find((q) => 
+          q.projectIds?.includes(args.projectId)
+        ) || null;
+      })(),
       // Get assigned employee if there is one
       project.assignedEmployeeId 
         ? ctx.db.get(project.assignedEmployeeId as Id<"profiles">) 

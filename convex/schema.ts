@@ -193,6 +193,7 @@ export default defineSchema({
     code: v.string(),
     projectTypeId: v.id('projectTypes'),
     clientId: v.optional(v.id('profiles')), // Optional for admin-initiated "No Client" projects
+    quotationId: v.optional(v.id('quotations')), // NEW: Link to parent quotation
     source: projectSourceValidator,
     // NEW: Multi-dimensional status
     phase: projectPhaseValidator,
@@ -250,6 +251,7 @@ export default defineSchema({
     .index('by_awaitingActorRole', ['awaitingActorRole'])
     .index('by_code', ['code'])
     .index('by_projectTypeId', ['projectTypeId'])
+    .index('by_quotationId', ['quotationId'])
     .index('by_assignedEmployeeId', ['assignedEmployeeId']),
 
   // --------------------------------------------------------------------------

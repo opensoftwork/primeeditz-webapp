@@ -17,6 +17,8 @@ import { FolderDropZone } from "./folder-drop-zone";
 import { FolderAssetList } from "./folder-asset-list";
 import { StagedUploadQueue, type StagedFile } from "./staged-upload-queue";
 
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+
 interface FolderDetailViewProps {
   projectId: string;
   folderId: string;
@@ -29,6 +31,7 @@ export function FolderDetailView({
   isAdmin = false,
 }: FolderDetailViewProps) {
   const router = useRouter();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   // State
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
@@ -45,6 +48,35 @@ export function FolderDetailView({
     : useQuery(api.functions.folders.queries.getFolderDetails, {
         folderId: folderId as Id<"folders">,
       });
+
+  const project = useQuery(
+    isAdmin
+      ? api.admin.getAdminProject
+      : api.functions.projects.queries.getProject,
+    { projectId: projectId as Id<"projects"> },
+  );
+
+  // Handle Breadcrumb Overrides
+  useEffect(() => {
+    if (project?.eventName) {
+      setOverride(projectId, project.eventName);
+    }
+    if (folder?.name) {
+      setOverride(folderId, folder.name);
+    }
+
+    return () => {
+      removeOverride(projectId);
+      removeOverride(folderId);
+    };
+  }, [
+    projectId,
+    folderId,
+    project?.eventName,
+    folder?.name,
+    setOverride,
+    removeOverride,
+  ]);
 
   const assets = isAdmin
     ? useQuery(api.functions.folders.queries.getAdminFolderAssets, {
@@ -250,7 +282,7 @@ export function FolderDetailView({
   const totalSize = assets?.reduce((sum, a) => sum + a.sizeBytes, 0) || 0;
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-12 p-8 md:p-12">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}

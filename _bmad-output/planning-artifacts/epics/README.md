@@ -18,13 +18,18 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 
 - [Epic 0: Project Foundation](./00-foundation.md)
 - [Epic 1: Authentication & Onboarding](./01-auth-onboarding.md)
-- [Epic 2: Client Portal — Project Request](./02-client-portal-request.md)
+- [Epic 2: Client Portal — Project Request](./02-client-portal-request.md) _(Superseded by 11C)_
 - [Epic 3: Admin Portal — Project & System Management](./03-admin-portal-management.md)
 - [Epic 4: Quotation System](./04-quotation-system.md)
 - [Epic 5: Asset Upload & Folder Management](./05-asset-upload.md)
 - [Epic 6: Deliverables & QC Workflow](./06-deliverables-qc.md)
 - [Epic 7: Status Tracking & Dashboards](./07-status-tracking.md)
 - [Epic 10: Landing Page — Marketing & Conversion](./10-landing-page.md)
+- **[Epic 11: System Architecture Revamp (Master)](./11-system-restructuring-revamp.md)** ⬅️ NEW
+  - [Epic 11A: Schema & Data Foundation](./11a-schema-foundation.md)
+  - [Epic 11B: Quotation Engine Enhancements](./11b-quotation-engine.md)
+  - [Epic 11C: Studio Portal Revamp](./11c-studio-portal.md)
+  - [Epic 11D: Terminology & Routing Cleanup](./11d-terminology-cleanup.md)
 
 ---
 

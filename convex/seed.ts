@@ -29,7 +29,6 @@ export const seedAll = mutation({
       console.log("⚠️  Clearing existing data...\n");
       const tables = [
         "projects",
-        "profiles",
         "statusHistory",
         "projectCategories",
         "projectTypes",

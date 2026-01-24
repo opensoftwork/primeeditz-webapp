@@ -201,3 +201,17 @@ development_status:
   10-12-seo-meta-tags: deferred # P1 - SEO optimization
   10-13-responsive-testing-polish: deferred # P0 - Final QA
   epic-10-retrospective: optional
+
+  # ============================================================================
+  # EPIC 11: System Architecture Revamp (Master)
+  # ============================================================================
+  epic-11: in-progress
+
+  # Epic 11A: Schema & Data Foundation
+  11a-1-add-quotationid-to-projects: review
+  11a-2-enhance-quotation-templates: ready-for-dev
+  11a-3-add-folder-template-variants: ready-for-dev
+  11a-4-seed-folder-templates: ready-for-dev
+  11a-5-introduce-studio-role: ready-for-dev
+  11a-6-create-migration: ready-for-dev
+  epic-11-retrospective: optional
