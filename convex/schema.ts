@@ -16,7 +16,8 @@ export type ActionState = Infer<typeof projectActionStateValidator>;
 export const roleValidator = v.union(
   v.literal('client'),
   v.literal('employee'),
-  v.literal('admin')
+  v.literal('admin'),
+  v.literal('studio')
 )
 
 // Project phases: high-level lifecycle stages
@@ -445,4 +446,32 @@ export default defineSchema({
     .index('by_clientId', ['clientId'])
     .index('by_status', ['status'])
     .index('by_shareToken', ['shareToken']),
+
+  // --------------------------------------------------------------------------
+  // Project Squads (Teams) - Phase 2 Implementation
+  // --------------------------------------------------------------------------
+  projectSquads: defineTable({
+    projectId: v.id('projects'),
+    profileId: v.id('profiles'),
+    role: v.optional(v.string()), // e.g., "Lead Editor", "Colorist", "QC"
+    isLead: v.boolean(),
+    assignedAt: v.number(),
+    dissolvedAt: v.optional(v.number()), // For historical tracking of ephemeral teams
+  })
+    .index('by_projectId', ['projectId'])
+    .index('by_profileId', ['profileId'])
+    .index('by_project_profile', ['projectId', 'profileId']),
+
+  // --------------------------------------------------------------------------
+  // Handoff Logs (Baton Pass) - Phase 2 Implementation
+  // --------------------------------------------------------------------------
+  handoffLogs: defineTable({
+    projectId: v.id('projects'),
+    fromProfileId: v.id('profiles'),
+    toProfileId: v.optional(v.id('profiles')), // Could be null if handed back to admin/pool
+    fromActionState: projectActionStateValidator,
+    toActionState: projectActionStateValidator,
+    notes: v.optional(v.string()),
+    createdAt: v.number(),
+  }).index('by_projectId', ['projectId']),
 });

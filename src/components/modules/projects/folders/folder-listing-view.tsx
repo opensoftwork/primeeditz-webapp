@@ -14,17 +14,20 @@ import { FolderGrid } from "@/components/shared/project-folders";
 interface FolderListingViewProps {
   projectId: string;
   isAdmin?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderListingView({
   projectId,
   isAdmin = false,
+  isEmployee = false,
 }: FolderListingViewProps) {
   const router = useRouter();
+  const isStaff = isAdmin || isEmployee;
 
   // Queries
   const project = useQuery(
-    isAdmin
+    isStaff
       ? api.admin.getAdminProject
       : api.functions.projects.queries.getProject,
     {
@@ -33,7 +36,7 @@ export function FolderListingView({
   );
 
   const folders = useQuery(
-    isAdmin
+    isStaff
       ? api.functions.folders.queries.getProjectFolders
       : api.functions.folders.queries.getMyProjectFolders,
     {

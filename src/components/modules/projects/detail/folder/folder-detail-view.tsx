@@ -21,14 +21,17 @@ interface FolderDetailViewProps {
   projectId: string;
   folderId: string;
   isAdmin?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderDetailView({
   projectId,
   folderId,
   isAdmin = false,
+  isEmployee = false,
 }: FolderDetailViewProps) {
   const router = useRouter();
+  const isStaff = isAdmin || isEmployee;
 
   // State
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
@@ -38,7 +41,7 @@ export function FolderDetailView({
   );
 
   // Queries & Mutations
-  const folder = isAdmin
+  const folder = isStaff
     ? useQuery(api.functions.folders.queries.getProjectFolders, {
         projectId: projectId as Id<"projects">,
       })?.find((f) => f._id === folderId)
@@ -46,13 +49,9 @@ export function FolderDetailView({
         folderId: folderId as Id<"folders">,
       });
 
-  const assets = isAdmin
-    ? useQuery(api.functions.folders.queries.getAdminFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      })
-    : useQuery(api.functions.folders.queries.getFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      });
+  const assets = useQuery(api.functions.folders.queries.getFolderAssets, {
+    folderId: folderId as Id<"folders">,
+  });
 
   const updateFolderStatus = useMutation(
     isAdmin
