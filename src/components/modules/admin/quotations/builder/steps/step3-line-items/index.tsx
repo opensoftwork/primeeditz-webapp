@@ -7,7 +7,10 @@ import { useQuotationBuilder } from "../../quotation-builder-context";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 
-import { LibraryItemsDrawer } from "./library-items-drawer";
+import {
+  LibraryItemsDrawer,
+  type LibraryDisplayItem,
+} from "./library-items-drawer";
 import { LineItemDrawer } from "./line-item-drawer";
 import { ProjectSectionItems } from "./project-section-items";
 import type { QuotationLineItem, Project, Section } from "../../types";
@@ -29,7 +32,7 @@ export function Step3LineItems() {
   const selectedProjectIds = formData.step2.projectIds;
   const filteredProjects =
     (projects as Project[])?.filter((p) =>
-      selectedProjectIds.includes(p._id)
+      selectedProjectIds.includes(p._id),
     ) || [];
 
   const sections =
@@ -55,7 +58,9 @@ export function Step3LineItems() {
   >();
 
   // Expanded projects state
-  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(new Set());
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set(),
+  );
   const seenProjectsRef = useRef<Set<string>>(new Set());
 
   // Auto-expand new projects
@@ -64,10 +69,10 @@ export function Step3LineItems() {
     // We using functional update to access latest state without adding it to deps if possible,
     // but better to just compare with current state logic
     const newSeen = new Set(seenProjectsRef.current);
-    
+
     // Check for new projects
     const projectsToExpand: string[] = [];
-    
+
     filteredProjects.forEach((p) => {
       if (!newSeen.has(p._id)) {
         newSeen.add(p._id);
@@ -121,7 +126,7 @@ export function Step3LineItems() {
       setTargetProjectId(projectId);
       setLibraryOpen(true);
     },
-    []
+    [],
   );
 
   // Open drawer to add new item (with project and optional section)
@@ -138,7 +143,7 @@ export function Step3LineItems() {
       setDefaultSectionForDrawer(effectiveSectionId);
       setItemDrawerOpen(true);
     },
-    [filteredProjects, sections]
+    [filteredProjects, sections],
   );
 
   // Open drawer to edit existing item
@@ -149,12 +154,11 @@ export function Step3LineItems() {
       setDefaultProjectForDrawer(item.projectId);
       setItemDrawerOpen(true);
     },
-    []
+    [],
   );
 
-  // Handle library item select
   const handleSelectFromLibrary = useCallback(
-    (item: any, projectId?: string) => {
+    (item: LibraryDisplayItem, projectId?: string) => {
       // Use the projectId from the library drawer, or fallback
       const effectiveProjectId =
         projectId ||
@@ -166,7 +170,7 @@ export function Step3LineItems() {
         unit: item.unit,
         rate: item.unitPrice,
         quantity: 1,
-        sectionId: item.sectionId as any,
+        sectionId: item.sectionId as Id<"quotationSections">,
         projectId: effectiveProjectId,
       });
 
@@ -174,7 +178,7 @@ export function Step3LineItems() {
         ensureProjectExpanded(effectiveProjectId);
       }
     },
-    [addLineItem, filteredProjects, targetProjectId, ensureProjectExpanded]
+    [addLineItem, filteredProjects, targetProjectId, ensureProjectExpanded],
   );
 
   // Handle save from drawer (add or update)
@@ -191,10 +195,8 @@ export function Step3LineItems() {
       setItemDrawerOpen(false);
       setEditingItem(null);
     },
-    [editingItem, addLineItem, updateLineItem, ensureProjectExpanded]
+    [editingItem, addLineItem, updateLineItem, ensureProjectExpanded],
   );
-
-  
 
   // All items with originalIdx
   const allItemsWithIdx = useMemo(
@@ -203,7 +205,7 @@ export function Step3LineItems() {
         ...(item as QuotationLineItem),
         originalIdx,
       })),
-    [lineItems]
+    [lineItems],
   );
 
   // Check if projects are selected
@@ -244,8 +246,6 @@ export function Step3LineItems() {
             </Button>
           </div>
         </div>
-
-        
 
         {/* Project-based Items Display */}
         <div className="mt-6 p-5 rounded-2xl bg-white/2 border border-white/5">

@@ -209,9 +209,16 @@ development_status:
 
   # Epic 11A: Schema & Data Foundation
   11a-1-add-quotationid-to-projects: review
-  11a-2-enhance-quotation-templates: ready-for-dev
-  11a-3-add-folder-template-variants: ready-for-dev
-  11a-4-seed-folder-templates: ready-for-dev
-  11a-5-introduce-studio-role: ready-for-dev
-  11a-6-create-migration: ready-for-dev
-  epic-11-retrospective: optional
+  11a-2-enhance-quotation-templates: review
+  11a-3-add-folder-template-variants: review
+  11a-4-seed-folder-templates: review
+  11a-5-introduce-studio-role: review
+  11a-6-create-migration: review
+  epic-11a-retrospective: optional
+
+  # Epic 11B: Quotation Engine Enhancements
+  11b-1-link-line-items-to-types: review
+  11b-2-select-folder-template: review
+  11b-3-project-spawning-backend: review
+  11b-4-display-spawned-projects: review
+  epic-11b-retrospective: optional

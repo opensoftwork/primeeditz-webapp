@@ -37,6 +37,12 @@ export const clearTestData = mutation({
       await ctx.db.delete(asset._id);
     }
 
+    // Delete all deliverables
+    const deliverables = await ctx.db.query("deliverables").collect();
+    for (const d of deliverables) {
+      await ctx.db.delete(d._id);
+    }
+
     return {
       deleted: {
         projects: projects.length,
@@ -44,6 +50,7 @@ export const clearTestData = mutation({
         statusHistory: history.length,
         folders: folders.length,
         assets: assets.length,
+        deliverables: deliverables.length,
       },
     };
   },

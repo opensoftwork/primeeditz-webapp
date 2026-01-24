@@ -10,6 +10,7 @@ export const createStorageTier = adminMutation({
     sizeGB: v.number(),
     priceINR: v.number(),
     isActive: v.boolean(),
+    isDefault: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     // Validate inputs
@@ -25,6 +26,7 @@ export const createStorageTier = adminMutation({
       sizeGB: args.sizeGB,
       priceINR: args.priceINR,
       isActive: args.isActive,
+      isDefault: args.isDefault,
     })
 
     return tierId
@@ -41,6 +43,7 @@ export const updateStorageTier = adminMutation({
     sizeGB: v.optional(v.number()),
     priceINR: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
+    isDefault: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     const { id, ...updates } = args

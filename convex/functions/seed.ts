@@ -63,3 +63,51 @@ export const resetAndSeed = mutation({
   },
 })
 
+/**
+ * Seed initial storage tiers and folder templates for quotation testing.
+ */
+export const seedQuotationBasics = mutation({
+  args: {},
+  handler: async (ctx) => {
+    // 1. Seed Storage Tiers
+    const existingTiers = await ctx.db.query("storageTiers").collect();
+    if (existingTiers.length === 0) {
+      await ctx.db.insert("storageTiers", {
+        name: "Standard Tier",
+        sizeGB: 100,
+        priceINR: 5000,
+        isActive: true,
+        isDefault: true,
+      });
+      await ctx.db.insert("storageTiers", {
+        name: "Premium Tier",
+        sizeGB: 500,
+        priceINR: 15000,
+        isActive: true,
+      });
+    }
+
+    // 2. Seed Folder Templates
+    const projectTypes = await ctx.db.query("projectTypes").collect();
+    const weddingFilmType = projectTypes.find((t) => t.name === "Wedding Film");
+
+    if (weddingFilmType) {
+      const existingTemplates = await ctx.db
+        .query("folderTemplates")
+        .filter((q) => q.eq(q.field("projectTypeId"), weddingFilmType._id))
+        .collect();
+
+      if (existingTemplates.length === 0) {
+        await ctx.db.insert("folderTemplates", {
+          name: "Standard Wedding Structure",
+          projectTypeId: weddingFilmType._id,
+          folders: ["Raw Footage", "Music", "Assets", "Drafts", "Final Delivery"],
+          isActive: true,
+          isDefault: true,
+        });
+      }
+    }
+
+    return { message: "Quotation basics seeded successfully" };
+  },
+});

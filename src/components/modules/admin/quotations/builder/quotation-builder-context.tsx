@@ -123,7 +123,7 @@ interface QuotationBuilderContextValue {
   // Actions
   setFormData: <K extends keyof QuotationFormData>(
     step: K,
-    data: Partial<QuotationFormData[K]>
+    data: Partial<QuotationFormData[K]>,
   ) => void;
   goToStep: (step: QuotationStepId) => void;
   nextStep: () => void;
@@ -147,7 +147,7 @@ export function useQuotationBuilder() {
   const context = useContext(QuotationBuilderContext);
   if (!context) {
     throw new Error(
-      "useQuotationBuilder must be used within QuotationBuilderProvider"
+      "useQuotationBuilder must be used within QuotationBuilderProvider",
     );
   }
   return context;
@@ -170,7 +170,7 @@ export function QuotationBuilderProvider({
 
   // State
   const [quotationId, setQuotationId] = useState<string | null>(
-    initialQuotationId ?? null
+    initialQuotationId ?? null,
   );
   const [currentStep, setCurrentStep] = useState<QuotationStepId>(1);
   const [formData, setFormDataState] =
@@ -179,7 +179,7 @@ export function QuotationBuilderProvider({
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
-    null
+    null,
   );
 
   // Query existing quotation if editing
@@ -187,7 +187,7 @@ export function QuotationBuilderProvider({
     api.functions.quotations.queries.getQuotation,
     initialQuotationId
       ? { quotationId: initialQuotationId as Id<"quotations"> }
-      : "skip"
+      : "skip",
   );
 
   // Populate form data if editing
@@ -231,14 +231,14 @@ export function QuotationBuilderProvider({
     api.admin.getAdminProjectsSimple,
     formData.step1.clientId
       ? { clientId: formData.step1.clientId as Id<"profiles"> }
-      : "skip"
+      : "skip",
   );
 
   const templatesQuery = useQuery(
     api.functions.quotations.templates.queries.getTemplates,
     {
       activeOnly: true,
-    }
+    },
   );
   const templates = templatesQuery as Template[] | undefined;
 
@@ -246,22 +246,22 @@ export function QuotationBuilderProvider({
     api.functions.quotations.sections.queries.getSections,
     {
       activeOnly: true,
-    }
+    },
   );
   const sections = sectionsQuery as Section[] | undefined;
 
   // Mutations
   const createQuotation = useMutation(
-    api.functions.quotations.mutations.createQuotation
+    api.functions.quotations.mutations.createQuotation,
   );
   const updateQuotation = useMutation(
-    api.functions.quotations.mutations.updateQuotation
+    api.functions.quotations.mutations.updateQuotation,
   );
 
   // Computed
   const selectedClient = useMemo(
     () => clients?.find((c) => c._id === formData.step1.clientId),
-    [clients, formData.step1.clientId]
+    [clients, formData.step1.clientId],
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -275,7 +275,7 @@ export function QuotationBuilderProvider({
       const subItemsTotal =
         item.subItems?.reduce(
           (s: number, sub: QuotationSubItem) => s + sub.rate * sub.quantity,
-          0
+          0,
         ) ?? 0;
       return acc + itemTotal + subItemsTotal;
     }, 0);
@@ -289,7 +289,7 @@ export function QuotationBuilderProvider({
   const setFormData = useCallback(
     <K extends keyof QuotationFormData>(
       step: K,
-      data: Partial<QuotationFormData[K]>
+      data: Partial<QuotationFormData[K]>,
     ) => {
       setFormDataState((prev) => ({
         ...prev,
@@ -297,7 +297,7 @@ export function QuotationBuilderProvider({
       }));
       setIsDirty(true);
     },
-    []
+    [],
   );
 
   // Navigation
@@ -334,7 +334,7 @@ export function QuotationBuilderProvider({
           const currentItems = prev.step4.lineItems;
           // Remove items for this project
           const filteredItems = currentItems.filter(
-            (item) => item.projectId !== projectId
+            (item) => item.projectId !== projectId,
           );
           return {
             ...prev,
@@ -377,8 +377,8 @@ export function QuotationBuilderProvider({
         const combinedTerms = currentTerms.includes(newTerms.substring(0, 20))
           ? currentTerms
           : currentTerms
-          ? `${currentTerms}\n\n${newTerms}`
-          : newTerms;
+            ? `${currentTerms}\n\n${newTerms}`
+            : newTerms;
         return {
           ...prev,
           step5: { ...prev.step5, terms: combinedTerms },
@@ -394,6 +394,9 @@ export function QuotationBuilderProvider({
           rate: li.unitPrice,
           quantity: li.defaultQuantity,
           projectId: projectId, // Assign to specific project
+          spawnsProject: li.spawnsProject,
+          projectTypeId: li.projectTypeId,
+          selectedFolderTemplateId: li.selectedFolderTemplateId,
           subItems: li.subItems?.map((si) => ({
             id: crypto.randomUUID(),
             description: si.description,
@@ -401,13 +404,13 @@ export function QuotationBuilderProvider({
             rate: si.unitPrice,
             quantity: si.defaultQuantity,
           })),
-        })
+        }),
       );
 
       // Merge items: Remove old items for this project, add new ones
       setFormDataState((prev) => {
         const otherItems = prev.step4.lineItems.filter(
-          (item) => item.projectId !== projectId
+          (item) => item.projectId !== projectId,
         );
         return {
           ...prev,
@@ -418,7 +421,7 @@ export function QuotationBuilderProvider({
         };
       });
     },
-    [templates]
+    [templates],
   );
 
   // Line Item management
@@ -438,7 +441,7 @@ export function QuotationBuilderProvider({
         lineItems: [...formData.step4.lineItems, newItem],
       });
     },
-    [sections, formData.step4.lineItems, setFormData]
+    [sections, formData.step4.lineItems, setFormData],
   );
 
   const updateLineItem = useCallback(
@@ -447,7 +450,7 @@ export function QuotationBuilderProvider({
       newItems[idx] = { ...newItems[idx], ...updates };
       setFormData("step4", { lineItems: newItems });
     },
-    [formData.step4.lineItems, setFormData]
+    [formData.step4.lineItems, setFormData],
   );
 
   const removeLineItem = useCallback(
@@ -455,7 +458,7 @@ export function QuotationBuilderProvider({
       const newItems = formData.step4.lineItems.filter((_, i) => i !== idx);
       setFormData("step4", { lineItems: newItems });
     },
-    [formData.step4.lineItems, setFormData]
+    [formData.step4.lineItems, setFormData],
   );
 
   // Save quotation
@@ -480,6 +483,9 @@ export function QuotationBuilderProvider({
         unit: item.unit,
         rate: item.rate,
         quantity: item.quantity,
+        spawnsProject: item.spawnsProject,
+        projectTypeId: item.projectTypeId,
+        selectedFolderTemplateId: item.selectedFolderTemplateId,
         subItems: item.subItems?.map((s) => ({
           id: s.id || crypto.randomUUID(),
           description: s.description,

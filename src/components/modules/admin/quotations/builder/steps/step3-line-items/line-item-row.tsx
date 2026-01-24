@@ -13,17 +13,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
-import type { QuotationLineItem, Project } from "../../types";
+import type { QuotationLineItem, Project, Section } from "../../types";
 
 interface LineItemRowProps {
   item: QuotationLineItem & { originalIdx: number };
   idx: number;
   filteredProjects: Project[];
-  sections: any[];
+  sections: Section[];
   handleUpdateItem: (
     idx: number,
     field: keyof QuotationLineItem,
-    value: any
+    value: string | number | boolean | undefined,
   ) => void;
   removeLineItem: (idx: number) => void;
 }
@@ -103,7 +103,7 @@ export function LineItemRow({
                 handleUpdateItem(
                   idx,
                   "projectId",
-                  val === "none" ? undefined : val
+                  val === "none" ? undefined : val,
                 )
               }
             >

@@ -30,8 +30,20 @@ import type { Project } from "../../types";
 
 type TabType = "all" | "library" | "templates";
 
+export interface LibraryDisplayItem {
+  _id: string;
+  name: string;
+  description?: string;
+  sectionId: string;
+  unit: string;
+  unitPrice: number;
+  isActive: boolean;
+  source: "library" | "template";
+  templateName?: string;
+}
+
 interface LibraryItemsDrawerProps {
-  onSelect: (item: any, projectId?: string) => void;
+  onSelect: (item: LibraryDisplayItem, projectId?: string) => void;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialSectionId?: string | null;
@@ -50,11 +62,11 @@ export function LibraryItemsDrawer({
   const [search, setSearch] = useState("");
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const [selectedSectionId, setSelectedSectionId] = useState<string | null>(
-    null
+    null,
   );
-  const [selectedProjectId, setSelectedProjectId] = useState<string | undefined>(
-    initialProjectId
-  );
+  const [selectedProjectId, setSelectedProjectId] = useState<
+    string | undefined
+  >(initialProjectId);
 
   const itemGroups =
     useQuery(api.functions.quotations.queries.getLibraryItems, {}) || [];
@@ -63,7 +75,10 @@ export function LibraryItemsDrawer({
   useEffect(() => {
     if (open) {
       setSelectedSectionId(initialSectionId);
-      setSelectedProjectId(initialProjectId || (projects.length === 1 ? projects[0]._id : undefined));
+      setSelectedProjectId(
+        initialProjectId ||
+          (projects.length === 1 ? projects[0]._id : undefined),
+      );
       setSearch("");
       setActiveTab("all");
     }
@@ -77,7 +92,7 @@ export function LibraryItemsDrawer({
   const filteredItems = useMemo(() => {
     if (!selectedGroup) return [];
 
-    return selectedGroup.items.filter((item: any) => {
+    return selectedGroup.items.filter((item) => {
       const matchesSearch =
         item.name.toLowerCase().includes(search.toLowerCase()) ||
         item.description?.toLowerCase().includes(search.toLowerCase()) ||
@@ -96,7 +111,7 @@ export function LibraryItemsDrawer({
   const needsProjectSelection = projects.length > 1 && !selectedProjectId;
 
   // Handle item selection with project
-  const handleItemSelect = (item: any) => {
+  const handleItemSelect = (item: LibraryDisplayItem) => {
     onSelect(item, selectedProjectId);
   };
 
@@ -155,7 +170,7 @@ export function LibraryItemsDrawer({
                       "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                       activeTab === "all"
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "text-white/40 hover:text-white"
+                        : "text-white/40 hover:text-white",
                     )}
                   >
                     All
@@ -166,7 +181,7 @@ export function LibraryItemsDrawer({
                       "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                       activeTab === "library"
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "text-white/40 hover:text-white"
+                        : "text-white/40 hover:text-white",
                     )}
                   >
                     Library
@@ -177,7 +192,7 @@ export function LibraryItemsDrawer({
                       "px-4 py-2 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all",
                       activeTab === "templates"
                         ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
-                        : "text-white/40 hover:text-white"
+                        : "text-white/40 hover:text-white",
                     )}
                   >
                     Suggested
@@ -207,16 +222,16 @@ export function LibraryItemsDrawer({
                         group.section.color === "blue"
                           ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
                           : group.section.color === "purple"
-                          ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                          : group.section.color === "green"
-                          ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                          : group.section.color === "amber"
-                          ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                          : group.section.color === "indigo"
-                          ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
-                          : group.section.color === "orange"
-                          ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
-                          : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
+                            ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                            : group.section.color === "green"
+                              ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                              : group.section.color === "amber"
+                                ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                : group.section.color === "indigo"
+                                  ? "bg-indigo-500/10 border-indigo-500/20 text-indigo-400"
+                                  : group.section.color === "orange"
+                                    ? "bg-orange-500/10 border-orange-500/20 text-orange-400"
+                                    : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400",
                       )}
                     >
                       {group.section.name}
@@ -275,7 +290,7 @@ export function LibraryItemsDrawer({
                           "flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition-all",
                           selectedProjectId === project._id
                             ? "bg-primary text-primary-foreground"
-                            : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white"
+                            : "bg-white/5 border border-white/10 text-white/60 hover:bg-white/10 hover:text-white",
                         )}
                       >
                         {selectedProjectId === project._id && (
@@ -294,14 +309,15 @@ export function LibraryItemsDrawer({
               )}
 
               <div className="grid grid-cols-1 gap-4">
-                {filteredItems.map((item: any) => (
+                {filteredItems.map((item) => (
                   <button
                     key={item._id}
                     onClick={() => handleItemSelect(item)}
                     disabled={needsProjectSelection}
                     className={cn(
                       "flex flex-col items-start p-5 rounded-3xl bg-white/2 border border-white/5 hover:border-primary/40 hover:bg-white/5 transition-all text-left group relative overflow-hidden",
-                      needsProjectSelection && "opacity-50 cursor-not-allowed hover:border-white/5 hover:bg-white/2"
+                      needsProjectSelection &&
+                        "opacity-50 cursor-not-allowed hover:border-white/5 hover:bg-white/2",
                     )}
                   >
                     <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-12 -translate-y-12" />
@@ -316,7 +332,7 @@ export function LibraryItemsDrawer({
                           "px-2 py-0.5 rounded-lg text-[7px] font-black uppercase tracking-widest border transition-colors",
                           item.source === "template"
                             ? "bg-primary/10 border-primary/20 text-primary group-hover:bg-primary group-hover:text-primary-foreground"
-                            : "bg-white/5 border-white/10 text-white/30"
+                            : "bg-white/5 border-white/10 text-white/30",
                         )}
                       >
                         {item.source === "template" ? "Suggested" : "Base"}

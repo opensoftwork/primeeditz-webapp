@@ -26,6 +26,7 @@ import { PricingSummary } from "./components/pricing-summary";
 import { TermsConditions } from "./components/terms-conditions";
 import { QuickActions } from "./components/quick-actions";
 import { ClientFeedbackSection } from "./components/client-feedback-section";
+import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 
 const statusConfig: Record<
   string,
@@ -100,7 +101,7 @@ export function QuotationDetail({
 }: {
   quotationId?: string;
 }) {
-   const params = useParams();
+  const params = useParams();
   const router = useRouter();
   const quotationId = propQuotationId || (params.id as string);
   const { setOverride, removeOverride } = useBreadcrumbStore();
@@ -121,7 +122,7 @@ export function QuotationDetail({
 
   const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
   const duplicateMutation = useMutation(
-    api.functions.quotations.mutations.duplicateQuotation
+    api.functions.quotations.mutations.duplicateQuotation,
   );
 
   if (data === undefined) {
@@ -175,23 +176,25 @@ export function QuotationDetail({
   const grandTotal = subtotal - discountAmount + taxAmount;
 
   // Group line items by project, then by section (new project-based grouping)
-  const groupedByProject = projects.map((project: any) => {
-    const projectItems = quotation.lineItems.filter(
-      (item: any) => item.projectId === project._id
-    );
-    const sectionGroups = sections
-      .map((section: any) => ({
-        section,
-        items: projectItems.filter(
-          (item: any) => item.sectionId === section._id
-        ),
-      }))
-      .filter((g: any) => g.items.length > 0);
-    return {
-      project,
-      sectionGroups,
-    };
-  }).filter((pg: any) => pg.sectionGroups.length > 0);
+  const groupedByProject = projects
+    .map((project: any) => {
+      const projectItems = quotation.lineItems.filter(
+        (item: any) => item.projectId === project._id,
+      );
+      const sectionGroups = sections
+        .map((section: any) => ({
+          section,
+          items: projectItems.filter(
+            (item: any) => item.sectionId === section._id,
+          ),
+        }))
+        .filter((g: any) => g.items.length > 0);
+      return {
+        project,
+        sectionGroups,
+      };
+    })
+    .filter((pg: any) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
   const groupedBySection = sections.map((section: any) => ({
@@ -200,7 +203,6 @@ export function QuotationDetail({
       (item: any) => item.sectionId === section._id,
     ),
   }));
-
 
   const handleDuplicate = async () => {
     try {
@@ -238,6 +240,9 @@ export function QuotationDetail({
             projects={projects}
             formatCurrency={formatCurrency}
           />
+          {quotation.status === "approved" && (
+            <SpawnedProjectsList quotationId={quotationId} isAdmin={true} />
+          )}
           <TermsConditions terms={quotation.terms} />
         </div>
 
@@ -251,7 +256,7 @@ export function QuotationDetail({
             grandTotal={grandTotal}
             formatCurrency={formatCurrency}
           />
-          <QuickActions 
+          <QuickActions
             quotation={quotation}
             sections={sections}
             projects={projects}

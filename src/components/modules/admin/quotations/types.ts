@@ -40,6 +40,9 @@ export interface QuotationLineItem {
   width?: string;
   image?: string;
   subItems?: QuotationSubItem[];
+  spawnsProject?: boolean;
+  projectTypeId?: string | Id<"projectTypes">;
+  selectedFolderTemplateId?: string | Id<"folderTemplates">;
 }
 
 // ============================================================================
@@ -125,6 +128,9 @@ export interface TemplateLineItem {
   defaultQuantity: number;
   sectionId?: string;
   subItems?: TemplateSubItem[];
+  spawnsProject?: boolean;
+  projectTypeId?: string | Id<"projectTypes">;
+  selectedFolderTemplateId?: string | Id<"folderTemplates">;
 }
 
 // ============================================================================

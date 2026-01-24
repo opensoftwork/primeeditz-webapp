@@ -41,6 +41,7 @@ import type * as functions_projects_mutation_admin from "../functions/projects/m
 import type * as functions_projects_mutation_shared from "../functions/projects/mutation/shared.js";
 import type * as functions_projects_mutations from "../functions/projects/mutations.js";
 import type * as functions_projects_queries from "../functions/projects/queries.js";
+import type * as functions_projects_spawning from "../functions/projects/spawning.js";
 import type * as functions_projects_storage from "../functions/projects/storage.js";
 import type * as functions_quotations_mutations from "../functions/quotations/mutations.js";
 import type * as functions_quotations_queries from "../functions/quotations/queries.js";
@@ -114,6 +115,7 @@ declare const fullApi: ApiFromModules<{
   "functions/projects/mutation/shared": typeof functions_projects_mutation_shared;
   "functions/projects/mutations": typeof functions_projects_mutations;
   "functions/projects/queries": typeof functions_projects_queries;
+  "functions/projects/spawning": typeof functions_projects_spawning;
   "functions/projects/storage": typeof functions_projects_storage;
   "functions/quotations/mutations": typeof functions_quotations_mutations;
   "functions/quotations/queries": typeof functions_quotations_queries;

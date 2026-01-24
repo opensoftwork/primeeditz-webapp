@@ -7,35 +7,49 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import {
-  Package,
-  IndianRupee,
-  Hash,
-  FileText,
-  Sparkles,
   Edit3,
+  FileText,
+  Folders,
+  Hash,
+  IndianRupee,
   Loader2,
+  Package,
+  Rocket,
+  Sparkles,
 } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
-  DrawerClose,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
-import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_UNIT } from "@/lib/constants/units";
-import { SectionPickerDrawer } from "./section-picker-drawer";
+import { cn } from "@/lib/utils";
+import type { Project, QuotationLineItem, Section } from "../../types";
 import { ProjectPickerDrawer } from "./project-picker-drawer";
-import type { QuotationLineItem, Section, Project } from "../../types";
+import { SectionPickerDrawer } from "./section-picker-drawer";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
@@ -49,7 +63,7 @@ const formatCurrency = (amount: number): string => {
 interface LineItemDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  item?: QuotationLineItem | null;
+  item?: (QuotationLineItem & { originalIdx?: number }) | null;
   sections: Section[];
   defaultSectionId?: string;
   projects?: Project[];
@@ -83,6 +97,29 @@ export function LineItemDrawer({
   const [rate, setRate] = useState<number>(0);
   const [quantity, setQuantity] = useState<number>(1);
 
+  // Project Spawning state
+  const [spawnsProject, setSpawnsProject] = useState(false);
+  const [projectTypeId, setProjectTypeId] = useState<
+    Id<"projectTypes"> | undefined
+  >(undefined);
+  const [selectedFolderTemplateId, setSelectedFolderTemplateId] = useState<
+    Id<"folderTemplates"> | undefined
+  >(undefined);
+
+  // Queries
+  const activeProjectTypes = useQuery(
+    api.functions.projectTypes.queries.getActiveProjectTypes,
+  );
+  const folderTemplates = useQuery(
+    api.functions.folderTemplates.queries.listFolderTemplates,
+    {},
+  );
+
+  const filteredFolderTemplates = useMemo(() => {
+    if (!projectTypeId || !folderTemplates) return [];
+    return folderTemplates.filter((t) => t.projectTypeId === projectTypeId);
+  }, [projectTypeId, folderTemplates]);
+
   // Populate form when opening
   useEffect(() => {
     if (open) {
@@ -94,6 +131,11 @@ export function LineItemDrawer({
         setUnit(item.unit || DEFAULT_UNIT);
         setRate(item.rate || 0);
         setQuantity(item.quantity || 1);
+        setSpawnsProject(!!item.spawnsProject);
+        setProjectTypeId(item.projectTypeId as Id<"projectTypes">);
+        setSelectedFolderTemplateId(
+          item.selectedFolderTemplateId as Id<"folderTemplates">,
+        );
       } else {
         // Reset for new item
         setDescription("");
@@ -103,6 +145,9 @@ export function LineItemDrawer({
         setUnit(DEFAULT_UNIT);
         setRate(0);
         setQuantity(1);
+        setSpawnsProject(false);
+        setProjectTypeId(undefined);
+        setSelectedFolderTemplateId(undefined);
       }
     }
   }, [open, item, defaultSectionId, defaultProjectId, sections]);
@@ -117,12 +162,15 @@ export function LineItemDrawer({
     if (!description.trim()) return;
 
     onSave({
-      sectionId: sectionId as any,
+      sectionId: sectionId as Id<"quotationSections">,
       projectId,
       description: description.trim(),
       unit,
       rate,
       quantity,
+      spawnsProject,
+      projectTypeId,
+      selectedFolderTemplateId,
     });
   };
 
@@ -176,7 +224,7 @@ export function LineItemDrawer({
           </Field>
 
           {/* Project Association */}
-          {projects.length > 0 && (
+          {projects && projects.length > 0 && (
             <Field>
               <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest">
                 Associated Project {requireProject && "*"}
@@ -195,6 +243,107 @@ export function LineItemDrawer({
               </FieldContent>
             </Field>
           )}
+
+          {/* Project Spawning Configuration (Story 11B.1 & 11B.2) */}
+          <div className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="space-y-0.5">
+                <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <Rocket className="h-3 w-3" />
+                  Project Spawning
+                </FieldLabel>
+                <p className="text-[10px] text-white/20">
+                  Create new project on approval
+                </p>
+              </div>
+              <Switch
+                checked={spawnsProject}
+                onCheckedChange={setSpawnsProject}
+              />
+            </div>
+
+            {spawnsProject && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: "auto" }}
+                className="space-y-4 pt-2 border-t border-white/5"
+              >
+                {/* Project Type Selector */}
+                <Field>
+                  <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
+                    Project Type
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={projectTypeId || ""}
+                      onValueChange={(val) => {
+                        setProjectTypeId(val as Id<"projectTypes">);
+                        // Auto-select default folder template if available
+                        const defaultTpl = folderTemplates?.find(
+                          (t) => t.projectTypeId === val && t.isDefault,
+                        );
+                        if (defaultTpl)
+                          setSelectedFolderTemplateId(defaultTpl._id);
+                      }}
+                    >
+                      <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
+                        <SelectValue placeholder="Select Project Type..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                        {activeProjectTypes?.map((t) => (
+                          <SelectItem
+                            key={t._id}
+                            value={t._id}
+                            className="text-[11px] font-bold"
+                          >
+                            {t.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+
+                {/* Folder Template Selector (Story 11B.2) */}
+                <Field>
+                  <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1.5">
+                    <Folders className="h-3 w-3" /> Folder Template
+                  </FieldLabel>
+                  <FieldContent>
+                    <Select
+                      value={selectedFolderTemplateId || ""}
+                      onValueChange={(val) =>
+                        setSelectedFolderTemplateId(
+                          val as Id<"folderTemplates">,
+                        )
+                      }
+                    >
+                      <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
+                        <SelectValue placeholder="Select Folder Template..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                        {filteredFolderTemplates.map((t) => {
+                          const variantLabel = t.variant
+                            ? ` (${t.variant})`
+                            : "";
+                          return (
+                            <SelectItem
+                              key={t._id}
+                              value={t._id}
+                              className="text-[11px] font-bold"
+                            >
+                              {t.name}
+                              {variantLabel}
+                            </SelectItem>
+                          );
+                        })}
+                      </SelectContent>
+                    </Select>
+                  </FieldContent>
+                </Field>
+              </motion.div>
+            )}
+          </div>
 
           {/* Item Description */}
           <Field>
@@ -324,7 +473,13 @@ export function LineItemDrawer({
           </DrawerClose>
           <Button
             onClick={handleSave}
-            disabled={!description.trim() || !sectionId || isSubmitting || (requireProject && !projectId)}
+            disabled={
+              !description.trim() ||
+              !sectionId ||
+              isSubmitting ||
+              (requireProject && !projectId) ||
+              (spawnsProject && !projectTypeId)
+            }
             className={cn(
               "flex-1 h-11 rounded-xl font-black uppercase tracking-wider text-[10px] gap-2",
               isEditing

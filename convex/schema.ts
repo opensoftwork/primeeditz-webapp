@@ -70,7 +70,8 @@ export const projectActionStateValidator = v.union(
 // Project source: client_request vs admin_init
 export const projectSourceValidator = v.union(
   v.literal('client_request'),
-  v.literal('admin_init')
+  v.literal('admin_init'),
+  v.literal('quotation_spawned')
 )
 
 // Folder status flow: pending_upload → in_progress → completed
@@ -263,6 +264,7 @@ export default defineSchema({
     sizeGB: v.number(),
     priceINR: v.number(),
     isActive: v.boolean(),
+    isDefault: v.optional(v.boolean()),
   }),
 
   // --------------------------------------------------------------------------

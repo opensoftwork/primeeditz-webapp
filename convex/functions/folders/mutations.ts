@@ -2,7 +2,104 @@ import { v } from "convex/values";
 import { adminMutation, clientMutation, authenticatedWithProfileMutation } from "../../lib/customFunctions";
 import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
 import { ActionState } from "../../schema";
-import { Id } from "../../_generated/dataModel";
+import { DataModel, Id } from "../../_generated/dataModel";
+import { MutationCtx } from "../../_generated/server";
+
+/**
+ * Shared helper for setting up project folders and storage allocation.
+ */
+export async function setupFoldersInternal(
+  ctx: MutationCtx,
+  args: {
+    projectId: Id<"projects">;
+    templateId: Id<"folderTemplates">;
+    storageTierId: Id<"storageTiers">;
+    changedBy: Id<"profiles">;
+  }
+) {
+  // Get the project
+  const project = await ctx.db.get(args.projectId);
+  if (!project) {
+    throw new Error("Project not found");
+  }
+
+  // Check if folders already exist for this project
+  const existingFolders = await ctx.db
+    .query("folders")
+    .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+    .first();
+
+  if (existingFolders) {
+    throw new Error("Folders have already been set up for this project");
+  }
+
+  // Get the folder template
+  const template = await ctx.db.get(args.templateId);
+  if (!template) {
+    throw new Error("Folder template not found");
+  }
+
+  // Get the storage tier
+  const storageTier = await ctx.db.get(args.storageTierId);
+  if (!storageTier) {
+    throw new Error("Storage tier not found");
+  }
+
+  // Create folder records from the template
+  const folderIds = [];
+  for (const folderName of template.folders) {
+    const folderId = await ctx.db.insert("folders", {
+      projectId: args.projectId,
+      name: folderName,
+      path: `/${folderName.toLowerCase().replace(/\s+/g, "-")}`,
+      status: "pending_upload",
+    });
+    folderIds.push(folderId);
+  }
+
+  // Update project's storage allocation (convert GB to bytes)
+  const storageInBytes = storageTier.sizeGB * 1024 * 1024 * 1024;
+  
+  // Transition the project status to storage_allocated
+  if (canTransition(project.actionState as ActionState, "storage_allocated")) {
+    const newPhase = getPhaseForState("storage_allocated");
+    const newActor = getActorForState("storage_allocated");
+
+    await ctx.db.patch(args.projectId, {
+      storageAllocated: storageInBytes,
+      phase: newPhase,
+      actionState: "storage_allocated",
+      awaitingActorRole: newActor,
+      updatedAt: Date.now(),
+    });
+
+    // Record status history
+    await ctx.db.insert("statusHistory", {
+      projectId: args.projectId,
+      previousPhase: project.phase,
+      newPhase: newPhase,
+      previousActionState: project.actionState,
+      newActionState: "storage_allocated",
+      previousAwaitingActorRole: project.awaitingActorRole,
+      newAwaitingActorRole: newActor,
+      changedBy: args.changedBy,
+      changedAt: Date.now(),
+      notes: `Folders set up using template: ${template.name}. Storage allocated: ${storageTier.sizeGB}GB.`,
+    });
+  } else {
+    // Just update storage if transition isn't allowed
+    await ctx.db.patch(args.projectId, {
+      storageAllocated: storageInBytes,
+      updatedAt: Date.now(),
+    });
+  }
+
+  return {
+    success: true,
+    foldersCreated: folderIds.length,
+    storageAllocated: storageInBytes,
+  };
+}
 
 /**
  * Setup project folders from a template.
@@ -15,91 +112,13 @@ export const setupProjectFolders = adminMutation({
     storageTierId: v.id("storageTiers"),
   },
   handler: async (ctx, args) => {
-    // Get the project
-    const project = await ctx.db.get(args.projectId);
-    if (!project) {
-      throw new Error("Project not found");
-    }
-
-    // Check if folders already exist for this project
-    const existingFolders = await ctx.db
-      .query("folders")
-      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
-      .first();
-
-    if (existingFolders) {
-      throw new Error("Folders have already been set up for this project");
-    }
-
-    // Get the folder template
-    const template = await ctx.db.get(args.templateId);
-    if (!template) {
-      throw new Error("Folder template not found");
-    }
-
-    // Get the storage tier
-    const storageTier = await ctx.db.get(args.storageTierId);
-    if (!storageTier) {
-      throw new Error("Storage tier not found");
-    }
-
-    // Create folder records from the template
-    const folderIds = [];
-    for (const folderName of template.folders) {
-      const folderId = await ctx.db.insert("folders", {
-        projectId: args.projectId,
-        name: folderName,
-        path: `/${folderName.toLowerCase().replace(/\s+/g, "-")}`,
-        status: "pending_upload",
-      });
-      folderIds.push(folderId);
-    }
-
-    // Update project's storage allocation (convert GB to bytes)
-    const storageInBytes = storageTier.sizeGB * 1024 * 1024 * 1024;
-    
-    // CRITICAL: Transition the project status to storage_allocated
-    // This unblocks the next steps in the pipeline (awaiting_uploads)
-    if (canTransition(project.actionState as ActionState, "storage_allocated")) {
-      const newPhase = getPhaseForState("storage_allocated");
-      const newActor = getActorForState("storage_allocated");
-
-      await ctx.db.patch(args.projectId, {
-        storageAllocated: storageInBytes,
-        phase: newPhase,
-        actionState: "storage_allocated",
-        awaitingActorRole: newActor,
-        updatedAt: Date.now(),
-      });
-
-      // Record status history
-      await ctx.db.insert("statusHistory", {
-        projectId: args.projectId,
-        previousPhase: project.phase,
-        newPhase: newPhase,
-        previousActionState: project.actionState,
-        newActionState: "storage_allocated",
-        previousAwaitingActorRole: project.awaitingActorRole,
-        newAwaitingActorRole: newActor,
-        changedBy: ctx.profile._id,
-        changedAt: Date.now(),
-        notes: `Folders set up using template: ${template.name}. Storage allocated: ${storageTier.sizeGB}GB.`,
-      });
-    } else {
-      // Just update storage if transition isn't allowed (shouldn't happen in normal flow)
-      await ctx.db.patch(args.projectId, {
-        storageAllocated: storageInBytes,
-        updatedAt: Date.now(),
-      });
-    }
-
-    return {
-      success: true,
-      foldersCreated: folderIds.length,
-      storageAllocated: storageInBytes,
-    };
+    return await setupFoldersInternal(ctx, {
+      ...args,
+      changedBy: ctx.profile._id,
+    });
   },
 });
+
 
 /**
  * Delete all folders for a project.

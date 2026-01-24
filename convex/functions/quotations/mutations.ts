@@ -4,6 +4,7 @@ import { Doc, Id } from "../../_generated/dataModel";
 import { adminMutation, clientMutation, Profile } from "../../lib/customFunctions";
 import { getPhaseForState, getActorForState } from "../../lib/statusMachine";
 import { ActionState } from "../../schema";
+import { spawnProjectsFromQuotation } from "../projects/spawning";
 
 /**
  * Line item input validator
@@ -19,6 +20,9 @@ const lineItemInput = v.object({
   length: v.optional(v.string()),
   width: v.optional(v.string()),
   image: v.optional(v.string()),
+  spawnsProject: v.optional(v.boolean()),
+  projectTypeId: v.optional(v.id("projectTypes")),
+  selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
   subItems: v.optional(
     v.array(
       v.object({
@@ -377,6 +381,11 @@ export const approveQuotation = adminMutation({
       targetState: "quotation_approved",
       notes: "Admin approved the quotation",
     });
+    // Story 11B.3: Spawn projects based on line items
+    await spawnProjectsFromQuotation(ctx, {
+      quotationId: args.quotationId,
+      profileId: ctx.profile._id,
+    });
 
     return null;
   },
@@ -471,6 +480,12 @@ export const acceptQuotation = clientMutation({
       projectIds: quotation.projectIds,
       targetState: "quotation_approved",
       notes: "Client approved the quotation",
+    });
+
+    // Story 11B.3: Spawn projects based on line items
+    await spawnProjectsFromQuotation(ctx, {
+      quotationId: args.quotationId,
+      profileId: ctx.profile._id,
     });
 
     return { success: true };

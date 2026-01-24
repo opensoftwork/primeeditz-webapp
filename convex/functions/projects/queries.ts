@@ -381,6 +381,49 @@ export const getPendingProjects = adminQuery({
 })
 
 // ============================================================================
+// Shared Queries (Admin & Studio/Client)
+// ============================================================================
+
+/**
+ * Get all projects spawned from a specific quotation.
+ * Returns enriched data with project type names.
+ */
+export const getByQuotationId = authenticatedWithProfileQuery({
+  args: { quotationId: v.id("quotations") },
+  handler: async (ctx, args) => {
+    // 1. Fetch the quotation to check permissions
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) return [];
+
+    // 2. Permission check: Admin can see everything, 
+    // Clients/Studios only see their own quotations
+    if (ctx.profile.role !== "admin" && quotation.clientId !== ctx.profile._id) {
+      return [];
+    }
+
+    // 3. Fetch projects
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_quotationId", (q) => q.eq("quotationId", args.quotationId))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .collect();
+
+    // 4. Enrich with project type info
+    const enriched = await Promise.all(
+      projects.map(async (project) => {
+        const projectType = await ctx.db.get(project.projectTypeId);
+        return {
+          ...project,
+          projectTypeName: projectType?.name || "Unknown",
+        };
+      })
+    );
+
+    return enriched;
+  },
+});
+
+// ============================================================================
 // Internal Queries
 // ============================================================================
 

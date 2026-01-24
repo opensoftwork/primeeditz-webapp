@@ -10,6 +10,9 @@ const templateLineItemInput = v.object({
   unit: v.string(),
   unitPrice: v.number(),
   defaultQuantity: v.number(),
+  spawnsProject: v.optional(v.boolean()),
+  projectTypeId: v.optional(v.id("projectTypes")),
+  selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
   subItems: v.optional(
     v.array(
       v.object({
