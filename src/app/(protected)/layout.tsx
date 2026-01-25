@@ -27,14 +27,14 @@ import { UserNav } from "@/components/modules/header/user-nav";
 interface DashboardLayoutProps {
   children: React.ReactNode;
   admin: React.ReactNode;
-  client: React.ReactNode;
+  studio: React.ReactNode;
   employee: React.ReactNode;
 }
 
 export default function DashboardLayout({
   children,
   admin,
-  client,
+  studio,
   employee,
 }: DashboardLayoutProps) {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
@@ -49,7 +49,9 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { overrides } = useBreadcrumbStore();
   const isWizardPage =
-    pathname?.includes("/projects/new") || pathname?.includes("/preview");
+    pathname?.includes("/projects/new") ||
+    pathname?.includes("/quotations/new") ||
+    pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
 
   // Redirect to onboarding or sign-in based on auth state
@@ -126,7 +128,7 @@ export default function DashboardLayout({
         return admin;
       case "client":
       case "studio":
-        return client;
+        return studio;
       case "employee":
         return employee;
       default:

@@ -1,5 +1,5 @@
-import ClientList from "@/components/modules/admin/clients/client-list";
+import { StudioList } from "@/components/modules/admin/studio";
 
 export default function ClientsPage() {
-  return <ClientList />;
+  return <StudioList />;
 }
