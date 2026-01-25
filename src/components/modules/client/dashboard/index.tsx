@@ -15,7 +15,7 @@ import { LayoutGrid, Clock, CheckCircle2 } from "lucide-react";
 import { QuotationsSection } from "@/components/modules/client/quotations/quotations-section";
 import { StatCard } from "./stat-card";
 import { DashboardHeader } from "./dashboard-header";
-import { PipelineTable } from "./pipeline-table";
+import { GroupedProjectList } from "./grouped-project-list";
 
 export default function ClientDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);
@@ -83,8 +83,8 @@ export default function ClientDashboard() {
       {/* Quotations Section */}
       <QuotationsSection />
 
-      {/* Main Project List Section */}
-      <PipelineTable projects={projects as any} />
+      {/* Main Project List Section (Grouped by End Client) */}
+      <GroupedProjectList />
     </div>
   );
 }

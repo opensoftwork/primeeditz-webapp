@@ -146,6 +146,49 @@ export const getProjectUploadEligibility = authenticatedWithProfileQuery({
 })
 
 /**
+ * Get projects for the current studio grouped by end client name.
+ * Used for the revamped studio dashboard (Story 11C.3).
+ */
+export const getMyProjectsGroupedByEndClient = clientQuery({
+  args: {},
+  handler: async (ctx) => {
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .collect();
+
+    // Map to group projects
+    const groups: Record<string, any[]> = {};
+
+    for (const project of projects) {
+      const endClient = project.endClientName || "Direct Engagements";
+      if (!groups[endClient]) {
+        groups[endClient] = [];
+      }
+
+      const projectType = await ctx.db.get(project.projectTypeId);
+      groups[endClient].push({
+        ...project,
+        projectTypeName: projectType?.name ?? "Unknown",
+        createdAt: project._creationTime,
+      });
+    }
+
+    // Convert to sorted array of groups
+    return Object.entries(groups)
+      .map(([name, projects]) => ({
+        name,
+        projects,
+        count: projects.length,
+        lastUpdated: Math.max(...projects.map((p) => p.updatedAt)),
+      }))
+      .sort((a, b) => b.lastUpdated - a.lastUpdated);
+  },
+});
+
+/**
  * Get projects for the current client with their project type and category info.
  * Returns enriched project data for dashboard display.
  */

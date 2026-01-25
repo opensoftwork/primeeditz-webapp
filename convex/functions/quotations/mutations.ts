@@ -158,6 +158,67 @@ async function transitionProjectsForQuotation(
 }
 
 /**
+ * Request a quotation (Studio-side)
+ */
+export const requestQuotation = clientMutation({
+  args: {
+    templateId: v.id("quotationTemplates"),
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const template = await ctx.db.get(args.templateId);
+    if (!template) throw new Error("Template not found");
+
+    const code = await generateQuotationCode(ctx);
+    const taxRate = 0.18; // Default GST
+
+    // Map template line items to quotation line items
+    const lineItems = template.lineItems.map((li) => ({
+      id: crypto.randomUUID(),
+      sectionId: li.sectionId,
+      description: li.description,
+      unit: li.unit,
+      rate: li.unitPrice,
+      quantity: li.defaultQuantity,
+      spawnsProject: li.spawnsProject,
+      projectTypeId: li.projectTypeId,
+      selectedFolderTemplateId: li.selectedFolderTemplateId,
+    }));
+
+    const { subtotal, taxAmount, total } = calculateTotals(
+      lineItems,
+      taxRate,
+      0
+    );
+
+    const quotationId = await ctx.db.insert("quotations", {
+      code,
+      version: 1,
+      clientId: ctx.profile._id,
+      templateId: args.templateId,
+      status: "requested",
+      lineItems,
+      subtotal,
+      taxRate,
+      taxAmount,
+      total,
+      terms: template.terms,
+      endClientName: args.endClientName,
+      eventName: args.eventName,
+      eventDate: args.eventDate,
+      clientNotes: args.notes,
+      createdBy: "STUDIO",
+      updatedAt: Date.now(),
+    });
+
+    return quotationId;
+  },
+});
+
+/**
  * Create a new quotation
  */
 export const createQuotation = adminMutation({

@@ -15,10 +15,9 @@ export type ActionState = Infer<typeof projectActionStateValidator>;
 // Role validator for profiles
 export const roleValidator = v.union(
   v.literal('client'),
-  v.literal('studio'), // NEW: Gradual migration
+  v.literal('studio'),
   v.literal('employee'),
-  v.literal('admin'),
-  v.literal('studio')
+  v.literal('admin')
 )
 
 // Project phases: high-level lifecycle stages
@@ -95,6 +94,7 @@ export const quotationStatusValidator = v.union(
   v.literal('draft'),
   v.literal('sent'),
   v.literal('viewed'),
+  v.literal('requested'),
   v.literal('approved'),
   v.literal('changes_requested'),
   v.literal('rejected'),
@@ -405,6 +405,10 @@ export default defineSchema({
     projectIds: v.optional(v.array(v.string())),
     templateId: v.optional(v.id('quotationTemplates')),
     status: quotationStatusValidator,
+    // Event details for Studio-initiated requests (links to spawned projects)
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     lineItems: v.array(
       v.object({
         id: v.string(),

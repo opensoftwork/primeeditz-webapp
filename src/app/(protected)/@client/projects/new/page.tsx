@@ -7,8 +7,8 @@
 
 "use client";
 
-import { ProjectWizard } from "@/components/modules/projects";
+import QuoteRequestWizard from "@/components/modules/client/quotations/request-flow";
 
 export default function NewProjectPage() {
-  return <ProjectWizard />;
+  return <QuoteRequestWizard />;
 }

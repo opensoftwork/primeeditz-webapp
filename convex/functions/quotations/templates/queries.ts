@@ -1,10 +1,10 @@
 import { v } from "convex/values";
-import { adminQuery } from "../../../lib/customFunctions";
+import { adminQuery, authenticatedQuery } from "../../../lib/customFunctions";
 
 /**
- * Get all quotation templates
+ * Get all quotation templates (Accessible by Studios for package selection)
  */
-export const getTemplates = adminQuery({
+export const getTemplates = authenticatedQuery({
   args: {
     activeOnly: v.optional(v.boolean()),
   },
@@ -22,7 +22,7 @@ export const getTemplates = adminQuery({
 /**
  * Get a single template by ID
  */
-export const getTemplate = adminQuery({
+export const getTemplate = authenticatedQuery({
   args: {
     templateId: v.id("quotationTemplates"),
   },
@@ -34,7 +34,7 @@ export const getTemplate = adminQuery({
 /**
  * Get templates filtered by project type hint
  */
-export const getTemplatesByProjectType = adminQuery({
+export const getTemplatesByProjectType = authenticatedQuery({
   args: {
     projectTypeHint: v.string(),
   },

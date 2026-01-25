@@ -91,9 +91,12 @@ export async function spawnProjectsFromQuotation(
         actionState: "quotation_approved",
         awaitingActorRole: getActorForState("quotation_approved"),
         storageUsed: 0,
+        lastStep: 3, // Start at step 3 for onboarding (Story 11C.5)
         updatedAt: now(),
         quotationApprovedAt: now(),
+        endClientName: quotation.endClientName,
         eventName: item.description,
+        eventDate: quotation.eventDate,
       });
 
       createdProjectIds.push(projectId);

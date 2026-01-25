@@ -125,6 +125,7 @@ export default function DashboardLayout({
       case "admin":
         return admin;
       case "client":
+      case "studio":
         return client;
       case "employee":
         return employee;
