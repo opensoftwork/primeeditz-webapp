@@ -30,6 +30,7 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
   - [Epic 11B: Quotation Engine Enhancements](./11b-quotation-engine.md)
   - [Epic 11C: Studio Portal Revamp](./11c-studio-portal.md)
   - [Epic 11D: Terminology & Routing Cleanup](./11d-terminology-cleanup.md)
+- [Epic 12: Employee Assignment & Team Management](./12-employee-assignment-team-management.md)
 
 ---
 

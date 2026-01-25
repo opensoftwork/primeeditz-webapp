@@ -83,7 +83,7 @@ export const adminNavGroups: NavGroup[] = [
     label: "Relationships",
     items: [
       {
-        title: "Clients",
+        title: "Studios",
         url: "/clients",
         icon: Users,
       },

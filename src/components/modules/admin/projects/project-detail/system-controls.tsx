@@ -19,6 +19,7 @@ interface SystemControlsProps {
   folderSetupReason?: string | null;
   onSetupFolders?: () => void;
   onViewFolders?: () => void;
+  onAssignTeam?: () => void;
 }
 
 function formatBytes(bytes: number): string {
@@ -36,6 +37,7 @@ export function SystemControls({
   folderSetupReason,
   onSetupFolders,
   onViewFolders,
+  onAssignTeam,
 }: SystemControlsProps) {
   const isAdminActive = awaitingActorRole === "admin";
   // Determine folder button state
@@ -110,6 +112,7 @@ export function SystemControls({
         )}
         <Button
           variant="outline"
+          onClick={onAssignTeam}
           className="w-full justify-between rounded-xl h-12 border-white/5 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest group"
           disabled={
             !isAdminActive ||

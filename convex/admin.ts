@@ -12,3 +12,4 @@ export * from "./functions/admin/clients";
 export * from "./functions/admin/employees";
 export * from "./functions/admin/quotations";
 export * from "./functions/admin/maintenance";
+export * from "./functions/admin/squads";

@@ -1,12 +1,17 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
-import { adminQuery, clientQuery } from "../../lib/customFunctions";
+import { 
+  adminQuery, 
+  clientQuery, 
+  staffQuery, 
+  authenticatedWithProfileQuery 
+} from "../../lib/customFunctions";
 
 /**
- * Get all folders for a project (admin view).
+ * Get all folders for a project (staff view).
  * Returns folder details with asset counts.
  */
-export const getProjectFolders = adminQuery({
+export const getProjectFolders = staffQuery({
   args: {
     projectId: v.id("projects"),
   },
@@ -261,9 +266,9 @@ export const getFolderSetupStatus = query({
 
 /**
  * Get a single folder's details.
- * Verifies ownership via project.
+ * Staff access (Admin/Employee) or Client ownership via project.
  */
-export const getFolderDetails = clientQuery({
+export const getFolderDetails = authenticatedWithProfileQuery({
   args: {
     folderId: v.id("folders"),
   },
@@ -271,11 +276,19 @@ export const getFolderDetails = clientQuery({
     const folder = await ctx.db.get(args.folderId);
     if (!folder) throw new Error("Folder not found");
 
-    // Verify ownership via project
+    // Verify access
     const project = await ctx.db.get(folder.projectId);
-    if (!project || project.clientId !== ctx.profile._id) {
-      throw new Error("Access denied");
+    if (!project) throw new Error("Project not found");
+
+    // If client, verify they own the project
+    if (ctx.profile.role === 'client') {
+      if (project.clientId !== ctx.profile._id) {
+        throw new Error("Access denied");
+      }
     }
+    
+    // For staff (admin/employee), we allow access if they reached here.
+    // getProjectFolders/getAdminProject already handle their list-level security.
 
     return folder;
   },
@@ -283,9 +296,9 @@ export const getFolderDetails = clientQuery({
 
 /**
  * Get assets in a folder.
- * Returns all files uploaded to this folder.
+ * Staff access (Admin/Employee) or Client ownership via project.
  */
-export const getFolderAssets = clientQuery({
+export const getFolderAssets = authenticatedWithProfileQuery({
   args: {
     folderId: v.id("folders"),
   },
@@ -293,10 +306,15 @@ export const getFolderAssets = clientQuery({
     const folder = await ctx.db.get(args.folderId);
     if (!folder) throw new Error("Folder not found");
 
-    // Verify ownership via project
+    // Verify access
     const project = await ctx.db.get(folder.projectId);
-    if (!project || project.clientId !== ctx.profile._id) {
-      throw new Error("Access denied");
+    if (!project) throw new Error("Project not found");
+
+    // If client, verify ownership
+    if (ctx.profile.role === 'client') {
+      if (project.clientId !== ctx.profile._id) {
+        throw new Error("Access denied");
+      }
     }
 
     const assets = await ctx.db
@@ -310,34 +328,9 @@ export const getFolderAssets = clientQuery({
       return {
         ...asset,
         uploaderName: uploader?.name || "Unknown",
-        uploaderRole: uploader?.role || "client",
+        uploaderRole: (uploader as any)?.role || "client",
       };
     }));
   },
 });
 
-/**
- * Get assets in a folder for admins.
- * No ownership check - admin access.
- */
-export const getAdminFolderAssets = adminQuery({
-  args: {
-    folderId: v.id("folders"),
-  },
-  handler: async (ctx, args) => {
-    const assets = await ctx.db
-      .query("assets")
-      .withIndex("by_folderId", (q) => q.eq("folderId", args.folderId))
-      .collect();
-
-    // Enrich with uploader info
-    return await Promise.all(assets.map(async (asset) => {
-      const uploader = asset.uploadedBy ? await ctx.db.get(asset.uploadedBy) : null;
-      return {
-        ...asset,
-        uploaderName: uploader?.name || "Unknown",
-        uploaderRole: uploader?.role || "client",
-      };
-    }));
-  },
-});

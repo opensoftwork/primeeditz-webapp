@@ -23,15 +23,18 @@ interface FolderDetailViewProps {
   projectId: string;
   folderId: string;
   isAdmin?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderDetailView({
   projectId,
   folderId,
   isAdmin = false,
+  isEmployee = false,
 }: FolderDetailViewProps) {
   const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
+  const isStaff = isAdmin || isEmployee;
 
   // State
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
@@ -41,13 +44,9 @@ export function FolderDetailView({
   );
 
   // Queries & Mutations
-  const folder = isAdmin
-    ? useQuery(api.functions.folders.queries.getProjectFolders, {
-        projectId: projectId as Id<"projects">,
-      })?.find((f) => f._id === folderId)
-    : useQuery(api.functions.folders.queries.getFolderDetails, {
-        folderId: folderId as Id<"folders">,
-      });
+  const folder = useQuery(api.functions.folders.queries.getFolderDetails, {
+    folderId: folderId as Id<"folders">,
+  });
 
   const project = useQuery(
     isAdmin
@@ -78,13 +77,9 @@ export function FolderDetailView({
     removeOverride,
   ]);
 
-  const assets = isAdmin
-    ? useQuery(api.functions.folders.queries.getAdminFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      })
-    : useQuery(api.functions.folders.queries.getFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      });
+  const assets = useQuery(api.functions.folders.queries.getFolderAssets, {
+    folderId: folderId as Id<"folders">,
+  });
 
   const updateFolderStatus = useMutation(
     isAdmin
@@ -282,7 +277,7 @@ export function FolderDetailView({
   const totalSize = assets?.reduce((sum, a) => sum + a.sizeBytes, 0) || 0;
 
   return (
-    <div className="space-y-12 p-8 md:p-12">
+    <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -365,7 +360,7 @@ export function FolderDetailView({
                 View Only Mode
               </p>
               <p className="text-[9px] font-bold text-amber-500/60 uppercase tracking-widest">
-                {uploadEligibility?.reason || "Client Upload Phase"}
+                {uploadEligibility?.reason || "Studio Upload Phase"}
               </p>
             </div>
           </div>

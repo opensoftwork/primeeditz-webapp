@@ -43,11 +43,18 @@ export function getMinioPublicUrl(storageKey: string | undefined | null): string
  */
 export function enrichReferenceFilesWithUrls<T extends { storageKey?: string | null; previewUrl?: string | null }>(
   files: T[] | undefined
-): (T & { displayUrl: string | null })[] {
+): (T & { url: string | null; id: string; name: string; size: number; type: string })[] {
   if (!files) return [];
 
-  return files.map((file) => ({
-    ...file,
-    displayUrl: getMinioPublicUrl(file.storageKey) || file.previewUrl || null,
-  }));
+  return files.map((file) => {
+    const f = file as any;
+    return {
+      ...file,
+      url: getMinioPublicUrl(file.storageKey) || f.previewUrl || null,
+      id: f.fileId || f.id || f._id,
+      name: f.fileName || f.name,
+      size: f.fileSize || f.size,
+      type: f.fileType || f.type,
+    } as any;
+  });
 }

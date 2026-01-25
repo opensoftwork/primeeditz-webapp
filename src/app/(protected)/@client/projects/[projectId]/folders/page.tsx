@@ -15,8 +15,6 @@ export default function ProjectFoldersPage({
   const { projectId } = use(params);
 
   return (
-    <div className="p-8 md:p-12">
-      <FolderListingView projectId={projectId} />
-    </div>
+    <FolderListingView projectId={projectId} />
   );
 }

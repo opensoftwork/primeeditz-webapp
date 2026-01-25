@@ -115,7 +115,7 @@ export const generateUploadUrl = action({
     fileName: v.string(),
     contentType: v.string(),
     projectId: v.id("projects"),
-    folderId: v.id("folders"),
+    folderId: v.optional(v.id("folders")),
     fileSize: v.number(),
   },
   handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
@@ -140,7 +140,8 @@ export const generateUploadUrl = action({
     // 3. Generate unique storage key
     const timestamp = Date.now();
     const cleanName = args.fileName.replace(/\s+/g, "_");
-    const storageKey = `projects/${args.projectId}/assets/${args.folderId}/${timestamp}_${cleanName}`;
+    const subPath = args.folderId ? `assets/${args.folderId}` : 'deliverables';
+    const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
 
     // 3. Generate pre-signed PUT URL
     const s3Client = getS3Client();

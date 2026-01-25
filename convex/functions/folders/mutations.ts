@@ -271,9 +271,13 @@ export const markAllUploadsComplete = authenticatedWithProfileMutation({
     const newActor = getActorForState("uploads_complete");
 
     if (project.actionState === "awaiting_uploads") {
+      const nextState = "awaiting_assignment";
+      const newPhase = getPhaseForState(nextState);
+      const newActor = getActorForState(nextState);
+
       await ctx.db.patch(args.projectId, {
         phase: newPhase,
-        actionState: "uploads_complete",
+        actionState: nextState,
         awaitingActorRole: newActor,
         uploadsCompletedAt: Date.now(),
         updatedAt: Date.now(),
@@ -285,12 +289,12 @@ export const markAllUploadsComplete = authenticatedWithProfileMutation({
         previousPhase: project.phase,
         newPhase,
         previousActionState: project.actionState,
-        newActionState: "uploads_complete",
+        newActionState: nextState,
         previousAwaitingActorRole: project.awaitingActorRole,
         newAwaitingActorRole: newActor,
         changedBy: ctx.profile._id,
         changedAt: Date.now(),
-        notes: `Uploads marked as complete by ${ctx.profile.name} (${ctx.profile.role}).`,
+        notes: `Uploads marked as complete by ${ctx.profile.name} (${ctx.profile.role}). Ready for assignment.`,
       });
     }
 
@@ -312,12 +316,13 @@ async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projec
   if (allCompleted) {
     const project = await ctx.db.get(projectId);
     if (project && project.actionState === "awaiting_uploads") {
-      const newPhase = getPhaseForState("uploads_complete");
-      const newActor = getActorForState("uploads_complete");
+      const nextState = "awaiting_assignment";
+      const newPhase = getPhaseForState(nextState);
+      const newActor = getActorForState(nextState);
 
       await ctx.db.patch(projectId, {
         phase: newPhase,
-        actionState: "uploads_complete",
+        actionState: nextState,
         awaitingActorRole: newActor,
         uploadsCompletedAt: Date.now(),
         updatedAt: Date.now(),
@@ -329,12 +334,12 @@ async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projec
         previousPhase: project.phase,
         newPhase,
         previousActionState: project.actionState,
-        newActionState: "uploads_complete",
+        newActionState: nextState,
         previousAwaitingActorRole: project.awaitingActorRole,
         newAwaitingActorRole: newActor,
         changedBy: ctx.profile._id,
         changedAt: Date.now(),
-        notes: `All folders marked as completed. Ready for assignment. (Auto-triggered by ${ctx.profile.role} ${ctx.profile.name})`,
+        notes: `All folders marked as completed. Auto-transitioned to assignment phase. (Triggered by ${ctx.profile.role} ${ctx.profile.name})`,
       });
     }
   }

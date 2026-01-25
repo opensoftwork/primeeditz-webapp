@@ -1,11 +1,14 @@
 import { v } from "convex/values";
 import { paginationOptsValidator } from "convex/server";
-import { adminQuery, adminMutation } from "../../lib/customFunctions";
+import { adminQuery, adminMutation, staffQuery } from "../../lib/customFunctions";
 import { internalQuery } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
 import { projectPhaseValidator, projectActionStateValidator } from "../../schema";
 import { checkUploadEligibility } from "../../lib/uploadGate";
 import { getNextStates } from "../../lib/statusMachine";
+import { ConvexError } from "convex/values";
+
+import { enrichReferenceFilesWithUrls } from "../../lib/storageUtils";
 
 /**
  * Get all projects for admin listing with cursor-based pagination.
@@ -141,15 +144,30 @@ export const getTrashedProjects = adminQuery({
 });
 
 /**
- * Get a single project by ID (admin view).
+ * Get a single project by ID (Staff view - Admin or assigned Employee).
  */
-export const getAdminProject = adminQuery({
+export const getAdminProject = staffQuery({
   args: {
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
     const project = await ctx.db.get(args.projectId);
     if (!project) return null;
+
+    // Authorization check for employees
+    if (ctx.profile.role === 'employee') {
+       const squadMember = await ctx.db
+         .query('projectSquads')
+         .withIndex('by_project_profile', (q) =>
+           q.eq('projectId', args.projectId).eq('profileId', ctx.profile._id)
+         )
+         .filter((q) => q.eq(q.field('dissolvedAt'), undefined))
+         .first();
+       
+       if (!squadMember && project.assignedEmployeeId !== ctx.profile._id) {
+         throw new ConvexError('Access denied: Not part of this project squad');
+       }
+    }
 
     const [client, projectType, history, quotation, assignedEmployee] = await Promise.all([
       project.clientId ? ctx.db.get(project.clientId as Id<"profiles">) : null,
@@ -191,8 +209,12 @@ export const getAdminProject = adminQuery({
 
     const uploadEligibility = await checkUploadEligibility(ctx, args.projectId);
 
+    // Enrich reference files with URLs
+    const referenceFiles = enrichReferenceFilesWithUrls(project.referenceFiles);
+
     return {
       ...project,
+      referenceFiles,
       clientName: client?.name ?? "Unknown Client",
       clientEmail: client?.email ?? "Unknown Email",
       projectTypeName: projectType?.name ?? "Unknown",

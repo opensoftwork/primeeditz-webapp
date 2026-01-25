@@ -157,6 +157,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           project={project}
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}
           onViewFolders={handleViewFolders}
+          onOpenAssignEmployee={() =>
+            router.push(`/projects/${projectId}/assign`)
+          }
         />
         <AwaitingActorBanner project={project} />
 
@@ -199,6 +202,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 folderSetupReason={folderSetupStatus?.reason}
                 onSetupFolders={() => setIsFolderSetupOpen(true)}
                 onViewFolders={handleViewFolders}
+                onAssignTeam={() =>
+                  router.push(`/projects/${projectId}/assign`)
+                }
               />
             </div>
           </div>
