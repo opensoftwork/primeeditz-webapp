@@ -1,12 +1,14 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
-import { Package, CheckCircle2, Sparkles } from "lucide-react";
+import { Package, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { useRequestWizard } from "../request-wizard-context";
+import { PackageDetailsDrawer } from "./package-details-drawer";
 
 export function Step1Packages() {
   const {
@@ -17,6 +19,29 @@ export function Step1Packages() {
     setSelectedPackage,
     filteredTemplates,
   } = useRequestWizard();
+
+  const [detailPkg, setDetailPkg] = useState<any>(null);
+
+  const detailIndex =
+    detailPkg && filteredTemplates
+      ? filteredTemplates.findIndex((t: any) => t._id === detailPkg._id)
+      : -1;
+
+  const handleNext = () => {
+    if (
+      filteredTemplates &&
+      detailIndex !== -1 &&
+      detailIndex < filteredTemplates.length - 1
+    ) {
+      setDetailPkg(filteredTemplates[detailIndex + 1]);
+    }
+  };
+
+  const handlePrev = () => {
+    if (filteredTemplates && detailIndex > 0) {
+      setDetailPkg(filteredTemplates[detailIndex - 1]);
+    }
+  };
 
   return (
     <motion.div
@@ -80,6 +105,10 @@ export function Step1Packages() {
             0,
           );
 
+          const projectType = useRequestWizard().projectTypes?.find(
+            (pt) => pt._id === pkg.projectTypeHint,
+          );
+
           return (
             <motion.div
               key={pkg._id}
@@ -128,23 +157,33 @@ export function Step1Packages() {
                       <CheckCircle2 className="h-5 w-5 text-primary" />
                     </div>
                   ) : (
-                    <div className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary/40">
-                      PKG-{pkg._id.slice(-4).toUpperCase()}
-                    </div>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest px-4 h-8 text-white/40 hover:text-white hover:bg-primary/20 hover:border-primary/30 transition-all font-sans"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setDetailPkg(pkg);
+                      }}
+                    >
+                      View Breakdown
+                    </Button>
                   )}
                 </div>
 
                 <div className="space-y-2 relative z-10 flex-1">
-                  <h3
-                    className={cn(
-                      "text-2xl font-black uppercase tracking-tighter leading-none transition-colors",
-                      isSelected
-                        ? "text-black"
-                        : "text-white group-hover:text-primary",
-                    )}
-                  >
-                    {pkg.name}
-                  </h3>
+                  <div className="flex items-center justify-between gap-4">
+                    <h3
+                      className={cn(
+                        "text-2xl font-black uppercase tracking-tighter leading-none transition-colors",
+                        isSelected
+                          ? "text-black"
+                          : "text-white group-hover:text-primary",
+                      )}
+                    >
+                      {pkg.name}
+                    </h3>
+                  </div>
                   <p
                     className={cn(
                       "text-[11px] font-medium leading-relaxed transition-colors line-clamp-3",
@@ -172,7 +211,7 @@ export function Step1Packages() {
                           : "bg-white/5 text-white/60 border-white/10 group-hover:border-primary/30",
                       )}
                     >
-                      {pkg.projectTypeHint || "Standard"}
+                      {projectType?.name || pkg.projectTypeHint || "Standard"}
                     </Badge>
                     <div className="flex flex-col items-end">
                       <span
@@ -199,6 +238,20 @@ export function Step1Packages() {
           );
         })}
       </div>
+
+      <PackageDetailsDrawer
+        open={!!detailPkg}
+        onOpenChange={(open) => !open && setDetailPkg(null)}
+        pkg={detailPkg}
+        onSelect={(id) => setSelectedPackage(id)}
+        isSelected={selectedPackage === detailPkg?._id}
+        onNext={handleNext}
+        onPrev={handlePrev}
+        hasNext={
+          filteredTemplates ? detailIndex < filteredTemplates.length - 1 : false
+        }
+        hasPrev={detailIndex > 0}
+      />
     </motion.div>
   );
 }

@@ -29,6 +29,7 @@ interface RequestWizardContextType {
 
   // Queries
   categories: any[] | undefined;
+  projectTypes: any[] | undefined;
   templates: any[] | undefined;
   filteredTemplates: any[] | undefined;
 
@@ -62,16 +63,27 @@ export function RequestWizardProvider({
   const categories = useQuery(
     api.functions.projectCategories.queries.getActiveCategories,
   );
+  const projectTypes = useQuery(
+    api.functions.projectTypes.queries.getActiveProjectTypes,
+  );
   const templates = useQuery(
     api.functions.quotations.templates.queries.getTemplates,
     { activeOnly: true },
   );
 
-  const filteredTemplates = templates?.filter(
-    (t) =>
-      !selectedCategory ||
-      t.projectTypeHint?.toLowerCase() === selectedCategory.toLowerCase(),
-  );
+  const filteredTemplates = React.useMemo(() => {
+    if (!templates) return undefined;
+    if (!selectedCategory) return templates;
+    if (!projectTypes) return [];
+
+    return templates.filter((t) => {
+      // Find the project type for this template
+      const pt = projectTypes.find((p: any) => p._id === t.projectTypeHint);
+      if (!pt) return false;
+
+      return pt.categoryName?.toLowerCase() === selectedCategory.toLowerCase();
+    });
+  }, [templates, projectTypes, selectedCategory]);
 
   // Mutations
   const requestQuotation = useMutation(
@@ -129,6 +141,7 @@ export function RequestWizardProvider({
     selectedPackage,
     setSelectedPackage,
     categories,
+    projectTypes,
     templates,
     filteredTemplates,
     isSubmitting,

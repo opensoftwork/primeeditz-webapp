@@ -120,7 +120,7 @@ function QuoteRequestWizardContent() {
         {/* Main Step Canvas */}
         <main className="flex-1 overflow-y-auto bg-zinc-950/50 relative flex flex-col">
           <div className="flex-1 w-full p-8 md:p-12">
-            <div className="max-w-full mx-auto min-h-full flex flex-col">
+            <div className="max-w-7xl mx-auto min-h-full flex flex-col">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}

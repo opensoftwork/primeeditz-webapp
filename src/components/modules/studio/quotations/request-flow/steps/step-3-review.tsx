@@ -1,71 +1,215 @@
 "use client";
 
 import { motion } from "motion/react";
-import { Rocket } from "lucide-react";
+import {
+  Rocket,
+  Package,
+  Calendar,
+  User,
+  FileText,
+  ShieldCheck,
+  CheckCircle2,
+} from "lucide-react";
+import { format } from "date-fns";
+import { Card } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useRequestWizard } from "../request-wizard-context";
+import { cn } from "@/lib/utils";
 
 export function Step3Review() {
-  const { formData, templates, selectedPackage } = useRequestWizard();
+  const { formData, templates, selectedPackage, projectTypes } =
+    useRequestWizard();
+
+  const pkg = templates?.find((t) => t._id === selectedPackage);
+  const projectType = pkg
+    ? projectTypes?.find((pt: any) => pt._id === pkg.projectTypeHint)
+    : null;
+
+  const totalAmount =
+    pkg?.lineItems.reduce(
+      (acc: number, item: any) => acc + item.unitPrice * item.defaultQuantity,
+      0,
+    ) || 0;
 
   return (
     <motion.div
       key="step3"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 1.05 }}
       className="space-y-8 w-full"
     >
-      <div className="text-center space-y-4">
-        <div className="h-20 w-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
-          <Rocket className="h-10 w-10 text-primary animate-pulse" />
+      {/* Header */}
+      <div className="space-y-2">
+        <div className="flex items-center gap-3">
+          <div className="h-0.5 w-12 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+          <span className="text-[10px] font-black uppercase tracking-[0.4em] text-primary/60">
+            Final Confirmation
+          </span>
         </div>
-        <h2 className="text-2xl font-black uppercase tracking-tight">
-          Ready to Submit?
+        <h2 className="text-4xl font-black uppercase tracking-tighter text-white">
+          Production Manifest
         </h2>
-        <p className="text-white/40 text-[11px] uppercase tracking-widest font-black leading-relaxed">
-          Review your engagement details before sending the request to our
-          production team.
+        <p className="text-sm font-semibold text-white/40 max-w-lg leading-relaxed">
+          Verify the engagement parameters below. Upon confirmation, this
+          request will be routed to our creative directors.
         </p>
       </div>
 
-      <div className="bg-white/3 border border-white/10 rounded-3xl p-8 space-y-6">
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
-            Package
-          </span>
-          <span className="text-[11px] font-black uppercase text-primary">
-            {templates?.find((t) => t._id === selectedPackage)?.name}
-          </span>
-        </div>
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
-            End Client
-          </span>
-          <span className="text-[11px] font-black uppercase text-white">
-            {formData.endClientName || "N/A"}
-          </span>
-        </div>
-        <div className="flex items-center justify-between border-b border-white/5 pb-4">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
-            Event
-          </span>
-          <span className="text-[11px] font-black uppercase text-white">
-            {formData.eventName || "N/A"}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
-            Date
-          </span>
-          <span className="text-[11px] font-black uppercase text-white">
-            {formData.eventDate || "TBD"}
-          </span>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Column: Package Identity */}
+        <Card className="bg-zinc-900/30 border-white/5 overflow-hidden flex flex-col relative group">
+          <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[32px_32px] pointer-events-none" />
+          <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] rounded-full -mr-32 -mt-32 pointer-events-none transition-opacity duration-1000 group-hover:opacity-100 opacity-50" />
+
+          <div className="p-8 space-y-8 relative z-10 flex-1">
+            <div className="flex items-start justify-between">
+              <div className="space-y-4">
+                <Badge
+                  variant="outline"
+                  className="rounded-full bg-primary/10 border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1"
+                >
+                  Selected Model
+                </Badge>
+                <div className="space-y-1">
+                  <h3 className="text-3xl font-black uppercase tracking-tighter text-white leading-none">
+                    {pkg?.name}
+                  </h3>
+                  <div className="flex items-center gap-2 text-white/40">
+                    <Package className="h-3 w-3" />
+                    <span className="text-[10px] font-bold uppercase tracking-widest">
+                      {projectType?.name || "Standard Production"}
+                    </span>
+                  </div>
+                </div>
+              </div>
+              <div className="h-14 w-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center">
+                <Rocket className="h-6 w-6 text-white/80" />
+              </div>
+            </div>
+
+            <div className="space-y-4">
+              <div className="p-6 rounded-3xl bg-black/20 border border-white/5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] font-black w-24 uppercase tracking-widest text-white/20">
+                    Base Value
+                  </span>
+                  <span className="text-xl font-black text-white tracking-tighter">
+                    ₹{totalAmount.toLocaleString()}
+                  </span>
+                </div>
+                <div className="h-px w-full bg-white/5" />
+                <div className="flex items-start justify-between">
+                  <span className="text-[10px] font-black w-24 uppercase tracking-widest text-white/20 mt-1">
+                    Includes
+                  </span>
+                  <div className="text-right space-y-1">
+                    {pkg?.lineItems
+                      .slice(0, 3)
+                      .map((item: any, idx: number) => (
+                        <div
+                          key={idx}
+                          className="text-[11px] font-bold text-white/60"
+                        >
+                          {item.quantity}x {item.description}
+                        </div>
+                      ))}
+                    {pkg?.lineItems.length > 3 && (
+                      <div className="text-[9px] font-black text-primary/60 uppercase tracking-wider pt-1">
+                        + {pkg.lineItems.length - 3} more deliverables
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Card>
+
+        {/* Right Column: Engagement Intel */}
+        <div className="space-y-8">
+          <Card className="bg-zinc-900/30 border-white/5 p-8 relative overflow-hidden group">
+            <div className="absolute inset-0 bg-white/1 pointer-events-none" />
+
+            <div className="space-y-8 relative z-10">
+              <div className="flex items-center gap-3">
+                <Badge
+                  variant="outline"
+                  className="rounded-full bg-white/5 border-white/10 text-white/40 text-[9px] font-black uppercase tracking-widest px-3 py-1"
+                >
+                  Engagement Intel
+                </Badge>
+              </div>
+
+              <div className="grid gap-6">
+                {/* Client */}
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 text-white/40">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                      End Client Identity
+                    </p>
+                    <p className="text-lg font-bold text-white">
+                      {formData.endClientName || "Not Specified"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Date */}
+                <div className="flex items-start gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 text-white/40">
+                    <Calendar className="h-4 w-4" />
+                  </div>
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                      Target Execution Date
+                    </p>
+                    <p className="text-lg font-bold text-white">
+                      {formData.eventDate
+                        ? format(new Date(formData.eventDate), "PPP")
+                        : "TBD"}
+                    </p>
+                  </div>
+                </div>
+
+                {/* Description */}
+                {formData.eventName && (
+                  <div className="flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center shrink-0 border border-white/5 text-white/40">
+                      <FileText className="h-4 w-4" />
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                        Operation Variant
+                      </p>
+                      <p className="text-base font-medium text-white/80 leading-relaxed">
+                        {formData.eventName}
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          </Card>
+
+          {/* Terms */}
+          <div className="p-6 rounded-3xl bg-primary/5 border border-primary/10 flex items-start gap-4">
+            <ShieldCheck className="h-5 w-5 text-primary shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <h4 className="text-[11px] font-black uppercase tracking-widest text-primary">
+                Protocol Verification
+              </h4>
+              <p className="text-[11px] font-medium text-primary/60 leading-relaxed">
+                By submitting this manifest, you confirm that all strategic
+                parameters are accurate. Our team will initiate the resource
+                allocation protocol immediately upon receipt.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-
-      <p className="text-[9px] text-center text-white/20 font-bold uppercase tracking-[0.2em]">
-        Your request will be processed into a official quotation.
-      </p>
     </motion.div>
   );
 }
