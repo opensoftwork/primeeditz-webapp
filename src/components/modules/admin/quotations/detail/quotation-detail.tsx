@@ -19,13 +19,15 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DetailHeader } from "./components/detail-header";
-import { ClientProjectInfo } from "./components/client-project-info";
-import { LineItemsSection } from "./components/line-items-section";
-import { PricingSummary } from "./components/pricing-summary";
-import { TermsConditions } from "./components/terms-conditions";
-import { QuickActions } from "./components/quick-actions";
-import { ClientFeedbackSection } from "./components/client-feedback-section";
+import {
+  DetailHeader,
+  StudioProjectInfo,
+  LineItemsSection,
+  PricingSummary,
+  TermsConditions,
+  QuickActions,
+  StudioFeedbackSection,
+} from "./components";
 import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 
 const statusConfig: Record<
@@ -60,6 +62,13 @@ const statusConfig: Record<
     borderColor: "border-indigo-400/20",
   },
   approved: {
+    label: "Approved",
+    icon: CheckCircle2,
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-400/10",
+    borderColor: "border-emerald-400/20",
+  },
+  quotation_approved: {
     label: "Approved",
     icon: CheckCircle2,
     color: "text-emerald-400",
@@ -233,7 +242,7 @@ export function QuotationDetail({
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <ClientProjectInfo quotation={quotation} />
+          <StudioProjectInfo quotation={quotation} />
           <LineItemsSection
             groupedByProject={groupedByProject}
             groupedBySection={groupedBySection}
@@ -247,7 +256,7 @@ export function QuotationDetail({
         </div>
 
         <div className="space-y-6">
-          <ClientFeedbackSection quotation={quotation} />
+          <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}
             discountAmount={discountAmount}

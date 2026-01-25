@@ -3,14 +3,7 @@
 import { useState } from "react";
 import { motion } from "motion/react";
 import { format } from "date-fns";
-import {
-  Receipt,
-  Copy,
-  ArrowLeft,
-  Edit,
-  Send,
-  FileText,
-} from "lucide-react";
+import { Receipt, Copy, ArrowLeft, Edit, Send, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { toast } from "sonner";
@@ -35,7 +28,12 @@ interface DetailHeaderProps {
     [key: string]: unknown;
   };
   sections: { _id: string; name: string; color?: string }[];
-  projects?: { _id: string; code: string; eventName?: string; projectTypeName?: string }[];
+  projects?: {
+    _id: string;
+    code: string;
+    eventName?: string;
+    projectTypeName?: string;
+  }[];
   status: {
     label: string;
     icon: React.ComponentType<{ className?: string }>;
@@ -160,7 +158,7 @@ export function DetailHeader({
           )}
         >
           <Send className="h-4 w-4 mr-2" />
-          {quotation.status === "draft" ? "Send to Client" : "Resend"}
+          {quotation.status === "draft" ? "Send to Studio" : "Resend"}
         </Button>
       </div>
     </div>

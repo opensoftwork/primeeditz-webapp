@@ -1,5 +1,5 @@
 /**
- * Existing Client Content Component
+ * Existing Studio Content Component
  * Content area shown when "Select Existing" option is selected
  */
 
@@ -7,32 +7,32 @@
 
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { ClientDataTable } from "@/components/modules/admin/clients/client-data-table";
+import { StudioDataTable } from "@/components/modules/admin/studio";
 import type { Doc } from "@convex/_generated/dataModel";
 import type { Id } from "@convex/_generated/dataModel";
 
-type Client = Doc<"profiles">;
+type Studio = Doc<"profiles">;
 
-interface ExistingClientContentProps {
+interface ExistingStudioContentProps {
   onCancel: () => void;
-  onSelectClient: (client: Client) => void;
+  onSelectStudio: (studio: Studio) => void;
   selectedId?: Id<"profiles">;
 }
 
 export function ExistingClientContent({
   onCancel,
-  onSelectClient,
+  onSelectStudio,
   selectedId,
-}: ExistingClientContentProps) {
+}: ExistingStudioContentProps) {
   return (
     <div className="mt-10 space-y-8 px-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-lg font-black uppercase tracking-tight text-white">
-            Select Existing Client
+            Select Existing Studio
           </h3>
           <p className="text-sm text-white/40 font-medium">
-            Choose a client from your existing database
+            Choose a studio from your existing database
           </p>
         </div>
         <Button
@@ -46,7 +46,7 @@ export function ExistingClientContent({
       </div>
 
       <div className="rounded-2xl bg-white/2 border border-white/5 overflow-hidden">
-        <ClientDataTable onSelect={onSelectClient} selectedId={selectedId} />
+        <StudioDataTable onSelect={onSelectStudio} selectedId={selectedId} />
       </div>
     </div>
   );

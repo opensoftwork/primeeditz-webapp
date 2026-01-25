@@ -14,7 +14,7 @@ import { ProjectHeader } from "./project-header";
 import { ProjectSpecs } from "./project-specs";
 import { ProjectReferenceFiles } from "./project-reference-files";
 import { ProjectHistory } from "./project-history";
-import { ClientCard } from "./client-card";
+import { StudioCard } from "./studio-card";
 import { SystemControls } from "./system-controls";
 import { ProjectDetailSkeleton } from "./skeleton";
 import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
@@ -183,7 +183,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           </div>
 
           <div className="lg:col-span-4 space-y-10">
-            <ClientCard
+            <StudioCard
               clientName={project.clientName}
               clientEmail={project.clientEmail}
               submittedAt={project._creationTime}

@@ -3,13 +3,13 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Calendar, Hash, Eye } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { ClientStatusBadge } from "../client-status-badge";
+import { StudioStatusBadge } from "../studio-status-badge";
 import { PhaseProgress } from "../phase-progress";
-import type { ClientProject } from "./types";
+import type { StudioProject } from "./types";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
-export const columns: ColumnDef<ClientProject>[] = [
+export const columns: ColumnDef<StudioProject>[] = [
   {
     accessorKey: "code",
     header: ({ column }) => (
@@ -69,7 +69,7 @@ export const columns: ColumnDef<ClientProject>[] = [
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => (
-      <ClientStatusBadge status={row.getValue("actionState")} />
+      <StudioStatusBadge status={row.getValue("actionState")} />
     ),
     filterFn: (row, id, value) => {
       return (value as string[]).includes(row.getValue(id));

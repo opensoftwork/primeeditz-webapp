@@ -34,7 +34,12 @@ interface QuickActionsProps {
     _creationTime: number;
   };
   sections: { _id: string; name: string; color?: string }[];
-  projects?: { _id: string; code: string; eventName?: string; projectTypeName?: string }[];
+  projects?: {
+    _id: string;
+    code: string;
+    eventName?: string;
+    projectTypeName?: string;
+  }[];
   onSend: () => void;
   onDuplicate: () => void;
 }
@@ -61,12 +66,16 @@ export function QuickActions({
           variant="outline"
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
           onClick={onSend}
-          disabled={!["draft", "sent", "viewed", "changes_requested"].includes(quotation.status)}
+          disabled={
+            !["draft", "sent", "viewed", "changes_requested"].includes(
+              quotation.status,
+            )
+          }
         >
           <Send className="h-4 w-4 mr-2 text-primary" />
-          Send to Client
+          Send to Studio
         </Button>
-        
+
         <DownloadQuotation
           quotation={quotation}
           sections={sections}
@@ -76,7 +85,7 @@ export function QuickActions({
           icon={<Download className="h-4 w-4 mr-2 text-white/40" />}
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
         />
-        
+
         <Button
           variant="outline"
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"

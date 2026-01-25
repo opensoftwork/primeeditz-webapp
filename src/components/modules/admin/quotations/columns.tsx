@@ -2,7 +2,7 @@
 
 import { ColumnDef } from "@tanstack/react-table";
 import { AdminQuotation } from "./list-types";
-import { QuotationStatusBadge } from "@/components/modules/client/quotations/shared/quotation-status-badge";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { format } from "date-fns";
 import { Eye, Receipt, User } from "lucide-react";
 import Link from "next/link";
@@ -15,7 +15,7 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     cell: ({ row }) => {
       const quotation = row.original;
       return (
-        <Link 
+        <Link
           href={`/quotations/${quotation._id}`}
           className="flex items-center gap-2 group/link"
         >
@@ -31,17 +31,17 @@ export const columns: ColumnDef<AdminQuotation>[] = [
   },
   {
     accessorKey: "clientName",
-    header: "Client",
+    header: "Studio",
     cell: ({ row }) => {
       const name = row.getValue("clientName") as string;
       return (
         <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <User className="h-3 w-3 text-white/40" />
-            </div>
-            <span className="font-bold text-white/50 truncate max-w-[150px] block">
-                {name || "Guest"}
-            </span>
+          <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+            <User className="h-3 w-3 text-white/40" />
+          </div>
+          <span className="font-bold text-white/50 truncate max-w-[150px] block">
+            {name || "Guest"}
+          </span>
         </div>
       );
     },

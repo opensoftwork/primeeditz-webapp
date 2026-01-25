@@ -27,7 +27,7 @@ import {
   QUOTATION_STEPS,
 } from "./quotation-builder-context";
 import {
-  Step1ClientContext,
+  Step1StudioContext,
   Step2ProjectSelection,
   Step2TemplateSelection,
   Step3LineItems,
@@ -61,7 +61,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     formData,
     subtotal,
     grandTotal,
-    selectedClient,
+    selectedStudio,
     goToStep,
   } = useQuotationBuilder();
 
@@ -104,7 +104,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
             </h1>
           </div>
           <p className="text-white/50 text-xs font-medium">
-            Crafting a new professional proposal for your clients.
+            Crafting a new professional proposal for your strategic studios.
           </p>
         </div>
 
@@ -134,8 +134,8 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                 {quotationId
                   ? "Save Changes"
                   : currentStep === 5
-                  ? "Finalize & Preview"
-                  : "Next Step"}
+                    ? "Finalize & Preview"
+                    : "Next Step"}
               </>
             )}
           </Button>
@@ -145,7 +145,9 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
       {/* Steps Indicator */}
       <div className="flex items-center gap-1">
         {QUOTATION_STEPS.map((step, idx) => {
-          const StepIcon = [User, FolderOpen, Layout, Receipt, CheckCircle2][idx];
+          const StepIcon = [User, FolderOpen, Layout, Receipt, CheckCircle2][
+            idx
+          ];
           return (
             <div key={step.id} className="flex-1 flex items-center gap-2">
               <button
@@ -157,7 +159,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   "group flex items-center gap-3 transition-all text-left",
                   quotationId || currentStep > step.id
                     ? "cursor-pointer hover:opacity-100"
-                    : "cursor-default"
+                    : "cursor-default",
                 )}
               >
                 <div
@@ -166,8 +168,8 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                     currentStep === step.id
                       ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
                       : currentStep > step.id
-                      ? "bg-primary/20 border-primary/30 text-primary"
-                      : "bg-white/5 border-white/5 text-white/40"
+                        ? "bg-primary/20 border-primary/30 text-primary"
+                        : "bg-white/5 border-white/5 text-white/40",
                   )}
                 >
                   <StepIcon className="h-4 w-4" />
@@ -198,7 +200,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
               exit={{ opacity: 0, y: -8 }}
               transition={{ duration: 0.15, ease: "easeOut" }}
             >
-              {currentStep === 1 && <Step1ClientContext />}
+              {currentStep === 1 && <Step1StudioContext />}
               {currentStep === 2 && <Step2ProjectSelection />}
               {currentStep === 3 && <Step2TemplateSelection />}
               {currentStep === 4 && <Step3LineItems />}
@@ -211,7 +213,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
           <SummarySidebar
             subtotal={subtotal}
             grandTotal={grandTotal}
-            selectedClient={selectedClient}
+            selectedStudio={selectedStudio}
           />
         </div>
       </div>

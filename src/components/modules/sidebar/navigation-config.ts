@@ -24,8 +24,8 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-// Client Navigation - Simple, focused on their projects
-export const clientNavItems: NavItem[] = [
+// Studio Navigation - Simple, focused on their projects
+export const studioNavItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -154,7 +154,7 @@ export function getNavItemsForRole(
       return employeeNavItems;
     case "client":
     case "studio":
-      return clientNavItems;
+      return studioNavItems;
     default:
       return [];
   }

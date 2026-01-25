@@ -87,7 +87,7 @@ export const INITIAL_FORM_DATA: QuotationFormData = {
 };
 
 export const QUOTATION_STEPS = [
-  { id: 1 as const, label: "Client & Context" },
+  { id: 1 as const, label: "Studio & Context" },
   { id: 2 as const, label: "Projects" },
   { id: 3 as const, label: "Template Selection" },
   { id: 4 as const, label: "Calculate Worth" },
@@ -109,11 +109,11 @@ interface QuotationBuilderContextValue {
   submitTrigger: (() => void) | null;
 
   // Data from queries
-  clients: Client[] | undefined;
+  studios: Client[] | undefined;
   projects: Project[] | undefined;
   templates: Template[] | undefined;
   sections: Section[] | undefined;
-  selectedClient: Client | undefined;
+  selectedStudio: Client | undefined;
 
   // Computed values
   subtotal: number;
@@ -224,8 +224,8 @@ export function QuotationBuilderProvider({
   }, [existingQuotation, initialQuotationId]);
 
   // Queries - cast to proper types
-  const clientsQuery = useQuery(api.admin.getClients, {});
-  const clients = clientsQuery as Client[] | undefined;
+  const studiosQuery = useQuery(api.admin.getClients, {});
+  const studios = studiosQuery as Client[] | undefined;
 
   const projectsQuery = useQuery(
     api.admin.getAdminProjectsSimple,
@@ -259,9 +259,9 @@ export function QuotationBuilderProvider({
   );
 
   // Computed
-  const selectedClient = useMemo(
-    () => clients?.find((c) => c._id === formData.step1.clientId),
-    [clients, formData.step1.clientId],
+  const selectedStudio = useMemo(
+    () => studios?.find((c) => c._id === formData.step1.clientId),
+    [studios, formData.step1.clientId],
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -484,8 +484,10 @@ export function QuotationBuilderProvider({
         rate: item.rate,
         quantity: item.quantity,
         spawnsProject: item.spawnsProject,
-        projectTypeId: item.projectTypeId,
-        selectedFolderTemplateId: item.selectedFolderTemplateId,
+        projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
+        selectedFolderTemplateId: item.selectedFolderTemplateId as
+          | Id<"folderTemplates">
+          | undefined,
         subItems: item.subItems?.map((s) => ({
           id: s.id || crypto.randomUUID(),
           description: s.description,
@@ -504,17 +506,17 @@ export function QuotationBuilderProvider({
             : undefined;
 
       const payload = {
-        clientId: step1.clientId,
+        clientId: step1.clientId as Id<"profiles">,
         projectId:
           step1.projectId && step1.projectId !== "none"
-            ? step1.projectId
+            ? (step1.projectId as Id<"projects">)
             : undefined,
-        projectIds: projectIds,
+        projectIds: projectIds as Id<"projects">[] | undefined,
 
         // Template ID is ambiguous with multiple projects, passing undefined or we could pass a primary one.
         // For now, let's omit it as the source of truth is the line items.
-        templateId: undefined,
-        lineItems: lineItemsPayload,
+        templateId: undefined as Id<"quotationTemplates"> | undefined,
+        lineItems: lineItemsPayload as any,
         terms: step5.terms,
         taxRate: step5.taxRate / 100, // API expects decimal
         discountAmount: step5.discountAmount,
@@ -525,16 +527,16 @@ export function QuotationBuilderProvider({
       if (quotationId) {
         await updateQuotation({
           quotationId: quotationId as Id<"quotations">,
-          lineItems: lineItemsPayload,
+          lineItems: lineItemsPayload as any,
           terms: step5.terms,
           taxRate: step5.taxRate / 100,
           discountAmount: step5.discountAmount,
-          clientId: step1.clientId,
+          clientId: step1.clientId as Id<"profiles">,
           projectId:
             step1.projectId && step1.projectId !== "none"
-              ? step1.projectId
+              ? (step1.projectId as Id<"projects">)
               : undefined,
-          projectIds: projectIds,
+          projectIds: projectIds as Id<"projects">[] | undefined,
           validUntil: step1.validUntil?.getTime(),
         });
         toast.success("Quotation updated successfully");
@@ -612,11 +614,11 @@ export function QuotationBuilderProvider({
         isLoading,
         error,
         submitTrigger,
-        clients,
+        studios,
         projects,
         templates,
         sections,
-        selectedClient,
+        selectedStudio,
         subtotal,
         taxAmount,
         grandTotal,

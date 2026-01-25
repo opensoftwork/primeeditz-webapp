@@ -1,17 +1,11 @@
 "use client";
 
 import { motion } from "motion/react";
-import {
-  Receipt,
-  Calendar,
-  User,
-  Eye,
-  Hash,
-} from "lucide-react";
+import { Receipt, Calendar, User, Eye, Hash } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { QuotationStatusBadge } from "@/components/modules/client/quotations/shared/quotation-status-badge";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import Link from "next/link";
 import { AdminQuotation } from "./list-types";
 
@@ -25,7 +19,7 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
       <motion.div
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
+        className="group p-6 rounded-3xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
@@ -43,7 +37,9 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
                 v{quotation.version} • Quotation
               </span>
             </div>
-            <QuotationStatusBadge status={quotation.status as AdminQuotation["status"]} />
+            <QuotationStatusBadge
+              status={quotation.status as AdminQuotation["status"]}
+            />
           </div>
 
           {/* Client Info */}
@@ -73,7 +69,9 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
               Total Valuation
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-sm font-bold text-white/40 tracking-tighter">₹</span>
+              <span className="text-sm font-bold text-white/40 tracking-tighter">
+                ₹
+              </span>
               <span className="text-2xl font-black text-white tracking-tighter">
                 {quotation.total.toLocaleString("en-IN")}
               </span>

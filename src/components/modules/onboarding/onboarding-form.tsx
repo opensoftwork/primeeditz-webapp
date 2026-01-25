@@ -115,7 +115,9 @@ export default function OnboardingForm() {
         const roleMessage =
           result.role === "admin"
             ? "Welcome, Admin! Your studio is ready."
-            : "Profile created! Welcome to PrimeEditz.";
+            : result.role === "studio"
+              ? "Welcome! Your studio profile is ready."
+              : "Profile created! Welcome to PrimeEditz.";
 
         toast.success(roleMessage);
         router.push("/dashboard");
@@ -456,7 +458,7 @@ export default function OnboardingForm() {
                           htmlFor={field.name}
                           className="text-sm font-medium"
                         >
-                          Company name
+                          Studio / Company name
                         </FieldLabel>
                         <Input
                           id={field.name}

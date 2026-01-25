@@ -12,9 +12,9 @@ import {
 } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { ClientDataTable } from "../../../clients/client-data-table";
+import { StudioDataTable } from "../../../studio/studio-data-table";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
-import type { Client } from "../../builder/types";
+import type { Studio as Client } from "../../../studio/studio-data-table";
 
 export function EditorClientSection() {
   const { formData, setFormData, selectedClient } = useQuotationBuilder();
@@ -38,7 +38,7 @@ export function EditorClientSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Client Selection */}
-        <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5 space-y-4">
+        <div className="p-6 rounded-4xl bg-white/2 border border-white/5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-black uppercase tracking-widest text-white/40">
               Recipient
@@ -57,7 +57,7 @@ export function EditorClientSection() {
             )}
           </div>
 
-          <ClientDataTable
+          <StudioDataTable
             onSelect={handleClientSelect}
             selectedId={step1Data.clientId}
             onlyWithProjects
@@ -65,7 +65,7 @@ export function EditorClientSection() {
         </div>
 
         {/* Project & Validity Window */}
-        <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5 space-y-6">
+        <div className="p-6 rounded-4xl bg-white/2 border border-white/5 space-y-6">
           <div>
             <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-3">
               Validity Window
@@ -77,7 +77,7 @@ export function EditorClientSection() {
                   variant="outline"
                   className={cn(
                     "w-full h-14 bg-white/5 border-white/5 rounded-2xl px-5 flex items-center justify-between text-white font-bold hover:bg-white/10 transition-colors text-left",
-                    !step1Data.validUntil && "text-white/40"
+                    !step1Data.validUntil && "text-white/40",
                   )}
                 >
                   <span>

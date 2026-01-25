@@ -11,15 +11,15 @@ import type { Id } from '@convex/_generated/dataModel'
 // Wizard Mode
 // ============================================================================
 
-/** Wizard mode: client-initiated (5 steps) or admin-initiated (6 steps) */
-export type WizardMode = 'client' | 'studio' | 'admin'
+/** Wizard mode: studio-initiated (5 steps) or admin-initiated (6 steps) */
+export type WizardMode = 'studio' | 'admin'
 
 // ============================================================================
 // Step Definitions
 // ============================================================================
 
-/** Steps for client-initiated projects (5 steps) */
-export const CLIENT_WIZARD_STEPS = [
+/** Steps for studio-initiated projects (5 steps) */
+export const STUDIO_WIZARD_STEPS = [
   { id: 1, title: 'Project Type', description: 'Select project type and basic info' },
   { id: 2, title: 'Details', description: 'Project-specific details' },
   { id: 3, title: 'Files', description: 'Upload reference files' },
@@ -29,7 +29,7 @@ export const CLIENT_WIZARD_STEPS = [
 
 /** Steps for admin-initiated projects (6 steps) */
 export const ADMIN_WIZARD_STEPS = [
-  { id: 0, title: 'Client', description: 'Select or create client' },
+  { id: 0, title: 'Studio', description: 'Select or create studio' },
   { id: 1, title: 'Basics', description: 'Project type and basic info' },
   { id: 2, title: 'Details', description: 'Project-specific details' },
   { id: 3, title: 'Files', description: 'Upload reference files' },
@@ -37,15 +37,15 @@ export const ADMIN_WIZARD_STEPS = [
   { id: 5, title: 'Review', description: 'Review and submit' },
 ] as const
 
-/** Default wizard steps (client mode for backward compatibility) */
-export const WIZARD_STEPS = CLIENT_WIZARD_STEPS
+/** Default wizard steps (studio mode) */
+export const WIZARD_STEPS = STUDIO_WIZARD_STEPS
 
-/** Step IDs: 0-5 for admin mode, 1-5 for client mode */
+/** Step IDs: 0-5 for admin mode, 1-5 for studio mode */
 export type WizardStepId = 0 | 1 | 2 | 3 | 4 | 5
 
 /** Get wizard steps based on mode */
 export function getWizardSteps(mode: WizardMode) {
-  return mode === 'admin' ? ADMIN_WIZARD_STEPS : CLIENT_WIZARD_STEPS
+  return mode === 'admin' ? ADMIN_WIZARD_STEPS : STUDIO_WIZARD_STEPS
 }
 
 /** Get total step count based on mode */
@@ -57,10 +57,6 @@ export function getStepCount(mode: WizardMode): number {
 export function getFirstStepId(mode: WizardMode): WizardStepId {
   return mode === 'admin' ? 0 : 1
 }
-
-
-
-
 
 // ============================================================================
 // Project Type Definition
@@ -82,11 +78,11 @@ export interface ProjectType {
 // Form Data Types
 // ============================================================================
 
-/** Client selection mode in admin wizard */
-export type ClientSelectionMode = 'existing' | 'new' | 'none' | null
+/** Studio selection mode in admin wizard */
+export type StudioSelectionMode = 'existing' | 'new' | 'none' | null
 
-/** Selected client data for display */
-export interface SelectedClientData {
+/** Selected studio data for display */
+export interface SelectedStudioData {
   _id: Id<'profiles'>
   name: string
   email: string
@@ -97,12 +93,12 @@ export interface SelectedClientData {
   activeProjectCount?: number
 }
 
-/** Step 0: Client Selection (admin mode only) */
+/** Step 0: Studio Selection (admin mode only) */
 export interface Step0Data {
-  selectionMode: ClientSelectionMode
-  clientId: Id<'profiles'> | null
-  clientData: SelectedClientData | null
-  isNewClient: boolean
+  selectionMode: StudioSelectionMode
+  studioId: Id<'profiles'> | null
+  studioData: SelectedStudioData | null
+  isNewStudio: boolean
 }
 
 /** Step 1: Basic Info */
@@ -144,7 +140,7 @@ export interface Step4Data {
 
 /** Combined wizard form data */
 export interface WizardFormData {
-  step0: Step0Data  // Client selection (admin mode only)
+  step0: Step0Data  // Studio selection (admin mode only)
   step1: Step1Data
   step2: Step2Data
   step3: Step3Data
@@ -155,9 +151,9 @@ export interface WizardFormData {
 export const INITIAL_FORM_DATA: WizardFormData = {
   step0: {
     selectionMode: null,
-    clientId: null,
-    clientData: null,
-    isNewClient: false,
+    studioId: null,
+    studioData: null,
+    isNewStudio: false,
   },
   step1: {
     projectTypeId: null,

@@ -7,7 +7,7 @@ export {
   getNavItemsForRole,
   adminNavGroups,
   employeeNavItems,
-  clientNavItems,
+  studioNavItems,
   commonNavGroup,
   type NavItem,
 } from "./navigation-config";
