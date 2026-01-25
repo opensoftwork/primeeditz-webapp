@@ -20,7 +20,7 @@ export const createProfile = authenticatedMutation({
   args: {
     name: v.string(),
     phone: v.optional(v.string()),
-    role: v.union(v.literal('client'), v.literal('admin')),
+    role: v.union(v.literal('client'), v.literal('studio'), v.literal('admin')),
   },
   handler: async (ctx, args) => {
     // ctx.authUser is available from the authenticatedMutation wrapper
@@ -142,7 +142,7 @@ export const createDraftClientProfile = authenticatedMutation({
       name: args.name,
       phone: args.phone,
       company: args.company,
-      role: 'client',
+      role: 'studio',
       onboardingComplete: false, // Client hasn't completed onboarding
       updatedAt: Date.now(),
     })
@@ -172,7 +172,7 @@ export const updateClientProfile = adminMutation({
 
     const targetProfile = await ctx.db.get(profileId)
     if (!targetProfile) throw new Error('Client profile not found')
-    if (targetProfile.role !== 'client') throw new Error('Target profile is not a client')
+    if (targetProfile.role !== 'client' && targetProfile.role !== 'studio') throw new Error('Target profile is not a client/studio')
 
     const filteredUpdates: Record<string, any> = {
       updatedAt: Date.now(),

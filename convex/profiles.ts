@@ -38,7 +38,7 @@ export const createProfile = mutation({
     // Check if this is the first user
     const firstProfile = await ctx.db.query("profiles").first();
     const isFirst = firstProfile === null;
-    const role = isFirst ? ("admin" as const) : ("client" as const);
+    const role = isFirst ? ("admin" as const) : ("studio" as const);
 
     // Create the profile
     const profileId = await ctx.db.insert("profiles", {
