@@ -8,14 +8,14 @@
 export const ROLES = {
   admin: 'admin',
   employee: 'employee',
-  client: 'client',
+  client: 'studio',
   studio: 'studio', // NEW: Transition role
 } as const
 
 export type Role = (typeof ROLES)[keyof typeof ROLES]
 
 // Role hierarchy (higher index = higher privilege)
-const ROLE_HIERARCHY: Role[] = ['client', 'studio', 'employee', 'admin']
+const ROLE_HIERARCHY: Role[] = ['studio', 'studio', 'employee', 'admin']
 
 /**
  * Check if user has a specific role

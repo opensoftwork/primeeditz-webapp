@@ -145,14 +145,13 @@ export const commonNavGroup: NavGroup = {
 
 // Get navigation items based on role
 export function getNavItemsForRole(
-  role: "admin" | "employee" | "client" | "studio" | null
+  role: "admin" | "employee" | "studio" | null
 ): NavItem[] | NavGroup[] {
   switch (role) {
     case "admin":
       return adminNavGroups;
     case "employee":
       return employeeNavItems;
-    case "client":
     case "studio":
       return studioNavItems;
     default:
