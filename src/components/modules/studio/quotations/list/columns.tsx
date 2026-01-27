@@ -31,9 +31,10 @@ export const columns: ColumnDef<StudioQuotation>[] = [
   },
   {
     accessorKey: "projectName",
-    header: "Project",
+    header: "Target / End Client",
     cell: ({ row }) => {
-      const name = row.getValue("projectName") as string;
+      const quotation = row.original;
+      const name = quotation.endClientName || quotation.projectName;
       return (
         <span className="font-bold text-white/50 truncate max-w-[200px] block">
           {name || "N/A"}

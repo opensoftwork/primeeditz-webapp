@@ -42,7 +42,7 @@ export function AdminProjectList() {
   const [projectTypeId, setProjectTypeId] = useState<
     Id<"projectTypes"> | undefined
   >(undefined);
-  const [clientSearch, setClientSearch] = useState("");
+  const [studioSearch, setClientSearch] = useState("");
   const [sortBy, setSortBy] = useState<"date" | "status">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
   const [page, setPage] = useState(1);
@@ -55,7 +55,7 @@ export function AdminProjectList() {
     phase: phase as any,
     actionState: actionState as any,
     projectTypeId: projectTypeId,
-    clientSearch: debouncedSearch || undefined,
+    studioSearch: debouncedSearch || undefined,
     sortBy: sortBy,
     sortOrder: sortOrder,
     page: page,
@@ -153,7 +153,7 @@ export function AdminProjectList() {
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search by client or code..."
-                value={clientSearch}
+                value={studioSearch}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-9"
               />
@@ -248,7 +248,7 @@ export function AdminProjectList() {
               {/* Table Header */}
               <div className="hidden md:grid md:grid-cols-6 gap-4 px-4 py-2 bg-muted/50 rounded-lg text-sm font-medium text-muted-foreground">
                 <div>Code</div>
-                <div>Client</div>
+                <div>Studio</div>
                 <div>Type</div>
                 <div>Event</div>
                 <div>Status</div>
@@ -269,12 +269,12 @@ export function AdminProjectList() {
                     {project.code}
                   </div>
 
-                  {/* Client */}
+                  {/* Studio */}
                   <div className="text-sm">
                     <span className="md:hidden text-muted-foreground mr-2">
-                      Client:
+                      Studio:
                     </span>
-                    {project.clientName}
+                    {project.studioName}
                   </div>
 
                   {/* Type */}

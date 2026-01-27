@@ -1,12 +1,12 @@
 /**
- * Types and Constants for Step 0: Client Selection
+ * Types and Constants for Step 0: Studio Selection
  */
 
 import { LucideIcon, Users, UserPlus, FolderOpen } from "lucide-react";
-import type { ClientSelectionMode } from "../../types";
+import type { StudioSelectionMode } from "../../types";
 
 export interface SelectionOption {
-    id: ClientSelectionMode;
+    id: StudioSelectionMode;
     icon: LucideIcon;
     title: string;
     description: string;
@@ -17,18 +17,18 @@ export const SELECTION_OPTIONS: SelectionOption[] = [
         id: "existing",
         icon: Users,
         title: "Select Existing",
-        description: "Browse your client list",
+        description: "Browse your studio list",
     },
     {
         id: "new",
         icon: UserPlus,
-        title: "Create New Client",
-        description: "Add a new client now",
+        title: "Create New Studio",
+        description: "Add a new studio now",
     },
     {
         id: "none",
         icon: FolderOpen,
-        title: "No Client",
+        title: "No Studio",
         description: "Create without association",
     },
 ];

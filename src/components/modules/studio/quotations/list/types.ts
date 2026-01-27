@@ -4,9 +4,10 @@ export type StudioQuotation = {
   _id: string;
   _creationTime: number;
   code: string;
-  status: "draft" | "sent" | "viewed" | "approved" | "changes_requested" | "rejected" | "expired" | "superseded";
+  status: "initiated" | "draft" | "sent" | "viewed" | "approved" | "changes_requested" | "rejected" | "expired" | "superseded";
   total: number;
   projectName?: string;
+  endClientName?: string;
   validUntil?: number;
   approvedAt?: number;
 };

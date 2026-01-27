@@ -3,7 +3,7 @@
  *
  * Provides form state management across wizard steps using React Context.
  * Persists form data to Convex draft on step changes.
- * Supports both client mode (5 steps) and admin mode (6 steps).
+ * Supports both studio mode (5 steps) and admin mode (6 steps).
  */
 
 "use client";
@@ -27,7 +27,7 @@ import {
   type WizardStepId,
   type WizardMode,
   type ReferenceFile,
-  type SelectedClientData,
+  type SelectedStudioData,
   INITIAL_FORM_DATA,
   WIZARD_STEPS,
   getWizardSteps,
@@ -71,7 +71,7 @@ interface WizardContextValue {
   cancelWizard: () => Promise<void>;
   resetWizard: () => void;
   setSubmitTrigger: (fn: (() => void) | null) => void;
-  setClientData: (clientData: SelectedClientData | null) => void;
+  setStudioData: (studioData: SelectedStudioData | null) => void;
 }
 
 const WizardContext = createContext<WizardContextValue | null>(null);
@@ -103,7 +103,7 @@ interface WizardFormProviderProps {
 
 export function WizardFormProvider({
   children,
-  mode = "client",
+  mode = "studio",
   initialProjectId,
   initialProjectCode,
   initialStep,
@@ -149,8 +149,14 @@ export function WizardFormProvider({
   const generateUploadUrl = useAction(
     api.functions.projects.storage.generateUploadUrl,
   );
+  const updateOnboarding = useMutation(
+    api.functions.projects.mutation.shared.updateOnboarding,
+  );
+  const completeOnboardingMutation = useMutation(
+    api.functions.projects.mutation.shared.completeOnboarding,
+  );
 
-  const existingClientDraft = useQuery(
+  const existingStudioDraft = useQuery(
     api.functions.projects.queries.getMyActiveDraft,
     mode === "admin" ? "skip" : {},
   );
@@ -163,11 +169,19 @@ export function WizardFormProvider({
 
   // Combined existing draft based on mode
   const existingDraft =
-    mode === "admin" ? existingAdminDraft : existingClientDraft;
+    mode === "admin" ? existingAdminDraft : existingStudioDraft;
 
   // Fetch all active project types for logic and selection
   const projectTypes = useQuery(
     api.functions.projectTypes.queries.getActiveProjectTypes,
+  );
+
+  // Load project for onboarding mode
+  const onboardingProject = useQuery(
+    api.functions.projects.queries.getProject,
+    mode === "onboarding" && (projectId || initialProjectId)
+      ? { projectId: (projectId || initialProjectId) as Id<"projects"> }
+      : "skip",
   );
 
   // Ref to prevent double-initialization in Strict Mode
@@ -175,9 +189,50 @@ export function WizardFormProvider({
 
   // Create or Resume draft on first load
   useEffect(() => {
+    if (hasInitialized.current) return;
+
+    // For onboarding mode, we don't look for active drafts
+    if (mode === "onboarding") {
+      if (!onboardingProject) return;
+
+      setProjectId(onboardingProject._id);
+      setProjectCode(onboardingProject.code);
+      // Start at step 3 (Files) for onboarding
+      setCurrentStep(3);
+
+      // Populate form data from project
+      setFormDataState(
+        (prev): WizardFormData => ({
+          ...prev,
+          step1: {
+            projectTypeId: onboardingProject.projectTypeId,
+            endClientName: onboardingProject.endClientName || "",
+            eventName: onboardingProject.eventName || "",
+            eventDate: onboardingProject.eventDate ?? null,
+            venue: onboardingProject.venue || "",
+          },
+          step2: {
+            typeSpecificDetails: onboardingProject.typeSpecificDetails || {},
+          },
+          step3: {
+            referenceFiles:
+              (onboardingProject.referenceFiles as ReferenceFile[]) || [],
+          },
+          step4: {
+            description: onboardingProject.description || "",
+            additionalNotes: onboardingProject.additionalNotes || "",
+            preferredDeliveryDate:
+              onboardingProject.preferredDeliveryDate ?? null,
+          },
+        }),
+      );
+      hasInitialized.current = true;
+      return;
+    }
+
     // Wait for existingDraft query to return (undefined means loading)
     if (existingDraft === undefined) return;
-    if (projectId || hasInitialized.current) return;
+    if (projectId) return;
 
     const initDraft = async () => {
       if (existingDraft) {
@@ -192,16 +247,16 @@ export function WizardFormProvider({
         setFormDataState(
           (prev): WizardFormData => ({
             ...prev,
-            // Step 0 for admin mode - restore client selection
-            // Note: clientData is null because draft only stores clientId, not full profile data
-            // The UI can query full client data separately using the clientId if needed
+            // Step 0 for admin mode - restore studio selection
+            // Note: studioData is null because draft only stores studioId, not full profile data
+            // The UI can query full studio data separately using the studioId if needed
             step0:
-              mode === "admin" && existingDraft.clientId
+              mode === "admin" && existingDraft.studioId
                 ? {
-                    clientId: existingDraft.clientId,
-                    clientData: null,
+                    studioId: existingDraft.studioId,
+                    studioData: null,
                     selectionMode: "existing" as const,
-                    isNewClient: false,
+                    isNewStudio: false,
                   }
                 : prev.step0,
             step1: {
@@ -255,7 +310,7 @@ export function WizardFormProvider({
       }
     };
     initDraft();
-  }, [projectId, createDraft, existingDraft, mode]);
+  }, [projectId, createDraft, existingDraft, mode, onboardingProject]);
 
   // Update form data for a specific step
   const setFormData = useCallback(
@@ -280,29 +335,44 @@ export function WizardFormProvider({
       setIsLoading(true);
       setError(null);
       try {
-        await updateDraft({
-          projectId,
-          clientId: formData.step0.clientId ?? undefined,
-          // Step 1
-          projectTypeId: formData.step1.projectTypeId ?? undefined,
-          endClientName: formData.step1.endClientName || undefined,
-          eventName: formData.step1.eventName || undefined,
-          eventDate: formData.step1.eventDate ?? undefined,
-          venue: formData.step1.venue || undefined,
-          // Step 2
-          typeSpecificDetails: formData.step2.typeSpecificDetails,
-          // Step 3
-          referenceFiles:
-            formData.step3.referenceFiles.length > 0
-              ? formData.step3.referenceFiles
-              : undefined,
-          // Step 4
-          description: formData.step4.description || undefined,
-          additionalNotes: formData.step4.additionalNotes || undefined,
-          preferredDeliveryDate:
-            formData.step4.preferredDeliveryDate ?? undefined,
-          lastStep: stepOverride ?? currentStep,
-        });
+        if (mode === "onboarding") {
+          await updateOnboarding({
+            projectId,
+            referenceFiles:
+              formData.step3.referenceFiles.length > 0
+                ? formData.step3.referenceFiles
+                : undefined,
+            description: formData.step4.description || undefined,
+            additionalNotes: formData.step4.additionalNotes || undefined,
+            preferredDeliveryDate:
+              formData.step4.preferredDeliveryDate ?? undefined,
+            lastStep: stepOverride ?? currentStep,
+          });
+        } else {
+          await updateDraft({
+            projectId,
+            studioId: formData.step0.studioId ?? undefined,
+            // Step 1
+            projectTypeId: formData.step1.projectTypeId ?? undefined,
+            endClientName: formData.step1.endClientName || undefined,
+            eventName: formData.step1.eventName || undefined,
+            eventDate: formData.step1.eventDate ?? undefined,
+            venue: formData.step1.venue || undefined,
+            // Step 2
+            typeSpecificDetails: formData.step2.typeSpecificDetails,
+            // Step 3
+            referenceFiles:
+              formData.step3.referenceFiles.length > 0
+                ? formData.step3.referenceFiles
+                : undefined,
+            // Step 4
+            description: formData.step4.description || undefined,
+            additionalNotes: formData.step4.additionalNotes || undefined,
+            preferredDeliveryDate:
+              formData.step4.preferredDeliveryDate ?? undefined,
+            lastStep: stepOverride ?? currentStep,
+          });
+        }
         setIsDirty(false);
       } catch (err) {
         const errorMessage =
@@ -318,7 +388,7 @@ export function WizardFormProvider({
         setIsLoading(false);
       }
     },
-    [projectId, formData, updateDraft],
+    [projectId, formData, updateDraft, updateOnboarding, mode, currentStep],
   );
 
   // Navigation
@@ -394,44 +464,44 @@ export function WizardFormProvider({
         );
 
         // 2. Upload files in parallel with graceful error handling
-        const uploadPromises = filesToUpload.map(async (clientFile) => {
+        const uploadPromises = filesToUpload.map(async (studioFile) => {
           // If already has storageKey, use it
-          if (clientFile.storageKey) {
+          if (studioFile.storageKey) {
             return {
-              fileId: clientFile.id,
-              fileName: clientFile.fileName,
-              fileSize: clientFile.fileSize,
-              fileType: clientFile.fileType,
-              storageKey: clientFile.storageKey,
-              previewUrl: clientFile.previewUrl || undefined,
+              fileId: studioFile.id,
+              fileName: studioFile.fileName,
+              fileSize: studioFile.fileSize,
+              fileType: studioFile.fileType,
+              storageKey: studioFile.storageKey,
+              previewUrl: studioFile.previewUrl || undefined,
             };
           }
 
           // Otherwise, upload to MinIO
           const { uploadUrl, storageKey } = await generateUploadUrl({
             projectId,
-            fileName: clientFile.fileName,
-            fileType: clientFile.fileType,
+            fileName: studioFile.fileName,
+            fileType: studioFile.fileType,
           });
 
           const response = await fetch(uploadUrl, {
             method: "PUT",
-            body: clientFile.file, // This is the actual File object
+            body: studioFile.file, // This is the actual File object
             headers: {
-              "Content-Type": clientFile.fileType,
+              "Content-Type": studioFile.fileType,
             },
           });
 
           if (!response.ok)
-            throw new Error(`Failed to transmit ${clientFile.fileName}`);
+            throw new Error(`Failed to transmit ${studioFile.fileName}`);
 
           return {
-            fileId: clientFile.id,
-            fileName: clientFile.fileName,
-            fileSize: clientFile.fileSize,
-            fileType: clientFile.fileType,
+            fileId: studioFile.id,
+            fileName: studioFile.fileName,
+            fileSize: studioFile.fileSize,
+            fileType: studioFile.fileType,
             storageKey: storageKey,
-            previewUrl: clientFile.previewUrl || undefined,
+            previewUrl: studioFile.previewUrl || undefined,
           };
         });
 
@@ -476,28 +546,41 @@ export function WizardFormProvider({
       }
 
       // 3. Save final form data with updated storage keys
-      await updateDraft({
-        projectId,
-        // Step 1
-        projectTypeId: formData.step1.projectTypeId ?? undefined,
-        endClientName: formData.step1.endClientName || undefined,
-        eventName: formData.step1.eventName || undefined,
-        eventDate: formData.step1.eventDate ?? undefined,
-        venue: formData.step1.venue || undefined,
-        // Step 2
-        typeSpecificDetails: formData.step2.typeSpecificDetails,
-        // Step 3 - Use the actual uploaded files metadata
-        referenceFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
-        // Step 4
-        description: formData.step4.description || undefined,
-        additionalNotes: formData.step4.additionalNotes || undefined,
-        preferredDeliveryDate:
-          formData.step4.preferredDeliveryDate ?? undefined,
-        lastStep: currentStep,
-      });
-
-      // 4. Finally submit
-      await submitProjectMutation({ projectId });
+      if (mode === "onboarding") {
+        await updateOnboarding({
+          projectId,
+          referenceFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+          description: formData.step4.description || undefined,
+          additionalNotes: formData.step4.additionalNotes || undefined,
+          preferredDeliveryDate:
+            formData.step4.preferredDeliveryDate ?? undefined,
+          lastStep: currentStep,
+        });
+        // 4. Finally submit
+        await completeOnboardingMutation({ projectId });
+      } else {
+        await updateDraft({
+          projectId,
+          // Step 1
+          projectTypeId: formData.step1.projectTypeId ?? undefined,
+          endClientName: formData.step1.endClientName || undefined,
+          eventName: formData.step1.eventName || undefined,
+          eventDate: formData.step1.eventDate ?? undefined,
+          venue: formData.step1.venue || undefined,
+          // Step 2
+          typeSpecificDetails: formData.step2.typeSpecificDetails,
+          // Step 3 - Use the actual uploaded files metadata
+          referenceFiles: uploadedFiles.length > 0 ? uploadedFiles : undefined,
+          // Step 4
+          description: formData.step4.description || undefined,
+          additionalNotes: formData.step4.additionalNotes || undefined,
+          preferredDeliveryDate:
+            formData.step4.preferredDeliveryDate ?? undefined,
+          lastStep: currentStep,
+        });
+        // 4. Finally submit
+        await submitProjectMutation({ projectId });
+      }
       return true;
     } catch (err) {
       console.error("Submission error:", err);
@@ -520,9 +603,12 @@ export function WizardFormProvider({
     projectId,
     formData,
     updateDraft,
+    updateOnboarding,
     submitProjectMutation,
+    completeOnboardingMutation,
     generateUploadUrl,
     currentStep,
+    mode,
   ]);
 
   // Cancel wizard and delete draft
@@ -530,7 +616,9 @@ export function WizardFormProvider({
     if (projectId) {
       setIsLoading(true);
       try {
-        await deleteDraftMutation({ projectId });
+        if (mode !== "onboarding") {
+          await deleteDraftMutation({ projectId });
+        }
       } catch (err) {
         console.error("Failed to delete draft:", err);
         const errorMessage =
@@ -565,15 +653,15 @@ export function WizardFormProvider({
     setSubmitTriggerState(() => fn);
   }, []);
 
-  // Set client data (for admin mode client selection)
-  const setClientData = useCallback((clientData: SelectedClientData | null) => {
+  // Set studio data (for admin mode studio selection)
+  const setStudioData = useCallback((studioData: SelectedStudioData | null) => {
     setFormDataState((prev) => ({
       ...prev,
       step0: {
         ...prev.step0,
-        clientId: clientData?._id ?? null,
-        clientData,
-        selectionMode: clientData ? "existing" : prev.step0.selectionMode,
+        studioId: studioData?._id ?? null,
+        studioData,
+        selectionMode: studioData ? "existing" : prev.step0.selectionMode,
       },
     }));
     setIsDirty(true);
@@ -607,7 +695,7 @@ export function WizardFormProvider({
         submitTrigger,
         setSubmitTrigger,
         projectTypes,
-        setClientData,
+        setStudioData,
       }}
     >
       {children}

@@ -122,7 +122,12 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
     <Link href={`/projects/${project._id}`}>
       <motion.div
         whileHover={{ y: -5 }}
-        className="group relative h-full bg-white/3 border border-white/5 rounded-[2.5rem] p-8 hover:bg-white/5 hover:border-primary/30 transition-all duration-500 overflow-hidden flex flex-col"
+        className={cn(
+          "group relative h-full rounded-[2.5rem] p-8 transition-all duration-500 overflow-hidden flex flex-col",
+          project.actionState === "awaiting_uploads"
+            ? "bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/40"
+            : "bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/30",
+        )}
       >
         {/* Hover Highlight Effect */}
         <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 blur-[80px] rounded-full translate-x-24 -translate-y-24 group-hover:bg-primary/10 transition-colors" />
@@ -177,15 +182,26 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
           </div>
 
           {/* Onboarding Action (Story 11C.4 & 11C.5) */}
-          {(project.phase === "setup" || project.phase === "onboarding") && (
+          {project.actionState === "awaiting_uploads" ? (
             <div className="pt-6">
               <Link href={`/projects/${project._id}/onboarding`}>
                 <Button className="w-full h-11 rounded-2xl bg-primary text-black font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 gap-2">
                   <Rocket className="h-4 w-4" />
-                  Resume Onboarding
+                  Complete Onboarding
                 </Button>
               </Link>
             </div>
+          ) : (
+            (project.phase === "setup" || project.phase === "onboarding") && (
+              <div className="pt-6">
+                <Link href={`/projects/${project._id}/onboarding`}>
+                  <Button className="w-full h-11 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all gap-2">
+                    <Rocket className="h-4 w-4 opacity-40" />
+                    Resume Onboarding
+                  </Button>
+                </Link>
+              </div>
+            )
           )}
 
           {/* Footer */}

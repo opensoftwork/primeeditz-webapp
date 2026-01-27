@@ -34,7 +34,8 @@ export function StudioQuotationList() {
   }, [query]);
 
   const statusOptions = [
-    { label: "Pending Review", value: "sent" },
+    { label: "Pending Review", value: "initiated" },
+    { label: "Awaiting Response", value: "sent" },
     { label: "Viewed", value: "viewed" },
     { label: "Approved", value: "approved" },
     { label: "Changes Requested", value: "changes_requested" },

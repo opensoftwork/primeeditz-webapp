@@ -8,6 +8,7 @@ import {
   RefreshCw,
   Eye,
   Send,
+  Rocket,
   type LucideIcon,
 } from "lucide-react";
 
@@ -20,6 +21,7 @@ type QuotationStatus =
   | "expired"
   | "superseded"
   | "draft"
+  | "initiated"
   | "requested";
 
 interface QuotationStatusBadgeProps {
@@ -109,6 +111,14 @@ const statusConfig: Record<
     bgColor: "bg-blue-400/10",
     borderColor: "border-blue-400/20",
     glowColor: "bg-blue-400/10",
+  },
+  initiated: {
+    label: "Pending Review",
+    icon: Rocket,
+    color: "text-primary",
+    bgColor: "bg-primary/10",
+    borderColor: "border-primary/20",
+    glowColor: "bg-primary/10",
   },
 };
 

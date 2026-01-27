@@ -1,6 +1,6 @@
 /**
  * Selection Option Card Component
- * Individual option card for client selection mode
+ * Individual option card for studio selection mode
  */
 
 "use client";
@@ -9,12 +9,12 @@ import { motion, AnimatePresence } from "motion/react";
 import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { SelectionOption } from "./types";
-import type { ClientSelectionMode } from "../../types";
+import type { StudioSelectionMode } from "../../types";
 
 interface SelectionOptionCardProps {
   option: SelectionOption;
   isSelected: boolean;
-  onSelect: (id: ClientSelectionMode) => void;
+  onSelect: (id: StudioSelectionMode) => void;
 }
 
 export function SelectionOptionCard({

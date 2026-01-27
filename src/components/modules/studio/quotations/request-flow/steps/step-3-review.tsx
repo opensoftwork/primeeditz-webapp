@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { motion } from "motion/react";
 import {
   Rocket,
@@ -13,12 +14,22 @@ import {
 import { format } from "date-fns";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { useRequestWizard } from "../request-wizard-context";
 import { cn } from "@/lib/utils";
+import { PackageDetailsDrawer } from "./package-details-drawer";
 
 export function Step3Review() {
-  const { formData, templates, selectedPackage, projectTypes } =
-    useRequestWizard();
+  const {
+    formData,
+    templates,
+    selectedPackage,
+    projectTypes,
+    setSelectedPackage,
+    filteredTemplates,
+  } = useRequestWizard();
+
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const pkg = templates?.find((t) => t._id === selectedPackage);
   const projectType = pkg
@@ -30,6 +41,27 @@ export function Step3Review() {
       (acc: number, item: any) => acc + item.unitPrice * item.defaultQuantity,
       0,
     ) || 0;
+
+  const detailIndex =
+    pkg && filteredTemplates
+      ? filteredTemplates.findIndex((t: any) => t._id === pkg._id)
+      : -1;
+
+  const handleNextPkg = () => {
+    if (
+      filteredTemplates &&
+      detailIndex !== -1 &&
+      detailIndex < filteredTemplates.length - 1
+    ) {
+      setSelectedPackage(filteredTemplates[detailIndex + 1]._id);
+    }
+  };
+
+  const handlePrevPkg = () => {
+    if (filteredTemplates && detailIndex > 0) {
+      setSelectedPackage(filteredTemplates[detailIndex - 1]._id);
+    }
+  };
 
   return (
     <motion.div
@@ -65,12 +97,22 @@ export function Step3Review() {
           <div className="p-8 space-y-8 relative z-10 flex-1">
             <div className="flex items-start justify-between">
               <div className="space-y-4">
-                <Badge
-                  variant="outline"
-                  className="rounded-full bg-primary/10 border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1"
-                >
-                  Selected Model
-                </Badge>
+                <div className="flex items-center gap-3">
+                  <Badge
+                    variant="outline"
+                    className="rounded-full bg-primary/10 border-primary/20 text-primary text-[9px] font-black uppercase tracking-widest px-3 py-1"
+                  >
+                    Selected Model
+                  </Badge>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-full bg-white/5 border border-white/10 text-[9px] font-black uppercase tracking-widest px-4 h-8 text-white/40 hover:text-white hover:bg-primary/20 hover:border-primary/30 transition-all font-sans"
+                    onClick={() => setIsDrawerOpen(true)}
+                  >
+                    View Detailed Breakdown
+                  </Button>
+                </div>
                 <div className="space-y-1">
                   <h3 className="text-3xl font-black uppercase tracking-tighter text-white leading-none">
                     {pkg?.name}
@@ -210,6 +252,23 @@ export function Step3Review() {
           </div>
         </div>
       </div>
+
+      <PackageDetailsDrawer
+        open={isDrawerOpen}
+        onOpenChange={setIsDrawerOpen}
+        pkg={pkg}
+        onSelect={(id) => {
+          setSelectedPackage(id);
+          setIsDrawerOpen(false);
+        }}
+        isSelected={selectedPackage === pkg?._id}
+        onNext={handleNextPkg}
+        onPrev={handlePrevPkg}
+        hasNext={
+          filteredTemplates ? detailIndex < filteredTemplates.length - 1 : false
+        }
+        hasPrev={detailIndex > 0}
+      />
     </motion.div>
   );
 }

@@ -201,7 +201,7 @@ export function StudioProjectList() {
   );
 
   const query = useSimplePaginatedQuery(
-    api.functions.projects.queries.getClientProjectsPaginated,
+    api.functions.projects.queries.getStudioProjectsPaginated,
     {
       actionState: statusFilter,
       projectTypeId: typeFilter,

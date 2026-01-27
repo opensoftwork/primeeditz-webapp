@@ -1,6 +1,6 @@
 /**
- * New Client Form Component
- * Form for creating a new client during project wizard
+ * New Studio Form Component
+ * Form for creating a new studio during project wizard
  */
 
 "use client";
@@ -19,13 +19,13 @@ import { useWizardForm } from "../../wizard-form-context";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
-import type { SelectedClientData } from "../../types";
+import type { SelectedStudioData } from "../../types";
 
-interface NewClientFormProps {
+interface NewStudioFormProps {
   onSuccess: () => void;
 }
 
-export function NewClientForm({ onSuccess }: NewClientFormProps) {
+export function NewStudioForm({ onSuccess }: NewStudioFormProps) {
   const { setFormData } = useWizardForm();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -33,8 +33,8 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
   const [company, setCompany] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const createClientProfile = useMutation(
-    api.functions.profiles.mutations.createDraftClientProfile,
+  const createStudioProfile = useMutation(
+    api.functions.profiles.mutations.createDraftStudioProfile,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -47,15 +47,15 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
 
     setIsSubmitting(true);
     try {
-      const result = await createClientProfile({
+      const result = await createStudioProfile({
         name: name.trim(),
         email: email.trim(),
         phone: phone.trim() || undefined,
         company: company.trim() || undefined,
       });
 
-      // Create client data for the wizard
-      const clientData: SelectedClientData = {
+      // Create studio data for the wizard
+      const studioData: SelectedStudioData = {
         _id: result.profileId,
         name: result.name,
         email: result.email,
@@ -69,16 +69,16 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
       // Update wizard state
       setFormData("step0", {
         selectionMode: "new",
-        clientId: result.profileId,
-        clientData,
-        isNewClient: true,
+        studioId: result.profileId,
+        studioData,
+        isNewStudio: true,
       });
 
-      toast.success("Client profile created");
+      toast.success("Studio profile created");
       onSuccess();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Failed to create client",
+        error instanceof Error ? error.message : "Failed to create studio",
       );
     } finally {
       setIsSubmitting(false);
@@ -96,7 +96,7 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
         {/* Name Field */}
         <Field>
           <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
-            Client Name <span className="text-primary ml-1.5">*</span>
+            Studio Name <span className="text-primary ml-1.5">*</span>
           </FieldLabel>
           <FieldContent>
             <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
@@ -104,7 +104,7 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
                 <User className="h-4 w-4 text-white/10" />
               </InputGroupAddon>
               <InputGroupInput
-                id="client-name"
+                id="studio-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., John Smith"
@@ -126,11 +126,11 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
                 <Mail className="h-4 w-4 text-white/10" />
               </InputGroupAddon>
               <InputGroupInput
-                id="client-email"
+                id="studio-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g., client@email.com"
+                placeholder="e.g., studio@email.com"
                 required
                 className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
               />
@@ -149,7 +149,7 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
                 <Phone className="h-4 w-4 text-white/10" />
               </InputGroupAddon>
               <InputGroupInput
-                id="client-phone"
+                id="studio-phone"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="e.g., +91 98765 43210"
@@ -170,7 +170,7 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
                 <Building2 className="h-4 w-4 text-white/10" />
               </InputGroupAddon>
               <InputGroupInput
-                id="client-company"
+                id="studio-company"
                 value={company}
                 onChange={(e) => setCompany(e.target.value)}
                 placeholder="e.g., Acme Corp"
@@ -186,7 +186,7 @@ export function NewClientForm({ onSuccess }: NewClientFormProps) {
         disabled={isSubmitting || !name.trim() || !email.trim()}
         className="w-full h-12 font-black uppercase tracking-widest text-[11px] rounded-xl"
       >
-        {isSubmitting ? "Creating..." : "Create Client"}
+        {isSubmitting ? "Creating..." : "Create Studio"}
       </Button>
     </motion.form>
   );

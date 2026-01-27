@@ -16,6 +16,7 @@ import { QuotationsSection } from "@/components/modules/studio/quotations/quotat
 import { StatCard } from "./stat-card";
 import { DashboardHeader } from "./dashboard-header";
 import { GroupedProjectList } from "./grouped-project-list";
+import { ProjectOnboardingCard } from "../projects/project-onboarding-card";
 
 export default function StudioDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);
@@ -34,6 +35,9 @@ export default function StudioDashboard() {
     ).length ?? 0;
   const completedCount =
     projects?.filter((p) => p.phase === "completed").length ?? 0;
+
+  const projectsAwaitingOnboarding =
+    projects?.filter((p) => p.actionState === "awaiting_uploads") ?? [];
 
   if (!profile) {
     return (
@@ -79,6 +83,11 @@ export default function StudioDashboard() {
           color="text-emerald-400"
         />
       </div>
+
+      {/* Onboarding Callout (Story 11C.4) */}
+      {projectsAwaitingOnboarding.length > 0 && (
+        <ProjectOnboardingCard projectId={projectsAwaitingOnboarding[0]._id} />
+      )}
 
       {/* Quotations Section */}
       <QuotationsSection />

@@ -1,9 +1,9 @@
 /**
- * Client Table Pagination Component
+ * Studio Table Pagination Component
  *
- * Reusable pagination controls for the client selection table.
+ * Reusable pagination controls for the studio selection table.
  * Features premium styling with page numbers, prev/next buttons,
- * and client count display.
+ * and studio count display.
  */
 
 "use client";
@@ -26,7 +26,7 @@ export interface PaginationInfo {
   pageSize: number;
 }
 
-interface ClientTablePaginationProps {
+interface StudioTablePaginationProps {
   pagination: PaginationInfo;
   onPageChange: (page: number) => void;
   onPageSizeChange?: (size: number) => void;
@@ -35,14 +35,14 @@ interface ClientTablePaginationProps {
   itemName?: string;
 }
 
-export function ClientTablePagination({
+export function StudioTablePagination({
   pagination,
   onPageChange,
   onPageSizeChange,
   pageSizeOptions = [5, 10, 20, 50],
   className,
-  itemName = "clients",
-}: ClientTablePaginationProps) {
+  itemName = "studios",
+}: StudioTablePaginationProps) {
   const { currentPage, totalPages, totalItems, startIndex, endIndex } =
     pagination;
 

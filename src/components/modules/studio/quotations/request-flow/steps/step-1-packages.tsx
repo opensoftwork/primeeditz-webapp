@@ -18,6 +18,7 @@ export function Step1Packages() {
     selectedPackage,
     setSelectedPackage,
     filteredTemplates,
+    projectTypes,
   } = useRequestWizard();
 
   const [detailPkg, setDetailPkg] = useState<any>(null);
@@ -105,7 +106,7 @@ export function Step1Packages() {
             0,
           );
 
-          const projectType = useRequestWizard().projectTypes?.find(
+          const projectType = projectTypes?.find(
             (pt) => pt._id === pkg.projectTypeHint,
           );
 

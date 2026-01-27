@@ -31,7 +31,7 @@ export function BasicInfoReview({
         />
         <ReviewData
           icon={<User className="h-4 w-4" />}
-          label="End Client"
+          label="End Studio"
           value={formData.step1.endClientName}
         />
         <ReviewData

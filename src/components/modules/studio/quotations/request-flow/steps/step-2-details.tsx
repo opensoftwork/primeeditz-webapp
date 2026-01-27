@@ -31,7 +31,7 @@ export function Step2Details() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8 w-full max-w-5xl"
+      className="space-y-8 w-full"
     >
       <div className="space-y-2">
         <div className="flex items-center gap-3">

@@ -14,6 +14,8 @@ import { Step1Packages } from "./steps/step-1-packages";
 import { Step2Details } from "./steps/step-2-details";
 import { Step3Review } from "./steps/step-3-review";
 import Link from "next/link";
+import { authClient } from "@/lib/auth-client";
+import { Badge } from "@/components/ui/badge";
 
 export default function QuoteRequestWizard() {
   return (
@@ -32,6 +34,7 @@ function QuoteRequestWizardContent() {
     isSubmitting,
     selectedPackage,
   } = useRequestWizard();
+  const { data: session } = authClient.useSession();
 
   return (
     <div className="dark flex flex-col h-screen bg-zinc-950 overflow-hidden text-white selection:bg-primary/20">
@@ -49,21 +52,32 @@ function QuoteRequestWizardContent() {
 
           <div className="h-8 w-px bg-white/5" />
 
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
-              Step {step} of 3
-            </span>
-            <div className="flex gap-1">
-              {[1, 2, 3].map((s) => (
-                <div
-                  key={s}
-                  className={cn(
-                    "h-1 w-4 rounded-full transition-all duration-500",
-                    s <= step ? "bg-primary" : "bg-white/10",
-                  )}
-                />
-              ))}
+          <div className="flex items-center gap-6">
+            <div className="flex flex-col items-start gap-1">
+              <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+                Step {step} of 3
+              </span>
+              <div className="flex gap-1">
+                {[1, 2, 3].map((s) => (
+                  <div
+                    key={s}
+                    className={cn(
+                      "h-1 w-4 rounded-full transition-all duration-500",
+                      s <= step ? "bg-primary" : "bg-white/10",
+                    )}
+                  />
+                ))}
+              </div>
             </div>
+
+            {session?.user && (
+              <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-4 py-2 rounded-2xl">
+                <div className="h-1.5 w-1.5 rounded-full bg-primary animate-pulse" />
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">
+                  {(session.user as any).role}
+                </span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -120,7 +134,7 @@ function QuoteRequestWizardContent() {
         {/* Main Step Canvas */}
         <main className="flex-1 overflow-y-auto bg-zinc-950/50 relative flex flex-col">
           <div className="flex-1 w-full p-8 md:p-12">
-            <div className="max-w-7xl mx-auto min-h-full flex flex-col">
+            <div className="w-full mx-auto min-h-full flex flex-col">
               <AnimatePresence mode="wait">
                 <motion.div
                   key={step}

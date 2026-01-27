@@ -1,32 +1,32 @@
 /**
- * New Client Content Component
- * Content area shown when "Create New Client" option is selected
+ * New Studio Content Component
+ * Content area shown when "Create New Studio" option is selected
  */
 
 "use client";
 
 import { X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { NewClientForm } from "./new-client-form";
+import { NewStudioForm } from "./new-studio-form";
 
-interface NewClientContentProps {
+interface NewStudioContentProps {
   onCancel: () => void;
   onSuccess: () => void;
 }
 
-export function NewClientContent({
+export function NewStudioContent({
   onCancel,
   onSuccess,
-}: NewClientContentProps) {
+}: NewStudioContentProps) {
   return (
     <div className="mt-10 space-y-8 px-8">
       <div className="flex items-center justify-between">
         <div className="space-y-1">
           <h3 className="text-lg font-black uppercase tracking-tight text-white">
-            Create New Client
+            Create New Studio
           </h3>
           <p className="text-sm text-white/40 font-medium">
-            Enter the client details below
+            Enter the studio details below
           </p>
         </div>
         <Button
@@ -39,7 +39,7 @@ export function NewClientContent({
         </Button>
       </div>
 
-      <NewClientForm onSuccess={onSuccess} />
+      <NewStudioForm onSuccess={onSuccess} />
     </div>
   );
 }

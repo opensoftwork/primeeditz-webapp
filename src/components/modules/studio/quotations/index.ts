@@ -9,5 +9,4 @@ export * from "./detail/components/pricing-summary";
 export * from "./detail/studio-quotation-detail";
 export * from "./public/public-quotation-view";
 export * from "./list";
-export { StudioQuotationsList as ClientQuotationsList } from "./quotations-list";
 export { default as QuoteRequestWizard } from "./request-flow";

@@ -53,7 +53,7 @@ export function AcceptQuotationDrawer({
       setIsSubmitting(true);
       await acceptQuotation({
         quotationId: quotation._id,
-        clientSignature: signature || undefined,
+        studioSignature: signature || undefined,
       });
       toast.success("Quotation accepted successfully!");
       onClose();

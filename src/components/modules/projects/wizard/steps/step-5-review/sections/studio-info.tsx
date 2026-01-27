@@ -5,18 +5,18 @@ import { Users, Mail, Phone, Building, Info, UserCircle } from "lucide-react";
 import { SectionWrapper } from "../section-wrapper";
 import { ReviewData } from "../review-data";
 
-interface ClientInfoReviewProps {
+interface StudioInfoReviewProps {
     formData: any;
     onEdit: () => void;
 }
 
-export function ClientInfoReview({ formData, onEdit }: ClientInfoReviewProps) {
-    const { selectionMode, clientData } = formData.step0;
+export function StudioInfoReview({ formData, onEdit }: StudioInfoReviewProps) {
+    const { selectionMode, studioData } = formData.step0;
 
     if (selectionMode === "none") {
         return (
             <SectionWrapper
-                title="Client Association"
+                title="Studio Association"
                 onEdit={onEdit}
                 icon={<Users className="h-4 w-4" />}
             >
@@ -24,10 +24,10 @@ export function ClientInfoReview({ formData, onEdit }: ClientInfoReviewProps) {
                     <Info className="h-5 w-5 shrink-0" />
                     <div>
                         <h4 className="text-sm font-black uppercase tracking-widest mb-1">
-                            No Client Associated
+                            No Studio Associated
                         </h4>
                         <p className="text-[11px] leading-relaxed font-medium">
-                            This project will be created without an associated client profile.
+                            This project will be created without an associated studio profile.
                             You can associate one later from the project settings.
                         </p>
                     </div>
@@ -36,11 +36,11 @@ export function ClientInfoReview({ formData, onEdit }: ClientInfoReviewProps) {
         );
     }
 
-    if (!clientData) return null;
+    if (!studioData) return null;
 
     return (
         <SectionWrapper
-            title="Client Information"
+            title="Studio Information"
             onEdit={onEdit}
             icon={<UserCircle className="h-4 w-4" />}
         >
@@ -48,25 +48,25 @@ export function ClientInfoReview({ formData, onEdit }: ClientInfoReviewProps) {
                 <ReviewData
                     icon={<Users className="h-4 w-4" />}
                     label="Name"
-                    value={clientData.name}
+                    value={studioData.name}
                 />
                 <ReviewData
                     icon={<Mail className="h-4 w-4" />}
                     label="Email"
-                    value={clientData.email}
+                    value={studioData.email}
                 />
-                {clientData.phone && (
+                {studioData.phone && (
                     <ReviewData
                         icon={<Phone className="h-4 w-4" />}
                         label="Phone"
-                        value={clientData.phone}
+                        value={studioData.phone}
                     />
                 )}
-                {clientData.company && (
+                {studioData.company && (
                     <ReviewData
                         icon={<Building className="h-4 w-4" />}
                         label="Company"
-                        value={clientData.company}
+                        value={studioData.company}
                     />
                 )}
             </div>

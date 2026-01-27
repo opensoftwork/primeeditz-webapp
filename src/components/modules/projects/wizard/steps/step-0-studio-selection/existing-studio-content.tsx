@@ -19,7 +19,7 @@ interface ExistingStudioContentProps {
   selectedId?: Id<"profiles">;
 }
 
-export function ExistingClientContent({
+export function ExistingStudioContent({
   onCancel,
   onSelectStudio,
   selectedId,

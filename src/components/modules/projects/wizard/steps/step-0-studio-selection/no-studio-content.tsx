@@ -1,6 +1,6 @@
 /**
- * No Client Content Component
- * Content area shown when "No Client" option is selected
+ * No Studio Content Component
+ * Content area shown when "No Studio" option is selected
  */
 
 "use client";
@@ -9,11 +9,11 @@ import { motion } from "motion/react";
 import { FolderOpen, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface NoClientContentProps {
+interface NoStudioContentProps {
   onCancel: () => void;
 }
 
-export function NoClientContent({ onCancel }: NoClientContentProps) {
+export function NoStudioContent({ onCancel }: NoStudioContentProps) {
   return (
     <div className="mt-10 space-y-8 px-8">
       <div className="flex items-center justify-between">
@@ -22,7 +22,7 @@ export function NoClientContent({ onCancel }: NoClientContentProps) {
             Internal Project
           </h3>
           <p className="text-sm text-white/40 font-medium">
-            This project will not be associated with a client
+            This project will not be associated with a studio
           </p>
         </div>
         <Button
@@ -46,11 +46,11 @@ export function NoClientContent({ onCancel }: NoClientContentProps) {
           </div>
           <div>
             <h4 className="text-base font-black text-amber-400 uppercase tracking-tight">
-              No Client Association
+              No Studio Association
             </h4>
             <p className="text-sm text-white/40 font-medium mt-1 max-w-md">
               This project will be treated as an internal account. You can
-              assign a client later if needed.
+              assign a studio later if needed.
             </p>
           </div>
         </div>

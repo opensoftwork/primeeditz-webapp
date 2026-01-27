@@ -11,8 +11,8 @@ import type { Id } from '@convex/_generated/dataModel'
 // Wizard Mode
 // ============================================================================
 
-/** Wizard mode: studio-initiated (5 steps) or admin-initiated (6 steps) */
-export type WizardMode = 'studio' | 'admin'
+/** Wizard mode: studio-initiated (5 steps), admin-initiated (6 steps), or onboarding (3 steps) */
+export type WizardMode = 'studio' | 'admin' | 'onboarding'
 
 // ============================================================================
 // Step Definitions
@@ -37,6 +37,13 @@ export const ADMIN_WIZARD_STEPS = [
   { id: 5, title: 'Review', description: 'Review and submit' },
 ] as const
 
+/** Steps for project onboarding (3 steps: Files, Description, Review) */
+export const ONBOARDING_WIZARD_STEPS = [
+  { id: 3, title: 'Files', description: 'Upload reference files' },
+  { id: 4, title: 'Description', description: 'Add description and notes' },
+  { id: 5, title: 'Review', description: 'Review and confirm' },
+] as const
+
 /** Default wizard steps (studio mode) */
 export const WIZARD_STEPS = STUDIO_WIZARD_STEPS
 
@@ -45,17 +52,23 @@ export type WizardStepId = 0 | 1 | 2 | 3 | 4 | 5
 
 /** Get wizard steps based on mode */
 export function getWizardSteps(mode: WizardMode) {
-  return mode === 'admin' ? ADMIN_WIZARD_STEPS : STUDIO_WIZARD_STEPS
+  if (mode === 'admin') return ADMIN_WIZARD_STEPS
+  if (mode === 'onboarding') return ONBOARDING_WIZARD_STEPS
+  return STUDIO_WIZARD_STEPS
 }
 
 /** Get total step count based on mode */
 export function getStepCount(mode: WizardMode): number {
-  return mode === 'admin' ? 6 : 5
+  if (mode === 'admin') return 6
+  if (mode === 'onboarding') return 3
+  return 5
 }
 
 /** Get first step ID based on mode */
 export function getFirstStepId(mode: WizardMode): WizardStepId {
-  return mode === 'admin' ? 0 : 1
+  if (mode === 'admin') return 0
+  if (mode === 'onboarding') return 3
+  return 1
 }
 
 // ============================================================================
@@ -441,7 +454,7 @@ export const PROJECT_TYPE_FIELDS: Record<string, FieldDefinition[]> = {
       type: 'select',
       options: [
         { value: 'royalty-free', label: 'Royalty-Free (we provide)' },
-        { value: 'client-provided', label: 'Client Provided' },
+        { value: 'studio-provided', label: 'Studio Provided' },
         { value: 'none', label: 'No Music Needed' },
       ]
     },
