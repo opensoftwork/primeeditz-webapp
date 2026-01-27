@@ -5,14 +5,14 @@ import { Doc, Id } from "../../_generated/dataModel";
 /**
  * Get all clients for selection.
  */
-export const getClients = adminQuery({
+export const getStudios = adminQuery({
   args: {
     includeDeactivated: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
     return await ctx.db
       .query("profiles")
-      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .withIndex("by_role", (q) => q.eq("role", "studio"))
       .filter((q) => args.includeDeactivated ? q.neq(q.field("deactivatedAt"), -1) : q.eq(q.field("deactivatedAt"), undefined))
       .collect();
   },
@@ -21,7 +21,7 @@ export const getClients = adminQuery({
 /**
  * Get clients for selection optimized for drawers.
  */
-export const getClientsForSelection = adminQuery({
+export const getStudiosForSelection = adminQuery({
   args: {
     search: v.optional(v.string()),
     limit: v.optional(v.number()),
@@ -32,7 +32,7 @@ export const getClientsForSelection = adminQuery({
 
     let clients = await ctx.db
       .query("profiles")
-      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .withIndex("by_role", (q) => q.eq("role", "studio"))
       .order("desc")
       .collect();
 
@@ -49,7 +49,7 @@ export const getClientsForSelection = adminQuery({
       clients.map(async (client) => {
         const projects = await ctx.db
           .query("projects")
-          .withIndex("by_clientId", (q) => q.eq("clientId", client._id))
+          .withIndex("by_studioId", (q) => q.eq("studioId", client._id))
           .collect();
 
         const projectCount = projects.length;
@@ -84,17 +84,17 @@ export const getClientsForSelection = adminQuery({
 /**
  * Get clients with at least one project.
  */
-export const getClientsWithProjects = adminQuery({
+export const getStudiosWithProjects = adminQuery({
   args: {},
   handler: async (ctx) => {
     const allClients = await ctx.db
       .query("profiles")
-      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .withIndex("by_role", (q) => q.eq("role", "studio"))
       .collect();
 
     const clientsWithProjects = await Promise.all(
       allClients.map(async (client) => {
-        const project = await ctx.db.query("projects").withIndex("by_clientId", (q) => q.eq("clientId", client._id)).first();
+        const project = await ctx.db.query("projects").withIndex("by_studioId", (q) => q.eq("studioId", client._id)).first();
         return project ? client : null;
       })
     );
@@ -106,10 +106,10 @@ export const getClientsWithProjects = adminQuery({
  * Get simple list of projects for a client.
  */
 export const getAdminProjectsSimple = adminQuery({
-  args: { clientId: v.optional(v.id("profiles")) },
+  args: { studioId: v.optional(v.id("profiles")) },
   handler: async (ctx, args) => {
-    let projects = args.clientId
-      ? await ctx.db.query("projects").withIndex("by_clientId", (q) => q.eq("clientId", args.clientId!)).collect()
+    let projects = args.studioId
+      ? await ctx.db.query("projects").withIndex("by_studioId", (q) => q.eq("studioId", args.studioId!)).collect()
       : await ctx.db.query("projects").order("desc").collect();
 
     // Filter out projects that already have an approved quotation or are past the setup/quotation phase
@@ -133,15 +133,15 @@ export const getAdminProjectsSimple = adminQuery({
 /**
  * Get a single client with their projects and stats.
  */
-export const getClientWithProjects = adminQuery({
-  args: { clientId: v.id("profiles") },
+export const getStudioWithProjects = adminQuery({
+  args: { studioId: v.id("profiles") },
   handler: async (ctx, args) => {
-    const client = await ctx.db.get(args.clientId);
-    if (!client || client.role !== "client") return null;
+    const client = await ctx.db.get(args.studioId);
+    if (!client || client.role !== "studio") return null;
 
     const projects = await ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+      .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId))
       .order("desc")
       .collect();
 

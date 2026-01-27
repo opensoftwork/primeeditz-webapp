@@ -46,7 +46,7 @@ export async function canUpload(
   }
 
   // 2. Client Permissions
-  if (userRole === "client") {
+  if (userRole === "studio") {
     switch (actionState) {
       case "awaiting_uploads":
       case "uploads_complete":
@@ -119,7 +119,7 @@ export async function checkUploadEligibility(
   const permission = await canUpload(
     ctx,
     projectId,
-    profile?.role ?? "client",
+    profile?.role ?? "studio",
     profile?._id
   );
 

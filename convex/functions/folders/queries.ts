@@ -2,7 +2,7 @@ import { v } from "convex/values";
 import { query } from "../../_generated/server";
 import { 
   adminQuery, 
-  clientQuery, 
+  studioQuery, 
   staffQuery, 
   authenticatedWithProfileQuery 
 } from "../../lib/customFunctions";
@@ -47,14 +47,14 @@ export const getProjectFolders = staffQuery({
  * Get project folders for client view.
  * Shows only the client's own project folders.
  */
-export const getMyProjectFolders = clientQuery({
+export const getMyProjectFolders = studioQuery({
   args: {
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
     // Verify project belongs to this client
     const project = await ctx.db.get(args.projectId);
-    if (!project || project.clientId !== ctx.profile._id) {
+    if (!project || project.studioId !== ctx.profile._id) {
       throw new Error("Access denied");
     }
 
@@ -180,12 +180,12 @@ export const canSetupFolders = adminQuery({
 
     // No direct quotation link - check if we can allow setup with quotation selection
     // This enables the enhanced flow where admin can link to any client quotation
-    const clientId = project.clientId;
-    if (clientId) {
-      const clientIdString = clientId as string;
+    const studioId = project.studioId;
+    if (studioId) {
+      const studioIdString = studioId as string;
       const clientQuotations = await ctx.db
         .query("quotations")
-        .withIndex("by_clientId", (q) => q.eq("clientId", clientIdString))
+        .withIndex("by_studioId", (q) => q.eq("studioId", studioIdString))
         .collect();
       
       const hasClientApprovedQuotation = clientQuotations.some(
@@ -281,8 +281,8 @@ export const getFolderDetails = authenticatedWithProfileQuery({
     if (!project) throw new Error("Project not found");
 
     // If client, verify they own the project
-    if (ctx.profile.role === 'client') {
-      if (project.clientId !== ctx.profile._id) {
+    if (ctx.profile.role === 'studio') {
+      if (project.studioId !== ctx.profile._id) {
         throw new Error("Access denied");
       }
     }
@@ -311,8 +311,8 @@ export const getFolderAssets = authenticatedWithProfileQuery({
     if (!project) throw new Error("Project not found");
 
     // If client, verify ownership
-    if (ctx.profile.role === 'client') {
-      if (project.clientId !== ctx.profile._id) {
+    if (ctx.profile.role === 'studio') {
+      if (project.studioId !== ctx.profile._id) {
         throw new Error("Access denied");
       }
     }

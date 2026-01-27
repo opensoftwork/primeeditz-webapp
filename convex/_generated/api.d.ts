@@ -12,7 +12,6 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as employees from "../employees.js";
-import type * as functions_admin_clients from "../functions/admin/clients.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_admin_employees from "../functions/admin/employees.js";
 import type * as functions_admin_maintenance from "../functions/admin/maintenance.js";
@@ -20,6 +19,7 @@ import type * as functions_admin_projectTypes from "../functions/admin/projectTy
 import type * as functions_admin_projects from "../functions/admin/projects.js";
 import type * as functions_admin_quotations from "../functions/admin/quotations.js";
 import type * as functions_admin_squads from "../functions/admin/squads.js";
+import type * as functions_admin_studios from "../functions/admin/studios.js";
 import type * as functions_assets_mutations from "../functions/assets/mutations.js";
 import type * as functions_deliverables_mutations from "../functions/deliverables/mutations.js";
 import type * as functions_employees_dashboard from "../functions/employees/dashboard.js";
@@ -88,7 +88,6 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
   employees: typeof employees;
-  "functions/admin/clients": typeof functions_admin_clients;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/admin/employees": typeof functions_admin_employees;
   "functions/admin/maintenance": typeof functions_admin_maintenance;
@@ -96,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   "functions/admin/projects": typeof functions_admin_projects;
   "functions/admin/quotations": typeof functions_admin_quotations;
   "functions/admin/squads": typeof functions_admin_squads;
+  "functions/admin/studios": typeof functions_admin_studios;
   "functions/assets/mutations": typeof functions_assets_mutations;
   "functions/deliverables/mutations": typeof functions_deliverables_mutations;
   "functions/employees/dashboard": typeof functions_employees_dashboard;

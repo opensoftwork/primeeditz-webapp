@@ -49,12 +49,12 @@ async function generateProjectCode(
 
 /**
  * Create a new draft project.
- * Called when client or admin starts the project request wizard.
+ * Called when studio or admin starts the project request wizard.
  */
 export const createDraft = mutation({
   args: {
     projectTypeId: v.optional(v.id('projectTypes')),
-    clientId: v.optional(v.id('profiles')),
+    studioId: v.optional(v.id('profiles')),
   },
   handler: async (ctx, args) => {
     // 1. Get authenticated user
@@ -76,11 +76,11 @@ export const createDraft = mutation({
     // Determine source
     const source = (profile.role === 'admin' || profile.role === 'employee')
       ? 'admin_init'
-      : 'client_request'
+      : 'studio_request'
 
     // 3. Enforce "one draft" rule to prevent duplicates (especially in Strict Mode)
     // For admin, we find any admin_init draft (global for admin scope)
-    // For client, we find any draft for this specific client
+    // For studio, we find any draft for this specific studio
     if (source === 'admin_init') {
       const existingAdminDraft = await ctx.db
         .query('projects')
@@ -96,14 +96,14 @@ export const createDraft = mutation({
         return { projectId: existingAdminDraft._id, code: existingAdminDraft.code }
       }
     } else {
-      const existingClientDraft = await ctx.db
+      const existingStudioDraft = await ctx.db
         .query('projects')
-        .withIndex('by_clientId', (q) => q.eq('clientId', profile._id))
+        .withIndex('by_studioId', (q) => q.eq('studioId', profile._id))
         .filter((q) => q.eq(q.field('actionState'), 'draft'))
         .first()
 
-      if (existingClientDraft) {
-        return { projectId: existingClientDraft._id, code: existingClientDraft.code }
+      if (existingStudioDraft) {
+        return { projectId: existingStudioDraft._id, code: existingStudioDraft.code }
       }
     }
 
@@ -125,23 +125,23 @@ export const createDraft = mutation({
       }
     }
 
-    // Determine clientId:
+    // Determine studioId:
     // 1. If provided (admin mode), use it
-    // 2. If not provided and caller is client, use caller's profileId
+    // 2. If not provided and caller is studio, use caller's profileId
     // 3. Otherwise null (internal project)
-    let clientId = args.clientId
-    if (!clientId && profile.role === 'client') {
-      clientId = profile._id
+    let studioId = args.studioId
+    if (!studioId && profile.role === 'studio') {
+      studioId = profile._id
     }
 
     const projectId = await ctx.db.insert('projects', {
       code,
       projectTypeId,
-      clientId,
+      studioId,
       source,
       phase: 'setup',
       actionState: 'draft',
-      awaitingActorRole: 'client',
+      awaitingActorRole: 'studio',
       lastStep: 1,
       storageUsed: 0,
       updatedAt: now(),
@@ -158,7 +158,7 @@ export const createDraft = mutation({
 export const updateDraft = authenticatedMutation({
   args: {
     projectId: v.id('projects'),
-    clientId: v.optional(v.id('profiles')),
+    studioId: v.optional(v.id('profiles')),
     // Step 1: Basic Info
     projectTypeId: v.optional(v.id('projectTypes')),
     endClientName: v.optional(v.string()),
@@ -187,7 +187,7 @@ export const updateDraft = authenticatedMutation({
     lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    const { projectId, clientId: newClientId, ...updates } = args
+    const { projectId, studioId: newStudioId, ...updates } = args
 
     // Get profile
     const profile = await ctx.db
@@ -205,9 +205,9 @@ export const updateDraft = authenticatedMutation({
 
     // Verify ownership/permissions
     // Admin can update any draft
-    // Client can only update their own draft
+    // Studio can only update their own draft
     if (profile.role !== 'admin' && profile.role !== 'employee') {
-      if (project.clientId !== profile._id) {
+      if (project.studioId !== profile._id) {
         throw new ConvexError('Access denied')
       }
     }
@@ -225,9 +225,9 @@ export const updateDraft = authenticatedMutation({
       }
     }
 
-    // Handle clientId update (only for admins)
-    if (newClientId !== undefined && profile.role === 'admin') {
-      filteredUpdates.clientId = newClientId
+    // Handle studioId update (only for admins)
+    if (newStudioId !== undefined && profile.role === 'admin') {
+      filteredUpdates.studioId = newStudioId
     }
 
     await ctx.db.patch(projectId, filteredUpdates)
@@ -261,7 +261,7 @@ export const submitProject = authenticatedMutation({
 
     // Verify ownership/permissions
     if (profile.role !== 'admin' && profile.role !== 'employee') {
-      if (project.clientId !== profile._id) {
+      if (project.studioId !== profile._id) {
         throw new ConvexError('Access denied')
       }
     }
@@ -289,7 +289,7 @@ export const submitProject = authenticatedMutation({
       newPhase: 'setup',
       previousActionState: 'draft',
       newActionState: 'awaiting_quotation',
-      previousAwaitingActorRole: 'client',
+      previousAwaitingActorRole: 'studio',
       newAwaitingActorRole: 'admin',
       changedBy: profile._id,
       changedAt: now(),
@@ -324,7 +324,7 @@ export const deleteDraft = authenticatedMutation({
 
     // Verify ownership
     if (profile.role !== 'admin' && profile.role !== 'employee') {
-      if (project.clientId !== profile._id) {
+      if (project.studioId !== profile._id) {
         throw new ConvexError('Access denied')
       }
     }
@@ -335,6 +335,125 @@ export const deleteDraft = authenticatedMutation({
     }
 
     await ctx.db.delete(args.projectId)
+
+    return { success: true }
+  },
+})
+
+/**
+ * Update project onboarding data.
+ * Used by wizard in 'onboarding' mode.
+ */
+export const updateOnboarding = authenticatedMutation({
+  args: {
+    projectId: v.id('projects'),
+    // Step 3: Reference files
+    referenceFiles: v.optional(
+      v.array(
+        v.object({
+          fileId: v.string(),
+          fileName: v.string(),
+          fileSize: v.number(),
+          fileType: v.string(),
+          storageKey: v.optional(v.string()),
+          previewUrl: v.optional(v.string()),
+        })
+      )
+    ),
+    // Step 4: Description
+    description: v.optional(v.string()),
+    additionalNotes: v.optional(v.string()),
+    preferredDeliveryDate: v.optional(v.number()),
+    lastStep: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const { projectId, ...updates } = args
+
+    // Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
+      .first()
+
+    if (!profile) throw new ConvexError("Profile not found")
+
+    // Get and verify project
+    const project = await ctx.db.get(projectId)
+    if (!project) throw new ConvexError('Project not found')
+
+    // Verify ownership/permissions
+    if (profile.role !== 'admin' && profile.role !== 'employee') {
+      if (project.studioId !== profile._id) throw new ConvexError('Access denied')
+    }
+
+    // Only allow in onboarding phase
+    if (project.actionState !== 'awaiting_uploads') {
+      throw new ConvexError('Project is not in onboarding phase')
+    }
+
+    // Filter out undefined values
+    const filteredUpdates: Record<string, unknown> = { updatedAt: now() }
+    for (const [key, value] of Object.entries(updates)) {
+      if (value !== undefined) {
+        filteredUpdates[key] = value
+      }
+    }
+
+    await ctx.db.patch(projectId, filteredUpdates)
+
+    return { success: true }
+  },
+})
+
+/**
+ * Finalize project onboarding.
+ * Moves project from 'awaiting_uploads' to 'uploads_complete'.
+ */
+export const completeOnboarding = authenticatedMutation({
+  args: {
+    projectId: v.id('projects'),
+  },
+  handler: async (ctx, args) => {
+    // Get profile
+    const profile = await ctx.db
+      .query('profiles')
+      .withIndex('by_userId', (q) => q.eq('userId', ctx.authUser._id))
+      .first()
+
+    if (!profile) throw new ConvexError("Profile not found")
+
+    const project = await ctx.db.get(args.projectId)
+    if (!project) throw new ConvexError('Project not found')
+
+    // Verify ownership/permissions
+    if (profile.role !== 'admin' && profile.role !== 'employee') {
+      if (project.studioId !== profile._id) throw new ConvexError('Access denied')
+    }
+
+    // Only allow finalizing if in awaiting_uploads
+    if (project.actionState !== 'awaiting_uploads') {
+      throw new ConvexError('Project is not in onboarding phase')
+    }
+
+    await ctx.db.patch(args.projectId, {
+      actionState: 'uploads_complete',
+      awaitingActorRole: 'admin',
+      updatedAt: now(),
+    })
+
+    // Record status change
+    await ctx.db.insert('statusHistory', {
+      projectId: args.projectId,
+      previousPhase: project.phase,
+      newPhase: project.phase, // Stays in current phase (usually 'onboarding' or 'setup')
+      previousActionState: 'awaiting_uploads',
+      newActionState: 'uploads_complete',
+      previousAwaitingActorRole: 'studio',
+      newAwaitingActorRole: 'admin',
+      changedBy: profile._id,
+      changedAt: now(),
+      notes: 'Project onboarding completed by studio',
+    })
 
     return { success: true }
   },

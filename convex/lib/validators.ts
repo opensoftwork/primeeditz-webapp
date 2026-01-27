@@ -13,7 +13,7 @@ import { v } from 'convex/values'
 
 /** User role validator */
 export const roleValidator = v.union(
-  v.literal('client'),
+  v.literal('studio'),
   v.literal('employee'),
   v.literal('admin')
 )

@@ -43,7 +43,7 @@ export const getAdminProjectsPaginated = adminQuery({
 
     const clients: Doc<"profiles">[] = await ctx.db
       .query("profiles")
-      .withIndex("by_role", (q) => q.eq("role", "client"))
+      .withIndex("by_role", (q) => q.eq("role", "studio"))
       .collect();
     const clientMap = new Map<Id<"profiles">, Doc<"profiles">>(
       clients.map((c) => [c._id, c])
@@ -55,7 +55,7 @@ export const getAdminProjectsPaginated = adminQuery({
       )
       .map((project: Doc<"projects">) => {
         const projectType = projectTypeMap.get(project.projectTypeId);
-        const client = project.clientId ? clientMap.get(project.clientId) : null;
+        const client = project.studioId ? clientMap.get(project.studioId) : null;
 
         return {
           _id: project._id,
@@ -64,8 +64,8 @@ export const getAdminProjectsPaginated = adminQuery({
           actionState: project.actionState,
           status: project.actionState, // Compatibility
           projectTypeName: projectType?.name ?? "Unknown",
-          clientName: client?.name ?? "Unknown Client",
-          clientId: project.clientId,
+          studioName: client?.name ?? "Unknown Client",
+          studioId: project.studioId,
           source: project.source,
           eventName: project.eventName,
           eventDate: project.eventDate,
@@ -118,7 +118,7 @@ export const getTrashedProjects = adminQuery({
       results.page.map(async (project: Doc<"projects">) => {
         const [projectType, client] = await Promise.all([
           ctx.db.get(project.projectTypeId),
-          project.clientId ? ctx.db.get(project.clientId) : null,
+          project.studioId ? ctx.db.get(project.studioId) : null,
         ]);
 
         return {
@@ -128,7 +128,7 @@ export const getTrashedProjects = adminQuery({
           actionState: project.actionState,
           status: project.actionState, // Compatibility
           projectTypeName: projectType?.name ?? "Unknown",
-          clientName: client?.name ?? "Unknown Client",
+          studioName: client?.name ?? "Unknown Client",
           deletedAt: project.deletedAt,
           eventName: project.eventName,
           createdAt: project._creationTime,
@@ -170,7 +170,7 @@ export const getAdminProject = staffQuery({
     }
 
     const [client, projectType, history, quotation, assignedEmployee] = await Promise.all([
-      project.clientId ? ctx.db.get(project.clientId as Id<"profiles">) : null,
+      project.studioId ? ctx.db.get(project.studioId as Id<"profiles">) : null,
       ctx.db.get(project.projectTypeId),
       ctx.db.query("statusHistory")
         .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
@@ -215,7 +215,7 @@ export const getAdminProject = staffQuery({
     return {
       ...project,
       referenceFiles,
-      clientName: client?.name ?? "Unknown Client",
+      studioName: client?.name ?? "Unknown Client",
       clientEmail: client?.email ?? "Unknown Email",
       projectTypeName: projectType?.name ?? "Unknown",
       deliveryConfig: projectType?.deliveryConfig,
@@ -246,7 +246,7 @@ export const getAdminProjects = adminQuery({
     phase: v.optional(projectPhaseValidator),
     actionState: v.optional(projectActionStateValidator),
     projectTypeId: v.optional(v.id("projectTypes")),
-    clientSearch: v.optional(v.string()),
+    studioSearch: v.optional(v.string()),
     sortBy: v.optional(v.union(v.literal("date"), v.literal("status"))),
     sortOrder: v.optional(v.union(v.literal("asc"), v.literal("desc"))),
     page: v.optional(v.number()),
@@ -274,7 +274,7 @@ export const getAdminProjects = adminQuery({
 
     const [projectTypes, clients] = await Promise.all([
       ctx.db.query("projectTypes").collect(),
-      ctx.db.query("profiles").withIndex("by_role", (q) => q.eq("role", "client")).collect()
+      ctx.db.query("profiles").withIndex("by_role", (q) => q.eq("role", "studio")).collect()
     ]);
 
     const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
@@ -287,18 +287,18 @@ export const getAdminProjects = adminQuery({
       actionState: project.actionState,
       status: project.actionState, // Compatibility
       projectTypeName: projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
-      clientName: (project.clientId ? clientMap.get(project.clientId) : null)?.name ?? "Unknown Client",
-      clientId: project.clientId,
+      studioName: (project.studioId ? clientMap.get(project.studioId) : null)?.name ?? "Unknown Client",
+      studioId: project.studioId,
       eventName: project.eventName,
       eventDate: project.eventDate,
       createdAt: project._creationTime,
       updatedAt: project.updatedAt,
     }));
 
-    if (args.clientSearch) {
-      const search = args.clientSearch.toLowerCase();
+    if (args.studioSearch) {
+      const search = args.studioSearch.toLowerCase();
       enrichedProjects = enrichedProjects.filter(
-        (p) => (p.clientName?.toLowerCase().includes(search) ?? false) || p.code.toLowerCase().includes(search)
+        (p) => (p.studioName?.toLowerCase().includes(search) ?? false) || p.code.toLowerCase().includes(search)
       );
     }
 

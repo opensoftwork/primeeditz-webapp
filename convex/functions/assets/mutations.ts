@@ -26,7 +26,7 @@ export const createAsset = mutation({
       throw new Error("Project not found");
     }
     
-    if (profile.role === "client" && project.clientId !== profile._id) {
+    if (profile.role === "studio" && project.studioId !== profile._id) {
       throw new Error("Access denied");
     }
 

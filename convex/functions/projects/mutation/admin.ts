@@ -33,7 +33,7 @@ export const transitionProject = authenticatedWithProfileMutation({
     if (!project) throw new ConvexError('Project not found')
 
     // 2. Security Check: Only admins, workers, or the project owner can transition
-    const isOwner = project.clientId === ctx.profile._id
+    const isOwner = project.studioId === ctx.profile._id
     const isAdmin = ctx.profile.role === 'admin'
     const isEmployee = ctx.profile.role === 'employee'
 
@@ -338,7 +338,7 @@ export const permanentlyDeleteProject = adminMutation({
     // NEVER cascade delete quotations (financial records)
     const quotations = await ctx.db
       .query('quotations')
-      .withIndex('by_clientId', (q) => q.eq('clientId', project.clientId as string))
+      .withIndex('by_studioId', (q) => q.eq('studioId', project.studioId as string))
       .collect()
 
     for (const quotation of quotations) {
@@ -354,8 +354,8 @@ export const permanentlyDeleteProject = adminMutation({
           projectId: quotation.projectId === projectIdString 
             ? (updatedProjectIds[0] || undefined)
             : quotation.projectId,
-          clientNotes: quotation.clientNotes 
-            ? `${quotation.clientNotes}\n[System Note: ${note}]`
+          studioNotes: quotation.studioNotes 
+            ? `${quotation.studioNotes}\n[System Note: ${note}]`
             : `[System Note: ${note}]`,
         })
       }
@@ -451,8 +451,8 @@ export const linkProjectToQuotation = adminMutation({
     }
 
     // 4. Validate client match
-    const projectClientId = project.clientId as string | undefined
-    const quotationClientId = quotation.clientId as string | undefined
+    const projectClientId = project.studioId as string | undefined
+    const quotationClientId = quotation.studioId as string | undefined
     
     if (projectClientId && quotationClientId && projectClientId !== quotationClientId) {
       throw new ConvexError('Quotation belongs to a different client')

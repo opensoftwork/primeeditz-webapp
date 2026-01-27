@@ -14,13 +14,13 @@ import { authenticatedMutation, adminMutation } from '../../lib/customFunctions'
  *
  * @param name - User's full name (required)
  * @param phone - User's phone number (optional)
- * @param role - User's role: 'client' or 'admin' (for first user bootstrap)
+ * @param role - User's role: 'studio' or 'admin' (for first user bootstrap)
  */
 export const createProfile = authenticatedMutation({
   args: {
     name: v.string(),
     phone: v.optional(v.string()),
-    role: v.union(v.literal('client'), v.literal('studio'), v.literal('admin')),
+    role: v.union(v.literal('studio'), v.literal('admin')),
   },
   handler: async (ctx, args) => {
     // ctx.authUser is available from the authenticatedMutation wrapper
@@ -90,16 +90,16 @@ export const updateProfile = authenticatedMutation({
 })
 
 /**
- * Create a draft client profile (admin-initiated).
- * Used when admin creates a project for a new client who hasn't registered.
- * The client will receive an invitation to complete their profile later.
+ * Create a draft studio profile (admin-initiated).
+ * Used when admin creates a project for a new studio who hasn't registered.
+ * The studio will receive an invitation to complete their profile later.
  *
- * @param name - Client's full name (required)
- * @param email - Client's email address (required)
- * @param phone - Client's phone number (optional)
- * @param company - Client's company name (optional)
+ * @param name - Studio's full name (required)
+ * @param email - Studio's email address (required)
+ * @param phone - Studio's phone number (optional)
+ * @param company - Studio's company name (optional)
  */
-export const createDraftClientProfile = authenticatedMutation({
+export const createDraftStudioProfile = authenticatedMutation({
   args: {
     name: v.string(),
     email: v.string(),
@@ -107,7 +107,7 @@ export const createDraftClientProfile = authenticatedMutation({
     company: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Verify the caller is an admin or employee (has permission to create clients)
+    // Verify the caller is an admin or employee (has permission to create studios)
     const callerUserId = ctx.authUser._id
 
     const callerProfile = await ctx.db
@@ -120,7 +120,7 @@ export const createDraftClientProfile = authenticatedMutation({
     }
 
     if (callerProfile.role !== 'admin' && callerProfile.role !== 'employee') {
-      throw new Error('Only admins and employees can create client profiles')
+      throw new Error('Only admins and employees can create studio profiles')
     }
 
     // Check if a profile with this email already exists
@@ -133,8 +133,8 @@ export const createDraftClientProfile = authenticatedMutation({
       throw new Error('A profile with this email already exists')
     }
 
-    // Create the draft client profile
-    // Note: userId will be set when the client actually registers/logs in
+    // Create the draft studio profile
+    // Note: userId will be set when the studio actually registers/logs in
     // For now, we use a placeholder that can be linked later
     const profileId = await ctx.db.insert('profiles', {
       userId: `draft_${Date.now()}_${Math.random().toString(36).substring(7)}`, // Placeholder
@@ -143,7 +143,7 @@ export const createDraftClientProfile = authenticatedMutation({
       phone: args.phone,
       company: args.company,
       role: 'studio',
-      onboardingComplete: false, // Client hasn't completed onboarding
+      onboardingComplete: false, // Studio hasn't completed onboarding
       updatedAt: Date.now(),
     })
 
@@ -158,9 +158,9 @@ export const createDraftClientProfile = authenticatedMutation({
 })
 
 /**
- * Update a client profile (admin only).
+ * Update a studio profile (admin only).
  */
-export const updateClientProfile = adminMutation({
+export const updateStudioProfile = adminMutation({
   args: {
     profileId: v.id('profiles'),
     name: v.optional(v.string()),
@@ -171,8 +171,8 @@ export const updateClientProfile = adminMutation({
     const { profileId, ...updates } = args
 
     const targetProfile = await ctx.db.get(profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
-    if (targetProfile.role !== 'client' && targetProfile.role !== 'studio') throw new Error('Target profile is not a client/studio')
+    if (!targetProfile) throw new Error('Studio profile not found')
+    if (targetProfile.role !== 'studio') throw new Error('Target profile is not a studio')
 
     const filteredUpdates: Record<string, any> = {
       updatedAt: Date.now(),
@@ -189,15 +189,15 @@ export const updateClientProfile = adminMutation({
 })
 
 /**
- * Deactivate a client profile (soft delete).
+ * Deactivate a studio profile (soft delete).
  */
-export const deactivateClient = adminMutation({
+export const deactivateStudio = adminMutation({
   args: {
     profileId: v.id('profiles'),
   },
   handler: async (ctx, args) => {
     const targetProfile = await ctx.db.get(args.profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
+    if (!targetProfile) throw new Error('Studio profile not found')
 
     await ctx.db.patch(args.profileId, {
       deactivatedAt: Date.now(),
@@ -210,15 +210,15 @@ export const deactivateClient = adminMutation({
 })
 
 /**
- * Reactivate a deactivated client profile.
+ * Reactivate a deactivated studio profile.
  */
-export const reactivateClient = adminMutation({
+export const reactivateStudio = adminMutation({
   args: {
     profileId: v.id('profiles'),
   },
   handler: async (ctx, args) => {
     const targetProfile = await ctx.db.get(args.profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
+    if (!targetProfile) throw new Error('Studio profile not found')
 
     await ctx.db.patch(args.profileId, {
       deactivatedAt: undefined,

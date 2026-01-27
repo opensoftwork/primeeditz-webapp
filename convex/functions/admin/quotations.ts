@@ -5,7 +5,7 @@ import { Doc, Id } from "../../_generated/dataModel";
 import { quotationStatusValidator } from "../../schema";
 
 export type EnrichedQuotation = Doc<"quotations"> & {
-  clientName?: string;
+  studioName?: string;
   projectName?: string;
 };
 
@@ -15,19 +15,19 @@ export type EnrichedQuotation = Doc<"quotations"> & {
 export const getAdminQuotations = query({
   args: {
     status: v.optional(quotationStatusValidator),
-    clientId: v.optional(v.string()),
+    studioId: v.optional(v.string()),
   },
   handler: async (ctx, args): Promise<EnrichedQuotation[]> => {
     const quotations: Doc<"quotations">[] = await ctx.runQuery(api.functions.quotations.queries.getQuotations, {
       status: args.status,
-      clientId: args.clientId,
+      studioId: args.studioId,
     });
 
-    const clientIds = quotations.map((q) => q.clientId).filter((id): id is string => !!id);
+    const studioIds = quotations.map((q) => q.studioId).filter((id): id is string => !!id);
     const projectIds = quotations.map((q) => q.projectId).filter((id): id is string => !!id);
 
     const [clients, projects] = await Promise.all([
-      Promise.all(clientIds.map((id) => ctx.db.get(id as Id<"profiles">))),
+      Promise.all(studioIds.map((id) => ctx.db.get(id as Id<"profiles">))),
       Promise.all(projectIds.map((id) => ctx.db.get(id as Id<"projects">)))
     ]);
 
@@ -36,7 +36,7 @@ export const getAdminQuotations = query({
 
     return quotations.map((q) => ({
       ...q,
-      clientName: q.clientId ? clientMap.get(q.clientId) : undefined,
+      studioName: q.studioId ? clientMap.get(q.studioId) : undefined,
       projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
     }));
   },

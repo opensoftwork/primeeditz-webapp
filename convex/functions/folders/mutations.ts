@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { adminMutation, clientMutation, authenticatedWithProfileMutation } from "../../lib/customFunctions";
+import { adminMutation, studioMutation, authenticatedWithProfileMutation } from "../../lib/customFunctions";
 import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
 import { ActionState } from "../../schema";
 import { DataModel, Id } from "../../_generated/dataModel";
@@ -208,7 +208,7 @@ export const adminUpdateFolderStatus = adminMutation({
  * Update a folder's status.
  * Used by clients to mark a folder as "completed" after they finish uploading.
  */
-export const updateFolderStatus = clientMutation({
+export const updateFolderStatus = studioMutation({
   args: {
     folderId: v.id("folders"),
     status: v.union(v.literal("in_progress"), v.literal("completed")),
@@ -219,7 +219,7 @@ export const updateFolderStatus = clientMutation({
 
     // Verify ownership
     const project = await ctx.db.get(folder.projectId);
-    if (!project || project.clientId !== ctx.profile._id) {
+    if (!project || project.studioId !== ctx.profile._id) {
       throw new Error("Access denied");
     }
 
@@ -249,7 +249,7 @@ export const markAllUploadsComplete = authenticatedWithProfileMutation({
     if (!project) throw new Error("Project not found");
 
     // Security check: only client owner or admin/employee can trigger
-    const isOwner = project.clientId === ctx.profile._id;
+    const isOwner = project.studioId === ctx.profile._id;
     const isStaff = ctx.profile.role === "admin" || ctx.profile.role === "employee";
     if (!isOwner && !isStaff) throw new Error("Permission denied");
 

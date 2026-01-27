@@ -32,7 +32,7 @@ function getS3Client(): S3Client {
 
 /**
  * Generate a signed upload URL for project assets.
- * Path format: [clientName]/[projectCode]/[fileName]
+ * Path format: [studioName]/[projectCode]/[fileName]
  */
 export const generateUploadUrl = action({
   args: {
@@ -63,9 +63,9 @@ export const generateUploadUrl = action({
     }
 
     // Role-based access control
-    if (profile.role === 'client') {
+    if (profile.role === 'studio') {
       // Clients can only upload to their own projects
-      if (project.clientId !== profile._id) {
+      if (project.studioId !== profile._id) {
         throw new ConvexError('Access denied: You do not own this project')
       }
     } else if (profile.role !== 'admin' && profile.role !== 'employee') {
@@ -74,25 +74,25 @@ export const generateUploadUrl = action({
     }
 
     // 3. Prepare the storage key
-    // We want the folder structure to be [clientName]/[projectCode]/[fileName]
+    // We want the folder structure to be [studioName]/[projectCode]/[fileName]
     // If uploader is admin/employee, we should still use the project's client name if available
     let clientFolderName = 'internal'
 
-    if (project.clientId) {
+    if (project.studioId) {
       const projectClient = await ctx.runQuery(api.profiles.getProfileById, {
-        profileId: project.clientId
+        profileId: project.studioId
       })
       if (projectClient) {
         clientFolderName = projectClient.name
       }
-    } else if (profile.role === 'client') {
+    } else if (profile.role === 'studio') {
       clientFolderName = profile.name
     }
 
-    const clientName: string = clientFolderName.replace(/\s+/g, '_').toLowerCase()
+    const studioName: string = clientFolderName.replace(/\s+/g, '_').toLowerCase()
     const projectCode: string = project.code.toLowerCase()
     const sanitizedFileName: string = args.fileName.replace(/\s+/g, '_')
-    const storageKey: string = `${clientName}/${projectCode}/${sanitizedFileName}`
+    const storageKey: string = `${studioName}/${projectCode}/${sanitizedFileName}`
 
     // 4. Generate signed URL
     const s3Client: S3Client = getS3Client()

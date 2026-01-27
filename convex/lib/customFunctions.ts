@@ -4,7 +4,7 @@
  * Provides role-based access control at the API level:
  * - authenticatedQuery/Mutation: Requires valid session
  * - adminQuery/Mutation: Requires admin role
- * - clientQuery/Mutation: Requires client role
+ * - studioQuery/Mutation: Requires studio role
  *
  * Uses Better Auth component for authentication.
  * @see https://github.com/get-convex/convex-helpers
@@ -39,7 +39,7 @@ export type AuthUser = {
 export type Profile = {
   _id: Id<'profiles'>
   userId: string // Better Auth user ID
-  role: 'client' | 'studio' | 'employee' | 'admin'
+  role: 'studio' | 'employee' | 'admin'
   name: string
   phone?: string
   company?: string
@@ -106,7 +106,7 @@ export async function getAuthUserWithProfile(
  */
 function requireRole(
   profile: Profile,
-  allowedRoles: Array<'client' | 'studio' | 'employee' | 'admin'>
+  allowedRoles: Array<'studio' | 'employee' | 'admin'>
 ): void {
   if (!allowedRoles.includes(profile.role)) {
     throw new Error('Access denied')
@@ -196,31 +196,31 @@ export const adminMutation = customMutation(mutation, {
 })
 
 // ============================================================================
-// Client Wrappers
+// Studio Wrappers
 // ============================================================================
 
 /**
- * Query wrapper that requires client role.
+ * Query wrapper that requires studio role.
  * Adds `ctx.authUser` and `ctx.profile`.
  */
-export const clientQuery = customQuery(query, {
+export const studioQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
     const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client', 'studio'])
+    requireRole(profile, ['studio'])
     return { ctx: { ...ctx, authUser, profile }, args: {} }
   },
 })
 
 /**
- * Mutation wrapper that requires client role.
+ * Mutation wrapper that requires studio role.
  * Adds `ctx.authUser` and `ctx.profile`.
  */
-export const clientMutation = customMutation(mutation, {
+export const studioMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
     const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client', 'studio'])
+    requireRole(profile, ['studio'])
     return { ctx: { ...ctx, authUser, profile }, args: {} }
   },
 })
@@ -290,10 +290,10 @@ export const staffMutation = customMutation(mutation, {
 // ============================================================================
 
 /**
- * Action wrapper that requires client role.
+ * Action wrapper that requires studio role.
  * Adds `ctx.profile`.
  */
-export const clientAction = customAction(action, {
+export const studioAction = customAction(action, {
   args: {},
   input: async (ctx: ActionCtx): Promise<{ ctx: { profile: Profile } & ActionCtx; args: Record<string, unknown> }> => {
     let authUser;
@@ -313,7 +313,7 @@ export const clientAction = customAction(action, {
       throw new Error('Profile not found')
     }
 
-    if (profile.role !== 'client' && profile.role !== 'studio') {
+    if (profile.role !== 'studio') {
       throw new Error('Access denied')
     }
 

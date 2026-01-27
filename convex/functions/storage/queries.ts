@@ -19,7 +19,7 @@ export const getProjectStorageUsage = query({
     if (!project) throw new Error("Project not found");
 
     // Verify access - client must own, or be admin
-    if (profile.role === "client" && project.clientId !== profile._id) {
+    if (profile.role === "studio" && project.studioId !== profile._id) {
       throw new Error("Access denied");
     }
 

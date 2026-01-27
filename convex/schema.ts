@@ -14,7 +14,6 @@ export type ActionState = Infer<typeof projectActionStateValidator>;
 
 // Role validator for profiles
 export const roleValidator = v.union(
-  v.literal('client'),
   v.literal('studio'),
   v.literal('employee'),
   v.literal('admin')
@@ -67,9 +66,9 @@ export const projectActionStateValidator = v.union(
   v.literal('archived')
 )
 
-// Project source: client_request vs admin_init
+// Project source: studio_request vs admin_init
 export const projectSourceValidator = v.union(
-  v.literal('client_request'),
+  v.literal('studio_request'),
   v.literal('admin_init'),
   v.literal('quotation_spawned')
 )
@@ -92,6 +91,7 @@ export const deliverableStatusValidator = v.union(
 // Quotation status flow
 export const quotationStatusValidator = v.union(
   v.literal('draft'),
+  v.literal('initiated'), // NEW: Studio-side request
   v.literal('sent'),
   v.literal('viewed'),
   v.literal('requested'),
@@ -195,13 +195,13 @@ export default defineSchema({
   projects: defineTable({
     code: v.string(),
     projectTypeId: v.id('projectTypes'),
-    clientId: v.optional(v.id('profiles')), // Optional for admin-initiated "No Client" projects
+    studioId: v.optional(v.id('profiles')), // Optional for admin-initiated "No Studio" projects
     quotationId: v.optional(v.id('quotations')), // NEW: Link to parent quotation
     source: projectSourceValidator,
     // NEW: Multi-dimensional status
     phase: projectPhaseValidator,
     actionState: projectActionStateValidator,
-    awaitingActorRole: v.optional(roleValidator), // client | admin | employee
+    awaitingActorRole: v.optional(roleValidator), // studio | admin | employee
     awaitingActorId: v.optional(v.id('profiles')), // Specific person assigned for next action
     lastStep: v.optional(v.number()), // To track wizard progress (1-5)
     // Event/project details
@@ -248,7 +248,7 @@ export default defineSchema({
     // Timestamp (uses _creationTime for created)
     updatedAt: v.number(),
   })
-    .index('by_clientId', ['clientId'])
+    .index('by_studioId', ['studioId'])
     .index('by_phase', ['phase'])
     .index('by_actionState', ['actionState'])
     .index('by_awaitingActorRole', ['awaitingActorRole'])
@@ -400,7 +400,7 @@ export default defineSchema({
     code: v.string(),
     version: v.number(),
     parentQuotationId: v.optional(v.id('quotations')),
-    clientId: v.optional(v.string()), // Profile ID
+    studioId: v.optional(v.string()), // Profile ID
     projectId: v.optional(v.string()), // Project ID
     projectIds: v.optional(v.array(v.string())),
     templateId: v.optional(v.id('quotationTemplates')),
@@ -444,7 +444,7 @@ export default defineSchema({
     total: v.number(),
     terms: v.optional(v.string()),
     validUntil: v.optional(v.number()),
-    clientNotes: v.optional(v.string()),
+    studioNotes: v.optional(v.string()),
     createdBy: v.string(),
     sentAt: v.optional(v.number()),
     sentTo: v.optional(v.string()), // Email address sent to
@@ -453,14 +453,14 @@ export default defineSchema({
     viewedAt: v.optional(v.number()),
     approvedAt: v.optional(v.number()),
     rejectedAt: v.optional(v.number()),
-    clientSignature: v.optional(v.string()),
+    studioSignature: v.optional(v.string()),
     changeReasons: v.optional(v.array(v.string())),
     changeRequestedAt: v.optional(v.number()),
     rejectionReason: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
   })
     .index('by_code', ['code'])
-    .index('by_clientId', ['clientId'])
+    .index('by_studioId', ['studioId'])
     .index('by_status', ['status'])
     .index('by_shareToken', ['shareToken']),
 

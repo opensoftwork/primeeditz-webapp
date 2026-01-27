@@ -57,15 +57,15 @@ export const getPendingProjects = adminQuery({
     const enrichedProjects = await Promise.all(
       pendingProjects.map(async (project) => {
         const projectType = await ctx.db.get(project.projectTypeId);
-        const client = project.clientId
-          ? await ctx.db.get(project.clientId)
+        const client = project.studioId
+          ? await ctx.db.get(project.studioId)
           : null;
 
         return {
           _id: project._id,
           code: project.code,
           projectTypeName: projectType?.name ?? "Unknown",
-          clientName: client?.name ?? "Unknown Client",
+          studioName: client?.name ?? "Unknown Client",
           eventName: project.eventName,
           eventDate: project.eventDate,
           createdAt: project._creationTime,

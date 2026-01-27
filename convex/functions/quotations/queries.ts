@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { adminQuery, clientQuery } from "../../lib/customFunctions";
+import { adminQuery, studioQuery } from "../../lib/customFunctions";
 import { QueryCtx, query } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
@@ -11,7 +11,7 @@ import { quotationStatusValidator } from "../../schema";
 export const getQuotations = adminQuery({
   args: {
     status: v.optional(v.string()),
-    clientId: v.optional(v.string()),
+    studioId: v.optional(v.string()),
     projectId: v.optional(v.string()),
     limit: v.optional(v.number()),
   },
@@ -23,10 +23,10 @@ export const getQuotations = adminQuery({
         .query("quotations")
         .withIndex("by_status", (q) => q.eq("status", args.status as "draft" | "sent" | "viewed" | "approved" | "changes_requested" | "rejected" | "expired" | "superseded"))
         .collect();
-    } else if (args.clientId) {
+    } else if (args.studioId) {
       quotations = await ctx.db
         .query("quotations")
-        .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId))
+        .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId))
         .collect();
     } else {
       quotations = await ctx.db.query("quotations").collect();
@@ -64,11 +64,11 @@ export const getAdminQuotationsPaginated = adminQuery({
     const results = await query.order("desc").paginate(args.paginationOpts);
 
     // Get all profiles for client name enrichment
-    const clientIds = [...new Set(results.page.map(q => q.clientId).filter((id): id is string => !!id))];
+    const studioIds = [...new Set(results.page.map(q => q.studioId).filter((id): id is string => !!id))];
     const clients = await Promise.all(
-      clientIds.map((id) => ctx.db.get(id as Id<"profiles">))
+      studioIds.map((id) => ctx.db.get(id as Id<"profiles">))
     );
-    const clientNameMap = new Map(
+    const studioNameMap = new Map(
       clients.filter((c): c is Doc<"profiles"> => !!c).map((c) => [c._id as string, c.name])
     );
 
@@ -83,7 +83,7 @@ export const getAdminQuotationsPaginated = adminQuery({
 
     const enrichedPage = results.page.map((q) => ({
       ...q,
-      clientName: q.clientId ? clientNameMap.get(q.clientId) : undefined,
+      studioName: q.studioId ? studioNameMap.get(q.studioId) : undefined,
       projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
     }));
 
@@ -164,10 +164,10 @@ export const getQuotationWithSections = adminQuery({
     );
 
     // Get client name
-    let clientName = undefined;
-    if (quotation.clientId) {
-      const profile = await ctx.db.get(quotation.clientId as Id<"profiles">);
-      clientName = profile?.name;
+    let studioName = undefined;
+    if (quotation.studioId) {
+      const profile = await ctx.db.get(quotation.studioId as Id<"profiles">);
+      studioName = profile?.name;
     }
 
     // Get project name(s)
@@ -199,7 +199,7 @@ export const getQuotationWithSections = adminQuery({
     return {
       quotation: {
         ...quotation,
-        clientName,
+        studioName,
         projectName,
         projectCode,
       },
@@ -320,17 +320,17 @@ export const getQuotationByShareToken = query({
 /**
  * Get current client's quotations
  */
-export const getMyQuotations = clientQuery({
+export const getMyQuotations = studioQuery({
   args: {},
   handler: async (ctx, args) => {
     const quotations = await ctx.db
       .query("quotations")
-      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .collect();
     
     // Filter by status (visible to client)
-    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
-    const visibleQuotations = quotations.filter((q) => clientVisibleStatus.includes(q.status));
+    const studioVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    const visibleQuotations = quotations.filter((q) => studioVisibleStatus.includes(q.status));
 
     // Get project names for enrichment
     const projectIds = [...new Set(visibleQuotations.map(q => q.projectId).filter((id): id is string => !!id))];
@@ -354,7 +354,7 @@ export const getMyQuotations = clientQuery({
  * Get all quotations for the current client with cursor-based pagination.
  * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
  */
-export const getMyQuotationsPaginated = clientQuery({
+export const getMyQuotationsPaginated = studioQuery({
   args: {
     paginationOpts: paginationOptsValidator,
     status: v.optional(quotationStatusValidator),
@@ -364,10 +364,10 @@ export const getMyQuotationsPaginated = clientQuery({
     // Clients only see their own quotations and non-draft quotations
     let query = ctx.db
       .query("quotations")
-      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id));
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id));
 
     // Filter by client visible status
-    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected", "expired", "superseded"];
+    const studioVisibleStatus = ["initiated", "sent", "viewed", "approved", "changes_requested", "rejected", "expired", "superseded"];
     
     // Applying status filter if provided, otherwise filter by visible statuses
     if (args.status) {
@@ -375,7 +375,7 @@ export const getMyQuotationsPaginated = clientQuery({
     } else {
       query = query.filter((q) => 
         q.or(
-          ...clientVisibleStatus.map(status => q.eq(q.field("status"), status))
+          ...studioVisibleStatus.map(status => q.eq(q.field("status"), status))
         )
       );
     }
@@ -394,6 +394,7 @@ export const getMyQuotationsPaginated = clientQuery({
     const enrichedPage = results.page.map((q) => ({
       ...q,
       projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+      endClientName: q.endClientName,
     }));
 
     return {
@@ -406,7 +407,7 @@ export const getMyQuotationsPaginated = clientQuery({
 /**
  * Get client's specific quotation with sections
  */
-export const getMyQuotationDetail = clientQuery({
+export const getMyQuotationDetail = studioQuery({
   args: {
     quotationId: v.id("quotations"),
   },
@@ -415,13 +416,13 @@ export const getMyQuotationDetail = clientQuery({
     if (!quotation) return null;
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
     // Status check
-    const clientVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
-    if (!clientVisibleStatus.includes(quotation.status)) {
+    const studioVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    if (!studioVisibleStatus.includes(quotation.status)) {
        return null;
     }
 
@@ -463,15 +464,15 @@ export const getMyQuotationDetail = clientQuery({
  */
 export const getClientApprovedQuotations = adminQuery({
   args: {
-    clientId: v.id("profiles"),
+    studioId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
-    const clientIdString = args.clientId as string;
+    const studioIdString = args.studioId as string;
     
     // 1. Get approved quotations for this client
     const quotations = await ctx.db
       .query("quotations")
-      .withIndex("by_clientId", (q) => q.eq("clientId", clientIdString))
+      .withIndex("by_studioId", (q) => q.eq("studioId", studioIdString))
       .collect();
 
     // Filter only approved quotations

@@ -1,7 +1,7 @@
 import { v } from "convex/values";
 import { QueryCtx, MutationCtx, mutation } from "../../_generated/server";
 import { Doc, Id } from "../../_generated/dataModel";
-import { adminMutation, clientMutation, Profile } from "../../lib/customFunctions";
+import { adminMutation, studioMutation, Profile } from "../../lib/customFunctions";
 import { getPhaseForState, getActorForState } from "../../lib/statusMachine";
 import { ActionState } from "../../schema";
 import { spawnProjectsFromQuotation } from "../projects/spawning";
@@ -91,7 +91,7 @@ function calculateTotals(
 async function transitionProjectsForQuotation(
   ctx: MutationCtx & { profile: Profile },
   args: {
-    clientId?: string;
+    studioId?: string;
     projectId?: string;
     projectIds?: string[];
     targetState: ActionState;
@@ -109,17 +109,17 @@ async function transitionProjectsForQuotation(
   // Optimized fetch: Query all projects for this client
   let projectsToUpdate: Doc<"projects">[] = [];
   
-  if (args.clientId) {
+  if (args.studioId) {
     const allClientProjects = await ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId as Id<"profiles">))
+      .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId as Id<"profiles">))
       .collect();
     
     projectsToUpdate = allClientProjects.filter(p => 
       targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code)
     );
   } else {
-    // Fallback if no clientId: fetch individually
+    // Fallback if no studioId: fetch individually
     for (const pId of targetProjectIds) {
       let p = await ctx.db.get(pId as Id<"projects">);
       if (!p) {
@@ -160,7 +160,7 @@ async function transitionProjectsForQuotation(
 /**
  * Request a quotation (Studio-side)
  */
-export const requestQuotation = clientMutation({
+export const requestQuotation = studioMutation({
   args: {
     templateId: v.id("quotationTemplates"),
     endClientName: v.optional(v.string()),
@@ -197,9 +197,9 @@ export const requestQuotation = clientMutation({
     const quotationId = await ctx.db.insert("quotations", {
       code,
       version: 1,
-      clientId: ctx.profile._id,
+      studioId: ctx.profile._id,
       templateId: args.templateId,
-      status: "requested",
+      status: "initiated",
       lineItems,
       subtotal,
       taxRate,
@@ -209,7 +209,7 @@ export const requestQuotation = clientMutation({
       endClientName: args.endClientName,
       eventName: args.eventName,
       eventDate: args.eventDate,
-      clientNotes: args.notes,
+      studioNotes: args.notes,
       createdBy: "STUDIO",
       updatedAt: Date.now(),
     });
@@ -223,7 +223,7 @@ export const requestQuotation = clientMutation({
  */
 export const createQuotation = adminMutation({
   args: {
-    clientId: v.optional(v.string()),
+    studioId: v.optional(v.string()),
     projectId: v.optional(v.string()),
     projectIds: v.optional(v.array(v.string())),
     templateId: v.optional(v.id("quotationTemplates")),
@@ -246,7 +246,7 @@ export const createQuotation = adminMutation({
     const quotationId = await ctx.db.insert("quotations", {
       code,
       version: 1,
-      clientId: args.clientId,
+      studioId: args.studioId,
       projectId: args.projectId,
       projectIds: args.projectIds,
       templateId: args.templateId,
@@ -265,7 +265,7 @@ export const createQuotation = adminMutation({
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: args.clientId,
+      studioId: args.studioId,
       projectId: args.projectId,
       projectIds: args.projectIds,
       targetState: "awaiting_quotation",
@@ -288,7 +288,7 @@ export const updateQuotation = adminMutation({
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
-    clientId: v.optional(v.string()),
+    studioId: v.optional(v.string()),
     projectId: v.optional(v.string()),
     projectIds: v.optional(v.array(v.string())),
   },
@@ -377,7 +377,7 @@ export const sendQuotation = adminMutation({
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_sent",
@@ -436,7 +436,7 @@ export const approveQuotation = adminMutation({
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_approved",
@@ -465,7 +465,7 @@ export const deleteQuotation = adminMutation({
     
     await ctx.db.patch(args.quotationId, {
       status: "rejected",
-      clientNotes: "Deleted by admin",
+      studioNotes: "Deleted by admin",
       rejectedAt: Date.now(),
       updatedAt: Date.now(),
     });
@@ -476,10 +476,10 @@ export const deleteQuotation = adminMutation({
       ...(quotation.projectIds || []),
     ];
 
-    if (targetProjectIds.length > 0 && quotation.clientId) {
+    if (targetProjectIds.length > 0 && quotation.studioId) {
       const allClientProjects = await ctx.db
         .query("projects")
-        .withIndex("by_clientId", (q) => q.eq("clientId", quotation.clientId as Id<"profiles">))
+        .withIndex("by_studioId", (q) => q.eq("studioId", quotation.studioId as Id<"profiles">))
         .collect();
       
       const projectsToLog = allClientProjects.filter(p => 
@@ -507,17 +507,17 @@ export const deleteQuotation = adminMutation({
 /**
  * Accept quotation (client-side)
  */
-export const acceptQuotation = clientMutation({
+export const acceptQuotation = studioMutation({
   args: {
     quotationId: v.id("quotations"),
-    clientSignature: v.optional(v.string()),
+    studioSignature: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
@@ -530,13 +530,13 @@ export const acceptQuotation = clientMutation({
     await ctx.db.patch(args.quotationId, {
       status: "approved",
       approvedAt: Date.now(),
-      clientSignature: args.clientSignature,
+      studioSignature: args.studioSignature,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_approved",
@@ -556,7 +556,7 @@ export const acceptQuotation = clientMutation({
 /**
  * Request quotation changes (client-side)
  */
-export const requestQuotationChanges = clientMutation({
+export const requestQuotationChanges = studioMutation({
   args: {
     quotationId: v.id("quotations"),
     reasons: v.array(v.string()),
@@ -567,7 +567,7 @@ export const requestQuotationChanges = clientMutation({
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
@@ -581,13 +581,13 @@ export const requestQuotationChanges = clientMutation({
       status: "changes_requested",
       changeRequestedAt: Date.now(),
       changeReasons: args.reasons,
-      clientNotes: args.notes,
+      studioNotes: args.notes,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "awaiting_quotation",
@@ -601,7 +601,7 @@ export const requestQuotationChanges = clientMutation({
 /**
  * Reject quotation (client-side)
  */
-export const rejectQuotation = clientMutation({
+export const rejectQuotation = studioMutation({
   args: {
     quotationId: v.id("quotations"),
     reason: v.string(),
@@ -612,7 +612,7 @@ export const rejectQuotation = clientMutation({
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
@@ -626,13 +626,13 @@ export const rejectQuotation = clientMutation({
       status: "rejected",
       rejectedAt: Date.now(),
       rejectionReason: args.reason,
-      clientNotes: args.notes,
+      studioNotes: args.notes,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_rejected",
@@ -674,9 +674,9 @@ export const duplicateQuotation = adminMutation({
       changeRequestedAt: undefined,
       shareToken: undefined,
       shareTokenExpiresAt: undefined,
-      clientSignature: undefined,
+      studioSignature: undefined,
       changeReasons: undefined,
-      clientNotes: undefined,
+      studioNotes: undefined,
       rejectionReason: undefined,
     } as any);
 

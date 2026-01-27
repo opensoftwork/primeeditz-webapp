@@ -2,14 +2,14 @@
  * Project Queries
  *
  * Read operations for projects with role-based access.
- * Uses clientQuery for client-owned project access.
+ * Uses studioQuery for studio-owned project access.
  */
 
 import { v, ConvexError } from 'convex/values'
 import { paginationOptsValidator } from 'convex/server'
 import { query } from '../../_generated/server'
 import {
-  clientQuery,
+  studioQuery,
   adminQuery,
   staffQuery,
   authenticatedWithProfileQuery,
@@ -20,19 +20,19 @@ import type { Doc } from '../../_generated/dataModel'
 import { projectPhaseValidator, projectActionStateValidator } from '../../schema'
 
 // ============================================================================
-// Client Queries
+// Studio Queries
 // ============================================================================
 
 /**
- * Get all projects for the current client.
+ * Get all projects for the current studio.
  * Excludes drafts - only shows submitted projects.
  */
-export const getMyProjects = clientQuery({
+export const getMyProjects = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
       .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
+      .withIndex('by_studioId', (q) => q.eq('studioId', ctx.profile._id))
       .filter((q) => q.eq(q.field('deletedAt'), undefined))
       .order('desc')
       .collect()
@@ -42,10 +42,10 @@ export const getMyProjects = clientQuery({
 })
 
 /**
- * Get a draft project for the current client.
+ * Get a draft project for the current studio.
  * Used by the wizard to resume a draft.
  */
-export const getDraft = clientQuery({
+export const getDraft = studioQuery({
   args: {
     projectId: v.id('projects'),
   },
@@ -57,7 +57,7 @@ export const getDraft = clientQuery({
     }
 
     // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
+    if (project.studioId !== ctx.profile._id) {
       throw new ConvexError('Access denied')
     }
 
@@ -71,15 +71,15 @@ export const getDraft = clientQuery({
 })
 
 /**
- * Get the current active draft project for the current client.
+ * Get the current active draft project for the current studio.
  * Used to resume a draft without knowing its ID.
  */
-export const getMyActiveDraft = clientQuery({
+export const getMyActiveDraft = studioQuery({
   args: {},
   handler: async (ctx) => {
     const draft = await ctx.db
       .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
+      .withIndex('by_studioId', (q) => q.eq('studioId', ctx.profile._id))
       .filter((q) => q.eq(q.field('actionState'), 'draft'))
       .first()
 
@@ -89,10 +89,10 @@ export const getMyActiveDraft = clientQuery({
 
 /**
  * Get a single project by ID.
- * Verifies ownership for clients.
+ * Verifies ownership for studios.
  * Enriches reference files with proper MinIO public URLs.
  */
-export const getProject = clientQuery({
+export const getProject = studioQuery({
   args: {
     projectId: v.id('projects'),
   },
@@ -104,7 +104,7 @@ export const getProject = clientQuery({
     }
 
     // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
+    if (project.studioId !== ctx.profile._id) {
       throw new ConvexError('Access denied')
     }
 
@@ -146,15 +146,15 @@ export const getProjectUploadEligibility = authenticatedWithProfileQuery({
 })
 
 /**
- * Get projects for the current studio grouped by end client name.
+ * Get projects for the current studio grouped by end studio name.
  * Used for the revamped studio dashboard (Story 11C.3).
  */
-export const getMyProjectsGroupedByEndClient = clientQuery({
+export const getMyProjectsGroupedByEndClient = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .filter((q) => q.eq(q.field("deletedAt"), undefined))
       .order("desc")
       .collect();
@@ -189,15 +189,15 @@ export const getMyProjectsGroupedByEndClient = clientQuery({
 });
 
 /**
- * Get projects for the current client with their project type and category info.
+ * Get projects for the current studio with their project type and category info.
  * Returns enriched project data for dashboard display.
  */
-export const getMyProjectsWithType = clientQuery({
+export const getMyProjectsWithType = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
       .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
+      .withIndex('by_studioId', (q) => q.eq('studioId', ctx.profile._id))
       .filter((q) => 
           q.eq(q.field('deletedAt'), undefined)
       )
@@ -228,10 +228,10 @@ export const getMyProjectsWithType = clientQuery({
 })
 
 /**
- * Get all projects for the current client with cursor-based pagination.
+ * Get all projects for the current studio with cursor-based pagination.
  * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
  */
-export const getClientProjectsPaginated = clientQuery({
+export const getStudioProjectsPaginated = studioQuery({
   args: {
     paginationOpts: paginationOptsValidator,
     phase: v.optional(projectPhaseValidator),
@@ -240,10 +240,10 @@ export const getClientProjectsPaginated = clientQuery({
   },
   handler: async (ctx, args) => {
     // Execute pagination - conditionally use index for status filtering
-    // Clients only see their own projects and non-draft projects
+    // Studios only see their own projects and non-draft projects
     let query = ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .filter((q) => q.eq(q.field("deletedAt"), undefined));
 
     if (args.phase) {
@@ -293,9 +293,9 @@ export const getClientProjectsPaginated = clientQuery({
 });
 
 /**
- * Get all project types for filter dropdown (Client View).
+ * Get all project types for filter dropdown (Studio View).
  */
-export const getProjectTypes = clientQuery({
+export const getProjectTypes = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projectTypes = await ctx.db.query("projectTypes").collect();
@@ -343,13 +343,13 @@ export const getAdminActiveDraft = adminQuery({
     // Enrich with project type name
     const projectType = await ctx.db.get(draft.projectTypeId)
 
-    // Get client info if exists
-    const client = draft.clientId ? await ctx.db.get(draft.clientId) : null
+    // Get studio info if exists
+    const studio = draft.studioId ? await ctx.db.get(draft.studioId) : null
 
     return {
       ...draft,
       projectTypeName: projectType?.name ?? 'Unknown',
-      clientName: client?.name ?? null,
+      studioName: studio?.name ?? null,
     }
   },
 })
@@ -375,16 +375,16 @@ export const getAllProjects = adminQuery({
 
     const projects = await query.order('desc').collect();
 
-    // Enrich with client and project type info
+    // Enrich with studio and project type info
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const [client, projectType] = await Promise.all([
-          project.clientId ? ctx.db.get(project.clientId) : null,
+        const [studio, projectType] = await Promise.all([
+          project.studioId ? ctx.db.get(project.studioId) : null,
           ctx.db.get(project.projectTypeId),
         ])
         return {
           ...project,
-          clientName: client?.name ?? 'Unknown',
+          studioName: studio?.name ?? 'Unknown',
           projectTypeName: projectType?.name ?? 'Unknown',
         }
       })
@@ -406,15 +406,15 @@ export const getPendingProjects = adminQuery({
       .order('desc')
       .collect()
 
-    // Enrich with client info (clientId is optional for admin-initiated projects)
+    // Enrich with studio info (studioId is optional for admin-initiated projects)
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const client = project.clientId
-          ? await ctx.db.get(project.clientId)
+        const studio = project.studioId
+          ? await ctx.db.get(project.studioId)
           : null
         return {
           ...project,
-          clientName: client?.name ?? 'Unknown',
+          studioName: studio?.name ?? 'Unknown',
         }
       })
     )
@@ -424,7 +424,7 @@ export const getPendingProjects = adminQuery({
 })
 
 // ============================================================================
-// Shared Queries (Admin & Studio/Client)
+// Shared Queries (Admin & Studio/Studio)
 // ============================================================================
 
 /**
@@ -439,8 +439,8 @@ export const getByQuotationId = authenticatedWithProfileQuery({
     if (!quotation) return [];
 
     // 2. Permission check: Admin can see everything, 
-    // Clients/Studios only see their own quotations
-    if (ctx.profile.role !== "admin" && quotation.clientId !== ctx.profile._id) {
+    // Studios/Studios only see their own quotations
+    if (ctx.profile.role !== "admin" && quotation.studioId !== ctx.profile._id) {
       return [];
     }
 
