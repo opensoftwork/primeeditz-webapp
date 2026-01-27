@@ -30,10 +30,10 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     },
   },
   {
-    accessorKey: "clientName",
+    accessorKey: "studioName",
     header: "Studio",
     cell: ({ row }) => {
-      const name = row.getValue("clientName") as string;
+      const name = row.getValue("studioName") as string;
       return (
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">

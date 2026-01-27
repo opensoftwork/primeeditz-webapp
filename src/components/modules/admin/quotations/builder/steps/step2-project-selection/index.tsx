@@ -15,7 +15,7 @@ export function Step2ProjectSelection() {
     projects,
     nextStep,
     setSubmitTrigger,
-    selectedClient,
+    selectedStudio,
   } = useQuotationBuilder();
 
   // Selected project IDs come from step2 in the new context
@@ -53,11 +53,11 @@ export function Step2ProjectSelection() {
             Involved Projects
           </h2>
           <p className="text-sm text-white/40 font-medium">
-            Select the projects involved in this quotation for {selectedClient?.name || "the client"}
+            Select the projects involved in this quotation for {selectedStudio?.name || "the client"}
           </p>
         </div>
         <ProjectListingDrawer
-          clientId={formData.step1.clientId}
+          studioId={formData.step1.studioId}
           selectedProjectIds={selectedProjectIds}
           onAddProject={handleAddProject}
           onRemoveProject={handleRemoveProject}
@@ -120,7 +120,7 @@ export function Step2ProjectSelection() {
             Please select at least one project to continue with the quotation process.
           </p>
           <ProjectListingDrawer
-            clientId={formData.step1.clientId}
+            studioId={formData.step1.studioId}
             selectedProjectIds={selectedProjectIds}
             onAddProject={handleAddProject}
             onRemoveProject={handleRemoveProject}

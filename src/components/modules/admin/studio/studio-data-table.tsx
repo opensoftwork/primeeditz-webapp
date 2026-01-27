@@ -12,9 +12,9 @@ import { Badge } from "@/components/ui/badge";
 import { Doc } from "@convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import {
-  ClientTablePagination,
+  StudioTablePagination,
   type PaginationInfo,
-} from "@/components/modules/projects/wizard/steps/step-0-client-selection/client-table-pagination";
+} from "@/components/modules/projects/wizard/steps/step-0-studio-selection/studio-table-pagination";
 
 export type Studio = Doc<"profiles">;
 
@@ -35,8 +35,8 @@ export function StudioDataTable({
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
-  const allStudios = useQuery(api.admin.getClients, {});
-  const studiosWithProjects = useQuery(api.admin.getClientsWithProjects);
+  const allStudios = useQuery(api.admin.getStudios, {});
+  const studiosWithProjects = useQuery(api.admin.getStudiosWithProjects);
 
   // Use the appropriate studio list based on the prop
   const studios = onlyWithProjects ? studiosWithProjects : allStudios;
@@ -206,7 +206,7 @@ export function StudioDataTable({
       />
 
       {/* Pagination Controls */}
-      <ClientTablePagination
+      <StudioTablePagination
         pagination={paginationInfo}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}

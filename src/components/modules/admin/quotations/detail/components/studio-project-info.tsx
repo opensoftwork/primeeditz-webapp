@@ -27,7 +27,7 @@ export function StudioProjectInfo({ quotation }: StudioProjectInfoProps) {
             Strategic Studio
           </p>
           <p className="text-xs font-bold text-white uppercase tracking-tight">
-            {quotation.clientId || "Universal"}
+            {quotation.studioId || "Universal"}
           </p>
         </div>
         {quotation.projectId && (

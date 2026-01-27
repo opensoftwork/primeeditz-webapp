@@ -52,7 +52,7 @@ export function AwaitingActorBanner({ project }: AwaitingActorBannerProps) {
 }
 
 function getAwaitingConfig(role: string, state: string, employeeName?: string) {
-  if (role === "client" || role === "studio") {
+  if (role === "studio" || role === "studio") {
     const messages: Record<string, { title: string; message: string }> = {
       quotation_sent: {
         title: "Waiting for Client",

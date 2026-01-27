@@ -9,7 +9,7 @@ interface InvolvedProjectsProps {
   projects: Project[] | undefined;
   selectedProjectIds: string[];
   filteredProjects: Project[];
-  clientId?: string;
+  studioId?: string;
   onAddProject: (id: string) => void;
   onRemoveProject: (id: string) => void;
 }
@@ -18,7 +18,7 @@ export function InvolvedProjects({
   projects,
   selectedProjectIds,
   filteredProjects,
-  clientId,
+  studioId,
   onAddProject,
   onRemoveProject,
 }: InvolvedProjectsProps) {
@@ -39,7 +39,7 @@ export function InvolvedProjects({
           </div>
         </div>
         <ProjectListingDrawer
-          clientId={clientId || ""}
+          studioId={studioId || ""}
           selectedProjectIds={selectedProjectIds}
           onAddProject={onAddProject}
           onRemoveProject={onRemoveProject}

@@ -48,7 +48,7 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
               <User className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
             </div>
             <span className="font-black text-white/80 uppercase tracking-tight text-sm truncate">
-              {quotation.clientName || "Direct Inquiry"}
+              {quotation.studioName || "Direct Inquiry"}
             </span>
           </div>
 

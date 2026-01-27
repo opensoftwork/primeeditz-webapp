@@ -3,8 +3,8 @@
 import { User, Mail, Calendar, CheckCircle2 } from "lucide-react";
 
 interface StudioCardProps {
-  clientName: string;
-  clientEmail?: string;
+  studioName: string;
+  studioEmail?: string;
   submittedAt: number;
 }
 
@@ -35,8 +35,8 @@ function LocalSidebarItem({
 }
 
 export function StudioCard({
-  clientName,
-  clientEmail,
+  studioName,
+  studioEmail,
   submittedAt,
 }: StudioCardProps) {
   return (
@@ -56,12 +56,12 @@ export function StudioCard({
         <LocalSidebarItem
           icon={<User className="h-4 w-4" />}
           label="Name"
-          value={clientName}
+          value={studioName}
         />
         <LocalSidebarItem
           icon={<Mail className="h-4 w-4" />}
           label="Email"
-          value={clientEmail || "—"}
+          value={studioEmail || "—"}
         />
         <LocalSidebarItem
           icon={<Calendar className="h-4 w-4" />}

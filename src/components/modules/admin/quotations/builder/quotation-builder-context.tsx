@@ -38,7 +38,7 @@ export type QuotationStepId = 1 | 2 | 3 | 4 | 5;
 
 export interface QuotationFormData {
   step1: {
-    clientId: string;
+    studioId: string;
     projectId: string; // Left for compatibility
     projectIds: string[]; // Master list, but we sync with step2
     validUntil: Date | undefined;
@@ -65,7 +65,7 @@ export interface QuotationFormData {
 
 export const INITIAL_FORM_DATA: QuotationFormData = {
   step1: {
-    clientId: "",
+    studioId: "",
     projectId: "",
     projectIds: [],
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
@@ -195,7 +195,7 @@ export function QuotationBuilderProvider({
     if (existingQuotation && initialQuotationId) {
       setFormDataState({
         step1: {
-          clientId: existingQuotation.clientId || "",
+          studioId: existingQuotation.studioId || "",
           projectId: existingQuotation.projectId || "",
           projectIds: existingQuotation.projectIds || [],
           validUntil: existingQuotation.validUntil
@@ -224,13 +224,13 @@ export function QuotationBuilderProvider({
   }, [existingQuotation, initialQuotationId]);
 
   // Queries - cast to proper types
-  const studiosQuery = useQuery(api.admin.getClients, {});
+  const studiosQuery = useQuery(api.admin.getStudios, {});
   const studios = studiosQuery as Client[] | undefined;
 
   const projectsQuery = useQuery(
     api.admin.getAdminProjectsSimple,
-    formData.step1.clientId
-      ? { clientId: formData.step1.clientId as Id<"profiles"> }
+    formData.step1.studioId
+      ? { studioId: formData.step1.studioId as Id<"profiles"> }
       : "skip",
   );
 
@@ -260,8 +260,8 @@ export function QuotationBuilderProvider({
 
   // Computed
   const selectedStudio = useMemo(
-    () => studios?.find((c) => c._id === formData.step1.clientId),
-    [studios, formData.step1.clientId],
+    () => studios?.find((c) => c._id === formData.step1.studioId),
+    [studios, formData.step1.studioId],
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -469,7 +469,7 @@ export function QuotationBuilderProvider({
     try {
       const { step1, step2, step3, step4, step5 } = formData;
 
-      if (!step1.clientId) throw new Error("Please select a client");
+      if (!step1.studioId) throw new Error("Please select a client");
       if (step4.lineItems.length === 0)
         throw new Error("Please add at least one line item");
 
@@ -506,7 +506,7 @@ export function QuotationBuilderProvider({
             : undefined;
 
       const payload = {
-        clientId: step1.clientId as Id<"profiles">,
+        studioId: step1.studioId as Id<"profiles">,
         projectId:
           step1.projectId && step1.projectId !== "none"
             ? (step1.projectId as Id<"projects">)
@@ -531,7 +531,7 @@ export function QuotationBuilderProvider({
           terms: step5.terms,
           taxRate: step5.taxRate / 100,
           discountAmount: step5.discountAmount,
-          clientId: step1.clientId as Id<"profiles">,
+          studioId: step1.studioId as Id<"profiles">,
           projectId:
             step1.projectId && step1.projectId !== "none"
               ? (step1.projectId as Id<"projects">)

@@ -60,7 +60,7 @@ interface FolderSetupDrawerProps {
   projectCode: string;
   projectName?: string;
   projectTypeId: Id<"projectTypes">;
-  clientId?: Id<"profiles">;
+  studioId?: Id<"profiles">;
   linkedQuotationId?: Id<"quotations">;
   onSuccess?: () => void;
 }
@@ -72,7 +72,7 @@ export function FolderSetupDrawer({
   projectCode,
   projectName,
   projectTypeId,
-  clientId,
+  studioId,
   linkedQuotationId,
   onSuccess,
 }: FolderSetupDrawerProps) {
@@ -86,7 +86,7 @@ export function FolderSetupDrawer({
 
   // Check if project already has a linked approved quotation
   const hasLinkedQuotation = !!linkedQuotationId;
-  const needsQuotationStep = !hasLinkedQuotation && !!clientId;
+  const needsQuotationStep = !hasLinkedQuotation && !!studioId;
 
   // Calculate step numbers based on whether quotation selection is needed
   const getStepNumber = (baseStep: number) => {
@@ -205,7 +205,7 @@ export function FolderSetupDrawer({
                 )}
               </div>
               <QuotationSelector
-                clientId={clientId}
+                studioId={studioId}
                 selectedQuotationId={selectedQuotation?._id ?? null}
                 onSelect={setSelectedQuotation}
               />

@@ -17,11 +17,11 @@ import { useQuotationBuilder } from "../../builder/quotation-builder-context";
 import type { Studio as Client } from "../../../studio/studio-data-table";
 
 export function EditorClientSection() {
-  const { formData, setFormData, selectedClient } = useQuotationBuilder();
+  const { formData, setFormData, selectedStudio } = useQuotationBuilder();
   const step1Data = formData.step1;
 
   const handleClientSelect = (client: Client) => {
-    setFormData("step1", { clientId: client._id });
+    setFormData("step1", { studioId: client._id });
     toast.success(`Selected ${client.name}`);
   };
 
@@ -43,7 +43,7 @@ export function EditorClientSection() {
             <h3 className="text-xs font-black uppercase tracking-widest text-white/40">
               Recipient
             </h3>
-            {step1Data.clientId && (
+            {step1Data.studioId && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -51,7 +51,7 @@ export function EditorClientSection() {
               >
                 <CheckCircle2 className="h-3 w-3 text-primary" />
                 <span className="text-[8px] font-black text-primary uppercase tracking-widest">
-                  {selectedClient?.name}
+                  {selectedStudio?.name}
                 </span>
               </motion.div>
             )}
@@ -59,7 +59,7 @@ export function EditorClientSection() {
 
           <StudioDataTable
             onSelect={handleClientSelect}
-            selectedId={step1Data.clientId}
+            selectedId={step1Data.studioId}
             onlyWithProjects
           />
         </div>

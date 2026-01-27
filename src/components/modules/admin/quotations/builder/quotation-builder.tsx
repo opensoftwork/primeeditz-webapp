@@ -76,7 +76,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
   const canSubmit = useMemo(() => {
     switch (currentStep) {
       case 1:
-        return !!formData.step1.clientId;
+        return !!formData.step1.studioId;
       case 2:
         return formData.step2.projectIds.length > 0;
       case 3:

@@ -34,7 +34,7 @@ export function NewStudioDrawer({ open, onOpenChange }: NewStudioDrawerProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const createStudioProfile = useMutation(
-    api.functions.profiles.mutations.createDraftClientProfile,
+    api.functions.profiles.mutations.createDraftStudioProfile,
   );
 
   const handleSubmit = async (e: React.FormEvent) => {

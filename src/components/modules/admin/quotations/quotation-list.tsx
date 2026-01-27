@@ -20,14 +20,16 @@ import { Plus } from "lucide-react";
 export function QuotationList() {
   const router = useRouter();
   const [pageSize, setPageSize] = useState(15);
-  const [statusFilter, setStatusFilter] = useState<AdminQuotation["status"] | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<
+    AdminQuotation["status"] | undefined
+  >(undefined);
 
   const query = useSimplePaginatedQuery(
     api.functions.quotations.queries.getAdminQuotationsPaginated,
     {
       status: statusFilter,
     },
-    { initialNumItems: pageSize }
+    { initialNumItems: pageSize },
   );
 
   const quotations: AdminQuotation[] = useMemo(() => {
@@ -42,10 +44,11 @@ export function QuotationList() {
   }, [query]);
 
   const statusOptions = [
+    { label: "Initiated", value: "initiated" },
     { label: "Draft", value: "draft" },
     { label: "Sent", value: "sent" },
     { label: "Viewed", value: "viewed" },
-    { label: "Approved", value: "approved" },
+    { label: "Accepted", value: "approved" },
     { label: "Changes Requested", value: "changes_requested" },
     { label: "Rejected", value: "rejected" },
     { label: "Expired", value: "expired" },
@@ -114,9 +117,7 @@ export function QuotationList() {
         isLoading={query.isLoading}
         emptyTitle="No Quotations Found"
         emptyDescription="No quotations match your current filters. Try adjusting your search criteria."
-        renderCard={(quotation) => (
-          <QuotationCard quotation={quotation} />
-        )}
+        renderCard={(quotation) => <QuotationCard quotation={quotation} />}
         defaultView="table"
         showViewToggle={true}
         toolbar={{

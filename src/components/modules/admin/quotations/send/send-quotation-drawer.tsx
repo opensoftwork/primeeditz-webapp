@@ -25,8 +25,8 @@ interface SendQuotationDrawerProps {
     _id: Id<"quotations">;
     code: string;
     total: number;
-    clientId?: string;
-    clientName?: string;
+    studioId?: string;
+    studioName?: string;
     status: string;
     shareToken?: string;
   };
@@ -102,13 +102,13 @@ export function SendQuotationDrawer({
                 ₹{quotation.total.toLocaleString("en-IN")}
               </span>
             </div>
-            {quotation.clientName && (
+            {quotation.studioName && (
               <div className="flex items-center gap-2 px-1">
                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
                   Client:
                 </span>
                 <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                  {quotation.clientName}
+                  {quotation.studioName}
                 </span>
               </div>
             )}
@@ -119,7 +119,7 @@ export function SendQuotationDrawer({
 
             <div className="space-y-4">
               <DashboardSection
-                clientId={quotation.clientId}
+                studioId={quotation.studioId}
                 isSent={quotation.status !== "draft"}
                 isSending={isSending}
                 onSend={handleSend}

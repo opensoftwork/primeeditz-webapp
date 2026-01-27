@@ -7,9 +7,9 @@ export interface AdminProject {
   actionState: string;
   status: string; // compatibility
   projectTypeName: string;
-  clientName: string;
-  clientId?: Id<"profiles">;
-  source: "client_request" | "admin_init";
+  studioName: string;
+  studioId?: Id<"profiles">;
+  source: "studio_request" | "admin_init";
   eventName?: string;
   eventDate?: number;
   createdAt: number;

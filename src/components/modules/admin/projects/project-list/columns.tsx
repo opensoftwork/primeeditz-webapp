@@ -25,7 +25,7 @@ export const columns: ColumnDef<AdminProject>[] = [
     ),
   },
   {
-    accessorKey: "clientName",
+    accessorKey: "studioName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Client" />
     ),
@@ -35,16 +35,16 @@ export const columns: ColumnDef<AdminProject>[] = [
           <User className="h-3 w-3 text-white/40" />
         </div>
         <span className="font-bold text-white/80 truncate max-w-[160px]">
-          {row.getValue("clientName")}
+          {row.getValue("studioName")}
         </span>
       </div>
     ),
     filterFn: (row, id, value) => {
-      const clientName = row.getValue(id) as string;
+      const studioName = row.getValue(id) as string;
       const code = row.original.code;
       const search = (value as string).toLowerCase();
       return (
-        clientName.toLowerCase().includes(search) ||
+        studioName.toLowerCase().includes(search) ||
         code.toLowerCase().includes(search)
       );
     },

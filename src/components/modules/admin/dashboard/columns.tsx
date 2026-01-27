@@ -44,12 +44,12 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
-    accessorKey: "clientName",
+    accessorKey: "studioName",
     header: "Client",
     cell: ({ row }: CellContext<any, any>) => (
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-white/80">
-          {row.getValue("clientName")}
+          {row.getValue("studioName")}
         </span>
       </div>
     ),

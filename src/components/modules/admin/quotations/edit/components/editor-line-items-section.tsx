@@ -226,7 +226,7 @@ export function EditorLineItemsSection() {
         projects={projects as Project[]}
         selectedProjectIds={selectedProjectIds}
         filteredProjects={filteredProjects}
-        clientId={formData.step1.clientId}
+        studioId={formData.step1.studioId}
         onAddProject={handleAddProject}
         onRemoveProject={handleRemoveProject}
       />

@@ -39,7 +39,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
     grandTotal,
     formData,
     taxAmount,
-    selectedClient,
+    selectedStudio,
   } = useQuotationBuilder();
 
   return (
@@ -63,7 +63,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
           </div>
           <p className="text-white/50 text-xs font-medium ml-12">
             Modifying quotation details for{" "}
-            {selectedClient?.name || "selected client"}.
+            {selectedStudio?.name || "selected client"}.
           </p>
         </div>
 

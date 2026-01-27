@@ -29,7 +29,7 @@ interface QuotationPreviewProps {
   projects?: Project[];
   onBack?: () => void;
   companyInfo?: CompanyInfo;
-  clientName?: string;
+  studioName?: string;
   projectName?: string;
 }
 
@@ -43,7 +43,7 @@ export function QuotationPreview({
   projects = [],
   onBack,
   companyInfo,
-  clientName,
+  studioName,
   projectName,
 }: QuotationPreviewProps) {
   const documentRef = useRef<HTMLDivElement>(null);
@@ -91,7 +91,7 @@ export function QuotationPreview({
               sections={sections}
               projects={projects}
               companyInfo={companyInfo}
-              clientName={clientName}
+              studioName={studioName}
               projectName={projectName}
               variant="outline"
               size="sm"
@@ -109,7 +109,7 @@ export function QuotationPreview({
           sections={sections}
           projects={projects}
           companyInfo={companyInfo}
-          clientName={clientName}
+          studioName={studioName}
           projectName={projectName}
         />
       </div>

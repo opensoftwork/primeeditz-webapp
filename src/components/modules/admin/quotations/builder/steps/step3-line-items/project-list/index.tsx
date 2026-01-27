@@ -29,7 +29,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import type { Project } from "../../../types";
 
 interface ProjectListingDrawerProps {
-  clientId: string;
+  studioId: string;
   selectedProjectIds: string[];
   onAddProject: (projectId: string) => void;
   onRemoveProject: (projectId: string) => void;
@@ -37,7 +37,7 @@ interface ProjectListingDrawerProps {
 }
 
 export function ProjectListingDrawer({
-  clientId,
+  studioId,
   selectedProjectIds,
   onAddProject,
   onRemoveProject,
@@ -50,7 +50,7 @@ export function ProjectListingDrawer({
   // Use simple query since we want a "lighter" UI and usually clients don't have hundreds of projects
   const projects = useQuery(
     api.admin.getAdminProjectsSimple,
-    clientId ? { clientId: clientId as Id<"profiles"> } : {}
+    studioId ? { studioId: studioId as Id<"profiles"> } : {}
   ) as Project[] | undefined;
 
   const filteredProjects = useMemo(() => {
@@ -80,7 +80,7 @@ export function ProjectListingDrawer({
             type="button"
             variant="outline"
             className="h-9 bg-white/5 border-white/5 rounded-xl px-4 text-[10px] font-black uppercase tracking-wider text-white hover:bg-white/10 transition-colors"
-            disabled={!clientId}
+            disabled={!studioId}
           >
             <Plus className="h-3.5 w-3.5 mr-2 text-primary" />
             Add Projects

@@ -38,7 +38,7 @@ interface QuotationDocumentProps {
   projects?: Project[];
   activeSection?: string; // Filter to show only this section
   companyInfo?: CompanyInfo;
-  clientName?: string;
+  studioName?: string;
   projectName?: string;
 }
 
@@ -128,7 +128,7 @@ function DocumentLineItem({
 export const QuotationDocument = React.forwardRef<
   HTMLDivElement,
   QuotationDocumentProps
->(({ quotation, sections, projects = [], activeSection, companyInfo, clientName, projectName }, ref) => {
+>(({ quotation, sections, projects = [], activeSection, companyInfo, studioName, projectName }, ref) => {
   // Filter sections if activeSection is provided
   const filteredSections = activeSection
     ? sections.filter((s) => s.name === activeSection)
@@ -296,7 +296,7 @@ export const QuotationDocument = React.forwardRef<
             </div>
             <div className="pl-4">
               <div className="font-black text-lg text-slate-900">
-                {clientName || quotation.clientId || "—"}
+                {studioName || quotation.studioId || "—"}
               </div>
               <div className="text-xs text-slate-500 font-medium">
                 Post-Production Engagement

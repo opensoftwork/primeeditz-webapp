@@ -32,13 +32,13 @@ export function StudioActions({ studio }: StudioActionsProps) {
   const [isLoading, setIsLoading] = useState(false);
 
   const updateClient = useMutation(
-    api.functions.profiles.mutations.updateClientProfile,
+    api.functions.profiles.mutations.updateStudioProfile,
   );
-  const deactivateClient = useMutation(
-    api.functions.profiles.mutations.deactivateClient,
+  const deactivateStudio = useMutation(
+    api.functions.profiles.mutations.deactivateStudio,
   );
-  const reactivateClient = useMutation(
-    api.functions.profiles.mutations.reactivateClient,
+  const reactivateStudio = useMutation(
+    api.functions.profiles.mutations.reactivateStudio,
   );
 
   const handleSave = async (values: any) => {
@@ -62,7 +62,7 @@ export function StudioActions({ studio }: StudioActionsProps) {
   const handleDeactivate = async () => {
     setIsLoading(true);
     try {
-      await deactivateClient({ profileId: studio._id });
+      await deactivateStudio({ profileId: studio._id });
       toast.success(`Studio ${studio.name} has been deactivated.`);
     } catch (error) {
       toast.error(
@@ -77,7 +77,7 @@ export function StudioActions({ studio }: StudioActionsProps) {
   const handleReactivate = async () => {
     setIsLoading(true);
     try {
-      await reactivateClient({ profileId: studio._id });
+      await reactivateStudio({ profileId: studio._id });
       toast.success(`Studio ${studio.name} has been reactivated.`);
     } catch (error) {
       toast.error(

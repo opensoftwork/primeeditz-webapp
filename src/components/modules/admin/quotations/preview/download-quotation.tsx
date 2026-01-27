@@ -32,7 +32,7 @@ interface DownloadQuotationProps {
   projects?: Project[];
   activeSection?: string; // Section name for filtered download
   companyInfo?: CompanyInfo;
-  clientName?: string;
+  studioName?: string;
   projectName?: string;
   variant?: "default" | "outline";
   size?: "sm" | "default" | "lg";
@@ -51,7 +51,7 @@ export function DownloadQuotation({
   projects = [],
   activeSection,
   companyInfo,
-  clientName,
+  studioName,
   projectName,
   variant = "default",
   size = "sm",
@@ -258,7 +258,7 @@ export function DownloadQuotation({
             projects={projects}
             activeSection={activeSection}
             companyInfo={companyInfo}
-            clientName={clientName}
+            studioName={studioName}
             projectName={projectName}
           />
         </div>

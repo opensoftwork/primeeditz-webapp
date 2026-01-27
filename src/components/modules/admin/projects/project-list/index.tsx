@@ -70,7 +70,7 @@ function ProjectCard({ project }: { project: AdminProject }) {
               <User className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
             </div>
             <span className="font-black text-white/80 uppercase tracking-tight text-sm">
-              {project.clientName}
+              {project.studioName}
             </span>
           </div>
 
@@ -119,7 +119,7 @@ function DraftBanner({
   draft: {
     _id: string;
     code: string;
-    clientName?: string | null;
+    studioName?: string | null;
     eventName?: string;
   };
   onResume: () => void;
@@ -145,12 +145,12 @@ function DraftBanner({
             <span className="font-mono font-bold text-primary">
               {draft.code}
             </span>
-            {draft.clientName && (
+            {draft.studioName && (
               <>
                 {" "}
                 for client{" "}
                 <span className="font-bold text-white/80">
-                  {draft.clientName}
+                  {draft.studioName}
                 </span>
               </>
             )}
@@ -362,7 +362,7 @@ export default function ProjectList() {
         showViewToggle={true}
         toolbar={{
           search: {
-            column: "clientName",
+            column: "studioName",
             placeholder: "Search by client or code...",
           },
           filters: [

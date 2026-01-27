@@ -184,8 +184,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
 
           <div className="lg:col-span-4 space-y-10">
             <StudioCard
-              clientName={project.clientName}
-              clientEmail={project.clientEmail}
+              studioName={project.studioName}
+              studioEmail={project.studioEmail}
               submittedAt={project._creationTime}
             />
             <QuotationCard
@@ -228,7 +228,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         projectCode={project.code}
         projectName={project.eventName}
         projectTypeId={project.projectTypeId}
-        clientId={project.clientId}
+        studioId={project.studioId}
         onSuccess={handleFolderSetupSuccess}
       />
 

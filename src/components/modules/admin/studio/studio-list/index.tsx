@@ -108,8 +108,8 @@ export default function StudioList({
 }: StudioListProps) {
   const [showNewStudioDrawer, setShowNewStudioDrawer] = useState(false);
   // Fetch studios based on the filter prop
-  const allStudios = useQuery(api.admin.getClients, {});
-  const studiosWithProjects = useQuery(api.admin.getClientsWithProjects);
+  const allStudios = useQuery(api.admin.getStudios, {});
+  const studiosWithProjects = useQuery(api.admin.getStudiosWithProjects);
 
   const rawStudios = onlyWithProjects ? studiosWithProjects : allStudios;
 

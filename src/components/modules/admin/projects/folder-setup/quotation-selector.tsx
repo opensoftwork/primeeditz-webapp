@@ -28,7 +28,7 @@ interface QuotationOption {
 }
 
 interface QuotationSelectorProps {
-  clientId: Id<"profiles"> | undefined;
+  studioId: Id<"profiles"> | undefined;
   selectedQuotationId: Id<"quotations"> | null;
   onSelect: (quotation: QuotationOption | null) => void;
   linkedQuotation?: QuotationOption | null;
@@ -52,17 +52,17 @@ function formatDate(timestamp: number): string {
 }
 
 export function QuotationSelector({
-  clientId,
+  studioId,
   selectedQuotationId,
   onSelect,
   linkedQuotation,
 }: QuotationSelectorProps) {
   const quotations = useQuery(
     api.functions.quotations.queries.getClientApprovedQuotations,
-    clientId ? { clientId } : "skip"
+    studioId ? { studioId } : "skip"
   );
 
-  if (!clientId) {
+  if (!studioId) {
     return (
       <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
         <div className="flex items-center gap-3">

@@ -26,9 +26,9 @@ import {
   FieldSet,
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
-import { StudioDataTable } from "../../../../studio/studio-data-table";
+import { StudioDataTable } from "@/components/modules/admin/studio/studio-data-table";
 import { useQuotationBuilder } from "../../quotation-builder-context";
-import type { Studio } from "../../../../studio/studio-data-table";
+import type { Studio } from "@/components/modules/admin/studio/studio-data-table";
 
 export function Step1StudioContext() {
   const { formData, setFormData, nextStep, selectedStudio, setSubmitTrigger } =
@@ -39,13 +39,13 @@ export function Step1StudioContext() {
   // TanStack Form setup
   const form = useForm({
     defaultValues: {
-      clientId: step1Data.clientId,
+      studioId: step1Data.studioId,
       projectId: step1Data.projectId,
       validUntil: step1Data.validUntil,
     },
     onSubmit: async ({ value }) => {
       setFormData("step1", {
-        clientId: value.clientId,
+        studioId: value.studioId,
         projectId: value.projectId,
         validUntil: value.validUntil ?? undefined,
       });
@@ -61,8 +61,8 @@ export function Step1StudioContext() {
 
   // Handle client selection from table
   const handleClientSelect = (studio: Studio) => {
-    form.setFieldValue("clientId", studio._id);
-    setFormData("step1", { clientId: studio._id });
+    form.setFieldValue("studioId", studio._id);
+    setFormData("step1", { studioId: studio._id });
     toast.success(`Selected ${studio.name}`);
   };
 
@@ -89,7 +89,7 @@ export function Step1StudioContext() {
           <FieldSet className="w-full border-none p-0">
             <FieldGroup className="space-y-6">
               <form.Field
-                name="clientId"
+                name="studioId"
                 validators={{
                   onChange: ({ value }) =>
                     !value ? "Please select a client" : undefined,

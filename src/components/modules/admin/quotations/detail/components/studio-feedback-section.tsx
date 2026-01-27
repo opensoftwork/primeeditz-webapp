@@ -105,24 +105,24 @@ export function StudioFeedbackSection({
         )}
 
         {/* Notes/Signature */}
-        {quotation.clientNotes && (
+        {quotation.studioNotes && (
           <div className="space-y-2">
             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
               Studio Notes
             </span>
             <div className="p-4 rounded-2xl bg-black/40 border border-white/5 text-xs font-medium text-white/70 leading-relaxed italic">
-              "{quotation.clientNotes}"
+              "{quotation.studioNotes}"
             </div>
           </div>
         )}
 
-        {quotation.clientSignature && (
+        {quotation.studioSignature && (
           <div className="flex items-center gap-2 pt-2">
             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
               Digitally Signed:
             </span>
             <span className="text-xs font-black text-white/80 italic">
-              {quotation.clientSignature}
+              {quotation.studioSignature}
             </span>
           </div>
         )}

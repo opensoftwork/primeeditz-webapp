@@ -7,7 +7,7 @@ import { getStatusConfig } from "@/lib/status-display";
 
 interface StatusBadgeProps {
   status: string;
-  source?: "client_request" | "admin_init";
+  source?: "studio_request" | "admin_init";
   deliveryLabel?: string;
 }
 

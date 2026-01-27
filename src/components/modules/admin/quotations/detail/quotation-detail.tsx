@@ -282,8 +282,8 @@ export function QuotationDetail({
           _id: quotationId as Id<"quotations">,
           code: quotation.code,
           total: quotation.total,
-          clientId: quotation.clientId,
-          clientName: quotation.clientName,
+          studioId: quotation.studioId,
+          studioName: quotation.studioName,
           status: quotation.status,
           shareToken: quotation.shareToken,
         }}

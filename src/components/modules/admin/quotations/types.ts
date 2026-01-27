@@ -70,7 +70,7 @@ export interface QuotationData {
   code: string;
   version: number;
   status: string;
-  clientId?: string;
+  studioId?: string;
   projectIds?: string[];
   lineItems: QuotationLineItem[];
   terms?: string;
@@ -146,7 +146,7 @@ export type LibraryItem = Doc<"quotationLibraryItems">;
 // ============================================================================
 
 export interface QuotationBuilderState {
-  clientId: string;
+  studioId: string;
   projectId: string;
   projectIds: string[];
   templateId: string;
