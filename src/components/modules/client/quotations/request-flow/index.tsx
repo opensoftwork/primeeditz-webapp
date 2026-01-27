@@ -43,7 +43,7 @@ export default function QuoteRequestWizard() {
 
   // Queries
   const categories = useQuery(
-    api.functions.projects.queries.getProjectCategories,
+    api.functions.projectCategories.queries.getProjectCategories,
   );
   const templates = useQuery(
     api.functions.quotations.templates.queries.getTemplates,

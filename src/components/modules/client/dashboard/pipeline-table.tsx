@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClientStatusBadge } from "../../projects/client-status-badge";
+import { StudioStatusBadge } from "../../projects/studio-status-badge";
 import { PhaseProgress } from "../../projects/phase-progress";
 import { ProjectData } from "./types";
 
@@ -67,7 +67,7 @@ export function PipelineTable({ projects }: PipelineTableProps) {
         <DataTableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => (
-        <ClientStatusBadge status={row.getValue("actionState")} />
+        <StudioStatusBadge status={row.getValue("actionState")} />
       ),
     },
     {

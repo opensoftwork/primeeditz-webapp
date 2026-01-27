@@ -16,7 +16,7 @@ interface QuotationActionButtonsProps {
     code: string;
     total: number;
     approvedAt?: number;
-    clientSignature?: string;
+    studioSignature?: string;
     rejectionReason?: string;
   };
   className?: string;
@@ -58,11 +58,11 @@ export function QuotationActionButtons({
             </p>
           </div>
         </div>
-        {quotation.clientSignature && (
+        {quotation.studioSignature && (
           <div className="pt-4 border-t border-green-500/10 flex items-center gap-2 text-[9px] font-black uppercase tracking-widest text-white/30 relative z-10">
             <span>Digitally Signed by:</span>
             <span className="text-white/60 italic">
-              {quotation.clientSignature}
+              {quotation.studioSignature}
             </span>
           </div>
         )}

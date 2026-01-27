@@ -11,10 +11,11 @@ import {
   Layers,
   Zap,
   ArrowRight,
+  Rocket,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { ClientStatusBadge } from "../../projects/client-status-badge";
+import { StudioStatusBadge } from "../../projects/studio-status-badge";
 import { PhaseProgress } from "../../projects/phase-progress";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -143,7 +144,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
                 </span>
               </div>
             </div>
-            <ClientStatusBadge status={project.actionState} />
+            <StudioStatusBadge status={project.actionState} />
           </div>
 
           {/* Metadata */}
