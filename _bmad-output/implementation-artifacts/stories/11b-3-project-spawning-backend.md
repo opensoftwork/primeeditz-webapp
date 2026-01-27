@@ -23,9 +23,10 @@ so that Studios don't need to manually request projects and the workflow is seam
      - `clientId`: The quotation's `clientId`.
      - `projectTypeId`: From line item.
      - `source`: new literal `'quotation_spawned'` (add to validator if missing).
-     - `phase`: `'onboarding'` (skip setup).
-     - `actionState`: `'storage_allocated'`.
-     - `endClientName`: Use quotation client name or add a field to quote for "Event Name".
+     - `phase`: `'onboarding'` (Skip setup, enter onboarding phase).
+     - `actionState`: `'awaiting_uploads'` (Awaiting Studio asset upload).
+     - `endClientName`: Mapped from quotation `endClientName`.
+     - `eventName`: Mapped from line item description or quotation `eventName`.
    - **Folder Setup**:
      - Immediately call the folder setup logic (internal mutation) using `selectedFolderTemplateId`.
 4. Logging:

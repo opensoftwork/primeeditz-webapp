@@ -208,17 +208,27 @@ development_status:
   epic-11: in-progress
 
   # Epic 11A: Schema & Data Foundation
-  11a-1-add-quotationid-to-projects: review
-  11a-2-enhance-quotation-templates: review
-  11a-3-add-folder-template-variants: review
-  11a-4-seed-folder-templates: review
-  11a-5-introduce-studio-role: review
-  11a-6-create-migration: review
+  11a-1-add-quotationid-to-projects: done
+  11a-2-enhance-quotation-templates: done
+  11a-3-add-folder-template-variants: done
+  11a-4-seed-folder-templates: done
+  11a-5-introduce-studio-role: done
+  11a-6-create-migration: done
   epic-11a-retrospective: optional
 
   # Epic 11B: Quotation Engine Enhancements
-  11b-1-link-line-items-to-types: review
-  11b-2-select-folder-template: review
-  11b-3-project-spawning-backend: review
+  11b-1-link-line-items-to-types: done # Integrated into line item schema
+  11b-2-select-folder-template: done # Integrated into line item schema
+  11b-3-project-spawning-backend: done # IMPLEMENTED: Spawn logic bridges to Onboarding
   11b-4-display-spawned-projects: review
   epic-11b-retrospective: optional
+
+  # Epic 11C: Studio Portal Revamp
+  11c-1-quote-request-flow: ready-for-dev # NEW: Studio initiates 'initiated' quotes
+  11c-2-my-quote-requests-list: ready-for-dev
+  11c-3-my-projects-grouped-by-end-client: ready-for-dev
+  11c-4-project-onboarding-card: ready-for-dev
+  11c-5-repurpose-wizard-for-onboarding-only: ready-for-dev
+  11c-6-studio-project-detail-view: backlog
+  11c-7-deprecate-old-wizard: backlog
+  epic-11c-retrospective: optional

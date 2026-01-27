@@ -43,7 +43,7 @@ This epic **transforms the Studio (formerly Client) experience** from a project-
   - **Step 2**: Enter End Client Name (required) and Event Date (optional)
   - **Step 3**: Review selected package and submit
 - [ ] Submitting creates a quotation request with:
-  - `status: 'pending_review'` or new `'requested'` status
+  - `status: 'initiated'` (indicates a studio's raw request)
   - `clientId` = Studio's profile ID
   - `endClientName` stored on quote (new field)
   - Template's line items copied to this quotation instance

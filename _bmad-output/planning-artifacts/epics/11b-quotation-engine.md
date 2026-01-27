@@ -85,18 +85,21 @@ This epic enhances the existing Quotation system (Epic 4) to support **project-s
 
 **Acceptance Criteria**:
 
-- [ ] Modify `approveQuotation` mutation in `convex/functions/quotations/mutations.ts`.
-- [ ] After status change to `approved`, iterate through `quotation.lineItems`.
-- [ ] For each item where `spawnsProject === true`:
-  - Generate project code using existing `generateProjectCode`.
-  - Create project record with:
-    - `projectTypeId` from line item
-    - `clientId` from quotation
-    - `quotationId` linking to this quotation
-    - `endClientName` from quotation (new field or derived)
-    - `source: 'quotation_spawned'` (new literal)
-    - `actionState: 'storage_allocated'` (skip quote steps)
-  - Call `setupProjectFolders` with `selectedFolderTemplateId` from line item.
+- [ ] Modify `approveQuotation` mutation to support the new "Admin Acceptance" flow.
+- [ ] Logic for spawning projects remains primarily triggered by the `approved` status, but can now be manually gated by Admin payment confirmation.
+- [ ] After status change to `approved` (triggered by Admin after payment/review):
+  - Iterate through `quotation.lineItems`.
+  - For each item where `spawnsProject === true`:
+    - Generate project code using existing `generateProjectCode`.
+    - Create project record with:
+      - `projectTypeId` from line item
+      - `clientId` from quotation
+      - `quotationId` linking to this quotation
+      - `endClientName` from quotation
+      - `source: 'quotation_spawned'`
+      - `actionState: 'awaiting_uploads'` (Starts in Onboarding)
+      - `phase: 'onboarding'`
+    - Call `setupProjectFolders` with `selectedFolderTemplateId` from line item.
 - [ ] Return list of created project IDs.
 - [ ] Log project creation in status history.
 - [ ] If no spawnable items, proceed without error (service-only quote).
