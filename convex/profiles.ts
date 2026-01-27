@@ -124,7 +124,10 @@ export const claimDraftProfile = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (existingProfile && existingProfile._id !== args.profileId) {
+    if (existingProfile) {
+      if (existingProfile._id === args.profileId) {
+        return args.profileId;
+      }
       throw new ConvexError("User already has an active profile");
     }
 
