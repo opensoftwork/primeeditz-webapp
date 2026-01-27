@@ -98,7 +98,7 @@ export function Step1Packages() {
       </div>
 
       {/* Packages Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8 pb-32">
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 pb-20">
         {filteredTemplates?.map((pkg) => {
           const isSelected = selectedPackage === pkg._id;
           const minPrice = pkg.lineItems.reduce(
@@ -113,55 +113,55 @@ export function Step1Packages() {
           return (
             <motion.div
               key={pkg._id}
-              whileHover={{ y: -8, scale: 1.02 }}
+              whileHover={{ y: -5, scale: 1.01 }}
               whileTap={{ scale: 0.98 }}
               className="h-full"
             >
               <Card
                 onClick={() => setSelectedPackage(pkg._id)}
                 className={cn(
-                  "h-full relative overflow-hidden group cursor-pointer transition-all duration-700 rounded-[2.5rem] border-2",
+                  "h-full relative overflow-hidden group cursor-pointer transition-all duration-500 rounded-3xl border-2",
                   isSelected
-                    ? "bg-primary border-primary shadow-[0_30px_60px_rgba(var(--primary),0.3)] ring-4 ring-primary/20"
-                    : "bg-zinc-900/40 border-white/5 hover:border-primary/40 hover:bg-zinc-900/60 shadow-2xl shadow-black/40",
+                    ? "bg-primary border-primary shadow-[0_20px_40px_rgba(var(--primary),0.2)] ring-2 ring-primary/20"
+                    : "bg-zinc-900/40 border-white/5 hover:border-primary/40 hover:bg-zinc-900/60 shadow-xl shadow-black/40",
                 )}
               >
                 {/* Background Textures */}
                 <div
                   className={cn(
-                    "absolute inset-0 bg-grid-white/[0.02] bg-size-[40px_40px] pointer-events-none transition-opacity duration-500",
-                    isSelected ? "opacity-20" : "opacity-40",
+                    "absolute inset-0 bg-grid-white/[0.02] bg-size-[32px_32px] pointer-events-none transition-opacity duration-500",
+                    isSelected ? "opacity-10" : "opacity-30",
                   )}
                 />
 
                 {/* Dynamic Glow */}
                 <div
                   className={cn(
-                    "absolute -top-24 -right-24 w-64 h-64 blur-[100px] rounded-full transition-all duration-1000 group-hover:w-80 group-hover:h-80",
+                    "absolute -top-16 -right-16 w-48 h-48 blur-[80px] rounded-full transition-all duration-700 group-hover:w-64 group-hover:h-64",
                     isSelected
-                      ? "bg-black/20"
-                      : "bg-primary/10 opacity-0 group-hover:opacity-100",
+                      ? "bg-black/10"
+                      : "bg-primary/5 opacity-0 group-hover:opacity-100",
                   )}
                 />
 
-                <div className="relative z-10 p-8 flex flex-col h-full min-h-[500px]">
+                <div className="relative z-10 p-6 flex flex-col h-full min-h-[420px]">
                   {/* Top: Branding & Title */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <div
                         className={cn(
-                          "h-12 w-12 rounded-2xl flex items-center justify-center transition-all duration-500",
+                          "h-10 w-10 rounded-xl flex items-center justify-center transition-all duration-500",
                           isSelected
                             ? "bg-black/10 text-black"
                             : "bg-white/5 text-primary border border-primary/20",
                         )}
                       >
-                        <Package className="h-6 w-6" />
+                        <Package className="h-5 w-5" />
                       </div>
                       <Badge
                         variant="outline"
                         className={cn(
-                          "text-[9px] font-black uppercase tracking-[0.2em] px-4 py-1.5 border-2 rounded-full transition-all",
+                          "text-[8px] font-black uppercase tracking-[0.2em] px-3 py-1 border rounded-full transition-all",
                           isSelected
                             ? "bg-black/10 text-black border-black/20"
                             : "bg-primary/10 text-primary border-primary/20",
@@ -176,7 +176,7 @@ export function Step1Packages() {
                     <div className="space-y-1">
                       <h3
                         className={cn(
-                          "text-4xl font-black uppercase tracking-tighter leading-[0.85] transition-colors",
+                          "text-2xl font-black uppercase tracking-tighter leading-none transition-colors",
                           isSelected
                             ? "text-black"
                             : "text-white group-hover:text-primary",
@@ -186,21 +186,21 @@ export function Step1Packages() {
                       </h3>
                       <p
                         className={cn(
-                          "text-[12px] font-bold leading-relaxed transition-colors mt-3 max-w-[80%]",
+                          "text-[11px] font-bold leading-relaxed transition-colors mt-2 line-clamp-2",
                           isSelected ? "text-black/70" : "text-white/40",
                         )}
                       >
                         {pkg.description ||
-                          "The gold standard for modern creative production."}
+                          "Gold standard for modern creative production."}
                       </p>
                     </div>
                   </div>
 
                   {/* Middle: Value Prop / Features */}
-                  <div className="mt-10 flex-1 space-y-3">
+                  <div className="mt-6 flex-1 space-y-2">
                     <div
                       className={cn(
-                        "text-[10px] font-black uppercase tracking-[0.2em] mb-4 opacity-40",
+                        "text-[9px] font-black uppercase tracking-[0.2em] mb-2 opacity-40",
                         isSelected ? "text-black" : "text-primary",
                       )}
                     >
@@ -210,28 +210,19 @@ export function Step1Packages() {
                       <div
                         key={idx}
                         className={cn(
-                          "flex items-center gap-3 p-3.5 rounded-2xl border transition-all duration-300",
+                          "flex items-center gap-2.5 p-2 rounded-xl border transition-all duration-300",
                           isSelected
                             ? "bg-black/5 border-black/5 text-black"
-                            : "bg-white/5 border-white/5 text-white/50 group-hover:bg-white/10 group-hover:text-white/90 group-hover:border-white/10",
+                            : "bg-white/5 border-white/5 text-white/50 group-hover:bg-white/10 group-hover:text-white group-hover:border-white/10",
                         )}
                       >
-                        <div
+                        <CheckCircle2
                           className={cn(
-                            "h-5 w-5 rounded-full flex items-center justify-center shrink-0 border",
-                            isSelected
-                              ? "bg-black/10 border-black/10"
-                              : "bg-primary/10 border-primary/20",
+                            "h-3.5 w-3.5 shrink-0",
+                            isSelected ? "text-black" : "text-primary/60",
                           )}
-                        >
-                          <CheckCircle2
-                            className={cn(
-                              "h-3 w-3",
-                              isSelected ? "text-black" : "text-primary",
-                            )}
-                          />
-                        </div>
-                        <span className="text-[11px] font-black uppercase tracking-tight truncate">
+                        />
+                        <span className="text-[10px] font-black uppercase tracking-tight truncate">
                           {item.description}
                         </span>
                       </div>
@@ -240,7 +231,7 @@ export function Step1Packages() {
                     <Button
                       variant="ghost"
                       className={cn(
-                        "w-full mt-2 h-10 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all",
+                        "w-full mt-1 h-8 rounded-lg text-[9px] font-black uppercase tracking-[0.2em] transition-all",
                         isSelected
                           ? "hover:bg-black/10 text-black/60 hover:text-black"
                           : "hover:bg-white/5 text-white/30 hover:text-white",
@@ -250,23 +241,23 @@ export function Step1Packages() {
                         setDetailPkg(pkg);
                       }}
                     >
-                      Explore Full Specs
+                      View All Specs
                     </Button>
                   </div>
 
-                  {/* Bottom: Pricing (As per sketch) */}
-                  <div className="mt-8 pt-8 border-t-2 border-dashed border-current opacity-20 relative">
+                  {/* Bottom: Pricing */}
+                  <div className="mt-6 pt-5 border-t-2 border-dashed border-current opacity-20 relative">
                     <div className="flex items-baseline justify-end gap-1">
                       <span
                         className={cn(
-                          "text-[10px] font-black uppercase tracking-[0.2em] mb-1 opacity-60",
+                          "text-[9px] font-black uppercase tracking-[0.2em] mb-0.5 opacity-60",
                         )}
                       >
-                        Starting at
+                        From
                       </span>
                       <span
                         className={cn(
-                          "text-5xl font-black tracking-tighter",
+                          "text-3xl font-black tracking-tighter",
                           isSelected ? "text-black" : "text-white",
                         )}
                       >
@@ -279,9 +270,9 @@ export function Step1Packages() {
                   {isSelected && (
                     <motion.div
                       layoutId="selection"
-                      className="absolute top-6 right-6 h-10 w-10 rounded-full bg-black flex items-center justify-center shadow-xl z-20"
+                      className="absolute top-4 right-4 h-8 w-8 rounded-full bg-black flex items-center justify-center shadow-lg z-20"
                     >
-                      <CheckCircle2 className="h-6 w-6 text-primary" />
+                      <CheckCircle2 className="h-5 w-5 text-primary" />
                     </motion.div>
                   )}
                 </div>
