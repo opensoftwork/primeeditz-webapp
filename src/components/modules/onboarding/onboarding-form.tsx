@@ -28,6 +28,7 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 
 // Zod validation schema
 const onboardingSchema = z.object({
@@ -61,10 +62,10 @@ export default function OnboardingForm() {
   // Handle automatic profile claiming if profileId is present
   useEffect(() => {
     const autoClaim = async () => {
-      if (profileId && !myProfile && !isClaiming && !claimError) {
+      if (profileId && myProfile === null && !isClaiming && !claimError) {
         setIsClaiming(true);
         try {
-          await claimProfile({ profileId: profileId as any });
+          await claimProfile({ profileId: profileId as Id<"profiles"> });
           toast.success("Profile linked successfully!");
           router.push("/dashboard");
         } catch (error: any) {
