@@ -1,6 +1,6 @@
 "use client";
 
-import { HardDrive, Database, TrendingDown } from "lucide-react";
+import { Database, HardDrive, TrendingDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StorageSummaryCardProps {
@@ -35,29 +35,35 @@ export function StorageSummaryCard({
   const isCritical = remainingGB < totalGB * 0.1; // Less than 10% remaining
 
   return (
-    <div className={cn(
-      "p-6 rounded-2xl border space-y-4",
-      "bg-linear-to-br from-white/5 to-white/2 border-white/10",
-      className
-    )}>
+    <div
+      className={cn(
+        "p-6 rounded-2xl border space-y-4",
+        "bg-linear-to-br from-white/5 to-white/2 border-white/10",
+        className,
+      )}
+    >
       {/* Header */}
       <div className="flex items-center gap-3">
-        <div className={cn(
-          "p-2.5 rounded-xl",
-          isCritical 
-            ? "bg-red-500/10" 
-            : isLow 
-            ? "bg-amber-500/10" 
-            : "bg-emerald-500/10"
-        )}>
-          <HardDrive className={cn(
-            "h-5 w-5",
-            isCritical 
-              ? "text-red-500" 
-              : isLow 
-              ? "text-amber-500" 
-              : "text-emerald-500"
-          )} />
+        <div
+          className={cn(
+            "p-2.5 rounded-xl",
+            isCritical
+              ? "bg-red-500/10"
+              : isLow
+                ? "bg-amber-500/10"
+                : "bg-emerald-500/10",
+          )}
+        >
+          <HardDrive
+            className={cn(
+              "h-5 w-5",
+              isCritical
+                ? "text-red-500"
+                : isLow
+                  ? "text-amber-500"
+                  : "text-emerald-500",
+            )}
+          />
         </div>
         <div>
           <h3 className="text-white font-black uppercase tracking-tight text-sm">
@@ -87,11 +93,11 @@ export function StorageSummaryCard({
             <div
               className={cn(
                 "h-full rounded-full transition-all duration-500",
-                isCritical 
-                  ? "bg-red-500" 
-                  : isLow 
-                  ? "bg-amber-500" 
-                  : "bg-emerald-500"
+                isCritical
+                  ? "bg-red-500"
+                  : isLow
+                    ? "bg-amber-500"
+                    : "bg-emerald-500",
               )}
               style={{ width: `${Math.min(allocatedPercent, 100)}%` }}
             />
@@ -131,14 +137,16 @@ export function StorageSummaryCard({
             Remaining
           </span>
         </div>
-        <span className={cn(
-          "font-bold text-sm",
-          isCritical 
-            ? "text-red-500" 
-            : isLow 
-            ? "text-amber-500" 
-            : "text-emerald-500"
-        )}>
+        <span
+          className={cn(
+            "font-bold text-sm",
+            isCritical
+              ? "text-red-500"
+              : isLow
+                ? "text-amber-500"
+                : "text-emerald-500",
+          )}
+        >
           {formatGB(remainingGB)}
         </span>
       </div>

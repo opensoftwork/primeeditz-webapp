@@ -1,11 +1,11 @@
 "use client";
 
+import { Folder, GripVertical, Plus, X } from "lucide-react";
+import { AnimatePresence, motion, Reorder } from "motion/react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Plus, X, GripVertical, Folder } from "lucide-react";
-import { motion, Reorder, AnimatePresence } from "motion/react";
 
 interface FolderListEditorProps {
   folders: string[];
@@ -85,7 +85,7 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
                 <div className="flex items-center justify-center w-8 h-8 rounded-xl bg-white/5 group-hover:bg-primary/20 transition-colors">
                   <GripVertical className="h-4 w-4 text-white/20 group-hover:text-primary transition-colors" />
                 </div>
-                
+
                 <span className="flex-1 text-sm font-bold text-white/80 group-hover:text-white transition-colors">
                   {folder}
                 </span>
@@ -112,7 +112,7 @@ export function FolderListEditor({ folders, onChange }: FolderListEditorProps) {
           </div>
         )}
       </div>
-      
+
       <p className="text-[9px] text-white/20 font-medium px-1">
         Drag and drop folders to reorder.
       </p>

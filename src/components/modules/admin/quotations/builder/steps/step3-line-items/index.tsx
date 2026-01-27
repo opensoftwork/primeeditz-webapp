@@ -1,19 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo, useRef } from "react";
-import { Plus, BookOpen } from "lucide-react";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
+import { BookOpen, Plus } from "lucide-react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuotationBuilder } from "../../quotation-builder-context";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
-
+import type { Project, QuotationLineItem, Section } from "../../types";
 import {
-  LibraryItemsDrawer,
   type LibraryDisplayItem,
+  LibraryItemsDrawer,
 } from "./library-items-drawer";
 import { LineItemDrawer } from "./line-item-drawer";
 import { ProjectSectionItems } from "./project-section-items";
-import type { QuotationLineItem, Project, Section } from "../../types";
 
 export function Step3LineItems() {
   const {
@@ -65,7 +64,7 @@ export function Step3LineItems() {
 
   // Auto-expand new projects
   useEffect(() => {
-    let changed = false;
+    const changed = false;
     // We using functional update to access latest state without adding it to deps if possible,
     // but better to just compare with current state logic
     const newSeen = new Set(seenProjectsRef.current);

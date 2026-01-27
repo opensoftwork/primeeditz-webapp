@@ -1,18 +1,28 @@
 /**
  * Status Machine Utilities
- * 
+ *
  * Provides centralized logic for valid project status transitions,
  * phase mappings, and actor assignments.
  */
 
-import { ActionState, ProjectPhase, Role } from "../schema";
+import type { ActionState, ProjectPhase, Role } from "../schema";
 
 // Transition map defining allowed target states for each current state
 const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   // Setup Phase
-  draft: ["awaiting_quotation", "quotation_sent", "quotation_approved", "cancelled"],
+  draft: [
+    "awaiting_quotation",
+    "quotation_sent",
+    "quotation_approved",
+    "cancelled",
+  ],
   awaiting_quotation: ["quotation_sent", "cancelled"],
-  quotation_sent: ["quotation_approved", "quotation_rejected", "awaiting_quotation", "cancelled"],
+  quotation_sent: [
+    "quotation_approved",
+    "quotation_rejected",
+    "awaiting_quotation",
+    "cancelled",
+  ],
   quotation_approved: ["storage_allocated", "cancelled"],
   quotation_rejected: ["awaiting_quotation", "cancelled"],
   storage_allocated: ["awaiting_uploads"],
@@ -51,22 +61,22 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   quotation_approved: "setup",
   quotation_rejected: "setup",
   storage_allocated: "setup",
-  
+
   awaiting_uploads: "onboarding",
   uploads_complete: "onboarding",
   awaiting_assignment: "onboarding",
-  
+
   assigned: "production",
   work_in_progress: "production",
   deliverables_ready: "production",
-  
+
   awaiting_review: "review",
   revisions_requested: "review",
   review_approved: "review",
-  
+
   preparing_delivery: "delivery",
   ready_for_delivery: "delivery",
-  
+
   delivered: "completed",
   completed: "completed",
   cancelled: "archived",

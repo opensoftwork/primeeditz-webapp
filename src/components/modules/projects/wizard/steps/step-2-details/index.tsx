@@ -8,11 +8,17 @@
 
 "use client";
 
-import { useEffect } from "react";
+import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
+import { ArrowLeft, ArrowRight, Layers } from "lucide-react";
 import { motion } from "motion/react";
+import { useEffect } from "react";
+import {
+  type FieldValue,
+  filterAlbumFields,
+  hasAlbumConfig,
+} from "@/components/shared/dynamic-form-fields";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,19 +28,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { FieldGroup, FieldSet } from "@/components/ui/field";
-import { useWizardForm } from "../../wizard-form-context";
-import {
-  hasAlbumConfig,
-  filterAlbumFields,
-  type FieldValue,
-} from "@/components/shared/dynamic-form-fields";
-import { ArrowLeft, ArrowRight, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWizardForm } from "../../wizard-form-context";
 import { WizardLoadingState } from "../../wizard-loading-state";
-import { NoProjectTypeState } from "./no-project-type-state";
-import { NoFieldsState } from "./no-fields-state";
-import { FormFieldWrapper } from "./form-field-wrapper";
 import { AlbumConfigSection } from "./album-config-section";
+import { FormFieldWrapper } from "./form-field-wrapper";
+import { NoFieldsState } from "./no-fields-state";
+import { NoProjectTypeState } from "./no-project-type-state";
 
 export function WizardStep2() {
   const {
@@ -54,14 +54,14 @@ export function WizardStep2() {
     api.functions.projectTypes.queries.getProjectType,
     formData.step1.projectTypeId
       ? { projectTypeId: formData.step1.projectTypeId }
-      : "skip"
+      : "skip",
   );
 
   const dbFields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
     formData.step1.projectTypeId
       ? { projectTypeId: formData.step1.projectTypeId }
-      : "skip"
+      : "skip",
   );
 
   const isAlbumProject = dbFields ? hasAlbumConfig(dbFields) : false;
@@ -144,7 +144,7 @@ export function WizardStep2() {
                       transition={{ duration: 0.2, delay: index * 0.05 }}
                       className={cn(
                         "w-full",
-                        fieldDef.type === "textarea" ? "md:col-span-2" : ""
+                        fieldDef.type === "textarea" ? "md:col-span-2" : "",
                       )}
                     >
                       <FormFieldWrapper

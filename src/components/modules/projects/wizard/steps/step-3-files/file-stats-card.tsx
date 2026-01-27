@@ -1,15 +1,15 @@
 "use client";
 
-import React from "react";
 import {
-  RotateCcw,
-  Image as ImageIcon,
-  Video,
   FileText,
+  Image as ImageIcon,
   LucideIcon,
+  RotateCcw,
+  Video,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface FileStatsCardProps {
   type: "image" | "video" | "document";
@@ -58,7 +58,7 @@ export function FileStatsCard({ type, count, onClick }: FileStatsCardProps) {
       onClick={onClick}
       className={cn(
         "p-4 h-auto rounded-2xl bg-white/2 border border-white/5 flex flex-col items-start gap-2 group hover:bg-white/5 transition-all text-left relative overflow-hidden",
-        config.hoverBorder
+        config.hoverBorder,
       )}
     >
       <div className="absolute top-0 right-0 p-3 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -66,13 +66,13 @@ export function FileStatsCard({ type, count, onClick }: FileStatsCardProps) {
           className={cn(
             "flex items-center gap-1.5 px-2 py-1 rounded-lg border",
             config.manageBg,
-            config.manageBorder
+            config.manageBorder,
           )}
         >
           <span
             className={cn(
               "text-[8px] font-black uppercase tracking-widest",
-              config.manageText
+              config.manageText,
             )}
           >
             Manage

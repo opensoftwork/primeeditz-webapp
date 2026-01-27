@@ -1,11 +1,11 @@
 "use client";
 
-import React from "react";
 import { format } from "date-fns";
-import { Clock, Calendar, Database, Sparkles } from "lucide-react";
+import { Calendar, Clock, Database, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
-import { SidebarItem } from "./shared";
+import React from "react";
 import { Button } from "@/components/ui/button";
+import { SidebarItem } from "./shared";
 
 interface DetailSidebarProps {
   project: any;

@@ -14,7 +14,7 @@ export const getProjectStorageUsage = query({
   handler: async (ctx, args) => {
     const { profile } = await getAuthUserWithProfile(ctx);
     if (!profile) throw new Error("Not authenticated");
-    
+
     const project = await ctx.db.get(args.projectId);
     if (!project) throw new Error("Project not found");
 
@@ -37,7 +37,7 @@ export const getProjectStorageUsage = query({
     if (!allocated) {
       // Check for approved quotation
       const projectIdString = args.projectId as string;
-      
+
       let quotation = await ctx.db
         .query("quotations")
         .withIndex("by_status", (q) => q.eq("status", "approved"))
@@ -49,16 +49,18 @@ export const getProjectStorageUsage = query({
           .query("quotations")
           .withIndex("by_status", (q) => q.eq("status", "approved"))
           .collect();
-        
-        quotation = allApproved.find(q => q.projectIds?.includes(projectIdString)) || null;
+
+        quotation =
+          allApproved.find((q) => q.projectIds?.includes(projectIdString)) ||
+          null;
       }
 
       if (quotation) {
         // Find storage tier in line items
-        const storageItem = quotation.lineItems.find(item => 
-          item.description.toLowerCase().includes("storage")
+        const storageItem = quotation.lineItems.find((item) =>
+          item.description.toLowerCase().includes("storage"),
         );
-        
+
         if (storageItem) {
           const match = storageItem.description.match(/(\d+)\s*GB/i);
           if (match) {

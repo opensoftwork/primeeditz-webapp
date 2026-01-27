@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, CheckCircle2, RefreshCw } from "lucide-react";
+import { CheckCircle2, LayoutDashboard, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 

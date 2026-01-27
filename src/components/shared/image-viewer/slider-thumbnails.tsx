@@ -1,7 +1,7 @@
 "use client";
 
-import Image from "next/image";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { cn } from "@/lib/utils";
 
 interface SliderThumbnailsProps {
@@ -48,7 +48,7 @@ export function SliderThumbnails({
                   "relative w-20 h-20 rounded-2xl overflow-hidden transition-all duration-500 shrink-0 group",
                   idx === currentIndex
                     ? "ring-2 ring-primary ring-offset-4 ring-offset-black scale-110 shadow-2xl shadow-primary/20"
-                    : "opacity-40 grayscale hover:opacity-100 hover:grayscale-0 hover:scale-105"
+                    : "opacity-40 grayscale hover:opacity-100 hover:grayscale-0 hover:scale-105",
                 )}
               >
                 <Image

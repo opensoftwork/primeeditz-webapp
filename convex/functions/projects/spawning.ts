@@ -8,7 +8,9 @@ import { setupFoldersInternal } from "../folders/mutations";
 /**
  * Generate a unique project code
  */
-async function generateProjectCode(db: GenericDatabaseWriter<DataModel>): Promise<string> {
+async function generateProjectCode(
+  db: GenericDatabaseWriter<DataModel>,
+): Promise<string> {
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, "0");
@@ -95,8 +97,6 @@ export async function spawnProjectsFromQuotation(
         updatedAt: now(),
         quotationApprovedAt: now(),
         endClientName: quotation.endClientName,
-        eventName: item.description,
-        eventDate: quotation.eventDate,
         assignedEmployeeId: quotation.assignedEmployeeId,
       });
 

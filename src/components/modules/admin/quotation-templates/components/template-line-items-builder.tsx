@@ -7,8 +7,8 @@
 
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
-import { Plus, BookOpen, Layers } from "lucide-react";
+import { BookOpen, Layers, Plus } from "lucide-react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -20,13 +20,13 @@ import {
 import { cn } from "@/lib/utils";
 
 import { LibraryItemsDrawer } from "../../quotations/builder/steps/step3-line-items/library-items-drawer";
-import { TemplateLineItemsTable } from "./template-line-items-table";
-import { TemplateLineItemDrawer } from "./template-line-item-drawer";
 import type {
-  TemplateLineItem,
   Section,
+  TemplateLineItem,
   TemplateSubItem,
 } from "../../quotations/builder/types";
+import { TemplateLineItemDrawer } from "./template-line-item-drawer";
+import { TemplateLineItemsTable } from "./template-line-items-table";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
@@ -70,11 +70,11 @@ export function TemplateLineItemsBuilder({
     (sectionId?: string) => {
       setEditingItem(null);
       setDefaultSectionId(
-        sectionId || (activeTab !== "all" ? activeTab : sections[0]?._id)
+        sectionId || (activeTab !== "all" ? activeTab : sections[0]?._id),
       );
       setItemDrawerOpen(true);
     },
-    [activeTab, sections]
+    [activeTab, sections],
   );
 
   const openEditItemDrawer = useCallback(
@@ -83,7 +83,7 @@ export function TemplateLineItemsBuilder({
       setDefaultSectionId(item.sectionId);
       setItemDrawerOpen(true);
     },
-    []
+    [],
   );
 
   const handleSaveItem = (itemData: TemplateLineItem) => {
@@ -123,14 +123,14 @@ export function TemplateLineItemsBuilder({
         ...item,
         originalIdx,
       })),
-    [lineItems]
+    [lineItems],
   );
 
   const sectionCounts = useMemo(() => {
     const counts: Record<string, number> = { all: allItemsWithIdx.length };
     sections.forEach((s) => {
       counts[s._id] = allItemsWithIdx.filter(
-        (item) => item.sectionId === s._id
+        (item) => item.sectionId === s._id,
       ).length;
     });
     return counts;
@@ -143,7 +143,7 @@ export function TemplateLineItemsBuilder({
       const subItemsTotal = (item.subItems || []).reduce(
         (sum: number, sub: TemplateSubItem) =>
           sum + sub.unitPrice * sub.defaultQuantity,
-        0
+        0,
       );
       const total = itemTotal + subItemsTotal;
       totals.all += total;
@@ -217,14 +217,14 @@ export function TemplateLineItemsBuilder({
                         s.color === "blue"
                           ? "bg-blue-500"
                           : s.color === "purple"
-                          ? "bg-purple-500"
-                          : s.color === "green"
-                          ? "bg-emerald-500"
-                          : s.color === "amber"
-                          ? "bg-amber-500"
-                          : s.color === "red"
-                          ? "bg-red-500"
-                          : "bg-zinc-500"
+                            ? "bg-purple-500"
+                            : s.color === "green"
+                              ? "bg-emerald-500"
+                              : s.color === "amber"
+                                ? "bg-amber-500"
+                                : s.color === "red"
+                                  ? "bg-red-500"
+                                  : "bg-zinc-500",
                       )}
                     />
                     {s.name} ({sectionCounts[s._id] || 0})
@@ -245,7 +245,7 @@ export function TemplateLineItemsBuilder({
             {formatCurrency(
               activeTab === "all"
                 ? sectionTotals.all
-                : sectionTotals[activeTab] || 0
+                : sectionTotals[activeTab] || 0,
             )}
           </span>
         </div>
@@ -258,7 +258,7 @@ export function TemplateLineItemsBuilder({
           {activeTab === "all" ? (
             sections.map((section) => {
               const sectionItems = allItemsWithIdx.filter(
-                (item) => item.sectionId === section._id
+                (item) => item.sectionId === section._id,
               );
               if (sectionItems.length === 0) return null;
 
@@ -271,14 +271,14 @@ export function TemplateLineItemsBuilder({
                         section.color === "blue"
                           ? "bg-blue-500"
                           : section.color === "purple"
-                          ? "bg-purple-500"
-                          : section.color === "green"
-                          ? "bg-emerald-500"
-                          : section.color === "amber"
-                          ? "bg-amber-500"
-                          : section.color === "red"
-                          ? "bg-red-500"
-                          : "bg-zinc-500"
+                            ? "bg-purple-500"
+                            : section.color === "green"
+                              ? "bg-emerald-500"
+                              : section.color === "amber"
+                                ? "bg-amber-500"
+                                : section.color === "red"
+                                  ? "bg-red-500"
+                                  : "bg-zinc-500",
                       )}
                     />
                     <h4 className="text-[11px] font-black uppercase tracking-[0.2em] text-white/60">

@@ -43,9 +43,7 @@ export const getTemplatesByProjectType = authenticatedQuery({
       .query("quotationTemplates")
       .withIndex("by_isActive", (q) => q.eq("isActive", true))
       .collect();
-    
-    return templates.filter(
-      (t) => t.projectTypeHint === args.projectTypeHint
-    );
+
+    return templates.filter((t) => t.projectTypeHint === args.projectTypeHint);
   },
 });

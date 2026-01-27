@@ -1,6 +1,6 @@
 "use client";
 
-import { Folder, Clock, CheckCircle2, Upload, Lock } from "lucide-react";
+import { CheckCircle2, Clock, Folder, Lock, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type FolderStatus = "pending_upload" | "in_progress" | "completed";
@@ -31,7 +31,7 @@ export function formatBytes(bytes: number): string {
   const k = 1024;
   const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+  return parseFloat((bytes / k ** i).toFixed(1)) + " " + sizes[i];
 }
 
 interface FolderCardProps {

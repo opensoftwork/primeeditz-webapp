@@ -1,10 +1,10 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
-import { Plus, Trash2, GripVertical } from "lucide-react";
+import { GripVertical, Plus, Trash2 } from "lucide-react";
+import { motion, Reorder } from "motion/react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { motion, Reorder } from "motion/react";
 
 interface Option {
   id: string;
@@ -50,7 +50,7 @@ export function OptionsBuilder({ value, onChange }: OptionsBuilderProps) {
             id: opt.id || `opt-${i}-${Date.now()}`,
             label: opt.label || "",
             value: opt.value || "",
-          }))
+          })),
         );
       }
     } catch (e) {
@@ -63,12 +63,12 @@ export function OptionsBuilder({ value, onChange }: OptionsBuilderProps) {
     (newOptions: Option[]) => {
       setOptions(newOptions);
       const jsonValue = JSON.stringify(
-        newOptions.map(({ label, value }) => ({ label, value }))
+        newOptions.map(({ label, value }) => ({ label, value })),
       );
       lastSentValueRef.current = jsonValue;
       onChange(jsonValue);
     },
-    [onChange]
+    [onChange],
   );
 
   const addOption = () => {
@@ -86,7 +86,7 @@ export function OptionsBuilder({ value, onChange }: OptionsBuilderProps) {
   const handleOptionChange = (
     id: string,
     field: "label" | "value",
-    val: string
+    val: string,
   ) => {
     const newOptions = options.map((opt) => {
       if (opt.id === id) {

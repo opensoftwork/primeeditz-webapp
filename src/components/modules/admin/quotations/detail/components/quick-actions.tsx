@@ -1,7 +1,7 @@
 "use client";
 
+import { Copy, Download, Send } from "lucide-react";
 import { motion } from "motion/react";
-import { Send, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DownloadQuotation } from "../../preview";
 

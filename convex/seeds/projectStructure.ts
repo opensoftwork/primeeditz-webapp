@@ -1,9 +1,9 @@
-import { MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Project Categories & Types
- * 
+ *
  * Aligned with Prime Editz B2B Rate Card pricing strategy.
  * Categories: Photography Post-Production, Videography Post-Production
  */
@@ -13,13 +13,13 @@ export async function seedProjectStructure(ctx: MutationCtx) {
   // PROJECT CATEGORIES
   // ==========================================================================
   const categories = [
-    { 
-      name: "Photography Post-Production", 
+    {
+      name: "Photography Post-Production",
       isActive: true,
       displayOrder: 1,
     },
-    { 
-      name: "Videography Post-Production", 
+    {
+      name: "Videography Post-Production",
       isActive: true,
       displayOrder: 2,
     },
@@ -32,7 +32,7 @@ export async function seedProjectStructure(ctx: MutationCtx) {
       .query("projectCategories")
       .filter((q) => q.eq(q.field("name"), cat.name))
       .first();
-    
+
     if (existing) {
       categoryMap[cat.name] = existing._id;
       await ctx.db.patch(existing._id, { displayOrder: cat.displayOrder });
@@ -47,8 +47,8 @@ export async function seedProjectStructure(ctx: MutationCtx) {
   // ==========================================================================
   const projectTypes = [
     // Photography Post-Production Types
-    { 
-      name: "Traditional Photo Color Correction", 
+    {
+      name: "Traditional Photo Color Correction",
       category: "Photography Post-Production",
       displayOrder: 1,
       deliveryConfig: {
@@ -56,10 +56,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Color Corrected Photos",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Candid Photo Grading", 
+    {
+      name: "Candid Photo Grading",
       category: "Photography Post-Production",
       displayOrder: 2,
       deliveryConfig: {
@@ -67,10 +67,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Graded Photos",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Album Design - Traditional", 
+    {
+      name: "Album Design - Traditional",
       category: "Photography Post-Production",
       displayOrder: 3,
       deliveryConfig: {
@@ -79,10 +79,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Album Design Files",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Album Design - Candid", 
+    {
+      name: "Album Design - Candid",
       category: "Photography Post-Production",
       displayOrder: 4,
       deliveryConfig: {
@@ -91,10 +91,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Album Design Files",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Album Design - Custom Branding", 
+    {
+      name: "Album Design - Custom Branding",
       category: "Photography Post-Production",
       displayOrder: 5,
       deliveryConfig: {
@@ -103,11 +103,11 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Album Design + Branding Assets",
         requiresSignoff: true,
-      }
+      },
     },
     // Videography Post-Production Types
-    { 
-      name: "Traditional Video Edit", 
+    {
+      name: "Traditional Video Edit",
       category: "Videography Post-Production",
       displayOrder: 6,
       deliveryConfig: {
@@ -115,10 +115,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Full Length Video",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Pre-Wedding Teaser", 
+    {
+      name: "Pre-Wedding Teaser",
       category: "Videography Post-Production",
       displayOrder: 7,
       deliveryConfig: {
@@ -126,10 +126,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Teaser + Video Files",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Pre-Wedding with VFX", 
+    {
+      name: "Pre-Wedding with VFX",
       category: "Videography Post-Production",
       displayOrder: 8,
       deliveryConfig: {
@@ -137,10 +137,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "VFX Enhanced Video",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Highlight/Teaser Edit", 
+    {
+      name: "Highlight/Teaser Edit",
       category: "Videography Post-Production",
       displayOrder: 9,
       deliveryConfig: {
@@ -148,10 +148,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Highlight Reel",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "VFX Work", 
+    {
+      name: "VFX Work",
       category: "Videography Post-Production",
       displayOrder: 10,
       deliveryConfig: {
@@ -159,10 +159,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "VFX Rendered Files",
         requiresSignoff: false,
-      }
+      },
     },
-    { 
-      name: "Cinematic Film", 
+    {
+      name: "Cinematic Film",
       category: "Videography Post-Production",
       displayOrder: 11,
       deliveryConfig: {
@@ -171,11 +171,11 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Cinematic Film Master",
         requiresSignoff: true,
-      }
+      },
     },
     // Combo/Package Project Types
-    { 
-      name: "Wedding Package - Silver", 
+    {
+      name: "Wedding Package - Silver",
       category: "Photography Post-Production",
       displayOrder: 20,
       deliveryConfig: {
@@ -184,10 +184,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "All Digital Assets",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Wedding Package - Gold", 
+    {
+      name: "Wedding Package - Gold",
       category: "Photography Post-Production",
       displayOrder: 21,
       deliveryConfig: {
@@ -196,10 +196,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "All Digital Assets",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Wedding Package - Platinum", 
+    {
+      name: "Wedding Package - Platinum",
       category: "Videography Post-Production",
       displayOrder: 22,
       deliveryConfig: {
@@ -208,10 +208,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "All Digital Assets + Drone",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Wedding Package - Diamond", 
+    {
+      name: "Wedding Package - Diamond",
       category: "Videography Post-Production",
       displayOrder: 23,
       deliveryConfig: {
@@ -220,10 +220,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Complete Digital Suite",
         requiresSignoff: true,
-      }
+      },
     },
-    { 
-      name: "Wedding Package - Royal Elite", 
+    {
+      name: "Wedding Package - Royal Elite",
       category: "Videography Post-Production",
       displayOrder: 24,
       deliveryConfig: {
@@ -232,7 +232,7 @@ export async function seedProjectStructure(ctx: MutationCtx) {
         hasDigitalDelivery: true,
         digitalDeliveryLabel: "Complete Digital Suite + Raw Backups",
         requiresSignoff: true,
-      }
+      },
     },
   ];
 
@@ -243,10 +243,10 @@ export async function seedProjectStructure(ctx: MutationCtx) {
       .query("projectTypes")
       .filter((q) => q.eq(q.field("name"), type.name))
       .first();
-    
+
     if (existing) {
       typeMap[type.name] = existing._id;
-      await ctx.db.patch(existing._id, { 
+      await ctx.db.patch(existing._id, {
         deliveryConfig: type.deliveryConfig,
         displayOrder: type.displayOrder,
         categoryId: categoryMap[type.category],
@@ -263,7 +263,9 @@ export async function seedProjectStructure(ctx: MutationCtx) {
     }
   }
 
-  console.log(`Seeded ${Object.keys(categoryMap).length} categories and ${Object.keys(typeMap).length} project types`);
+  console.log(
+    `Seeded ${Object.keys(categoryMap).length} categories and ${Object.keys(typeMap).length} project types`,
+  );
 
   return { categoryMap, typeMap };
 }

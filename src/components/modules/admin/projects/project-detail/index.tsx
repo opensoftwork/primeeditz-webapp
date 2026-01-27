@@ -1,38 +1,36 @@
 "use client";
 
-import { useAction, useQuery } from "convex/react";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Package } from "lucide-react";
-import Link from "next/link";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { useAction, useQuery } from "convex/react";
+import { Package } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PhaseProgress } from "@/components/modules/projects/phase-progress";
 import { FilesVaultDrawer } from "@/components/shared/files-vault/drawer";
-
-import { ProjectHeader } from "./project-header";
-import { ProjectSpecs } from "./project-specs";
-import { ProjectReferenceFiles } from "./project-reference-files";
-import { ProjectHistory } from "./project-history";
-import { StudioCard } from "./studio-card";
-import { SystemControls } from "./system-controls";
-import { ProjectDetailSkeleton } from "./skeleton";
+import { Button } from "@/components/ui/button";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
+import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
-import { PhaseProgress } from "@/components/modules/projects/phase-progress";
-import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { ProjectHeader } from "./project-header";
+import { ProjectHistory } from "./project-history";
+import { ProjectReferenceFiles } from "./project-reference-files";
+import { ProjectSpecs } from "./project-specs";
+import { ProjectDetailSkeleton } from "./skeleton";
+import { StudioCard } from "./studio-card";
+import { SystemControls } from "./system-controls";
 
 interface ProjectDetailProps {
   projectId: string;
 }
 
-import { AdminProjectDetail } from "./types";
-import { getDeliveryPhaseLabel } from "@/lib/status-display";
-import { toast } from "sonner";
-import { QuotationCard } from "./quotation-card";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { getDeliveryPhaseLabel } from "@/lib/status-display";
+import { QuotationCard } from "./quotation-card";
+import type { AdminProjectDetail } from "./types";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const router = useRouter();

@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { UserNav } from "@/components/modules/header/user-nav";
 import { AppSidebar } from "@/components/modules/sidebar";
-import { usePathname } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,8 +15,13 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import { UserNav } from "@/components/modules/header/user-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;

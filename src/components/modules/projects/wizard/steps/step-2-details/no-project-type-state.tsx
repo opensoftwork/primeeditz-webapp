@@ -1,8 +1,8 @@
 "use client";
 
+import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
 
 interface NoProjectTypeStateProps {
   onBack: () => void;

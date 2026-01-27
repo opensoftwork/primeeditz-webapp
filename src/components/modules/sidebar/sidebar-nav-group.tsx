@@ -1,15 +1,15 @@
-import { useState, useMemo } from "react";
+import { ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "./navigation-config";

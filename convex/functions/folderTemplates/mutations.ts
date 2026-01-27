@@ -17,9 +17,11 @@ export const createFolderTemplate = adminMutation({
     if (args.isDefault) {
       const existing = await ctx.db
         .query("folderTemplates")
-        .withIndex("by_projectTypeId", (q) => q.eq("projectTypeId", args.projectTypeId))
+        .withIndex("by_projectTypeId", (q) =>
+          q.eq("projectTypeId", args.projectTypeId),
+        )
         .collect();
-      
+
       for (const t of existing) {
         if (t.isDefault) {
           await ctx.db.patch(t._id, { isDefault: false });
@@ -54,12 +56,14 @@ export const updateFolderTemplate = adminMutation({
     if (updates.isDefault) {
       const template = await ctx.db.get(id);
       const projectTypeId = updates.projectTypeId ?? template?.projectTypeId;
-      
+
       const existing = await ctx.db
         .query("folderTemplates")
-        .withIndex("by_projectTypeId", (q) => q.eq("projectTypeId", projectTypeId))
+        .withIndex("by_projectTypeId", (q) =>
+          q.eq("projectTypeId", projectTypeId),
+        )
         .collect();
-      
+
       for (const t of existing) {
         if (t.isDefault && t._id !== id) {
           await ctx.db.patch(t._id, { isDefault: false });

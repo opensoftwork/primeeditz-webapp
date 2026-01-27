@@ -3,12 +3,12 @@
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 import { motion } from "motion/react";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
-import { columns } from "./columns";
 import { QuotationCard } from "../shared/quotation-card";
-import { StudioQuotation } from "./types";
+import { columns } from "./columns";
+import type { StudioQuotation } from "./types";
 
 export function StudioQuotationList() {
   const [pageSize, setPageSize] = useState(15);

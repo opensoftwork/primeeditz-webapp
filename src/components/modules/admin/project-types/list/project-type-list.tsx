@@ -1,32 +1,32 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ListAlerts, ListContent, ListEmpty, ListHeader } from "./index";
 import {
   ProjectTypeDrawer,
   type ProjectTypeFormValues,
 } from "./project-type-drawer";
-import { ListHeader, ListEmpty, ListContent, ListAlerts } from "./index";
-import type { Id } from "@convex/_generated/dataModel";
 
 export function ProjectTypeList() {
   const projectTypes = useQuery(
-    api.functions.projectTypes.queries.getProjectTypes
+    api.functions.projectTypes.queries.getProjectTypes,
   );
   const createProjectType = useMutation(
-    api.functions.projectTypes.mutations.createProjectType
+    api.functions.projectTypes.mutations.createProjectType,
   );
   const updateProjectType = useMutation(
-    api.functions.projectTypes.mutations.updateProjectType
+    api.functions.projectTypes.mutations.updateProjectType,
   );
   const toggleStatusMutation = useMutation(
-    api.functions.projectTypes.mutations.toggleProjectTypeActive
+    api.functions.projectTypes.mutations.toggleProjectTypeActive,
   );
   const deleteMutation = useMutation(
-    api.functions.projectTypes.mutations.deleteProjectType
+    api.functions.projectTypes.mutations.deleteProjectType,
   );
 
   // State
@@ -84,7 +84,7 @@ export function ProjectTypeList() {
         isActive: !typeToToggle.current,
       });
       toast.success(
-        `Project type ${!typeToToggle.current ? "activated" : "deactivated"}`
+        `Project type ${!typeToToggle.current ? "activated" : "deactivated"}`,
       );
       setTypeToToggle(null);
     } catch (error) {

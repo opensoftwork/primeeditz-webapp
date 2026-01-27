@@ -1,7 +1,20 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import {
+  Briefcase,
+  Camera,
+  Check,
+  Film,
+  Hammer,
+  LucideIcon,
+  Music,
+  Package,
+  PenTool,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -9,24 +22,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useEffect, useState } from "react";
-import {
-  Film,
-  Hammer,
-  PenTool,
-  Package,
-  Camera,
-  Music,
-  Briefcase,
-  LucideIcon,
-  Check,
-} from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Section } from "./types";
+import type { Section } from "./types";
 
 const sectionSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -164,7 +164,7 @@ export function SectionDrawer({
                               "flex items-center justify-center h-12 rounded-xl transition-all border",
                               field.state.value === item.name
                                 ? "bg-primary/20 border-primary text-primary"
-                                : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white"
+                                : "bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white",
                             )}
                           >
                             <Icon className="h-5 w-5" />
@@ -193,7 +193,7 @@ export function SectionDrawer({
                             color.class,
                             field.state.value === color.value
                               ? "border-white scale-110"
-                              : "border-transparent opacity-60 hover:opacity-100"
+                              : "border-transparent opacity-60 hover:opacity-100",
                           )}
                         >
                           {field.state.value === color.value && (
@@ -242,8 +242,8 @@ export function SectionDrawer({
                     {state.isSubmitting
                       ? "Saving..."
                       : initialData
-                      ? "Update Section"
-                      : "Create Section"}
+                        ? "Update Section"
+                        : "Create Section"}
                   </Button>
                 )}
               </form.Subscribe>

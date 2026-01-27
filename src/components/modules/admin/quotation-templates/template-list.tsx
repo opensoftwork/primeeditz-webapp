@@ -1,11 +1,13 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useState } from "react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { FileText, Filter, LayoutList, Plus, Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -15,12 +17,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Search, FileText, Filter, LayoutList } from "lucide-react";
-import { Template, TemplateLineItem } from "../quotation-sections/types";
-import { Id } from "@convex/_generated/dataModel";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import type { Template, TemplateLineItem } from "../quotation-sections/types";
 import { TemplateCard } from "./template-card";
-import { motion, AnimatePresence } from "motion/react";
 
 export function TemplateList() {
   const router = useRouter();
@@ -31,15 +30,15 @@ export function TemplateList() {
     api.functions.quotations.templates.queries.getTemplates,
     {
       activeOnly: false,
-    }
+    },
   );
 
   const projectTypes = useQuery(api.admin.getProjectTypes);
   const updateTemplate = useMutation(
-    api.functions.quotations.templates.mutations.updateTemplate
+    api.functions.quotations.templates.mutations.updateTemplate,
   );
   const deleteTemplate = useMutation(
-    api.functions.quotations.templates.mutations.deleteTemplate
+    api.functions.quotations.templates.mutations.deleteTemplate,
   );
 
   const handleToggleActive = async (id: string, current: boolean) => {
@@ -57,7 +56,7 @@ export function TemplateList() {
   const handleDelete = async (id: string) => {
     if (
       !confirm(
-        "Are you sure you want to delete this template? Existing quotations will not be affected."
+        "Are you sure you want to delete this template? Existing quotations will not be affected.",
       )
     ) {
       return;
@@ -208,7 +207,7 @@ export function TemplateList() {
           >
             {filteredTemplates?.map((template, idx) => {
               const projectType = projectTypes.find(
-                (pt) => pt._id === template.projectTypeHint
+                (pt) => pt._id === template.projectTypeHint,
               );
 
               const subtotal = (
@@ -218,7 +217,7 @@ export function TemplateList() {
                 const subItemsTotal =
                   item.subItems?.reduce(
                     (s, sub) => s + sub.unitPrice * sub.defaultQuantity,
-                    0
+                    0,
                   ) ?? 0;
                 return acc + itemTotal + subItemsTotal;
               }, 0);

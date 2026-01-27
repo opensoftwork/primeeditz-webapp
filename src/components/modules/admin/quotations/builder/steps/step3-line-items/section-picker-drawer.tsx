@@ -7,18 +7,18 @@
 
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
-import { Check, Layers, Search, ChevronRight } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Check, ChevronRight, Layers, Search } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetDescription,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { Section } from "../../types";
@@ -60,7 +60,7 @@ export function SectionPickerDrawer({
           variant="outline"
           className={cn(
             "h-11 w-full justify-between bg-white/5 border-white/10 rounded-xl px-4 text-left hover:bg-white/8",
-            triggerClassName
+            triggerClassName,
           )}
         >
           <div className="flex items-center gap-3 overflow-hidden">
@@ -72,14 +72,14 @@ export function SectionPickerDrawer({
                     selectedSection.color === "blue"
                       ? "bg-blue-500"
                       : selectedSection.color === "purple"
-                      ? "bg-purple-500"
-                      : selectedSection.color === "green"
-                      ? "bg-emerald-500"
-                      : selectedSection.color === "amber"
-                      ? "bg-amber-500"
-                      : selectedSection.color === "red"
-                      ? "bg-red-500"
-                      : "bg-zinc-500"
+                        ? "bg-purple-500"
+                        : selectedSection.color === "green"
+                          ? "bg-emerald-500"
+                          : selectedSection.color === "amber"
+                            ? "bg-amber-500"
+                            : selectedSection.color === "red"
+                              ? "bg-red-500"
+                              : "bg-zinc-500",
                   )}
                 />
                 <span className="text-sm font-medium text-white truncate">
@@ -142,7 +142,7 @@ export function SectionPickerDrawer({
                         "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left",
                         isSelected
                           ? "bg-primary/10 border-primary/30"
-                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10"
+                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
                       )}
                     >
                       <div className="flex items-center gap-3">
@@ -152,14 +152,14 @@ export function SectionPickerDrawer({
                             section.color === "blue"
                               ? "bg-blue-500/10 border-blue-500/20"
                               : section.color === "purple"
-                              ? "bg-purple-500/10 border-purple-500/20"
-                              : section.color === "green"
-                              ? "bg-emerald-500/10 border-emerald-500/20"
-                              : section.color === "amber"
-                              ? "bg-amber-500/10 border-amber-500/20"
-                              : section.color === "red"
-                              ? "bg-red-500/10 border-red-500/20"
-                              : "bg-zinc-500/10 border-zinc-500/20"
+                                ? "bg-purple-500/10 border-purple-500/20"
+                                : section.color === "green"
+                                  ? "bg-emerald-500/10 border-emerald-500/20"
+                                  : section.color === "amber"
+                                    ? "bg-amber-500/10 border-amber-500/20"
+                                    : section.color === "red"
+                                      ? "bg-red-500/10 border-red-500/20"
+                                      : "bg-zinc-500/10 border-zinc-500/20",
                           )}
                         >
                           <div
@@ -168,14 +168,14 @@ export function SectionPickerDrawer({
                               section.color === "blue"
                                 ? "bg-blue-500"
                                 : section.color === "purple"
-                                ? "bg-purple-500"
-                                : section.color === "green"
-                                ? "bg-emerald-500"
-                                : section.color === "amber"
-                                ? "bg-amber-500"
-                                : section.color === "red"
-                                ? "bg-red-500"
-                                : "bg-zinc-500"
+                                  ? "bg-purple-500"
+                                  : section.color === "green"
+                                    ? "bg-emerald-500"
+                                    : section.color === "amber"
+                                      ? "bg-amber-500"
+                                      : section.color === "red"
+                                        ? "bg-red-500"
+                                        : "bg-zinc-500",
                             )}
                           />
                         </div>

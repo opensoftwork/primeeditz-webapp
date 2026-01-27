@@ -1,8 +1,8 @@
 "use client";
 
+import type { Id } from "@convex/_generated/dataModel";
 import { use } from "react";
 import { ProjectWizard } from "@/components/modules/projects";
-import { Id } from "@convex/_generated/dataModel";
 
 interface OnboardingPageProps {
   params: Promise<{

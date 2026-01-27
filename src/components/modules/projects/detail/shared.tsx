@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import type React from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 
@@ -85,7 +85,7 @@ export function SidebarItem({
   );
 }
 
-import { getStatusConfig, getPhaseConfig } from "@/lib/status-display";
+import { getPhaseConfig, getStatusConfig } from "@/lib/status-display";
 
 export function StatusBadge({
   status,

@@ -1,5 +1,5 @@
+import type { Metadata } from "next";
 import { TemplateList } from "@/components/modules/admin/quotation-templates";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Quotation Templates | PrimeEditz Admin",

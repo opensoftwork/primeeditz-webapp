@@ -15,5 +15,7 @@ export default function EmployeeFolderDetailPage({
 }: EmployeeFolderDetailPageProps) {
   const { projectId, folderId } = use(params);
 
-  return <FolderDetailView projectId={projectId} folderId={folderId} isEmployee />;
+  return (
+    <FolderDetailView projectId={projectId} folderId={folderId} isEmployee />
+  );
 }

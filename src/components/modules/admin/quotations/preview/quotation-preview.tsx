@@ -7,17 +7,17 @@
 
 "use client";
 
+import { ArrowLeft, FileText } from "lucide-react";
 import React, { useRef } from "react";
-import { FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QuotationDocument } from "./quotation-document";
-import { DownloadQuotation } from "./download-quotation";
 import type {
-  QuotationData,
-  QuotationSection,
   CompanyInfo,
   Project,
+  QuotationData,
+  QuotationSection,
 } from "../types";
+import { DownloadQuotation } from "./download-quotation";
+import { QuotationDocument } from "./quotation-document";
 
 // ============================================================================
 // Component Props

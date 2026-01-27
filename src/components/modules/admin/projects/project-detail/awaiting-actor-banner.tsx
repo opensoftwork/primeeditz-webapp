@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Clock, User, UserCog } from "lucide-react";
-import { AdminProjectDetail } from "./types";
+import { motion } from "motion/react";
+import type { AdminProjectDetail } from "./types";
 
 interface AwaitingActorBannerProps {
   project: AdminProjectDetail;

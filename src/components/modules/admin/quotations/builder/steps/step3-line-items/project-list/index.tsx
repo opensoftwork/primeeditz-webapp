@@ -1,31 +1,31 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
-  Search,
   Briefcase,
-  Hash,
-  Plus,
   ChevronLeft,
   ChevronRight,
+  Hash,
+  Plus,
+  Search,
   X,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetDescription,
 } from "@/components/ui/sheet";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import type { Id } from "@convex/_generated/dataModel";
 import type { Project } from "../../../types";
 
 interface ProjectListingDrawerProps {
@@ -50,7 +50,7 @@ export function ProjectListingDrawer({
   // Use simple query since we want a "lighter" UI and usually clients don't have hundreds of projects
   const projects = useQuery(
     api.admin.getAdminProjectsSimple,
-    studioId ? { studioId: studioId as Id<"profiles"> } : {}
+    studioId ? { studioId: studioId as Id<"profiles"> } : {},
   ) as Project[] | undefined;
 
   const filteredProjects = useMemo(() => {
@@ -61,7 +61,7 @@ export function ProjectListingDrawer({
       (p) =>
         p.eventName?.toLowerCase().includes(lowerSearch) ||
         p.code.toLowerCase().includes(lowerSearch) ||
-        p.projectTypeName?.toLowerCase().includes(lowerSearch)
+        p.projectTypeName?.toLowerCase().includes(lowerSearch),
     );
   }, [projects, search]);
 
@@ -69,7 +69,7 @@ export function ProjectListingDrawer({
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedProjects = filteredProjects.slice(
     startIndex,
-    startIndex + pageSize
+    startIndex + pageSize,
   );
 
   return (
@@ -134,7 +134,7 @@ export function ProjectListingDrawer({
                         "group p-5 rounded-3xl border transition-all duration-300 relative overflow-hidden cursor-pointer",
                         isSelected
                           ? "bg-primary/5 border-primary/30"
-                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10"
+                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
                       )}
                       onClick={() =>
                         isSelected
@@ -178,7 +178,7 @@ export function ProjectListingDrawer({
                             "h-8 w-8 rounded-xl flex items-center justify-center border transition-all",
                             isSelected
                               ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                              : "bg-white/5 border-white/10 text-white/20 group-hover:text-white/40 group-hover:bg-white/10"
+                              : "bg-white/5 border-white/10 text-white/20 group-hover:text-white/40 group-hover:bg-white/10",
                           )}
                         >
                           {isSelected ? (

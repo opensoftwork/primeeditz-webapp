@@ -8,10 +8,10 @@
 "use client";
 
 import { CheckCircle2, ChevronRight, X } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
 
 interface ProjectType {
   _id: string;
@@ -35,14 +35,17 @@ export function ProjectTypeSelectionDrawer({
   onSelect,
 }: ProjectTypeSelectionDrawerProps) {
   // Group project types by category
-  const groupedTypes = projectTypes?.reduce((acc, type) => {
-    const category = type.categoryName || "Other";
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(type);
-    return acc;
-  }, {} as Record<string, ProjectType[]>);
+  const groupedTypes = projectTypes?.reduce(
+    (acc, type) => {
+      const category = type.categoryName || "Other";
+      if (!acc[category]) {
+        acc[category] = [];
+      }
+      acc[category].push(type);
+      return acc;
+    },
+    {} as Record<string, ProjectType[]>,
+  );
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
@@ -144,7 +147,7 @@ export function ProjectTypeSelectionDrawer({
                                     "w-full text-left group relative p-6 rounded-[1.8rem] transition-all duration-500 overflow-hidden border",
                                     isSelected
                                       ? "bg-primary border-primary shadow-[0_20px_40px_rgba(var(--primary),0.2)] scale-[1.02]"
-                                      : "bg-white/1 border-white/5 hover:border-primary/40 hover:bg-white/3 hover:scale-[1.01]"
+                                      : "bg-white/1 border-white/5 hover:border-primary/40 hover:bg-white/3 hover:scale-[1.01]",
                                   )}
                                   onClick={() => {
                                     onSelect(projectType._id);
@@ -161,7 +164,7 @@ export function ProjectTypeSelectionDrawer({
                                           "text-[10px] font-black uppercase tracking-[0.2em] transition-all",
                                           isSelected
                                             ? "text-black/50"
-                                            : "text-white/20 group-hover:text-primary/60"
+                                            : "text-white/20 group-hover:text-primary/60",
                                         )}
                                       >
                                         PRT-
@@ -174,7 +177,7 @@ export function ProjectTypeSelectionDrawer({
                                           "text-xl font-black uppercase tracking-tight transition-all",
                                           isSelected
                                             ? "text-black"
-                                            : "text-white group-hover:text-primary"
+                                            : "text-white group-hover:text-primary",
                                         )}
                                       >
                                         {projectType.name}
@@ -186,7 +189,7 @@ export function ProjectTypeSelectionDrawer({
                                         "p-2.5 rounded-2xl transition-all duration-500",
                                         isSelected
                                           ? "bg-black/10 scale-110"
-                                          : "bg-white/5 group-hover:bg-primary/10 group-hover:scale-110"
+                                          : "bg-white/5 group-hover:bg-primary/10 group-hover:scale-110",
                                       )}
                                     >
                                       {isSelected ? (
@@ -195,7 +198,7 @@ export function ProjectTypeSelectionDrawer({
                                         <ChevronRight
                                           className={cn(
                                             "h-6 w-6 transition-colors",
-                                            "text-white/10 group-hover:text-primary"
+                                            "text-white/10 group-hover:text-primary",
                                           )}
                                         />
                                       )}
@@ -207,7 +210,7 @@ export function ProjectTypeSelectionDrawer({
                           })}
                         </div>
                       </motion.div>
-                    )
+                    ),
                   )}
                 </AnimatePresence>
               </div>

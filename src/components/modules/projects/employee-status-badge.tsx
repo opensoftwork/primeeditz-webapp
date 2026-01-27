@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { CircleDot, Clock, RotateCcw, Search } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface EmployeeStatusBadgeProps {
   status: string;

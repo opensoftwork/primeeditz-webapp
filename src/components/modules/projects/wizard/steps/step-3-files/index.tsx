@@ -7,11 +7,21 @@
 
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { format } from "date-fns";
-import { useWizardForm } from "../../wizard-form-context";
-import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { useAction } from "convex/react";
+import { format } from "date-fns";
+import {
+  FileText,
+  Image as ImageIcon,
+  RotateCcw,
+  ShieldCheck,
+  Upload,
+  Vault,
+  Video,
+} from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldContent,
@@ -19,23 +29,13 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import {
-  Upload,
-  Vault,
-  ShieldCheck,
-  Video,
-  Image as ImageIcon,
-  FileText,
-  RotateCcw,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import {
-  useReferenceFilesStore,
   useFileTypeCounts,
+  useReferenceFilesStore,
 } from "@/stores/reference-files-store";
+import { useWizardForm } from "../../wizard-form-context";
+import { FileStatsCard } from "./file-stats-card";
 import { FileUploadZone } from "./file-upload-zone";
 import { UploadedFilesDrawer } from "./uploaded-files-drawer";
-import { FileStatsCard } from "./file-stats-card";
 
 export function WizardStep3() {
   const {
@@ -78,14 +78,14 @@ export function WizardStep3() {
           {
             description: "Stored in local cache for final transmission.",
             duration: 2500,
-          }
+          },
         );
         setLastSynced(new Date());
       } else if (result.error) {
         toast.error(result.error, { duration: 4000 });
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   // Keep Wizard Form Data in sync with the global files store for draft persistence

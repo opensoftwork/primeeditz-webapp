@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { FileImage, Eye, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { formatBytes } from "@/components/shared/project-folders/folder-card";
+import { Eye, FileImage, Trash2 } from "lucide-react";
+import { useEffect, useState } from "react";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { formatBytes } from "@/components/shared/project-folders/folder-card";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
 
 interface Asset {
   _id: string;

@@ -1,11 +1,11 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
 import { api } from "@convex/_generated/api";
-import { type Id } from "@convex/_generated/dataModel";
-import { motion } from "motion/react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { Lock } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
 import { StorageUsageBar } from "@/components/shared/storage-usage-bar";

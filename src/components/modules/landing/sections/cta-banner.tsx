@@ -1,17 +1,16 @@
 "use client";
 
+import { ArrowRight, Calendar, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 // --- Main Component ---
 
 export function CTABannerSection() {
   return (
     <section className="relative w-full py-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-      
       <div className="relative max-w-4xl mx-auto">
         {/* Banner Container - Glassmorphic Card */}
         <motion.div
@@ -24,7 +23,7 @@ export function CTABannerSection() {
             "border border-white/10",
             "bg-white/5 backdrop-blur-sm",
             "p-10 sm:p-14 lg:p-16",
-            "text-center"
+            "text-center",
           )}
         >
           {/* Subtle glow effects */}
@@ -88,7 +87,7 @@ export function CTABannerSection() {
                   "bg-primary text-primary-foreground hover:bg-primary/90",
                   "font-bold px-8 py-6 text-base rounded-xl",
                   "shadow-lg shadow-primary/20",
-                  "transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-105"
+                  "transition-all duration-300 hover:shadow-xl hover:shadow-primary/30 hover:scale-105",
                 )}
               >
                 <Link href="/sign-up" className="flex items-center gap-2">
@@ -105,7 +104,7 @@ export function CTABannerSection() {
                 className={cn(
                   "bg-white/5 text-white border border-white/10 hover:bg-white/10 hover:border-white/20",
                   "font-semibold px-8 py-6 text-base rounded-xl",
-                  "transition-all duration-300"
+                  "transition-all duration-300",
                 )}
               >
                 <Link href="/contact" className="flex items-center gap-2">

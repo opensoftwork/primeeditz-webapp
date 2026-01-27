@@ -1,11 +1,11 @@
 "use client";
 
+import { ExternalLink, FileText } from "lucide-react";
 import { motion } from "motion/react";
-import { FileText, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { DetailSection } from "@/components/modules/projects/detail/shared";
 import type { VaultFile } from "@/components/shared/files-vault/drawer";
+import { Button } from "@/components/ui/button";
 
 interface ProjectReferenceFilesProps {
   referenceFilesCount: number;

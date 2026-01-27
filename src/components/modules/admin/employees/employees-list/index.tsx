@@ -2,16 +2,16 @@
 
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Building, Eye, Phone, User, Briefcase } from "lucide-react";
+import { Briefcase, Building, Eye, Phone, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
+import { NewEmployeeDrawer } from "./new-employee-drawer";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminEmployee } from "./types";
-import { NewEmployeeDrawer } from "./new-employee-drawer";
 
 // ============================================================================
 // Employee Card Component (for card view)
@@ -101,11 +101,9 @@ interface EmployeeListProps {
 // Main Component
 // ============================================================================
 
-export default function EmployeeList({
-  showHeader = true,
-}: EmployeeListProps) {
+export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
   const [showNewEmployeeDrawer, setShowNewEmployeeDrawer] = useState(false);
-  
+
   // Fetch employees
   const rawEmployees = useQuery(api.admin.getEmployees, {});
 

@@ -1,23 +1,23 @@
 "use client";
 
 import {
-  FileImage,
-  X,
-  Upload,
-  Loader2,
-  CheckCircle2,
   AlertCircle,
+  CheckCircle2,
+  FileImage,
+  Loader2,
+  Upload,
+  X,
 } from "lucide-react";
+import { formatBytes } from "@/components/shared/project-folders/folder-card";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { formatBytes } from "@/components/shared/project-folders/folder-card";
 
 export interface StagedFile {
   id: string;

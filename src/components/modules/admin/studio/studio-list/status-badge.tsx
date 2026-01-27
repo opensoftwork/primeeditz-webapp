@@ -25,7 +25,7 @@ export function OnboardingBadge({ isComplete }: StatusBadgeProps) {
       className={cn(
         "inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border",
         config.bgColor,
-        config.color
+        config.color,
       )}
     >
       <CircleDot className="h-2.5 w-2.5" />

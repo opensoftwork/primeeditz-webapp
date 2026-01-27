@@ -1,12 +1,12 @@
 "use client";
 
-import { motion } from "motion/react";
 import { format } from "date-fns";
-import { Receipt, Calendar, Eye, Hash } from "lucide-react";
+import { Calendar, Eye, Hash, Receipt } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { QuotationStatusBadge } from "./quotation-status-badge";
-import { useRouter } from "next/navigation";
-import Link from "next/link";
 
 interface QuotationCardProps {
   quotation: {
@@ -68,7 +68,9 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
               Total Valuation
             </div>
             <div className="flex items-baseline gap-1">
-              <span className="text-sm font-bold text-white/40 tracking-tighter">₹</span>
+              <span className="text-sm font-bold text-white/40 tracking-tighter">
+                ₹
+              </span>
               <span className="text-2xl font-black text-white tracking-tighter">
                 {quotation.total.toLocaleString("en-IN")}
               </span>

@@ -1,15 +1,14 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, FolderTree, ArrowLeft } from "lucide-react";
-import { motion } from "motion/react";
-import { toast } from "sonner";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft, CheckCircle2, FolderTree, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
+import { Button } from "@/components/ui/button";
 
 interface FolderListingViewProps {
   projectId: string;
@@ -52,11 +51,11 @@ export function FolderListingView({
   const handleFolderClick = (folder: any) => {
     // Navigate to dedicated folder upload page
     let baseRoute = `/projects/${projectId}/folders`;
-    
+
     if (isEmployee) {
       baseRoute = `/assigned-work/${projectId}/folders`;
     }
-    
+
     router.push(`${baseRoute}/${folder._id}`);
   };
 
@@ -144,9 +143,7 @@ export function FolderListingView({
           <p className="text-xs text-white/50 leading-relaxed font-bold uppercase tracking-wide">
             Select a folder above to start uploading your assets. Once you have
             uploaded files to all folders, click the
-            <span className="text-emerald-400 mx-1">
-              Finalize My Uploads
-            </span>{" "}
+            <span className="text-emerald-400 mx-1">Finalize My Uploads</span>{" "}
             button to notify our team.
           </p>
         </div>

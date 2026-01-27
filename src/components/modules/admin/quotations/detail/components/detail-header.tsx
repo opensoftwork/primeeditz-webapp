@@ -1,13 +1,13 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
 import { format } from "date-fns";
-import { Receipt, Copy, ArrowLeft, Edit, Send, FileText } from "lucide-react";
+import { ArrowLeft, Copy, Edit, FileText, Receipt, Send } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
 import { DownloadQuotation } from "../../preview";
 
 interface DetailHeaderProps {

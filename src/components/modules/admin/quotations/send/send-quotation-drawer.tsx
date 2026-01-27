@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../../../../convex/_generated/api";
-import { Id } from "../../../../../../convex/_generated/dataModel";
+import { Receipt, Send, X } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet";
+import { api } from "../../../../../../convex/_generated/api";
+import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { DashboardSection } from "./dashboard-section";
 import { ShareLinkSection } from "./share-link-section";
 import { ValiditySelector } from "./validity-selector";
-import { toast } from "sonner";
-import { Receipt, X, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SendQuotationDrawerProps {
   isOpen: boolean;

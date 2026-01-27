@@ -5,9 +5,12 @@
 
 "use client";
 
-import { useState } from "react";
+import { api } from "@convex/_generated/api";
+import { useMutation } from "convex/react";
+import { Building2, Mail, Phone, User } from "lucide-react";
 import { motion } from "motion/react";
-import { User, Mail, Phone, Building2 } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
@@ -15,11 +18,8 @@ import {
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { useWizardForm } from "../../wizard-form-context";
-import { useMutation } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { toast } from "sonner";
 import type { SelectedStudioData } from "../../types";
+import { useWizardForm } from "../../wizard-form-context";
 
 interface NewStudioFormProps {
   onSuccess: () => void;

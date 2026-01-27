@@ -1,25 +1,25 @@
 "use client";
 
-import Link from "next/link";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "convex/react";
 import {
-  Users,
-  FolderKanban,
   AlertCircle,
+  CheckCircle2,
+  Database,
+  FolderKanban,
   Settings,
   UserCog,
-  Database,
+  Users,
   Zap,
-  CheckCircle2,
 } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { DashboardHeader } from "./dashboard-header";
-import { StatCard } from "./stat-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActionButton } from "./action-button";
 import { columns } from "./columns";
+import { DashboardHeader } from "./dashboard-header";
+import { StatCard } from "./stat-card";
 
 export default function AdminDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);

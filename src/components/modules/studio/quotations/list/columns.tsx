@@ -1,12 +1,12 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { StudioQuotation } from "./types";
-import { QuotationStatusBadge } from "../shared/quotation-status-badge";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Eye, Receipt } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { QuotationStatusBadge } from "../shared/quotation-status-badge";
+import type { StudioQuotation } from "./types";
 
 export const columns: ColumnDef<StudioQuotation>[] = [
   {

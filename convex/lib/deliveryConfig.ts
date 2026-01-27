@@ -1,10 +1,10 @@
 /**
  * Delivery Configuration Utilities
- * 
+ *
  * Provides centralized logic for project-type-specific delivery behavior.
  */
 
-import { Doc } from "../_generated/dataModel";
+import type { Doc } from "../_generated/dataModel";
 
 export interface DeliveryConfig {
   hasPhysicalDelivery: boolean;
@@ -26,7 +26,9 @@ const DEFAULT_DELIVERY_CONFIG: DeliveryConfig = {
  * Gets the consolidated delivery configuration for a project type.
  * Falls back to defaults if not configured.
  */
-export function getDeliveryConfig(projectType: Doc<"projectTypes">): DeliveryConfig {
+export function getDeliveryConfig(
+  projectType: Doc<"projectTypes">,
+): DeliveryConfig {
   if (!projectType.deliveryConfig) {
     return DEFAULT_DELIVERY_CONFIG;
   }

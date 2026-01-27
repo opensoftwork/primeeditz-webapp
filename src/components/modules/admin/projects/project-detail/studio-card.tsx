@@ -1,6 +1,6 @@
 "use client";
 
-import { User, Mail, Calendar, CheckCircle2 } from "lucide-react";
+import { Calendar, CheckCircle2, Mail, User } from "lucide-react";
 
 interface StudioCardProps {
   studioName: string;

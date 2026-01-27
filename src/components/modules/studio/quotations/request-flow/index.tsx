@@ -1,21 +1,21 @@
 "use client";
 
-import { AnimatePresence, motion } from "motion/react";
 import { ArrowLeft, ArrowRight, ChevronRight, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
+import { RequestStepNavigation } from "./request-step-navigation";
 import {
   RequestWizardProvider,
   useRequestWizard,
 } from "./request-wizard-context";
-import { RequestStepNavigation } from "./request-step-navigation";
-import { REQUEST_WIZARD_STEPS } from "./types";
 import { Step1Packages } from "./steps/step-1-packages";
 import { Step2Details } from "./steps/step-2-details";
 import { Step3Review } from "./steps/step-3-review";
-import Link from "next/link";
-import { authClient } from "@/lib/auth-client";
-import { Badge } from "@/components/ui/badge";
+import { REQUEST_WIZARD_STEPS } from "./types";
 
 export default function QuoteRequestWizard() {
   return (

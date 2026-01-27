@@ -11,11 +11,13 @@ interface HeatBarProps {
 
 export function HeatBar({ current, max, className }: HeatBarProps) {
   const percentage = Math.min((current / max) * 100, 100);
-  
+
   // Decide color based on percentage
   const getColor = () => {
-    if (percentage < 40) return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]";
-    if (percentage < 80) return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.3)]";
+    if (percentage < 40)
+      return "bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.3)]";
+    if (percentage < 80)
+      return "bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,0.3)]";
     return "bg-rose-500 shadow-[0_0_10px_rgba(244,63,94,0.3)]";
   };
 
@@ -28,11 +30,16 @@ export function HeatBar({ current, max, className }: HeatBarProps) {
   return (
     <div className={cn("flex flex-col gap-2 w-32", className)}>
       <div className="flex justify-between items-center px-1">
-        <span className={cn(
-          "text-[9px] font-black uppercase tracking-widest",
-          percentage < 40 ? "text-emerald-500/80" : 
-          percentage < 80 ? "text-amber-500/80" : "text-rose-500/80"
-        )}>
+        <span
+          className={cn(
+            "text-[9px] font-black uppercase tracking-widest",
+            percentage < 40
+              ? "text-emerald-500/80"
+              : percentage < 80
+                ? "text-amber-500/80"
+                : "text-rose-500/80",
+          )}
+        >
           {getLabel()}
         </span>
         <span className="text-[9px] font-bold text-white/30 uppercase tracking-tighter">
@@ -44,7 +51,10 @@ export function HeatBar({ current, max, className }: HeatBarProps) {
           initial={{ width: 0 }}
           animate={{ width: `${percentage}%` }}
           transition={{ duration: 0.8, ease: "easeOut" }}
-          className={cn("h-full rounded-full transition-all duration-500", getColor())}
+          className={cn(
+            "h-full rounded-full transition-all duration-500",
+            getColor(),
+          )}
         />
       </div>
     </div>

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import { Briefcase, FolderOpen, Plus, X } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useQuotationBuilder } from "../../quotation-builder-context";
-import { ProjectListingDrawer } from "../step3-line-items/project-list";
 import type { Project } from "../../types";
+import { ProjectListingDrawer } from "../step3-line-items/project-list";
 
 export function Step2ProjectSelection() {
   const {
@@ -24,7 +24,7 @@ export function Step2ProjectSelection() {
   // Filter full project objects
   const filteredProjects =
     (projects as Project[])?.filter((p) =>
-      selectedProjectIds.includes(p._id)
+      selectedProjectIds.includes(p._id),
     ) || [];
 
   // Register submit trigger
@@ -53,7 +53,8 @@ export function Step2ProjectSelection() {
             Involved Projects
           </h2>
           <p className="text-sm text-white/40 font-medium">
-            Select the projects involved in this quotation for {selectedStudio?.name || "the client"}
+            Select the projects involved in this quotation for{" "}
+            {selectedStudio?.name || "the client"}
           </p>
         </div>
         <ProjectListingDrawer
@@ -117,7 +118,8 @@ export function Step2ProjectSelection() {
             No Projects Selected
           </h3>
           <p className="text-sm text-white/30 max-w-xs text-center mb-6">
-            Please select at least one project to continue with the quotation process.
+            Please select at least one project to continue with the quotation
+            process.
           </p>
           <ProjectListingDrawer
             studioId={formData.step1.studioId}

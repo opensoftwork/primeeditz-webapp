@@ -1,12 +1,11 @@
 "use client";
 
+import { Instagram, Linkedin, Twitter } from "lucide-react";
 import Link from "next/link";
-import { cn } from "@/lib/utils";
-import { Twitter, Linkedin, Instagram } from "lucide-react";
 import { Logo } from "@/components/modules/landing/logo";
+import { cn } from "@/lib/utils";
 
 // --- Data ---
-
 
 const footerLinks = {
   product: [
@@ -45,14 +44,14 @@ export function FooterSection() {
       <div className="max-w-7xl mx-auto">
         {/* Main Grid: Logo + Columns */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-12 lg:gap-8 mb-16">
-          
           {/* Brand Column (2 cols wide on desktop) */}
           <div className="lg:col-span-2 flex flex-col gap-4">
             <Link href="/" className="inline-block">
               <Logo className="h-10 w-auto" />
             </Link>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-xs">
-              Streamlining post-production workflows for creative studios worldwide.
+              Streamlining post-production workflows for creative studios
+              worldwide.
             </p>
           </div>
 
@@ -66,7 +65,7 @@ export function FooterSection() {
               <ul className="flex flex-col gap-2">
                 {footerLinks.product.map((link) => (
                   <li key={link.href}>
-                    <Link 
+                    <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -85,7 +84,7 @@ export function FooterSection() {
               <ul className="flex flex-col gap-2">
                 {footerLinks.resources.map((link) => (
                   <li key={link.href}>
-                    <Link 
+                    <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -104,7 +103,7 @@ export function FooterSection() {
               <ul className="flex flex-col gap-2">
                 {footerLinks.company.map((link) => (
                   <li key={link.href}>
-                    <Link 
+                    <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -123,7 +122,7 @@ export function FooterSection() {
               <ul className="flex flex-col gap-2">
                 {footerLinks.legal.map((link) => (
                   <li key={link.href}>
-                    <Link 
+                    <Link
                       href={link.href}
                       className="text-sm text-muted-foreground hover:text-primary transition-colors"
                     >
@@ -141,10 +140,10 @@ export function FooterSection() {
           <p className="text-sm text-muted-foreground">
             © {currentYear} PrimeEditz, Inc. All rights reserved.
           </p>
-          
+
           <div className="flex items-center gap-6">
             {socialLinks.map((social) => (
-              <a 
+              <a
                 key={social.label}
                 href={social.href}
                 target="_blank"

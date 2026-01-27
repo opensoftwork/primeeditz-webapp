@@ -7,23 +7,22 @@
  * Refactored into modular sub-components for better maintainability.
  */
 
-import { useEffect } from "react";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import { Database } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
-import { type Id } from "@convex/_generated/dataModel";
-import { motion } from "motion/react";
-
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { AssetsSection } from "./assets-section";
 // Modular Components
 import { ProjectHeader } from "./header";
-import { ProjectSpecifications } from "./specifications";
 import { ReferenceMaterials } from "./reference-materials";
-import { AssetsSection } from "./assets-section";
 import { DetailSidebar } from "./sidebar";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { ProjectSpecifications } from "./specifications";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -36,11 +35,11 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   });
 
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    if (project?.endClientName) {
+      setOverride(projectId, project.endClientName);
     }
     return () => removeOverride(projectId);
-  }, [projectId, project?.eventName, setOverride, removeOverride]);
+  }, [projectId, project?.endClientName, setOverride, removeOverride]);
 
   const fields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
@@ -88,7 +87,6 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
       >
         <ProjectHeader
           code={project.code}
-          eventName={project.eventName}
           endClientName={project.endClientName}
           status={project.actionState}
         />

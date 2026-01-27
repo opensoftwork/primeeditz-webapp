@@ -2,9 +2,9 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { TransitionLink } from "./transition-link";
 import { Logo } from "./logo";
 import { MobileMenu } from "./mobile-menu";
+import { TransitionLink } from "./transition-link";
 
 export const Header = () => {
   const pathname = usePathname();
@@ -28,7 +28,9 @@ export const Header = () => {
           <nav className="hidden xl:flex absolute left-1/2 -translate-x-1/2 items-center justify-center gap-x-8 xl:gap-x-10 pointer-events-none">
             <div className="flex items-center gap-x-8 xl:gap-x-10 pointer-events-auto">
               {navItems.map((item) => {
-                const isActive = pathname === item.path || (pathname === "/" && item.path === "/");
+                const isActive =
+                  pathname === item.path ||
+                  (pathname === "/" && item.path === "/");
                 return (
                   <TransitionLink
                     className={`uppercase inline-block font-mono text-sm duration-150 transition-colors ease-out ${
@@ -46,10 +48,16 @@ export const Header = () => {
             </div>
           </nav>
           <div className="flex items-center gap-3 sm:gap-4 md:gap-5 lg:gap-6 shrink-0">
-            <Link className="uppercase hidden xl:block transition-colors ease-out duration-150 font-mono text-sm text-primary hover:text-primary/80 font-medium" href="/sign-in/">
+            <Link
+              className="uppercase hidden xl:block transition-colors ease-out duration-150 font-mono text-sm text-primary hover:text-primary/80 font-medium"
+              href="/sign-in/"
+            >
               Sign In
             </Link>
-            <Link className="uppercase hidden xl:block transition-colors ease-out duration-150 font-mono text-sm text-primary hover:text-primary/80 font-medium" href="/sign-up/">
+            <Link
+              className="uppercase hidden xl:block transition-colors ease-out duration-150 font-mono text-sm text-primary hover:text-primary/80 font-medium"
+              href="/sign-up/"
+            >
               Sign Up
             </Link>
             <MobileMenu />

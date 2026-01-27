@@ -1,20 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import { motion } from "motion/react";
+import { api } from "@convex/_generated/api";
+import { useMutation } from "convex/react";
 import {
-  AlertCircle,
+  type AlertCircle,
+  Archive,
   ArrowRight,
+  CheckCircle,
   FileText,
   FolderPlus,
+  Package,
   Upload,
   Users,
-  CheckCircle,
-  Package,
-  Archive,
   XCircle,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -25,12 +28,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { AdminProjectDetail } from "./types";
-import { useMutation } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { toast } from "sonner";
-import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import { getDeliveryPhaseLabel } from "@/lib/status-display";
+import type { AdminProjectDetail } from "./types";
 
 interface AdminActionBannerProps {
   project: AdminProjectDetail;

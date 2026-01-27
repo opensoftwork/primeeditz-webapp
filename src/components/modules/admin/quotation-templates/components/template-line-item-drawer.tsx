@@ -7,34 +7,34 @@
 
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
 import {
-  Package,
-  IndianRupee,
-  Hash,
-  FileText,
-  Sparkles,
   Edit3,
+  FileText,
+  Hash,
+  IndianRupee,
   Loader2,
+  Package,
+  Sparkles,
 } from "lucide-react";
+import React, { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
+  DrawerClose,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
-  DrawerClose,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
 import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
-import { cn } from "@/lib/utils";
+import { Textarea } from "@/components/ui/textarea";
 import { DEFAULT_UNIT } from "@/lib/constants/units";
+import { cn } from "@/lib/utils";
 import { SectionPickerDrawer } from "../../quotations/builder/steps/step3-line-items/section-picker-drawer";
-import type { TemplateLineItem, Section } from "../../quotations/builder/types";
+import type { Section, TemplateLineItem } from "../../quotations/builder/types";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {

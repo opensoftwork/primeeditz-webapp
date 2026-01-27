@@ -1,9 +1,9 @@
-import { create } from 'zustand'
+import { create } from "zustand";
 
 interface BreadcrumbStore {
-  overrides: Record<string, string>
-  setOverride: (segment: string, label: string) => void
-  removeOverride: (segment: string) => void
+  overrides: Record<string, string>;
+  setOverride: (segment: string, label: string) => void;
+  removeOverride: (segment: string) => void;
 }
 
 export const useBreadcrumbStore = create<BreadcrumbStore>((set) => ({
@@ -14,7 +14,7 @@ export const useBreadcrumbStore = create<BreadcrumbStore>((set) => ({
     })),
   removeOverride: (segment) =>
     set((state) => {
-      const { [segment]: _, ...rest } = state.overrides
-      return { overrides: rest }
+      const { [segment]: _, ...rest } = state.overrides;
+      return { overrides: rest };
     }),
-}))
+}));

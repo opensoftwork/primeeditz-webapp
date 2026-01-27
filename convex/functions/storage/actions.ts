@@ -2,36 +2,40 @@
 
 /**
  * Storage URL Generation Action
- * 
+ *
  * Generates pre-signed URLs for MinIO-stored files.
  * Uses "use node" directive for AWS SDK compatibility.
  */
 
-import { v } from 'convex/values'
-import { internalAction, action } from '../../_generated/server'
-import { S3Client, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
-import { api } from '../../_generated/api'
+import {
+  GetObjectCommand,
+  PutObjectCommand,
+  S3Client,
+} from "@aws-sdk/client-s3";
+import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { v } from "convex/values";
+import { api } from "../../_generated/api";
+import { action, internalAction } from "../../_generated/server";
 
 // Initialize S3 client for MinIO
 function getS3Client(): S3Client {
   if (!process.env.MINIO_ENDPOINT) {
-    throw new Error('MINIO_ENDPOINT is not configured')
+    throw new Error("MINIO_ENDPOINT is not configured");
   }
 
   return new S3Client({
     endpoint: process.env.MINIO_ENDPOINT,
-    region: process.env.MINIO_REGION || 'us-east-1',
+    region: process.env.MINIO_REGION || "us-east-1",
     credentials: {
       accessKeyId: process.env.MINIO_ACCESS_KEY!,
       secretAccessKey: process.env.MINIO_SECRET_KEY!,
     },
     forcePathStyle: true,
-  })
+  });
 }
 
 function getBucket(): string {
-  return process.env.MINIO_BUCKET || 'primeeditz-assets'
+  return process.env.MINIO_BUCKET || "primeeditz-assets";
 }
 
 /**
@@ -45,27 +49,30 @@ export const getSignedFileUrl = internalAction({
   },
   handler: async (_ctx, args): Promise<string | null> => {
     if (!args.storageKey) {
-      return null
+      return null;
     }
 
     try {
-      const s3Client = getS3Client()
+      const s3Client = getS3Client();
       const command = new GetObjectCommand({
         Bucket: getBucket(),
         Key: args.storageKey,
-      })
+      });
 
       const signedUrl = await getSignedUrl(s3Client, command, {
         expiresIn: args.expiresIn ?? 3600,
-      })
+      });
 
-      return signedUrl
+      return signedUrl;
     } catch (error) {
-      console.error(`Error generating signed URL for ${args.storageKey}:`, error)
-      return null
+      console.error(
+        `Error generating signed URL for ${args.storageKey}:`,
+        error,
+      );
+      return null;
     }
   },
-})
+});
 
 /**
  * Generate pre-signed URLs for multiple files.
@@ -77,34 +84,34 @@ export const getSignedFileUrls = action({
     expiresIn: v.optional(v.number()),
   },
   handler: async (_ctx, args): Promise<Record<string, string | null>> => {
-    const results: Record<string, string | null> = {}
+    const results: Record<string, string | null> = {};
 
-    const s3Client = getS3Client()
-    const bucket = getBucket()
-    const expiresIn = args.expiresIn ?? 3600
+    const s3Client = getS3Client();
+    const bucket = getBucket();
+    const expiresIn = args.expiresIn ?? 3600;
 
     for (const key of args.storageKeys) {
       if (!key) {
-        results[key] = null
-        continue
+        results[key] = null;
+        continue;
       }
 
       try {
         const command = new GetObjectCommand({
           Bucket: bucket,
           Key: key,
-        })
+        });
 
-        results[key] = await getSignedUrl(s3Client, command, { expiresIn })
+        results[key] = await getSignedUrl(s3Client, command, { expiresIn });
       } catch (error) {
-        console.error(`Error generating signed URL for ${key}:`, error)
-        results[key] = null
+        console.error(`Error generating signed URL for ${key}:`, error);
+        results[key] = null;
       }
     }
 
-    return results
+    return results;
   },
-})
+});
 
 /**
  * Generate a pre-signed PUT URL for uploading a small file.
@@ -120,27 +127,35 @@ export const generateUploadUrl = action({
   },
   handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
     // 1. Verify eligibility using role-agnostic query
-    const uploadEligibility = await ctx.runQuery(api.functions.projects.queries.getProjectUploadEligibility, {
-      projectId: args.projectId,
-    });
+    const uploadEligibility = await ctx.runQuery(
+      api.functions.projects.queries.getProjectUploadEligibility,
+      {
+        projectId: args.projectId,
+      },
+    );
 
     if (!uploadEligibility?.isAllowed) {
       throw new Error(uploadEligibility?.reason || "Upload not allowed");
     }
 
     // 2. Storage Limit Check
-    const storageStats = await ctx.runQuery(api.functions.storage.queries.getProjectStorageUsage, {
-      projectId: args.projectId,
-    });
+    const storageStats = await ctx.runQuery(
+      api.functions.storage.queries.getProjectStorageUsage,
+      {
+        projectId: args.projectId,
+      },
+    );
 
     if (storageStats.used + args.fileSize > storageStats.allocated) {
-      throw new Error(`Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+      throw new Error(
+        `Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+      );
     }
 
     // 3. Generate unique storage key
     const timestamp = Date.now();
     const cleanName = args.fileName.replace(/\s+/g, "_");
-    const subPath = args.folderId ? `assets/${args.folderId}` : 'deliverables';
+    const subPath = args.folderId ? `assets/${args.folderId}` : "deliverables";
     const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
 
     // 3. Generate pre-signed PUT URL
@@ -170,21 +185,29 @@ export const getTusConfig = action({
   },
   handler: async (ctx, args) => {
     // Verify eligibility using role-agnostic query
-    const uploadEligibility = await ctx.runQuery(api.functions.projects.queries.getProjectUploadEligibility, {
-      projectId: args.projectId,
-    });
+    const uploadEligibility = await ctx.runQuery(
+      api.functions.projects.queries.getProjectUploadEligibility,
+      {
+        projectId: args.projectId,
+      },
+    );
 
     if (!uploadEligibility?.isAllowed) {
       throw new Error(uploadEligibility?.reason || "Upload not allowed");
     }
 
     // Storage Limit Check
-    const storageStats = await ctx.runQuery(api.functions.storage.queries.getProjectStorageUsage, {
-      projectId: args.projectId,
-    });
+    const storageStats = await ctx.runQuery(
+      api.functions.storage.queries.getProjectStorageUsage,
+      {
+        projectId: args.projectId,
+      },
+    );
 
     if (storageStats.used + args.fileSize > storageStats.allocated) {
-      throw new Error(`Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`);
+      throw new Error(
+        `Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+      );
     }
 
     return {

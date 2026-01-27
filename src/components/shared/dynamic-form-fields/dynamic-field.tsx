@@ -1,11 +1,11 @@
 "use client";
 
-import { DbFieldDefinition, FieldRenderProps, FieldValue } from "./types";
-import { TextField } from "./text-field";
+import { CheckboxField } from "./checkbox-field";
 import { NumberField } from "./number-field";
 import { SelectField } from "./select-field";
-import { CheckboxField } from "./checkbox-field";
+import { TextField } from "./text-field";
 import { TextareaField } from "./textarea-field";
+import type { DbFieldDefinition, FieldRenderProps, FieldValue } from "./types";
 
 interface DynamicFieldProps {
   fieldDef: DbFieldDefinition;

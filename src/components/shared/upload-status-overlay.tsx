@@ -1,19 +1,19 @@
 "use client";
 
-import { useUploadStore } from "@/stores/upload-store";
 import {
+  AlertCircle,
+  CheckCircle2,
+  ChevronDown,
+  ChevronUp,
+  Loader2,
   Upload,
   X,
-  ChevronUp,
-  ChevronDown,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useState } from "react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { useUploadStore } from "@/stores/upload-store";
 
 export function UploadStatusOverlay() {
   const { items, removeUpload } = useUploadStore();

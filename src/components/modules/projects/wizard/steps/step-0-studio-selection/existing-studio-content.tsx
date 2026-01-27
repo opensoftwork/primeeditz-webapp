@@ -5,11 +5,10 @@
 
 "use client";
 
+import type { Doc, Id } from "@convex/_generated/dataModel";
 import { X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { StudioDataTable } from "@/components/modules/admin/studio";
-import type { Doc } from "@convex/_generated/dataModel";
-import type { Id } from "@convex/_generated/dataModel";
+import { Button } from "@/components/ui/button";
 
 type Studio = Doc<"profiles">;
 

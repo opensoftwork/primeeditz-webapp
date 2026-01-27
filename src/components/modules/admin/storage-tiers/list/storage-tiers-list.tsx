@@ -1,19 +1,19 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { ListAlerts } from "./list-alerts";
+import { ListEmpty } from "./list-empty";
+import { ListHeader } from "./list-header";
+import { StorageTierCard } from "./storage-tier-card";
 import {
   StorageTierDrawer,
   type StorageTierFormValues,
 } from "./storage-tier-drawer";
-import { StorageTierCard } from "./storage-tier-card";
-import { ListHeader } from "./list-header";
-import { ListEmpty } from "./list-empty";
-import { ListAlerts } from "./list-alerts";
-import type { Id } from "@convex/_generated/dataModel";
 
 interface StorageTier {
   _id: string;
@@ -25,19 +25,19 @@ interface StorageTier {
 
 export function StorageTiersList() {
   const storageTiers = useQuery(
-    api.functions.storageTiers.queries.listStorageTiers
+    api.functions.storageTiers.queries.listStorageTiers,
   );
   const createStorageTier = useMutation(
-    api.functions.storageTiers.mutations.createStorageTier
+    api.functions.storageTiers.mutations.createStorageTier,
   );
   const updateStorageTier = useMutation(
-    api.functions.storageTiers.mutations.updateStorageTier
+    api.functions.storageTiers.mutations.updateStorageTier,
   );
   const toggleStatusMutation = useMutation(
-    api.functions.storageTiers.mutations.toggleStorageTierActive
+    api.functions.storageTiers.mutations.toggleStorageTierActive,
   );
   const deleteMutation = useMutation(
-    api.functions.storageTiers.mutations.deleteStorageTier
+    api.functions.storageTiers.mutations.deleteStorageTier,
   );
 
   // State
@@ -87,7 +87,9 @@ export function StorageTiersList() {
       setIsDrawerOpen(false);
     } catch (error) {
       const message =
-        error instanceof Error ? error.message : "An error occurred while saving";
+        error instanceof Error
+          ? error.message
+          : "An error occurred while saving";
       toast.error(message);
     }
   };
@@ -100,7 +102,7 @@ export function StorageTiersList() {
         isActive: !tierToToggle.current,
       });
       toast.success(
-        `Storage tier ${!tierToToggle.current ? "activated" : "deactivated"}`
+        `Storage tier ${!tierToToggle.current ? "activated" : "deactivated"}`,
       );
       setTierToToggle(null);
     } catch (error) {
@@ -140,10 +142,7 @@ export function StorageTiersList() {
       <div className="space-y-8 p-8 md:p-12 w-full">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <Skeleton
-              key={i}
-              className="h-48 w-full bg-white/5 rounded-xl"
-            />
+            <Skeleton key={i} className="h-48 w-full bg-white/5 rounded-xl" />
           ))}
         </div>
       </div>

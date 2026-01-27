@@ -1,19 +1,19 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { ArrowRight, Building, Mail, User, X } from "lucide-react";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { User, Mail, Building, ArrowRight, X } from "lucide-react";
-import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
-import { useEffect } from "react";
+import { isValidPhoneNumber, PhoneInput } from "@/components/ui/phone-input";
 import type { AdminStudio } from "./studio-list/types";
 
 interface StudioFormValues {

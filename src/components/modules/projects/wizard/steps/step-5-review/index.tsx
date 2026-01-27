@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "@convex/_generated/api";
+import { useCallback, useEffect } from "react";
 
 import { toast } from "sonner";
 import { useReferenceFilesStore } from "@/stores/reference-files-store";
+import { useWizardForm } from "../../wizard-form-context";
 import { UploadedFilesDrawer } from "../step-3-files/uploaded-files-drawer";
-
 // Components
 import { Step5Header } from "./header";
-import { StudioInfoReview } from "./sections/studio-info";
 import { BasicInfoReview } from "./sections/basic-info";
-import { SpecificationsReview } from "./sections/specifications";
 import { DescriptionReview } from "./sections/description";
 import { FilesReview } from "./sections/files-review";
-
-import { useWizardForm } from "../../wizard-form-context";
+import { SpecificationsReview } from "./sections/specifications";
+import { StudioInfoReview } from "./sections/studio-info";
 import { SubmissionCard } from "./submission-card";
 
 export function WizardStep5() {

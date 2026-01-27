@@ -25,7 +25,7 @@ export function TypeSpecificOptions({ type, form }: TypeSpecificOptionsProps) {
                   value={field.state.value ?? ""}
                   onChange={(e) =>
                     field.handleChange(
-                      e.target.value ? Number(e.target.value) : undefined
+                      e.target.value ? Number(e.target.value) : undefined,
                     )
                   }
                   className="bg-white/5 border-white/10 text-white"
@@ -44,7 +44,7 @@ export function TypeSpecificOptions({ type, form }: TypeSpecificOptionsProps) {
                   value={field.state.value ?? ""}
                   onChange={(e) =>
                     field.handleChange(
-                      e.target.value ? Number(e.target.value) : undefined
+                      e.target.value ? Number(e.target.value) : undefined,
                     )
                   }
                   className="bg-white/5 border-white/10 text-white"

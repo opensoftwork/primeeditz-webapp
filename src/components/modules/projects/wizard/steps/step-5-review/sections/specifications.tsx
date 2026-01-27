@@ -1,9 +1,9 @@
 "use client";
 
-import React from "react";
 import { Sparkles } from "lucide-react";
-import { SectionWrapper } from "../section-wrapper";
+import React from "react";
 import { ReviewData } from "../review-data";
+import { SectionWrapper } from "../section-wrapper";
 
 interface SpecificationsReviewProps {
   formData: any;
@@ -41,7 +41,7 @@ export function SpecificationsReview({
                 value={displayValue}
               />
             );
-          }
+          },
         )}
       </div>
     </SectionWrapper>

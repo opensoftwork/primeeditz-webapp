@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "@tanstack/react-form";
 import type { Id } from "@convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import { useEffect, useState } from "react";
 import { FieldGroup, FieldSet } from "@/components/ui/field";
-import { WizardLoadingState } from "../../wizard-loading-state";
-import { useWizardForm } from "../../wizard-form-context";
 import { ProjectTypeSelectionDrawer } from "../../project-type-drawer";
+import { useWizardForm } from "../../wizard-form-context";
+import { WizardLoadingState } from "../../wizard-loading-state";
+import { DateVenueFields } from "./date-venue-fields";
 import { Step1Header } from "./header";
 import { ProjectTypeField } from "./project-type-field";
 import { StudioEventFields } from "./studio-event-fields";
-import { DateVenueFields } from "./date-venue-fields";
 
 export function WizardStep1() {
   const {
@@ -32,7 +32,8 @@ export function WizardStep1() {
   // Pre-fill endClientName if studio is selected in Step 0 (Admin Mode)
   const isStudioSelectedOrNew =
     mode === "admin" &&
-    (step0Data.selectionMode === "existing" || step0Data.selectionMode === "new") &&
+    (step0Data.selectionMode === "existing" ||
+      step0Data.selectionMode === "new") &&
     !!step0Data.studioData;
 
   const preFilledEndStudioName = isStudioSelectedOrNew
@@ -43,16 +44,12 @@ export function WizardStep1() {
     defaultValues: {
       projectTypeId: (step1Data.projectTypeId as string) ?? "",
       endClientName: preFilledEndStudioName ?? "",
-      eventName: step1Data.eventName,
-      eventDate: step1Data.eventDate,
       venue: step1Data.venue,
     },
     onSubmit: async ({ value }) => {
       setFormData("step1", {
         projectTypeId: value.projectTypeId as Id<"projectTypes">,
         endClientName: value.endClientName,
-        eventName: value.eventName,
-        eventDate: value.eventDate ?? null,
         venue: value.venue ?? "",
       });
       if (isReviewing) {

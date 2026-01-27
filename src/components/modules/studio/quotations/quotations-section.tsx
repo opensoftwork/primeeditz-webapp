@@ -1,13 +1,13 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { QuotationCard } from "./shared/quotation-card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Receipt, ArrowRight } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useQuery } from "convex/react";
+import { ArrowRight, Receipt } from "lucide-react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { QuotationCard } from "./shared/quotation-card";
 
 export function QuotationsSection() {
   const router = useRouter();
@@ -74,7 +74,7 @@ export function QuotationsSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <QuotationCard quotation={quotation } />
+            <QuotationCard quotation={quotation} />
           </motion.div>
         ))}
       </div>

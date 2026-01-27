@@ -1,8 +1,8 @@
 "use client";
 
-import Image from "next/image";
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -121,7 +121,7 @@ export function SliderStage({
               isImageLoading
                 ? "opacity-0 translate-y-8"
                 : "opacity-100 translate-y-0",
-              isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"
+              isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in",
             )}
             onClick={() => onSetIsZoomed(!isZoomed)}
           >

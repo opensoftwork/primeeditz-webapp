@@ -14,7 +14,5 @@ export default function AdminProjectFoldersPage({
 }: AdminProjectFoldersPageProps) {
   const { projectId } = use(params);
 
-  return (
-    <FolderListingView projectId={projectId} isAdmin />
-  );
+  return <FolderListingView projectId={projectId} isAdmin />;
 }

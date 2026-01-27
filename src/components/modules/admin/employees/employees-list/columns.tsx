@@ -1,7 +1,7 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { Building, Mail, Phone, User, Briefcase } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Briefcase, Building, Mail, Phone, User } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { OnboardingBadge } from "./status-badge";

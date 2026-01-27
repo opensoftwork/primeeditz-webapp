@@ -1,21 +1,26 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
+import type { Doc, Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { Boxes } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { FieldList, FieldDrawer } from "./index";
-import { type FieldFormValues } from "./field-drawer";
-import { DetailHeader, DetailStats, DetailAlerts } from "./index";
-import { DeliveryConfigForm } from "./delivery-config-form";
+import { useParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import type { Doc, Id } from "@convex/_generated/dataModel";
+import { DeliveryConfigForm } from "./delivery-config-form";
+import type { FieldFormValues } from "./field-drawer";
+import {
+  DetailAlerts,
+  DetailHeader,
+  DetailStats,
+  FieldDrawer,
+  FieldList,
+} from "./index";
 
 export function ProjectTypeDetail() {
   const params = useParams();

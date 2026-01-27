@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
+import { ChevronRight, Eye, LayoutGrid } from "lucide-react";
 import Image from "next/image";
-import { LayoutGrid, Eye, ChevronRight } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { SectionWrapper } from "../section-wrapper";
 

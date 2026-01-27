@@ -34,7 +34,9 @@ export function FolderPreview({ folders, projectCode }: FolderPreviewProps) {
           >
             <Folder className="h-4 w-4 text-amber-500/70" />
             <span className="text-white/80 font-medium text-sm">{folder}</span>
-            <span className="text-white/20 text-xs ml-auto">pending_upload</span>
+            <span className="text-white/20 text-xs ml-auto">
+              pending_upload
+            </span>
           </div>
         ))}
       </div>
@@ -42,7 +44,8 @@ export function FolderPreview({ folders, projectCode }: FolderPreviewProps) {
       {/* Summary */}
       <div className="pt-2 text-center">
         <span className="text-white/30 text-xs font-medium">
-          {folders.length} folder{folders.length !== 1 ? "s" : ""} will be created
+          {folders.length} folder{folders.length !== 1 ? "s" : ""} will be
+          created
         </span>
       </div>
     </div>

@@ -1,8 +1,8 @@
-import { v } from "convex/values";
-import { adminQuery, studioQuery } from "../../lib/customFunctions";
-import { QueryCtx, query } from "../../_generated/server";
-import { Doc, Id } from "../../_generated/dataModel";
 import { paginationOptsValidator } from "convex/server";
+import { v } from "convex/values";
+import type { Doc, Id } from "../../_generated/dataModel";
+import { type QueryCtx, query } from "../../_generated/server";
+import { adminQuery, studioQuery } from "../../lib/customFunctions";
 import { quotationStatusValidator } from "../../schema";
 
 /**
@@ -17,11 +17,24 @@ export const getQuotations = adminQuery({
   },
   handler: async (ctx: QueryCtx, args) => {
     let quotations: Doc<"quotations">[];
-    
+
     if (args.status) {
       quotations = await ctx.db
         .query("quotations")
-        .withIndex("by_status", (q) => q.eq("status", args.status as "draft" | "sent" | "viewed" | "approved" | "changes_requested" | "rejected" | "expired" | "superseded"))
+        .withIndex("by_status", (q) =>
+          q.eq(
+            "status",
+            args.status as
+              | "draft"
+              | "sent"
+              | "viewed"
+              | "approved"
+              | "changes_requested"
+              | "rejected"
+              | "expired"
+              | "superseded",
+          ),
+        )
         .collect();
     } else if (args.studioId) {
       quotations = await ctx.db
@@ -31,17 +44,17 @@ export const getQuotations = adminQuery({
     } else {
       quotations = await ctx.db.query("quotations").collect();
     }
-    
+
     if (args.projectId) {
       quotations = quotations.filter((q) => q.projectId === args.projectId);
     }
-    
+
     quotations.sort((a, b) => b._creationTime - a._creationTime);
-    
+
     if (args.limit) {
       quotations = quotations.slice(0, args.limit);
     }
-    
+
     return quotations;
   },
 });
@@ -58,27 +71,41 @@ export const getAdminQuotationsPaginated = adminQuery({
     const query = args.status
       ? ctx.db
           .query("quotations")
-          .withIndex("by_status", (q) => q.eq("status", args.status as Doc<"quotations">["status"]))
+          .withIndex("by_status", (q) =>
+            q.eq("status", args.status as Doc<"quotations">["status"]),
+          )
       : ctx.db.query("quotations");
 
     const results = await query.order("desc").paginate(args.paginationOpts);
 
     // Get all profiles for client name enrichment
-    const studioIds = [...new Set(results.page.map(q => q.studioId).filter((id): id is string => !!id))];
+    const studioIds = [
+      ...new Set(
+        results.page.map((q) => q.studioId).filter((id): id is string => !!id),
+      ),
+    ];
     const clients = await Promise.all(
-      studioIds.map((id) => ctx.db.get(id as Id<"profiles">))
+      studioIds.map((id) => ctx.db.get(id as Id<"profiles">)),
     );
     const studioNameMap = new Map(
-      clients.filter((c): c is Doc<"profiles"> => !!c).map((c) => [c._id as string, c.name])
+      clients
+        .filter((c): c is Doc<"profiles"> => !!c)
+        .map((c) => [c._id as string, c.name]),
     );
 
     // Get project names for enrichment
-    const projectIds = [...new Set(results.page.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projectIds = [
+      ...new Set(
+        results.page.map((q) => q.projectId).filter((id): id is string => !!id),
+      ),
+    ];
     const projects = await Promise.all(
-      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">)),
     );
     const projectMap = new Map(
-      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+      projects
+        .filter((p): p is Doc<"projects"> => !!p)
+        .map((p) => [p._id as string, p.endClientName || p.code]),
     );
 
     const enrichedPage = results.page.map((q) => ({
@@ -118,10 +145,11 @@ export const getQuotationByCode = adminQuery({
       .query("quotations")
       .withIndex("by_code", (q) => q.eq("code", args.code))
       .collect();
-    
+
     if (quotations.length === 0) return null;
-    return quotations.reduce((latest: Doc<"quotations">, q: Doc<"quotations">) => 
-      q.version > latest.version ? q : latest
+    return quotations.reduce(
+      (latest: Doc<"quotations">, q: Doc<"quotations">) =>
+        q.version > latest.version ? q : latest,
     );
   },
 });
@@ -136,12 +164,12 @@ export const getQuotationHistory = adminQuery({
   handler: async (ctx: QueryCtx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) return [];
-    
+
     const allVersions = await ctx.db
       .query("quotations")
       .withIndex("by_code", (q) => q.eq("code", quotation.code))
       .collect();
-    
+
     return allVersions.sort((a, b) => b.version - a.version);
   },
 });
@@ -156,31 +184,31 @@ export const getQuotationWithSections = adminQuery({
   handler: async (ctx: QueryCtx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) return null;
-    
+
     // Get all sections used in this quotation
-    const sectionIds = [...new Set(quotation.lineItems.map((li) => li.sectionId))];
-    const sections = await Promise.all(
-      sectionIds.map((id) => ctx.db.get(id))
-    );
+    const sectionIds = [
+      ...new Set(quotation.lineItems.map((li) => li.sectionId)),
+    ];
+    const sections = await Promise.all(sectionIds.map((id) => ctx.db.get(id)));
 
     // Get client name
-    let studioName = undefined;
+    let studioName;
     if (quotation.studioId) {
       const profile = await ctx.db.get(quotation.studioId as Id<"profiles">);
       studioName = profile?.name;
     }
 
     // Get project name(s)
-    let projectName = undefined;
-    let projectCode = undefined;
+    let projectName;
+    let projectCode;
     if (quotation.projectId) {
       const project = await ctx.db.get(quotation.projectId as Id<"projects">);
-      projectName = project?.eventName || project?.code;
+      projectName = project?.endClientName || project?.code;
       projectCode = project?.code;
     }
 
     // Get assigned employee
-    let assignedEmployeeName = undefined;
+    let assignedEmployeeName;
     if (quotation.assignedEmployeeId) {
       const emp = await ctx.db.get(quotation.assignedEmployeeId);
       assignedEmployeeName = emp?.name;
@@ -188,21 +216,25 @@ export const getQuotationWithSections = adminQuery({
 
     // Get all projects linked to this quotation (for project-based grouping)
     const projectTypes = await ctx.db.query("projectTypes").collect();
-    const projectIds = quotation.projectIds || (quotation.projectId ? [quotation.projectId] : []);
+    const projectIds =
+      quotation.projectIds ||
+      (quotation.projectId ? [quotation.projectId] : []);
     const projects = await Promise.all(
       projectIds.map(async (id) => {
         const project = await ctx.db.get(id as Id<"projects">);
         if (!project) return null;
-        const projectType = projectTypes.find((pt) => pt._id === project.projectTypeId);
+        const projectType = projectTypes.find(
+          (pt) => pt._id === project.projectTypeId,
+        );
         return {
           _id: project._id,
           code: project.code,
-          eventName: project.eventName,
+          endClientName: project.endClientName,
           projectTypeName: projectType?.name || "Unknown",
         };
-      })
+      }),
     );
-    
+
     return {
       quotation: {
         ...quotation,
@@ -211,7 +243,9 @@ export const getQuotationWithSections = adminQuery({
         projectCode,
         assignedEmployeeName,
       },
-      sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+      sections: sections.filter(
+        (s): s is Doc<"quotationSections"> => s !== null,
+      ),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
@@ -241,7 +275,9 @@ export const getLibraryItems = adminQuery({
     let filteredLibraryItems = libraryItems;
     if (args.projectTypeHint) {
       filteredLibraryItems = libraryItems.filter(
-        (item) => !item.projectTypeHint || item.projectTypeHint === args.projectTypeHint
+        (item) =>
+          !item.projectTypeHint ||
+          item.projectTypeHint === args.projectTypeHint,
       );
     }
 
@@ -254,7 +290,10 @@ export const getLibraryItems = adminQuery({
     const templateLineItems: any[] = [];
     templates.forEach((template) => {
       // If projectTypeHint is provided, only include line items from matching templates
-      if (args.projectTypeHint && template.projectTypeHint !== args.projectTypeHint) {
+      if (
+        args.projectTypeHint &&
+        template.projectTypeHint !== args.projectTypeHint
+      ) {
         return;
       }
 
@@ -278,11 +317,13 @@ export const getLibraryItems = adminQuery({
 
     // 6. Group by section
     const sections = await ctx.db.query("quotationSections").collect();
-    
-    return sections.map(section => ({
-      section,
-      items: allItems.filter(item => item.sectionId === section._id)
-    })).filter(group => group.items.length > 0);
+
+    return sections
+      .map((section) => ({
+        section,
+        items: allItems.filter((item) => item.sectionId === section._id),
+      }))
+      .filter((group) => group.items.length > 0);
   },
 });
 
@@ -298,29 +339,40 @@ export const getQuotationByShareToken = query({
       .query("quotations")
       .withIndex("by_shareToken", (q) => q.eq("shareToken", args.shareToken))
       .unique();
-    
+
     if (!quotation) return null;
-    
+
     // Check expiry
-    if (quotation.shareTokenExpiresAt && Date.now() > quotation.shareTokenExpiresAt) {
-       return { error: "Link expired" };
+    if (
+      quotation.shareTokenExpiresAt &&
+      Date.now() > quotation.shareTokenExpiresAt
+    ) {
+      return { error: "Link expired" };
     }
-    
+
     // Check status
-    const publicStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    const publicStatus = [
+      "sent",
+      "viewed",
+      "approved",
+      "changes_requested",
+      "rejected",
+    ];
     if (!publicStatus.includes(quotation.status)) {
-       return { error: "Quotation no longer available" };
+      return { error: "Quotation no longer available" };
     }
-    
+
     // Get sections for detail view
-    const sectionIds = [...new Set(quotation.lineItems.map((li) => li.sectionId))];
-    const sections = await Promise.all(
-      sectionIds.map((id) => ctx.db.get(id))
-    );
-    
+    const sectionIds = [
+      ...new Set(quotation.lineItems.map((li) => li.sectionId)),
+    ];
+    const sections = await Promise.all(sectionIds.map((id) => ctx.db.get(id)));
+
     return {
       quotation,
-      sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+      sections: sections.filter(
+        (s): s is Doc<"quotationSections"> => s !== null,
+      ),
     };
   },
 });
@@ -335,18 +387,34 @@ export const getMyQuotations = studioQuery({
       .query("quotations")
       .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .collect();
-    
+
     // Filter by status (visible to client)
-    const studioVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
-    const visibleQuotations = quotations.filter((q) => studioVisibleStatus.includes(q.status));
+    const studioVisibleStatus = [
+      "sent",
+      "viewed",
+      "approved",
+      "changes_requested",
+      "rejected",
+    ];
+    const visibleQuotations = quotations.filter((q) =>
+      studioVisibleStatus.includes(q.status),
+    );
 
     // Get project names for enrichment
-    const projectIds = [...new Set(visibleQuotations.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projectIds = [
+      ...new Set(
+        visibleQuotations
+          .map((q) => q.projectId)
+          .filter((id): id is string => !!id),
+      ),
+    ];
     const projects = await Promise.all(
-      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">)),
     );
     const projectMap = new Map(
-      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+      projects
+        .filter((p): p is Doc<"projects"> => !!p)
+        .map((p) => [p._id as string, p.endClientName || p.code]),
     );
 
     return visibleQuotations
@@ -375,28 +443,45 @@ export const getMyQuotationsPaginated = studioQuery({
       .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id));
 
     // Filter by client visible status
-    const studioVisibleStatus = ["initiated", "sent", "viewed", "approved", "changes_requested", "rejected", "expired", "superseded"];
-    
+    const studioVisibleStatus = [
+      "initiated",
+      "sent",
+      "viewed",
+      "approved",
+      "changes_requested",
+      "rejected",
+      "expired",
+      "superseded",
+    ];
+
     // Applying status filter if provided, otherwise filter by visible statuses
     if (args.status) {
       query = query.filter((q) => q.eq(q.field("status"), args.status!));
     } else {
-      query = query.filter((q) => 
+      query = query.filter((q) =>
         q.or(
-          ...studioVisibleStatus.map(status => q.eq(q.field("status"), status))
-        )
+          ...studioVisibleStatus.map((status) =>
+            q.eq(q.field("status"), status),
+          ),
+        ),
       );
     }
 
     const results = await query.order("desc").paginate(args.paginationOpts);
 
     // Get project names for enrichment
-    const projectIds = [...new Set(results.page.map(q => q.projectId).filter((id): id is string => !!id))];
+    const projectIds = [
+      ...new Set(
+        results.page.map((q) => q.projectId).filter((id): id is string => !!id),
+      ),
+    ];
     const projects = await Promise.all(
-      projectIds.map((id) => ctx.db.get(id as Id<"projects">))
+      projectIds.map((id) => ctx.db.get(id as Id<"projects">)),
     );
     const projectMap = new Map(
-      projects.filter((p): p is Doc<"projects"> => !!p).map((p) => [p._id as string, p.eventName || p.code])
+      projects
+        .filter((p): p is Doc<"projects"> => !!p)
+        .map((p) => [p._id as string, p.endClientName || p.code]),
     );
 
     const enrichedPage = results.page.map((q) => ({
@@ -429,37 +514,52 @@ export const getMyQuotationDetail = studioQuery({
     }
 
     // Status check
-    const studioVisibleStatus = ["initiated", "sent", "viewed", "approved", "changes_requested", "rejected"];
+    const studioVisibleStatus = [
+      "initiated",
+      "sent",
+      "viewed",
+      "approved",
+      "changes_requested",
+      "rejected",
+    ];
     if (!studioVisibleStatus.includes(quotation.status)) {
-       return null;
+      return null;
     }
 
     // Get all sections used in this quotation
-    const sectionIds = [...new Set(quotation.lineItems.map((li) => li.sectionId))];
+    const sectionIds = [
+      ...new Set(quotation.lineItems.map((li) => li.sectionId)),
+    ];
     const sections = await Promise.all(
-      sectionIds.map((id) => id ? ctx.db.get(id) : null)
+      sectionIds.map((id) => (id ? ctx.db.get(id) : null)),
     );
 
     // Get all projects linked to this quotation (for project-based grouping)
     const projectTypes = await ctx.db.query("projectTypes").collect();
-    const projectIds = quotation.projectIds || (quotation.projectId ? [quotation.projectId] : []);
+    const projectIds =
+      quotation.projectIds ||
+      (quotation.projectId ? [quotation.projectId] : []);
     const projects = await Promise.all(
       projectIds.map(async (id) => {
         const project = await ctx.db.get(id as Id<"projects">);
         if (!project) return null;
-        const projectType = projectTypes.find((pt) => pt._id === project.projectTypeId);
+        const projectType = projectTypes.find(
+          (pt) => pt._id === project.projectTypeId,
+        );
         return {
           _id: project._id,
           code: project.code,
-          eventName: project.eventName,
+          endClientName: project.endClientName,
           projectTypeName: projectType?.name || "Unknown",
         };
-      })
+      }),
     );
 
     return {
       quotation,
-      sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
+      sections: sections.filter(
+        (s): s is Doc<"quotationSections"> => s !== null,
+      ),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
@@ -476,7 +576,7 @@ export const getClientApprovedQuotations = adminQuery({
   },
   handler: async (ctx, args) => {
     const studioIdString = args.studioId as string;
-    
+
     // 1. Get approved quotations for this client
     const quotations = await ctx.db
       .query("quotations")
@@ -484,7 +584,9 @@ export const getClientApprovedQuotations = adminQuery({
       .collect();
 
     // Filter only approved quotations
-    const approvedQuotations = quotations.filter((q) => q.status === "approved");
+    const approvedQuotations = quotations.filter(
+      (q) => q.status === "approved",
+    );
 
     // 2. For each quotation, calculate storage usage from linked projects
     const enriched = await Promise.all(
@@ -492,19 +594,21 @@ export const getClientApprovedQuotations = adminQuery({
         // Get projects linked to this quotation
         const quotationIdString = quotation._id as string;
         const allProjects = await ctx.db.query("projects").collect();
-        
+
         // Find projects that reference this quotation (via projectId in quotation)
         // Or projects where quotation.projectId matches
         const linkedProjects = allProjects.filter((p) => {
           const projectIdString = p._id as string;
-          return quotation.projectId === projectIdString || 
-                 quotation.projectIds?.includes(projectIdString);
+          return (
+            quotation.projectId === projectIdString ||
+            quotation.projectIds?.includes(projectIdString)
+          );
         });
 
         // Calculate allocated storage from linked projects
         const allocatedBytes = linkedProjects.reduce(
           (sum, p) => sum + (p.storageAllocated || 0),
-          0
+          0,
         );
 
         // Try to determine total storage from quotation
@@ -517,9 +621,15 @@ export const getClientApprovedQuotations = adminQuery({
         const storageTiers = await ctx.db.query("storageTiers").collect();
         for (const li of quotation.lineItems) {
           const desc = li.description.toLowerCase();
-          if (desc.includes("storage") || desc.includes("gb") || desc.includes("cloud")) {
+          if (
+            desc.includes("storage") ||
+            desc.includes("gb") ||
+            desc.includes("cloud")
+          ) {
             // Try to match with a storage tier by rate
-            const matchingTier = storageTiers.find((t) => t.priceINR === li.rate);
+            const matchingTier = storageTiers.find(
+              (t) => t.priceINR === li.rate,
+            );
             if (matchingTier) {
               totalStorageGB = matchingTier.sizeGB;
               break;
@@ -540,14 +650,16 @@ export const getClientApprovedQuotations = adminQuery({
           linkedProjectCount: linkedProjects.length,
           storageInfo: {
             totalGB: totalStorageGB,
-            allocatedGB: Math.round((allocatedBytes / (1024 * 1024 * 1024)) * 100) / 100,
-            remainingGB: Math.round((remainingBytes / (1024 * 1024 * 1024)) * 100) / 100,
+            allocatedGB:
+              Math.round((allocatedBytes / (1024 * 1024 * 1024)) * 100) / 100,
+            remainingGB:
+              Math.round((remainingBytes / (1024 * 1024 * 1024)) * 100) / 100,
             totalBytes,
             allocatedBytes,
             remainingBytes,
           },
         };
-      })
+      }),
     );
 
     // Sort by approval date (most recent first)
@@ -571,18 +683,20 @@ export const getQuotationStorageSummary = adminQuery({
     const allProjects = await ctx.db.query("projects").collect();
     const linkedProjects = allProjects.filter((p) => {
       const projectIdString = p._id as string;
-      return quotation.projectId === projectIdString || 
-             quotation.projectIds?.includes(projectIdString);
+      return (
+        quotation.projectId === projectIdString ||
+        quotation.projectIds?.includes(projectIdString)
+      );
     });
 
     // Calculate storage
     const allocatedBytes = linkedProjects.reduce(
       (sum, p) => sum + (p.storageAllocated || 0),
-      0
+      0,
     );
     const usedBytes = linkedProjects.reduce(
       (sum, p) => sum + (p.storageUsed || 0),
-      0
+      0,
     );
 
     // Get storage tier (estimate from line items)
@@ -590,7 +704,11 @@ export const getQuotationStorageSummary = adminQuery({
     const storageTiers = await ctx.db.query("storageTiers").collect();
     for (const li of quotation.lineItems) {
       const desc = li.description.toLowerCase();
-      if (desc.includes("storage") || desc.includes("gb") || desc.includes("cloud")) {
+      if (
+        desc.includes("storage") ||
+        desc.includes("gb") ||
+        desc.includes("cloud")
+      ) {
         const matchingTier = storageTiers.find((t) => t.priceINR === li.rate);
         if (matchingTier) {
           totalStorageGB = matchingTier.sizeGB;
@@ -608,7 +726,7 @@ export const getQuotationStorageSummary = adminQuery({
       return {
         _id: p._id,
         code: p.code,
-        eventName: p.eventName,
+        endClientName: p.endClientName,
         projectTypeName: projectType?.name || "Unknown",
         storageAllocated: p.storageAllocated || 0,
         storageUsed: p.storageUsed || 0,
@@ -620,9 +738,13 @@ export const getQuotationStorageSummary = adminQuery({
       quotationCode: quotation.code,
       storage: {
         totalGB: totalStorageGB,
-        allocatedGB: Math.round((allocatedBytes / (1024 * 1024 * 1024)) * 100) / 100,
+        allocatedGB:
+          Math.round((allocatedBytes / (1024 * 1024 * 1024)) * 100) / 100,
         usedGB: Math.round((usedBytes / (1024 * 1024 * 1024)) * 100) / 100,
-        remainingGB: Math.round(((totalBytes - allocatedBytes) / (1024 * 1024 * 1024)) * 100) / 100,
+        remainingGB:
+          Math.round(
+            ((totalBytes - allocatedBytes) / (1024 * 1024 * 1024)) * 100,
+          ) / 100,
         totalBytes,
         allocatedBytes,
         usedBytes,
@@ -632,4 +754,3 @@ export const getQuotationStorageSummary = adminQuery({
     };
   },
 });
-

@@ -7,20 +7,20 @@
 
 "use client";
 
-import React, { useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
 import {
+  BookOpen,
   ChevronDown,
   ChevronRight,
   FolderOpen,
-  Plus,
   Layers,
-  BookOpen,
+  Plus,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import React, { useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { Project, QuotationLineItem, Section } from "../../types";
 import { LineItemsTable } from "./line-items-table";
-import type { QuotationLineItem, Section, Project } from "../../types";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
@@ -54,7 +54,7 @@ const calculateTotal = (items: LineItemWithIdx[]): number => {
     const itemTotal = item.rate * item.quantity;
     const subItemsTotal = (item.subItems || []).reduce(
       (subSum, sub) => subSum + sub.rate * sub.quantity,
-      0
+      0,
     );
     return sum + itemTotal + subItemsTotal;
   }, 0);
@@ -71,12 +71,11 @@ export function ProjectSectionItems({
   onAddItem,
   onAddFromLibrary,
 }: ProjectSectionItemsProps) {
-
   // Group items by project, then by section
   const groupedByProject = useMemo(() => {
     return projects.map((project) => {
       const projectItems = items.filter(
-        (item) => item.projectId === project._id
+        (item) => item.projectId === project._id,
       );
 
       // Group by section within this project
@@ -197,59 +196,63 @@ export function ProjectSectionItems({
                     >
                       <div className="px-4 pb-4 space-y-6">
                         {/* Section Groups */}
-                        {sectionGroups.map(({ section, items: sectionItems }) => (
-                          <div key={section._id} className="space-y-3">
-                            {/* Section Header */}
-                            <div className="flex items-center justify-between px-1">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={cn(
-                                    "h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest",
-                                    section.color === "blue"
-                                      ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                                      : section.color === "purple"
-                                      ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
-                                      : section.color === "green"
-                                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                                      : section.color === "amber"
-                                      ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
-                                      : section.color === "red"
-                                      ? "bg-red-500/10 border-red-500/20 text-red-400"
-                                      : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400"
-                                  )}
-                                >
-                                  {section.name}
+                        {sectionGroups.map(
+                          ({ section, items: sectionItems }) => (
+                            <div key={section._id} className="space-y-3">
+                              {/* Section Header */}
+                              <div className="flex items-center justify-between px-1">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={cn(
+                                      "h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest",
+                                      section.color === "blue"
+                                        ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
+                                        : section.color === "purple"
+                                          ? "bg-purple-500/10 border-purple-500/20 text-purple-400"
+                                          : section.color === "green"
+                                            ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
+                                            : section.color === "amber"
+                                              ? "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                                              : section.color === "red"
+                                                ? "bg-red-500/10 border-red-500/20 text-red-400"
+                                                : "bg-zinc-500/10 border-zinc-500/20 text-zinc-400",
+                                    )}
+                                  >
+                                    {section.name}
+                                  </div>
+                                  <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                                    {sectionItems.length} Component
+                                    {sectionItems.length !== 1 ? "s" : ""}
+                                  </span>
                                 </div>
-                                <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                  {sectionItems.length} Component
-                                  {sectionItems.length !== 1 ? "s" : ""}
-                                </span>
+                                <div className="flex items-center gap-4">
+                                  <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                                    Section Share
+                                  </span>
+                                  <span className="text-sm font-black text-white">
+                                    {formatCurrency(
+                                      calculateTotal(sectionItems),
+                                    )}
+                                  </span>
+                                </div>
                               </div>
-                              <div className="flex items-center gap-4">
-                                <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                                  Section Share
-                                </span>
-                                <span className="text-sm font-black text-white">
-                                  {formatCurrency(calculateTotal(sectionItems))}
-                                </span>
-                              </div>
-                            </div>
 
-                            {/* Section Items Table */}
-                            <LineItemsTable
-                              items={sectionItems}
-                              section={section}
-                              onEditItem={onEditItem}
-                              onRemoveItem={onRemoveItem}
-                              onAddItem={() =>
-                                onAddItem(project._id, section._id)
-                              }
-                              onAddFromLibrary={() =>
-                                onAddFromLibrary(project._id, section._id)
-                              }
-                            />
-                          </div>
-                        ))}
+                              {/* Section Items Table */}
+                              <LineItemsTable
+                                items={sectionItems}
+                                section={section}
+                                onEditItem={onEditItem}
+                                onRemoveItem={onRemoveItem}
+                                onAddItem={() =>
+                                  onAddItem(project._id, section._id)
+                                }
+                                onAddFromLibrary={() =>
+                                  onAddFromLibrary(project._id, section._id)
+                                }
+                              />
+                            </div>
+                          ),
+                        )}
 
                         {/* Unsectioned Items */}
                         {unsectionedItems.length > 0 && (
@@ -271,7 +274,9 @@ export function ProjectSectionItems({
                               onEditItem={onEditItem}
                               onRemoveItem={onRemoveItem}
                               onAddItem={() => onAddItem(project._id)}
-                              onAddFromLibrary={() => onAddFromLibrary(project._id)}
+                              onAddFromLibrary={() =>
+                                onAddFromLibrary(project._id)
+                              }
                             />
                           </div>
                         )}
@@ -319,7 +324,7 @@ export function ProjectSectionItems({
                 </AnimatePresence>
               </motion.div>
             );
-          }
+          },
         )}
       </AnimatePresence>
 

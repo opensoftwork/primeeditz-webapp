@@ -1,11 +1,11 @@
 "use client";
 
-import { User, Tag, Lock, Info, Sparkles } from "lucide-react";
+import { Info, Lock, Sparkles, User } from "lucide-react";
 import {
   Field,
   FieldContent,
-  FieldLabel,
   FieldError,
+  FieldLabel,
 } from "@/components/ui/field";
 import {
   InputGroup,
@@ -13,7 +13,7 @@ import {
   InputGroupInput,
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
-import type { WizardMode, StudioSelectionMode } from "../../types";
+import type { StudioSelectionMode, WizardMode } from "../../types";
 
 interface StudioEventFieldsProps {
   form: any;
@@ -78,7 +78,7 @@ export function StudioEventFields({
                   className={cn(
                     "bg-white/3 border-white/10 transition-all duration-500 rounded-xl h-12",
                     !isEndStudioReadOnly && "focus-within:border-primary/40",
-                    isEndStudioReadOnly && "bg-white/[0.01] border-dashed"
+                    isEndStudioReadOnly && "bg-white/1 border-dashed",
                   )}
                 >
                   <InputGroupAddon align="inline-start" className="pl-4">
@@ -100,7 +100,7 @@ export function StudioEventFields({
                     placeholder="e.g., John & Jane"
                     className={cn(
                       "text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10",
-                      isEndStudioReadOnly && "text-white/40 cursor-not-allowed"
+                      isEndStudioReadOnly && "text-white/40 cursor-not-allowed",
                     )}
                   />
                 </InputGroup>
@@ -116,50 +116,6 @@ export function StudioEventFields({
                 )}
 
                 {isInvalid && !isEndStudioReadOnly && (
-                  <FieldError className="mt-2 ml-1">
-                    {field.state.meta.errors.join(", ")}
-                  </FieldError>
-                )}
-              </FieldContent>
-            </Field>
-          );
-        }}
-      />
-
-      {/* Event Name */}
-      <form.Field
-        name="eventName"
-        validators={{
-          onChange: ({ value }: { value: string }) =>
-            !value || value.length < 2
-              ? "Event name must be at least 2 characters"
-              : undefined,
-        }}
-        children={(field: any) => {
-          const isInvalid =
-            field.state.meta.isTouched && field.state.meta.errors.length > 0;
-          return (
-            <Field data-invalid={isInvalid}>
-              <FieldLabel className="text-sm font-black uppercase tracking-widest text-white/60 mb-3 flex items-center">
-                Event Name <span className="text-primary ml-1.5">*</span>
-              </FieldLabel>
-              <FieldContent>
-                <InputGroup className="bg-white/3 border-white/10 focus-within:border-primary/40 transition-all duration-500 rounded-xl h-12">
-                  <InputGroupAddon align="inline-start" className="pl-4">
-                    <Tag className="h-4 w-4 text-white/10" />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    id="eventName"
-                    name={field.name}
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={isInvalid}
-                    placeholder="e.g., Smith Wedding"
-                    className="text-[15px] font-black uppercase tracking-wider text-white placeholder:text-white/10"
-                  />
-                </InputGroup>
-                {isInvalid && (
                   <FieldError className="mt-2 ml-1">
                     {field.state.meta.errors.join(", ")}
                   </FieldError>

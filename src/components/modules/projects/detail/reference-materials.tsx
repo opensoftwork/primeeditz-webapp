@@ -1,18 +1,25 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
-import Image from "next/image";
-import { LayoutGrid, FileText, Eye, Loader2, ArrowRight, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
-import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { DetailSection } from "./shared";
+import { useAction } from "convex/react";
+import {
+  ArrowRight,
+  ExternalLink,
+  Eye,
+  FileText,
+  LayoutGrid,
+  Loader2,
+} from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FilesVaultDrawer,
-  VaultFile,
+  type VaultFile,
 } from "@/components/shared/files-vault/drawer";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { Button } from "@/components/ui/button";
+import { DetailSection } from "./shared";
 
 interface ReferenceFile {
   fileId: string;
@@ -29,17 +36,17 @@ interface ReferenceMaterialsProps {
 
 export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
-    {}
+    {},
   );
   const [loading, setLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
+    null,
   );
 
   // Action to get signed URLs
   const getSignedUrls = useAction(
-    api.functions.storage.actions.getSignedFileUrls
+    api.functions.storage.actions.getSignedFileUrls,
   );
 
   // Extract storage keys

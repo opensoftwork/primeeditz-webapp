@@ -57,6 +57,3 @@ export interface AdminProjectDetail {
     requiresSignoff: boolean;
   };
 }
-
-
-

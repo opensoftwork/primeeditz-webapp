@@ -19,13 +19,13 @@ export const createAsset = mutation({
   handler: async (ctx, args) => {
     // 1. Verify authentication
     const { profile } = await getAuthUserWithProfile(ctx);
-    
+
     // 2. Verify access - client must own project, or user must be admin
     const project = await ctx.db.get(args.projectId);
     if (!project) {
       throw new Error("Project not found");
     }
-    
+
     if (profile.role === "studio" && project.studioId !== profile._id) {
       throw new Error("Access denied");
     }

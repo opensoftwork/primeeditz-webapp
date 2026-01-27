@@ -1,30 +1,33 @@
-import { MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Project Type Dynamic Fields
- * 
+ *
  * Defines the dynamic form fields that appear in the project wizard
  * based on the selected project type.
  */
 
 export async function seedProjectTypeFields(
   ctx: MutationCtx,
-  typeMap: Record<string, Id<"projectTypes">>
+  typeMap: Record<string, Id<"projectTypes">>,
 ) {
   // Field definitions organized by project type
-  const fieldsByType: Record<string, Array<{
-    name: string;
-    label: string;
-    type: "text" | "number" | "select" | "checkbox" | "textarea";
-    required: boolean;
-    placeholder?: string;
-    description?: string;
-    options?: string; // JSON string for select options
-    min?: number;
-    max?: number;
-    displayOrder: number;
-  }>> = {
+  const fieldsByType: Record<
+    string,
+    Array<{
+      name: string;
+      label: string;
+      type: "text" | "number" | "select" | "checkbox" | "textarea";
+      required: boolean;
+      placeholder?: string;
+      description?: string;
+      options?: string; // JSON string for select options
+      min?: number;
+      max?: number;
+      displayOrder: number;
+    }>
+  > = {
     // ==========================================================================
     // PHOTOGRAPHY POST-PRODUCTION FIELDS
     // ==========================================================================
@@ -220,8 +223,14 @@ export async function seedProjectTypeFields(
         type: "select",
         required: true,
         options: JSON.stringify([
-          { value: "basic_34", label: "Basic: 1min Teaser + 3-4min Video (₹4,500)" },
-          { value: "standard_48", label: "Standard: 1min Teaser + 4-8min Video (₹6,000)" },
+          {
+            value: "basic_34",
+            label: "Basic: 1min Teaser + 3-4min Video (₹4,500)",
+          },
+          {
+            value: "standard_48",
+            label: "Standard: 1min Teaser + 4-8min Video (₹6,000)",
+          },
         ]),
         displayOrder: 1,
       },
@@ -250,8 +259,14 @@ export async function seedProjectTypeFields(
         type: "select",
         required: true,
         options: JSON.stringify([
-          { value: "vfx_34", label: "With VFX: 1min Teaser + 3-4min Video (₹6,000)" },
-          { value: "vfx_48", label: "With VFX: 1min Teaser + 4-8min Video (₹9,000)" },
+          {
+            value: "vfx_34",
+            label: "With VFX: 1min Teaser + 3-4min Video (₹6,000)",
+          },
+          {
+            value: "vfx_48",
+            label: "With VFX: 1min Teaser + 4-8min Video (₹9,000)",
+          },
         ]),
         displayOrder: 1,
       },
@@ -273,7 +288,8 @@ export async function seedProjectTypeFields(
         label: "VFX Instructions",
         type: "textarea",
         required: false,
-        placeholder: "Describe specific effects, scenes, or provide reference links",
+        placeholder:
+          "Describe specific effects, scenes, or provide reference links",
         displayOrder: 3,
       },
     ],
@@ -403,20 +419,22 @@ export async function seedProjectTypeFields(
 
   // Clear existing fields for types we're seeding
   const existingFields = await ctx.db.query("projectTypeFields").collect();
-  
+
   let insertedCount = 0;
   let updatedCount = 0;
 
   for (const [typeName, fields] of Object.entries(fieldsByType)) {
     const typeId = typeMap[typeName];
     if (!typeId) {
-      console.warn(`Project type "${typeName}" not found in typeMap, skipping fields`);
+      console.warn(
+        `Project type "${typeName}" not found in typeMap, skipping fields`,
+      );
       continue;
     }
 
     for (const field of fields) {
       const existing = existingFields.find(
-        (f) => f.projectTypeId === typeId && f.name === field.name
+        (f) => f.projectTypeId === typeId && f.name === field.name,
       );
 
       if (existing) {
@@ -437,5 +455,7 @@ export async function seedProjectTypeFields(
     }
   }
 
-  console.log(`Project type fields: ${insertedCount} inserted, ${updatedCount} updated`);
+  console.log(
+    `Project type fields: ${insertedCount} inserted, ${updatedCount} updated`,
+  );
 }

@@ -1,30 +1,30 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 import {
-  Search,
-  Plus,
   BookOpen,
-  Layers,
-  Sparkles,
+  Check,
   ChevronLeft,
   ChevronRight,
-  Hash,
   FolderOpen,
-  Check,
+  Hash,
+  Layers,
+  Plus,
+  Search,
+  Sparkles,
 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
-  SheetHeader,
-  SheetTitle,
   SheetDescription,
   SheetFooter,
+  SheetHeader,
+  SheetTitle,
 } from "@/components/ui/sheet";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
 import { cn } from "@/lib/utils";
 import type { Project } from "../../types";
 

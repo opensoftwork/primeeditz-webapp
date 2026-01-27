@@ -1,6 +1,6 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
-import { Role, ActionState } from "../schema";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { ActionState, type Role } from "../schema";
 
 export interface UploadPermission {
   allowed: boolean;
@@ -16,7 +16,7 @@ export async function canUpload(
   ctx: QueryCtx | MutationCtx,
   projectId: Id<"projects">,
   userRole: Role,
-  userId?: Id<"profiles">
+  userId?: Id<"profiles">,
 ): Promise<UploadPermission> {
   const project = await ctx.db.get(projectId);
   if (!project) {
@@ -35,7 +35,7 @@ export async function canUpload(
       "work_in_progress",
       "deliverables_ready",
       "awaiting_review",
-      "revisions_requested"
+      "revisions_requested",
     ];
     if (allowedAdminStates.includes(actionState)) {
       return {
@@ -113,14 +113,14 @@ export async function canUpload(
  */
 export async function checkUploadEligibility(
   ctx: QueryCtx | MutationCtx,
-  projectId: Id<"projects">
+  projectId: Id<"projects">,
 ): Promise<{ isAllowed: boolean; reason: string; canOverride: boolean }> {
   const profile = (ctx as any).profile;
   const permission = await canUpload(
     ctx,
     projectId,
     profile?.role ?? "studio",
-    profile?._id
+    profile?._id,
   );
 
   return {

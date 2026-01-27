@@ -2,12 +2,12 @@
 
 import { api } from "@convex/_generated/api";
 import { motion } from "motion/react";
-import { useState, useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
 import { columns } from "./list/columns";
+import type { ClientQuotation } from "./list/types";
 import { QuotationCard } from "./shared/quotation-card";
-import { ClientQuotation } from "./list/types";
 
 /**
  * Client-facing list of quotations.
@@ -22,7 +22,7 @@ export function ClientQuotationsList() {
     {
       status: statusFilter,
     },
-    { initialNumItems: pageSize }
+    { initialNumItems: pageSize },
   );
 
   const quotations: ClientQuotation[] = useMemo(() => {

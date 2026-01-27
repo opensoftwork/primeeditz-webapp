@@ -20,7 +20,7 @@ export function DashboardPreview() {
     <>
       <div className="w-full group">
         <div className="bg-gradient-to-br from-primary/10 via-primary/5 to-background/20 rounded-xl sm:rounded-2xl md:rounded-3xl p-2 sm:p-3 md:p-4 shadow-2xl sm:shadow-3xl border border-foreground/10 w-full transition-all duration-500 hover:border-foreground/20 hover:shadow-[0_25px_50px_-12px_rgba(0,147,221,0.3)]">
-          <div 
+          <div
             className="relative overflow-hidden"
             // onClick={() => {
             //   // Only allow click on mobile - Commented out for now
@@ -53,5 +53,5 @@ export function DashboardPreview() {
         onClose={() => setIsModalOpen(false)}
       /> */}
     </>
-  )
+  );
 }

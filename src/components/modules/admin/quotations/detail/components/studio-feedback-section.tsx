@@ -1,12 +1,12 @@
 "use client";
 
-import {
-  MessageSquare,
-  AlertCircle,
-  XCircle,
-  CheckCircle2,
-} from "lucide-react";
 import { format } from "date-fns";
+import {
+  AlertCircle,
+  CheckCircle2,
+  MessageSquare,
+  XCircle,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StudioFeedbackSectionProps {

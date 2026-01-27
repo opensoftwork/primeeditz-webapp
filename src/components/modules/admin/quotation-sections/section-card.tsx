@@ -1,23 +1,23 @@
 "use client";
 
 import {
-  Film,
-  Hammer,
-  PenTool,
-  Package,
-  Camera,
-  Music,
   Briefcase,
-  GripVertical,
+  Camera,
   Edit2,
-  Trash2,
+  Film,
+  GripVertical,
+  Hammer,
+  type LucideIcon,
+  Music,
+  Package,
+  PenTool,
   Power,
-  LucideIcon,
+  Trash2,
 } from "lucide-react";
-import { Section } from "./types";
+import { Reorder, useDragControls } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Reorder, useDragControls } from "motion/react";
+import type { Section } from "./types";
 
 const ICON_MAP: Record<string, LucideIcon> = {
   Film,
@@ -65,7 +65,7 @@ export function SectionCard({
       <div
         className={cn(
           "flex items-center gap-4 p-4 rounded-2xl bg-white/5 border border-white/10 transition-[background-color,border-color,box-shadow,opacity,filter] duration-300 hover:bg-white/8 hover:shadow-xl hover:shadow-black/40",
-          !section.isActive && "opacity-60 grayscale"
+          !section.isActive && "opacity-60 grayscale",
         )}
       >
         {/* Drag Handle */}
@@ -80,7 +80,7 @@ export function SectionCard({
         <div
           className={cn(
             "flex items-center justify-center h-12 w-12 rounded-xl border",
-            colorClass
+            colorClass,
           )}
         >
           <Icon className="h-6 w-6" />
@@ -94,7 +94,7 @@ export function SectionCard({
             <div
               className={cn(
                 "h-1.5 w-1.5 rounded-full",
-                section.isActive ? "bg-green-500 animate-pulse" : "bg-white/20"
+                section.isActive ? "bg-green-500 animate-pulse" : "bg-white/20",
               )}
             />
             <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
@@ -122,7 +122,7 @@ export function SectionCard({
               "h-10 w-10 rounded-xl",
               section.isActive
                 ? "text-amber-500/40 hover:text-amber-500 hover:bg-amber-500/10"
-                : "text-green-500/40 hover:text-green-500 hover:bg-green-500/10"
+                : "text-green-500/40 hover:text-green-500 hover:bg-green-500/10",
             )}
           >
             <Power className="h-4 w-4" />

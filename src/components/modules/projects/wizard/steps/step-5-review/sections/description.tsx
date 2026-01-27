@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
 import { format } from "date-fns";
-import { Sparkles, Calendar } from "lucide-react";
-import { SectionWrapper } from "../section-wrapper";
+import { Calendar, Sparkles } from "lucide-react";
+import React from "react";
 import { ReviewData, ReviewLabel } from "../review-data";
+import { SectionWrapper } from "../section-wrapper";
 
 interface DescriptionReviewProps {
   formData: any;

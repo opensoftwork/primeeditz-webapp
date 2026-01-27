@@ -1,26 +1,25 @@
 "use client";
 
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 
 // Types
-export type { VaultFile, VaultTabType, FileTypeCounts } from "./types";
-import type { VaultFile, VaultTabType } from "./types";
+export type { FileTypeCounts, VaultFile, VaultTabType } from "./types";
 
+import { VaultEmptyState } from "./components/vault-empty-state";
+import { VaultFileItem } from "./components/vault-file-item";
+import { VaultFooter } from "./components/vault-footer";
+// Components
+import { VaultHeader } from "./components/vault-header";
+import type { VaultFile, VaultTabType } from "./types";
 // Utils
 import {
   calculateFileTypeCounts,
   filterFilesByTab,
   getAcceptTypesForTab,
 } from "./utils";
-
-// Components
-import { VaultHeader } from "./components/vault-header";
-import { VaultEmptyState } from "./components/vault-empty-state";
-import { VaultFileItem } from "./components/vault-file-item";
-import { VaultFooter } from "./components/vault-footer";
 
 interface FilesVaultDrawerProps {
   open: boolean;
@@ -51,7 +50,7 @@ export function FilesVaultDrawer({
 }: FilesVaultDrawerProps) {
   const [activeTab, setActiveTab] = useState<VaultTabType>(initialTab);
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
+    null,
   );
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -66,11 +65,11 @@ export function FilesVaultDrawer({
   const fileTypeCounts = useMemo(() => calculateFileTypeCounts(files), [files]);
   const totalSize = useMemo(
     () => files.reduce((sum, f) => sum + (f.size || 0), 0),
-    [files]
+    [files],
   );
   const filteredFiles = useMemo(
     () => filterFilesByTab(files, activeTab),
-    [files, activeTab]
+    [files, activeTab],
   );
 
   const imagesForSlider = useMemo(() => {

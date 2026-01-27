@@ -1,15 +1,15 @@
 "use client";
 
+import type { CellContext, ColumnDef } from "@tanstack/react-table";
+import { Database, Eye, Hash, Zap } from "lucide-react";
 import Link from "next/link";
-import { type ColumnDef, type CellContext } from "@tanstack/react-table";
-import { Calendar, Hash, Eye, Database, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { StudioStatusBadge } from "../../projects/studio-status-badge";
 import { PhaseProgress } from "../../projects/phase-progress";
-import { ProjectData } from "./types";
+import { StudioStatusBadge } from "../../projects/studio-status-badge";
+import type { ProjectData } from "./types";
 
 interface PipelineTableProps {
   projects: ProjectData[] | undefined;
@@ -43,21 +43,13 @@ export function PipelineTable({ projects }: PipelineTableProps) {
       ),
     },
     {
-      accessorKey: "eventName",
+      accessorKey: "endClientName",
       header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Event" />
+        <DataTableColumnHeader column={column} title="Client" />
       ),
       cell: ({ row }) => (
-        <div className="space-y-1">
-          <div className="font-bold text-white/60 truncate max-w-[180px]">
-            {row.getValue("eventName") || "—"}
-          </div>
-          {row.original.eventDate && (
-            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest flex items-center gap-1.5">
-              <Calendar className="h-3 w-3" />
-              {new Date(row.original.eventDate).toLocaleDateString()}
-            </div>
-          )}
+        <div className="font-bold text-white/60 truncate max-w-[180px]">
+          {row.getValue("endClientName") || "—"}
         </div>
       ),
     },

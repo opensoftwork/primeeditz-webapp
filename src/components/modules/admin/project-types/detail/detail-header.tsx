@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
 import { ArrowLeft, Eye, Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface DetailHeaderProps {
   id: string;

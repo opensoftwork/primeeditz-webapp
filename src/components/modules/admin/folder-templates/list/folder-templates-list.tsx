@@ -1,25 +1,28 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { ListHeader } from "./list-header";
-import { ListEmpty } from "./list-empty";
-import { FolderTemplateCard } from "./folder-template-card";
-import { FolderTemplateDrawer, type FolderTemplateFormValues } from "./folder-template-drawer";
-import { 
-  AlertDialog, 
-  AlertDialogAction, 
-  AlertDialogCancel, 
-  AlertDialogContent, 
-  AlertDialogDescription, 
-  AlertDialogFooter, 
-  AlertDialogHeader, 
-  AlertDialogTitle 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { Id } from "@convex/_generated/dataModel";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FolderTemplateCard } from "./folder-template-card";
+import {
+  FolderTemplateDrawer,
+  type FolderTemplateFormValues,
+} from "./folder-template-drawer";
+import { ListEmpty } from "./list-empty";
+import { ListHeader } from "./list-header";
 
 interface FolderTemplate {
   _id: string;
@@ -33,15 +36,28 @@ interface FolderTemplate {
 }
 
 export function FolderTemplatesList() {
-  const templates = useQuery(api.functions.folderTemplates.queries.listFolderTemplates);
-  const createMutation = useMutation(api.functions.folderTemplates.mutations.createFolderTemplate);
-  const updateMutation = useMutation(api.functions.folderTemplates.mutations.updateFolderTemplate);
-  const deleteMutation = useMutation(api.functions.folderTemplates.mutations.deleteFolderTemplate);
+  const templates = useQuery(
+    api.functions.folderTemplates.queries.listFolderTemplates,
+  );
+  const createMutation = useMutation(
+    api.functions.folderTemplates.mutations.createFolderTemplate,
+  );
+  const updateMutation = useMutation(
+    api.functions.folderTemplates.mutations.updateFolderTemplate,
+  );
+  const deleteMutation = useMutation(
+    api.functions.folderTemplates.mutations.deleteFolderTemplate,
+  );
 
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<FolderTemplate | null>(null);
-  const [templateToDelete, setTemplateToDelete] = useState<{ id: string; name: string } | null>(null);
+  const [editingTemplate, setEditingTemplate] = useState<FolderTemplate | null>(
+    null,
+  );
+  const [templateToDelete, setTemplateToDelete] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
 
   // Handlers
   const handleCreate = () => {
@@ -72,14 +88,18 @@ export function FolderTemplatesList() {
       }
       setIsDrawerOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : "Failed to save template");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to save template",
+      );
     }
   };
 
   const handleDeleteConfirm = async () => {
     if (!templateToDelete) return;
     try {
-      await deleteMutation({ id: templateToDelete.id as Id<"folderTemplates"> });
+      await deleteMutation({
+        id: templateToDelete.id as Id<"folderTemplates">,
+      });
       toast.success("Template deleted permanently");
       setTemplateToDelete(null);
     } catch (error) {
@@ -93,7 +113,10 @@ export function FolderTemplatesList() {
         <Skeleton className="h-20 w-1/3 bg-white/5 rounded-3xl animate-pulse" />
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-64 w-full bg-white/5 rounded-[32px]" />
+            <Skeleton
+              key={i}
+              className="h-64 w-full bg-white/5 rounded-[32px]"
+            />
           ))}
         </div>
       </div>
@@ -126,14 +149,18 @@ export function FolderTemplatesList() {
         initialData={editingTemplate}
       />
 
-      <AlertDialog open={!!templateToDelete} onOpenChange={() => setTemplateToDelete(null)}>
+      <AlertDialog
+        open={!!templateToDelete}
+        onOpenChange={() => setTemplateToDelete(null)}
+      >
         <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[32px] p-8">
           <AlertDialogHeader>
             <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
               Verify Deletion
             </AlertDialogTitle>
             <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-              Are you sure you want to remove <span className="text-white">"{templateToDelete?.name}"</span>? 
+              Are you sure you want to remove{" "}
+              <span className="text-white">"{templateToDelete?.name}"</span>?
               This action is permanent and cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>

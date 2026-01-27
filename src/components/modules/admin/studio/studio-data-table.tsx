@@ -1,20 +1,20 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useState, useMemo, useEffect } from "react";
-import { ColumnDef } from "@tanstack/react-table";
-import { Search, User, Mail, Building, Phone, ArrowUpDown } from "lucide-react";
+import type { Doc } from "@convex/_generated/dataModel";
+import type { ColumnDef } from "@tanstack/react-table";
+import { useQuery } from "convex/react";
+import { ArrowUpDown, Building, Mail, Phone, Search, User } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import {
+  type PaginationInfo,
+  StudioTablePagination,
+} from "@/components/modules/projects/wizard/steps/step-0-studio-selection/studio-table-pagination";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Doc } from "@convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
-import {
-  StudioTablePagination,
-  type PaginationInfo,
-} from "@/components/modules/projects/wizard/steps/step-0-studio-selection/studio-table-pagination";
 
 export type Studio = Doc<"profiles">;
 

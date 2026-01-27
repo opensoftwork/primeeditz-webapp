@@ -1,10 +1,10 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { Edit2, HardDrive, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Edit2, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
+import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
 interface StorageTier {
@@ -66,7 +66,7 @@ export function StorageTierCard({
                 "cursor-pointer text-[9px] h-5 px-2 font-black uppercase tracking-widest",
                 tier.isActive
                   ? "bg-primary/20 text-primary hover:bg-primary/30"
-                  : "bg-white/5 text-white/40 border-white/5"
+                  : "bg-white/5 text-white/40 border-white/5",
               )}
               onClick={(e) => {
                 e.preventDefault();

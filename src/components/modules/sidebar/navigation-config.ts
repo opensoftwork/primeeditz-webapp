@@ -1,16 +1,16 @@
 import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
   Briefcase,
-  FileText,
-  Settings,
-  ClipboardList,
-  LayoutGrid,
   ClipboardCheck,
-  HardDrive,
+  ClipboardList,
+  FileText,
+  FolderKanban,
   FolderTree,
+  HardDrive,
+  LayoutDashboard,
+  LayoutGrid,
   type LucideIcon,
+  Settings,
+  Users,
 } from "lucide-react";
 
 export interface NavItem {
@@ -145,7 +145,7 @@ export const commonNavGroup: NavGroup = {
 
 // Get navigation items based on role
 export function getNavItemsForRole(
-  role: "admin" | "employee" | "studio" | null
+  role: "admin" | "employee" | "studio" | null,
 ): NavItem[] | NavGroup[] {
   switch (role) {
     case "admin":

@@ -1,16 +1,16 @@
 "use client";
 
-import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useState, useEffect } from "react";
-import { Truck, Globe, CheckSquare, Save } from "lucide-react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { CheckSquare, Globe, Save, Truck } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
-import { motion } from "motion/react";
-import type { Id } from "@convex/_generated/dataModel";
+import { Switch } from "@/components/ui/switch";
 
 interface DeliveryConfig {
   hasPhysicalDelivery: boolean;

@@ -1,13 +1,13 @@
 "use client";
 
+import { format } from "date-fns";
+import { Calendar, Eye, Hash, Receipt, User } from "lucide-react";
 import { motion } from "motion/react";
-import { Receipt, Calendar, User, Eye, Hash } from "lucide-react";
+import Link from "next/link";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { format } from "date-fns";
-import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
-import Link from "next/link";
-import { AdminQuotation } from "./list-types";
+import type { AdminQuotation } from "./list-types";
 
 interface QuotationCardProps {
   quotation: AdminQuotation;
@@ -52,11 +52,11 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
             </span>
           </div>
 
-          {/* Project Name (if any) */}
-          {quotation.projectName && (
+          {/* Project Name (if any) or End Client Identity */}
+          {(quotation.projectName || quotation.endClientName) && (
             <div className="pt-3 border-t border-white/5">
               <div className="font-bold text-white/50 truncate text-xs uppercase tracking-tight">
-                {quotation.projectName}
+                {quotation.projectName || quotation.endClientName}
               </div>
             </div>
           )}

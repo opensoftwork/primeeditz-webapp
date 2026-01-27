@@ -1,6 +1,6 @@
 /**
  * Transition Styles
- * 
+ *
  * Page transition animations for smooth navigation effects.
  */
 
@@ -60,7 +60,9 @@
 .slide-up-enter-active {
   opacity: 1;
   transform: translateY(0);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }
 
 .slide-up-exit {
@@ -71,5 +73,7 @@
 .slide-up-exit-active {
   opacity: 0;
   transform: translateY(-20px);
-  transition: opacity 0.4s ease, transform 0.4s ease;
+  transition:
+    opacity 0.4s ease,
+    transform 0.4s ease;
 }

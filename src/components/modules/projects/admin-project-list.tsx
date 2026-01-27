@@ -1,22 +1,21 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { useState } from "react";
-import Link from "next/link";
-import {
-  Search,
-  Filter,
-  ChevronLeft,
-  ChevronRight,
-  FolderKanban,
-  ArrowUpDown,
-  Eye,
-} from "lucide-react";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import {
+  ArrowUpDown,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  Filter,
+  FolderKanban,
+  Search,
+} from "lucide-react";
+import Link from "next/link";
+import { useState } from "react";
+import { StatusBadge } from "@/components/modules/projects/detail/shared";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Card,
   CardContent,
@@ -24,6 +23,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
@@ -32,8 +32,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
-
-import { StatusBadge } from "@/components/modules/projects/detail/shared";
 
 export function AdminProjectList() {
   // Filter state

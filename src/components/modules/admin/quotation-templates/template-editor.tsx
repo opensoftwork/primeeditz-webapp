@@ -1,15 +1,16 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useEffect } from "react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft, Loader2, Save } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
@@ -17,13 +18,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { TemplateLineItemsBuilder } from "./components/template-line-items-builder";
-import type { TemplateLineItem as LineItemData } from "../quotations/builder/types";
-import { PricePreview } from "./price-preview";
-import { ArrowLeft, Save, Loader2 } from "lucide-react";
-import { Section, Template } from "../quotation-sections/types";
-import { Id } from "@convex/_generated/dataModel";
+import { Textarea } from "@/components/ui/textarea";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { type Section, Template } from "../quotation-sections/types";
+import type { TemplateLineItem as LineItemData } from "../quotations/builder/types";
+import { TemplateLineItemsBuilder } from "./components/template-line-items-builder";
+import { PricePreview } from "./price-preview";
 
 interface TemplateEditorProps {
   templateId?: string;

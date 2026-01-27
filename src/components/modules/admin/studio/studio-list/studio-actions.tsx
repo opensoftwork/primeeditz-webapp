@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Archive, ArchiveRestore, Eye, Pencil, LinkIcon } from "lucide-react";
+import { Archive, ArchiveRestore, Eye, LinkIcon, Pencil } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -19,8 +19,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type { AdminStudio } from "./types";
 import { StudioEditDrawer } from "../studio-edit-drawer";
+import type { AdminStudio } from "./types";
 
 interface StudioActionsProps {
   studio: AdminStudio;

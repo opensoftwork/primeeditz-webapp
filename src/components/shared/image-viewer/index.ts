@@ -4,4 +4,4 @@
  * Components for viewing and navigating images in a modal/drawer.
  */
 
-export { ImageSlider } from './image-slider'
+export { ImageSlider } from "./image-slider";

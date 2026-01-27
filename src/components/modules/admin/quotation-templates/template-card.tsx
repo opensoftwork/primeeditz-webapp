@@ -1,9 +1,9 @@
 "use client";
 
-import { FileText, Edit2, Trash2, Power, Tag } from "lucide-react";
+import { Edit2, FileText, Power, Tag, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Template } from "../quotation-sections/types";
+import type { Template } from "../quotation-sections/types";
 
 interface TemplateCardProps {
   template: Template & {
@@ -38,7 +38,7 @@ export function TemplateCard({
     <div
       className={cn(
         "group relative p-5 rounded-2xl bg-white/5 border border-white/10 transition-[background-color,border-color,box-shadow,opacity,filter] duration-300 hover:bg-white/8 hover:shadow-xl hover:shadow-black/40 overflow-hidden",
-        !template.isActive && "opacity-60 grayscale"
+        !template.isActive && "opacity-60 grayscale",
       )}
     >
       {/* Header */}
@@ -67,7 +67,7 @@ export function TemplateCard({
           <div
             className={cn(
               "h-1.5 w-1.5 rounded-full",
-              template.isActive ? "bg-green-500 animate-pulse" : "bg-white/20"
+              template.isActive ? "bg-green-500 animate-pulse" : "bg-white/20",
             )}
           />
           <span className="text-xs font-bold tracking-wide text-white/50">
@@ -127,7 +127,7 @@ export function TemplateCard({
             "h-9 w-9 rounded-lg",
             template.isActive
               ? "text-amber-500/40 hover:text-amber-500 hover:bg-amber-500/10"
-              : "text-green-500/40 hover:text-green-500 hover:bg-green-500/10"
+              : "text-green-500/40 hover:text-green-500 hover:bg-green-500/10",
           )}
         >
           <Power className="h-3.5 w-3.5" />

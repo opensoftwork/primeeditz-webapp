@@ -8,11 +8,11 @@ import {
 } from "@/components/ui/field";
 import {
   InputGroup,
-  InputGroupInput,
   InputGroupAddon,
+  InputGroupInput,
 } from "@/components/ui/input-group";
-import { getFieldIcon, type FieldRenderProps } from "./types";
 import { FieldLabelWithRequired } from "./shared-components";
+import { type FieldRenderProps, getFieldIcon } from "./types";
 
 export function TextField({
   fieldDef,

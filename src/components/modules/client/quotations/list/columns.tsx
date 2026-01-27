@@ -1,12 +1,12 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { ClientQuotation } from "./types";
-import { QuotationStatusBadge } from "../shared/quotation-status-badge";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Eye, Receipt } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { QuotationStatusBadge } from "../shared/quotation-status-badge";
+import type { ClientQuotation } from "./types";
 
 export const columns: ColumnDef<ClientQuotation>[] = [
   {
@@ -15,7 +15,7 @@ export const columns: ColumnDef<ClientQuotation>[] = [
     cell: ({ row }) => {
       const quotation = row.original;
       return (
-        <Link 
+        <Link
           href={`/quotations/${quotation._id}`}
           className="flex items-center gap-2 group/link"
         >

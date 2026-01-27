@@ -1,7 +1,7 @@
 "use client";
 
+import { Activity, FolderTree, Settings, Settings2 } from "lucide-react";
 import { motion } from "motion/react";
-import { Settings, Activity, FolderTree, Settings2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -54,7 +54,7 @@ export function DetailStats({ projectType, fieldCount }: DetailStatsProps) {
               "text-[10px] font-black uppercase tracking-widest px-2 py-1 rounded",
               projectType.isActive
                 ? "bg-green-500/10 text-green-500"
-                : "bg-red-500/10 text-red-500"
+                : "bg-red-500/10 text-red-500",
             )}
           >
             {projectType.isActive ? "Active" : "Inactive"}

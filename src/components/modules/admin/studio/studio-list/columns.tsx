@@ -4,8 +4,8 @@ import type { ColumnDef } from "@tanstack/react-table";
 import { Building, Mail, Phone, User } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { OnboardingBadge } from "./status-badge";
-import type { AdminStudio } from "./types";
 import { StudioActions } from "./studio-actions";
+import type { AdminStudio } from "./types";
 
 export const columns: ColumnDef<AdminStudio>[] = [
   {

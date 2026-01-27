@@ -1,8 +1,7 @@
 "use client";
 
+import { AlertCircle, Check, ChevronDown, Globe } from "lucide-react";
 import * as React from "react";
-import { Check, ChevronDown, Globe, AlertCircle } from "lucide-react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -12,12 +11,13 @@ import {
   CommandItem,
   CommandList,
 } from "@/components/ui/command";
+import { Input } from "@/components/ui/input";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+import { cn } from "@/lib/utils";
 
 // Country data with dial codes and flags (emoji flags for simplicity)
 const countries = [
@@ -89,38 +89,38 @@ function validatePhoneNumber(phoneNumber: string): {
 } {
   const digits = getDigitsOnly(phoneNumber);
   const digitCount = digits.length;
-  
+
   if (digitCount === 0) {
     return { isValid: true, digitCount, error: undefined }; // Empty is valid (optional field)
   }
-  
+
   if (digitCount < REQUIRED_DIGITS) {
-    return { 
-      isValid: false, 
-      digitCount, 
-      error: `Phone number must be ${REQUIRED_DIGITS} digits (${digitCount}/${REQUIRED_DIGITS})` 
+    return {
+      isValid: false,
+      digitCount,
+      error: `Phone number must be ${REQUIRED_DIGITS} digits (${digitCount}/${REQUIRED_DIGITS})`,
     };
   }
-  
+
   if (digitCount > REQUIRED_DIGITS) {
-    return { 
-      isValid: false, 
-      digitCount, 
-      error: `Phone number must be ${REQUIRED_DIGITS} digits (${digitCount}/${REQUIRED_DIGITS})` 
+    return {
+      isValid: false,
+      digitCount,
+      error: `Phone number must be ${REQUIRED_DIGITS} digits (${digitCount}/${REQUIRED_DIGITS})`,
     };
   }
-  
+
   return { isValid: true, digitCount, error: undefined };
 }
 
 // Export validation helper for external use
 function isValidPhoneNumber(fullPhoneNumber: string): boolean {
   if (!fullPhoneNumber || fullPhoneNumber.trim() === "") return true; // Empty is valid (optional)
-  
+
   // Extract the phone number part (after the dial code)
   const parts = fullPhoneNumber.trim().split(" ");
   if (parts.length < 2) return false;
-  
+
   const phoneNumber = parts.slice(1).join("");
   const { isValid } = validatePhoneNumber(phoneNumber);
   return isValid;
@@ -158,20 +158,21 @@ function PhoneInput({
   const [open, setOpen] = React.useState(false);
   const [touched, setTouched] = React.useState(false);
   const [selectedCountry, setSelectedCountry] = React.useState<Country>(
-    () => countries.find((c) => c.code === defaultCountry) || countries[0]
+    () => countries.find((c) => c.code === defaultCountry) || countries[0],
   );
 
   // Parse the phone number to extract country code and number
   const parsePhoneNumber = React.useCallback(
     (phoneValue: string): { dialCode: string; number: string } => {
-      if (!phoneValue) return { dialCode: selectedCountry.dialCode, number: "" };
+      if (!phoneValue)
+        return { dialCode: selectedCountry.dialCode, number: "" };
 
       // Check if starts with a dial code
       const trimmedValue = phoneValue.trim();
       if (trimmedValue.startsWith("+")) {
         // Find the matching country by dial code
         const matchingCountry = countries.find((c) =>
-          trimmedValue.startsWith(c.dialCode)
+          trimmedValue.startsWith(c.dialCode),
         );
         if (matchingCountry) {
           return {
@@ -183,18 +184,22 @@ function PhoneInput({
 
       return { dialCode: selectedCountry.dialCode, number: trimmedValue };
     },
-    [selectedCountry]
+    [selectedCountry],
   );
 
   const { number: phoneNumber } = parsePhoneNumber(value);
-  
+
   // Validation state
   const validation = React.useMemo(() => {
     if (!phoneNumber && !required) {
       return { isValid: true, digitCount: 0, error: undefined };
     }
     if (!phoneNumber && required) {
-      return { isValid: false, digitCount: 0, error: "Phone number is required" };
+      return {
+        isValid: false,
+        digitCount: 0,
+        error: "Phone number is required",
+      };
     }
     return validatePhoneNumber(phoneNumber);
   }, [phoneNumber, required]);
@@ -209,15 +214,15 @@ function PhoneInput({
     const inputValue = e.target.value;
     // Only allow numbers, spaces, and hyphens
     const sanitized = inputValue.replace(/[^\d\s-]/g, "");
-    
+
     // Extract only digits to check count
     const digitsOnly = getDigitsOnly(sanitized);
-    
+
     // Limit to 10 digits
     if (digitsOnly.length > REQUIRED_DIGITS) {
       return; // Don't allow more than 10 digits
     }
-    
+
     const fullNumber = `${selectedCountry.dialCode} ${sanitized}`.trim();
     onChange?.(fullNumber);
   };
@@ -237,7 +242,8 @@ function PhoneInput({
     onChange?.(fullNumber);
   };
 
-  const showError = showValidation && touched && !validation.isValid && phoneNumber.length > 0;
+  const showError =
+    showValidation && touched && !validation.isValid && phoneNumber.length > 0;
   const showDigitCounter = showValidation && phoneNumber.length > 0;
 
   return (
@@ -257,11 +263,13 @@ function PhoneInput({
                 "focus:border-primary/50 focus:ring-0",
                 "transition-colors duration-200",
                 disabled && "opacity-50 cursor-not-allowed",
-                showError && "border-destructive/50"
+                showError && "border-destructive/50",
               )}
             >
               <span className="flex items-center gap-1.5">
-                <span className="text-lg leading-none">{selectedCountry.flag}</span>
+                <span className="text-lg leading-none">
+                  {selectedCountry.flag}
+                </span>
                 <span className="text-sm font-medium text-foreground/80">
                   {selectedCountry.dialCode}
                 </span>
@@ -292,10 +300,12 @@ function PhoneInput({
                       className={cn(
                         "flex items-center gap-3 px-3 py-2.5 cursor-pointer",
                         "hover:bg-accent/50 transition-colors",
-                        selectedCountry.code === country.code && "bg-accent/30"
+                        selectedCountry.code === country.code && "bg-accent/30",
                       )}
                     >
-                      <span className="text-xl leading-none">{country.flag}</span>
+                      <span className="text-xl leading-none">
+                        {country.flag}
+                      </span>
                       <div className="flex flex-1 items-center justify-between gap-2">
                         <span className="text-sm font-medium truncate">
                           {country.name}
@@ -331,11 +341,11 @@ function PhoneInput({
             "h-11 bg-background/50 border-border/50",
             "focus:border-primary/50 transition-colors",
             showError && "border-destructive/50 focus:border-destructive/50",
-            inputClassName
+            inputClassName,
           )}
         />
       </div>
-      
+
       {/* Validation feedback */}
       {showValidation && (
         <div className="flex items-center justify-between text-xs px-1">
@@ -348,10 +358,14 @@ function PhoneInput({
             <span></span>
           )}
           {showDigitCounter && (
-            <span className={cn(
-              "font-mono tabular-nums",
-              validation.isValid ? "text-muted-foreground" : "text-destructive"
-            )}>
+            <span
+              className={cn(
+                "font-mono tabular-nums",
+                validation.isValid
+                  ? "text-muted-foreground"
+                  : "text-destructive",
+              )}
+            >
               {validation.digitCount}/{REQUIRED_DIGITS}
             </span>
           )}
@@ -361,6 +375,11 @@ function PhoneInput({
   );
 }
 
-export { PhoneInput, countries, isValidPhoneNumber, validatePhoneNumber, REQUIRED_DIGITS };
+export {
+  PhoneInput,
+  countries,
+  isValidPhoneNumber,
+  validatePhoneNumber,
+  REQUIRED_DIGITS,
+};
 export type { PhoneInputProps };
-

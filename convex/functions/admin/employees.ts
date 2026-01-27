@@ -1,12 +1,12 @@
 /**
  * Admin Employee Management
- * 
+ *
  * Queries for managing employees (users with role: 'employee').
  */
 
 import { v } from "convex/values";
-import { adminQuery, adminMutation } from "../../lib/customFunctions";
 import { Doc } from "../../_generated/dataModel";
+import { adminMutation, adminQuery } from "../../lib/customFunctions";
 
 /**
  * Get all employees.
@@ -19,7 +19,11 @@ export const getEmployees = adminQuery({
     return await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "employee"))
-      .filter((q) => args.includeDeactivated ? q.neq(q.field("deactivatedAt"), -1) : q.eq(q.field("deactivatedAt"), undefined))
+      .filter((q) =>
+        args.includeDeactivated
+          ? q.neq(q.field("deactivatedAt"), -1)
+          : q.eq(q.field("deactivatedAt"), undefined),
+      )
       .collect();
   },
 });
@@ -47,7 +51,11 @@ export const getEmployeesForSelection = adminQuery({
         const name = employee.name?.toLowerCase() ?? "";
         const email = employee.email?.toLowerCase() ?? "";
         const company = employee.company?.toLowerCase() ?? "";
-        return name.includes(searchTerm) || email.includes(searchTerm) || company.includes(searchTerm);
+        return (
+          name.includes(searchTerm) ||
+          email.includes(searchTerm) ||
+          company.includes(searchTerm)
+        );
       });
     }
 
@@ -55,15 +63,21 @@ export const getEmployeesForSelection = adminQuery({
       employees.map(async (employee) => {
         const assignedProjects = await ctx.db
           .query("projects")
-          .withIndex("by_assignedEmployeeId", (q) => q.eq("assignedEmployeeId", employee._id))
+          .withIndex("by_assignedEmployeeId", (q) =>
+            q.eq("assignedEmployeeId", employee._id),
+          )
           .collect();
 
         const activeCount = assignedProjects.filter(
-          (p) => p.phase !== 'completed' && p.phase !== 'archived' && p.actionState !== 'cancelled'
+          (p) =>
+            p.phase !== "completed" &&
+            p.phase !== "archived" &&
+            p.actionState !== "cancelled",
         ).length;
-        const lastProjectActivity = assignedProjects.length > 0 
-          ? Math.max(...assignedProjects.map((p) => p.updatedAt)) 
-          : null;
+        const lastProjectActivity =
+          assignedProjects.length > 0
+            ? Math.max(...assignedProjects.map((p) => p.updatedAt))
+            : null;
         const lastActivityDate = lastProjectActivity ?? employee.updatedAt;
 
         return {
@@ -79,10 +93,12 @@ export const getEmployeesForSelection = adminQuery({
           activeProjectCount: activeCount,
           lastActivityDate,
         };
-      })
+      }),
     );
 
-    enrichedEmployees.sort((a, b) => (b.lastActivityDate ?? 0) - (a.lastActivityDate ?? 0));
+    enrichedEmployees.sort(
+      (a, b) => (b.lastActivityDate ?? 0) - (a.lastActivityDate ?? 0),
+    );
     return {
       employees: enrichedEmployees.slice(0, limit),
       hasMore: enrichedEmployees.length > limit,
@@ -102,7 +118,9 @@ export const getEmployeeWithProjects = adminQuery({
 
     const projects = await ctx.db
       .query("projects")
-      .withIndex("by_assignedEmployeeId", (q) => q.eq("assignedEmployeeId", args.employeeId))
+      .withIndex("by_assignedEmployeeId", (q) =>
+        q.eq("assignedEmployeeId", args.employeeId),
+      )
       .order("desc")
       .collect();
 
@@ -114,9 +132,10 @@ export const getEmployeeWithProjects = adminQuery({
       code: project.code,
       phase: project.phase,
       actionState: project.actionState,
-      projectTypeName: projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
-      eventName: project.eventName,
-      eventDate: project.eventDate,
+      projectTypeName:
+        projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
+      eventName: project.endClientName,
+      eventDate: project.preferredDeliveryDate,
       venue: project.venue,
       description: project.description,
       createdAt: project._creationTime,
@@ -125,9 +144,15 @@ export const getEmployeeWithProjects = adminQuery({
 
     const stats = {
       totalProjects: projects.length,
-      activeProjects: projects.filter(p => !['completed', 'archived'].includes(p.phase) && p.actionState !== 'cancelled').length,
-      completedProjects: projects.filter(p => p.phase === "completed").length,
-      inProgressProjects: projects.filter(p => p.actionState === "work_in_progress").length,
+      activeProjects: projects.filter(
+        (p) =>
+          !["completed", "archived"].includes(p.phase) &&
+          p.actionState !== "cancelled",
+      ).length,
+      completedProjects: projects.filter((p) => p.phase === "completed").length,
+      inProgressProjects: projects.filter(
+        (p) => p.actionState === "work_in_progress",
+      ).length,
     };
 
     return { employee, projects: enrichedProjects, stats };
@@ -149,14 +174,14 @@ export const createDraftEmployeeProfile = adminMutation({
   handler: async (ctx, args) => {
     // Generate a unique identifier for this draft employee
     const draftId = `draft_emp_${Date.now()}_${Math.random().toString(36).substring(7)}`;
-    
+
     // If no email provided, use a placeholder that bypasses strict email check during claiming
     const email = args.email || `${draftId}@pending.primeeditz.com`;
 
     // Create the draft employee profile
     const profileId = await ctx.db.insert("profiles", {
       userId: draftId, // Placeholder until employee completes onboarding
-      email: email, 
+      email: email,
       name: args.name,
       phone: args.phone,
       company: args.company,
@@ -192,7 +217,8 @@ export const updateEmployeeProfile = adminMutation({
 
     const targetProfile = await ctx.db.get(profileId);
     if (!targetProfile) throw new Error("Employee profile not found");
-    if (targetProfile.role !== "employee") throw new Error("Target profile is not an employee");
+    if (targetProfile.role !== "employee")
+      throw new Error("Target profile is not an employee");
 
     const filteredUpdates: Record<string, any> = {
       updatedAt: Date.now(),
@@ -200,8 +226,10 @@ export const updateEmployeeProfile = adminMutation({
 
     if (updates.name !== undefined) filteredUpdates.name = updates.name;
     if (updates.phone !== undefined) filteredUpdates.phone = updates.phone;
-    if (updates.company !== undefined) filteredUpdates.company = updates.company;
-    if (updates.designation !== undefined) filteredUpdates.designation = updates.designation;
+    if (updates.company !== undefined)
+      filteredUpdates.company = updates.company;
+    if (updates.designation !== undefined)
+      filteredUpdates.designation = updates.designation;
 
     await ctx.db.patch(profileId, filteredUpdates);
 
@@ -219,7 +247,8 @@ export const deactivateEmployee = adminMutation({
   handler: async (ctx, args) => {
     const targetProfile = await ctx.db.get(args.profileId);
     if (!targetProfile) throw new Error("Employee profile not found");
-    if (targetProfile.role !== "employee") throw new Error("Target profile is not an employee");
+    if (targetProfile.role !== "employee")
+      throw new Error("Target profile is not an employee");
 
     await ctx.db.patch(args.profileId, {
       deactivatedAt: Date.now(),

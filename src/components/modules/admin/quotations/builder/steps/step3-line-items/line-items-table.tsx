@@ -8,9 +8,16 @@
 
 "use client";
 
+import {
+  BookOpen,
+  ChevronDown,
+  ChevronRight,
+  Edit2,
+  Plus,
+  Trash2,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Plus, ChevronRight, ChevronDown, Trash2, Edit2, BookOpen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { QuotationLineItem, QuotationSubItem } from "../../types";
@@ -68,7 +75,7 @@ export function LineItemsTable({
     const itemTotal = item.rate * item.quantity;
     const subItemsTotal = (item.subItems || []).reduce(
       (subSum, sub) => subSum + sub.rate * sub.quantity,
-      0
+      0,
     );
     return sum + itemTotal + subItemsTotal;
   }, 0);

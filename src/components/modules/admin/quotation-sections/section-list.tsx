@@ -1,17 +1,12 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useState, useEffect, useRef } from "react";
-import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Plus, ListFilter, LayoutGrid } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { SectionCard } from "./section-card";
-import { SectionDrawer, type SectionFormValues } from "./section-drawer";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { LayoutGrid, ListFilter, Plus } from "lucide-react";
 import { Reorder } from "motion/react";
-import { Section } from "./types";
-import { Id } from "@convex/_generated/dataModel";
+import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -22,26 +17,31 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { SectionCard } from "./section-card";
+import { SectionDrawer, type SectionFormValues } from "./section-drawer";
+import type { Section } from "./types";
 
 export function SectionList() {
   const sections = useQuery(
     api.functions.quotations.sections.queries.getSections,
-    { activeOnly: false }
+    { activeOnly: false },
   );
   const createSection = useMutation(
-    api.functions.quotations.sections.mutations.createSection
+    api.functions.quotations.sections.mutations.createSection,
   );
   const updateSection = useMutation(
-    api.functions.quotations.sections.mutations.updateSection
+    api.functions.quotations.sections.mutations.updateSection,
   );
   const reorderSections = useMutation(
-    api.functions.quotations.sections.mutations.reorderSections
+    api.functions.quotations.sections.mutations.reorderSections,
   );
   const deleteSection = useMutation(
-    api.functions.quotations.sections.mutations.deleteSection
+    api.functions.quotations.sections.mutations.deleteSection,
   );
   const toggleActive = useMutation(
-    api.functions.quotations.sections.mutations.toggleSectionActive
+    api.functions.quotations.sections.mutations.toggleSectionActive,
   );
 
   const [localSections, setLocalSections] = useState<Section[]>([]);
@@ -59,7 +59,7 @@ export function SectionList() {
         const isMatch =
           sections.length === localSections.length &&
           sections.every(
-            (s: Section, i: number) => s._id === localSections[i]?._id
+            (s: Section, i: number) => s._id === localSections[i]?._id,
           );
         if (isMatch) {
           isSyncingOrder.current = false;

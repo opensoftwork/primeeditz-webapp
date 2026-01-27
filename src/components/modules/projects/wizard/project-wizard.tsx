@@ -8,11 +8,12 @@
 
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import type { Id } from "@convex/_generated/dataModel";
+import { ArrowLeft, ArrowRight, Check, Loader2, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import { useEffect, useRef, useState } from "react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -23,20 +24,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { WizardFormProvider, useWizardForm } from "./wizard-form-context";
-import { StepNavigation, type FormStep } from "./step-navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { cn } from "@/lib/utils";
+import { type FormStep, StepNavigation } from "./step-navigation";
 import { WizardStep0 } from "./steps/step-0-studio-selection";
 import { WizardStep1 } from "./steps/step-1-basics";
 import { WizardStep2 } from "./steps/step-2-details";
 import { WizardStep3 } from "./steps/step-3-files";
 import { WizardStep4 } from "./steps/step-4-description";
 import { WizardStep5 } from "./steps/step-5-review";
-import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
-import { ArrowLeft, ArrowRight, Check, Loader2, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
-import type { Id } from "@convex/_generated/dataModel";
 import type { WizardMode } from "./types";
+import { useWizardForm, WizardFormProvider } from "./wizard-form-context";
 
 // Step definitions for UI display (studio mode - 5 steps)
 const CLIENT_FORM_STEPS: FormStep[] = [

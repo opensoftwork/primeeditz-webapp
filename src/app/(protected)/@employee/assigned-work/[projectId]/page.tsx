@@ -9,7 +9,9 @@ interface AssignedWorkDetailPageProps {
   }>;
 }
 
-export default function AssignedWorkDetailPage({ params }: AssignedWorkDetailPageProps) {
+export default function AssignedWorkDetailPage({
+  params,
+}: AssignedWorkDetailPageProps) {
   const { projectId } = use(params);
 
   return <EmployeeProjectDetail projectId={projectId} />;

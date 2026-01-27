@@ -1,7 +1,7 @@
 "use client";
 
+import { FolderOpen, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { Layers, FolderOpen } from "lucide-react";
 
 // ============================================================================
 // Types
@@ -77,9 +77,9 @@ export function QuotationLineItemsView({
             item.rate * item.quantity +
             (item.subItems?.reduce(
               (s: number, sub) => s + sub.rate * sub.quantity,
-              0
+              0,
             ) ?? 0),
-          0
+          0,
         )
       );
     }, 0);
@@ -184,7 +184,7 @@ export function QuotationLineItemsView({
               {/* Sections within Project */}
               <div className="space-y-8 pl-4 border-l-2 border-white/5">
                 {sectionGroups.map(({ section, items }) =>
-                  items.length > 0 ? renderSection(section, items) : null
+                  items.length > 0 ? renderSection(section, items) : null,
                 )}
               </div>
             </div>
@@ -194,7 +194,7 @@ export function QuotationLineItemsView({
         // Fallback: Section-based grouping
         <>
           {groupedBySection.map(({ section, items }) =>
-            items.length > 0 ? renderSection(section, items) : null
+            items.length > 0 ? renderSection(section, items) : null,
           )}
         </>
       )}

@@ -1,23 +1,23 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
+  PricingSummary,
+  QuotationActionButtons,
   QuotationDetailHeader,
   QuotationLineItemsView,
   QuotationTermsView,
-  QuotationActionButtons,
-  PricingSummary,
 } from "@/components/modules/client/quotations";
-import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 export function ClientQuotationDetail() {
   const params = useParams();

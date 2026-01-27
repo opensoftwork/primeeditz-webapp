@@ -1,25 +1,25 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import type { Doc } from "@convex/_generated/dataModel";
 import {
-  GripVertical,
-  Edit2,
-  Trash2,
-  RefreshCcw,
-  Check,
-  X,
+  AlignLeft,
   Asterisk,
-  Type,
+  Check,
+  CheckSquare,
+  Edit2,
+  GripVertical,
   Hash,
   ListOrdered,
-  CheckSquare,
-  AlignLeft,
-  LucideIcon,
+  type LucideIcon,
+  RefreshCcw,
+  Trash2,
+  Type,
+  X,
 } from "lucide-react";
-import { motion, Reorder, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion, Reorder } from "motion/react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import type { Doc } from "@convex/_generated/dataModel";
 
 interface FieldListProps {
   fields: Doc<"projectTypeFields">[];
@@ -69,7 +69,7 @@ export function FieldList({
                 "flex items-center gap-4 p-4 rounded-2xl border transition-[background-color,border-color,box-shadow,opacity,filter] duration-300 group relative overflow-hidden",
                 field.isActive
                   ? "bg-white/5 border-white/5 hover:bg-white/10"
-                  : "bg-white/2 border-white/5 opacity-60 grayscale-[0.5]"
+                  : "bg-white/2 border-white/5 opacity-60 grayscale-[0.5]",
               )}
             >
               {!field.isActive && (
@@ -87,13 +87,13 @@ export function FieldList({
               <div
                 className={cn(
                   "h-10 w-10 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                  field.isActive ? "bg-white/5" : "bg-white/1"
+                  field.isActive ? "bg-white/5" : "bg-white/1",
                 )}
               >
                 <Icon
                   className={cn(
                     "h-5 w-5",
-                    field.isActive ? "text-white/60" : "text-white/20"
+                    field.isActive ? "text-white/60" : "text-white/20",
                   )}
                 />
               </div>
@@ -103,7 +103,7 @@ export function FieldList({
                   <h4
                     className={cn(
                       "font-bold truncate",
-                      field.isActive ? "text-white" : "text-white/40"
+                      field.isActive ? "text-white" : "text-white/40",
                     )}
                   >
                     {field.label}
@@ -111,7 +111,7 @@ export function FieldList({
                   {field.required && (
                     <div
                       className={cn(
-                        field.isActive ? "text-primary" : "text-primary/30"
+                        field.isActive ? "text-primary" : "text-primary/30",
                       )}
                       title="Required Field"
                     >

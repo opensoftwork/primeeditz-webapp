@@ -2,19 +2,25 @@
 
 import { useForm } from "@tanstack/react-form";
 import {
+  ArrowRight,
+  Database,
+  HardDrive,
+  IndianRupee,
+  Info,
+} from "lucide-react";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import {
   Drawer,
   DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
   DrawerDescription,
   DrawerFooter,
+  DrawerHeader,
+  DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { HardDrive, IndianRupee, Database, Info, ArrowRight } from "lucide-react";
-import { useEffect } from "react";
 
 export interface StorageTierFormValues {
   name: string;
@@ -109,7 +115,9 @@ export function StorageTierDrawer({
                       <Input
                         type="number"
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                         placeholder="100"
                       />
@@ -130,7 +138,9 @@ export function StorageTierDrawer({
                       <Input
                         type="number"
                         value={field.state.value}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
+                        onChange={(e) =>
+                          field.handleChange(Number(e.target.value))
+                        }
                         className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                         placeholder="999"
                       />

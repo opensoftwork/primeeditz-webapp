@@ -3,11 +3,10 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Calendar, Hash, User } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
+import { getDeliveryPhaseLabel } from "@/lib/status-display";
 import { ProjectActions } from "./project-actions";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
-
-import { getDeliveryPhaseLabel } from "@/lib/status-display";
 
 export const columns: ColumnDef<AdminProject>[] = [
   {

@@ -1,9 +1,9 @@
 "use client";
 
+import { Briefcase, FolderOpen, X } from "lucide-react";
 import { motion } from "motion/react";
-import { Briefcase, X, FolderOpen } from "lucide-react";
-import { ProjectListingDrawer } from "./project-list";
 import type { Project } from "../../types";
+import { ProjectListingDrawer } from "./project-list";
 
 interface InvolvedProjectsProps {
   projects: Project[] | undefined;

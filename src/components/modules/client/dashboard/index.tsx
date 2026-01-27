@@ -8,14 +8,14 @@
  * Properly modularized for maintainability.
  */
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Skeleton } from "@/components/ui/skeleton";
-import { LayoutGrid, Clock, CheckCircle2 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { CheckCircle2, Clock, LayoutGrid } from "lucide-react";
 import { QuotationsSection } from "@/components/modules/client/quotations/quotations-section";
-import { StatCard } from "./stat-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { DashboardHeader } from "./dashboard-header";
 import { GroupedProjectList } from "./grouped-project-list";
+import { StatCard } from "./stat-card";
 
 export default function ClientDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);

@@ -1,1 +1,1 @@
-export const px = (value: number) => `${value}px`
+export const px = (value: number) => `${value}px`;

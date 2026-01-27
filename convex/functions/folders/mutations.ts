@@ -1,9 +1,17 @@
 import { v } from "convex/values";
-import { adminMutation, studioMutation, authenticatedWithProfileMutation } from "../../lib/customFunctions";
-import { canTransition, getPhaseForState, getActorForState } from "../../lib/statusMachine";
-import { ActionState } from "../../schema";
-import { DataModel, Id } from "../../_generated/dataModel";
-import { MutationCtx } from "../../_generated/server";
+import { DataModel, type Id } from "../../_generated/dataModel";
+import type { MutationCtx } from "../../_generated/server";
+import {
+  adminMutation,
+  authenticatedWithProfileMutation,
+  studioMutation,
+} from "../../lib/customFunctions";
+import {
+  canTransition,
+  getActorForState,
+  getPhaseForState,
+} from "../../lib/statusMachine";
+import type { ActionState } from "../../schema";
 
 /**
  * Shared helper for setting up project folders and storage allocation.
@@ -15,7 +23,7 @@ export async function setupFoldersInternal(
     templateId: Id<"folderTemplates">;
     storageTierId: Id<"storageTiers">;
     changedBy: Id<"profiles">;
-  }
+  },
 ) {
   // Get the project
   const project = await ctx.db.get(args.projectId);
@@ -59,7 +67,7 @@ export async function setupFoldersInternal(
 
   // Update project's storage allocation (convert GB to bytes)
   const storageInBytes = storageTier.sizeGB * 1024 * 1024 * 1024;
-  
+
   // Transition the project status to storage_allocated
   if (canTransition(project.actionState as ActionState, "storage_allocated")) {
     const newPhase = getPhaseForState("storage_allocated");
@@ -119,7 +127,6 @@ export const setupProjectFolders = adminMutation({
   },
 });
 
-
 /**
  * Delete all folders for a project.
  * Admin-only operation for cleanup or reset.
@@ -144,7 +151,7 @@ export const deleteProjectFolders = adminMutation({
 
       if (assets) {
         throw new Error(
-          `Cannot delete folders: folder "${folder.name}" contains uploaded assets`
+          `Cannot delete folders: folder "${folder.name}" contains uploaded assets`,
         );
       }
     }
@@ -250,7 +257,8 @@ export const markAllUploadsComplete = authenticatedWithProfileMutation({
 
     // Security check: only client owner or admin/employee can trigger
     const isOwner = project.studioId === ctx.profile._id;
-    const isStaff = ctx.profile.role === "admin" || ctx.profile.role === "employee";
+    const isStaff =
+      ctx.profile.role === "admin" || ctx.profile.role === "employee";
     if (!isOwner && !isStaff) throw new Error("Permission denied");
 
     // 2. Get all folders
@@ -305,7 +313,10 @@ export const markAllUploadsComplete = authenticatedWithProfileMutation({
 /**
  * Helper to check if all folders are complete and transition project to uploads_complete.
  */
-async function checkAndTransitionUploadsComplete(ctx: any, projectId: Id<"projects">) {
+async function checkAndTransitionUploadsComplete(
+  ctx: any,
+  projectId: Id<"projects">,
+) {
   const folders = await ctx.db
     .query("folders")
     .withIndex("by_projectId", (q: any) => q.eq("projectId", projectId))
@@ -385,6 +396,8 @@ export const openProjectForUpload = adminMutation({
       return { success: true };
     }
 
-    throw new Error(`Cannot open project for upload from current state: ${project.actionState}`);
+    throw new Error(
+      `Cannot open project for upload from current state: ${project.actionState}`,
+    );
   },
 });

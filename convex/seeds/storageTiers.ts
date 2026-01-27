@@ -1,8 +1,8 @@
-import { MutationCtx } from "../_generated/server";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Storage Tiers
- * 
+ *
  * Tiered storage pricing for project allocations.
  */
 
@@ -45,7 +45,7 @@ export async function seedStorageTiers(ctx: MutationCtx) {
   let updatedCount = 0;
 
   for (const tier of tiers) {
-    const existing = existingTiers.find(t => t.name === tier.name);
+    const existing = existingTiers.find((t) => t.name === tier.name);
 
     if (existing) {
       await ctx.db.patch(existing._id, {
@@ -65,5 +65,7 @@ export async function seedStorageTiers(ctx: MutationCtx) {
     }
   }
 
-  console.log(`Storage tiers: ${insertedCount} inserted, ${updatedCount} updated`);
+  console.log(
+    `Storage tiers: ${insertedCount} inserted, ${updatedCount} updated`,
+  );
 }

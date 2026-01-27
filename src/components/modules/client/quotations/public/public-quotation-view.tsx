@@ -1,20 +1,20 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { useMutation, useQuery } from "convex/react";
+import { format } from "date-fns";
+import { AlertCircle, CheckCircle2, LogIn } from "lucide-react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
+  PricingSummary,
   QuotationDetailHeader,
   QuotationLineItemsView,
   QuotationTermsView,
-  PricingSummary,
 } from "@/components/modules/client/quotations";
-import { format } from "date-fns";
-import { AlertCircle, LogIn, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Link from "next/link";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function PublicQuotationView() {
   const params = useParams();
@@ -84,12 +84,14 @@ export function PublicQuotationView() {
   };
 
   // Group by section (public view doesn't have project data)
-  const groupedBySection = sections.map((section: { _id: string; name: string; color?: string }) => ({
-    section,
-    items: quotation.lineItems.filter(
-      (item: { sectionId?: string }) => item.sectionId === section._id,
-    ),
-  }));
+  const groupedBySection = sections.map(
+    (section: { _id: string; name: string; color?: string }) => ({
+      section,
+      items: quotation.lineItems.filter(
+        (item: { sectionId?: string }) => item.sectionId === section._id,
+      ),
+    }),
+  );
 
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-12">

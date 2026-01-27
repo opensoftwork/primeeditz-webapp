@@ -1,18 +1,18 @@
 import { v } from "convex/values";
 import { mutation } from "./_generated/server";
+import { seedFolderTemplates } from "./seeds/folderTemplates";
 import { seedProjectStructure } from "./seeds/projectStructure";
 import { seedProjectTypeFields } from "./seeds/projectTypeFields";
+import { seedQuotationLibraryItems } from "./seeds/quotationLibraryItems";
 import { seedQuotationSections } from "./seeds/quotationSections";
 import { seedQuotationTemplates } from "./seeds/quotationTemplates";
-import { seedQuotationLibraryItems } from "./seeds/quotationLibraryItems";
 import { seedStorageTiers } from "./seeds/storageTiers";
-import { seedFolderTemplates } from "./seeds/folderTemplates";
 
 /**
  * SEEDING ENTRY POINT
- * 
+ *
  * Orchestrates the modular seeding process aligned with Prime Editz B2B Rate Card.
- * 
+ *
  * Run via Convex Dashboard or CLI:
  *   npx convex run seed:seedAll '{"clearFirst": true}'
  */
@@ -59,7 +59,9 @@ export const seedAll = mutation({
     // 1. Seed Project Structure (Categories & Types)
     console.log("📁 Step 1: Seeding Project Structure...");
     const { categoryMap, typeMap } = await seedProjectStructure(ctx);
-    console.log(`   ✓ ${Object.keys(categoryMap).length} categories, ${Object.keys(typeMap).length} project types\n`);
+    console.log(
+      `   ✓ ${Object.keys(categoryMap).length} categories, ${Object.keys(typeMap).length} project types\n`,
+    );
 
     // 2. Seed Project Type Fields (Dynamic Form Fields)
     console.log("📝 Step 2: Seeding Project Type Fields...");
@@ -94,14 +96,14 @@ export const seedAll = mutation({
     console.log("========================================");
     console.log("✅ All seeds completed successfully!");
     console.log("========================================");
-    
-    return { 
+
+    return {
       success: true,
       summary: {
         categories: Object.keys(categoryMap).length,
         projectTypes: Object.keys(typeMap).length,
         sections: Object.keys(sectionMap).length,
-      }
+      },
     };
   },
 });
@@ -123,10 +125,10 @@ export const seedQuotationsOnly = mutation({
 
     // Seed sections
     const sectionMap = await seedQuotationSections(ctx);
-    
+
     // Seed library items
     await seedQuotationLibraryItems(ctx, sectionMap, typeMap);
-    
+
     // Seed templates
     await seedQuotationTemplates(ctx, sectionMap, typeMap);
 

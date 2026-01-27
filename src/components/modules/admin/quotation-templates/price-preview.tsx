@@ -1,6 +1,6 @@
 "use client";
 
-import { Receipt, Info } from "lucide-react";
+import { Info, Receipt } from "lucide-react";
 import type { TemplateLineItem } from "@/components/modules/admin/quotations/types";
 
 // ============================================================================
@@ -27,7 +27,7 @@ export function PricePreview({ lineItems, gstRate = 18 }: PricePreviewProps) {
     const subItemsTotal =
       item.subItems?.reduce(
         (s, sub) => s + sub.unitPrice * sub.defaultQuantity,
-        0
+        0,
       ) ?? 0;
     return sum + itemTotal + subItemsTotal;
   }, 0);

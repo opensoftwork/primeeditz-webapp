@@ -1,9 +1,18 @@
 import { v } from "convex/values";
-import { QueryCtx, MutationCtx, mutation } from "../../_generated/server";
-import { Doc, Id } from "../../_generated/dataModel";
-import { adminMutation, studioMutation, Profile } from "../../lib/customFunctions";
-import { getPhaseForState, getActorForState } from "../../lib/statusMachine";
-import { ActionState } from "../../schema";
+import type { Doc, Id } from "../../_generated/dataModel";
+import {
+  type MutationCtx,
+  mutation,
+  type QueryCtx,
+} from "../../_generated/server";
+import {
+  adminMutation,
+  authenticatedWithProfileMutation,
+  type Profile,
+  studioMutation,
+} from "../../lib/customFunctions";
+import { getActorForState, getPhaseForState } from "../../lib/statusMachine";
+import type { ActionState } from "../../schema";
 import { spawnProjectsFromQuotation } from "../projects/spawning";
 
 /**
@@ -31,15 +40,17 @@ const lineItemInput = v.object({
         unit: v.string(),
         rate: v.number(),
         quantity: v.number(),
-      })
-    )
+      }),
+    ),
   ),
 });
 
 /**
  * Generate unique quotation code
  */
-async function generateQuotationCode(ctx: QueryCtx | MutationCtx): Promise<string> {
+async function generateQuotationCode(
+  ctx: QueryCtx | MutationCtx,
+): Promise<string> {
   const quotations = await ctx.db.query("quotations").collect();
   const maxNumber = quotations.reduce((max: number, q: Doc<"quotations">) => {
     const match = q.code.match(/QT-(\d+)/);
@@ -49,7 +60,7 @@ async function generateQuotationCode(ctx: QueryCtx | MutationCtx): Promise<strin
     }
     return max;
   }, 0);
-  
+
   const nextNumber = maxNumber + 1;
   return `QT-${nextNumber.toString().padStart(6, "0")}`;
 }
@@ -64,10 +75,10 @@ function calculateTotals(
     subItems?: Array<{ rate: number; quantity: number }>;
   }>,
   taxRate: number,
-  discountAmount?: number
+  discountAmount?: number,
 ) {
   let subtotal = 0;
-  
+
   for (const item of lineItems) {
     subtotal += item.rate * item.quantity;
     if (item.subItems) {
@@ -76,12 +87,12 @@ function calculateTotals(
       }
     }
   }
-  
+
   const discount = discountAmount || 0;
   const taxableAmount = subtotal - discount;
   const taxAmount = taxableAmount * taxRate;
   const total = taxableAmount + taxAmount;
-  
+
   return { subtotal, taxAmount, total };
 }
 
@@ -97,7 +108,7 @@ async function transitionProjectsForQuotation(
     targetState: ActionState;
     notes: string;
     onlyFromDraft?: boolean;
-  }
+  },
 ) {
   const targetProjectIds = [
     ...(args.projectId ? [args.projectId] : []),
@@ -108,22 +119,28 @@ async function transitionProjectsForQuotation(
 
   // Optimized fetch: Query all projects for this client
   let projectsToUpdate: Doc<"projects">[] = [];
-  
+
   if (args.studioId) {
     const allClientProjects = await ctx.db
       .query("projects")
-      .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId as Id<"profiles">))
+      .withIndex("by_studioId", (q) =>
+        q.eq("studioId", args.studioId as Id<"profiles">),
+      )
       .collect();
-    
-    projectsToUpdate = allClientProjects.filter(p => 
-      targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code)
+
+    projectsToUpdate = allClientProjects.filter(
+      (p) =>
+        targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code),
     );
   } else {
     // Fallback if no studioId: fetch individually
     for (const pId of targetProjectIds) {
       let p = await ctx.db.get(pId as Id<"projects">);
       if (!p) {
-        p = await ctx.db.query("projects").withIndex("by_code", q => q.eq("code", pId)).unique();
+        p = await ctx.db
+          .query("projects")
+          .withIndex("by_code", (q) => q.eq("code", pId))
+          .unique();
       }
       if (p) projectsToUpdate.push(p);
     }
@@ -160,12 +177,10 @@ async function transitionProjectsForQuotation(
 /**
  * Request a quotation (Studio-side)
  */
-export const requestQuotation = studioMutation({
+export const requestQuotation = authenticatedWithProfileMutation({
   args: {
     templateId: v.id("quotationTemplates"),
-    endClientName: v.optional(v.string()),
-    eventName: v.optional(v.string()),
-    eventDate: v.optional(v.number()),
+    endClientName: v.string(),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
@@ -191,7 +206,7 @@ export const requestQuotation = studioMutation({
     const { subtotal, taxAmount, total } = calculateTotals(
       lineItems,
       taxRate,
-      0
+      0,
     );
 
     const quotationId = await ctx.db.insert("quotations", {
@@ -207,8 +222,6 @@ export const requestQuotation = studioMutation({
       total,
       terms: template.terms,
       endClientName: args.endClientName,
-      eventName: args.eventName,
-      eventDate: args.eventDate,
       studioNotes: args.notes,
       createdBy: "STUDIO",
       updatedAt: Date.now(),
@@ -232,6 +245,7 @@ export const createQuotation = adminMutation({
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
+    endClientName: v.string(),
     createdBy: v.string(),
   },
   handler: async (ctx, args) => {
@@ -240,9 +254,9 @@ export const createQuotation = adminMutation({
     const { subtotal, taxAmount, total } = calculateTotals(
       args.lineItems,
       taxRate,
-      args.discountAmount
+      args.discountAmount,
     );
-    
+
     const quotationId = await ctx.db.insert("quotations", {
       code,
       version: 1,
@@ -259,6 +273,7 @@ export const createQuotation = adminMutation({
       total,
       terms: args.terms,
       validUntil: args.validUntil,
+      endClientName: args.endClientName,
       createdBy: args.createdBy,
       updatedAt: Date.now(),
     });
@@ -269,7 +284,8 @@ export const createQuotation = adminMutation({
       projectId: args.projectId,
       projectIds: args.projectIds,
       targetState: "awaiting_quotation",
-      notes: "System moved project to awaiting_quotation because a quotation was created",
+      notes:
+        "System moved project to awaiting_quotation because a quotation was created",
       onlyFromDraft: true,
     });
 
@@ -288,6 +304,7 @@ export const updateQuotation = adminMutation({
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
+    endClientName: v.optional(v.string()),
     studioId: v.optional(v.string()),
     projectId: v.optional(v.string()),
     projectIds: v.optional(v.array(v.string())),
@@ -297,22 +314,22 @@ export const updateQuotation = adminMutation({
     if (!quotation) {
       throw new Error("Quotation not found");
     }
-    
+
     if (quotation.status !== "draft") {
       throw new Error("Can only edit draft quotations");
     }
-    
+
     const { quotationId, ...updates } = args;
-    
+
     if (updates.lineItems) {
       const taxRate = updates.taxRate ?? quotation.taxRate;
       const discountAmount = updates.discountAmount ?? quotation.discountAmount;
       const { subtotal, taxAmount, total } = calculateTotals(
         updates.lineItems,
         taxRate,
-        discountAmount
+        discountAmount,
       );
-      
+
       await ctx.db.patch(quotationId, {
         ...updates,
         lineItems: updates.lineItems,
@@ -323,9 +340,9 @@ export const updateQuotation = adminMutation({
       });
     } else {
       const cleanUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, v]) => v !== undefined)
+        Object.entries(updates).filter(([_, v]) => v !== undefined),
       );
-      
+
       if (Object.keys(cleanUpdates).length > 0) {
         await ctx.db.patch(quotationId, {
           ...cleanUpdates,
@@ -333,7 +350,7 @@ export const updateQuotation = adminMutation({
         });
       }
     }
-    
+
     return null;
   },
 });
@@ -350,22 +367,28 @@ export const sendQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
     // Status can be draft (first time) or sent/viewed (resending)
-    const canSend = ["draft", "sent", "viewed", "changes_requested"].includes(quotation.status);
-    if (!canSend) throw new Error(`Cannot send quotation in ${quotation.status} status`);
-    
+    const canSend = ["draft", "sent", "viewed", "changes_requested"].includes(
+      quotation.status,
+    );
+    if (!canSend)
+      throw new Error(`Cannot send quotation in ${quotation.status} status`);
+
     // Generate share token
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let shareToken = "";
     for (let i = 0; i < 16; i++) {
-      shareToken += characters.charAt(Math.floor(Math.random() * characters.length));
+      shareToken += characters.charAt(
+        Math.floor(Math.random() * characters.length),
+      );
     }
-    
+
     // Calculate expiry
     const validityDays = args.validityDays ?? 30;
-    const shareTokenExpiresAt = Date.now() + (validityDays * 24 * 60 * 60 * 1000);
-    
+    const shareTokenExpiresAt = Date.now() + validityDays * 24 * 60 * 60 * 1000;
+
     await ctx.db.patch(args.quotationId, {
       status: "sent",
       sentAt: Date.now(),
@@ -398,7 +421,7 @@ export const markQuotationViewed = mutation({
   handler: async (ctx: MutationCtx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) return null;
-    
+
     // Only update viewedAt if it hasn't been set or if status is 'sent'
     if (quotation.status === "sent") {
       await ctx.db.patch(args.quotationId, {
@@ -412,7 +435,7 @@ export const markQuotationViewed = mutation({
         updatedAt: Date.now(),
       });
     }
-    
+
     return null;
   },
 });
@@ -428,17 +451,26 @@ export const approveQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
     // Status check
-    const allowed = ["initiated", "draft", "sent", "viewed", "changes_requested"];
+    const allowed = [
+      "initiated",
+      "draft",
+      "sent",
+      "viewed",
+      "changes_requested",
+    ];
     if (!allowed.includes(quotation.status)) {
-      throw new Error(`Cannot approve quotation from status: ${quotation.status}`);
+      throw new Error(
+        `Cannot approve quotation from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
       status: "approved",
       approvedAt: Date.now(),
-      assignedEmployeeId: args.assignedEmployeeId ?? quotation.assignedEmployeeId,
+      assignedEmployeeId:
+        args.assignedEmployeeId ?? quotation.assignedEmployeeId,
       updatedAt: Date.now(),
     });
 
@@ -524,7 +556,7 @@ export const deleteQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
     await ctx.db.patch(args.quotationId, {
       status: "rejected",
       studioNotes: "Deleted by admin",
@@ -541,11 +573,14 @@ export const deleteQuotation = adminMutation({
     if (targetProjectIds.length > 0 && quotation.studioId) {
       const allClientProjects = await ctx.db
         .query("projects")
-        .withIndex("by_studioId", (q) => q.eq("studioId", quotation.studioId as Id<"profiles">))
+        .withIndex("by_studioId", (q) =>
+          q.eq("studioId", quotation.studioId as Id<"profiles">),
+        )
         .collect();
-      
-      const projectsToLog = allClientProjects.filter(p => 
-        targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code)
+
+      const projectsToLog = allClientProjects.filter(
+        (p) =>
+          targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code),
       );
 
       for (const project of projectsToLog) {
@@ -586,7 +621,9 @@ export const acceptQuotation = studioMutation({
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Quotation cannot be accepted from status: ${quotation.status}`);
+      throw new Error(
+        `Quotation cannot be accepted from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
@@ -636,7 +673,9 @@ export const requestQuotationChanges = studioMutation({
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Changes cannot be requested from status: ${quotation.status}`);
+      throw new Error(
+        `Changes cannot be requested from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
@@ -681,7 +720,9 @@ export const rejectQuotation = studioMutation({
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Quotation cannot be rejected from status: ${quotation.status}`);
+      throw new Error(
+        `Quotation cannot be rejected from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
@@ -718,7 +759,7 @@ export const duplicateQuotation = adminMutation({
     if (!original) throw new Error("Original quotation not found");
 
     const code = await generateQuotationCode(ctx);
-    
+
     // Create new quotation as a copy of the original
     const newQuotationId = await ctx.db.insert("quotations", {
       ...original,

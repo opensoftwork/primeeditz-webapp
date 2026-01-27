@@ -1,24 +1,24 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useParams, useRouter } from "next/navigation";
-import { motion } from "motion/react";
-import { Eye, ArrowLeft, Info, Sparkles, Layout } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useForm } from "@tanstack/react-form";
-import { FieldGroup, FieldSet } from "@/components/ui/field";
-import {
-  hasAlbumConfig,
-  filterAlbumFields,
-  type FieldValue,
-} from "@/components/shared/dynamic-form-fields";
-import { cn } from "@/lib/utils";
-import { Skeleton } from "@/components/ui/skeleton";
 import type { Id } from "@convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import { useQuery } from "convex/react";
+import { ArrowLeft, Eye, Info, Layout, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import Link from "next/link";
-import { FormFieldWrapper } from "../../projects/wizard/steps/step-2-details/form-field-wrapper";
+import { useParams, useRouter } from "next/navigation";
+import {
+  type FieldValue,
+  filterAlbumFields,
+  hasAlbumConfig,
+} from "@/components/shared/dynamic-form-fields";
+import { Button } from "@/components/ui/button";
+import { FieldGroup, FieldSet } from "@/components/ui/field";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 import { AlbumConfigSection } from "../../projects/wizard/steps/step-2-details/album-config-section";
+import { FormFieldWrapper } from "../../projects/wizard/steps/step-2-details/form-field-wrapper";
 
 export function ProjectTypePreview() {
   const params = useParams();
@@ -27,7 +27,7 @@ export function ProjectTypePreview() {
 
   const projectType = useQuery(
     api.functions.projectTypes.queries.getProjectTypeWithFields,
-    { projectTypeId: id }
+    { projectTypeId: id },
   );
 
   const form = useForm({
@@ -172,7 +172,7 @@ export function ProjectTypePreview() {
                           transition={{ duration: 0.4, delay: index * 0.1 }}
                           className={cn(
                             "w-full",
-                            fieldDef.type === "textarea" ? "md:col-span-2" : ""
+                            fieldDef.type === "textarea" ? "md:col-span-2" : "",
                           )}
                         >
                           <FormFieldWrapper

@@ -1,17 +1,17 @@
-import { MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Quotation Library Items
- * 
+ *
  * Individual line items from the B2B Rate Card for building quotations.
  * Includes all base rates from the pricing strategy document.
  */
 
 export async function seedQuotationLibraryItems(
-  ctx: MutationCtx, 
+  ctx: MutationCtx,
   sectionMap: Record<string, string>,
-  typeMap?: Record<string, Id<"projectTypes">>
+  typeMap?: Record<string, Id<"projectTypes">>,
 ) {
   const libraryItems = [
     // ==========================================================================
@@ -19,7 +19,8 @@ export async function seedQuotationLibraryItems(
     // ==========================================================================
     {
       name: "Traditional Color Correction (Per Image)",
-      description: "Basic color correction for traditional photos. Bulk: ₹2/image for 2000+",
+      description:
+        "Basic color correction for traditional photos. Bulk: ₹2/image for 2000+",
       section: "Photo Color Correction",
       unit: "per image",
       unitPrice: 5,
@@ -27,7 +28,8 @@ export async function seedQuotationLibraryItems(
     },
     {
       name: "Pre-Wedding/Candid Grading (Per Image)",
-      description: "Artistic grading for candid shots. Bulk: ₹35/image for 100+",
+      description:
+        "Artistic grading for candid shots. Bulk: ₹35/image for 100+",
       section: "Photo Color Correction",
       unit: "per image",
       unitPrice: 50,
@@ -336,11 +338,13 @@ export async function seedQuotationLibraryItems(
   let updatedCount = 0;
 
   for (const item of libraryItems) {
-    const existing = currentItems.find(i => i.name === item.name);
+    const existing = currentItems.find((i) => i.name === item.name);
 
     const sectionId = sectionMap[item.section];
     if (!sectionId) {
-      console.warn(`Section "${item.section}" not found, skipping ${item.name}`);
+      console.warn(
+        `Section "${item.section}" not found, skipping ${item.name}`,
+      );
       continue;
     }
 
@@ -351,9 +355,10 @@ export async function seedQuotationLibraryItems(
       unitPrice: item.unitPrice,
       isActive: true,
       sectionId: sectionId as Id<"quotationSections">,
-      projectTypeHint: item.projectTypeHint && typeMap 
-        ? typeMap[item.projectTypeHint] 
-        : undefined,
+      projectTypeHint:
+        item.projectTypeHint && typeMap
+          ? typeMap[item.projectTypeHint]
+          : undefined,
     };
 
     if (existing) {
@@ -365,5 +370,7 @@ export async function seedQuotationLibraryItems(
     }
   }
 
-  console.log(`Library items: ${insertedCount} inserted, ${updatedCount} updated`);
+  console.log(
+    `Library items: ${insertedCount} inserted, ${updatedCount} updated`,
+  );
 }

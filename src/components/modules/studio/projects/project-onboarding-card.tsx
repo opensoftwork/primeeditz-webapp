@@ -1,9 +1,9 @@
 "use client";
 
-import { Rocket, Info, ArrowRight, ShieldCheck } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowRight, Info, Rocket, ShieldCheck } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ProjectOnboardingCardProps {

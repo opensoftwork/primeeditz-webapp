@@ -1,10 +1,10 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
-import { 
-  adminQuery, 
-  studioQuery, 
-  staffQuery, 
-  authenticatedWithProfileQuery 
+import {
+  adminQuery,
+  authenticatedWithProfileQuery,
+  staffQuery,
+  studioQuery,
 } from "../../lib/customFunctions";
 
 /**
@@ -29,14 +29,17 @@ export const getProjectFolders = staffQuery({
           .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
           .collect();
 
-        const totalSize = assets.reduce((sum, asset) => sum + asset.sizeBytes, 0);
+        const totalSize = assets.reduce(
+          (sum, asset) => sum + asset.sizeBytes,
+          0,
+        );
 
         return {
           ...folder,
           assetCount: assets.length,
           totalSize,
         };
-      })
+      }),
     );
 
     return enrichedFolders;
@@ -71,7 +74,10 @@ export const getMyProjectFolders = studioQuery({
           .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
           .collect();
 
-        const totalSize = assets.reduce((sum, asset) => sum + asset.sizeBytes, 0);
+        const totalSize = assets.reduce(
+          (sum, asset) => sum + asset.sizeBytes,
+          0,
+        );
 
         return {
           _id: folder._id,
@@ -80,7 +86,7 @@ export const getMyProjectFolders = studioQuery({
           assetCount: assets.length,
           totalSize,
         };
-      })
+      }),
     );
 
     return enrichedFolders;
@@ -140,7 +146,7 @@ export const canSetupFolders = adminQuery({
     // Check for approved quotation linked to this project
     // Note: quotations.projectId is stored as v.optional(v.string())
     const projectIdString = args.projectId as string;
-    
+
     // Check single projectId field
     let approvedQuotation = await ctx.db
       .query("quotations")
@@ -154,10 +160,11 @@ export const canSetupFolders = adminQuery({
         .query("quotations")
         .withIndex("by_status", (q) => q.eq("status", "approved"))
         .collect();
-      
-      approvedQuotation = allApprovedQuotations.find((q) => 
-        q.projectIds?.includes(projectIdString)
-      ) || null;
+
+      approvedQuotation =
+        allApprovedQuotations.find((q) =>
+          q.projectIds?.includes(projectIdString),
+        ) || null;
     }
 
     if (approvedQuotation) {
@@ -187,9 +194,9 @@ export const canSetupFolders = adminQuery({
         .query("quotations")
         .withIndex("by_studioId", (q) => q.eq("studioId", studioIdString))
         .collect();
-      
+
       const hasClientApprovedQuotation = clientQuotations.some(
-        (q) => q.status === "approved"
+        (q) => q.status === "approved",
       );
 
       if (hasClientApprovedQuotation) {
@@ -251,7 +258,7 @@ export const getFolderSetupStatus = query({
         acc[folder.status] = (acc[folder.status] || 0) + 1;
         return acc;
       },
-      {} as Record<string, number>
+      {} as Record<string, number>,
     );
 
     return {
@@ -281,12 +288,12 @@ export const getFolderDetails = authenticatedWithProfileQuery({
     if (!project) throw new Error("Project not found");
 
     // If client, verify they own the project
-    if (ctx.profile.role === 'studio') {
+    if (ctx.profile.role === "studio") {
       if (project.studioId !== ctx.profile._id) {
         throw new Error("Access denied");
       }
     }
-    
+
     // For staff (admin/employee), we allow access if they reached here.
     // getProjectFolders/getAdminProject already handle their list-level security.
 
@@ -311,7 +318,7 @@ export const getFolderAssets = authenticatedWithProfileQuery({
     if (!project) throw new Error("Project not found");
 
     // If client, verify ownership
-    if (ctx.profile.role === 'studio') {
+    if (ctx.profile.role === "studio") {
       if (project.studioId !== ctx.profile._id) {
         throw new Error("Access denied");
       }
@@ -323,14 +330,17 @@ export const getFolderAssets = authenticatedWithProfileQuery({
       .collect();
 
     // Enrich with uploader info
-    return await Promise.all(assets.map(async (asset) => {
-      const uploader = asset.uploadedBy ? await ctx.db.get(asset.uploadedBy) : null;
-      return {
-        ...asset,
-        uploaderName: uploader?.name || "Unknown",
-        uploaderRole: (uploader as any)?.role || "client",
-      };
-    }));
+    return await Promise.all(
+      assets.map(async (asset) => {
+        const uploader = asset.uploadedBy
+          ? await ctx.db.get(asset.uploadedBy)
+          : null;
+        return {
+          ...asset,
+          uploaderName: uploader?.name || "Unknown",
+          uploaderRole: (uploader as any)?.role || "client",
+        };
+      }),
+    );
   },
 });
-

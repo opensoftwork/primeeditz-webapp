@@ -1,6 +1,6 @@
 import { v } from "convex/values";
+import { type Doc, Id } from "../../_generated/dataModel";
 import { adminQuery } from "../../lib/customFunctions";
-import { Doc, Id } from "../../_generated/dataModel";
 
 /**
  * Get all clients for selection.
@@ -13,7 +13,11 @@ export const getStudios = adminQuery({
     return await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "studio"))
-      .filter((q) => args.includeDeactivated ? q.neq(q.field("deactivatedAt"), -1) : q.eq(q.field("deactivatedAt"), undefined))
+      .filter((q) =>
+        args.includeDeactivated
+          ? q.neq(q.field("deactivatedAt"), -1)
+          : q.eq(q.field("deactivatedAt"), undefined),
+      )
       .collect();
   },
 });
@@ -41,7 +45,11 @@ export const getStudiosForSelection = adminQuery({
         const name = client.name?.toLowerCase() ?? "";
         const email = client.email?.toLowerCase() ?? "";
         const company = client.company?.toLowerCase() ?? "";
-        return name.includes(searchTerm) || email.includes(searchTerm) || company.includes(searchTerm);
+        return (
+          name.includes(searchTerm) ||
+          email.includes(searchTerm) ||
+          company.includes(searchTerm)
+        );
       });
     }
 
@@ -53,8 +61,17 @@ export const getStudiosForSelection = adminQuery({
           .collect();
 
         const projectCount = projects.length;
-        const activeCount = projects.filter((p) => p.phase !== 'completed' && p.phase !== 'archived' && p.actionState !== 'draft' && p.actionState !== 'cancelled').length;
-        const lastProjectActivity = projects.length > 0 ? Math.max(...projects.map((p) => p.updatedAt)) : null;
+        const activeCount = projects.filter(
+          (p) =>
+            p.phase !== "completed" &&
+            p.phase !== "archived" &&
+            p.actionState !== "draft" &&
+            p.actionState !== "cancelled",
+        ).length;
+        const lastProjectActivity =
+          projects.length > 0
+            ? Math.max(...projects.map((p) => p.updatedAt))
+            : null;
         const lastActivityDate = lastProjectActivity ?? client.updatedAt;
 
         return {
@@ -69,10 +86,12 @@ export const getStudiosForSelection = adminQuery({
           activeProjectCount: activeCount,
           lastActivityDate,
         };
-      })
+      }),
     );
 
-    enrichedClients.sort((a, b) => (b.lastActivityDate ?? 0) - (a.lastActivityDate ?? 0));
+    enrichedClients.sort(
+      (a, b) => (b.lastActivityDate ?? 0) - (a.lastActivityDate ?? 0),
+    );
     return {
       clients: enrichedClients.slice(0, limit),
       hasMore: enrichedClients.length > limit,
@@ -94,9 +113,12 @@ export const getStudiosWithProjects = adminQuery({
 
     const clientsWithProjects = await Promise.all(
       allClients.map(async (client) => {
-        const project = await ctx.db.query("projects").withIndex("by_studioId", (q) => q.eq("studioId", client._id)).first();
+        const project = await ctx.db
+          .query("projects")
+          .withIndex("by_studioId", (q) => q.eq("studioId", client._id))
+          .first();
         return project ? client : null;
-      })
+      }),
     );
     return clientsWithProjects.filter((c): c is Doc<"profiles"> => c !== null);
   },
@@ -109,12 +131,22 @@ export const getAdminProjectsSimple = adminQuery({
   args: { studioId: v.optional(v.id("profiles")) },
   handler: async (ctx, args) => {
     let projects = args.studioId
-      ? await ctx.db.query("projects").withIndex("by_studioId", (q) => q.eq("studioId", args.studioId!)).collect()
+      ? await ctx.db
+          .query("projects")
+          .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId!))
+          .collect()
       : await ctx.db.query("projects").order("desc").collect();
 
     // Filter out projects that already have an approved quotation or are past the setup/quotation phase
-    const allowedStates = ["draft", "awaiting_quotation", "quotation_sent", "quotation_rejected"];
-    projects = projects.filter(p => allowedStates.includes(p.actionState) && !p.deletedAt);
+    const allowedStates = [
+      "draft",
+      "awaiting_quotation",
+      "quotation_sent",
+      "quotation_rejected",
+    ];
+    projects = projects.filter(
+      (p) => allowedStates.includes(p.actionState) && !p.deletedAt,
+    );
 
     return Promise.all(
       projects.map(async (p) => {
@@ -122,10 +154,10 @@ export const getAdminProjectsSimple = adminQuery({
         return {
           _id: p._id,
           code: p.code,
-          eventName: p.eventName,
+          eventName: p.endClientName,
           projectTypeName: type?.name ?? "Unknown",
         };
-      })
+      }),
     );
   },
 });
@@ -154,9 +186,10 @@ export const getStudioWithProjects = adminQuery({
       phase: project.phase,
       actionState: project.actionState,
       status: project.actionState, // Compatibility
-      projectTypeName: projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
-      eventName: project.eventName,
-      eventDate: project.eventDate,
+      projectTypeName:
+        projectTypeMap.get(project.projectTypeId)?.name ?? "Unknown",
+      eventName: project.endClientName,
+      eventDate: project.preferredDeliveryDate,
       venue: project.venue,
       description: project.description,
       createdAt: project._creationTime,
@@ -165,9 +198,15 @@ export const getStudioWithProjects = adminQuery({
 
     const stats = {
       totalProjects: projects.length,
-      activeProjects: projects.filter(p => !['completed', 'archived'].includes(p.phase) && p.actionState !== 'draft').length,
-      completedProjects: projects.filter(p => p.phase === "completed").length,
-      pendingProjects: projects.filter(p => p.actionState === "awaiting_quotation").length,
+      activeProjects: projects.filter(
+        (p) =>
+          !["completed", "archived"].includes(p.phase) &&
+          p.actionState !== "draft",
+      ).length,
+      completedProjects: projects.filter((p) => p.phase === "completed").length,
+      pendingProjects: projects.filter(
+        (p) => p.actionState === "awaiting_quotation",
+      ).length,
     };
 
     return { client, projects: enrichedProjects, stats };

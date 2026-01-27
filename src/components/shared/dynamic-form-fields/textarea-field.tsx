@@ -7,8 +7,8 @@ import {
   FieldError,
 } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { type FieldRenderProps } from "./types";
 import { FieldLabelWithRequired } from "./shared-components";
+import type { FieldRenderProps } from "./types";
 
 export function TextareaField({
   fieldDef,

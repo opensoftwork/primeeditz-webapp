@@ -23,12 +23,15 @@ export function ListContent({
   onToggleStatus,
   onDeleteRequest,
 }: ListContentProps) {
-  const categorizedTypes = projectTypes.reduce((acc, type) => {
-    const cat = type.categoryName || "Uncategorized";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(type);
-    return acc;
-  }, {} as Record<string, ProjectType[]>);
+  const categorizedTypes = projectTypes.reduce(
+    (acc, type) => {
+      const cat = type.categoryName || "Uncategorized";
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(type);
+      return acc;
+    },
+    {} as Record<string, ProjectType[]>,
+  );
 
   return (
     <div className="space-y-12">

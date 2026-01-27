@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { FileText } from "lucide-react";
+import { motion } from "motion/react";
 
 interface TermsConditionsProps {
   terms?: string;

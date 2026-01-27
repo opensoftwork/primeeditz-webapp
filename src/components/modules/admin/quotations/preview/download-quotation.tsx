@@ -7,20 +7,21 @@
 
 "use client";
 
-import React, { useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Download as DownloadIcon, Loader2 } from "lucide-react";
 import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
-import { QuotationDocument } from "./quotation-document";
+import { Download as DownloadIcon, Loader2 } from "lucide-react";
+import type React from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type {
-  QuotationData,
-  QuotationSection,
   CompanyInfo,
   Project,
+  QuotationData,
+  QuotationSection,
 } from "../types";
+import { QuotationDocument } from "./quotation-document";
 
 // ============================================================================
 // Component Props
@@ -81,7 +82,7 @@ export function DownloadQuotation({
             img.onload = resolve;
             img.onerror = resolve;
           });
-        })
+        }),
       );
 
       // Small extra delay for rendering stability
@@ -102,7 +103,7 @@ export function DownloadQuotation({
       // Smart Slicing Logic
       // Detects where components are cut and adjusts page breaks.
       // ======================================================================
-      
+
       const pdf = new jsPDF({
         orientation: "portrait",
         unit: "mm",
@@ -119,11 +120,11 @@ export function DownloadQuotation({
       const contentHeight = (imgProps.height * printableWidth) / imgProps.width;
 
       // Map browser pixels to PDF mm
-      const pxToMm = printableWidth / 900; 
+      const pxToMm = printableWidth / 900;
 
       // Find all elements that shouldn't be split
       const avoidElements = Array.from(
-        documentRef.current.querySelectorAll(".break-inside-avoid")
+        documentRef.current.querySelectorAll(".break-inside-avoid"),
       ) as HTMLElement[];
 
       const componentOffsets = avoidElements.map((el) => {
@@ -147,7 +148,7 @@ export function DownloadQuotation({
 
         // Check if any "avoid" element is being cut by this page boundary
         const cutoffElement = componentOffsets.find(
-          (off) => off.top < pageBottomLimit && off.bottom > pageBottomLimit
+          (off) => off.top < pageBottomLimit && off.bottom > pageBottomLimit,
         );
 
         // If an element is cut, and it's not larger than a whole page,
@@ -168,7 +169,7 @@ export function DownloadQuotation({
           printableWidth,
           contentHeight,
           undefined,
-          "NONE"
+          "NONE",
         );
 
         // Masking to clean up the edges (especially the overflow from currentTopMm)
@@ -182,7 +183,7 @@ export function DownloadQuotation({
         // We need to mask it so the content from the next page doesn't bleed in.
         const actualPageContentHeight = Math.min(
           pageBottomLimit - currentTopMm,
-          printableHeight
+          printableHeight,
         );
         if (actualPageContentHeight < printableHeight) {
           pdf.rect(
@@ -190,7 +191,7 @@ export function DownloadQuotation({
             margin + actualPageContentHeight,
             printableWidth,
             printableHeight - actualPageContentHeight,
-            "F"
+            "F",
           );
         }
 
@@ -224,11 +225,21 @@ export function DownloadQuotation({
         className={className}
       >
         {isGenerating ? (
-          <Loader2 className={cn("w-4 h-4 animate-spin", label !== "" && "mr-2")} />
+          <Loader2
+            className={cn("w-4 h-4 animate-spin", label !== "" && "mr-2")}
+          />
         ) : (
-          icon || <DownloadIcon className={cn("w-4 h-4", label !== "" && "mr-2")} />
+          icon || (
+            <DownloadIcon className={cn("w-4 h-4", label !== "" && "mr-2")} />
+          )
         )}
-        {isGenerating ? (label === "" ? "" : "Generating...") : (label !== undefined ? label : "Download PDF")}
+        {isGenerating
+          ? label === ""
+            ? ""
+            : "Generating..."
+          : label !== undefined
+            ? label
+            : "Download PDF"}
       </Button>
 
       {/* Hidden container for PDF capture - Uses explicit HEX overrides */}

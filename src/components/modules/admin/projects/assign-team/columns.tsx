@@ -1,12 +1,12 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { User, Briefcase, Check } from "lucide-react";
+import type { ColumnDef } from "@tanstack/react-table";
+import { Briefcase, Check, User } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
-import { HeatBar } from "./heat-bar";
-import { AvailabilityRibbon } from "./availability-ribbon";
 import { cn } from "@/lib/utils";
+import { AvailabilityRibbon } from "./availability-ribbon";
+import { HeatBar } from "./heat-bar";
 
 export interface EmployeeWithWorkload {
   _id: string;
@@ -66,10 +66,12 @@ export const columns: ColumnDef<EmployeeWithWorkload>[] = [
             )}
           </div>
           <div className="flex flex-col">
-            <span className={cn(
-               "text-sm font-bold transition-colors",
-               row.getIsSelected() ? "text-primary" : "text-white"
-            )}>
+            <span
+              className={cn(
+                "text-sm font-bold transition-colors",
+                row.getIsSelected() ? "text-primary" : "text-white",
+              )}
+            >
               {employee.name}
             </span>
             <div className="flex items-center gap-2 mt-0.5">
@@ -90,9 +92,9 @@ export const columns: ColumnDef<EmployeeWithWorkload>[] = [
       </span>
     ),
     cell: ({ row }) => (
-      <HeatBar 
-        current={row.original.activeProjects} 
-        max={row.original.maxCapacity} 
+      <HeatBar
+        current={row.original.activeProjects}
+        max={row.original.maxCapacity}
       />
     ),
   },

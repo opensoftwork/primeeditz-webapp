@@ -1,15 +1,15 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { toast } from "sonner";
 import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
+import React, { createContext, useCallback, useContext, useState } from "react";
+import { toast } from "sonner";
 import {
-  RequestStepId,
-  RequestFormData,
   INITIAL_REQUEST_FORM_DATA,
+  type RequestFormData,
+  type RequestStepId,
 } from "./types";
 
 interface RequestWizardContextType {
@@ -92,8 +92,14 @@ export function RequestWizardProvider({
 
   // Handlers
   const handleNext = useCallback(() => {
+    if (step === 2 && !formData.endClientName.trim()) {
+      toast.error("Missing Identity", {
+        description: "End Client Identity is required to proceed.",
+      });
+      return;
+    }
     if (step < 3) setStep((prev) => (prev + 1) as RequestStepId);
-  }, [step]);
+  }, [step, formData.endClientName]);
 
   const handleBack = useCallback(() => {
     if (step > 1) setStep((prev) => (prev - 1) as RequestStepId);
@@ -108,10 +114,6 @@ export function RequestWizardProvider({
       await requestQuotation({
         templateId: selectedPackage,
         endClientName: formData.endClientName,
-        eventName: formData.eventName,
-        eventDate: formData.eventDate
-          ? new Date(formData.eventDate).getTime()
-          : undefined,
         notes: formData.notes,
       });
 

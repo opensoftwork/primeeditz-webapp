@@ -1,25 +1,14 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowRight, Plus, Tag } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -28,12 +17,23 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { Plus, Tag, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "motion/react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 const projectTypeSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -60,10 +60,10 @@ export function ProjectTypeDrawer({
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const categories = useQuery(
-    api.functions.projectCategories.queries.getActiveCategories
+    api.functions.projectCategories.queries.getActiveCategories,
   );
   const createCategory = useMutation(
-    api.functions.projectCategories.mutations.createCategoryOnFly
+    api.functions.projectCategories.mutations.createCategoryOnFly,
   );
 
   const form = useForm({

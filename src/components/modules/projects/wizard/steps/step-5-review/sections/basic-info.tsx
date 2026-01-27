@@ -1,10 +1,9 @@
 "use client";
 
+import { Database, MapPin, Tag, User } from "lucide-react";
 import React from "react";
-import { format } from "date-fns";
-import { Tag, User, FileText, Calendar, MapPin, Database } from "lucide-react";
-import { SectionWrapper } from "../section-wrapper";
 import { ReviewData } from "../review-data";
+import { SectionWrapper } from "../section-wrapper";
 
 interface BasicInfoReviewProps {
   formData: any;
@@ -34,20 +33,7 @@ export function BasicInfoReview({
           label="End Studio"
           value={formData.step1.endClientName}
         />
-        <ReviewData
-          icon={<FileText className="h-4 w-4" />}
-          label="Event Name"
-          value={formData.step1.eventName}
-        />
-        <ReviewData
-          icon={<Calendar className="h-4 w-4" />}
-          label="Event Date"
-          value={
-            formData.step1.eventDate
-              ? format(formData.step1.eventDate, "PPP")
-              : "N/A"
-          }
-        />
+
         <ReviewData
           icon={<MapPin className="h-4 w-4" />}
           label="Venue"

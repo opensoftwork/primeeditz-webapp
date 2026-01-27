@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import { FolderPlus, Plus } from "lucide-react";
 import { motion } from "motion/react";
+import { Button } from "@/components/ui/button";
 
 interface ListEmptyProps {
   onCreate: () => void;
@@ -19,13 +19,14 @@ export function ListEmpty({ onCreate }: ListEmptyProps) {
         <div className="absolute inset-0 bg-primary/20 blur-3xl rounded-full" />
         <FolderPlus className="h-20 w-20 text-white/10 relative z-10" />
       </div>
-      
+
       <div className="space-y-2 max-w-sm">
         <h3 className="text-xl font-black text-white uppercase tracking-tight">
           No Templates Found
         </h3>
         <p className="text-white/40 font-medium text-sm">
-          You haven't defined any folder structures yet. Start by creating your first template.
+          You haven't defined any folder structures yet. Start by creating your
+          first template.
         </p>
       </div>
 

@@ -1,7 +1,7 @@
 "use client";
 
+import { Building2, FileText, Mail, User } from "lucide-react";
 import { motion } from "motion/react";
-import { User, Mail, Building2, FileText } from "lucide-react";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
 
 export function EditorClientCard() {

@@ -1,19 +1,19 @@
 "use client";
 
 import {
-  Search,
-  Layout,
-  Plus,
+  Check,
   ChevronLeft,
   ChevronRight,
+  Layout,
+  Plus,
+  Search,
   X,
-  Check,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { useState, useMemo } from "react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { Template } from "../../types";
 
@@ -31,7 +31,7 @@ export function TemplatePickerInline({
   onCancel,
 }: TemplatePickerInlineProps) {
   const [search, setSearch] = useState("");
-  
+
   // Pagination logic
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5; // Reduced slightly for inline layout
@@ -43,7 +43,7 @@ export function TemplatePickerInline({
     return templates.filter(
       (t) =>
         t.name.toLowerCase().includes(lowerSearch) ||
-        (t.description && t.description.toLowerCase().includes(lowerSearch))
+        (t.description && t.description.toLowerCase().includes(lowerSearch)),
     );
   }, [templates, search]);
 
@@ -51,7 +51,7 @@ export function TemplatePickerInline({
   const startIndex = (currentPage - 1) * pageSize;
   const paginatedTemplates = filteredTemplates.slice(
     startIndex,
-    startIndex + pageSize
+    startIndex + pageSize,
   );
 
   const handleSelect = (id: string) => {
@@ -59,7 +59,7 @@ export function TemplatePickerInline({
   };
 
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       className="mt-10 space-y-8 px-8 pb-8 relative border border-white/5 bg-white/1 rounded-4xl"
@@ -77,7 +77,7 @@ export function TemplatePickerInline({
             Select a template from your library
           </p>
         </div>
-        
+
         <div className="flex items-center gap-4 flex-1 max-w-md">
           <div className="relative group flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-primary transition-colors" />
@@ -115,21 +115,23 @@ export function TemplatePickerInline({
                   "group p-5 rounded-3xl border transition-all duration-300 relative overflow-hidden cursor-pointer",
                   isSelected
                     ? "bg-primary/5 border-primary/30"
-                    : "bg-zinc-950 border-white/5 hover:bg-white/5 hover:border-white/10"
+                    : "bg-zinc-950 border-white/5 hover:bg-white/5 hover:border-white/10",
                 )}
                 onClick={() => handleSelect(template._id)}
               >
                 <div className="flex items-center justify-between relative z-10">
                   <div className="flex items-center gap-5">
-                    <div className={cn(
-                      "h-12 w-12 rounded-2xl flex items-center justify-center border transition-all",
-                      isSelected 
-                        ? "bg-primary/20 border-primary/40 text-primary" 
-                        : "bg-white/5 border-white/10 text-white/20"
-                    )}>
+                    <div
+                      className={cn(
+                        "h-12 w-12 rounded-2xl flex items-center justify-center border transition-all",
+                        isSelected
+                          ? "bg-primary/20 border-primary/40 text-primary"
+                          : "bg-white/5 border-white/10 text-white/20",
+                      )}
+                    >
                       <Layout className="h-5 w-5" />
                     </div>
-                    
+
                     <div className="space-y-1">
                       <div className="flex items-center gap-3">
                         <h4 className="text-sm font-black text-white uppercase tracking-tight">
@@ -151,7 +153,7 @@ export function TemplatePickerInline({
                         )}
                       </div>
                       <p className="text-[10px] font-medium text-white/40 line-clamp-1 leading-relaxed">
-                          {template.description || "No description provided"}
+                        {template.description || "No description provided"}
                       </p>
                     </div>
                   </div>
@@ -161,7 +163,7 @@ export function TemplatePickerInline({
                       "h-10 w-10 rounded-xl flex items-center justify-center border transition-all",
                       isSelected
                         ? "bg-primary text-primary-foreground border-primary shadow-lg shadow-primary/20"
-                        : "bg-white/5 border-white/10 text-white/20 group-hover:text-white/40 group-hover:bg-white/10"
+                        : "bg-white/5 border-white/10 text-white/20 group-hover:text-white/40 group-hover:bg-white/10",
                     )}
                   >
                     {isSelected ? (
@@ -213,9 +215,7 @@ export function TemplatePickerInline({
               variant="ghost"
               size="icon"
               className="h-9 w-9 bg-white/5 border border-white/5 rounded-xl text-white/40 hover:text-white disabled:opacity-20"
-              onClick={() =>
-                setCurrentPage((p) => Math.min(totalPages, p + 1))
-              }
+              onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
               disabled={currentPage === totalPages}
             >
               <ChevronRight className="h-4 w-4" />

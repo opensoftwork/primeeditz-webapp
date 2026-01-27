@@ -1,11 +1,11 @@
 "use client";
 
-import { X, CheckCircle2, ChevronRight } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
-import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
+import { CheckCircle2, ChevronRight, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
+import { cn } from "@/lib/utils";
 
 interface PackageDetailsDrawerProps {
   open: boolean;
@@ -116,7 +116,7 @@ export function PackageDetailsDrawer({
                   >
                     {pkg.lineItems.map((item: any, index: number) => (
                       <div
-                        key={index}
+                        key={`${item.description}-${index}`}
                         className="p-4 rounded-2xl bg-white/2 border border-white/5 flex items-center justify-between gap-6"
                       >
                         <div className="space-y-0.5">

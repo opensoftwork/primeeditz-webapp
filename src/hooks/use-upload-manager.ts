@@ -1,29 +1,35 @@
 "use client";
 
-import { useMutation, useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useUploadStore, type UploadItem } from "@/stores/upload-store";
-import * as tus from "tus-js-client";
+import type { Id } from "@convex/_generated/dataModel";
+import { useAction, useMutation } from "convex/react";
 import { toast } from "sonner";
-import { type Id } from "@convex/_generated/dataModel";
+import * as tus from "tus-js-client";
+import { type UploadItem, useUploadStore } from "@/stores/upload-store";
 
 const SMALL_FILE_THRESHOLD = 50 * 1024 * 1024; // 50MB
 
 export function useUploadManager() {
   const { updateProgress, updateStatus, removeUpload } = useUploadStore();
-  
-  const generateUploadUrlAction = useAction(api.functions.storage.actions.generateUploadUrl);
-  const getTusConfigAction = useAction(api.functions.storage.actions.getTusConfig);
-  const createAssetMutation = useMutation(api.functions.assets.mutations.createAsset);
+
+  const generateUploadUrlAction = useAction(
+    api.functions.storage.actions.generateUploadUrl,
+  );
+  const getTusConfigAction = useAction(
+    api.functions.storage.actions.getTusConfig,
+  );
+  const createAssetMutation = useMutation(
+    api.functions.assets.mutations.createAsset,
+  );
 
   const processUpload = async (id: string, item: UploadItem) => {
     const { file, projectId, folderId } = item;
-    
+
     try {
       if (file.size < SMALL_FILE_THRESHOLD) {
         // --- SMALL FILE: Pre-signed PUT ---
         updateStatus(id, "uploading");
-        
+
         const { url, storageKey } = await generateUploadUrlAction({
           fileName: file.name,
           contentType: file.type,
@@ -35,7 +41,7 @@ export function useUploadManager() {
         const xhr = new XMLHttpRequest();
         xhr.open("PUT", url);
         xhr.setRequestHeader("Content-Type", file.type);
-        
+
         xhr.upload.onprogress = (event) => {
           if (event.lengthComputable) {
             const progress = Math.round((event.loaded / event.total) * 100);
@@ -63,11 +69,10 @@ export function useUploadManager() {
           sizeBytes: file.size,
           mimeType: file.type,
         });
-
       } else {
         // --- LARGE FILE: TUS Resumable ---
         updateStatus(id, "uploading");
-        
+
         const { endpoint } = await getTusConfigAction({
           projectId: projectId as Id<"projects">,
           fileSize: file.size,
@@ -93,21 +98,21 @@ export function useUploadManager() {
           onSuccess: async () => {
             // TUS server will have named the file in S3 already
             // We need to construct the key that matches TUS namingFunction
-            // Actually, TUS server 2.x returns the upload URL. 
+            // Actually, TUS server 2.x returns the upload URL.
             // The storage key is the last part of the URL.
             const minioKey = upload.url?.split("/").slice(-1)[0] || "";
             // Wait, our namingFunction returns a complex path projects/...
             // The TUS ID is the full path.
-            
+
             await createAssetMutation({
               projectId: projectId as Id<"projects">,
               folderId: folderId as Id<"folders">,
               filename: file.name,
-              minioKey: upload.url?.split("/tus/")[1] || "", 
+              minioKey: upload.url?.split("/tus/")[1] || "",
               sizeBytes: file.size,
               mimeType: file.type,
             });
-          }
+          },
         });
 
         upload.start();
@@ -115,10 +120,9 @@ export function useUploadManager() {
 
       updateStatus(id, "completed");
       toast.success(`${file.name} uploaded successfully`);
-      
+
       // Auto-remove from list after 3 seconds
       setTimeout(() => removeUpload(id), 3000);
-
     } catch (error: any) {
       console.error(`Upload error for ${file.name}:`, error);
       updateStatus(id, "error", { error: error.message });

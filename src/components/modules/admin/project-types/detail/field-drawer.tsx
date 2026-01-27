@@ -1,7 +1,9 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { useEffect } from "react";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -9,12 +11,10 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
-import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { TypeSpecificOptions } from "../fields/type-specific-options";
 
@@ -214,7 +214,7 @@ export function FieldDrawer({
                           onClick={() =>
                             !initialData &&
                             field.handleChange(
-                              t.value as FieldFormValues["type"]
+                              t.value as FieldFormValues["type"],
                             )
                           }
                           disabled={!!initialData}
@@ -224,7 +224,7 @@ export function FieldDrawer({
                               ? "bg-primary text-primary-foreground border-primary"
                               : "bg-white/5 text-white/40 border-white/5 hover:border-white/10 hover:text-white",
                             initialData &&
-                              "cursor-not-allowed opacity-50 hover:border-white/5 hover:text-white/40"
+                              "cursor-not-allowed opacity-50 hover:border-white/5 hover:text-white/40",
                           )}
                         >
                           {t.label}
@@ -315,8 +315,8 @@ export function FieldDrawer({
                     {isSubmitting
                       ? "Saving..."
                       : initialData
-                      ? "Update Field"
-                      : "Create Field"}
+                        ? "Update Field"
+                        : "Create Field"}
                   </Button>
                 )}
               </form.Subscribe>

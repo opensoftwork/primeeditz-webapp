@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
-import { User, Calendar } from "lucide-react";
 import { format } from "date-fns";
+import { Calendar, User } from "lucide-react";
+import { motion } from "motion/react";
 
 interface StudioProjectInfoProps {
   quotation: any;
@@ -27,7 +27,15 @@ export function StudioProjectInfo({ quotation }: StudioProjectInfoProps) {
             Strategic Studio
           </p>
           <p className="text-xs font-bold text-white uppercase tracking-tight">
-            {quotation.studioId || "Universal"}
+            {quotation.studioName || quotation.studioId || "Universal"}
+          </p>
+        </div>
+        <div className="space-y-1">
+          <p className="text-[9px] font-black text-white/20 uppercase tracking-[0.2em]">
+            End Client / Identity
+          </p>
+          <p className="text-xs font-bold text-white uppercase tracking-tight">
+            {quotation.endClientName || "Not Specified"}
           </p>
         </div>
         {quotation.projectId && (

@@ -1,12 +1,12 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { AdminQuotation } from "./list-types";
-import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Eye, Receipt, User } from "lucide-react";
 import Link from "next/link";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { Button } from "@/components/ui/button";
+import type { AdminQuotation } from "./list-types";
 
 export const columns: ColumnDef<AdminQuotation>[] = [
   {
@@ -48,12 +48,15 @@ export const columns: ColumnDef<AdminQuotation>[] = [
   },
   {
     accessorKey: "projectName",
-    header: "Project",
+    header: "Project / Identity",
     cell: ({ row }) => {
-      const name = row.getValue("projectName") as string;
+      const quotation = row.original;
+      const projectName = quotation.projectName;
+      const endClientName = quotation.endClientName;
+
       return (
         <span className="font-bold text-white/30 truncate max-w-[200px] block text-xs uppercase tracking-tight">
-          {name || "General"}
+          {projectName || endClientName || "General"}
         </span>
       );
     },

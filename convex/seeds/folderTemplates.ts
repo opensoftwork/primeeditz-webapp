@@ -1,23 +1,31 @@
-import { MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Folder Templates
- * 
+ *
  * Default folder structures for different project types.
  */
 
 export async function seedFolderTemplates(
   ctx: MutationCtx,
-  typeMap: Record<string, Id<"projectTypes">>
+  typeMap: Record<string, Id<"projectTypes">>,
 ) {
   const templates = [
     // Event-Based Templates
     {
       name: "Hindu Wedding - Brahmin",
       variant: "South Indian",
-      description: "Standard Brahmin wedding ceremonies with dedicated folders for Naandi and Muhurtham.",
-      folders: ["Naandi", "Muhurtham", "Grihapravesham", "Reception", "Candid", "Traditional"],
+      description:
+        "Standard Brahmin wedding ceremonies with dedicated folders for Naandi and Muhurtham.",
+      folders: [
+        "Naandi",
+        "Muhurtham",
+        "Grihapravesham",
+        "Reception",
+        "Candid",
+        "Traditional",
+      ],
       projectType: "Traditional Photo Color Correction",
       isDefault: false,
     },
@@ -25,7 +33,12 @@ export async function seedFolderTemplates(
       name: "Christian Wedding",
       variant: "General",
       description: "Church ceremony focused structure.",
-      folders: ["Church Ceremony", "Reception", "Couple Portraits", "Getting Ready"],
+      folders: [
+        "Church Ceremony",
+        "Reception",
+        "Couple Portraits",
+        "Getting Ready",
+      ],
       projectType: "Traditional Photo Color Correction",
       isDefault: false,
     },
@@ -33,7 +46,14 @@ export async function seedFolderTemplates(
       name: "YouTube Content",
       variant: "Social Media",
       description: "Asset organization for YouTube and social media edits.",
-      folders: ["A-Roll", "B-Roll", "Audio", "Assets", "Thumbnails", "Project Files"],
+      folders: [
+        "A-Roll",
+        "B-Roll",
+        "Audio",
+        "Assets",
+        "Thumbnails",
+        "Project Files",
+      ],
       projectType: "Traditional Video Edit",
       isDefault: false,
     },
@@ -43,7 +63,12 @@ export async function seedFolderTemplates(
       name: "Photo Color Correction",
       variant: "Standard",
       description: "Basic photo editing structure.",
-      folders: ["Raw Images", "Color Corrected", "Rejected", "Final Deliverables"],
+      folders: [
+        "Raw Images",
+        "Color Corrected",
+        "Rejected",
+        "Final Deliverables",
+      ],
       projectType: "Traditional Photo Color Correction",
       isDefault: true,
     },
@@ -51,7 +76,12 @@ export async function seedFolderTemplates(
       name: "Candid Photo Grading",
       variant: "Premium",
       description: "High-end grading for candid photography.",
-      folders: ["Raw Photos", "Reference Images", "Graded Output", "Final Selection"],
+      folders: [
+        "Raw Photos",
+        "Reference Images",
+        "Graded Output",
+        "Final Selection",
+      ],
       projectType: "Candid Photo Grading",
       isDefault: true,
     },
@@ -59,7 +89,13 @@ export async function seedFolderTemplates(
       name: "Album Design - Traditional",
       variant: "Standard",
       description: "Traditional grid-based album design workflow.",
-      folders: ["Raw Photos", "Selected Photos", "Design Drafts", "Client Approved", "Print Ready"],
+      folders: [
+        "Raw Photos",
+        "Selected Photos",
+        "Design Drafts",
+        "Client Approved",
+        "Print Ready",
+      ],
       projectType: "Album Design - Traditional",
       isDefault: true,
     },
@@ -67,7 +103,13 @@ export async function seedFolderTemplates(
       name: "Album Design - Candid",
       variant: "Premium",
       description: "Story-based candid album design workflow.",
-      folders: ["Raw Photos", "Graded Photos", "Layout Drafts", "Final Design", "Print Files"],
+      folders: [
+        "Raw Photos",
+        "Graded Photos",
+        "Layout Drafts",
+        "Final Design",
+        "Print Files",
+      ],
       projectType: "Album Design - Candid",
       isDefault: true,
     },
@@ -77,7 +119,13 @@ export async function seedFolderTemplates(
       name: "Traditional Video Edit",
       variant: "Standard",
       description: "Documentary style wedding video edit.",
-      folders: ["Raw Footage", "Proxy Files", "Audio", "Timeline Exports", "Final Render"],
+      folders: [
+        "Raw Footage",
+        "Proxy Files",
+        "Audio",
+        "Timeline Exports",
+        "Final Render",
+      ],
       projectType: "Traditional Video Edit",
       isDefault: true,
     },
@@ -85,7 +133,14 @@ export async function seedFolderTemplates(
       name: "Pre-Wedding Video",
       variant: "Teaser",
       description: "Short highlight film structure.",
-      folders: ["Raw Clips", "BTS Footage", "Music", "VFX Assets", "Teaser Export", "Main Video Export"],
+      folders: [
+        "Raw Clips",
+        "BTS Footage",
+        "Music",
+        "VFX Assets",
+        "Teaser Export",
+        "Main Video Export",
+      ],
       projectType: "Pre-Wedding Teaser",
       isDefault: true,
     },
@@ -93,7 +148,13 @@ export async function seedFolderTemplates(
       name: "Pre-Wedding with VFX",
       variant: "Premium",
       description: "High-end pre-wedding film with heavy visual effects.",
-      folders: ["Raw Clips", "VFX Source", "After Effects Projects", "Render Queue", "Final Exports"],
+      folders: [
+        "Raw Clips",
+        "VFX Source",
+        "After Effects Projects",
+        "Render Queue",
+        "Final Exports",
+      ],
       projectType: "Pre-Wedding with VFX",
       isDefault: true,
     },
@@ -101,7 +162,13 @@ export async function seedFolderTemplates(
       name: "VFX Project",
       variant: "General",
       description: "Standalone visual effects or cleanup work.",
-      folders: ["Source Footage", "Masks & Roto", "Composites", "Render Output", "Final Delivery"],
+      folders: [
+        "Source Footage",
+        "Masks & Roto",
+        "Composites",
+        "Render Output",
+        "Final Delivery",
+      ],
       projectType: "VFX Work",
       isDefault: true,
     },
@@ -109,7 +176,13 @@ export async function seedFolderTemplates(
       name: "Highlight/Teaser",
       variant: "Standard",
       description: "Quick turnaround highlight edit.",
-      folders: ["Raw Clips", "Selected Moments", "Music", "Draft Cuts", "Final Export"],
+      folders: [
+        "Raw Clips",
+        "Selected Moments",
+        "Music",
+        "Draft Cuts",
+        "Final Export",
+      ],
       projectType: "Highlight/Teaser Edit",
       isDefault: true,
     },
@@ -117,7 +190,16 @@ export async function seedFolderTemplates(
       name: "Cinematic Film",
       variant: "Premium",
       description: "Feature-length cinematic wedding film structure.",
-      folders: ["Day 1 Raw", "Day 2 Raw", "Interviews", "Drone Footage", "Audio", "Timeline", "Color Graded", "Master Export"],
+      folders: [
+        "Day 1 Raw",
+        "Day 2 Raw",
+        "Interviews",
+        "Drone Footage",
+        "Audio",
+        "Timeline",
+        "Color Graded",
+        "Master Export",
+      ],
       projectType: "Cinematic Film",
       isDefault: true,
     },
@@ -181,11 +263,12 @@ export async function seedFolderTemplates(
   let updatedCount = 0;
 
   for (const template of templates) {
-    const existing = existingTemplates.find(t => t.name === template.name);
-    
-    const projectTypeId = template.projectType && typeMap[template.projectType]
-      ? typeMap[template.projectType]
-      : undefined;
+    const existing = existingTemplates.find((t) => t.name === template.name);
+
+    const projectTypeId =
+      template.projectType && typeMap[template.projectType]
+        ? typeMap[template.projectType]
+        : undefined;
 
     const data: any = {
       name: template.name,
@@ -206,5 +289,7 @@ export async function seedFolderTemplates(
     }
   }
 
-  console.log(`Folder templates: ${insertedCount} inserted, ${updatedCount} updated`);
+  console.log(
+    `Folder templates: ${insertedCount} inserted, ${updatedCount} updated`,
+  );
 }

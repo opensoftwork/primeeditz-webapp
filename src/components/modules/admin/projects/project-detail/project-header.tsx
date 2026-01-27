@@ -1,11 +1,11 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/modules/projects/detail/shared";
 import { useRouter } from "next/navigation";
+import { StatusBadge } from "@/components/modules/projects/detail/shared";
+import { Button } from "@/components/ui/button";
 
 interface ProjectHeaderProps {
   code: string;

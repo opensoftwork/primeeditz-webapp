@@ -6,9 +6,9 @@ import { Calendar, ChevronRight, Eye, Hash, Users } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useMemo } from "react";
-import { StudioStatusBadge } from "../studio-status-badge";
-import { PhaseProgress } from "../phase-progress";
 import { DataTableSkeleton } from "@/components/shared/data-table";
+import { PhaseProgress } from "../phase-progress";
+import { StudioStatusBadge } from "../studio-status-badge";
 
 /**
  * Revamped Studio Projects view: Grouped by End Client.

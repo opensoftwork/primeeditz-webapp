@@ -1,5 +1,5 @@
-import { Server } from "@tus/server";
 import { S3Store } from "@tus/s3-store";
+import { Server } from "@tus/server";
 
 if (!process.env.MINIO_ENDPOINT) {
   throw new Error("MINIO_ENDPOINT is not configured");
@@ -23,12 +23,13 @@ export const tusServer = new Server({
   datastore: s3Store,
   namingFunction: (req: any) => {
     // Extract metadata from headers
-    const metadataStr = req.headers instanceof Headers 
-      ? req.headers.get("upload-metadata") || ""
-      : (req.headers["upload-metadata"] as string) || "";
-      
+    const metadataStr =
+      req.headers instanceof Headers
+        ? req.headers.get("upload-metadata") || ""
+        : (req.headers["upload-metadata"] as string) || "";
+
     const metadata: Record<string, string> = {};
-    
+
     metadataStr.split(",").forEach((item: string) => {
       const [key, b64Value] = item.trim().split(" ");
       if (key && b64Value) {
@@ -44,9 +45,9 @@ export const tusServer = new Server({
     const folderId = metadata.folderId || "unknown";
     const fileName = metadata.filename || "file";
     const timestamp = Date.now();
-    
+
     const cleanName = fileName.replace(/\s+/g, "_");
-    
+
     // Return the full storage key path
     return `projects/${projectId}/assets/${folderId}/${timestamp}_${cleanName}`;
   },

@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
 import { X } from "lucide-react";
 import { motion } from "motion/react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import type { FileTypeCounts, VaultTabType } from "../types";
 import { formatFileSize } from "../utils";
-import type { VaultTabType, FileTypeCounts } from "../types";
 import { VaultTabs } from "./vault-tabs";
 
 interface VaultHeaderProps {
@@ -39,7 +39,7 @@ export function VaultHeader({
       <div
         className={cn(
           "absolute top-0 right-0 w-80 h-80 blur-[120px] rounded-full -mr-40 -mt-40 animate-pulse duration-5000",
-          `bg-${primaryColor}/10`
+          `bg-${primaryColor}/10`,
         )}
       />
       <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[32px_32px]" />
@@ -55,13 +55,13 @@ export function VaultHeader({
               <div
                 className={cn(
                   "h-0.5 w-12 rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]",
-                  `bg-${primaryColor}`
+                  `bg-${primaryColor}`,
                 )}
               />
               <span
                 className={cn(
                   "text-[10px] font-black uppercase tracking-[0.4em]",
-                  `text-${primaryColor}/60`
+                  `text-${primaryColor}/60`,
                 )}
               >
                 Vault Protocol

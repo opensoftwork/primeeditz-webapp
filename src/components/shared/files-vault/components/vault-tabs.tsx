@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
-import { File, Image as ImageIcon, Video, FileText } from "lucide-react";
+import { File, FileText, Image as ImageIcon, Video } from "lucide-react";
 import { motion } from "motion/react";
+import React from "react";
 import { cn } from "@/lib/utils";
-import type { VaultTabType, FileTypeCounts } from "../types";
+import type { FileTypeCounts, VaultTabType } from "../types";
 
 interface VaultTabsProps {
   activeTab: VaultTabType;
@@ -57,7 +57,7 @@ export function VaultTabs({
               "relative flex items-center gap-2 px-4 py-2.5 rounded-xl transition-all duration-300",
               isActive
                 ? "bg-white/10 text-white shadow-lg"
-                : "text-white/20 hover:text-white/40 hover:bg-white/5"
+                : "text-white/20 hover:text-white/40 hover:bg-white/5",
             )}
           >
             {isActive && (
@@ -81,7 +81,7 @@ export function VaultTabs({
                   "text-[8px] font-bold px-1.5 py-0.5 rounded-md relative z-10",
                   isActive
                     ? "bg-primary text-primary-foreground"
-                    : "bg-white/5 text-white/40"
+                    : "bg-white/5 text-white/40",
                 )}
               >
                 {count}

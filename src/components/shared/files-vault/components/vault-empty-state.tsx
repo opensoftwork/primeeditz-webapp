@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
 import { Upload } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { getCategoryLabel, getCategoryIcon } from "../utils";
 import type { VaultTabType } from "../types";
+import { getCategoryIcon, getCategoryLabel } from "../utils";
 
 interface VaultEmptyStateProps {
   activeTab: VaultTabType;

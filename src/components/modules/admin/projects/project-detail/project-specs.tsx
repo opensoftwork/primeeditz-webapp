@@ -2,8 +2,8 @@
 
 import { Package } from "lucide-react";
 import {
-  DetailSection,
   DetailItem,
+  DetailSection,
 } from "@/components/modules/projects/detail/shared";
 import type { AdminProjectDetail } from "./types";
 

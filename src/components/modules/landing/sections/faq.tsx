@@ -1,13 +1,13 @@
 "use client";
 
 import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 
@@ -121,14 +121,14 @@ export function FAQSection() {
                     className={cn(
                       "rounded-xl border border-white/5 bg-white/2 px-6",
                       "data-[state=open]:bg-white/5 data-[state=open]:border-white/10",
-                      "transition-all duration-300"
+                      "transition-all duration-300",
                     )}
                   >
                     <AccordionTrigger
                       className={cn(
                         "text-left font-semibold text-white py-5",
                         "hover:no-underline hover:text-primary transition-colors",
-                        "[&[data-state=open]>svg]:rotate-180"
+                        "[&[data-state=open]>svg]:rotate-180",
                       )}
                     >
                       {faq.question}

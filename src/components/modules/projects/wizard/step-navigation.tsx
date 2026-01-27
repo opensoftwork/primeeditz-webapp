@@ -50,8 +50,8 @@ export function StepNavigation({
               isCurrent
                 ? "bg-primary/10 ring-1 ring-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.05)]"
                 : isClickable
-                ? "hover:bg-white/5 cursor-pointer"
-                : "opacity-80 cursor-default"
+                  ? "hover:bg-white/5 cursor-pointer"
+                  : "opacity-80 cursor-default",
             )}
           >
             {/* Indicator Box */}
@@ -62,8 +62,8 @@ export function StepNavigation({
                   isCompleted
                     ? "bg-green-500 border-green-500 text-white shadow-lg shadow-green-500/20"
                     : isCurrent
-                    ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
-                    : "bg-white/5 border-white/10 text-muted-foreground/30 group-hover:border-white/20"
+                      ? "bg-primary border-primary text-primary-foreground shadow-lg shadow-primary/20"
+                      : "bg-white/5 border-white/10 text-muted-foreground/30 group-hover:border-white/20",
                 )}
               >
                 {isCompleted ? (
@@ -84,7 +84,7 @@ export function StepNavigation({
               <span
                 className={cn(
                   "text-[10px] uppercase tracking-widest font-black mb-0.5 transition-opacity duration-300",
-                  isCurrent || isCompleted ? "opacity-40" : "opacity-20"
+                  isCurrent || isCompleted ? "opacity-40" : "opacity-20",
                 )}
               >
                 Step {index + 1}
@@ -95,8 +95,8 @@ export function StepNavigation({
                   isCurrent
                     ? "text-foreground"
                     : isCompleted
-                    ? "text-foreground/80"
-                    : "text-muted-foreground/20"
+                      ? "text-foreground/80"
+                      : "text-muted-foreground/20",
                 )}
               >
                 {step.title}

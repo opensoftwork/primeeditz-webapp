@@ -3,7 +3,7 @@
 import { CheckIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { FormStep } from "./types";
+import type { FormStep } from "./types";
 
 interface RequestStepNavigationProps {
   steps: FormStep[];

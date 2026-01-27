@@ -5,11 +5,11 @@
 
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
 import { Check } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import type { SelectionOption } from "./types";
 import type { StudioSelectionMode } from "../../types";
+import type { SelectionOption } from "./types";
 
 interface SelectionOptionCardProps {
   option: SelectionOption;

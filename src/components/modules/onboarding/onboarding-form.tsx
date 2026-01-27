@@ -1,34 +1,33 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import * as z from "zod";
+import { useMutation, useQuery } from "convex/react";
 import {
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  Crown,
   Loader2,
+  Shield,
   Sparkles,
   UserCircle,
-  Shield,
-  Crown,
-  Building2,
-  ArrowRight,
-  CheckCircle2,
 } from "lucide-react";
-import { useMutation, useQuery } from "convex/react";
 import { motion } from "motion/react";
-
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import { Input } from "@/components/ui/input";
+import { isValidPhoneNumber, PhoneInput } from "@/components/ui/phone-input";
 
 // Zod validation schema
 const onboardingSchema = z.object({

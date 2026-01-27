@@ -6,7 +6,7 @@
 
 "use client";
 
-import { User, Briefcase } from "lucide-react";
+import { Briefcase, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,

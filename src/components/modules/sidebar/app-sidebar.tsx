@@ -1,27 +1,29 @@
 "use client";
 
-import { useMemo } from "react";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Sidebar, SidebarContent, SidebarRail } from "@/components/ui/sidebar";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "convex/react";
+import { useMemo } from "react";
 import {
+  Sidebar,
+  SidebarContent,
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  commonNavGroup,
+  getNavItemsForRole,
+  type NavGroup,
+  type NavItem,
+} from "./navigation-config";
 import { SidebarBrand } from "./sidebar-brand";
 import { SidebarNavGroup } from "./sidebar-nav-group";
 import { SidebarUserMenu } from "./sidebar-user-menu";
-import {
-  getNavItemsForRole,
-  commonNavGroup,
-  type NavItem,
-  type NavGroup,
-} from "./navigation-config";
 
 // Type guard for NavGroup
 function isNavGroup(item: any): item is NavGroup {

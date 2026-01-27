@@ -1,16 +1,18 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Database, CheckCircle2 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { CheckCircle2, Database } from "lucide-react";
 import Link from "next/link";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
+import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./columns";
 
 export function RecentProjects() {
-  const projects = useQuery(api.employees.getEmployeeRecentProjects, { limit: 5 });
+  const projects = useQuery(api.employees.getEmployeeRecentProjects, {
+    limit: 5,
+  });
 
   if (projects === undefined) {
     return (
@@ -43,9 +45,7 @@ export function RecentProjects() {
           className="text-[9px] font-black uppercase tracking-widest text-indigo-400/60 hover:text-indigo-400 transition-colors"
           asChild
         >
-          <Link href="/assigned-work">
-            View Full Pipeline
-          </Link>
+          <Link href="/assigned-work">View Full Pipeline</Link>
         </Button>
       </div>
 

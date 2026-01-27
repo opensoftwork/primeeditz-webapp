@@ -1,31 +1,31 @@
 "use client";
 
-import { useState } from "react";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import {
-  ChevronRight,
   ArrowLeft,
   ArrowRight,
-  Rocket,
-  Package,
   Calendar,
-  User,
-  FileText,
   CheckCircle2,
+  ChevronRight,
+  FileText,
   Loader2,
+  Package,
+  Rocket,
   Sparkles,
+  User,
 } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
-import { toast } from "sonner";
-import type { Id } from "@convex/_generated/dataModel";
 
 export default function QuoteRequestWizard() {
   const router = useRouter();

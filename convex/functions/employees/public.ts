@@ -1,6 +1,6 @@
 /**
  * Public Employee Queries
- * 
+ *
  * Unauthenticated queries for employee onboarding.
  * These are intentionally public for the onboarding flow.
  */
@@ -13,12 +13,12 @@ import { query } from "../../_generated/server";
  * Only returns minimal info needed for the onboarding screen.
  */
 export const getEmployeeForOnboarding = query({
-  args: { 
-    employeeId: v.id("profiles") 
+  args: {
+    employeeId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
     const employee = await ctx.db.get(args.employeeId);
-    
+
     // Return null if not found or not an employee
     if (!employee || employee.role !== "employee") {
       return null;

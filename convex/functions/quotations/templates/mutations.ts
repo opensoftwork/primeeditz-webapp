@@ -20,8 +20,8 @@ const templateLineItemInput = v.object({
         unit: v.string(),
         unitPrice: v.number(),
         defaultQuantity: v.number(),
-      })
-    )
+      }),
+    ),
   ),
 });
 
@@ -65,18 +65,18 @@ export const updateTemplate = adminMutation({
   },
   handler: async (ctx, args) => {
     const { templateId, ...updates } = args;
-    
+
     // Remove undefined values
     const cleanUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, v]) => v !== undefined)
+      Object.entries(updates).filter(([_, v]) => v !== undefined),
     );
-    
+
     if (Object.keys(cleanUpdates).length > 0) {
       await ctx.db.patch(templateId, {
         ...cleanUpdates,
       });
     }
-    
+
     return null;
   },
 });
@@ -93,9 +93,9 @@ export const toggleTemplateActive = adminMutation({
     if (!template) {
       throw new Error("Template not found");
     }
-    
+
     const newStatus = !template.isActive;
-    await ctx.db.patch(args.templateId, { 
+    await ctx.db.patch(args.templateId, {
       isActive: newStatus,
     });
     return newStatus;
@@ -110,7 +110,7 @@ export const deleteTemplate = adminMutation({
     templateId: v.id("quotationTemplates"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.templateId, { 
+    await ctx.db.patch(args.templateId, {
       isActive: false,
     });
     return null;
@@ -131,7 +131,7 @@ export const duplicateTemplate = adminMutation({
     if (!original) {
       throw new Error("Template not found");
     }
-    
+
     return await ctx.db.insert("quotationTemplates", {
       name: args.newName,
       description: original.description,

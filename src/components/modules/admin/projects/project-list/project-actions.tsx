@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { useMutation, useAction } from "convex/react";
+import { useAction, useMutation } from "convex/react";
 import { Archive, ArchiveRestore, Eye, Pencil, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -255,8 +255,8 @@ export function ProjectActions({ project }: ProjectActionsProps) {
                   <br />
                   <br />
                   <span className="text-red-400/80">
-                    ⚠️ This action cannot be undone. All project data, files,
-                    and history will be permanently removed.
+                    ⚠️ This action cannot be undone. All project data, files, and
+                    history will be permanently removed.
                   </span>
                 </>
               ) : (

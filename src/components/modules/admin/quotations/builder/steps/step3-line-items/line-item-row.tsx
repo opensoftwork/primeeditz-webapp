@@ -1,10 +1,11 @@
 "use client";
 
+import { Briefcase, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
-import { Trash2, Briefcase } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
 import {
   Select,
   SelectContent,
@@ -12,8 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
-import type { QuotationLineItem, Project, Section } from "../../types";
+import type { Project, QuotationLineItem, Section } from "../../types";
 
 interface LineItemRowProps {
   item: QuotationLineItem & { originalIdx: number };

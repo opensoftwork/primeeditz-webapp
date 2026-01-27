@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { HardDrive, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 interface ListHeaderProps {
@@ -31,7 +31,8 @@ export function ListHeader({ onCreate, tierCount }: ListHeaderProps) {
           )}
         </div>
         <p className="text-white/50 text-xs font-medium max-w-xl">
-          Configure storage packages with capacity and pricing for client quotations and automated project fulfillment.
+          Configure storage packages with capacity and pricing for client
+          quotations and automated project fulfillment.
         </p>
       </motion.div>
 

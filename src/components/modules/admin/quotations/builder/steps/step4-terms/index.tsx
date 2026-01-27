@@ -6,19 +6,19 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
-import { motion } from "motion/react";
 import {
-  FileText,
-  Sparkles,
-  Copy,
-  Check,
   AlertCircle,
+  Check,
+  Copy,
+  FileText,
   Loader2,
+  Sparkles,
 } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useQuotationBuilder } from "../../quotation-builder-context";
 
@@ -197,7 +197,7 @@ export function Step4Terms() {
             "p-5 rounded-2xl border transition-colors",
             hasError
               ? "bg-red-500/5 border-red-500/20"
-              : "bg-white/2 border-white/5"
+              : "bg-white/2 border-white/5",
           )}
         >
           <div className="flex items-center justify-between mb-4">
@@ -247,7 +247,7 @@ Example:
 • Full rights transferred upon payment"
               className={cn(
                 "min-h-[350px] bg-white/5 border-white/5 rounded-xl p-4 text-white text-sm leading-relaxed focus:ring-primary/20 resize-none font-mono",
-                hasError && "border-red-500/30 focus:ring-red-500/20"
+                hasError && "border-red-500/30 focus:ring-red-500/20",
               )}
             />
           </FieldContent>

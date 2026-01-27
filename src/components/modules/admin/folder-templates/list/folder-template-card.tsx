@@ -1,18 +1,18 @@
 "use client";
 
-import { Card } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { 
-  FolderTree, 
-  Edit3, 
-  Trash2, 
-  CheckCircle2, 
+import type { Doc } from "@convex/_generated/dataModel";
+import {
+  CheckCircle2,
   ChevronRight,
-  Layout
+  Edit3,
+  FolderTree,
+  Layout,
+  Trash2,
 } from "lucide-react";
 import { motion } from "motion/react";
-import type { Doc } from "@convex/_generated/dataModel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 
 interface FolderTemplate extends Doc<"folderTemplates"> {
   projectTypeName: string;
@@ -84,7 +84,7 @@ export function FolderTemplateCard({
             </p>
             <div className="flex flex-wrap gap-2">
               {template.folders.slice(0, 4).map((folder, idx) => (
-                <div 
+                <div
                   key={idx}
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/5 border border-white/5 text-[10px] font-bold text-white/60 transition-colors group-hover:border-white/10"
                 >

@@ -1,21 +1,19 @@
-'use client'
+"use client";
 
-import { Hero } from "@/components/modules/landing/hero";
 import { Leva } from "leva";
-
-import { 
-  ProblemSolutionSection, 
-  FeaturesShowcaseSection, 
-  WorkflowDemoSection,
-  WhoItsForSection,
-  PricingSection,
-  FAQSection,
-  CTABannerSection,
-  FooterSection,
-  TestimonialsSection
-} from "@/components/modules/landing/sections";
-
 import { AnimatedSection } from "@/components/modules/landing/animated-section";
+import { Hero } from "@/components/modules/landing/hero";
+import {
+  CTABannerSection,
+  FAQSection,
+  FeaturesShowcaseSection,
+  FooterSection,
+  PricingSection,
+  ProblemSolutionSection,
+  TestimonialsSection,
+  WhoItsForSection,
+  WorkflowDemoSection,
+} from "@/components/modules/landing/sections";
 
 export default function Home() {
   return (
@@ -23,7 +21,7 @@ export default function Home() {
       <div className="relative z-10 min-h-screen">
         <main className="max-w-full mx-auto relative overflow-visible">
           <Hero />
-          
+
           <AnimatedSection id="problems">
             <ProblemSolutionSection />
           </AnimatedSection>
@@ -31,7 +29,7 @@ export default function Home() {
           <AnimatedSection id="workflow">
             <WorkflowDemoSection />
           </AnimatedSection>
-          
+
           <AnimatedSection id="features">
             <FeaturesShowcaseSection />
           </AnimatedSection>
@@ -63,4 +61,3 @@ export default function Home() {
     </div>
   );
 }
-

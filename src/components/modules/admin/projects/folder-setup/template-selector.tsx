@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { FolderIcon, CheckCircle, Circle, Loader2 } from "lucide-react";
+import { useQuery } from "convex/react";
+import { CheckCircle, Circle, FolderIcon, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FolderTemplate {
@@ -27,7 +27,7 @@ export function TemplateSelector({
 }: TemplateSelectorProps) {
   const templates = useQuery(
     api.functions.folderTemplates.queries.getTemplatesByProjectType,
-    { projectTypeId }
+    { projectTypeId },
   );
 
   if (templates === undefined) {
@@ -63,7 +63,7 @@ export function TemplateSelector({
             "w-full text-left p-4 rounded-xl border transition-all duration-200",
             selectedTemplateId === template._id
               ? "bg-primary/10 border-primary/30 ring-2 ring-primary/20"
-              : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10"
+              : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10",
           )}
         >
           <div className="flex items-start gap-4">
@@ -72,7 +72,7 @@ export function TemplateSelector({
                 "mt-0.5 p-2 rounded-lg transition-colors",
                 selectedTemplateId === template._id
                   ? "bg-primary/20"
-                  : "bg-white/5"
+                  : "bg-white/5",
               )}
             >
               {selectedTemplateId === template._id ? (

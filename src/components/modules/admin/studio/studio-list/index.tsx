@@ -5,14 +5,13 @@ import { useQuery } from "convex/react";
 import { Building, Eye, Mail, Phone, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
+import { NewStudioDrawer } from "./new-studio-drawer";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminStudio } from "./types";
-import { NewStudioDrawer } from "./new-studio-drawer";
-import { useState } from "react";
 
 // ============================================================================
 // Studio Card Component (for card view)

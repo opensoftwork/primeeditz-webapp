@@ -41,8 +41,9 @@ export function ListAlerts({
               Verify Deactivation
             </AlertDialogTitle>
             <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-              Are you sure you want to deactivate <span className="text-white">"{tierToToggle?.name}"</span>? 
-              This will hide the plan from new quotations.
+              Are you sure you want to deactivate{" "}
+              <span className="text-white">"{tierToToggle?.name}"</span>? This
+              will hide the plan from new quotations.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">
@@ -70,8 +71,9 @@ export function ListAlerts({
               Permanent Deletion
             </AlertDialogTitle>
             <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-              Are you sure you want to remove <span className="text-white">"{tierToDelete?.name}"</span>? 
-              This action is permanent and cannot be reversed.
+              Are you sure you want to remove{" "}
+              <span className="text-white">"{tierToDelete?.name}"</span>? This
+              action is permanent and cannot be reversed.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3">

@@ -1,35 +1,35 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { SendQuotationDrawer } from "../send";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import {
+  AlertCircle,
   ArrowLeft,
-  FileText,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2,
   Clock,
-  AlertCircle,
+  FileText,
+  ShieldCheck,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { SendQuotationDrawer } from "../send";
 import {
   DetailHeader,
-  StudioProjectInfo,
   LineItemsSection,
   PricingSummary,
-  TermsConditions,
   QuickActions,
-  StudioFeedbackSection,
   ReviewActions,
+  StudioFeedbackSection,
+  StudioProjectInfo,
+  TermsConditions,
 } from "./components";
-import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 
 const statusConfig: Record<
   string,

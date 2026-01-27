@@ -1,6 +1,6 @@
 "use client";
 
-import { Image, HardDrive, Loader2 } from "lucide-react";
+import { HardDrive, Image, Loader2 } from "lucide-react";
 import { FolderCard, formatBytes } from "./folder-card";
 
 interface FolderGridProps {

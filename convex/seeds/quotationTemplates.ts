@@ -1,9 +1,9 @@
-import { MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx } from "../_generated/server";
 
 /**
  * SEED: Quotation Templates
- * 
+ *
  * Package templates from B2B Rate Card:
  * - 5 Main Wedding Packages (Silver → Royal Elite)
  * - Pre-Wedding Special Packages
@@ -12,9 +12,9 @@ import { Id } from "../_generated/dataModel";
  */
 
 export async function seedQuotationTemplates(
-  ctx: MutationCtx, 
+  ctx: MutationCtx,
   sectionMap: Record<string, string>,
-  typeMap: Record<string, Id<"projectTypes">>
+  typeMap: Record<string, Id<"projectTypes">>,
 ) {
   const templates = [
     // ==========================================================================
@@ -65,7 +65,7 @@ DELIVERABLES
           spawnsProject: true,
           projectType: "Traditional Video Edit",
         },
-      ]
+      ],
     },
 
     {
@@ -128,7 +128,7 @@ DELIVERABLES
           unitPrice: 1700,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -199,7 +199,7 @@ DELIVERABLES
           unitPrice: 2800,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -247,7 +247,8 @@ Note: Includes custom branding for candid album`,
         },
         {
           section: "Album Design",
-          description: "Album Design - Candid + Custom Branding (25 Sheets, 12×36)",
+          description:
+            "Album Design - Candid + Custom Branding (25 Sheets, 12×36)",
           unit: "lot",
           unitPrice: 2875,
           defaultQuantity: 1,
@@ -280,7 +281,7 @@ Note: Includes custom branding for candid album`,
           unitPrice: 2527,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -334,7 +335,8 @@ DELIVERABLES
         },
         {
           section: "Album Design",
-          description: "Album Design - Candid + Custom Branding (30 Sheets, 12×36)",
+          description:
+            "Album Design - Candid + Custom Branding (30 Sheets, 12×36)",
           unit: "lot",
           unitPrice: 3450,
           defaultQuantity: 1,
@@ -362,7 +364,8 @@ DELIVERABLES
         },
         {
           section: "VFX & Effects",
-          description: "Pre-Wedding Video Edit with VFX (1 min Teaser + 6 min Video)",
+          description:
+            "Pre-Wedding Video Edit with VFX (1 min Teaser + 6 min Video)",
           unit: "lot",
           unitPrice: 9000,
           defaultQuantity: 1,
@@ -388,7 +391,7 @@ DELIVERABLES
           unitPrice: 3500,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     // ==========================================================================
@@ -418,7 +421,7 @@ DELIVERABLES
           unitPrice: 4250,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -445,7 +448,7 @@ DELIVERABLES
           unitPrice: 5875,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -473,7 +476,7 @@ DELIVERABLES
           unitPrice: 8500,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -496,12 +499,13 @@ DELIVERABLES
         },
         {
           section: "VFX & Effects",
-          description: "Pre-Wedding Teaser (1 min) + Video (6-8 min) with Heavy VFX",
+          description:
+            "Pre-Wedding Teaser (1 min) + Video (6-8 min) with Heavy VFX",
           unit: "lot",
           unitPrice: 12750,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     // ==========================================================================
@@ -522,7 +526,7 @@ DELIVERABLES
           unitPrice: 1200,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -548,7 +552,7 @@ DELIVERABLES
           unitPrice: 1000,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     // ==========================================================================
@@ -569,7 +573,7 @@ DELIVERABLES
           unitPrice: 900,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -595,7 +599,7 @@ DELIVERABLES
           unitPrice: 800,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
 
     {
@@ -621,36 +625,44 @@ DELIVERABLES
           unitPrice: 3700,
           defaultQuantity: 1,
         },
-      ]
+      ],
     },
   ];
 
   const currentTemplates = await ctx.db.query("quotationTemplates").collect();
 
   for (const temp of templates) {
-    const existing = currentTemplates.find(t => t.name === temp.name);
+    const existing = currentTemplates.find((t) => t.name === temp.name);
 
-    const lineItemsData = temp.lineItems.map(li => {
-      const sectionId = sectionMap[li.section];
-      if (!sectionId) {
-        console.warn(`Section "${li.section}" not found for template ${temp.name}`);
-      }
-      return {
-        sectionId: sectionId as Id<"quotationSections">,
-        description: li.description,
-        unit: li.unit,
-        unitPrice: li.unitPrice,
-        defaultQuantity: li.defaultQuantity,
-        spawnsProject: (li as any).spawnsProject,
-        projectTypeId: (li as any).projectType ? typeMap[(li as any).projectType] : undefined,
-      };
-    }).filter(li => li.sectionId);
+    const lineItemsData = temp.lineItems
+      .map((li) => {
+        const sectionId = sectionMap[li.section];
+        if (!sectionId) {
+          console.warn(
+            `Section "${li.section}" not found for template ${temp.name}`,
+          );
+        }
+        return {
+          sectionId: sectionId as Id<"quotationSections">,
+          description: li.description,
+          unit: li.unit,
+          unitPrice: li.unitPrice,
+          defaultQuantity: li.defaultQuantity,
+          spawnsProject: (li as any).spawnsProject,
+          projectTypeId: (li as any).projectType
+            ? typeMap[(li as any).projectType]
+            : undefined,
+        };
+      })
+      .filter((li) => li.sectionId);
 
     const data = {
       name: temp.name,
       description: temp.description,
       terms: temp.terms,
-      projectTypeHint: typeMap[temp.projectType] ? String(typeMap[temp.projectType]) : undefined,
+      projectTypeHint: typeMap[temp.projectType]
+        ? String(typeMap[temp.projectType])
+        : undefined,
       isActive: true,
       createdBy: "SYSTEM_SEED",
       lineItems: lineItemsData,

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { HardDrive, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 interface ListEmptyProps {
@@ -19,13 +19,14 @@ export function ListEmpty({ onCreate }: ListEmptyProps) {
         <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full" />
         <HardDrive className="h-8 w-8 text-primary relative z-10" />
       </div>
-      
+
       <div className="space-y-2">
         <h3 className="text-xl font-black text-white uppercase tracking-tight">
           No Storage Tiers Found
         </h3>
         <p className="text-white/40 font-bold uppercase tracking-widest text-[10px] max-w-[300px]">
-          Start by creating a storage plan to define capacity and pricing for your clients.
+          Start by creating a storage plan to define capacity and pricing for
+          your clients.
         </p>
       </div>
 

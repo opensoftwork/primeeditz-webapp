@@ -1,25 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { User, Mail, Building2, X, Plus } from "lucide-react";
-import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { useMutation } from "convex/react";
+import { Building2, Mail, Plus, User, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
+import { isValidPhoneNumber, PhoneInput } from "@/components/ui/phone-input";
 
 interface NewStudioDrawerProps {
   open: boolean;

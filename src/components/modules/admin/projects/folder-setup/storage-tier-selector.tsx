@@ -1,9 +1,15 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { HardDrive, IndianRupee, Check, Loader2, AlertTriangle } from "lucide-react";
+import { useQuery } from "convex/react";
+import {
+  AlertTriangle,
+  Check,
+  HardDrive,
+  IndianRupee,
+  Loader2,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StorageTier {
@@ -26,7 +32,9 @@ export function StorageTierSelector({
   recommendedTierId,
   maxGB,
 }: StorageTierSelectorProps) {
-  const tiers = useQuery(api.functions.storageTiers.queries.listActiveStorageTiers);
+  const tiers = useQuery(
+    api.functions.storageTiers.queries.listActiveStorageTiers,
+  );
 
   if (tiers === undefined) {
     return (
@@ -59,7 +67,8 @@ export function StorageTierSelector({
     <div className="space-y-2">
       {maxGB !== undefined && (
         <p className="text-white/30 text-xs font-medium px-1 mb-3">
-          Available from quotation: <span className="text-emerald-500">{maxGB} GB</span>
+          Available from quotation:{" "}
+          <span className="text-emerald-500">{maxGB} GB</span>
         </p>
       )}
       <div className="grid gap-2">
@@ -80,8 +89,8 @@ export function StorageTierSelector({
                     ? "bg-red-500/10 border-red-500/30 ring-2 ring-red-500/20"
                     : "bg-primary/10 border-primary/30 ring-2 ring-primary/20"
                   : exceedsQuota
-                  ? "bg-white/2 border-white/5 opacity-60 hover:opacity-80"
-                  : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10"
+                    ? "bg-white/2 border-white/5 opacity-60 hover:opacity-80"
+                    : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10",
               )}
             >
               <div className="flex items-center justify-between gap-4">
@@ -93,17 +102,19 @@ export function StorageTierSelector({
                         ? exceedsQuota
                           ? "border-red-500 bg-red-500"
                           : "border-primary bg-primary"
-                        : "border-white/20 bg-transparent"
+                        : "border-white/20 bg-transparent",
                     )}
                   >
                     {isSelected && <Check className="h-3 w-3 text-white" />}
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={cn(
-                        "font-bold text-sm",
-                        exceedsQuota ? "text-white/60" : "text-white"
-                      )}>
+                      <span
+                        className={cn(
+                          "font-bold text-sm",
+                          exceedsQuota ? "text-white/60" : "text-white",
+                        )}
+                      >
                         {tier.sizeGB} GB
                       </span>
                       <span className="text-white/40 font-medium">—</span>
@@ -124,10 +135,12 @@ export function StorageTierSelector({
                     </div>
                   </div>
                 </div>
-                <div className={cn(
-                  "flex items-center gap-1 font-bold",
-                  exceedsQuota ? "text-white/40" : "text-white/80"
-                )}>
+                <div
+                  className={cn(
+                    "flex items-center gap-1 font-bold",
+                    exceedsQuota ? "text-white/40" : "text-white/80",
+                  )}
+                >
                   <IndianRupee className="h-3.5 w-3.5" />
                   <span>{tier.priceINR.toLocaleString("en-IN")}</span>
                 </div>
@@ -139,4 +152,3 @@ export function StorageTierSelector({
     </div>
   );
 }
-

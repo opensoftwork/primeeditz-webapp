@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Info } from "lucide-react";
+import { Info, ShieldCheck } from "lucide-react";
 
 interface QuotationTermsViewProps {
   terms?: string;

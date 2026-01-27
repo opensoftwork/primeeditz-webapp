@@ -1,10 +1,10 @@
 "use client";
 
-import React from "react";
 import { format } from "date-fns";
-import { Calendar, MapPin, Tag, User, Database } from "lucide-react";
+import { Calendar, Database, MapPin, Tag, User } from "lucide-react";
 import { motion } from "motion/react";
-import { DetailSection, DetailItem } from "./shared";
+import React from "react";
+import { DetailItem, DetailSection } from "./shared";
 
 interface ProjectSpecificationsProps {
   project: any;
@@ -92,7 +92,7 @@ export function ProjectSpecifications({
                   <DetailItem label={label} value={displayValue} />
                 </motion.div>
               );
-            }
+            },
           )}
         </div>
       )}

@@ -4,18 +4,15 @@
 
 "use client";
 
-import { useEffect } from "react";
 import { useForm } from "@tanstack/react-form";
-import { motion } from "motion/react";
-import { CheckCircle2, Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
+import { Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect } from "react";
 import { toast } from "sonner";
+import type { Studio } from "@/components/modules/admin/studio/studio-data-table";
+import { StudioDataTable } from "@/components/modules/admin/studio/studio-data-table";
 import { Button } from "@/components/ui/button";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import {
   Field,
@@ -25,10 +22,13 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
-import { StudioDataTable } from "@/components/modules/admin/studio/studio-data-table";
 import { useQuotationBuilder } from "../../quotation-builder-context";
-import type { Studio } from "@/components/modules/admin/studio/studio-data-table";
 
 export function Step1StudioContext() {
   const { formData, setFormData, nextStep, selectedStudio, setSubmitTrigger } =

@@ -7,24 +7,24 @@
 
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
-  Receipt,
-  User,
-  Layout,
-  CheckCircle2,
-  Save,
   ArrowLeft,
-  Loader2,
+  CheckCircle2,
   FolderOpen,
+  Layout,
+  Loader2,
+  Receipt,
+  Save,
+  User,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { AnimatePresence, motion } from "motion/react";
 import { useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import {
+  QUOTATION_STEPS,
   QuotationBuilderProvider,
   useQuotationBuilder,
-  QUOTATION_STEPS,
 } from "./quotation-builder-context";
 import {
   Step1StudioContext,

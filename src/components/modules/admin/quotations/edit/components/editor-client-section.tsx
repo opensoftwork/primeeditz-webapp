@@ -1,20 +1,20 @@
 "use client";
 
-import { motion } from "motion/react";
-import { CheckCircle2, Calendar as CalendarIcon, User } from "lucide-react";
 import { format } from "date-fns";
+import { Calendar as CalendarIcon, CheckCircle2, User } from "lucide-react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
+import type { Studio as Client } from "../../../studio/studio-data-table";
 import { StudioDataTable } from "../../../studio/studio-data-table";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
-import type { Studio as Client } from "../../../studio/studio-data-table";
 
 export function EditorClientSection() {
   const { formData, setFormData, selectedStudio } = useQuotationBuilder();

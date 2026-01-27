@@ -1,9 +1,8 @@
 "use client";
 
 import { Badge } from "@/components/ui/badge";
-import { cn } from "@/lib/utils";
-
 import { getStatusConfig } from "@/lib/status-display";
+import { cn } from "@/lib/utils";
 
 export function StatusBadge({ status }: { status: string }) {
   const statusInfo = getStatusConfig(status);

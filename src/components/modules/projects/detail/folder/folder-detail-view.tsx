@@ -1,23 +1,20 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useAction } from "convex/react";
-import { ArrowLeft, CheckCircle2, Loader2, HardDrive, Eye } from "lucide-react";
-import { motion } from "motion/react";
-import { toast } from "sonner";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ArrowLeft, CheckCircle2, Eye, HardDrive, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatBytes } from "@/components/shared/project-folders/folder-card";
-
-import { FolderDropZone } from "./folder-drop-zone";
-import { FolderAssetList } from "./folder-asset-list";
-import { StagedUploadQueue, type StagedFile } from "./staged-upload-queue";
-
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { FolderAssetList } from "./folder-asset-list";
+import { FolderDropZone } from "./folder-drop-zone";
+import { type StagedFile, StagedUploadQueue } from "./staged-upload-queue";
 
 interface FolderDetailViewProps {
   projectId: string;

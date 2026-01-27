@@ -1,9 +1,9 @@
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
-import { User, X, Check } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Check, User, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
 
 interface SelectedMember {
   profileId: string;
@@ -39,7 +39,7 @@ export function SquadBuilderBar({
           <div className="bg-primary/20 p-3 rounded-2xl border border-primary/20">
             <User className="h-5 w-5 text-primary" />
           </div>
-          
+
           <div className="flex -space-x-3 overflow-visible px-2">
             <AnimatePresence mode="popLayout">
               {selectedMembers.map((member) => (

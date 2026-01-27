@@ -1,8 +1,8 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { getStatusConfig } from "@/lib/status-display";
+import { cn } from "@/lib/utils";
 
 interface StudioStatusBadgeProps {
   status: string;

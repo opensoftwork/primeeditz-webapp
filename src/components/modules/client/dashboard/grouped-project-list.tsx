@@ -1,24 +1,24 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useQuery } from "convex/react";
 import {
-  User,
+  ArrowRight,
+  Calendar,
   ChevronRight,
   Clock,
-  Calendar,
   Layers,
-  Zap,
-  ArrowRight,
   Rocket,
+  User,
+  Zap,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
-import { StudioStatusBadge } from "../../projects/studio-status-badge";
-import { PhaseProgress } from "../../projects/phase-progress";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import { PhaseProgress } from "../../projects/phase-progress";
+import { StudioStatusBadge } from "../../projects/studio-status-badge";
 
 export function GroupedProjectList() {
   const groupedProjects = useQuery(

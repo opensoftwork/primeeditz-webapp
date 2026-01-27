@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import type { ReactNode } from "react";
 
 export interface StatCardProps {
   icon: ReactNode;
@@ -11,11 +11,10 @@ export interface StatCardProps {
 
 export interface ProjectData {
   _id: string;
-  eventName: string;
+  endClientName: string;
   projectTypeName: string;
   code: string;
   phase: string;
   actionState: string;
-  eventDate?: number;
   createdAt: number;
 }

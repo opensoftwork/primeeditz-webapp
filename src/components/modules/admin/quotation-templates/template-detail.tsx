@@ -7,25 +7,25 @@
 
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useRouter } from "next/navigation";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import {
-  FileText,
   ArrowLeft,
   Edit3,
+  FileText,
+  Layers,
   Loader2,
   Settings2,
-  Layers,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { Id } from "@convex/_generated/dataModel";
-import { TemplateLineItem } from "../quotation-sections/types";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import type { TemplateLineItem } from "../quotation-sections/types";
 import { TemplateLineItemsTable } from "./components/template-line-items-table";
 import { PricePreview } from "./price-preview";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import { useEffect } from "react";
 
 interface TemplateDetailProps {
   templateId: string;

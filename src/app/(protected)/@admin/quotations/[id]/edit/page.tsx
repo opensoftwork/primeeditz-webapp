@@ -1,7 +1,7 @@
 "use client";
 
-import { EditQuotation } from "@/components/modules/admin/quotations/edit/edit-quotation";
 import { useParams } from "next/navigation";
+import { EditQuotation } from "@/components/modules/admin/quotations/edit/edit-quotation";
 
 export default function EditQuotationPage() {
   const params = useParams();

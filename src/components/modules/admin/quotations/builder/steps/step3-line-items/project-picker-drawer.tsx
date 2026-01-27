@@ -7,18 +7,18 @@
 
 "use client";
 
-import { motion, AnimatePresence } from "motion/react";
-import { Check, Briefcase, Search, Hash, X, ChevronRight } from "lucide-react";
-import { useState, useMemo } from "react";
+import { Briefcase, Check, ChevronRight, Hash, Search, X } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-  SheetDescription,
 } from "@/components/ui/sheet";
 import { cn } from "@/lib/utils";
 import type { Project } from "../../types";
@@ -48,7 +48,7 @@ export function ProjectPickerDrawer({
       (p) =>
         p.eventName?.toLowerCase().includes(lowerSearch) ||
         p.code.toLowerCase().includes(lowerSearch) ||
-        p.projectTypeName?.toLowerCase().includes(lowerSearch)
+        p.projectTypeName?.toLowerCase().includes(lowerSearch),
     );
   }, [projects, search]);
 
@@ -65,7 +65,7 @@ export function ProjectPickerDrawer({
           variant="outline"
           className={cn(
             "h-11 w-full justify-between bg-white/5 border-white/10 rounded-xl px-4 text-left hover:bg-white/8",
-            triggerClassName
+            triggerClassName,
           )}
         >
           <div className="flex items-center gap-3 overflow-hidden">
@@ -129,7 +129,7 @@ export function ProjectPickerDrawer({
                   "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left",
                   !selectedProjectId
                     ? "bg-primary/10 border-primary/30"
-                    : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10"
+                    : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
                 )}
               >
                 <div className="flex items-center gap-3">
@@ -164,7 +164,7 @@ export function ProjectPickerDrawer({
                         "w-full flex items-center justify-between p-4 rounded-xl border transition-all text-left",
                         isSelected
                           ? "bg-primary/10 border-primary/30"
-                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10"
+                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
                       )}
                     >
                       <div className="flex items-center gap-3">

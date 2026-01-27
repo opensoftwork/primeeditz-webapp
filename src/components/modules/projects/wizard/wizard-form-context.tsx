@@ -8,31 +8,31 @@
 
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useAction, useMutation, useQuery } from "convex/react";
+import { ConvexError } from "convex/values";
 import {
   createContext,
-  useContext,
-  useState,
   useCallback,
+  useContext,
   useEffect,
   useRef,
+  useState,
 } from "react";
-import { useMutation, useQuery, useAction } from "convex/react";
-import { ConvexError } from "convex/values";
-import { api } from "@convex/_generated/api";
-import { useReferenceFilesStore } from "@/stores/reference-files-store";
 import { toast } from "sonner";
-import type { Id } from "@convex/_generated/dataModel";
+import { useReferenceFilesStore } from "@/stores/reference-files-store";
 import {
-  type WizardFormData,
-  type WizardStepId,
-  type WizardMode,
-  type ReferenceFile,
-  type SelectedStudioData,
-  INITIAL_FORM_DATA,
-  WIZARD_STEPS,
-  getWizardSteps,
   getFirstStepId,
   getStepCount,
+  getWizardSteps,
+  INITIAL_FORM_DATA,
+  type ReferenceFile,
+  type SelectedStudioData,
+  WIZARD_STEPS,
+  type WizardFormData,
+  type WizardMode,
+  type WizardStepId,
 } from "./types";
 
 // ============================================================================

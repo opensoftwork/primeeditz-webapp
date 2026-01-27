@@ -1,5 +1,5 @@
+import type { Metadata } from "next";
 import { SectionList } from "@/components/modules/admin/quotation-sections";
-import { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "Quotation Sections | PrimeEditz Admin",

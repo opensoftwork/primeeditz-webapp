@@ -3,7 +3,7 @@
  */
 
 import { File, Image as ImageIcon, Video } from "lucide-react";
-import type { VaultFile, VaultTabType, FileTypeCounts } from "./types";
+import type { FileTypeCounts, VaultFile, VaultTabType } from "./types";
 
 export const formatFileSize = (bytes: number | undefined): string => {
   if (bytes === undefined || bytes === null || isNaN(bytes)) return "0 KB";
@@ -13,7 +13,7 @@ export const formatFileSize = (bytes: number | undefined): string => {
   const i = Math.floor(Math.log(bytes) / Math.log(k));
   if (isNaN(i) || i < 0) return "0 KB";
   return (
-    Math.round((bytes / Math.pow(k, i)) * 100) / 100 +
+    Math.round((bytes / k ** i) * 100) / 100 +
     " " +
     sizes[Math.min(i, sizes.length - 1)]
   );
@@ -33,11 +33,14 @@ export const calculateFileTypeCounts = (files: VaultFile[]): FileTypeCounts => {
       else acc.document++;
       return acc;
     },
-    { image: 0, video: 0, document: 0 }
+    { image: 0, video: 0, document: 0 },
   );
 };
 
-export const filterFilesByTab = (files: VaultFile[], tab: VaultTabType): VaultFile[] => {
+export const filterFilesByTab = (
+  files: VaultFile[],
+  tab: VaultTabType,
+): VaultFile[] => {
   return files.filter((f) => {
     if (tab === "all") return true;
     if (tab === "image") return f.type.startsWith("image/");

@@ -1,9 +1,8 @@
 "use client";
 
 import { CircleDot } from "lucide-react";
-import { cn } from "@/lib/utils";
-
 import { getStatusConfig } from "@/lib/status-display";
+import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
   status: string;

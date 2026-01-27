@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { adminQuery } from "../../lib/customFunctions";
 import { query } from "../../_generated/server";
+import { adminQuery } from "../../lib/customFunctions";
 
 /**
  * List all folder templates for admin.
@@ -22,7 +22,7 @@ export const listFolderTemplates = adminQuery({
           ...t,
           projectTypeName,
         };
-      })
+      }),
     );
   },
 });
@@ -51,14 +51,16 @@ export const getTemplatesByProjectType = query({
     // Get templates specifically for this project type
     const specificTemplates = await ctx.db
       .query("folderTemplates")
-      .withIndex("by_projectTypeId", (q) => q.eq("projectTypeId", args.projectTypeId))
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId),
+      )
       .filter((q) => q.eq(q.field("isActive"), true))
       .collect();
 
     // Also get general templates (where projectTypeId is not set)
     const allTemplates = await ctx.db.query("folderTemplates").collect();
     const generalTemplates = allTemplates.filter(
-      (t) => !t.projectTypeId && t.isActive
+      (t) => !t.projectTypeId && t.isActive,
     );
 
     return [...specificTemplates, ...generalTemplates];

@@ -1,8 +1,8 @@
 "use client";
 
+import { File, FileIcon, Image, Video, X } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { X, Image, Video, FileIcon, File } from "lucide-react";
 import { formatFileSize } from "@/lib/file";
 
 interface FileItemProps {

@@ -7,18 +7,17 @@
 
 "use client";
 
-import { useWizardForm } from "../../wizard-form-context";
-import { toast } from "sonner";
-import type { StudioSelectionMode, SelectedStudioData } from "../../types";
 import type { Doc } from "@convex/_generated/dataModel";
-
+import { toast } from "sonner";
+import type { SelectedStudioData, StudioSelectionMode } from "../../types";
+import { useWizardForm } from "../../wizard-form-context";
+import { ExistingStudioContent } from "./existing-studio-content";
+import { NewStudioContent } from "./new-studio-content";
+import { NoStudioContent } from "./no-studio-content";
+import { SelectionOptionCard } from "./selection-option-card";
+import { StudioSummaryCard } from "./studio-summary-card";
 // Import extracted components
 import { SELECTION_OPTIONS } from "./types";
-import { StudioSummaryCard } from "./studio-summary-card";
-import { SelectionOptionCard } from "./selection-option-card";
-import { NoStudioContent } from "./no-studio-content";
-import { NewStudioContent } from "./new-studio-content";
-import { ExistingStudioContent } from "./existing-studio-content";
 
 type Studio = Doc<"profiles">;
 

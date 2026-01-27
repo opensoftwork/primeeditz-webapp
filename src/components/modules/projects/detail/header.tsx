@@ -1,25 +1,22 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowLeft, ChevronRight } from "lucide-react";
-import { StatusBadge } from "./shared";
-
+import Link from "next/link";
 import { getStatusConfig } from "@/lib/status-display";
+import { StatusBadge } from "./shared";
 
 interface ProjectHeaderProps {
   code: string;
-  eventName?: string;
   endClientName?: string;
   status: string;
 }
 
 export function ProjectHeader({
   code,
-  eventName,
   endClientName,
   status,
 }: ProjectHeaderProps) {
-  const title = eventName || endClientName || "Untitled Project";
+  const title = endClientName || "Untitled Project";
   const statusInfo = getStatusConfig(status);
 
   return (

@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { useQuery, useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
   AlertTriangle,
   Calendar,
@@ -16,8 +16,8 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,12 +28,12 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
-import { toast } from "sonner";
+import { PhaseProgress } from "../phase-progress";
+import { StudioStatusBadge } from "../studio-status-badge";
 import { columns } from "./columns";
 import type { StudioProject } from "./types";
-import { StudioStatusBadge } from "../studio-status-badge";
-import { PhaseProgress } from "../phase-progress";
 
 // ============================================================================
 // Project Card Component (for card view)

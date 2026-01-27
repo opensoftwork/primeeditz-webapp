@@ -17,8 +17,8 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { Button } from "@/components/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,11 +29,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
 import { columns } from "./columns";
 import { StatusBadge } from "./status-badge";
 import type { AdminProject } from "./types";
-import { toast } from "sonner";
 
 // ============================================================================
 // Project Card Component (for card view)
