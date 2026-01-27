@@ -232,3 +232,50 @@ development_status:
   11c-6-studio-project-detail-view: backlog
   11c-7-deprecate-old-wizard: backlog
   epic-11c-retrospective: optional
+
+  # ============================================================================
+  # EPIC 13: Unified Service Package Configuration (Master)
+  # ============================================================================
+  # Context: Party Mode Brainstorming 2026-01-27
+  # Goal: Consolidate 7 config tables into unified Service Package model
+  # Key Change: 1 Quotation Template → 1 Project (no line-item spawning)
+  epic-13: backlog
+
+  # Epic 13A: Schema Consolidation
+  # Goal: Simplify data model, add template-level project config
+  13a-1-enhance-quotation-templates-schema: backlog
+  13a-2-simplify-line-item-schema: backlog
+  13a-3-migrate-existing-templates: backlog
+  13a-4-update-project-spawning-logic: backlog
+  13a-5-deprecate-project-type-fields: backlog
+  13a-6-update-quotation-mutations: backlog
+  epic-13a-retrospective: optional
+
+  # Epic 13B: Folder Template Enhancement
+  # Goal: Hierarchical folders, variants, project-type specific
+  13b-1-enhance-folder-templates-schema: backlog
+  13b-2-create-wedding-folder-seeds: backlog
+  13b-3-create-content-creator-folder-seeds: backlog
+  13b-4-update-folder-setup-mutation: backlog
+  13b-5-folder-template-builder-ui: backlog
+  epic-13b-retrospective: optional
+
+  # Epic 13C: Service Package Builder UI
+  # Goal: Unified admin wizard for configuring packages
+  13c-1-service-package-list-page: backlog
+  13c-2-builder-step-1-basic-info: backlog
+  13c-3-builder-step-2-project-configuration: backlog
+  13c-4-builder-step-3-pricing: backlog
+  13c-5-builder-step-4-review-publish: backlog
+  13c-6-package-detail-view: backlog
+  epic-13c-retrospective: optional
+
+  # Epic 13D: Legacy Cleanup & Migration
+  # Goal: Remove deprecated UIs, migrate production data
+  13d-1-remove-project-types-ui: backlog
+  13d-2-remove-quotation-templates-old-ui: backlog
+  13d-3-remove-quotation-sections-ui: backlog
+  13d-4-finalize-spawning-logic: backlog
+  13d-5-update-studio-package-selection: backlog
+  13d-6-production-data-migration: backlog
+  epic-13d-retrospective: optional
