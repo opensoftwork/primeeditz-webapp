@@ -1,5 +1,5 @@
-import { StudioProjectList } from "@/components/modules/projects";
+import { GroupedStudioProjectList } from "@/components/modules/projects/project-details/grouped-studio-project-list";
 
 export default function ProjectsPage() {
-  return <StudioProjectList />;
+  return <GroupedStudioProjectList />;
 }

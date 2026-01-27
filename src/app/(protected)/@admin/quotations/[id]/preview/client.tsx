@@ -76,7 +76,7 @@ export function QuotationPreviewClient({
         code: quotation.code,
         version: quotation.version,
         status: quotation.status,
-        clientId: quotation.clientId,
+        studioId: quotation.studioId,
         projectIds: quotation.projectIds,
         lineItems: quotation.lineItems,
         terms: quotation.terms,

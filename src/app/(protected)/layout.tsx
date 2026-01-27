@@ -126,7 +126,6 @@ export default function DashboardLayout({
     switch (userProfile.role) {
       case "admin":
         return admin;
-      case "client":
       case "studio":
         return studio;
       case "employee":
