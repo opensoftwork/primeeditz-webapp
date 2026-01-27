@@ -49,6 +49,7 @@ export default function OnboardingForm() {
   const searchParams = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [isClaiming, setIsClaiming] = useState(false);
+  const [claimError, setClaimError] = useState<string | null>(null);
 
   const createProfile = useMutation(api.profiles.createProfile);
   const claimProfile = useMutation(api.profiles.claimDraftProfile);
@@ -60,7 +61,7 @@ export default function OnboardingForm() {
   // Handle automatic profile claiming if profileId is present
   useEffect(() => {
     const autoClaim = async () => {
-      if (profileId && !myProfile && !isClaiming) {
+      if (profileId && !myProfile && !isClaiming && !claimError) {
         setIsClaiming(true);
         try {
           await claimProfile({ profileId: profileId as any });
@@ -68,19 +69,17 @@ export default function OnboardingForm() {
           router.push("/dashboard");
         } catch (error: any) {
           console.error("Failed to claim profile:", error);
-          // Extract the message from ConvexError if it exists
           const message =
             error.data || error.message || "Failed to link profile.";
+          setClaimError(message);
           toast.error(message);
-          // If claiming fails, we don't clear profileId from URL here (client might want to retry),
-          // but we do stop the claiming loader so they can see the fallback or try again.
         } finally {
           setIsClaiming(false);
         }
       }
     };
     autoClaim();
-  }, [profileId, myProfile, claimProfile, router, isClaiming]);
+  }, [profileId, myProfile, claimProfile, router, isClaiming, claimError]);
 
   // Redirect if profile already exists
   useEffect(() => {
@@ -144,8 +143,65 @@ export default function OnboardingForm() {
 
   const willBeAdmin = isFirstUser === true;
 
-  // Show specialized setup state for employees claiming a draft profile
+  // Show specialized setup state for employees/studios claiming a draft profile
   if (profileId && !myProfile) {
+    if (claimError) {
+      return (
+        <div className="min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="w-full max-w-md p-10 rounded-[2.5rem] border border-red-500/20 bg-red-500/5 backdrop-blur-3xl text-center space-y-8"
+          >
+            <div className="relative mx-auto w-20 h-20">
+              <div className="absolute inset-0 bg-red-500/20 blur-2xl rounded-full" />
+              <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-red-500/10 border border-red-500/20">
+                <Shield className="w-8 h-8 text-red-400" />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+                Claim Failed
+              </h2>
+              <p className="text-white/60 text-sm font-medium leading-relaxed">
+                {claimError}
+              </p>
+            </div>
+
+            <div className="space-y-3 pt-4">
+              <Button
+                onClick={() => {
+                  setClaimError(null);
+                  setIsClaiming(false);
+                }}
+                className="w-full h-12 bg-white text-black font-black uppercase tracking-widest text-xs rounded-xl hover:bg-white/90 transition-all"
+              >
+                Try Again
+              </Button>
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  // Remove profileId from URL and proceed with fresh onboarding
+                  const params = new URLSearchParams(searchParams.toString());
+                  params.delete("profileId");
+                  router.push(`/onboarding?${params.toString()}`);
+                }}
+                className="w-full h-12 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px]"
+              >
+                Create Fresh Profile
+              </Button>
+            </div>
+
+            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] leading-relaxed">
+              If this profile belongs to a different email address, please sign
+              out and sign in with the correct account.
+            </p>
+          </motion.div>
+        </div>
+      );
+    }
+
     return (
       <div className="min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950">
         <motion.div

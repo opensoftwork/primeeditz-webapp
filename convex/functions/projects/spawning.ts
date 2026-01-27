@@ -97,6 +97,7 @@ export async function spawnProjectsFromQuotation(
         endClientName: quotation.endClientName,
         eventName: item.description,
         eventDate: quotation.eventDate,
+        assignedEmployeeId: quotation.assignedEmployeeId,
       });
 
       createdProjectIds.push(projectId);

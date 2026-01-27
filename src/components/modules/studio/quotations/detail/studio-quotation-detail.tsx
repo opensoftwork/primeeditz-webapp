@@ -15,7 +15,7 @@ import {
 } from "..";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, AlertCircle } from "lucide-react";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 
@@ -30,6 +30,9 @@ export function StudioQuotationDetail() {
 
   const markViewed = useMutation(
     api.functions.quotations.mutations.markQuotationViewed,
+  );
+  const reinitiate = useMutation(
+    api.functions.quotations.mutations.reinitiateQuotation,
   );
 
   const { setOverride, removeOverride } = useBreadcrumbStore();
@@ -136,6 +139,39 @@ export function StudioQuotationDetail() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-12">
+          {quotation.status === "rejected" && (
+            <div className="p-8 rounded-4xl bg-red-400/5 border border-red-400/10 space-y-4">
+              <div className="flex items-center gap-3 text-red-400">
+                <AlertCircle className="h-6 w-6" />
+                <h3 className="text-lg font-black uppercase tracking-tight">
+                  Request Declined
+                </h3>
+              </div>
+              <p className="text-sm font-bold text-white/60 leading-relaxed italic">
+                "{quotation.rejectionReason || "No specific reason provided."}"
+              </p>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/30 pt-2">
+                Please contact the admin or re-initiate the request with
+                necessary changes.
+              </p>
+              <div className="pt-2">
+                <Button
+                  onClick={async () => {
+                    const toastId = toast.loading("Re-initiating request...");
+                    try {
+                      await reinitiate({ quotationId: quotation._id });
+                      toast.success("Request re-initiated!", { id: toastId });
+                    } catch (err) {
+                      toast.error("Failed to re-initiate request");
+                    }
+                  }}
+                  className="bg-white text-black font-black uppercase tracking-widest text-[10px] px-6 h-10 rounded-xl hover:scale-105 transition-all"
+                >
+                  Edit & Re-submit
+                </Button>
+              </div>
+            </div>
+          )}
           <QuotationLineItemsView
             groupedByProject={groupedByProject}
             groupedBySection={groupedBySection}

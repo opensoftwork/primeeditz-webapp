@@ -179,6 +179,13 @@ export const getQuotationWithSections = adminQuery({
       projectCode = project?.code;
     }
 
+    // Get assigned employee
+    let assignedEmployeeName = undefined;
+    if (quotation.assignedEmployeeId) {
+      const emp = await ctx.db.get(quotation.assignedEmployeeId);
+      assignedEmployeeName = emp?.name;
+    }
+
     // Get all projects linked to this quotation (for project-based grouping)
     const projectTypes = await ctx.db.query("projectTypes").collect();
     const projectIds = quotation.projectIds || (quotation.projectId ? [quotation.projectId] : []);
@@ -202,6 +209,7 @@ export const getQuotationWithSections = adminQuery({
         studioName,
         projectName,
         projectCode,
+        assignedEmployeeName,
       },
       sections: sections.filter((s): s is Doc<"quotationSections"> => s !== null),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
@@ -421,7 +429,7 @@ export const getMyQuotationDetail = studioQuery({
     }
 
     // Status check
-    const studioVisibleStatus = ["sent", "viewed", "approved", "changes_requested", "rejected"];
+    const studioVisibleStatus = ["initiated", "sent", "viewed", "approved", "changes_requested", "rejected"];
     if (!studioVisibleStatus.includes(quotation.status)) {
        return null;
     }

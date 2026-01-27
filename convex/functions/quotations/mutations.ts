@@ -418,19 +418,27 @@ export const markQuotationViewed = mutation({
 });
 
 /**
- * Approve quotation
+ * Approve quotation and spawn projects
  */
 export const approveQuotation = adminMutation({
   args: {
     quotationId: v.id("quotations"),
+    assignedEmployeeId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
     
+    // Status check
+    const allowed = ["initiated", "draft", "sent", "viewed", "changes_requested"];
+    if (!allowed.includes(quotation.status)) {
+      throw new Error(`Cannot approve quotation from status: ${quotation.status}`);
+    }
+
     await ctx.db.patch(args.quotationId, {
       status: "approved",
       approvedAt: Date.now(),
+      assignedEmployeeId: args.assignedEmployeeId ?? quotation.assignedEmployeeId,
       updatedAt: Date.now(),
     });
 
@@ -442,10 +450,64 @@ export const approveQuotation = adminMutation({
       targetState: "quotation_approved",
       notes: "Admin approved the quotation",
     });
+
     // Story 11B.3: Spawn projects based on line items
     await spawnProjectsFromQuotation(ctx, {
       quotationId: args.quotationId,
       profileId: ctx.profile._id,
+    });
+
+    return null;
+  },
+});
+
+/**
+ * Reject quotation (Admin-side)
+ */
+export const rejectQuotationByAdmin = adminMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    await ctx.db.patch(args.quotationId, {
+      status: "rejected",
+      rejectedAt: Date.now(),
+      rejectionReason: args.reason,
+      updatedAt: Date.now(),
+    });
+
+    // Optimized transition using helper
+    await transitionProjectsForQuotation(ctx, {
+      studioId: quotation.studioId,
+      projectId: quotation.projectId,
+      projectIds: quotation.projectIds,
+      targetState: "quotation_rejected",
+      notes: `Admin rejected requested quotation. Reason: ${args.reason}`,
+    });
+
+    return null;
+  },
+});
+
+/**
+ * Assign an employee to a quotation
+ */
+export const assignEmployeeToQuotation = adminMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    assignedEmployeeId: v.optional(v.id("profiles")),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    await ctx.db.patch(args.quotationId, {
+      assignedEmployeeId: args.assignedEmployeeId,
+      updatedAt: Date.now(),
     });
 
     return null;
@@ -681,5 +743,37 @@ export const duplicateQuotation = adminMutation({
     } as any);
 
     return newQuotationId;
+  },
+});
+
+/**
+ * Re-initiate a rejected quotation (Studio-side)
+ */
+export const reinitiateQuotation = studioMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    if (quotation.studioId !== ctx.profile._id) {
+      throw new Error("Access denied");
+    }
+
+    if (quotation.status !== "rejected") {
+      throw new Error("Only rejected quotations can be re-initiated");
+    }
+
+    await ctx.db.patch(args.quotationId, {
+      status: "initiated",
+      studioNotes: args.notes ?? quotation.studioNotes,
+      rejectionReason: undefined,
+      rejectedAt: undefined,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
   },
 });

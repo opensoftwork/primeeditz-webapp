@@ -457,6 +457,7 @@ export default defineSchema({
     changeReasons: v.optional(v.array(v.string())),
     changeRequestedAt: v.optional(v.number()),
     rejectionReason: v.optional(v.string()),
+    assignedEmployeeId: v.optional(v.id("profiles")),
     updatedAt: v.optional(v.number()),
   })
     .index('by_code', ['code'])

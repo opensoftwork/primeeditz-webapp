@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Archive, ArchiveRestore, Eye, Pencil } from "lucide-react";
+import { Archive, ArchiveRestore, Eye, Pencil, LinkIcon } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
@@ -101,6 +101,19 @@ export function StudioActions({ studio }: StudioActionsProps) {
       icon: Pencil,
       onClick: () => setShowEditDrawer(true),
     },
+    ...(!studio.onboardingComplete
+      ? [
+          {
+            label: "Copy Invite Link",
+            icon: LinkIcon,
+            onClick: () => {
+              const url = `${window.location.origin}/onboarding?profileId=${studio._id}`;
+              navigator.clipboard.writeText(url);
+              toast.success("Invite link copied to clipboard!");
+            },
+          },
+        ]
+      : []),
     {
       label: isDeactivated ? "Reactivate" : "Deactivate",
       icon: isDeactivated ? ArchiveRestore : Archive,

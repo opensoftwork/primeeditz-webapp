@@ -27,6 +27,7 @@ import {
   TermsConditions,
   QuickActions,
   StudioFeedbackSection,
+  ReviewActions,
 } from "./components";
 import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 
@@ -102,6 +103,13 @@ const statusConfig: Record<
     color: "text-zinc-500",
     bgColor: "bg-zinc-500/10",
     borderColor: "border-zinc-500/20",
+  },
+  initiated: {
+    label: "Pending Review",
+    icon: Clock,
+    color: "text-amber-400",
+    bgColor: "bg-amber-400/10",
+    borderColor: "border-amber-400/20",
   },
 };
 
@@ -256,6 +264,7 @@ export function QuotationDetail({
         </div>
 
         <div className="space-y-6">
+          <ReviewActions quotation={quotation as any} />
           <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}
