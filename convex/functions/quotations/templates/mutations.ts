@@ -1,70 +1,57 @@
 import { v } from "convex/values";
 import { adminMutation } from "../../../lib/customFunctions";
+import { servicePackageLineItemValidator } from "../../../schema";
 
 /**
- * Template line item validator for input
+ * Create a new service package
  */
-const templateLineItemInput = v.object({
-  sectionId: v.id("quotationSections"),
-  description: v.string(),
-  unit: v.string(),
-  unitPrice: v.number(),
-  defaultQuantity: v.number(),
-  spawnsProject: v.optional(v.boolean()),
-  projectTypeId: v.optional(v.id("projectTypes")),
-  selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
-  subItems: v.optional(
-    v.array(
-      v.object({
-        description: v.string(),
-        unit: v.string(),
-        unitPrice: v.number(),
-        defaultQuantity: v.number(),
-      }),
-    ),
-  ),
-});
-
-/**
- * Create a new quotation template
- */
-export const createTemplate = adminMutation({
+export const createPackage = adminMutation({
   args: {
     name: v.string(),
     description: v.optional(v.string()),
-    lineItems: v.array(templateLineItemInput),
+    categoryId: v.optional(v.id("projectCategories")),
+    projectTypeId: v.id("projectTypes"),
+    folderTemplateId: v.id("folderTemplates"),
+    defaultStorageTierId: v.optional(v.id("storageTiers")),
+    lineItems: v.array(servicePackageLineItemValidator),
     terms: v.optional(v.string()),
-    projectTypeHint: v.optional(v.string()),
-    createdBy: v.string(), // Host app passes user identifier
+    createdBy: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.insert("quotationTemplates", {
+    return await ctx.db.insert("servicePackages", {
       name: args.name,
       description: args.description,
+      categoryId: args.categoryId,
+      projectTypeId: args.projectTypeId,
+      folderTemplateId: args.folderTemplateId,
+      defaultStorageTierId: args.defaultStorageTierId,
       lineItems: args.lineItems,
       terms: args.terms,
-      projectTypeHint: args.projectTypeHint,
       isActive: true,
       createdBy: args.createdBy,
+      updatedAt: Date.now(),
     });
   },
 });
 
 /**
- * Update an existing template
+ * Update an existing package
  */
-export const updateTemplate = adminMutation({
+export const updatePackage = adminMutation({
   args: {
-    templateId: v.id("quotationTemplates"),
+    packageId: v.id("servicePackages"),
     name: v.optional(v.string()),
     description: v.optional(v.string()),
-    lineItems: v.optional(v.array(templateLineItemInput)),
+    categoryId: v.optional(v.id("projectCategories")),
+    projectTypeId: v.optional(v.id("projectTypes")),
+    folderTemplateId: v.optional(v.id("folderTemplates")),
+    defaultStorageTierId: v.optional(v.id("storageTiers")),
+    lineItems: v.optional(v.array(servicePackageLineItemValidator)),
     terms: v.optional(v.string()),
-    projectTypeHint: v.optional(v.string()),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    const { templateId, ...updates } = args;
+    const { packageId, ...updates } = args;
 
     // Remove undefined values
     const cleanUpdates = Object.fromEntries(
@@ -72,8 +59,9 @@ export const updateTemplate = adminMutation({
     );
 
     if (Object.keys(cleanUpdates).length > 0) {
-      await ctx.db.patch(templateId, {
+      await ctx.db.patch(packageId, {
         ...cleanUpdates,
+        updatedAt: Date.now(),
       });
     }
 
@@ -82,64 +70,39 @@ export const updateTemplate = adminMutation({
 });
 
 /**
- * Toggle template active status
+ * Toggle package active status
  */
-export const toggleTemplateActive = adminMutation({
+export const togglePackageActive = adminMutation({
   args: {
-    templateId: v.id("quotationTemplates"),
+    packageId: v.id("servicePackages"),
   },
   handler: async (ctx, args) => {
-    const template = await ctx.db.get(args.templateId);
-    if (!template) {
-      throw new Error("Template not found");
+    const pkg = await ctx.db.get(args.packageId);
+    if (!pkg) {
+      throw new Error("Package not found");
     }
 
-    const newStatus = !template.isActive;
-    await ctx.db.patch(args.templateId, {
+    const newStatus = !pkg.isActive;
+    await ctx.db.patch(args.packageId, {
       isActive: newStatus,
+      updatedAt: Date.now(),
     });
     return newStatus;
   },
 });
 
 /**
- * Delete a template (soft delete)
+ * Delete a package (mark inactive)
  */
-export const deleteTemplate = adminMutation({
+export const deletePackage = adminMutation({
   args: {
-    templateId: v.id("quotationTemplates"),
+    packageId: v.id("servicePackages"),
   },
   handler: async (ctx, args) => {
-    await ctx.db.patch(args.templateId, {
+    await ctx.db.patch(args.packageId, {
       isActive: false,
+      updatedAt: Date.now(),
     });
     return null;
-  },
-});
-
-/**
- * Duplicate a template
- */
-export const duplicateTemplate = adminMutation({
-  args: {
-    templateId: v.id("quotationTemplates"),
-    newName: v.string(),
-    createdBy: v.string(),
-  },
-  handler: async (ctx, args) => {
-    const original = await ctx.db.get(args.templateId);
-    if (!original) {
-      throw new Error("Template not found");
-    }
-
-    return await ctx.db.insert("quotationTemplates", {
-      name: args.newName,
-      description: original.description,
-      lineItems: original.lineItems,
-      terms: original.terms,
-      projectTypeHint: original.projectTypeHint,
-      isActive: true,
-      createdBy: args.createdBy,
-    });
   },
 });

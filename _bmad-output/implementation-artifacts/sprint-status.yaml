@@ -244,8 +244,8 @@ development_status:
 
   # Epic 13A: Schema Consolidation (FOUNDATION - MUST GO FIRST)
   # Goal: Rename table, multi-package model, simplified spawning
-  13a-1-create-service-packages-table: backlog # 3 points
-  13a-2-update-quotations-multi-package: backlog # 2 points
+  13a-1-create-service-packages-table: done # 3 points
+  13a-2-update-quotations-multi-package: in-progress # 2 points
   13a-3-update-spawning-logic: backlog # 3 points
   13a-4-create-service-package-seeds: backlog # 2 points
   13a-5-update-quotation-mutations: backlog # 2 points

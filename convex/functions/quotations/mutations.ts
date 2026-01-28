@@ -20,7 +20,7 @@ import { spawnProjectsFromQuotation } from "../projects/spawning";
  */
 const lineItemInput = v.object({
   id: v.string(),
-  sectionId: v.id("quotationSections"),
+  sectionId: v.optional(v.id("quotationSections")),
   projectId: v.optional(v.string()),
   description: v.string(),
   unit: v.string(),
@@ -102,9 +102,9 @@ function calculateTotals(
 async function transitionProjectsForQuotation(
   ctx: MutationCtx & { profile: Profile },
   args: {
-    studioId?: string;
-    projectId?: string;
-    projectIds?: string[];
+    studioId?: Id<"profiles">;
+    projectId?: Id<"projects">;
+    projectIds?: Id<"projects">[];
     targetState: ActionState;
     notes: string;
     onlyFromDraft?: boolean;
@@ -128,20 +128,13 @@ async function transitionProjectsForQuotation(
       )
       .collect();
 
-    projectsToUpdate = allClientProjects.filter(
-      (p) =>
-        targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code),
+    projectsToUpdate = allClientProjects.filter((p) =>
+      targetProjectIds.includes(p._id),
     );
   } else {
     // Fallback if no studioId: fetch individually
     for (const pId of targetProjectIds) {
-      let p = await ctx.db.get(pId as Id<"projects">);
-      if (!p) {
-        p = await ctx.db
-          .query("projects")
-          .withIndex("by_code", (q) => q.eq("code", pId))
-          .unique();
-      }
+      const p = await ctx.db.get(pId);
       if (p) projectsToUpdate.push(p);
     }
   }
@@ -179,28 +172,28 @@ async function transitionProjectsForQuotation(
  */
 export const requestQuotation = authenticatedWithProfileMutation({
   args: {
-    templateId: v.id("quotationTemplates"),
+    packageId: v.id("servicePackages"),
     endClientName: v.string(),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const template = await ctx.db.get(args.templateId);
-    if (!template) throw new Error("Template not found");
+    const pkg = await ctx.db.get(args.packageId);
+    if (!pkg) throw new Error("Package not found");
 
     const code = await generateQuotationCode(ctx);
     const taxRate = 0.18; // Default GST
 
-    // Map template line items to quotation line items
-    const lineItems = template.lineItems.map((li) => ({
+    // Map package line items to quotation line items
+    const lineItems = pkg.lineItems.map((li) => ({
       id: crypto.randomUUID(),
       sectionId: li.sectionId,
       description: li.description,
       unit: li.unit,
-      rate: li.unitPrice,
-      quantity: li.defaultQuantity,
-      spawnsProject: li.spawnsProject,
-      projectTypeId: li.projectTypeId,
-      selectedFolderTemplateId: li.selectedFolderTemplateId,
+      rate: li.rate,
+      quantity: li.quantity,
+      spawnsProject: true, // Packages now always spawn projects
+      projectTypeId: pkg.projectTypeId,
+      selectedFolderTemplateId: pkg.folderTemplateId,
     }));
 
     const { subtotal, taxAmount, total } = calculateTotals(
@@ -213,14 +206,14 @@ export const requestQuotation = authenticatedWithProfileMutation({
       code,
       version: 1,
       studioId: ctx.profile._id,
-      templateId: args.templateId,
+      selectedPackageIds: [args.packageId],
       status: "initiated",
       lineItems,
       subtotal,
       taxRate,
       taxAmount,
       total,
-      terms: template.terms,
+      terms: pkg.terms,
       endClientName: args.endClientName,
       studioNotes: args.notes,
       createdBy: "STUDIO",
@@ -236,16 +229,18 @@ export const requestQuotation = authenticatedWithProfileMutation({
  */
 export const createQuotation = adminMutation({
   args: {
-    studioId: v.optional(v.string()),
-    projectId: v.optional(v.string()),
-    projectIds: v.optional(v.array(v.string())),
-    templateId: v.optional(v.id("quotationTemplates")),
+    studioId: v.optional(v.id("profiles")),
+    projectId: v.optional(v.id("projects")),
+    projectIds: v.optional(v.array(v.id("projects"))),
+    selectedPackageIds: v.array(v.id("servicePackages")),
     lineItems: v.array(lineItemInput),
     terms: v.optional(v.string()),
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
     endClientName: v.string(),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     createdBy: v.string(),
   },
   handler: async (ctx, args) => {
@@ -263,7 +258,7 @@ export const createQuotation = adminMutation({
       studioId: args.studioId,
       projectId: args.projectId,
       projectIds: args.projectIds,
-      templateId: args.templateId,
+      selectedPackageIds: args.selectedPackageIds,
       status: "draft",
       lineItems: args.lineItems,
       subtotal,
@@ -274,6 +269,8 @@ export const createQuotation = adminMutation({
       terms: args.terms,
       validUntil: args.validUntil,
       endClientName: args.endClientName,
+      eventName: args.eventName,
+      eventDate: args.eventDate,
       createdBy: args.createdBy,
       updatedAt: Date.now(),
     });
@@ -305,9 +302,12 @@ export const updateQuotation = adminMutation({
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
     endClientName: v.optional(v.string()),
-    studioId: v.optional(v.string()),
-    projectId: v.optional(v.string()),
-    projectIds: v.optional(v.array(v.string())),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
+    studioId: v.optional(v.id("profiles")),
+    projectId: v.optional(v.id("projects")),
+    projectIds: v.optional(v.array(v.id("projects"))),
+    selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
@@ -573,14 +573,11 @@ export const deleteQuotation = adminMutation({
     if (targetProjectIds.length > 0 && quotation.studioId) {
       const allClientProjects = await ctx.db
         .query("projects")
-        .withIndex("by_studioId", (q) =>
-          q.eq("studioId", quotation.studioId as Id<"profiles">),
-        )
+        .withIndex("by_studioId", (q) => q.eq("studioId", quotation.studioId!))
         .collect();
 
-      const projectsToLog = allClientProjects.filter(
-        (p) =>
-          targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code),
+      const projectsToLog = allClientProjects.filter((p) =>
+        targetProjectIds.includes(p._id),
       );
 
       for (const project of projectsToLog) {
@@ -768,6 +765,7 @@ export const duplicateQuotation = adminMutation({
       code,
       version: 1,
       status: "draft",
+      selectedPackageIds: original.selectedPackageIds,
       createdBy: args.createdBy,
       updatedAt: Date.now(),
       sentAt: undefined,

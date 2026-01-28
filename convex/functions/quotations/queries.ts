@@ -11,8 +11,8 @@ import { quotationStatusValidator } from "../../schema";
 export const getQuotations = adminQuery({
   args: {
     status: v.optional(v.string()),
-    studioId: v.optional(v.string()),
-    projectId: v.optional(v.string()),
+    studioId: v.optional(v.id("profiles")),
+    projectId: v.optional(v.id("projects")),
     limit: v.optional(v.number()),
   },
   handler: async (ctx: QueryCtx, args) => {
@@ -39,7 +39,7 @@ export const getQuotations = adminQuery({
     } else if (args.studioId) {
       quotations = await ctx.db
         .query("quotations")
-        .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId))
+        .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId!))
         .collect();
     } else {
       quotations = await ctx.db.query("quotations").collect();
@@ -81,7 +81,7 @@ export const getAdminQuotationsPaginated = adminQuery({
     // Get all profiles for client name enrichment
     const studioIds = [
       ...new Set(
-        results.page.map((q) => q.studioId).filter((id): id is string => !!id),
+        results.page.map((q) => q.studioId).filter((id): id is Id<"profiles"> => !!id),
       ),
     ];
     const clients = await Promise.all(
@@ -96,7 +96,9 @@ export const getAdminQuotationsPaginated = adminQuery({
     // Get project names for enrichment
     const projectIds = [
       ...new Set(
-        results.page.map((q) => q.projectId).filter((id): id is string => !!id),
+        results.page
+          .map((q) => q.projectId)
+          .filter((id): id is Id<"projects"> => !!id),
       ),
     ];
     const projects = await Promise.all(
@@ -187,7 +189,11 @@ export const getQuotationWithSections = adminQuery({
 
     // Get all sections used in this quotation
     const sectionIds = [
-      ...new Set(quotation.lineItems.map((li) => li.sectionId)),
+      ...new Set(
+        quotation.lineItems
+          .map((li) => li.sectionId)
+          .filter((id): id is Id<"quotationSections"> => !!id),
+      ),
     ];
     const sections = await Promise.all(sectionIds.map((id) => ctx.db.get(id)));
 
@@ -265,9 +271,9 @@ export const getLibraryItems = adminQuery({
       .withIndex("by_isActive", (q) => q.eq("isActive", true))
       .collect();
 
-    // 2. Fetch all templates to extract their line items
-    const templates = await ctx.db
-      .query("quotationTemplates")
+    // 2. Fetch all service packages to extract their line items
+    const packages = await ctx.db
+      .query("servicePackages")
       .withIndex("by_isActive", (q) => q.eq("isActive", true))
       .collect();
 
@@ -286,34 +292,34 @@ export const getLibraryItems = adminQuery({
       source: "library" as const,
     }));
 
-    // 4. Process template line items
-    const templateLineItems: any[] = [];
-    templates.forEach((template) => {
-      // If projectTypeHint is provided, only include line items from matching templates
+    // 4. Process service package line items
+    const packageLineItems: any[] = [];
+    packages.forEach((pkg) => {
+      // If projectTypeHint is provided, only include line items from matching packages
       if (
         args.projectTypeHint &&
-        template.projectTypeHint !== args.projectTypeHint
+        pkg.projectTypeId !== args.projectTypeHint
       ) {
         return;
       }
 
-      template.lineItems.forEach((li) => {
-        templateLineItems.push({
-          _id: `${template._id}_${li.sectionId}_${li.description}`,
+      pkg.lineItems.forEach((li) => {
+        packageLineItems.push({
+          _id: `${pkg._id}_${li.sectionId}_${li.description}`,
           name: li.description,
-          description: `From Template: ${template.name}`,
+          description: `From Package: ${pkg.name}`,
           sectionId: li.sectionId,
           unit: li.unit,
-          unitPrice: li.unitPrice,
+          unitPrice: li.rate, // Map rate to unitPrice for UI consistency until UI updated
           isActive: true,
-          source: "template" as const,
-          templateName: template.name,
+          source: "package" as const,
+          packageName: pkg.name,
         });
       });
     });
 
     // 5. Merge and deduplicate (optional, but let's keep all for now)
-    const allItems = [...processedLibraryItems, ...templateLineItems];
+    const allItems = [...processedLibraryItems, ...packageLineItems];
 
     // 6. Group by section
     const sections = await ctx.db.query("quotationSections").collect();
@@ -364,7 +370,11 @@ export const getQuotationByShareToken = query({
 
     // Get sections for detail view
     const sectionIds = [
-      ...new Set(quotation.lineItems.map((li) => li.sectionId)),
+      ...new Set(
+        quotation.lineItems
+          .map((li) => li.sectionId)
+          .filter((id): id is Id<"quotationSections"> => !!id),
+      ),
     ];
     const sections = await Promise.all(sectionIds.map((id) => ctx.db.get(id)));
 
@@ -405,7 +415,7 @@ export const getMyQuotations = studioQuery({
       ...new Set(
         visibleQuotations
           .map((q) => q.projectId)
-          .filter((id): id is string => !!id),
+          .filter((id): id is Id<"projects"> => !!id),
       ),
     ];
     const projects = await Promise.all(
@@ -472,7 +482,7 @@ export const getMyQuotationsPaginated = studioQuery({
     // Get project names for enrichment
     const projectIds = [
       ...new Set(
-        results.page.map((q) => q.projectId).filter((id): id is string => !!id),
+        results.page.map((q) => q.projectId).filter((id): id is Id<"projects"> => !!id),
       ),
     ];
     const projects = await Promise.all(
@@ -575,12 +585,9 @@ export const getClientApprovedQuotations = adminQuery({
     studioId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
-    const studioIdString = args.studioId as string;
-
-    // 1. Get approved quotations for this client
     const quotations = await ctx.db
       .query("quotations")
-      .withIndex("by_studioId", (q) => q.eq("studioId", studioIdString))
+      .withIndex("by_studioId", (q) => q.eq("studioId", args.studioId))
       .collect();
 
     // Filter only approved quotations
@@ -592,16 +599,13 @@ export const getClientApprovedQuotations = adminQuery({
     const enriched = await Promise.all(
       approvedQuotations.map(async (quotation) => {
         // Get projects linked to this quotation
-        const quotationIdString = quotation._id as string;
         const allProjects = await ctx.db.query("projects").collect();
 
-        // Find projects that reference this quotation (via projectId in quotation)
-        // Or projects where quotation.projectId matches
+        // Find projects that reference this quotation
         const linkedProjects = allProjects.filter((p) => {
-          const projectIdString = p._id as string;
           return (
-            quotation.projectId === projectIdString ||
-            quotation.projectIds?.includes(projectIdString)
+            quotation.projectId === p._id ||
+            quotation.projectIds?.includes(p._id)
           );
         });
 
@@ -682,10 +686,9 @@ export const getQuotationStorageSummary = adminQuery({
     // Get linked projects (where quotation points to project OR projectIds array)
     const allProjects = await ctx.db.query("projects").collect();
     const linkedProjects = allProjects.filter((p) => {
-      const projectIdString = p._id as string;
       return (
-        quotation.projectId === projectIdString ||
-        quotation.projectIds?.includes(projectIdString)
+        quotation.projectId === p._id ||
+        quotation.projectIds?.includes(p._id)
       );
     });
 

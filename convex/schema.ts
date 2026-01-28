@@ -102,6 +102,24 @@ export const quotationStatusValidator = v.union(
   v.literal("superseded"),
 );
 
+// Service Package Line Item Validator - PRICING ONLY, no spawning config
+export const servicePackageLineItemValidator = v.object({
+  id: v.string(),
+  sectionId: v.optional(v.id("quotationSections")),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+  subItems: v.optional(
+    v.array(
+      v.object({
+        description: v.string(),
+        amount: v.optional(v.number()),
+      }),
+    ),
+  ),
+});
+
 // ============================================================================
 // Schema Definition
 // ============================================================================
@@ -350,37 +368,31 @@ export default defineSchema({
     .index("by_isActive", ["isActive"])
     .index("by_displayOrder", ["displayOrder"]),
 
-  quotationTemplates: defineTable({
+  // Service Packages - Replaces quotationTemplates
+  servicePackages: defineTable({
+    // Identity
     name: v.string(),
     description: v.optional(v.string()),
-    projectTypeHint: v.optional(v.string()),
+    categoryId: v.optional(v.id("projectCategories")),
+
+    // Project Spawning Config (1 package = 1 project type)
+    projectTypeId: v.id("projectTypes"),
+    folderTemplateId: v.id("folderTemplates"),
+    defaultStorageTierId: v.optional(v.id("storageTiers")),
+
+    // Pricing (line items are JUST for display/pricing)
+    lineItems: v.array(servicePackageLineItemValidator),
     terms: v.optional(v.string()),
+
+    // Status
     isActive: v.boolean(),
-    lineItems: v.array(
-      v.object({
-        sectionId: v.id("quotationSections"),
-        description: v.string(),
-        unit: v.string(),
-        unitPrice: v.number(),
-        defaultQuantity: v.number(),
-        spawnsProject: v.optional(v.boolean()), // NEW: Spawns a project on approval
-        projectTypeId: v.optional(v.id("projectTypes")), // NEW: Link to project type
-        selectedFolderTemplateId: v.optional(v.id("folderTemplates")), // NEW: Link to folder template
-        subItems: v.optional(
-          v.array(
-            v.object({
-              description: v.string(),
-              unit: v.string(),
-              unitPrice: v.number(),
-              defaultQuantity: v.number(),
-            }),
-          ),
-        ),
-      }),
-    ),
+
+    // Audit
     createdBy: v.optional(v.string()),
     updatedAt: v.optional(v.number()),
-  }).index("by_isActive", ["isActive"]),
+  })
+    .index("by_categoryId", ["categoryId"])
+    .index("by_isActive", ["isActive"]),
 
   quotationLibraryItems: defineTable({
     name: v.string(),
@@ -398,17 +410,19 @@ export default defineSchema({
     code: v.string(),
     version: v.number(),
     parentQuotationId: v.optional(v.id("quotations")),
-    studioId: v.optional(v.string()), // Profile ID
-    projectId: v.optional(v.string()), // Project ID
-    projectIds: v.optional(v.array(v.string())),
-    templateId: v.optional(v.id("quotationTemplates")),
+    studioId: v.optional(v.id("profiles")), // Profile ID
+    projectId: v.optional(v.id("projects")), // Associated project ID (for project-centric quotes)
+    projectIds: v.optional(v.array(v.id("projects"))), // Multi-project links
+    selectedPackageIds: v.array(v.id("servicePackages")), // NEW: Multi-package link (Required)
     status: quotationStatusValidator,
-    // Event details for Studio-initiated requests (links to spawned projects)
+    // Event details
     endClientName: v.string(),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     lineItems: v.array(
       v.object({
         id: v.string(),
-        sectionId: v.id("quotationSections"),
+        sectionId: v.optional(v.id("quotationSections")),
         projectId: v.optional(v.string()), // Associated project for this line item
         spawnsProject: v.optional(v.boolean()), // NEW: Spawns a project on approval
         projectTypeId: v.optional(v.id("projectTypes")), // NEW: Link to project type

@@ -39,7 +39,7 @@ export const seedAll = mutation({
         "assets",
         "deliverables",
         "quotationSections",
-        "quotationTemplates",
+        "servicePackages",
         "quotationLibraryItems",
         "quotations",
       ] as const;
@@ -88,9 +88,9 @@ export const seedAll = mutation({
     await seedQuotationLibraryItems(ctx, sectionMap, typeMap);
     console.log("");
 
-    // 7. Seed Quotation Templates (Packages)
-    console.log("📋 Step 7: Seeding Quotation Templates...");
-    await seedQuotationTemplates(ctx, sectionMap, typeMap);
+    // 7. Seed Service Packages (Replaces Quotation Templates)
+    console.log("📋 Step 7: Seeding Service Packages (Pending 13A.4)...");
+    // await seedQuotationTemplates(ctx, sectionMap, typeMap);
     console.log("");
 
     console.log("========================================");
@@ -129,8 +129,8 @@ export const seedQuotationsOnly = mutation({
     // Seed library items
     await seedQuotationLibraryItems(ctx, sectionMap, typeMap);
 
-    // Seed templates
-    await seedQuotationTemplates(ctx, sectionMap, typeMap);
+    // Seed packages (Pending 13A.4)
+    // await seedQuotationTemplates(ctx, sectionMap, typeMap);
 
     console.log("Quotation seeding complete!");
     return { success: true };

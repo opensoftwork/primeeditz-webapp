@@ -2,48 +2,58 @@ import { v } from "convex/values";
 import { adminQuery, authenticatedQuery } from "../../../lib/customFunctions";
 
 /**
- * Get all quotation templates (Accessible by Studios for package selection)
+ * Get all service packages (Accessible by Studios for package selection)
  */
-export const getTemplates = authenticatedQuery({
+export const getPackages = authenticatedQuery({
   args: {
     activeOnly: v.optional(v.boolean()),
+    categoryId: v.optional(v.id("projectCategories")),
   },
   handler: async (ctx, args) => {
+    let packages;
+    
     if (args.activeOnly) {
-      return await ctx.db
-        .query("quotationTemplates")
+      packages = await ctx.db
+        .query("servicePackages")
         .withIndex("by_isActive", (q) => q.eq("isActive", true))
         .collect();
+    } else {
+      packages = await ctx.db.query("servicePackages").collect();
     }
-    return await ctx.db.query("quotationTemplates").collect();
+    
+    if (args.categoryId) {
+      return packages.filter(p => p.categoryId === args.categoryId);
+    }
+    
+    return packages;
   },
 });
 
 /**
- * Get a single template by ID
+ * Get a single service package by ID
  */
-export const getTemplate = authenticatedQuery({
+export const getPackage = authenticatedQuery({
   args: {
-    templateId: v.id("quotationTemplates"),
+    packageId: v.id("servicePackages"),
   },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.templateId);
+    return await ctx.db.get(args.packageId);
   },
 });
 
 /**
- * Get templates filtered by project type hint
+ * Get packages filtered by project type
  */
-export const getTemplatesByProjectType = authenticatedQuery({
+export const getPackagesByProjectType = authenticatedQuery({
   args: {
-    projectTypeHint: v.string(),
+    projectTypeId: v.id("projectTypes"),
   },
   handler: async (ctx, args) => {
-    const templates = await ctx.db
-      .query("quotationTemplates")
+    const packages = await ctx.db
+      .query("servicePackages")
       .withIndex("by_isActive", (q) => q.eq("isActive", true))
       .collect();
 
-    return templates.filter((t) => t.projectTypeHint === args.projectTypeHint);
+    return packages.filter((t) => t.projectTypeId === args.projectTypeId);
   },
 });

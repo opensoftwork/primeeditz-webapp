@@ -1,6 +1,6 @@
 # Story 13A.1: Create `servicePackages` Table
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 3  
 **Epic**: [13A: Schema Consolidation](../../../../planning-artifacts/epics/13a-schema-consolidation.md)
 
@@ -147,6 +147,17 @@ servicePackages: defineTable({
 - ❌ Do NOT add `spawnsProject`, `projectTypeId`, or `selectedFolderTemplateId` to line items
 - ❌ Do NOT use recursive validators (Convex doesn't support them)
 - ❌ Do NOT make `projectTypeId` or `folderTemplateId` optional - they are REQUIRED
+
+## Tasks/Subtasks
+
+- [ ] **Implementation**
+  - [ ] Define `servicePackageLineItemValidator` in `convex/schema.ts` (AC2)
+  - [ ] Add `servicePackages` table to `convex/schema.ts` (AC1)
+  - [ ] Remove `quotationTemplates` table from `convex/schema.ts` (AC3)
+- [ ] **Validation**
+  - [ ] Run `pnpm convex dev --once` to verify schema compilation (AC4, Testing Req 1)
+  - [ ] Run `pnpm tsc --noEmit` to check for TypeScript errors (Testing Req 2)
+  - [ ] Verify generated types in `convex/_generated/dataModel.d.ts` (Testing Req 3, 4)
 
 ---
 
