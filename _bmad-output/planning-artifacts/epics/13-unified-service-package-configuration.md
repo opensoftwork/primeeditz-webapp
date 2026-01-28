@@ -51,14 +51,15 @@ This is **simpler than line-item spawning** because:
 
 ## 🗂️ Sub-Epic Breakdown
 
-| Epic ID | Title                       | Focus Area                                         | Points |
-| :------ | :-------------------------- | :------------------------------------------------- | :----- |
-| **13A** | Schema Consolidation        | Rename tables, multi-package model, spawning logic | 13     |
-| **13B** | Folder Template Enhancement | Hierarchical folders (depth-limited), variants     | 13     |
-| **13C** | Service Package Builder UI  | Unified admin configuration wizard                 | 21     |
-| **13D** | Legacy Cleanup & Migration  | Remove old UI, clear data, update spawning         | 13     |
+| Epic ID | Title                       | Focus Area                                         | Points | Status  |
+| :------ | :-------------------------- | :------------------------------------------------- | :----- | :------ |
+| **13A** | Schema Consolidation        | Rename tables, multi-package model, spawning logic | 13     | backlog |
+| **13B** | Folder Template Enhancement | Hierarchical folders (depth-limited), variants     | 13     | backlog |
+| **13C** | Service Package Builder UI  | Unified admin configuration wizard                 | 21     | backlog |
+| **13D** | Legacy Cleanup & Migration  | Remove old UI, clear data, update spawning         | 13     | backlog |
+| **13E** | Service Package Bundles     | Bundle quick-select with optional discounts        | 15     | planned |
 
-**Total Estimated Story Points: 60**
+**Total Estimated Story Points: 75** (60 core + 15 enhancement)
 
 ---
 
@@ -140,25 +141,27 @@ This is **simpler than line-item spawning** because:
 │     - Updated spawning logic                                                │
 └─────────────────────────────────┬───────────────────────────────────────────┘
                                   │
-               ┌──────────────────┴──────────────────┐
-               │                                     │
-               ▼                                     ▼
-    ┌───────────────────┐                 ┌───────────────────┐
-    │     Epic 13B      │                 │     Epic 13C      │
-    │  Folder Template  │                 │  Service Package  │
-    │   Enhancement     │                 │   Builder UI      │
-    │  (can parallel)   │                 │  (can parallel)   │
-    └─────────┬─────────┘                 └─────────┬─────────┘
-              │                                     │
-              └──────────────────┬──────────────────┘
-                                 │
-                                 ▼
-                      ┌───────────────────┐
-                      │     Epic 13D      │
-                      │  Legacy Cleanup   │
-                      │   (LAST)          │
-                      └───────────────────┘
+               ┌──────────────────┼──────────────────┐
+               │                  │                  │
+               ▼                  ▼                  ▼
+    ┌───────────────────┐ ┌───────────────────┐ ┌───────────────────┐
+    │     Epic 13B      │ │     Epic 13C      │ │     Epic 13E      │
+    │  Folder Template  │ │  Service Package  │ │  Service Bundles  │
+    │   Enhancement     │ │   Builder UI      │ │  (Enhancement)    │
+    │  (can parallel)   │ │  (can parallel)   │ │  (can parallel)   │
+    └─────────┬─────────┘ └─────────┬─────────┘ └───────────────────┘
+              │                     │                     │
+              └──────────┬──────────┘                     │
+                         │                                │
+                         ▼                                │
+              ┌───────────────────┐                       │
+              │     Epic 13D      │                       │
+              │  Legacy Cleanup   │ ◄─────────────────────┘
+              │   (LAST)          │   (13E can start before 13D)
+              └───────────────────┘
 ```
+
+**Note:** Epic 13E (Bundles) only depends on 13A.1 (servicePackages table). It can be developed in parallel with 13B, 13C, and even before 13D.
 
 ---
 

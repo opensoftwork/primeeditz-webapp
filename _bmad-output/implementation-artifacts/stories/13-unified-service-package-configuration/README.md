@@ -12,7 +12,8 @@ This directory contains all stories for Epic 13: Unified Service Package Configu
 | [13B: Folder Template Enhancement](./13b-folder-template-enhancement/) | 5              | 13            | backlog |
 | [13C: Service Package Builder UI](./13c-service-package-builder-ui/)   | 6              | 21            | backlog |
 | [13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration/)     | 6              | 13            | backlog |
-| **Total**                                                              | **23 stories** | **60 points** |         |
+| [13E: Service Package Bundles](./13e-service-package-bundles/)         | 6              | 15            | planned |
+| **Total**                                                              | **29 stories** | **75 points** |         |
 
 ---
 
@@ -67,6 +68,19 @@ This directory contains all stories for Epic 13: Unified Service Package Configu
 
 ---
 
+## 📁 Epic 13E: Service Package Bundles (Enhancement)
+
+| Story ID                                                                      | Story Title                           | Points | Status  |
+| ----------------------------------------------------------------------------- | ------------------------------------- | ------ | ------- |
+| [13E.1](./13e-service-package-bundles/13e-1-create-service-bundles-table.md)  | Create `serviceBundles` Table         | 2      | planned |
+| [13E.2](./13e-service-package-bundles/13e-2-bundle-builder-ui.md)             | Bundle Builder UI                     | 3      | planned |
+| [13E.3](./13e-service-package-bundles/13e-3-bundle-seed-data.md)              | Bundle Seed Data                      | 2      | planned |
+| [13E.4](./13e-service-package-bundles/13e-4-quotation-bundle-quick-select.md) | Quotation Bundle Quick-Select UI      | 3      | planned |
+| [13E.5](./13e-service-package-bundles/13e-5-apply-bundle-discount.md)         | Apply Bundle Discount in Calculations | 2      | planned |
+| [13E.6](./13e-service-package-bundles/13e-6-bundle-analytics.md)              | Bundle Analytics                      | 3      | planned |
+
+---
+
 ## 🔗 Dependency Graph
 
 ```
@@ -74,9 +88,11 @@ Epic 13A (Schema Foundation)
     ↓
     ├── Epic 13B (Folder Templates) - Can start in parallel after 13A.1
     │
-    └── Epic 13C (Package Builder UI) - Requires 13A.1, 13A.2
+    ├── Epic 13C (Package Builder UI) - Requires 13A.1, 13A.2
+    │
+    └── Epic 13E (Bundles) - Only requires 13A.1
          ↓
-Epic 13D (Cleanup) - Requires 13A, 13B, 13C complete
+Epic 13D (Cleanup) - Requires 13A, 13B, 13C complete (13E optional)
 ```
 
 ---
@@ -101,6 +117,7 @@ Epic 13D (Cleanup) - Requires 13A, 13B, 13C complete
 2. **Then 13A.2 → 13A.6** - Complete schema changes
 3. **Parallel: 13B and 13C** can start after 13A.1-2 are done
 4. **Finally: 13D** - Cleanup after all features are working
+5. **Optional: 13E** - Bundles can be added after 13A.1 (enhancement)
 
 ---
 
@@ -111,4 +128,5 @@ Epic 13D (Cleanup) - Requires 13A, 13B, 13C complete
 - [Epic 13B Plan](../../../../planning-artifacts/epics/13b-folder-template-enhancement.md)
 - [Epic 13C Plan](../../../../planning-artifacts/epics/13c-service-package-builder-ui.md)
 - [Epic 13D Plan](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)
+- [Epic 13E Plan](../../../../planning-artifacts/epics/13e-service-package-bundles.md)
 - [Sprint Status](../../sprint-status.yaml)
