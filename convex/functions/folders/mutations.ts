@@ -11,7 +11,9 @@ import {
   getActorForState,
   getPhaseForState,
 } from "../../lib/statusMachine";
-import type { ActionState } from "../../schema";
+import type { ActionState, FolderLevel1, FolderLevel2, FolderLevel3 } from "../../schema";
+
+type FolderItem = FolderLevel1 | FolderLevel2 | FolderLevel3;
 
 /**
  * Shared helper for setting up project folders and storage allocation.
@@ -53,17 +55,31 @@ export async function setupFoldersInternal(
     throw new Error("Storage tier not found");
   }
 
-  // Create folder records from the template
+  // Create folder records from the template (flatten hierarchy)
   const folderIds = [];
-  for (const folderName of template.folders) {
-    const folderId = await ctx.db.insert("folders", {
-      projectId: args.projectId,
-      name: folderName,
-      path: `/${folderName.toLowerCase().replace(/\s+/g, "-")}`,
-      status: "pending_upload",
-    });
-    folderIds.push(folderId);
+
+  async function createFoldersRecursively(
+    items: FolderItem[],
+    parentPath = "",
+  ) {
+    for (const item of items) {
+      const folderId = await ctx.db.insert("folders", {
+        projectId: args.projectId,
+        name: item.name,
+        path: item.path,
+        description: item.description,
+        isRequired: item.isRequired,
+        status: "pending_upload",
+      });
+      folderIds.push(folderId);
+
+      if ("children" in item && item.children && item.children.length > 0) {
+        await createFoldersRecursively(item.children, item.path);
+      }
+    }
   }
+
+  await createFoldersRecursively(template.folders);
 
   // Update project's storage allocation (convert GB to bytes)
   const storageInBytes = storageTier.sizeGB * 1024 * 1024 * 1024;

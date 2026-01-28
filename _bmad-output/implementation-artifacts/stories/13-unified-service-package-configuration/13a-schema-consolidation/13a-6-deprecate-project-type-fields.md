@@ -1,6 +1,6 @@
 # Story 13A.6: Deprecate `projectTypeFields` Table
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 1  
 **Epic**: [13A: Schema Consolidation](../../../../planning-artifacts/epics/13a-schema-consolidation.md)  
 **Depends On**: None (can run in parallel)

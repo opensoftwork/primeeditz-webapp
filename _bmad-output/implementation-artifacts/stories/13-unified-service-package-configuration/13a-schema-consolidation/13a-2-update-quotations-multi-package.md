@@ -1,6 +1,6 @@
 # Story 13A.2: Update `quotations` Table for Multi-Package Selection
 
-**Status**: in-progress  
+**Status**: done  
 **Points**: 2  
 **Epic**: [13A: Schema Consolidation](../../../../planning-artifacts/epics/13a-schema-consolidation.md)  
 **Depends On**: Story 13A.1

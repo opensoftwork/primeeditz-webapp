@@ -36,12 +36,10 @@ export const getProjectStorageUsage = query({
 
     if (!allocated) {
       // Check for approved quotation
-      const projectIdString = args.projectId as string;
-
       let quotation = await ctx.db
         .query("quotations")
         .withIndex("by_status", (q) => q.eq("status", "approved"))
-        .filter((q) => q.eq(q.field("projectId"), projectIdString))
+        .filter((q) => q.eq(q.field("projectId"), args.projectId))
         .first();
 
       if (!quotation) {
@@ -51,7 +49,7 @@ export const getProjectStorageUsage = query({
           .collect();
 
         quotation =
-          allApproved.find((q) => q.projectIds?.includes(projectIdString)) ||
+          allApproved.find((q) => q.projectIds?.includes(args.projectId)) ||
           null;
       }
 

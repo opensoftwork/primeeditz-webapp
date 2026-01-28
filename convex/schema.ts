@@ -7,6 +7,9 @@ import { type Infer, v } from "convex/values";
 export type Role = Infer<typeof roleValidator>;
 export type ProjectPhase = Infer<typeof projectPhaseValidator>;
 export type ActionState = Infer<typeof projectActionStateValidator>;
+export type FolderLevel1 = Infer<typeof folderLevel1Validator>;
+export type FolderLevel2 = Infer<typeof folderLevel2Validator>;
+export type FolderLevel3 = Infer<typeof folderLevel3Validator>;
 
 // ============================================================================
 // Reusable Validators
@@ -120,6 +123,32 @@ export const servicePackageLineItemValidator = v.object({
   ),
 });
 
+// Level 3: Leaf nodes (no children allowed)
+export const folderLevel3Validator = v.object({
+  name: v.string(),
+  path: v.string(),
+  description: v.optional(v.string()),
+  isRequired: v.optional(v.boolean()),
+});
+
+// Level 2: Can have Level 3 children
+export const folderLevel2Validator = v.object({
+  name: v.string(),
+  path: v.string(),
+  description: v.optional(v.string()),
+  isRequired: v.optional(v.boolean()),
+  children: v.optional(v.array(folderLevel3Validator)),
+});
+
+// Level 1: Root folders, can have Level 2 children
+export const folderLevel1Validator = v.object({
+  name: v.string(),
+  path: v.string(),
+  description: v.optional(v.string()),
+  isRequired: v.optional(v.boolean()),
+  children: v.optional(v.array(folderLevel2Validator)),
+});
+
 // ============================================================================
 // Schema Definition
 // ============================================================================
@@ -182,8 +211,27 @@ export default defineSchema({
     .index("by_categoryId", ["categoryId"])
     .index("by_isActive", ["isActive"]),
 
-  // Dynamic field definitions for each project type
-  // Allows admins to configure what fields appear in Step 2 of the wizard
+  /**
+   * @deprecated This table is deprecated as of Epic 13.
+   *
+   * BACKGROUND:
+   * Dynamic project type fields were originally designed to allow custom
+   * fields per project type. This added complexity without clear user value.
+   *
+   * NEW APPROACH:
+   * - Service Packages define all project configuration at package level
+   * - Required info is collected during onboarding with a static form
+   * - Type-specific details can use the existing typeSpecificDetails JSON field
+   *
+   * REMOVAL TIMELINE:
+   * - Epic 13A: Mark as deprecated (this story)
+   * - Epic 13D: Remove table and all references
+   *
+   * DO NOT:
+   * - Add new code that queries this table
+   * - Add new fields to this table
+   * - Create UI for managing these fields
+   */
   projectTypeFields: defineTable({
     projectTypeId: v.id("projectTypes"),
     name: v.string(), // Field key (e.g., 'albumCount')
@@ -228,6 +276,8 @@ export default defineSchema({
     description: v.optional(v.string()),
     additionalNotes: v.optional(v.string()),
     preferredDeliveryDate: v.optional(v.number()),
+    eventName: v.optional(v.string()), // NEW: Event name from quotation/package
+    eventDate: v.optional(v.number()), // NEW: Event date from quotation/package
     // NEW: Key milestone timestamps
     quotationApprovedAt: v.optional(v.number()),
     storageAllocatedAt: v.optional(v.number()),
@@ -289,18 +339,22 @@ export default defineSchema({
   // --------------------------------------------------------------------------
   folderTemplates: defineTable({
     name: v.string(),
-    variant: v.optional(v.string()), // NEW: e.g. "South Indian", "Christian", etc.
-    description: v.optional(v.string()), // NEW: Detailed info about this structure
-    folders: v.array(v.string()),
-    projectTypeId: v.optional(v.id("projectTypes")),
+    description: v.optional(v.string()),
+    projectTypeId: v.id("projectTypes"), // Now required link
+    variant: v.optional(v.string()), // e.g. "South Indian", "Christian", etc.
+    folders: v.array(folderLevel1Validator), // Hierarchical folders
     isDefault: v.optional(v.boolean()),
     isActive: v.boolean(),
-  }).index("by_projectTypeId", ["projectTypeId"]),
+  })
+    .index("by_projectTypeId", ["projectTypeId"])
+    .index("by_isActive", ["isActive"]),
 
   folders: defineTable({
     projectId: v.id("projects"),
     name: v.string(),
     path: v.string(),
+    description: v.optional(v.string()),
+    isRequired: v.optional(v.boolean()),
     status: folderStatusValidator,
     // Uses _creationTime
   }).index("by_projectId", ["projectId"]),
@@ -434,6 +488,7 @@ export default defineSchema({
         length: v.optional(v.string()),
         width: v.optional(v.string()),
         image: v.optional(v.string()),
+        sourcePackageId: v.optional(v.id("servicePackages")), // NEW: Source package tracker
         subItems: v.optional(
           v.array(
             v.object({

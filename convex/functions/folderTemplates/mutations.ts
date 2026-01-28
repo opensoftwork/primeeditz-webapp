@@ -1,4 +1,5 @@
 import { v } from "convex/values";
+import { folderLevel1Validator } from "../../schema";
 import { adminMutation } from "../../lib/customFunctions";
 
 /**
@@ -7,8 +8,10 @@ import { adminMutation } from "../../lib/customFunctions";
 export const createFolderTemplate = adminMutation({
   args: {
     name: v.string(),
-    folders: v.array(v.string()),
-    projectTypeId: v.optional(v.id("projectTypes")),
+    folders: v.array(folderLevel1Validator),
+    projectTypeId: v.id("projectTypes"),
+    variant: v.optional(v.string()),
+    description: v.optional(v.string()),
     isDefault: v.optional(v.boolean()),
     isActive: v.boolean(),
   },
@@ -44,8 +47,10 @@ export const updateFolderTemplate = adminMutation({
   args: {
     id: v.id("folderTemplates"),
     name: v.optional(v.string()),
-    folders: v.optional(v.array(v.string())),
+    folders: v.optional(v.array(folderLevel1Validator)),
     projectTypeId: v.optional(v.id("projectTypes")),
+    variant: v.optional(v.string()),
+    description: v.optional(v.string()),
     isDefault: v.optional(v.boolean()),
     isActive: v.optional(v.boolean()),
   },
@@ -57,16 +62,18 @@ export const updateFolderTemplate = adminMutation({
       const template = await ctx.db.get(id);
       const projectTypeId = updates.projectTypeId ?? template?.projectTypeId;
 
-      const existing = await ctx.db
-        .query("folderTemplates")
-        .withIndex("by_projectTypeId", (q) =>
-          q.eq("projectTypeId", projectTypeId),
-        )
-        .collect();
+      if (projectTypeId) {
+        const existing = await ctx.db
+          .query("folderTemplates")
+          .withIndex("by_projectTypeId", (q) =>
+            q.eq("projectTypeId", projectTypeId),
+          )
+          .collect();
 
-      for (const t of existing) {
-        if (t.isDefault && t._id !== id) {
-          await ctx.db.patch(t._id, { isDefault: false });
+        for (const t of existing) {
+          if (t.isDefault && t._id !== id) {
+            await ctx.db.patch(t._id, { isDefault: false });
+          }
         }
       }
     }

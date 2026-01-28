@@ -75,6 +75,7 @@ import type * as seeds_projectTypeFields from "../seeds/projectTypeFields.js";
 import type * as seeds_quotationLibraryItems from "../seeds/quotationLibraryItems.js";
 import type * as seeds_quotationSections from "../seeds/quotationSections.js";
 import type * as seeds_quotationTemplates from "../seeds/quotationTemplates.js";
+import type * as seeds_servicePackages from "../seeds/servicePackages.js";
 import type * as seeds_storageTiers from "../seeds/storageTiers.js";
 
 import type {
@@ -151,6 +152,7 @@ declare const fullApi: ApiFromModules<{
   "seeds/quotationLibraryItems": typeof seeds_quotationLibraryItems;
   "seeds/quotationSections": typeof seeds_quotationSections;
   "seeds/quotationTemplates": typeof seeds_quotationTemplates;
+  "seeds/servicePackages": typeof seeds_servicePackages;
   "seeds/storageTiers": typeof seeds_storageTiers;
 }>;
 

@@ -5,7 +5,7 @@ import { seedProjectStructure } from "./seeds/projectStructure";
 import { seedProjectTypeFields } from "./seeds/projectTypeFields";
 import { seedQuotationLibraryItems } from "./seeds/quotationLibraryItems";
 import { seedQuotationSections } from "./seeds/quotationSections";
-import { seedQuotationTemplates } from "./seeds/quotationTemplates";
+import { seedServicePackages } from "./seeds/servicePackages";
 import { seedStorageTiers } from "./seeds/storageTiers";
 
 /**
@@ -89,8 +89,8 @@ export const seedAll = mutation({
     console.log("");
 
     // 7. Seed Service Packages (Replaces Quotation Templates)
-    console.log("📋 Step 7: Seeding Service Packages (Pending 13A.4)...");
-    // await seedQuotationTemplates(ctx, sectionMap, typeMap);
+    console.log("📋 Step 7: Seeding Service Packages...");
+    await seedServicePackages(ctx);
     console.log("");
 
     console.log("========================================");
@@ -129,8 +129,8 @@ export const seedQuotationsOnly = mutation({
     // Seed library items
     await seedQuotationLibraryItems(ctx, sectionMap, typeMap);
 
-    // Seed packages (Pending 13A.4)
-    // await seedQuotationTemplates(ctx, sectionMap, typeMap);
+    // Seed packages
+    await seedServicePackages(ctx);
 
     console.log("Quotation seeding complete!");
     return { success: true };

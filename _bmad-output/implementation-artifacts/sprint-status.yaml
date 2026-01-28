@@ -244,20 +244,22 @@ development_status:
 
   # Epic 13A: Schema Consolidation (FOUNDATION - MUST GO FIRST)
   # Goal: Rename table, multi-package model, simplified spawning
+  epic-13a: done
   13a-1-create-service-packages-table: done # 3 points
-  13a-2-update-quotations-multi-package: in-progress # 2 points
-  13a-3-update-spawning-logic: backlog # 3 points
-  13a-4-create-service-package-seeds: backlog # 2 points
-  13a-5-update-quotation-mutations: backlog # 2 points
-  13a-6-deprecate-project-type-fields: backlog # 1 point
+  13a-2-update-quotations-multi-package: done # 2 points
+  13a-3-update-spawning-logic: done # 3 points
+  13a-4-create-service-package-seeds: done # 2 points
+  13a-5-update-quotation-mutations: done # 2 points
+  13a-6-deprecate-project-type-fields: done # 1 point
+
   epic-13a-retrospective: optional
 
   # Epic 13B: Folder Template Enhancement (parallel with 13C after 13A)
   # Goal: Depth-limited hierarchical folders, variants (NO RECURSION!)
-  13b-1-enhance-folder-templates-schema: backlog # 3 points
-  13b-2-create-wedding-folder-seeds: backlog # 3 points
-  13b-3-create-content-creator-folder-seeds: backlog # 2 points
-  13b-4-update-folder-setup-mutation: backlog # 2 points
+  13b-1-enhance-folder-templates-schema: done # 3 points
+  13b-2-create-wedding-folder-seeds: done # 3 points
+  13b-3-create-content-creator-folder-seeds: done # 2 points
+  13b-4-update-folder-setup-mutation: done # 2 points
   13b-5-folder-template-builder-ui: backlog # 3 points
   epic-13b-retrospective: optional
 

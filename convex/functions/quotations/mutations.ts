@@ -32,6 +32,7 @@ const lineItemInput = v.object({
   spawnsProject: v.optional(v.boolean()),
   projectTypeId: v.optional(v.id("projectTypes")),
   selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
+  sourcePackageId: v.optional(v.id("servicePackages")),
   subItems: v.optional(
     v.array(
       v.object({
@@ -94,6 +95,45 @@ function calculateTotals(
   const total = taxableAmount + taxAmount;
 
   return { subtotal, taxAmount, total };
+}
+
+/**
+ * Aggregates line items from multiple service packages.
+ * Adds sourcePackageId and spawning config to each item.
+ */
+async function aggregateLineItemsFromPackages(
+  ctx: MutationCtx,
+  packageIds: Id<"servicePackages">[],
+) {
+  const allLineItems: any[] = [];
+
+  for (const packageId of packageIds) {
+    const pkg = await ctx.db.get(packageId);
+    if (!pkg) {
+      throw new Error(`Package not found: ${packageId}`);
+    }
+
+    // Add each line item with source tracking and spawning config
+    for (const item of pkg.lineItems) {
+      allLineItems.push({
+        ...item,
+        id: crypto.randomUUID(), // New ID for quotation line item
+        sourcePackageId: packageId,
+        spawnsProject: true, // Packages always spawn projects now
+        projectTypeId: pkg.projectTypeId,
+        selectedFolderTemplateId: pkg.folderTemplateId,
+        subItems: item.subItems?.map((si) => ({
+          id: crypto.randomUUID(),
+          description: si.description,
+          unit: "Unit",
+          rate: si.amount ?? 0,
+          quantity: 1,
+        })),
+      });
+    }
+  }
+
+  return allLineItems;
 }
 
 /**
@@ -172,29 +212,26 @@ async function transitionProjectsForQuotation(
  */
 export const requestQuotation = authenticatedWithProfileMutation({
   args: {
-    packageId: v.id("servicePackages"),
+    selectedPackageIds: v.array(v.id("servicePackages")),
     endClientName: v.string(),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     notes: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const pkg = await ctx.db.get(args.packageId);
-    if (!pkg) throw new Error("Package not found");
+    // Validation
+    if (args.selectedPackageIds.length === 0) {
+      throw new Error("At least one package must be selected");
+    }
 
     const code = await generateQuotationCode(ctx);
     const taxRate = 0.18; // Default GST
 
-    // Map package line items to quotation line items
-    const lineItems = pkg.lineItems.map((li) => ({
-      id: crypto.randomUUID(),
-      sectionId: li.sectionId,
-      description: li.description,
-      unit: li.unit,
-      rate: li.rate,
-      quantity: li.quantity,
-      spawnsProject: true, // Packages now always spawn projects
-      projectTypeId: pkg.projectTypeId,
-      selectedFolderTemplateId: pkg.folderTemplateId,
-    }));
+    // Aggregate line items from all selected packages
+    const lineItems = await aggregateLineItemsFromPackages(
+      ctx,
+      args.selectedPackageIds,
+    );
 
     const { subtotal, taxAmount, total } = calculateTotals(
       lineItems,
@@ -206,15 +243,16 @@ export const requestQuotation = authenticatedWithProfileMutation({
       code,
       version: 1,
       studioId: ctx.profile._id,
-      selectedPackageIds: [args.packageId],
+      selectedPackageIds: args.selectedPackageIds,
       status: "initiated",
       lineItems,
       subtotal,
       taxRate,
       taxAmount,
       total,
-      terms: pkg.terms,
       endClientName: args.endClientName,
+      eventName: args.eventName,
+      eventDate: args.eventDate,
       studioNotes: args.notes,
       createdBy: "STUDIO",
       updatedAt: Date.now(),
@@ -244,10 +282,26 @@ export const createQuotation = adminMutation({
     createdBy: v.string(),
   },
   handler: async (ctx, args) => {
+    // Validation
+    if (args.selectedPackageIds.length === 0 && (!args.lineItems || args.lineItems.length === 0)) {
+      throw new Error("At least one package or one line item must be provided");
+    }
+
     const code = await generateQuotationCode(ctx);
     const taxRate = args.taxRate ?? 0.18;
+
+    // Aggregate line items from packages if provided
+    let combinedLineItems = [...(args.lineItems || [])];
+    if (args.selectedPackageIds.length > 0) {
+      const packageLineItems = await aggregateLineItemsFromPackages(
+        ctx,
+        args.selectedPackageIds,
+      );
+      combinedLineItems = [...combinedLineItems, ...packageLineItems];
+    }
+
     const { subtotal, taxAmount, total } = calculateTotals(
-      args.lineItems,
+      combinedLineItems,
       taxRate,
       args.discountAmount,
     );
@@ -260,7 +314,7 @@ export const createQuotation = adminMutation({
       projectIds: args.projectIds,
       selectedPackageIds: args.selectedPackageIds,
       status: "draft",
-      lineItems: args.lineItems,
+      lineItems: combinedLineItems,
       subtotal,
       taxRate,
       taxAmount,

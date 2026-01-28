@@ -1,6 +1,6 @@
 # Story 13A.5: Update Quotation Mutations
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 2  
 **Epic**: [13A: Schema Consolidation](../../../../planning-artifacts/epics/13a-schema-consolidation.md)  
 **Depends On**: Story 13A.1, 13A.2

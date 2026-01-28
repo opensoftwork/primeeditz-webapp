@@ -1,5 +1,5 @@
 import type { GenericDatabaseWriter } from "convex/server";
-import type { DataModel, Id } from "../../_generated/dataModel";
+import type { DataModel, Id, Doc } from "../../_generated/dataModel";
 import type { MutationCtx } from "../../_generated/server";
 import { now } from "../../lib/helpers";
 import { getActorForState } from "../../lib/statusMachine";
@@ -7,14 +7,13 @@ import { setupFoldersInternal } from "../folders/mutations";
 
 /**
  * Generate a unique project code
+ * Format: PRJ-YYYY-NNN (e.g., PRJ-2026-001)
  */
 async function generateProjectCode(
   db: GenericDatabaseWriter<DataModel>,
 ): Promise<string> {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, "0");
-  const prefix = `PE-${year}${month}`;
+  const year = new Date().getFullYear();
+  const prefix = `PRJ-${year}-`;
 
   const allProjects = await db.query("projects").collect();
 
@@ -32,7 +31,7 @@ async function generateProjectCode(
   }
 
   const newSeq = String(maxSeq + 1).padStart(3, "0");
-  return `${prefix}-${newSeq}`;
+  return `${prefix}${newSeq}`;
 }
 
 /**
@@ -61,8 +60,9 @@ async function getDefaultStorageTier(
 }
 
 /**
- * Spawn projects from a quotation based on its line items.
+ * Spawn projects from a quotation based on its selected service packages.
  * Called when a quotation is approved.
+ * Story 13A.3 Implementation
  */
 export async function spawnProjectsFromQuotation(
   ctx: MutationCtx,
@@ -77,73 +77,92 @@ export async function spawnProjectsFromQuotation(
   const createdProjectIds: Id<"projects">[] = [];
   const defaultStorageTierId = await getDefaultStorageTier(ctx.db);
 
-  for (const item of quotation.lineItems) {
-    if (item.spawnsProject && item.projectTypeId) {
-      // 1. Generate unique code
-      const code = await generateProjectCode(ctx.db);
+  if (!quotation.selectedPackageIds || quotation.selectedPackageIds.length === 0) {
+    console.warn(`Quotation ${quotation.code} has no selected packages. No projects spawned.`);
+    return [];
+  }
 
-      // 2. Insert new project
-      const projectId = await ctx.db.insert("projects", {
-        code,
-        projectTypeId: item.projectTypeId as Id<"projectTypes">,
-        studioId: quotation.studioId as Id<"profiles">,
-        quotationId: quotation._id,
-        source: "quotation_spawned",
-        phase: "onboarding",
-        actionState: "awaiting_uploads",
-        awaitingActorRole: getActorForState("awaiting_uploads"),
-        storageUsed: 0,
-        lastStep: 3, // Start at step 3 for onboarding (Story 11C.5)
-        updatedAt: now(),
-        quotationApprovedAt: now(),
-        endClientName: quotation.endClientName,
-        assignedEmployeeId: quotation.assignedEmployeeId,
-      });
+  for (const packageId of quotation.selectedPackageIds) {
+    const pkg = await ctx.db.get(packageId);
+    if (!pkg) {
+      console.warn(`Package ${packageId} not found. Skipping spawning.`);
+      continue;
+    }
 
-      createdProjectIds.push(projectId);
+    // Skip if package has no project type (though schema says it's required)
+    if (!pkg.projectTypeId) {
+      console.warn(`Package ${pkg.name} has no projectTypeId. Skipping spawning.`);
+      continue;
+    }
 
-      // 3. Log status history
-      await ctx.db.insert("statusHistory", {
-        projectId,
-        previousPhase: "setup",
-        newPhase: "onboarding",
-        previousActionState: "draft",
-        newActionState: "awaiting_uploads",
-        previousAwaitingActorRole: "studio",
-        newAwaitingActorRole: getActorForState("awaiting_uploads"),
-        changedBy: args.profileId,
-        changedAt: now(),
-        notes: `Project automatically spawned from approved quotation ${quotation.code}`,
-      });
+    // 1. Generate unique code
+    const code = await generateProjectCode(ctx.db);
 
-      // 4. Automated Folder Setup (Story 11B.2 / 11B.3)
-      if (item.selectedFolderTemplateId && defaultStorageTierId) {
-        try {
-          await setupFoldersInternal(ctx, {
-            projectId,
-            templateId: item.selectedFolderTemplateId as Id<"folderTemplates">,
-            storageTierId: defaultStorageTierId,
-            changedBy: args.profileId,
-          });
-        } catch (err) {
-          console.error(
-            `Failed to automount folders for project ${code}:`,
-            err,
-          );
-          // Don't fail the whole transaction, just log it
-          // We might want to add a note to status history too
-          await ctx.db.insert("statusHistory", {
-            projectId,
-            previousPhase: "setup",
-            newPhase: "setup",
-            previousActionState: "quotation_approved",
-            newActionState: "quotation_approved",
-            changedBy: args.profileId,
-            changedAt: now(),
-            notes:
-              "Automatic folder setup failed. Storage tier might be missing.",
-          });
-        }
+    // 2. Insert new project
+    const projectId = await ctx.db.insert("projects", {
+      code,
+      projectTypeId: pkg.projectTypeId,
+      studioId: quotation.studioId as Id<"profiles">,
+      quotationId: quotation._id,
+      source: "quotation_spawned",
+      phase: "onboarding",
+      actionState: "awaiting_uploads",
+      awaitingActorRole: getActorForState("awaiting_uploads"),
+      storageUsed: 0,
+      lastStep: 3, // Start at step 3 for onboarding (Story 11C.5)
+      updatedAt: now(),
+      quotationApprovedAt: now(),
+      endClientName: quotation.endClientName,
+      eventName: quotation.eventName,
+      eventDate: quotation.eventDate,
+      assignedEmployeeId: quotation.assignedEmployeeId,
+    });
+
+    createdProjectIds.push(projectId);
+
+    // 3. Log status history
+    await ctx.db.insert("statusHistory", {
+      projectId,
+      previousPhase: "setup", // Spawned projects start from setup logically but created at onboarding
+      newPhase: "onboarding",
+      previousActionState: "draft",
+      newActionState: "awaiting_uploads",
+      previousAwaitingActorRole: "studio",
+      newAwaitingActorRole: getActorForState("awaiting_uploads"),
+      changedBy: args.profileId,
+      changedAt: now(),
+      notes: `Project automatically spawned from approved quotation ${quotation.code} (Package: ${pkg.name})`,
+    });
+
+    // 4. Automated Folder Setup (Story 11B.2 / 11B.3)
+    const folderTemplateId = pkg.folderTemplateId;
+    const storageTierId = pkg.defaultStorageTierId || defaultStorageTierId;
+
+    if (folderTemplateId && storageTierId) {
+      try {
+        await setupFoldersInternal(ctx, {
+          projectId,
+          templateId: folderTemplateId,
+          storageTierId: storageTierId,
+          changedBy: args.profileId,
+        });
+      } catch (err) {
+        console.error(
+          `Failed to automount folders for project ${code}:`,
+          err,
+        );
+        // Don't fail the whole transaction, just log it
+        await ctx.db.insert("statusHistory", {
+          projectId,
+          previousPhase: "setup",
+          newPhase: "setup",
+          previousActionState: "quotation_approved",
+          newActionState: "quotation_approved",
+          changedBy: args.profileId,
+          changedAt: now(),
+          notes:
+            "Automatic folder setup failed. Storage tier might be missing.",
+        });
       }
     }
   }

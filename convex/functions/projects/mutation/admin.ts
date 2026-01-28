@@ -336,28 +336,24 @@ export const permanentlyDeleteProject = adminMutation({
     // NEVER cascade delete quotations (financial records)
     const quotations = await ctx.db
       .query("quotations")
-      .withIndex("by_studioId", (q) =>
-        q.eq("studioId", project.studioId as string),
-      )
+      .withIndex("by_studioId", (q) => q.eq("studioId", project.studioId!))
       .collect();
 
     for (const quotation of quotations) {
-      const projectIdString = args.projectId as string;
       const projectIds = quotation.projectIds || [];
-
       if (
-        quotation.projectId === projectIdString ||
-        projectIds.includes(projectIdString)
+        quotation.projectId === args.projectId ||
+        projectIds.includes(args.projectId)
       ) {
         const updatedProjectIds = projectIds.filter(
-          (id) => id !== projectIdString,
+          (id) => id !== args.projectId,
         );
         const note = `Project ${project.code} deleted on ${new Date().toISOString()}`;
 
         await ctx.db.patch(quotation._id, {
           projectIds: updatedProjectIds,
           projectId:
-            quotation.projectId === projectIdString
+            quotation.projectId === args.projectId
               ? updatedProjectIds[0] || undefined
               : quotation.projectId,
           studioNotes: quotation.studioNotes
@@ -457,28 +453,23 @@ export const linkProjectToQuotation = adminMutation({
     }
 
     // 4. Validate client match
-    const projectClientId = project.studioId as string | undefined;
-    const quotationClientId = quotation.studioId as string | undefined;
-
     if (
-      projectClientId &&
-      quotationClientId &&
-      projectClientId !== quotationClientId
+      project.studioId &&
+      quotation.studioId &&
+      project.studioId !== quotation.studioId
     ) {
       throw new ConvexError("Quotation belongs to a different client");
     }
 
     // 5. Update the quotation to include this project
-    // We use projectIds array for multi-project quotations
-    const projectIdString = args.projectId as string;
     const existingProjectIds = quotation.projectIds || [];
 
-    if (!existingProjectIds.includes(projectIdString)) {
+    if (!existingProjectIds.includes(args.projectId)) {
       // Add to projectIds array
       await ctx.db.patch(args.quotationId, {
-        projectIds: [...existingProjectIds, projectIdString],
+        projectIds: [...existingProjectIds, args.projectId],
         // Also set single projectId for backward compatibility if not set
-        projectId: quotation.projectId || projectIdString,
+        projectId: quotation.projectId || args.projectId,
       });
     }
 
@@ -536,19 +527,18 @@ export const unlinkProjectFromQuotation = adminMutation({
       throw new ConvexError("Quotation not found");
     }
 
-    const projectIdString = args.projectId as string;
     const existingProjectIds = quotation.projectIds || [];
 
     // Remove from projectIds array
     const updatedProjectIds = existingProjectIds.filter(
-      (id) => id !== projectIdString,
+      (id) => id !== args.projectId,
     );
 
     await ctx.db.patch(args.quotationId, {
       projectIds: updatedProjectIds,
       // Clear single projectId if it matches
       projectId:
-        quotation.projectId === projectIdString
+        quotation.projectId === args.projectId
           ? updatedProjectIds[0] || undefined
           : quotation.projectId,
     });

@@ -15,7 +15,7 @@ export type EnrichedQuotation = Doc<"quotations"> & {
 export const getAdminQuotations = query({
   args: {
     status: v.optional(quotationStatusValidator),
-    studioId: v.optional(v.string()),
+    studioId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args): Promise<EnrichedQuotation[]> => {
     const quotations: Doc<"quotations">[] = await ctx.runQuery(
@@ -26,27 +26,35 @@ export const getAdminQuotations = query({
       },
     );
 
-    const studioIds = quotations
-      .map((q) => q.studioId)
-      .filter((id): id is string => !!id);
-    const projectIds = quotations
-      .map((q) => q.projectId)
-      .filter((id): id is string => !!id);
+    const studioIds = [
+      ...new Set(
+        quotations
+          .map((q) => q.studioId)
+          .filter((id): id is Id<"profiles"> => !!id),
+      ),
+    ];
+    const projectIds = [
+      ...new Set(
+        quotations
+          .map((q) => q.projectId)
+          .filter((id): id is Id<"projects"> => !!id),
+      ),
+    ];
 
     const [clients, projects] = await Promise.all([
-      Promise.all(studioIds.map((id) => ctx.db.get(id as Id<"profiles">))),
-      Promise.all(projectIds.map((id) => ctx.db.get(id as Id<"projects">))),
+      Promise.all(studioIds.map((id) => ctx.db.get(id))),
+      Promise.all(projectIds.map((id) => ctx.db.get(id))),
     ]);
 
     const clientMap = new Map(
       clients
         .filter((c): c is Doc<"profiles"> => !!c)
-        .map((c) => [c._id as string, c.name]),
+        .map((c) => [c._id, c.name]),
     );
     const projectMap = new Map(
       projects
         .filter((p): p is Doc<"projects"> => !!p)
-        .map((p) => [p._id as string, p.endClientName || p.code]),
+        .map((p) => [p._id, p.endClientName || p.code]),
     );
 
     return quotations.map((q) => ({

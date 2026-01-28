@@ -1,6 +1,6 @@
 # Story 13A.3: Update Project Spawning Logic for Multi-Package
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 3  
 **Epic**: [13A: Schema Consolidation](../../../../planning-artifacts/epics/13a-schema-consolidation.md)  
 **Depends On**: Story 13A.1, 13A.2

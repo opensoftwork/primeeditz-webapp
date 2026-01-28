@@ -144,14 +144,11 @@ export const canSetupFolders = adminQuery({
     }
 
     // Check for approved quotation linked to this project
-    // Note: quotations.projectId is stored as v.optional(v.string())
-    const projectIdString = args.projectId as string;
-
-    // Check single projectId field
+    // Note: quotations.projectId is now v.id("projects")
     let approvedQuotation = await ctx.db
       .query("quotations")
       .withIndex("by_status", (q) => q.eq("status", "approved"))
-      .filter((q) => q.eq(q.field("projectId"), projectIdString))
+      .filter((q) => q.eq(q.field("projectId"), args.projectId))
       .first();
 
     // Also check projectIds array (for multi-project quotations)
@@ -163,7 +160,7 @@ export const canSetupFolders = adminQuery({
 
       approvedQuotation =
         allApprovedQuotations.find((q) =>
-          q.projectIds?.includes(projectIdString),
+          q.projectIds?.includes(args.projectId),
         ) || null;
     }
 
@@ -189,10 +186,9 @@ export const canSetupFolders = adminQuery({
     // This enables the enhanced flow where admin can link to any client quotation
     const studioId = project.studioId;
     if (studioId) {
-      const studioIdString = studioId as string;
       const clientQuotations = await ctx.db
         .query("quotations")
-        .withIndex("by_studioId", (q) => q.eq("studioId", studioIdString))
+        .withIndex("by_studioId", (q) => q.eq("studioId", studioId))
         .collect();
 
       const hasClientApprovedQuotation = clientQuotations.some(
