@@ -236,46 +236,47 @@ development_status:
   # ============================================================================
   # EPIC 13: Unified Service Package Configuration (Master)
   # ============================================================================
-  # Context: Party Mode Brainstorming 2026-01-27
-  # Goal: Consolidate 7 config tables into unified Service Package model
-  # Key Change: 1 Quotation Template → 1 Project (no line-item spawning)
+  # Context: Party Mode Review 2026-01-28
+  # Goal: Consolidate config into unified Service Package model
+  # Key Change: N Service Packages → N Projects (multi-package selection)
+  # Breaking Change: quotationTemplates → servicePackages (table rename)
   epic-13: backlog
 
-  # Epic 13A: Schema Consolidation
-  # Goal: Simplify data model, add template-level project config
-  13a-1-enhance-quotation-templates-schema: backlog
-  13a-2-simplify-line-item-schema: backlog
-  13a-3-migrate-existing-templates: backlog
-  13a-4-update-project-spawning-logic: backlog
-  13a-5-deprecate-project-type-fields: backlog
-  13a-6-update-quotation-mutations: backlog
+  # Epic 13A: Schema Consolidation (FOUNDATION - MUST GO FIRST)
+  # Goal: Rename table, multi-package model, simplified spawning
+  13a-1-create-service-packages-table: backlog # 3 points
+  13a-2-update-quotations-multi-package: backlog # 2 points
+  13a-3-update-spawning-logic: backlog # 3 points
+  13a-4-create-service-package-seeds: backlog # 2 points
+  13a-5-update-quotation-mutations: backlog # 2 points
+  13a-6-deprecate-project-type-fields: backlog # 1 point
   epic-13a-retrospective: optional
 
-  # Epic 13B: Folder Template Enhancement
-  # Goal: Hierarchical folders, variants, project-type specific
-  13b-1-enhance-folder-templates-schema: backlog
-  13b-2-create-wedding-folder-seeds: backlog
-  13b-3-create-content-creator-folder-seeds: backlog
-  13b-4-update-folder-setup-mutation: backlog
-  13b-5-folder-template-builder-ui: backlog
+  # Epic 13B: Folder Template Enhancement (parallel with 13C after 13A)
+  # Goal: Depth-limited hierarchical folders, variants (NO RECURSION!)
+  13b-1-enhance-folder-templates-schema: backlog # 3 points
+  13b-2-create-wedding-folder-seeds: backlog # 3 points
+  13b-3-create-content-creator-folder-seeds: backlog # 2 points
+  13b-4-update-folder-setup-mutation: backlog # 2 points
+  13b-5-folder-template-builder-ui: backlog # 3 points
   epic-13b-retrospective: optional
 
-  # Epic 13C: Service Package Builder UI
-  # Goal: Unified admin wizard for configuring packages
-  13c-1-service-package-list-page: backlog
-  13c-2-builder-step-1-basic-info: backlog
-  13c-3-builder-step-2-project-configuration: backlog
-  13c-4-builder-step-3-pricing: backlog
-  13c-5-builder-step-4-review-publish: backlog
-  13c-6-package-detail-view: backlog
+  # Epic 13C: Service Package Builder UI (parallel with 13B after 13A)
+  # Goal: Unified admin wizard with TanStack Form + Zod
+  13c-1-service-package-list-page: backlog # 3 points
+  13c-2-builder-step-1-identity: backlog # 3 points
+  13c-3-builder-step-2-project-config: backlog # 5 points
+  13c-4-builder-step-3-pricing: backlog # 5 points
+  13c-5-builder-step-4-review-publish: backlog # 3 points
+  13c-6-package-detail-view: backlog # 2 points
   epic-13c-retrospective: optional
 
-  # Epic 13D: Legacy Cleanup & Migration
-  # Goal: Remove deprecated UIs, migrate production data
-  13d-1-remove-project-types-ui: backlog
-  13d-2-remove-quotation-templates-old-ui: backlog
-  13d-3-remove-quotation-sections-ui: backlog
-  13d-4-finalize-spawning-logic: backlog
-  13d-5-update-studio-package-selection: backlog
-  13d-6-production-data-migration: backlog
+  # Epic 13D: Legacy Cleanup & Migration (LAST - after 13A, 13B, 13C complete)
+  # Goal: Remove deprecated UIs, multi-package studio flow, clear dev data
+  13d-1-remove-old-quotation-templates-ui: backlog # 2 points
+  13d-2-simplify-project-types-ui: backlog # 2 points
+  13d-3-remove-quotation-sections-ui: backlog # 2 points
+  13d-4-update-studio-quotation-request: backlog # 3 points
+  13d-5-update-quotation-request-mutation: backlog # 2 points
+  13d-6-clear-development-data: backlog # 2 points
   epic-13d-retrospective: optional

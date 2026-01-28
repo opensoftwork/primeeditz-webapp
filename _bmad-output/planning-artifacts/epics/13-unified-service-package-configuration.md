@@ -3,6 +3,7 @@
 **Epic Owner**: Architect/PM  
 **Status**: Planning  
 **Created**: 2026-01-27  
+**Updated**: 2026-01-28  
 **Complexity**: Very High (System-wide restructuring)  
 **Context**: Party Mode Brainstorming Session 2026-01-27
 
@@ -10,36 +11,121 @@
 
 ## 📋 Executive Summary
 
-This **umbrella epic** consolidates the fragmented configuration system (7 separate tables) into a unified **Service Package** model. The key simplification:
+This **umbrella epic** replaces the fragmented configuration system with a unified **Service Package** model. The key changes:
 
-> **1 Service Package (Quotation Template) → 1 Project**
+1. **Rename**: `quotationTemplates` → `servicePackages` (breaking change, dev mode)
+2. **Multi-Select**: Studios can select MULTIPLE packages per quotation
+3. **Simple Spawning**: Each package spawns exactly ONE project (N packages = N projects)
+4. **Line Items = Pricing Only**: No spawning configuration on line items
 
-No more line-item-based project spawning. Either:
+### **Multi-Project Solution**
 
-- Video + Album + Photos = ONE Wedding Project (with appropriate folder structure)
-- OR they are separate service packages if truly independent work
+> **Problem**: Studio wants Photo, Video, and Album as SEPARATE projects with SEPARATE timelines.
 
-### **Key Drivers**
+**Solution**: Studio selects multiple Service Packages in one quotation request:
 
-1. **Configuration Complexity**: Currently 7 tables that must stay synchronized
-2. **UX Friction**: Admin must visit 6 different pages to configure one sellable product
-3. **Mental Model Mismatch**: Studios think in "packages", not "project types" + "folder templates" + "quotation templates"
-4. **Simplified Spawning**: Remove line-item-based multi-project spawning
+```
+┌─────────────────────────────────────────────────────────────────┐
+│  QUOTATION REQUEST                                              │
+│                                                                 │
+│  ☑ Wedding Photography Package  → Spawns: Photo Project        │
+│  ☑ Wedding Cinema Package       → Spawns: Video Project        │
+│  ☑ Premium Album Package        → Spawns: Album Project        │
+│                                                                 │
+│  Combined Quote: ₹85,000                                        │
+└─────────────────────────────────────────────────────────────────┘
+                              ↓ Approval ↓
+┌─────────────────┐  ┌─────────────────┐  ┌─────────────────┐
+│ Photo Project   │  │ Video Project   │  │ Album Project   │
+│ Deadline: May 1 │  │ Deadline: May 15│  │ Deadline: Jun 1 │
+└─────────────────┘  └─────────────────┘  └─────────────────┘
+```
+
+This is **simpler than line-item spawning** because:
+
+- Package is the unit of configuration (not line items)
+- Each package has clear 1:1 project mapping
+- Mix-and-match flexibility for studios
 
 ---
 
 ## 🗂️ Sub-Epic Breakdown
 
-This master plan is decomposed into **four focused sub-epics**:
-
-| Epic ID | Title                       | Focus Area                                            | Estimated Points |
-| :------ | :-------------------------- | :---------------------------------------------------- | :--------------- |
-| **13A** | Schema Consolidation        | Remove/simplify tables, create ServicePackage entity  | 13               |
-| **13B** | Folder Template Enhancement | Hierarchical folders, project-type specific, variants | 13               |
-| **13C** | Service Package Builder UI  | Unified admin configuration wizard                    | 21               |
-| **13D** | Legacy Cleanup & Migration  | Remove old UI, migrate data, update spawning logic    | 13               |
+| Epic ID | Title                       | Focus Area                                         | Points |
+| :------ | :-------------------------- | :------------------------------------------------- | :----- |
+| **13A** | Schema Consolidation        | Rename tables, multi-package model, spawning logic | 13     |
+| **13B** | Folder Template Enhancement | Hierarchical folders (depth-limited), variants     | 13     |
+| **13C** | Service Package Builder UI  | Unified admin configuration wizard                 | 21     |
+| **13D** | Legacy Cleanup & Migration  | Remove old UI, clear data, update spawning         | 13     |
 
 **Total Estimated Story Points: 60**
+
+---
+
+## 📐 Architecture Overview
+
+### Data Model (Post-Epic 13)
+
+```
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                              SERVICE PACKAGES                                 │
+│                        (formerly quotationTemplates)                          │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  _id: Id<"servicePackages">                                                  │
+│  name: string                          // "Wedding Photography Package"       │
+│  description: string                                                          │
+│  categoryId: Id<"projectCategories">   // Wedding, YouTube, etc.             │
+│                                                                               │
+│  // PROJECT CONFIGURATION (1 package = 1 project type)                       │
+│  projectTypeId: Id<"projectTypes">     // What type of project spawns        │
+│  folderTemplateId: Id<"folderTemplates">  // Which folder structure          │
+│  defaultStorageTierId: Id<"storageTiers"> // Storage allocation              │
+│                                                                               │
+│  // PRICING (line items are JUST for pricing display)                        │
+│  lineItems: LineItem[]                 // No spawning config here!           │
+│  terms: string                                                                │
+│                                                                               │
+│  isActive: boolean                                                            │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                                QUOTATIONS                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  _id: Id<"quotations">                                                       │
+│  studioId: Id<"profiles">                                                    │
+│  endClientName: string                                                        │
+│                                                                               │
+│  // MULTIPLE PACKAGES per quotation                                          │
+│  selectedPackageIds: Id<"servicePackages">[]  // Array!                      │
+│                                                                               │
+│  // Aggregated from all selected packages                                    │
+│  lineItems: LineItem[]                                                        │
+│  totalAmount: number                                                          │
+│                                                                               │
+│  status: "draft" | "pending_review" | "sent" | "approved" | "rejected"       │
+└──────────────────────────────────────────────────────────────────────────────┘
+
+┌──────────────────────────────────────────────────────────────────────────────┐
+│                            SPAWNING LOGIC                                     │
+├──────────────────────────────────────────────────────────────────────────────┤
+│  On quotation.status = "approved":                                           │
+│                                                                               │
+│  for each packageId in quotation.selectedPackageIds:                         │
+│    package = db.get(packageId)                                               │
+│    if (package.projectTypeId):                                               │
+│      createProject({                                                         │
+│        quotationId: quotation._id,                                           │
+│        projectTypeId: package.projectTypeId,                                 │
+│        folderTemplateId: package.folderTemplateId,                           │
+│        storageTierId: package.defaultStorageTierId,                          │
+│        studioId: quotation.studioId,                                         │
+│        endClientName: quotation.endClientName,                               │
+│      })                                                                       │
+│      setupFolders(newProject._id, package.folderTemplateId)                  │
+│                                                                               │
+│  // N packages = N projects created                                          │
+└──────────────────────────────────────────────────────────────────────────────┘
+```
 
 ---
 
@@ -49,207 +135,146 @@ This master plan is decomposed into **four focused sub-epics**:
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │                           Epic 13A                                          │
 │               Schema Consolidation (MUST GO FIRST)                          │
-└─────────────────────────────────────┬───────────────────────────────────────┘
-                                      │
-               ┌──────────────────────┴──────────────────────┐
-               │                                             │
-               ▼                                             ▼
-    ┌───────────────────┐                         ┌───────────────────┐
-    │     Epic 13B      │                         │     Epic 13C      │
-    │  Folder Template  │                         │  Service Package  │
-    │   Enhancement     │                         │   Builder UI      │
-    └─────────┬─────────┘                         └─────────┬─────────┘
-              │                                             │
-              └──────────────────────┬──────────────────────┘
-                                     │
-                                     ▼
-                          ┌───────────────────┐
-                          │     Epic 13D      │
-                          │  Legacy Cleanup   │
-                          │   & Migration     │
-                          └───────────────────┘
+│     - Rename quotationTemplates → servicePackages                           │
+│     - Multi-package selection model                                         │
+│     - Updated spawning logic                                                │
+└─────────────────────────────────┬───────────────────────────────────────────┘
+                                  │
+               ┌──────────────────┴──────────────────┐
+               │                                     │
+               ▼                                     ▼
+    ┌───────────────────┐                 ┌───────────────────┐
+    │     Epic 13B      │                 │     Epic 13C      │
+    │  Folder Template  │                 │  Service Package  │
+    │   Enhancement     │                 │   Builder UI      │
+    │  (can parallel)   │                 │  (can parallel)   │
+    └─────────┬─────────┘                 └─────────┬─────────┘
+              │                                     │
+              └──────────────────┬──────────────────┘
+                                 │
+                                 ▼
+                      ┌───────────────────┐
+                      │     Epic 13D      │
+                      │  Legacy Cleanup   │
+                      │   (LAST)          │
+                      └───────────────────┘
 ```
 
 ---
 
-## 📁 Epic 13A: Schema Consolidation
+## ⚠️ Breaking Changes Notice
 
-**Goal**: Simplify the data model by introducing `servicePackages` as the primary configuration entity.
+**This is a BREAKING CHANGE epic.** Since we're in development:
 
-### Stories
-
-| ID    | Story                                        | AC Summary                                               | Points |
-| :---- | :------------------------------------------- | :------------------------------------------------------- | :----- |
-| 13A.1 | Create `servicePackages` table               | New unified table with projectType, folderTemplate links | 3      |
-| 13A.2 | Add fields to `quotationTemplates`           | Add `projectTypeId`, `folderTemplateId`, `storageTierId` | 2      |
-| 13A.3 | Remove `spawnsProject` from line items       | Line items become purely pricing, no spawning logic      | 2      |
-| 13A.4 | Deprecate `projectTypeFields` table          | Mark as deprecated, plan migration path                  | 2      |
-| 13A.5 | Update `projects` spawning to single project | Modify spawning to create ONE project per quotation      | 3      |
-| 13A.6 | Create data migration script                 | Migrate existing quotation templates to new structure    | 1      |
-
-**Definition of Done**:
-
-- [ ] `servicePackages` table exists OR `quotationTemplates` enhanced
-- [ ] Line items no longer contain spawning configuration
-- [ ] Single project spawns per quotation approval
-- [ ] Migration script tested in development
+1. **Data will be cleared** before migration
+2. **No backward compatibility** required
+3. **Table rename**: `quotationTemplates` → `servicePackages`
+4. **Old quotations**: Will be deleted (dev data only)
 
 ---
 
-## 📁 Epic 13B: Folder Template Enhancement
+## 📊 Before vs After Comparison
 
-**Goal**: Make folder templates hierarchical, project-type specific, and variant-aware for different cultural/event types.
-
-### Stories
-
-| ID    | Story                                        | AC Summary                                               | Points |
-| :---- | :------------------------------------------- | :------------------------------------------------------- | :----- |
-| 13B.1 | Enhance `folderTemplates` schema             | Change `folders` from flat array to hierarchical objects | 3      |
-| 13B.2 | Add folder metadata fields                   | Add `description`, `isRequired` per folder               | 2      |
-| 13B.3 | Create Wedding folder template seeds         | South Indian, Christian, North Indian variants           | 3      |
-| 13B.4 | Create YouTube/Content folder template seeds | A-Roll, B-Roll, Graphics, Audio structure                | 2      |
-| 13B.5 | Folder Template Builder UI                   | Visual drag-drop folder structure builder                | 3      |
-
-**Folder Template Schema Update**:
-
-```typescript
-folderTemplates: defineTable({
-  name: v.string(),
-  projectTypeId: v.id("projectTypes"),
-  variant: v.optional(v.string()),
-  description: v.optional(v.string()),
-  folders: v.array(
-    v.object({
-      name: v.string(),
-      path: v.string(),
-      description: v.optional(v.string()),
-      isRequired: v.optional(v.boolean()),
-      children: v.optional(v.array(v.object({...})))
-    })
-  ),
-  isDefault: v.optional(v.boolean()),
-  isActive: v.boolean(),
-})
-```
-
----
-
-## 📁 Epic 13C: Service Package Builder UI
-
-**Goal**: Create a unified admin wizard for configuring sellable service packages.
-
-### Stories
-
-| ID    | Story                                         | AC Summary                                            | Points |
-| :---- | :-------------------------------------------- | :---------------------------------------------------- | :----- |
-| 13C.1 | Service Package List Page                     | List all packages with filters, status, quick actions | 3      |
-| 13C.2 | Package Builder Step 1: Basic Info            | Name, description, category selection                 | 3      |
-| 13C.3 | Package Builder Step 2: Project Configuration | Project type, folder template, storage tier selection | 5      |
-| 13C.4 | Package Builder Step 3: Pricing               | Line items (pricing only), sections, terms            | 5      |
-| 13C.5 | Package Builder Step 4: Preview & Publish     | Preview package, activate/deactivate                  | 3      |
-| 13C.6 | Package Detail View                           | View configured package with edit capability          | 2      |
-
-**UI/UX Principles**:
-
-- One wizard, one mental model
-- Clear separation: "What you're selling" vs "How it's priced"
-- Visual folder structure preview
-- Live pricing preview
-
----
-
-## 📁 Epic 13D: Legacy Cleanup & Migration
-
-**Goal**: Remove deprecated code, update existing features, migrate data.
-
-### Stories
-
-| ID    | Story                                     | AC Summary                                 | Points |
-| :---- | :---------------------------------------- | :----------------------------------------- | :----- |
-| 13D.1 | Remove `admin/project-types` UI           | Delete 20 files, remove routes             | 2      |
-| 13D.2 | Remove `admin/quotation-templates` old UI | Delete 9 files, redirect to new builder    | 2      |
-| 13D.3 | Remove `admin/quotation-sections` UI      | Delete 5 files, sections become optional   | 2      |
-| 13D.4 | Update spawning logic                     | `spawnProjectFromQuotation` (singular)     | 3      |
-| 13D.5 | Update Studio package selection           | Use new servicePackages/quotationTemplates | 2      |
-| 13D.6 | Data migration: Production                | Run migration on production data           | 2      |
-
-**Files to Remove**:
+### BEFORE (Current Architecture)
 
 ```
-src/components/modules/admin/project-types/        (20 files)
-src/components/modules/admin/quotation-templates/  (9 files)
-src/components/modules/admin/quotation-sections/   (5 files)
-src/app/(protected)/@admin/settings/project-types/
-src/app/(protected)/@admin/settings/quotation-templates/
-src/app/(protected)/@admin/settings/quotation-sections/
-convex/functions/projectTypeFields/
-convex/functions/quotations/templates/
+Admin configures:
+1. Project Categories
+2. Project Types + Dynamic Fields
+3. Storage Tiers
+4. Folder Templates
+5. Quotation Sections
+6. Quotation Templates (with line-item spawning config)
+
+Quotation flow:
+- Studio selects 1 template
+- Each line item can spawn a project (complex!)
+- Multiple configs per line item
+
+Problems:
+- 7 configuration pages
+- Line items doing double-duty (pricing + spawning)
+- Confusing mental model
 ```
 
----
-
-## 📊 Current vs New Configuration Model
-
-### BEFORE (7 Configuration Areas)
+### AFTER (Epic 13 Architecture)
 
 ```
-Admin needs to configure:
-1. Project Categories     → "Wedding", "YouTube"
-2. Project Types          → "Wedding Photography", "Cinema Edit"
-3. Project Type Fields    → "Album Count", "Video Duration"
-4. Storage Tiers          → "50GB Standard", "100GB Premium"
-5. Folder Templates       → "Wedding Folders", "YouTube Folders"
-6. Quotation Sections     → "Photography", "Video Editing"
-7. Quotation Templates    → "Silver Package" (links to all above)
+Admin configures:
+1. Project Categories (keep)
+2. Project Types (simplified, no dynamic fields)
+3. Storage Tiers (keep)
+4. Folder Templates (enhanced with depth-limited hierarchy)
+5. Service Packages (unified, replaces quotation templates)
 
-Total Pages: 7
-Mental Model: Database-centric
-```
+Quotation flow:
+- Studio selects MULTIPLE packages
+- Each package spawns exactly 1 project
+- Line items = pricing only
 
-### AFTER (3 Configuration Areas)
-
-```
-Admin needs to configure:
-1. Service Packages       → "Silver Wedding Package" (all-in-one)
-2. Folder Templates       → Enhanced, auto-linked
-3. Storage Tiers          → Shared resource (unchanged)
-
-Total Pages: 3
-Mental Model: Product-centric
+Benefits:
+- 4 configuration areas (down from 7)
+- Clear separation: package = project spawner, line item = price
+- Natural multi-project support
 ```
 
 ---
 
 ## ✅ Acceptance Criteria (Epic Level)
 
-- [ ] Admin can create a "Service Package" in ONE wizard flow
-- [ ] Service Package links: Project Type + Folder Template + Storage + Pricing
-- [ ] 1 Quotation approval → 1 Project created (simplified spawning)
-- [ ] Studio can browse and select Service Packages
-- [ ] Folder templates support hierarchical structure
+- [ ] `quotationTemplates` table renamed to `servicePackages`
+- [ ] Admin can create Service Packages with embedded project config
+- [ ] Studio can select MULTIPLE packages per quotation
+- [ ] N selected packages → N projects on approval
+- [ ] Folder templates support 3-level hierarchy (no recursion)
+- [ ] Line items contain ONLY pricing information
 - [ ] Old configuration UIs removed from admin navigation
-- [ ] All existing data migrated without loss
+- [ ] Development data cleared before migration
 
 ---
 
-## 📝 Impact on Existing Epics
+## 📝 Technical Standards (Per Architecture Docs)
 
-| Epic                           | Impact                               |
-| :----------------------------- | :----------------------------------- |
-| **Epic 3: Admin Portal**       | Stories 3-7, 3-8 superseded by 13C   |
-| **Epic 4: Quotation System**   | Template management replaced by 13C  |
-| **Epic 11B: Quotation Engine** | Line-item spawning simplified by 13A |
-| **Epic 11C: Studio Portal**    | Package selection updated by 13D.5   |
+All stories in this epic MUST follow:
+
+### Convex Patterns (`04-implementation-patterns.md`)
+
+| Pattern        | Requirement                                                                   |
+| -------------- | ----------------------------------------------------------------------------- |
+| Auth Wrappers  | Use `adminMutation`, `studioQuery`, etc. from `convex/lib/customFunctions.ts` |
+| File Structure | Domain-based: `convex/functions/{domain}/queries.ts`, `mutations.ts`          |
+| Indexes        | Format: `by_{columnName}`                                                     |
+| Error Handling | Throw errors, never return error objects                                      |
+
+### React Patterns (`09-clean-code-standards.md`)
+
+| Pattern        | Requirement                                                 |
+| -------------- | ----------------------------------------------------------- |
+| Route Files    | Max 100 lines, config only, thin wrapper                    |
+| Modules        | Container components in `src/components/modules/{feature}/` |
+| Loading States | `{feature}-loading.tsx` and `{feature}-error.tsx` required  |
+| Exports        | Always from `index.ts` files                                |
+
+### Form Patterns (`tanstack-form.md`)
+
+| Pattern       | Requirement                                           |
+| ------------- | ----------------------------------------------------- |
+| Forms         | TanStack Form + Zod validation                        |
+| Validation    | `onSubmit` with `validators: { onSubmit: zodSchema }` |
+| Error Display | `<FieldError errors={field.state.meta.errors} />`     |
+| Invalid State | `aria-invalid={isInvalid}` on inputs                  |
 
 ---
 
 ## 🔗 Related Documents
 
 - [Epic 11: System Architecture Revamp](./11-system-restructuring-revamp.md)
-- [Epic 4: Quotation System](./04-quotation-system.md)
-- [Architecture: Quotation to Project Flow](../../../docs/architecture/quotation-to-project-flow.md)
+- [Architecture: Implementation Patterns](../architecture/04-implementation-patterns.md)
+- [Architecture: Clean Code Standards](../architecture/09-clean-code-standards.md)
+- [Docs: TanStack Form](../../docs/ui/tanstack-form.md)
+- [Docs: Convex Error Handling](../../docs/convex/error-handling.md)
 
 ---
 
-_Document Version: 1.0_  
-_Last Updated: 2026-01-27 18:30 IST_
+_Document Version: 2.0_  
+_Last Updated: 2026-01-28 12:30 IST_

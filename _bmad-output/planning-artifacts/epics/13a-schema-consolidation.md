@@ -3,6 +3,7 @@
 **Parent Epic**: [13: Unified Service Package Configuration](./13-unified-service-package-configuration.md)  
 **Status**: Backlog  
 **Created**: 2026-01-27  
+**Updated**: 2026-01-28  
 **Complexity**: High  
 **Estimated Points**: 13
 
@@ -10,223 +11,401 @@
 
 ## 📋 Epic Summary
 
-This epic consolidates the fragmented configuration schema into a unified model where:
+This epic consolidates the fragmented schema into a unified model:
 
-1. `quotationTemplates` becomes the single source of truth for "Service Packages"
-2. Line items are **purely for pricing** (no `spawnsProject`, `projectTypeId`, etc.)
-3. Project type and folder template are configured at the **template level**, not line-item level
-4. Spawning creates ONE project per quotation, not multiple
+1. **RENAME**: `quotationTemplates` → `servicePackages` (breaking change)
+2. **MULTI-SELECT**: Quotations link to MULTIPLE packages via `selectedPackageIds[]`
+3. **LINE ITEMS = PRICING ONLY**: Remove all spawning config from line items
+4. **PACKAGE-LEVEL SPAWNING**: Each package defines ONE project type
 
 ---
 
 ## 🎯 User Outcomes
 
-| Role       | Outcome                                              |
-| :--------- | :--------------------------------------------------- |
-| **Admin**  | Simpler mental model: one package = one project type |
-| **System** | Cleaner spawning logic, no line-item iteration       |
-| **Dev**    | Fewer tables to manage, clearer relationships        |
+| Role       | Outcome                                                  |
+| :--------- | :------------------------------------------------------- |
+| **Admin**  | Configure packages with clear 1:1 project mapping        |
+| **Studio** | Select multiple packages for different project timelines |
+| **System** | Simple N-packages = N-projects spawning                  |
 
 ---
 
-## 📝 User Stories
+## 📐 Schema Changes
 
-### Story 13A.1: Enhance `quotationTemplates` Schema
-
-**Points**: 3
-
-**As a** Developer,  
-**I want** to add direct project configuration fields to `quotationTemplates`,  
-**So that** each template directly specifies what project it creates.
-
-**Acceptance Criteria**:
-
-- [ ] Add `projectTypeId: v.id("projectTypes")` to `quotationTemplates`
-- [ ] Add `folderTemplateId: v.id("folderTemplates")` to `quotationTemplates`
-- [ ] Add `defaultStorageTierId: v.optional(v.id("storageTiers"))` to `quotationTemplates`
-- [ ] These fields define the single project that gets created on approval
-- [ ] Existing templates can have these fields as `optional` initially for migration
-
-**Schema Change**:
+### NEW: `servicePackages` Table (replaces `quotationTemplates`)
 
 ```typescript
-quotationTemplates: defineTable({
+// convex/schema.ts
+
+servicePackages: defineTable({
+  // Identity
   name: v.string(),
   description: v.optional(v.string()),
-  terms: v.optional(v.string()),
-  isActive: v.boolean(),
+  categoryId: v.optional(v.id("projectCategories")),
 
-  // NEW: Direct project configuration
-  projectTypeId: v.optional(v.id("projectTypes")),
-  folderTemplateId: v.optional(v.id("folderTemplates")),
+  // PROJECT SPAWNING CONFIG (1 package = 1 project type)
+  projectTypeId: v.id("projectTypes"),
+  folderTemplateId: v.id("folderTemplates"),
   defaultStorageTierId: v.optional(v.id("storageTiers")),
 
-  // Line items remain for PRICING ONLY
+  // PRICING ONLY - no spawning config in line items!
   lineItems: v.array(
     v.object({
-      sectionId: v.id("quotationSections"),
+      id: v.string(),
+      sectionId: v.optional(v.id("quotationSections")),
       description: v.string(),
       unit: v.string(),
-      unitPrice: v.number(),
-      defaultQuantity: v.number(),
+      rate: v.number(),
+      quantity: v.number(),
+      subItems: v.optional(v.array(v.object({
+        description: v.string(),
+        amount: v.optional(v.number()),
+      }))),
       // REMOVED: spawnsProject, projectTypeId, selectedFolderTemplateId
     }),
   ),
+
+  terms: v.optional(v.string()),
+  isActive: v.boolean(),
+  createdBy: v.optional(v.string()),
+  updatedAt: v.optional(v.number()),
+})
+  .index("by_categoryId", ["categoryId"])
+  .index("by_isActive", ["isActive"]),
+```
+
+### UPDATED: `quotations` Table
+
+```typescript
+quotations: defineTable({
+  // Client context
+  studioId: v.id("profiles"),
+  endClientName: v.string(),
+  eventName: v.optional(v.string()),
+  eventDate: v.optional(v.number()),
+
+  // CHANGE: Multiple packages instead of single template
+  selectedPackageIds: v.array(v.id("servicePackages")), // Array!
+
+  // Aggregated from all selected packages
+  lineItems: v.array(quotationLineItemValidator),
+
+  // Pricing (calculated from all packages)
+  subtotal: v.number(),
+  gstAmount: v.number(),
+  totalAmount: v.number(),
+  discount: v.optional(v.number()),
+
+  // Workflow
+  status: quotationStatusValidator,
+  viewToken: v.optional(v.string()),
+  sentAt: v.optional(v.number()),
+  approvedAt: v.optional(v.number()),
+  rejectedAt: v.optional(v.number()),
+
+  // Audit
   createdBy: v.optional(v.string()),
   updatedAt: v.optional(v.number()),
 }),
 ```
 
-**Technical Notes**:
-
-- File: `convex/schema.ts`
-- Run codegen after schema update
-
 ---
 
-### Story 13A.2: Simplify Line Item Schema
+## 📝 User Stories
 
-**Points**: 2
+### Story 13A.1: Create `servicePackages` Table
+
+**Points**: 3
 
 **As a** Developer,  
-**I want** to remove spawning-related fields from line items,  
-**So that** line items serve only as pricing elements.
+**I want** to create the new `servicePackages` table structure,  
+**So that** we have a clean foundation for the new model.
 
 **Acceptance Criteria**:
 
-- [ ] Remove `spawnsProject` from line item objects
-- [ ] Remove `projectTypeId` from line item objects
-- [ ] Remove `selectedFolderTemplateId` from line item objects
-- [ ] Keep: `id`, `sectionId`, `description`, `unit`, `rate`, `quantity`, `subItems`
-- [ ] Update seed files to remove spawning fields
-- [ ] Update mutations that create/update line items
+- [ ] Create `servicePackages` table with schema above
+- [ ] Add indexes: `by_categoryId`, `by_isActive`
+- [ ] Run `pnpm convex dev` to validate schema
+- [ ] Remove old `quotationTemplates` table (breaking change OK)
+
+**Technical Pattern**:
+
+- **File**: `convex/schema.ts`
+- **Auth Wrapper**: N/A (schema definition)
+- **Validator Location**: Define `servicePackageLineItemValidator` in schema
+
+**❌ DO NOT**:
+
+- Do NOT keep `quotationTemplates` for backward compatibility
+- Do NOT add `spawnsProject` or `projectTypeId` to line items
+- Do NOT use recursive validators (Convex doesn't support them)
 
 **Files to Modify**:
 
-- `convex/schema.ts` (quotationTemplates.lineItems)
-- `convex/schema.ts` (quotations.lineItems)
-- `convex/seeds/quotationTemplates.ts`
-- `convex/functions/quotations/mutations.ts`
+```
+MODIFY: convex/schema.ts
+  - Remove quotationTemplates table definition
+  - Add servicePackages table definition
+  - Update any validators that reference quotationTemplates
+```
 
 ---
 
-### Story 13A.3: Migrate Existing Quotation Templates
+### Story 13A.2: Update `quotations` Table for Multi-Package
 
 **Points**: 2
 
 **As a** Developer,  
-**I want** to migrate existing quotation templates to the new schema,  
-**So that** we don't lose existing configuration.
+**I want** quotations to reference multiple packages,  
+**So that** studios can combine packages for different project types.
 
 **Acceptance Criteria**:
 
-- [ ] Create migration script: `convex/migrations/migrateQuotationTemplates.ts`
-- [ ] For each template with line items that have `spawnsProject`:
-  - Extract the first spawning line item's `projectTypeId`
-  - Set it as the template's `projectTypeId`
-  - Extract `selectedFolderTemplateId` similarly
-- [ ] Log migration progress and any conflicts
-- [ ] Script can be re-run safely (idempotent)
+- [ ] Change `quotations.templateId` → `quotations.selectedPackageIds: v.array(v.id("servicePackages"))`
+- [ ] Ensure `lineItems` in quotations still store the pricing snapshot
+- [ ] Add index `by_studioId` if not present
+- [ ] Update TypeScript types in `_generated/`
 
-**Technical Notes**:
+**Technical Pattern**:
 
-- Use internal mutation for migration
-- Consider what to do if template has MULTIPLE spawning line items (log warning, use first)
+- **File**: `convex/schema.ts`
+- **Migration**: Clear dev data, no migration needed
+
+**❌ DO NOT**:
+
+- Do NOT try to migrate old quotations
+- Do NOT keep `templateId` field
+
+**Files to Modify**:
+
+```
+MODIFY: convex/schema.ts
+  - Update quotations table definition
+  - Change templateId to selectedPackageIds array
+```
 
 ---
 
-### Story 13A.4: Update Project Spawning Logic
+### Story 13A.3: Update Spawning Logic for Multi-Package
 
 **Points**: 3
 
 **As a** System,  
-**I want** project spawning to create ONE project per quotation,  
-**So that** the system is simpler and aligns with the service package model.
+**I want** project spawning to iterate through selected packages,  
+**So that** each package creates exactly one project.
 
 **Acceptance Criteria**:
 
-- [ ] Rename `spawnProjectsFromQuotation` → `spawnProjectFromQuotation`
-- [ ] Return `Promise<Id<"projects">>` instead of `Promise<Id<"projects">[]>`
-- [ ] Get `projectTypeId` and `folderTemplateId` from template, not line items
-- [ ] If template has no `projectTypeId`, skip spawning (service-only quote)
-- [ ] Update all callers to handle single project return
+- [ ] Rename function: `spawnProjectsFromQuotation` (keep plural, but different logic)
+- [ ] Return `Promise<Id<"projects">[]>` (array of created project IDs)
+- [ ] For each package in `quotation.selectedPackageIds`:
+  - Get package from DB
+  - If `package.projectTypeId` exists:
+    - Generate unique project code
+    - Create project with package's `projectTypeId`, `folderTemplateId`, `storageTierId`
+    - Setup folders using `setupFoldersInternal`
+    - Log to `statusHistory`
+- [ ] Update `approveQuotation` mutation to use new logic
 
-**Current Logic** (spawning.ts):
+**Technical Pattern**:
 
-```typescript
-// OLD: Iterates line items
-for (const item of quotation.lineItems) {
-  if (item.spawnsProject && item.projectTypeId) { ... }
-}
-```
+- **File**: `convex/functions/projects/spawning.ts`
+- **Auth Wrapper**: This is an internal function, called from `approveQuotation`
+- **Error Handling**: Throw on any failure, rollback handled by Convex
 
 **New Logic**:
 
 ```typescript
-// NEW: Uses template-level configuration
-const template = await ctx.db.get(quotation.templateId);
-if (template.projectTypeId) {
-  // Create ONE project using template's configuration
+// convex/functions/projects/spawning.ts
+
+export async function spawnProjectsFromQuotation(
+  ctx: MutationCtx,
+  quotationId: Id<"quotations">,
+): Promise<Id<"projects">[]> {
+  const quotation = await ctx.db.get(quotationId);
+  if (!quotation) throw new Error("Quotation not found");
+
+  const projectIds: Id<"projects">[] = [];
+
+  // Iterate packages, NOT line items
+  for (const packageId of quotation.selectedPackageIds) {
+    const pkg = await ctx.db.get(packageId);
+    if (!pkg || !pkg.projectTypeId) continue;
+
+    // Create project from package config
+    const projectId = await ctx.db.insert("projects", {
+      quotationId: quotation._id,
+      studioId: quotation.studioId,
+      projectTypeId: pkg.projectTypeId,
+      source: "quotation_spawned",
+      phase: "onboarding",
+      actionState: "awaiting_uploads",
+      endClientName: quotation.endClientName,
+      eventName: quotation.eventName,
+      code: await generateProjectCode(ctx),
+    });
+
+    // Setup folders
+    await setupFoldersInternal(ctx, projectId, pkg.folderTemplateId);
+
+    // Log status
+    await ctx.db.insert("statusHistory", {
+      entityType: "project",
+      entityId: projectId,
+      fromStatus: null,
+      toStatus: "onboarding",
+      changedBy: null,
+      reason: `Auto-created from quotation approval (package: ${pkg.name})`,
+    });
+
+    projectIds.push(projectId);
+  }
+
+  return projectIds;
 }
+```
+
+**❌ DO NOT**:
+
+- Do NOT iterate through `quotation.lineItems` for spawning
+- Do NOT check `lineItem.spawnsProject` (removed)
+- Do NOT create project if package has no `projectTypeId`
+
+**Files to Modify**:
+
+```
+MODIFY: convex/functions/projects/spawning.ts
+  - Rewrite spawnProjectsFromQuotation logic
+  - Use selectedPackageIds instead of lineItems
+
+MODIFY: convex/functions/quotations/mutations.ts
+  - Update approveQuotation to use new spawning logic
 ```
 
 ---
 
-### Story 13A.5: Deprecate `projectTypeFields` Table
+### Story 13A.4: Create Service Package Seeds
 
 **Points**: 2
 
 **As a** Developer,  
-**I want** to plan deprecation of `projectTypeFields`,  
-**So that** we don't maintain unused complexity.
+**I want** seeded service packages for testing,  
+**So that** I can validate the new model works correctly.
 
 **Acceptance Criteria**:
 
-- [ ] Add deprecation comment to schema
-- [ ] Remove UI for managing project type fields (deferred to 13D)
-- [ ] Document migration path: fields can move to service package config
-- [ ] If any fields are critical, move to `typeSpecificDetails` on project
+- [ ] Create `convex/seeds/servicePackages.ts`
+- [ ] Seed at least 3 packages:
+  - "Wedding Photography Package" → Wedding Photo project type
+  - "Wedding Cinema Package" → Wedding Video project type
+  - "Premium Album Package" → Album project type
+- [ ] Each package has proper line items for pricing
+- [ ] Update `convex/functions/seed.ts` to include service packages
 
-**Analysis**:
+**Technical Pattern**:
 
-- Current `projectTypeFields` allows per-project-type dynamic fields
-- In new model, these could be:
-  - A) Stored in `servicePackage.configurationFields` (if needed)
-  - B) Always collected during onboarding (simpler)
-  - C) Removed entirely if not used
+- **File**: `convex/seeds/servicePackages.ts`
+- **Pattern**: Follow existing seed file patterns
+
+**Files to Create/Modify**:
+
+```
+CREATE: convex/seeds/servicePackages.ts
+  - Define seed data for 3+ packages
+
+MODIFY: convex/functions/seed.ts
+  - Import and call seedServicePackages
+  - Ensure correct ordering (projectTypes before servicePackages)
+```
 
 ---
 
-### Story 13A.6: Update Quotation Mutations
+### Story 13A.5: Update Quotation Mutations
+
+**Points**: 2
+
+**As a** Developer,  
+**I want** quotation mutations to work with multi-package model,  
+**So that** the complete flow works end-to-end.
+
+**Acceptance Criteria**:
+
+- [ ] Update `requestQuotation` to accept `selectedPackageIds: Id<"servicePackages">[]`
+- [ ] Aggregate line items from all selected packages
+- [ ] Calculate combined `subtotal`, `gstAmount`, `totalAmount`
+- [ ] Update `createQuotation` (admin) to use same model
+
+**Technical Pattern**:
+
+- **File**: `convex/functions/quotations/mutations.ts`
+- **Auth Wrapper**: `studioMutation` for request, `adminMutation` for create
+- **Validation**: Use Zod for args validation
+
+**❌ DO NOT**:
+
+- Do NOT accept single `templateId` anymore
+- Do NOT copy spawning config from packages to quotation
+
+**Files to Modify**:
+
+```
+MODIFY: convex/functions/quotations/mutations.ts
+  - Update requestQuotation args and handler
+  - Update createQuotation args and handler
+  - Add helper: aggregateLineItemsFromPackages()
+```
+
+---
+
+### Story 13A.6: Deprecate `projectTypeFields` Table
 
 **Points**: 1
 
 **As a** Developer,  
-**I want** to update quotation mutations to use the new schema,  
-**So that** creating/updating quotations works correctly.
+**I want** to mark `projectTypeFields` as deprecated,  
+**So that** we don't maintain unused complexity.
 
 **Acceptance Criteria**:
 
-- [ ] `requestQuotation` mutation accepts `projectTypeId`, `folderTemplateId`
-- [ ] Line item creation removes spawning fields
-- [ ] `updateQuotation` handles new template-level fields
-- [ ] Approval flow uses template-level configuration for spawning
+- [ ] Add deprecation comment to `projectTypeFields` in schema
+- [ ] DO NOT delete the table yet (may be used by existing code)
+- [ ] Document in epic that UI removal is in 13D
+- [ ] If any fields are critical, move to `typeSpecificDetails` on project
+
+**Technical Pattern**:
+
+- **File**: `convex/schema.ts`
 
 **Files to Modify**:
 
-- `convex/functions/quotations/mutations.ts`
-- `convex/functions/quotations/templates/mutations.ts`
+```
+MODIFY: convex/schema.ts
+  - Add comment: // @deprecated - Remove in Epic 13D
+```
 
 ---
 
 ## ✅ Definition of Done
 
-- [ ] `quotationTemplates` schema has direct project configuration fields
-- [ ] Line items contain only pricing information
-- [ ] Migration script successfully migrates development data
-- [ ] Spawning creates exactly one project per quotation
-- [ ] All mutations updated and working
-- [ ] No TypeScript errors
+- [ ] `servicePackages` table exists with correct schema
+- [ ] `quotations` uses `selectedPackageIds` (array)
+- [ ] Line items contain NO spawning configuration
+- [ ] Spawning creates 1 project per selected package
+- [ ] Seed data includes 3+ packages
+- [ ] All mutations updated for new model
+- [ ] `pnpm convex dev` runs without errors
+- [ ] `pnpm tsc` has no type errors
+
+---
+
+## 🧪 Testing Requirements
+
+For each story, the implementing agent MUST:
+
+- [ ] Verify schema compiles: `pnpm convex dev --once`
+- [ ] Verify types: `pnpm tsc --noEmit`
+- [ ] Seed database: Run seed function
+- [ ] Manual test: Create quotation with 2 packages, approve, verify 2 projects spawn
 
 ---
 
@@ -244,5 +423,5 @@ if (template.projectTypeId) {
 
 ---
 
-_Document Version: 1.0_  
-_Last Updated: 2026-01-27_
+_Document Version: 2.0_  
+_Last Updated: 2026-01-28 12:35 IST_
