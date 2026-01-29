@@ -1,13 +1,9 @@
 "use client";
 
-import { Check, HardDrive } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { 
-  Field, 
-  FieldLabel, 
-  FieldDescription 
-} from "@/components/ui/field";
 import type { Doc } from "@convex/_generated/dataModel";
+import { Check, HardDrive } from "lucide-react";
+import { Field, FieldDescription, FieldLabel } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 
 interface StorageSelectorProps {
   tiers: Doc<"storageTiers">[];
@@ -27,27 +23,32 @@ export function StorageSelector({
       </FieldLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
         {/* No Storage Option */}
-        <div
+        <button
+          type="button"
           onClick={() => onChange("")}
           className={cn(
-            "relative p-4 rounded-xl border transition-all cursor-pointer group",
-            value === "" 
-              ? "bg-primary/10 border-primary shadow-lg shadow-primary/5" 
-              : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10"
+            "relative p-4 rounded-xl border transition-all cursor-pointer group text-left",
+            value === ""
+              ? "bg-primary/10 border-primary shadow-lg shadow-primary/5"
+              : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10",
           )}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className={cn(
-                "p-2 rounded-lg transition-colors",
-                value === "" ? "bg-primary/20 text-primary" : "bg-white/5 text-white/20"
-              )}>
+              <div
+                className={cn(
+                  "p-2 rounded-lg transition-colors",
+                  value === ""
+                    ? "bg-primary/20 text-primary"
+                    : "bg-white/5 text-white/20",
+                )}
+              >
                 <HardDrive className="h-4 w-4" />
               </div>
               <div>
-                <p className={cn(
-                  "text-xs font-black uppercase tracking-tight",
-                )}>
+                <p
+                  className={cn("text-xs font-black uppercase tracking-tight")}
+                >
                   No Default Tier
                 </p>
                 <p className="text-[9px] text-white/40 uppercase tracking-widest font-bold">
@@ -61,32 +62,39 @@ export function StorageSelector({
               </div>
             )}
           </div>
-        </div>
+        </button>
 
         {/* Storage Tier Options */}
         {tiers.map((tier) => (
-          <div
+          <button
             key={tier._id}
+            type="button"
             onClick={() => onChange(tier._id)}
             className={cn(
-              "relative p-4 rounded-xl border transition-all cursor-pointer group",
-              value === tier._id 
-                ? "bg-primary/10 border-primary shadow-lg shadow-primary/5" 
-                : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10"
+              "relative p-4 rounded-xl border transition-all cursor-pointer group text-left",
+              value === tier._id
+                ? "bg-primary/10 border-primary shadow-lg shadow-primary/5"
+                : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10",
             )}
           >
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-3">
-                <div className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  value === tier._id ? "bg-primary/20 text-primary" : "bg-white/5 text-white/40"
-                )}>
+                <div
+                  className={cn(
+                    "p-2 rounded-lg transition-colors",
+                    value === tier._id
+                      ? "bg-primary/20 text-primary"
+                      : "bg-white/5 text-white/40",
+                  )}
+                >
                   <HardDrive className="h-4 w-4" />
                 </div>
                 <div>
-                  <p className={cn(
-                    "text-xs font-black uppercase tracking-tight",
-                  )}>
+                  <p
+                    className={cn(
+                      "text-xs font-black uppercase tracking-tight",
+                    )}
+                  >
                     {tier.name}
                   </p>
                   <p className="text-[9px] text-white/40 uppercase tracking-widest font-bold">
@@ -105,7 +113,7 @@ export function StorageSelector({
                 )}
               </div>
             </div>
-          </div>
+          </button>
         ))}
       </div>
       <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">

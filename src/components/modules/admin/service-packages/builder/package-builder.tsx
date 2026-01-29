@@ -1,16 +1,16 @@
 "use client";
 
+import { ArrowLeft, Check } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { PageHeader } from "@/components/ui/page-header";
+import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
 import { Step1Identity } from "./step-1-identity";
 import { Step2ProjectConfig } from "./step-2-project-config";
 import { Step3Pricing } from "./step-3-pricing";
 import { Step4Review } from "./step-4-review";
-import { PageHeader } from "@/components/ui/page-header";
-import { cn } from "@/lib/utils";
-import { Check, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
 
 const STEPS = [
   { id: 1, label: "Identity", description: "Basic Info" },
@@ -61,9 +61,11 @@ export function PackageBuilder() {
         <div className="relative flex justify-between items-center px-4">
           {/* Progress Line */}
           <div className="absolute top-1/2 left-0 right-0 h-[2px] bg-white/5 -translate-y-1/2 z-0 mx-8" />
-          <div 
-            className="absolute top-1/2 left-0 h-[2px] bg-primary -translate-y-1/2 z-0 mx-8 transition-all duration-500 ease-in-out" 
-            style={{ width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%` }}
+          <div
+            className="absolute top-1/2 left-0 h-[2px] bg-primary -translate-y-1/2 z-0 mx-8 transition-all duration-500 ease-in-out"
+            style={{
+              width: `${((currentStep - 1) / (STEPS.length - 1)) * 100}%`,
+            }}
           />
 
           {STEPS.map((step) => {
@@ -71,40 +73,50 @@ export function PackageBuilder() {
             const isCompleted = currentStep > step.id;
 
             return (
-              <div key={step.id} className="relative z-10 flex flex-col items-center gap-3">
+              <div
+                key={step.id}
+                className="relative z-10 flex flex-col items-center gap-3"
+              >
                 <motion.div
                   initial={false}
                   animate={{
-                    backgroundColor: isActive || isCompleted ? "var(--primary)" : "rgba(255,255,255,0.05)",
+                    backgroundColor:
+                      isActive || isCompleted
+                        ? "var(--primary)"
+                        : "rgba(255,255,255,0.05)",
                     scale: isActive ? 1.2 : 1,
                   }}
                   className={cn(
                     "w-10 h-10 rounded-full flex items-center justify-center border-2 border-zinc-950 transition-all shadow-xl",
-                    (isActive || isCompleted) ? "bg-primary" : "bg-white/5"
+                    isActive || isCompleted ? "bg-primary" : "bg-white/5",
                   )}
                 >
                   {isCompleted ? (
                     <Check className="h-5 w-5 text-white" />
                   ) : (
-                    <span className={cn(
-                      "text-xs font-black",
-                      isActive ? "text-white" : "text-white/20"
-                    )}>
+                    <span
+                      className={cn(
+                        "text-xs font-black",
+                        isActive ? "text-white" : "text-white/20",
+                      )}
+                    >
                       {step.id}
                     </span>
                   )}
                 </motion.div>
                 <div className="absolute top-12 flex flex-col items-center min-w-[80px]">
-                  <span className={cn(
-                    "text-[10px] font-black uppercase tracking-widest transition-colors",
-                    isActive ? "text-white" : "text-white/20"
-                  )}>
+                  <span
+                    className={cn(
+                      "text-[10px] font-black uppercase tracking-widest transition-colors",
+                      isActive ? "text-white" : "text-white/20",
+                    )}
+                  >
                     {step.label}
                   </span>
                   {isActive && (
-                    <motion.span 
+                    <motion.span
                       layoutId="step-desc"
-                      className="text-[8px] font-bold text-primary uppercase tracking-[0.2em] mt-1 whitespace-nowrap"
+                      className="text-[8px] font-bold text-primary uppercase tracking-widest mt-1 whitespace-nowrap"
                     >
                       {step.description}
                     </motion.span>

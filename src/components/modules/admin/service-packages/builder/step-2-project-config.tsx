@@ -1,18 +1,27 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
-import * as z from "zod";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useBuilder } from "./builder-context";
-import { FolderPreview } from "./components/folder-preview";
-import { StorageSelector } from "./components/storage-selector";
+import type { Id } from "@convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import { useQuery } from "convex/react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  FolderTree,
+  HardDrive,
+  Info,
+  Layout,
+} from "lucide-react";
+import { useState } from "react";
+import * as z from "zod";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import {
   Field,
-  FieldLabel,
-  FieldError,
   FieldDescription,
+  FieldError,
+  FieldLabel,
 } from "@/components/ui/field";
 import {
   Select,
@@ -21,17 +30,14 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, Layout, FolderTree, HardDrive, Info } from "lucide-react";
-import { useState, useEffect } from "react";
-import type { Id } from "@convex/_generated/dataModel";
-import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { useBuilder } from "./builder-context";
+import { FolderPreview } from "./components/folder-preview";
+import { StorageSelector } from "./components/storage-selector";
 
 const step2Schema = z.object({
   projectTypeId: z.string().min(1, "Project type is required"),
   folderTemplateId: z.string().min(1, "Folder template is required"),
-  defaultStorageTierId: z.string().optional().or(z.literal("")),
+  defaultStorageTierId: z.string(),
 });
 
 export function Step2ProjectConfig() {
@@ -39,21 +45,24 @@ export function Step2ProjectConfig() {
 
   // Queries
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
-  const storageTiers = useQuery(api.functions.storageTiers.queries.list) || [];
+  const storageTiers =
+    useQuery(api.functions.storageTiers.queries.listStorageTiers) || [];
 
   // Local state for interactive filtering
   const [selectedProjectTypeId, setSelectedProjectTypeId] = useState<string>(
-    step2Data?.projectTypeId ?? ""
+    step2Data?.projectTypeId ?? "",
   );
-  const [selectedFolderTemplateId, setSelectedFolderTemplateId] = useState<string>(
-    step2Data?.folderTemplateId ?? ""
-  );
+  const [selectedFolderTemplateId, setSelectedFolderTemplateId] =
+    useState<string>(step2Data?.folderTemplateId ?? "");
 
   // Folder templates filtered by project type
-  const folderTemplates = useQuery(
-    api.functions.folderTemplates.queries.listByProjectType,
-    selectedProjectTypeId ? { projectTypeId: selectedProjectTypeId as Id<"projectTypes"> } : "skip"
-  ) || [];
+  const folderTemplates =
+    useQuery(
+      api.functions.folderTemplates.queries.listByProjectType,
+      selectedProjectTypeId
+        ? { projectTypeId: selectedProjectTypeId as Id<"projectTypes"> }
+        : "skip",
+    ) || [];
 
   const form = useForm({
     defaultValues: {
@@ -61,7 +70,6 @@ export function Step2ProjectConfig() {
       folderTemplateId: step2Data?.folderTemplateId ?? "",
       defaultStorageTierId: step2Data?.defaultStorageTierId ?? "",
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: step2Schema,
     },
@@ -82,7 +90,8 @@ export function Step2ProjectConfig() {
           Project Configuration
         </h2>
         <p className="text-white/40 font-medium text-sm">
-          Define the technical structure and delivery settings for projects spawned from this package.
+          Define the technical structure and delivery settings for projects
+          spawned from this package.
         </p>
       </div>
 
@@ -98,107 +107,138 @@ export function Step2ProjectConfig() {
             className="space-y-8"
           >
             {/* Project Type */}
-            <form.Field
-              name="projectTypeId"
-              children={(field) => (
-                <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <div className="flex items-center gap-2 mb-2 ml-1">
-                    <Layout className="h-3.5 w-3.5 text-primary" />
-                    <FieldLabel htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-white/50">
-                      Project Type *
-                    </FieldLabel>
-                  </div>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      field.handleChange(value);
-                      setSelectedProjectTypeId(value);
-                      // Clear folder template when project type changes
-                      form.setFieldValue("folderTemplateId", "");
-                      setSelectedFolderTemplateId("");
-                    }}
-                  >
-                    <SelectTrigger id={field.name} className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner">
-                      <SelectValue placeholder="Select project type..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                      {projectTypes.map((type) => (
-                        <SelectItem 
-                          key={type._id} 
-                          value={type._id}
-                          className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                        >
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
-                    Determines the workflow and field requirements.
-                  </FieldDescription>
-                  <FieldError className="text-[10px] uppercase tracking-wider font-bold">
-                    {field.state.meta.errors[0]?.toString()}
-                  </FieldError>
-                </Field>
-              )}
-            />
+            <form.Field name="projectTypeId">
+              {(field) => {
+                const hasError = field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={hasError}>
+                    <div className="flex items-center gap-2 mb-2 ml-1">
+                      <Layout className="h-3.5 w-3.5 text-primary" />
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/50"
+                      >
+                        Project Type *
+                      </FieldLabel>
+                    </div>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value);
+                        setSelectedProjectTypeId(value);
+                        // Clear folder template when project type changes
+                        form.setFieldValue("folderTemplateId", "");
+                        setSelectedFolderTemplateId("");
+                      }}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={hasError}
+                        className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner"
+                      >
+                        <SelectValue placeholder="Select project type..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
+                        {projectTypes.map((type) => (
+                          <SelectItem
+                            key={type._id}
+                            value={type._id}
+                            className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
+                          >
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
+                      Determines the workflow and field requirements.
+                    </FieldDescription>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold">
+                      {field.state.meta.errors
+                        .map((err) => err?.toString())
+                        .join(", ")}
+                    </FieldError>
+                  </Field>
+                );
+              }}
+            </form.Field>
 
             {/* Folder Template */}
-            <form.Field
-              name="folderTemplateId"
-              children={(field) => (
-                <Field data-invalid={field.state.meta.errors.length > 0}>
-                  <div className="flex items-center gap-2 mb-2 ml-1">
-                    <FolderTree className="h-3.5 w-3.5 text-primary" />
-                    <FieldLabel htmlFor={field.name} className="text-[10px] font-black uppercase tracking-widest text-white/50">
-                      Folder Hierarchy *
-                    </FieldLabel>
-                  </div>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      field.handleChange(value);
-                      setSelectedFolderTemplateId(value);
-                    }}
-                    disabled={!selectedProjectTypeId}
-                  >
-                    <SelectTrigger id={field.name} className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner disabled:opacity-50">
-                      <SelectValue placeholder={selectedProjectTypeId ? "Select folder structure..." : "Choose project type first"} />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                      {folderTemplates.map((template) => (
-                        <SelectItem 
-                          key={template._id} 
-                          value={template._id}
-                          className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                        >
-                          {template.name}
-                          {template.variant && <span className="ml-2 text-[10px] opacity-40">({template.variant})</span>}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
-                    Defines the directory structure for asset uploads.
-                  </FieldDescription>
-                  <FieldError className="text-[10px] uppercase tracking-wider font-bold">
-                    {field.state.meta.errors[0]?.toString()}
-                  </FieldError>
-                </Field>
-              )}
-            />
+            <form.Field name="folderTemplateId">
+              {(field) => {
+                const hasError = field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={hasError}>
+                    <div className="flex items-center gap-2 mb-2 ml-1">
+                      <FolderTree className="h-3.5 w-3.5 text-primary" />
+                      <FieldLabel
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/50"
+                      >
+                        Folder Hierarchy *
+                      </FieldLabel>
+                    </div>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value);
+                        setSelectedFolderTemplateId(value);
+                      }}
+                      disabled={!selectedProjectTypeId}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={hasError}
+                        className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner disabled:opacity-50"
+                      >
+                        <SelectValue
+                          placeholder={
+                            selectedProjectTypeId
+                              ? "Select folder structure..."
+                              : "Choose project type first"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
+                        {folderTemplates.map((template) => (
+                          <SelectItem
+                            key={template._id}
+                            value={template._id}
+                            className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
+                          >
+                            {template.name}
+                            {template.variant && (
+                              <span className="ml-2 text-[10px] opacity-40">
+                                ({template.variant})
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
+                      Defines the directory structure for asset uploads.
+                    </FieldDescription>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold">
+                      {field.state.meta.errors
+                        .map((err) => err?.toString())
+                        .join(", ")}
+                    </FieldError>
+                  </Field>
+                );
+              }}
+            </form.Field>
 
             {/* Storage Tier */}
-            <form.Field
-              name="defaultStorageTierId"
-              children={(field) => (
+            <form.Field name="defaultStorageTierId">
+              {(field) => (
                 <StorageSelector
                   tiers={storageTiers}
                   value={field.state.value}
                   onChange={field.handleChange}
                 />
               )}
-            />
+            </form.Field>
 
             <div className="pt-8 border-t border-white/5 flex items-center justify-between">
               <Button
@@ -210,20 +250,23 @@ export function Step2ProjectConfig() {
                 <ArrowLeft className="h-4 w-4" />
                 Identity
               </Button>
-              
+
               <form.Subscribe
                 selector={(state) => [state.canSubmit, state.isSubmitting]}
-                children={([canSubmit, isSubmitting]) => (
+              >
+                {([canSubmit, isSubmitting]) => (
                   <Button
                     type="submit"
                     disabled={!canSubmit || isSubmitting}
                     className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
                   >
                     {isSubmitting ? "Processing..." : "Next: Pricing"}
-                    {!isSubmitting && <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />}
+                    {!isSubmitting && (
+                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                    )}
                   </Button>
                 )}
-              />
+              </form.Subscribe>
             </div>
           </form>
         </div>
@@ -249,24 +292,27 @@ export function Step2ProjectConfig() {
               </div>
               {selectedProjectTypeId && (
                 <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                  {projectTypes.find(t => t._id === selectedProjectTypeId)?.name}
+                  {
+                    projectTypes.find((t) => t._id === selectedProjectTypeId)
+                      ?.name
+                  }
                 </Badge>
               )}
             </div>
-            
+
             <div className="flex-1 bg-zinc-950/20">
-               <FolderPreview templateId={selectedFolderTemplateId} />
+              <FolderPreview templateId={selectedFolderTemplateId} />
             </div>
 
             <div className="p-4 bg-white/2 border-t border-white/5">
-               <div className="flex items-center gap-2 px-3 py-2 bg-white/3 rounded-xl border border-white/5">
+              <div className="flex items-center gap-2 px-3 py-2 bg-white/3 rounded-xl border border-white/5">
                 <HardDrive className="h-3.5 w-3.5 text-white/20" />
                 <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                  {form.getFieldValue("defaultStorageTierId") 
-                    ? `Default Tier: ${storageTiers.find(t => t._id === form.getFieldValue("defaultStorageTierId"))?.name}`
+                  {form.getFieldValue("defaultStorageTierId")
+                    ? `Default Tier: ${storageTiers.find((t) => t._id === form.getFieldValue("defaultStorageTierId"))?.name}`
                     : "On-demand storage allocation"}
                 </span>
-               </div>
+              </div>
             </div>
           </Card>
         </div>
