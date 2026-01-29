@@ -260,16 +260,16 @@ development_status:
   13b-2-create-wedding-folder-seeds: done # 3 points
   13b-3-create-content-creator-folder-seeds: done # 2 points
   13b-4-update-folder-setup-mutation: done # 2 points
-  13b-5-folder-template-builder-ui: backlog # 3 points
+  13b-5-folder-template-builder-ui: done # 3 points
   epic-13b-retrospective: optional
 
   # Epic 13C: Service Package Builder UI (parallel with 13B after 13A)
   # Goal: Unified admin wizard with TanStack Form + Zod
-  13c-1-service-package-list-page: backlog # 3 points
-  13c-2-builder-step-1-identity: backlog # 3 points
-  13c-3-builder-step-2-project-config: backlog # 5 points
-  13c-4-builder-step-3-pricing: backlog # 5 points
-  13c-5-builder-step-4-review-publish: backlog # 3 points
+  13c-1-service-package-list-page: done # 3 points
+  13c-2-builder-step-1-identity: done # 3 points
+  13c-3-builder-step-2-project-config: done # 5 points
+  13c-4-builder-step-3-pricing: done # 5 points
+  13c-5-builder-step-4-review-publish: done # 3 points
   13c-6-package-detail-view: backlog # 2 points
   epic-13c-retrospective: optional
 

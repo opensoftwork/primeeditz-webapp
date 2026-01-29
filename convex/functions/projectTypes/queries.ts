@@ -3,6 +3,16 @@ import { query } from "../../_generated/server";
 import { adminQuery } from "../../lib/customFunctions";
 
 /**
+ * List all project types.
+ */
+export const list = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("projectTypes").collect();
+  },
+});
+
+/**
  * Get all active project types.
  * Used by the project wizard to show available options.
  */

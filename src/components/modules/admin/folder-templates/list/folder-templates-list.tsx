@@ -17,28 +17,31 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FolderTemplateCard } from "./folder-template-card";
-import {
-  FolderTemplateDrawer,
-  type FolderTemplateFormValues,
-} from "./folder-template-drawer";
 import { ListEmpty } from "./list-empty";
 import { ListHeader } from "./list-header";
+
+import type { FolderLevel1 } from "@convex/schema";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 
 interface FolderTemplate {
   _id: string;
   _creationTime: number;
   name: string;
-  folders: string[];
-  projectTypeId?: string;
+  folders: FolderLevel1[];
+  projectTypeId: Id<"projectTypes">;
   projectTypeName: string;
+  variant?: string;
+  description?: string;
   isDefault?: boolean;
   isActive: boolean;
 }
 
 export function FolderTemplatesList() {
   const templates = useQuery(
-    api.functions.folderTemplates.queries.listFolderTemplates,
+    api.functions.folderTemplates.queries.list,
   );
+  const router = useRouter();
   const createMutation = useMutation(
     api.functions.folderTemplates.mutations.createFolderTemplate,
   );
@@ -61,37 +64,11 @@ export function FolderTemplatesList() {
 
   // Handlers
   const handleCreate = () => {
-    setEditingTemplate(null);
-    setIsDrawerOpen(true);
+    router.push("/settings/folder-templates/new");
   };
 
   const handleEdit = (template: FolderTemplate) => {
-    setEditingTemplate(template);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (values: FolderTemplateFormValues) => {
-    try {
-      if (editingTemplate) {
-        await updateMutation({
-          id: editingTemplate._id as Id<"folderTemplates">,
-          ...values,
-          projectTypeId: values.projectTypeId as Id<"projectTypes"> | undefined,
-        });
-        toast.success("Folder template updated successfully");
-      } else {
-        await createMutation({
-          ...values,
-          projectTypeId: values.projectTypeId as Id<"projectTypes"> | undefined,
-        });
-        toast.success("New folder template created");
-      }
-      setIsDrawerOpen(false);
-    } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Failed to save template",
-      );
-    }
+    router.push(`/settings/folder-templates/${template._id}`);
   };
 
   const handleDeleteConfirm = async () => {
@@ -136,18 +113,11 @@ export function FolderTemplatesList() {
               key={template._id}
               template={template as any}
               onEdit={handleEdit}
-              onDeleteRequest={(id, name) => setTemplateToDelete({ id, name })}
+              onDelete={(id, name) => setTemplateToDelete({ id, name })}
             />
           ))}
         </div>
       )}
-
-      <FolderTemplateDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        onSave={handleSave}
-        initialData={editingTemplate}
-      />
 
       <AlertDialog
         open={!!templateToDelete}
@@ -168,12 +138,12 @@ export function FolderTemplatesList() {
             <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl">
               Cancel
             </AlertDialogCancel>
-            <AlertDialogAction
+            <Button
               onClick={handleDeleteConfirm}
               className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl"
             >
               Delete Permanently
-            </AlertDialogAction>
+            </Button>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

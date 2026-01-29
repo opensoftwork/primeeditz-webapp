@@ -127,6 +127,11 @@ export const adminNavGroups: NavGroup[] = [
         url: "/settings/folder-templates",
         icon: FolderTree,
       },
+      {
+        title: "Service Packages",
+        url: "/settings/service-packages",
+        icon: ClipboardCheck,
+      },
     ],
   },
 ];

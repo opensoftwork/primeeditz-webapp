@@ -347,7 +347,8 @@ export default defineSchema({
     isActive: v.boolean(),
   })
     .index("by_projectTypeId", ["projectTypeId"])
-    .index("by_isActive", ["isActive"]),
+    .index("by_isActive", ["isActive"])
+    .index("by_projectType_isActive", ["projectTypeId", "isActive"]),
 
   folders: defineTable({
     projectId: v.id("projects"),
