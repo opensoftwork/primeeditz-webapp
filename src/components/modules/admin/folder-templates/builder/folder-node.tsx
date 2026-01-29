@@ -6,6 +6,7 @@ import {
   UploadCloud,
   CheckCircle2,
   Circle,
+  Pencil,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -162,14 +163,11 @@ export function FolderNode({
           />
         ) : (
           <span
-            onClick={(e) => {
-              e.stopPropagation();
-              setIsEditing(true);
-            }}
             className={cn(
-              "text-white/90 transition-colors group-hover:text-white font-bold leading-tight truncate w-full hover:bg-white/5 px-2 py-1 rounded-lg",
+              "text-white/90 transition-colors group-hover:text-white font-bold leading-tight truncate w-full px-2 py-1",
               level === 1 ? "text-xs tracking-wide uppercase" : "text-xs",
             )}
+            title={folder.name}
           >
             {folder.name}
           </span>
@@ -184,6 +182,17 @@ export function FolderNode({
       {/* Action Controls */}
       <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
         <div className="flex flex-col gap-1">
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-7 w-7 rounded-lg bg-zinc-950/80 backdrop-blur-md border border-white/5 hover:bg-white/10 hover:text-white transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </Button>
           <Button
             size="icon"
             variant="ghost"
