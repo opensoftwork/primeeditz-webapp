@@ -1,6 +1,6 @@
 # Story 13D.1: Remove Old Quotation Templates UI
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 2  
 **Epic**: [13D: Legacy Cleanup & Migration](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)  
 **Depends On**: Epic 13A, 13C complete
@@ -136,12 +136,20 @@ Before marking complete:
 
 ### Agent Model Used
 
-_To be filled by implementing agent_
+Antigravity (Claude 3.5 Sonnet)
 
 ### Completion Notes
 
-_To be filled by implementing agent_
+- Removed the old Quotation Templates UI route: `/admin/settings/quotation-templates`
+- Deleted the corresponding component directory: `src/components/modules/admin/quotation-templates/`
+- Updated sidebar navigation to point to "Service Packages" and removed the redundant "Quotation Templates" link.
+- Verified that no remaining `src/` files import from the deleted directory.
+- Fixed an unrelated `nanoid` build error in `step-3-pricing.tsx` by replacing it with `crypto.randomUUID()`.
 
 ### Files Changed
 
-_To be filled by implementing agent_
+- `src/components/modules/sidebar/navigation-config.ts`
+- `src/components/modules/admin/service-packages/builder/step-3-pricing.tsx` (unrelated fix)
+- `_bmad-output/implementation-artifacts/sprint-status.yaml`
+- `_bmad-output/implementation-artifacts/stories/13-unified-service-package-configuration/13d-legacy-cleanup-migration/13d-1-remove-old-quotation-templates-ui.md`
+- (Deleted many files in `src/app/(protected)/@admin/settings/quotation-templates/` and `src/components/modules/admin/quotation-templates/`)

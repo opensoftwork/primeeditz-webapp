@@ -11,6 +11,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
+import { SectionQuickCreate } from "./section-quick-create";
 
 interface LineItemRowProps {
   form: any;
@@ -36,67 +38,61 @@ export function LineItemRow({
       <div className="flex-1 grid grid-cols-12 gap-4">
         {/* Description */}
         <div className="col-span-12 md:col-span-4">
-          <form.Field name={`lineItems[${index}].description`}>
-            {(field: any) => {
-              const hasError =
-                field.state.meta.errors.length > 0 &&
-                field.state.meta.isTouched;
-              return (
-                <div className="space-y-1">
-                  <Input
-                    placeholder="Service description..."
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    aria-invalid={hasError}
-                    className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all"
-                  />
-                  {hasError && (
+          <form.Field
+            name={`lineItems[${index}].description`}
+            children={(field: any) => (
+              <div className="space-y-1">
+                <Input
+                  placeholder="Service description..."
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all"
+                />
+                {field.state.meta.errors.length > 0 &&
+                  field.state.meta.isTouched && (
                     <p className="text-[9px] text-red-400 font-black uppercase tracking-widest ml-1">
-                      {field.state.meta.errors
-                        .map((err: any) => err?.toString())
-                        .join(", ")}
+                      {field.state.meta.errors[0]?.toString()}
                     </p>
                   )}
-                </div>
-              );
-            }}
-          </form.Field>
+              </div>
+            )}
+          />
         </div>
 
         {/* Section */}
         <div className="col-span-6 md:col-span-2">
-          <form.Field name={`lineItems[${index}].sectionId`}>
-            {(field: any) => {
-              const hasError =
-                field.state.meta.errors.length > 0 &&
-                field.state.meta.isTouched;
-              return (
-                <Select
-                  value={field.state.value || ""}
-                  onValueChange={field.handleChange}
-                >
-                  <SelectTrigger
-                    aria-invalid={hasError}
-                    className="bg-white/5 border-white/5 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all"
-                  >
-                    <SelectValue placeholder="Phase..." />
-                  </SelectTrigger>
-                  <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                    {sections.map((section) => (
-                      <SelectItem
-                        key={section._id}
-                        value={section._id}
-                        className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                      >
-                        {section.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              );
-            }}
-          </form.Field>
+          <form.Field
+            name={`lineItems[${index}].sectionId`}
+            children={(field: any) => (
+              <Select
+                value={field.state.value || ""}
+                onValueChange={field.handleChange}
+              >
+                <SelectTrigger className="bg-white/5 border-white/5 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all">
+                  <SelectValue placeholder="Phase..." />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
+                  {sections.map((section) => (
+                    <SelectItem
+                      key={section._id}
+                      value={section._id}
+                      className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
+                    >
+                      {section.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          <div className="mt-1.5 flex justify-end">
+            <SectionQuickCreate
+              onCreated={(id) =>
+                form.setFieldValue(`lineItems[${index}].sectionId`, id)
+              }
+            />
+          </div>
         </div>
 
         {/* Unit */}
@@ -148,45 +144,39 @@ export function LineItemRow({
 
         {/* Quantity */}
         <div className="col-span-6 md:col-span-2">
-          <form.Field name={`lineItems[${index}].quantity`}>
-            {(field: any) => {
-              const hasError =
-                field.state.meta.errors.length > 0 &&
-                field.state.meta.isTouched;
-              return (
-                <div className="flex items-center gap-3">
-                  <Input
-                    type="number"
-                    min={1}
-                    placeholder="Qty"
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
-                    aria-invalid={hasError}
-                    className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all"
-                  />
+          <form.Field
+            name={`lineItems[${index}].quantity`}
+            children={(field: any) => (
+              <div className="flex items-center gap-3">
+                <Input
+                  type="number"
+                  min={1}
+                  placeholder="Qty"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(Number(e.target.value))}
+                  className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-10 rounded-lg text-sm transition-all"
+                />
 
-                  <div className="flex flex-col items-end min-w-[60px]">
-                    <p className="text-[8px] font-black text-white/20 uppercase tracking-widest">
-                      Amount
-                    </p>
-                    <form.Subscribe
-                      selector={(state: any) => {
-                        const item = state.values.lineItems[index];
-                        return (item?.rate || 0) * (item?.quantity || 1);
-                      }}
-                    >
-                      {(amount: number) => (
-                        <p className="text-xs font-black text-white">
-                          ₹{amount.toLocaleString()}
-                        </p>
-                      )}
-                    </form.Subscribe>
-                  </div>
+                <div className="flex flex-col items-end min-w-[60px]">
+                  <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em]">
+                    Amount
+                  </p>
+                  <form.Subscribe
+                    selector={(state: any) => {
+                      const item = state.values.lineItems[index];
+                      return (item?.rate || 0) * (item?.quantity || 1);
+                    }}
+                    children={(amount: number) => (
+                      <p className="text-xs font-black text-white">
+                        ₹{amount.toLocaleString()}
+                      </p>
+                    )}
+                  />
                 </div>
-              );
-            }}
-          </form.Field>
+              </div>
+            )}
+          />
         </div>
       </div>
 

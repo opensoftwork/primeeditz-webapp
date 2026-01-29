@@ -16,8 +16,8 @@ export interface FormStep {
 export const REQUEST_WIZARD_STEPS = [
   {
     id: 1 as RequestStepId,
-    title: "Package",
-    description: "Select production model",
+    title: "Packages",
+    description: "Select production models",
   },
   {
     id: 2 as RequestStepId,
@@ -29,10 +29,16 @@ export const REQUEST_WIZARD_STEPS = [
 
 export interface RequestFormData {
   endClientName: string;
+  eventName: string;
+  eventDate: string;
+  venue: string;
   notes: string;
 }
 
 export const INITIAL_REQUEST_FORM_DATA: RequestFormData = {
   endClientName: "",
+  eventName: "",
+  eventDate: "",
+  venue: "",
   notes: "",
 };

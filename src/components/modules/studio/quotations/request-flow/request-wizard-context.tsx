@@ -24,14 +24,14 @@ interface RequestWizardContextType {
   setFormData: React.Dispatch<React.SetStateAction<RequestFormData>>;
   selectedCategory: string | null;
   setSelectedCategory: (category: string | null) => void;
-  selectedPackage: Id<"quotationTemplates"> | null;
-  setSelectedPackage: (id: Id<"quotationTemplates"> | null) => void;
+  selectedPackageIds: Id<"servicePackages">[];
+  setSelectedPackageIds: (ids: Id<"servicePackages">[]) => void;
 
   // Queries
   categories: any[] | undefined;
   projectTypes: any[] | undefined;
-  templates: any[] | undefined;
-  filteredTemplates: any[] | undefined;
+  packages: any[] | undefined;
+  filteredPackages: any[] | undefined;
 
   // Actions
   isSubmitting: boolean;
@@ -52,8 +52,9 @@ export function RequestWizardProvider({
   // State
   const [step, setStep] = useState<RequestStepId>(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedPackage, setSelectedPackage] =
-    useState<Id<"quotationTemplates"> | null>(null);
+  const [selectedPackageIds, setSelectedPackageIds] = useState<
+    Id<"servicePackages">[]
+  >([]);
   const [formData, setFormData] = useState<RequestFormData>(
     INITIAL_REQUEST_FORM_DATA,
   );
@@ -66,24 +67,19 @@ export function RequestWizardProvider({
   const projectTypes = useQuery(
     api.functions.projectTypes.queries.getActiveProjectTypes,
   );
-  const templates = useQuery(
-    api.functions.quotations.templates.queries.getTemplates,
-    { activeOnly: true },
-  );
+  const packages = useQuery(api.functions.servicePackages.queries.listActive);
 
-  const filteredTemplates = React.useMemo(() => {
-    if (!templates) return undefined;
-    if (!selectedCategory) return templates;
+  const filteredPackages = React.useMemo(() => {
+    if (!packages) return undefined;
+    if (!selectedCategory) return packages;
     if (!projectTypes) return [];
 
-    return templates.filter((t) => {
-      // Find the project type for this template
-      const pt = projectTypes.find((p: any) => p._id === t.projectTypeHint);
-      if (!pt) return false;
-
-      return pt.categoryName?.toLowerCase() === selectedCategory.toLowerCase();
+    return packages.filter((p) => {
+      if (!p.categoryId) return false;
+      const cat = categories?.find((c) => c._id === p.categoryId);
+      return cat?.name.toLowerCase() === selectedCategory.toLowerCase();
     });
-  }, [templates, projectTypes, selectedCategory]);
+  }, [packages, categories, selectedCategory]);
 
   // Mutations
   const requestQuotation = useMutation(
@@ -92,6 +88,12 @@ export function RequestWizardProvider({
 
   // Handlers
   const handleNext = useCallback(() => {
+    if (step === 1 && selectedPackageIds.length === 0) {
+      toast.error("No Services Selected", {
+        description: "Please select at least one package to proceed.",
+      });
+      return;
+    }
     if (step === 2 && !formData.endClientName.trim()) {
       toast.error("Missing Identity", {
         description: "End Client Identity is required to proceed.",
@@ -99,7 +101,7 @@ export function RequestWizardProvider({
       return;
     }
     if (step < 3) setStep((prev) => (prev + 1) as RequestStepId);
-  }, [step, formData.endClientName]);
+  }, [step, selectedPackageIds, formData.endClientName]);
 
   const handleBack = useCallback(() => {
     if (step > 1) setStep((prev) => (prev - 1) as RequestStepId);
@@ -107,20 +109,24 @@ export function RequestWizardProvider({
   }, [step, router]);
 
   const handleSubmit = async () => {
-    if (!selectedPackage) return;
+    if (selectedPackageIds.length === 0) return;
 
     setIsSubmitting(true);
     try {
-      await requestQuotation({
-        templateId: selectedPackage,
+      const quotationId = await requestQuotation({
+        selectedPackageIds,
         endClientName: formData.endClientName,
-        notes: formData.notes,
+        eventName: formData.eventName || undefined,
+        eventDate: formData.eventDate
+          ? new Date(formData.eventDate).getTime()
+          : undefined,
+        notes: formData.notes || undefined,
       });
 
       toast.success("Quote request submitted!", {
         description: "Our team will review it and get back to you shortly.",
       });
-      router.push("/dashboard");
+      router.push(`/quotations/${quotationId}`);
     } catch (err) {
       toast.error("Failed to submit request", {
         description:
@@ -140,12 +146,12 @@ export function RequestWizardProvider({
     setFormData,
     selectedCategory,
     setSelectedCategory,
-    selectedPackage,
-    setSelectedPackage,
+    selectedPackageIds,
+    setSelectedPackageIds,
     categories,
     projectTypes,
-    templates,
-    filteredTemplates,
+    packages,
+    filteredPackages,
     isSubmitting,
     handleSubmit,
   };

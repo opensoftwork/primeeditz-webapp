@@ -58,6 +58,8 @@ export function ProjectTypeList() {
         await updateProjectType({
           id: editingType._id as Id<"projectTypes">,
           name: values.name,
+          description: values.description,
+          icon: values.icon,
           categoryId: values.categoryId as Id<"projectCategories">,
           isActive: values.isActive,
         });
@@ -65,6 +67,8 @@ export function ProjectTypeList() {
       } else {
         await createProjectType({
           name: values.name,
+          description: values.description,
+          icon: values.icon,
           categoryId: values.categoryId as Id<"projectCategories">,
           isActive: values.isActive,
         });

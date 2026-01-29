@@ -1,4 +1,4 @@
-import { adminQuery } from "../../lib/customFunctions";
+import { adminQuery, authenticatedWithProfileQuery } from "../../lib/customFunctions";
 import { v } from "convex/values";
 
 /**
@@ -46,5 +46,29 @@ export const get = adminQuery({
   args: { id: v.id("servicePackages") },
   handler: async (ctx, { id }) => {
     return await ctx.db.get(id);
+  },
+});
+
+/**
+ * List all active service packages for studio request flow.
+ */
+export const listActive = authenticatedWithProfileQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("servicePackages")
+      .withIndex("by_isActive", (q) => q.eq("isActive", true))
+      .collect();
+  },
+});
+
+/**
+ * Get multiple service packages by IDs.
+ */
+export const getMany = authenticatedWithProfileQuery({
+  args: { ids: v.array(v.id("servicePackages")) },
+  handler: async (ctx, { ids }) => {
+    const packages = await Promise.all(ids.map((id) => ctx.db.get(id)));
+    return packages.filter((p): p is NonNullable<typeof p> => p !== null);
   },
 });

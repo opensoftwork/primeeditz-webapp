@@ -275,10 +275,10 @@ development_status:
 
   # Epic 13D: Legacy Cleanup & Migration (LAST - after 13A, 13B, 13C complete)
   # Goal: Remove deprecated UIs, multi-package studio flow, clear dev data
-  13d-1-remove-old-quotation-templates-ui: backlog # 2 points
-  13d-2-simplify-project-types-ui: backlog # 2 points
-  13d-3-remove-quotation-sections-ui: backlog # 2 points
-  13d-4-update-studio-quotation-request: backlog # 3 points
-  13d-5-update-quotation-request-mutation: backlog # 2 points
-  13d-6-clear-development-data: backlog # 2 points
+  13d-1-remove-old-quotation-templates-ui: done # 2 points
+  13d-2-simplify-project-types-ui: done # 2 points
+  13d-3-remove-quotation-sections-ui: done # 2 points
+  13d-4-update-studio-quotation-request: in-progress # 3 points
+  13d-5-update-quotation-request-mutation: ready-for-dev # 2 points
+  13d-6-clear-development-data: ready-for-dev # 2 points
   epic-13d-retrospective: optional

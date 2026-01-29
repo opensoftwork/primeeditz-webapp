@@ -7,6 +7,8 @@ import { adminMutation } from "../../lib/customFunctions";
 export const createProjectType = adminMutation({
   args: {
     name: v.string(),
+    description: v.optional(v.string()),
+    icon: v.optional(v.string()),
     categoryId: v.id("projectCategories"),
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()),
@@ -27,6 +29,8 @@ export const updateProjectType = adminMutation({
   args: {
     id: v.id("projectTypes"),
     name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    icon: v.optional(v.string()),
     categoryId: v.optional(v.id("projectCategories")),
     isActive: v.optional(v.boolean()),
     displayOrder: v.optional(v.number()),

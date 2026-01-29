@@ -72,14 +72,7 @@ export function ProjectTypeCard({
           </div>
 
           <div className="flex items-center justify-between gap-4 pt-3 border-t border-white/5">
-            <div className="flex items-baseline gap-1.5">
-              <span className="text-xl font-black text-white">
-                {String(type.fieldCount || 0).padStart(2, "0")}
-              </span>
-              <span className="text-[9px] text-white/20 font-black uppercase tracking-widest">
-                Fields
-              </span>
-            </div>
+            <div className="flex items-baseline gap-1.5" />
 
             <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
               <Button

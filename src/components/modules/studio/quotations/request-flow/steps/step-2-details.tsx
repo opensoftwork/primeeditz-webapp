@@ -1,6 +1,13 @@
 "use client";
 
-import { AlertCircle, FileText, User } from "lucide-react";
+import {
+  AlertCircle,
+  FileText,
+  User,
+  Calendar,
+  MapPin,
+  Tag,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { Card } from "@/components/ui/card";
 import {
@@ -16,13 +23,20 @@ import { useRequestWizard } from "../request-wizard-context";
 export function Step2Details() {
   const { formData, setFormData } = useRequestWizard();
 
+  const updateField = (field: keyof typeof formData, value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
+  };
+
   return (
     <motion.div
       key="step2"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="space-y-8 w-full"
+      className="space-y-8 w-full pb-10"
     >
       <div className="space-y-1">
         <div className="flex items-center gap-2">
@@ -59,13 +73,74 @@ export function Step2Details() {
               <Input
                 id="endClientName"
                 value={formData.endClientName}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    endClientName: e.target.value,
-                  }))
-                }
-                placeholder="e.g. Sharma Family Wedding"
+                onChange={(e) => updateField("endClientName", e.target.value)}
+                placeholder="e.g. Rahul & Priya"
+                className="pl-11 h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-white/10"
+              />
+            </div>
+          </Field>
+
+          {/* Event Name */}
+          <Field className="space-y-2">
+            <FieldLabel
+              htmlFor="eventName"
+              className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
+            >
+              Event Name
+            </FieldLabel>
+            <div className="relative group/input">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-primary transition-colors">
+                <Tag className="h-4 w-4" />
+              </div>
+              <Input
+                id="eventName"
+                value={formData.eventName}
+                onChange={(e) => updateField("eventName", e.target.value)}
+                placeholder="e.g. Grand Wedding Reception"
+                className="pl-11 h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-white/10"
+              />
+            </div>
+          </Field>
+
+          {/* Event Date */}
+          <Field className="space-y-2">
+            <FieldLabel
+              htmlFor="eventDate"
+              className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
+            >
+              Event Date
+            </FieldLabel>
+            <div className="relative group/input">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-primary transition-colors">
+                <Calendar className="h-4 w-4" />
+              </div>
+              <Input
+                id="eventDate"
+                type="date"
+                value={formData.eventDate}
+                onChange={(e) => updateField("eventDate", e.target.value)}
+                className="pl-11 h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none scheme-dark"
+              />
+            </div>
+          </Field>
+
+          {/* Venue */}
+          <Field className="space-y-2">
+            <FieldLabel
+              htmlFor="venue"
+              className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
+            >
+              Venue / Location
+            </FieldLabel>
+            <div className="relative group/input">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within/input:text-primary transition-colors">
+                <MapPin className="h-4 w-4" />
+              </div>
+              <Input
+                id="venue"
+                value={formData.venue}
+                onChange={(e) => updateField("venue", e.target.value)}
+                placeholder="e.g. Taj Lands End, Mumbai"
                 className="pl-11 h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-white/10"
               />
             </div>
@@ -92,18 +167,14 @@ export function Step2Details() {
               <Textarea
                 id="notes"
                 value={formData.notes}
-                onChange={(e) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    notes: e.target.value,
-                  }))
-                }
+                onChange={(e) => updateField("notes", e.target.value)}
                 placeholder="Specify scope, special deliverables, raw footage handling, or strict deadlines..."
-                className="pl-11 py-4 min-h-[120px] bg-black/20 border-white/5 rounded-2xl font-medium text-white text-sm leading-relaxed focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none placeholder:text-white/10"
+                className="pl-11 py-4 min-h-[140px] bg-black/20 border-white/5 rounded-2xl font-medium text-white text-sm leading-relaxed focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none resize-none placeholder:text-white/10 shadow-inner"
               />
             </div>
             <FieldDescription className="text-[9px] text-white/20 font-medium pl-2 max-w-2xl leading-relaxed">
-              * Please verify client details carefully.
+              * Please verify client details carefully. This information will be
+              used for project initialization.
             </FieldDescription>
           </Field>
         </FieldGroup>

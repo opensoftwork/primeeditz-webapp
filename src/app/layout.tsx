@@ -26,6 +26,30 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="dark">
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                if (typeof window !== 'undefined' && window.performance && window.performance.measure) {
+                  const originalMeasure = window.performance.measure;
+                  window.performance.measure = function(name, start, end) {
+                    try {
+                      return originalMeasure.apply(window.performance, arguments);
+                    } catch (e) {
+                      if (e instanceof Error && e.message.includes('end cannot be negative')) {
+                        console.warn('Swallowed Performance.measure error:', e.message);
+                        return;
+                      }
+                      throw e;
+                    }
+                  };
+                }
+              })();
+            `,
+          }}
+        />
+      </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >

@@ -108,16 +108,6 @@ export const adminNavGroups: NavGroup[] = [
         icon: LayoutGrid,
       },
       {
-        title: "Quotation Sections",
-        url: "/settings/quotation-sections",
-        icon: LayoutGrid,
-      },
-      {
-        title: "Quotation Templates",
-        url: "/settings/quotation-templates",
-        icon: ClipboardCheck,
-      },
-      {
         title: "Storage Tiers",
         url: "/settings/storage-tiers",
         icon: HardDrive,

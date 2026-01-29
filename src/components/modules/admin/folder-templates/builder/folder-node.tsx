@@ -1,9 +1,16 @@
 "use client";
 
-import { Folder, Plus, Pencil, Trash2 } from "lucide-react";
+import {
+  Folder,
+  Trash2,
+  UploadCloud,
+  CheckCircle2,
+  Circle,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { useState, useEffect, useRef } from "react";
 import type { FolderLevel1, FolderLevel2, FolderLevel3 } from "@convex/schema";
 
 interface FolderNodeProps {
@@ -11,8 +18,14 @@ interface FolderNodeProps {
   level: 1 | 2 | 3;
   path: string; // Internal unique ID for editing/deleting
   onAddChild?: (parentPath: string) => void;
-  onEdit: (path: string, folder: FolderLevel1 | FolderLevel2 | FolderLevel3) => void;
+  onEdit: (
+    path: string,
+    folder: FolderLevel1 | FolderLevel2 | FolderLevel3,
+  ) => void;
   onDelete: (path: string) => void;
+  onOpen?: () => void;
+  isSelected?: boolean;
+  onSelect?: () => void;
 }
 
 export function FolderNode({
@@ -22,74 +35,182 @@ export function FolderNode({
   onAddChild,
   onEdit,
   onDelete,
+  onOpen,
+  isSelected,
+  onSelect,
 }: FolderNodeProps) {
-  const canHaveChildren = level < 3;
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(folder.name);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setEditName(folder.name);
+  }, [folder.name]);
+
+  useEffect(() => {
+    if (isEditing && inputRef.current) {
+      inputRef.current.focus();
+      inputRef.current.select();
+    }
+  }, [isEditing]);
+
+  const handleNameSave = () => {
+    if (editName.trim() && editName !== folder.name) {
+      const slug = editName
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      onEdit(path, {
+        ...folder,
+        name: editName.trim(),
+        path: `/${slug}`,
+      });
+    } else {
+      setEditName(folder.name);
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleNameSave();
+    } else if (e.key === "Escape") {
+      setEditName(folder.name);
+      setIsEditing(false);
+    }
+  };
+
+  const handleToggleRequired = (checked: boolean) => {
+    onEdit(path, { ...folder, isRequired: checked });
+  };
 
   return (
-    <div 
+    <div
+      onDoubleClick={onOpen}
+      onClick={(e) => {
+        if (onSelect) {
+          e.stopPropagation();
+          onSelect();
+        }
+      }}
       className={cn(
-        "group flex items-center justify-between p-3 pr-4 rounded-xl transition-all border border-transparent hover:border-white/5 hover:bg-white/5",
-        level === 1 && "bg-white/5 border-white/5 p-4",
+        "group relative flex flex-col items-center justify-center p-6 rounded-2xl transition-all border cursor-pointer aspect-square text-center",
+        isSelected
+          ? "bg-primary/10 border-primary/50 ring-1 ring-primary/20"
+          : "bg-white/2 border-white/5 hover:border-primary/30 hover:bg-primary/5",
+        isEditing && "ring-2 ring-primary/50",
       )}
     >
-      <div className="flex items-center gap-3">
-        <div className={cn(
-          "flex items-center justify-center rounded-lg transition-colors",
-          level === 1 ? "h-10 w-10 bg-primary/10 text-primary group-hover:bg-primary/20" : "h-8 w-8 bg-white/5 text-white/40 group-hover:text-white/60"
-        )}>
-          <Folder className={cn("transition-all", level === 1 ? "h-5 w-5" : "h-4 w-4")} />
-        </div>
-        
-        <div className="flex flex-col">
-          <span className={cn(
-            "text-white/90 transition-colors group-hover:text-white font-bold leading-tight",
-            level === 1 ? "text-sm tracking-wide uppercase" : "text-sm",
-          )}>
-            {folder.name}
-          </span>
-          {folder.description && (
-            <span className="text-[10px] text-white/40 font-medium line-clamp-1 mt-0.5">
-              {folder.description}
-            </span>
-          )}
-        </div>
-
-        {folder.isRequired && (
-          <Badge className="bg-primary/20 text-primary border-primary/20 font-bold text-[9px] uppercase tracking-wider px-2 py-0.5 rounded-full h-5">
-            Required
-          </Badge>
+      {/* Selection Indicator */}
+      <div
+        className={cn(
+          "absolute top-3 left-3 h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200",
+          isSelected
+            ? "bg-primary text-white scale-110"
+            : "bg-white/5 text-white/20 opacity-0 group-hover:opacity-100 hover:bg-white/10",
+        )}
+      >
+        {isSelected ? (
+          <CheckCircle2 className="h-3.5 w-3.5" />
+        ) : (
+          <Circle className="h-3.5 w-3.5" />
         )}
       </div>
 
-      <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
-        {canHaveChildren && onAddChild && (
+      {/* Required Indicator */}
+      <div className="absolute top-3 left-10 flex items-center gap-2">
+        <div
+          className={cn(
+            "h-1.5 w-1.5 rounded-full",
+            folder.isRequired
+              ? "bg-primary shadow-[0_0_8px_rgba(var(--primary),0.5)]"
+              : "bg-white/10",
+          )}
+          title={folder.isRequired ? "Upload Required" : "Optional"}
+        />
+      </div>
+
+      {/* Folder Icon */}
+      <div
+        className={cn(
+          "flex items-center justify-center rounded-2xl transition-all mb-4 shrink-0 shadow-xl",
+          level === 1
+            ? "h-16 w-16 bg-primary/10 text-primary group-hover:scale-110"
+            : "h-14 w-14 bg-white/5 text-white/40 group-hover:text-white/60 group-hover:scale-110",
+          isSelected && "text-primary bg-primary/20",
+        )}
+      >
+        <Folder
+          className={cn("transition-all", level === 1 ? "h-8 w-8" : "h-6 w-6")}
+        />
+      </div>
+
+      {/* Folder Info */}
+      <div className="flex flex-col items-center w-full px-2 overflow-hidden">
+        {isEditing ? (
+          <Input
+            ref={inputRef}
+            value={editName}
+            onChange={(e) => setEditName(e.target.value)}
+            onBlur={handleNameSave}
+            onKeyDown={handleKeyDown}
+            onClick={(e) => e.stopPropagation()}
+            className="h-8 py-0 px-2 bg-zinc-950 border-primary/50 text-xs font-bold text-center focus-visible:ring-1 focus-visible:ring-primary/30 rounded-lg w-full"
+          />
+        ) : (
+          <span
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+            className={cn(
+              "text-white/90 transition-colors group-hover:text-white font-bold leading-tight truncate w-full hover:bg-white/5 px-2 py-1 rounded-lg",
+              level === 1 ? "text-xs tracking-wide uppercase" : "text-xs",
+            )}
+          >
+            {folder.name}
+          </span>
+        )}
+        {folder.description && (
+          <span className="text-[10px] text-white/30 font-medium line-clamp-1 mt-1 px-4">
+            {folder.description}
+          </span>
+        )}
+      </div>
+
+      {/* Action Controls */}
+      <div className="absolute top-3 right-3 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all">
+        <div className="flex flex-col gap-1">
           <Button
             size="icon"
             variant="ghost"
-            className="h-8 w-8 rounded-lg bg-white/5 hover:bg-primary/20 hover:text-primary border border-white/5 transition-all mb-0.5"
-            onClick={() => onAddChild(path)}
+            className="h-7 w-7 rounded-lg bg-zinc-950/80 backdrop-blur-md border border-white/5 hover:bg-red-500/20 hover:text-red-500 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              onDelete(path);
+            }}
           >
-            <Plus className="h-4 w-4" />
+            <Trash2 className="h-3.5 w-3.5" />
           </Button>
-        )}
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 rounded-lg bg-white/5 hover:bg-white/20 border border-white/5 transition-all text-white/60 hover:text-white mb-0.5"
-          onClick={() => onEdit(path, folder)}
-        >
-          <Pencil className="h-3.5 w-3.5" />
-        </Button>
-        <Button
-          size="icon"
-          variant="ghost"
-          className="h-8 w-8 rounded-lg bg-red-500/5 hover:bg-red-500/20 hover:text-red-500 border border-red-500/10 transition-all mb-0.5"
-          onClick={() => onDelete(path)}
-        >
-          <Trash2 className="h-3.5 w-3.5" />
-        </Button>
+          <div
+            className="h-7 w-7 rounded-lg bg-zinc-950/80 backdrop-blur-md border border-white/5 flex items-center justify-center cursor-pointer hover:bg-primary/20 transition-all"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleToggleRequired(!folder.isRequired);
+            }}
+          >
+            <UploadCloud
+              className={cn(
+                "h-3.5 w-3.5 transition-colors",
+                folder.isRequired ? "text-primary" : "text-white/20",
+              )}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );
 }
-

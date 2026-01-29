@@ -193,6 +193,8 @@ export default defineSchema({
 
   projectTypes: defineTable({
     name: v.string(),
+    description: v.optional(v.string()), // Basic info
+    icon: v.optional(v.string()), // For visual identification
     categoryId: v.id("projectCategories"),
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()), // For ordering in UI

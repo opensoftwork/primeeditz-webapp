@@ -37,8 +37,10 @@ import { Switch } from "@/components/ui/switch";
 
 const projectTypeSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string().max(500).optional().or(z.literal("")),
   categoryId: z.string().min(1, "Category is required"),
   isActive: z.boolean().default(true),
+  icon: z.string().optional().or(z.literal("")),
 });
 
 export type ProjectTypeFormValues = z.infer<typeof projectTypeSchema>;
@@ -69,8 +71,10 @@ export function ProjectTypeDrawer({
   const form = useForm({
     defaultValues: {
       name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
       categoryId: initialData?.categoryId ?? "",
       isActive: initialData?.isActive ?? true,
+      icon: initialData?.icon ?? "",
     },
     onSubmit: async ({ value }) => {
       await onSave(value as ProjectTypeFormValues);
@@ -201,6 +205,50 @@ export function ProjectTypeDrawer({
                           {field.state.meta.errors.join(", ")}
                         </p>
                       )}
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="description">
+                  {(field) => (
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/40"
+                      >
+                        Description (Optional)
+                      </Label>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20"
+                        placeholder="Briefly describe what this project type covers..."
+                      />
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="icon">
+                  {(field) => (
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/40"
+                      >
+                        Icon Identifier (Optional)
+                      </Label>
+                      <Input
+                        id={field.name}
+                        name={field.name}
+                        value={field.state.value}
+                        onBlur={field.handleBlur}
+                        onChange={(e) => field.handleChange(e.target.value)}
+                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20"
+                        placeholder="e.g. video, camera, music"
+                      />
                     </div>
                   )}
                 </form.Field>

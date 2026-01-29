@@ -1,6 +1,6 @@
 # Story 13D.4: Update Studio Quotation Request UI
 
-**Status**: backlog  
+**Status**: in-progress  
 **Points**: 3  
 **Epic**: [13D: Legacy Cleanup & Migration](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)  
 **Depends On**: Epic 13A complete
