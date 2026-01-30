@@ -45,7 +45,13 @@ import {
   ChevronRight,
   CheckCircle2,
   LayoutTemplate,
+  Pencil,
 } from "lucide-react";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import Link from "next/link";
 import {
   Field,
@@ -330,26 +336,55 @@ export function FolderTemplateBuilder({
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <div className="space-y-2 flex-1 max-w-md">
-            <h1 className="text-3xl font-black tracking-tight text-white uppercase font-sentient leading-none">
-              {templateId ? "Edit Template" : "New Template"}
-            </h1>
+          <div className="flex-1 max-w-2xl">
             <form.Field
               name="name"
               children={(field) => (
                 <div className="flex flex-col">
-                  <Input
-                    placeholder="Enter template name..."
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className="h-7 bg-transparent border-none p-0 text-[10px] font-bold uppercase tracking-[0.2em] text-white/40 focus-visible:ring-0 focus-visible:text-primary transition-colors focus-visible:placeholder:opacity-0"
-                  />
-                  {field.state.meta.errors.length > 0 && (
-                    <span className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1">
-                      {field.state.meta.errors[0]}
-                    </span>
-                  )}
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <button className="flex items-center gap-4 group w-fit transition-all text-left">
+                        <h1 className="text-3xl font-black tracking-tight text-white uppercase font-sentient leading-none group-hover:text-primary transition-colors">
+                          {field.state.value ||
+                            (templateId ? "Edit Template" : "New Template")}
+                        </h1>
+                        <div className="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/10 transition-all mt-1">
+                          <Pencil className="h-3 w-3 text-white/20 group-hover:text-primary transition-colors" />
+                        </div>
+                      </button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      side="bottom"
+                      align="start"
+                      className="w-80 bg-zinc-950 border-white/10 p-4 rounded-2xl glass shadow-2xl"
+                    >
+                      <div className="space-y-4">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                            Template Name
+                          </Label>
+                          <Input
+                            placeholder="Enter template name..."
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="h-10 bg-white/5 border-white/5 focus-visible:ring-primary/30 rounded-xl text-xs font-bold uppercase tracking-wider"
+                          />
+                        </div>
+                        {field.state.meta.errors.length > 0 && (
+                          <span className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1">
+                            {field.state.meta.errors
+                              .map((error: any) =>
+                                typeof error === "string"
+                                  ? error
+                                  : error?.message,
+                              )
+                              .join(", ")}
+                          </span>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
               )}
             />
