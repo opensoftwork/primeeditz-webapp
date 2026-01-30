@@ -20,16 +20,12 @@ import { Card } from "@/components/ui/card";
 import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
 
+import type { AdminProjectType } from "./types";
+
 interface ProjectTypeCardProps {
-  type: {
-    _id: string;
-    name: string;
-    categoryName?: string;
-    isActive: boolean;
-    fieldCount?: number;
-  };
-  onEdit: (type: ProjectTypeCardProps["type"]) => void;
-  onDelete: (id: string, name: string) => void;
+  type: AdminProjectType;
+  onEdit: (type: AdminProjectType) => void;
+  onDelete: (id: Id<"projectTypes">, name: string) => void;
 }
 
 export function ProjectTypeCard({

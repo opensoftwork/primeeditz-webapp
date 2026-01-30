@@ -82,7 +82,44 @@ export function FolderTemplatesList() {
           </div>
           <Skeleton className="h-12 w-48 bg-white/5 rounded-xl" />
         </div>
-        <DataTableSkeleton rows={6} columns={4} />
+        <DataTableSkeleton
+          rows={6}
+          columns={4}
+          viewMode="cards"
+          renderCardSkeleton={() => (
+            <div className="bg-white/2 border border-white/5 p-6 rounded-3xl space-y-5">
+              <div className="flex items-start justify-between">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-10 h-10 rounded-xl bg-white/5" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-3 w-20 bg-white/5" />
+                    <Skeleton className="h-3 w-12 bg-white/5" />
+                  </div>
+                </div>
+                <Skeleton className="h-8 w-8 rounded-lg bg-white/5" />
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-3/4 bg-white/5" />
+                <Skeleton className="h-3 w-1/2 bg-white/5" />
+              </div>
+              <div className="space-y-3">
+                <div className="flex justify-between">
+                  <Skeleton className="h-2 w-20 bg-white/5" />
+                  <Skeleton className="h-2 w-12 bg-white/5" />
+                </div>
+                <div className="flex gap-2">
+                  <Skeleton className="h-8 w-20 rounded-xl bg-white/5" />
+                  <Skeleton className="h-8 w-24 rounded-xl bg-white/5" />
+                  <Skeleton className="h-8 w-16 rounded-xl bg-white/5" />
+                </div>
+              </div>
+              <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                <Skeleton className="h-4 w-24 bg-white/5" />
+                <Skeleton className="h-8 w-24 rounded-lg bg-white/5" />
+              </div>
+            </div>
+          )}
+        />
       </div>
     );
   }

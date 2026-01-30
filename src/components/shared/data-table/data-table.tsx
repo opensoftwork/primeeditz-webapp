@@ -353,46 +353,91 @@ function EmptyState({
 export function DataTableSkeleton({
   rows = 5,
   columns = 4,
+  viewMode = "table",
+  renderCardSkeleton,
 }: {
   rows?: number;
   columns?: number;
+  viewMode?: "table" | "cards";
+  renderCardSkeleton?: () => React.ReactNode;
 }) {
   return (
     <div className="space-y-6">
       {/* Toolbar Skeleton */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-11 w-80 bg-white/5 rounded-xl" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-32 bg-white/5 rounded-xl" />
-          <Skeleton className="h-10 w-24 bg-white/5 rounded-xl" />
+      <div className="flex items-start gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-80 bg-white/5 rounded-xl" />
+            <Skeleton className="h-11 w-32 bg-white/5 rounded-xl" />
+            <Skeleton className="h-11 w-32 bg-white/5 rounded-xl" />
+          </div>
+        </div>
+        <div className="hidden lg:flex items-center border border-white/10 rounded-xl p-1 bg-white/5">
+          <Skeleton className="h-9 w-9 bg-white/10 rounded-lg" />
+          <Skeleton className="h-9 w-9 bg-transparent rounded-lg" />
         </div>
       </div>
 
-      {/* Table Skeleton */}
-      <div className="rounded-3xl border border-white/5 bg-white/2 overflow-hidden">
-        <div className="bg-white/3 p-4">
-          <div className="flex gap-8">
-            {Array.from({ length: columns }).map((_, i) => (
-              <Skeleton
-                key={`skeleton-header-${i}`}
-                className="h-4 w-24 bg-white/5"
-              />
-            ))}
-          </div>
-        </div>
-        <div className="divide-y divide-white/5">
+      {viewMode === "cards" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: rows }).map((_, i) => (
-            <div key={`skeleton-row-${i}`} className="flex gap-8 p-6">
-              {Array.from({ length: columns }).map((_, j) => (
-                <Skeleton
-                  key={`skeleton-cell-${i}-${j}`}
-                  className="h-5 w-32 bg-white/5"
-                />
-              ))}
+            <div key={`skeleton-card-${i}`}>
+              {renderCardSkeleton ? (
+                renderCardSkeleton()
+              ) : (
+                <div className="bg-white/2 border border-white/5 p-6 rounded-3xl space-y-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-xl bg-white/5" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-3 w-20 bg-white/5" />
+                        <Skeleton className="h-3 w-12 bg-white/5" />
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Skeleton className="h-8 w-8 rounded-lg bg-white/5" />
+                      <Skeleton className="h-8 w-8 rounded-lg bg-white/5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-3/4 bg-white/5" />
+                    <Skeleton className="h-3 w-1/2 bg-white/5" />
+                  </div>
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <Skeleton className="h-4 w-24 bg-white/5" />
+                    <Skeleton className="h-8 w-20 rounded-lg bg-white/5" />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </div>
+      ) : (
+        <div className="rounded-3xl border border-white/5 bg-white/2 overflow-hidden">
+          <div className="bg-white/3 p-4">
+            <div className="flex gap-8">
+              {Array.from({ length: columns }).map((_, i) => (
+                <Skeleton
+                  key={`skeleton-header-${i}`}
+                  className="h-4 w-24 bg-white/5"
+                />
+              ))}
+            </div>
+          </div>
+          <div className="divide-y divide-white/5">
+            {Array.from({ length: rows }).map((_, i) => (
+              <div key={`skeleton-row-${i}`} className="flex gap-8 p-6">
+                {Array.from({ length: columns }).map((_, j) => (
+                  <Skeleton
+                    key={`skeleton-cell-${i}-${j}`}
+                    className="h-5 w-32 bg-white/5"
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pagination Skeleton */}
       <div className="flex items-center justify-between pt-6 border-t border-white/5">

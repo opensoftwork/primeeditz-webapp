@@ -118,6 +118,9 @@ export function FolderTemplateBuilder({
   const [folders, setFolders] = useState<FolderLevel1[]>([]);
   const [deletePath, setDeletePath] = useState<string | null>(null);
   const [deletePaths, setDeletePaths] = useState<string[] | null>(null);
+  const [isEditingName, setIsEditingName] = useState(false);
+  const [initialName, setInitialName] = useState("");
+  const [showNameConfirm, setShowNameConfirm] = useState(false);
 
   // Sync with existing template
   useEffect(() => {
@@ -325,78 +328,108 @@ export function FolderTemplateBuilder({
     <div className="w-full space-y-12 pb-32 font-geist px-10 pt-16">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-white/5">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 flex-1 min-w-0">
           <Button
             variant="ghost"
             size="icon"
             asChild
-            className="rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-11 w-11"
+            className="shrink-0 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-11 w-11"
           >
             <Link href="/settings/folder-templates">
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
-          <div className="flex-1 max-w-2xl">
+          <div className="flex-1 min-w-0 flex items-center">
             <form.Field
               name="name"
               children={(field) => (
-                <div className="flex flex-col">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <button className="flex items-center gap-4 group w-fit transition-all text-left">
-                        <h1 className="text-3xl font-black tracking-tight text-white uppercase font-sentient leading-none group-hover:text-primary transition-colors">
-                          {field.state.value ||
-                            (templateId ? "Edit Template" : "New Template")}
-                        </h1>
-                        <div className="p-2 rounded-lg bg-white/5 border border-white/5 group-hover:border-primary/30 group-hover:bg-primary/10 transition-all mt-1">
-                          <Pencil className="h-3 w-3 text-white/20 group-hover:text-primary transition-colors" />
-                        </div>
-                      </button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      side="bottom"
-                      align="start"
-                      className="w-80 bg-zinc-950 border-white/10 p-4 rounded-2xl glass shadow-2xl"
+                <div className="flex flex-col w-full h-full justify-center">
+                  {isEditingName ? (
+                    <input
+                      autoFocus
+                      placeholder="Enter template name..."
+                      value={field.state.value}
+                      onBlur={() => {
+                        field.handleBlur();
+                        // Optional: we can trigger the confirm here too, but user asked for the button
+                      }}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const currentName = field.state.value;
+                          if (currentName !== initialName) {
+                            setShowNameConfirm(true);
+                          } else {
+                            setIsEditingName(false);
+                          }
+                        }
+                        if (e.key === "Escape") {
+                          field.handleChange(initialName);
+                          setIsEditingName(false);
+                        }
+                      }}
+                      onFocus={(e) => e.currentTarget.select()}
+                      className="bg-transparent border-none outline-none p-0 w-full text-3xl font-black uppercase tracking-tight text-white font-sentient leading-none placeholder:text-white/10"
+                    />
+                  ) : (
+                    <h1
+                      onClick={() => {
+                        setInitialName(field.state.value);
+                        setIsEditingName(true);
+                      }}
+                      className="text-3xl font-black tracking-tight text-white uppercase font-sentient leading-none cursor-text hover:text-white/80 transition-colors"
                     >
-                      <div className="space-y-4">
-                        <div className="space-y-2">
-                          <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                            Template Name
-                          </Label>
-                          <Input
-                            placeholder="Enter template name..."
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="h-10 bg-white/5 border-white/5 focus-visible:ring-primary/30 rounded-xl text-xs font-bold uppercase tracking-wider"
-                          />
-                        </div>
-                        {field.state.meta.errors.length > 0 && (
-                          <span className="text-[8px] text-red-500 font-bold uppercase tracking-widest mt-1">
-                            {field.state.meta.errors
-                              .map((error: any) =>
-                                typeof error === "string"
-                                  ? error
-                                  : error?.message,
-                              )
-                              .join(", ")}
-                          </span>
-                        )}
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                      {field.state.value ||
+                        (templateId ? "Edit Template" : "New Template")}
+                    </h1>
+                  )}
                 </div>
               )}
             />
           </div>
         </div>
-        <Button
-          onClick={() => form.handleSubmit()}
-          className="gap-3 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
-        >
-          <Save className="h-4 w-4" />
-          Save Changes
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            onClick={() => {
+              if (isEditingName) {
+                const currentName = form.getFieldValue("name");
+                if (currentName !== initialName) {
+                  setShowNameConfirm(true);
+                } else {
+                  setIsEditingName(false);
+                }
+              } else {
+                setInitialName(form.getFieldValue("name"));
+                setIsEditingName(true);
+              }
+            }}
+            className={cn(
+              "gap-2 bg-white/5 border border-white/5 hover:bg-white/10 text-white/40 hover:text-white font-bold uppercase tracking-widest text-[10px] h-12 px-6 rounded-xl transition-all",
+              isEditingName &&
+                "bg-primary/20 text-primary border-primary/20 hover:bg-primary/30",
+            )}
+          >
+            {isEditingName ? (
+              <>
+                <CheckCircle2 className="h-3.5 w-3.5" />
+                Done Editing
+              </>
+            ) : (
+              <>
+                <Pencil className="h-3.5 w-3.5" />
+                Edit Template Name
+              </>
+            )}
+          </Button>
+          <Button
+            onClick={() => form.handleSubmit()}
+            className="gap-3 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Save className="h-4 w-4" />
+            Save Changes
+          </Button>
+        </div>
       </div>
 
       <div className="space-y-8">
@@ -602,6 +635,43 @@ export function FolderTemplateBuilder({
               className="h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider text-[10px] flex-1 shadow-lg shadow-red-500/20"
             >
               Delete Selected
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      {/* Confirmation Dialog for Name Change */}
+      <AlertDialog open={showNameConfirm} onOpenChange={setShowNameConfirm}>
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-2xl glass">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white font-sentient">
+              Change Template Name?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-sm text-white/50 font-medium">
+              Are you sure you want to change the template name to{" "}
+              <span className="text-primary font-bold">
+                "{form.getFieldValue("name")}"
+              </span>
+              ?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel
+              onClick={() => {
+                form.setFieldValue("name", initialName);
+                setIsEditingName(false);
+              }}
+              className="rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-6 transition-all"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setIsEditingName(false);
+                setShowNameConfirm(false);
+              }}
+              className="rounded-xl bg-primary hover:bg-primary/90 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-8 transition-all shadow-lg shadow-primary/20"
+            >
+              Confirm Change
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

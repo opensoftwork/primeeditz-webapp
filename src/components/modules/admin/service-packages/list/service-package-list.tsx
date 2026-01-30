@@ -99,7 +99,7 @@ export function ServicePackageList() {
           </div>
           <Skeleton className="h-12 w-48 bg-white/5 rounded-xl" />
         </div>
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
@@ -164,7 +164,7 @@ export function ServicePackageList() {
             projectTypeName={pkg.projectTypeName}
           />
         )}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {

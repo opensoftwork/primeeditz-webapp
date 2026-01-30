@@ -76,7 +76,7 @@ export function QuotationList() {
             </h1>
           </motion.div>
         </div>
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
@@ -118,7 +118,7 @@ export function QuotationList() {
         emptyTitle="No Quotations Found"
         emptyDescription="No quotations match your current filters. Try adjusting your search criteria."
         renderCard={(quotation) => <QuotationCard quotation={quotation} />}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {

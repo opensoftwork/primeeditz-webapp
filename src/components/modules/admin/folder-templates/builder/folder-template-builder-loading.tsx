@@ -8,14 +8,16 @@ export function FolderTemplateBuilderLoading() {
     <div className="w-full space-y-12 pb-32 font-geist px-10 pt-16">
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-white/5">
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-5 flex-1 min-w-0">
           <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
-          <div className="flex items-center gap-4 flex-1 max-w-md">
-            <Skeleton className="h-8 w-64 bg-white/5" />
-            <Skeleton className="h-8 w-8 rounded-lg bg-white/5 mt-1" />
+          <div className="flex-1 min-w-0">
+            <Skeleton className="h-9 w-72 bg-white/5" />
           </div>
         </div>
-        <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-12 w-40 rounded-xl bg-white/5" />
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
+        </div>
       </div>
 
       <div className="space-y-8">

@@ -45,7 +45,7 @@ function ProjectCard({ project }: { project: AdminProject }) {
       <motion.div
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        className="group p-6 rounded-3xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
@@ -297,7 +297,7 @@ export default function ProjectList() {
             </h1>
           </motion.div>
         </div>
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
@@ -358,7 +358,7 @@ export default function ProjectList() {
         emptyTitle="No Projects Found"
         emptyDescription="No projects match your current filters. Try adjusting your search criteria."
         renderCard={(project) => <ProjectCard project={project} />}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {

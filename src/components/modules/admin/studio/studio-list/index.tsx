@@ -163,7 +163,7 @@ export default function StudioList({
             </motion.div>
           </div>
         )}
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
@@ -205,7 +205,7 @@ export default function StudioList({
         emptyTitle="No Studios Found"
         emptyDescription="No studios match your current filters. Try adjusting your search criteria."
         renderCard={(studio) => <StudioCard studio={studio} />}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={showHeader}
         toolbar={{
           search: {

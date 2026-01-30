@@ -142,7 +142,7 @@ export function ProjectTypeList() {
           </div>
           <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
-        <DataTableSkeleton rows={6} columns={4} />
+        <DataTableSkeleton rows={6} columns={4} viewMode="cards" />
       </div>
     );
   }
@@ -186,8 +186,8 @@ export function ProjectTypeList() {
           <ProjectTypeCard
             key={type._id}
             type={type}
-            onEdit={(type) => {
-              setEditingType(type);
+            onEdit={(editType) => {
+              setEditingType(editType);
               setIsDrawerOpen(true);
             }}
             onDelete={async (id) => {
