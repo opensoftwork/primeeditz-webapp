@@ -3,24 +3,35 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
-import { Skeleton } from "@/components/ui/skeleton";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
-import { ProjectTypeCard } from "./project-type-card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getColumns } from "./columns";
-import type { AdminProjectType } from "./types";
+import { ProjectTypeCard } from "./project-type-card";
 import {
   ProjectTypeDrawer,
   type ProjectTypeFormValues,
 } from "./project-type-drawer";
+import type { AdminProjectType } from "./types";
+
+// import { useRouter } from "next/navigation"; (removed from imports)
 
 export function ProjectTypeList() {
-  const router = useRouter();
+  // const router = useRouter(); (removed)
   const projectTypes = useQuery(
     api.functions.projectTypes.queries.getProjectTypes,
   );
@@ -34,9 +45,10 @@ export function ProjectTypeList() {
   const updateProjectType = useMutation(
     api.functions.projectTypes.mutations.updateProjectType,
   );
-  const toggleStatusMutation = useMutation(
+  /* const toggleStatusMutation = useMutation(
     api.functions.projectTypes.mutations.toggleProjectTypeActive,
-  );
+  ); */ // removed
+
   const deleteMutation = useMutation(
     api.functions.projectTypes.mutations.deleteProjectType,
   );
@@ -44,6 +56,10 @@ export function ProjectTypeList() {
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingType, setEditingType] = useState<AdminProjectType | null>(null);
+  const [typeToDelete, setTypeToDelete] = useState<{
+    id: Id<"projectTypes">;
+    name: string;
+  } | null>(null);
 
   // Transform data
   const data: AdminProjectType[] = useMemo(() => {
@@ -99,15 +115,26 @@ export function ProjectTypeList() {
         toast.success("New project type created");
       }
       setIsDrawerOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error("An error occurred while saving");
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!typeToDelete) return;
+    try {
+      await deleteMutation({ id: typeToDelete.id });
+      toast.success("Project type deleted permanently");
+      setTypeToDelete(null);
+    } catch (_error) {
+      toast.error("Failed to delete project type");
     }
   };
 
   // Loading State
   if (projectTypes === undefined) {
     return (
-      <div className="w-full">
+      <div className="w-full px-6 pt-6">
         <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -121,7 +148,7 @@ export function ProjectTypeList() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-6 pt-6">
       <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -163,21 +190,15 @@ export function ProjectTypeList() {
               setEditingType(type);
               setIsDrawerOpen(true);
             }}
-            onToggleStatus={async (id, current) => {
-              await toggleStatusMutation({
-                id: id as Id<"projectTypes">,
-                isActive: !current,
-              });
-              toast.success(
-                `Project type ${!current ? "activated" : "deactivated"}`,
-              );
-            }}
             onDelete={async (id) => {
-              // Note: handled in project-actions for consistency
+              setTypeToDelete({
+                id: id as Id<"projectTypes">,
+                name: type.name,
+              });
             }}
           />
         )}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {
@@ -212,6 +233,35 @@ export function ProjectTypeList() {
         onSave={handleSave}
         initialData={editingType}
       />
+
+      <AlertDialog
+        open={!!typeToDelete}
+        onOpenChange={(open) => !open && setTypeToDelete(null)}
+      >
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-3xl p-8">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Verify Deletion
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              Are you sure you want to remove{" "}
+              <span className="text-white">"{typeToDelete?.name}"</span>? This
+              will also impact any service packages using this project type.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

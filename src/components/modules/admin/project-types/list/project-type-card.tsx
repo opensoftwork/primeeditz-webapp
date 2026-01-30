@@ -1,17 +1,24 @@
 "use client";
 
-import { Boxes, Edit2, Settings2, Trash2, Loader2 } from "lucide-react";
-import { motion } from "motion/react";
-import Link from "next/link";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import {
+  Boxes,
+  Edit2,
+  Eye,
+  EyeOff,
+  Loader2,
+  Settings2,
+  Trash2,
+} from "lucide-react";
+import { motion } from "motion/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import type { Id } from "@convex/_generated/dataModel";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useMutationWithStatus } from "@/lib/convex-hooks";
+import { cn } from "@/lib/utils";
 
 interface ProjectTypeCardProps {
   type: {
@@ -21,7 +28,7 @@ interface ProjectTypeCardProps {
     isActive: boolean;
     fieldCount?: number;
   };
-  onEdit: (type: any) => void;
+  onEdit: (type: ProjectTypeCardProps["type"]) => void;
   onDelete: (id: string, name: string) => void;
 }
 
@@ -45,11 +52,13 @@ export function ProjectTypeCard({
 
   const handleToggleStatus = (e: React.MouseEvent) => {
     e.preventDefault();
+    e.stopPropagation();
     toggleStatusMutation.mutate({
       id: type._id as Id<"projectTypes">,
       isActive: !type.isActive,
     });
   };
+
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
@@ -69,22 +78,18 @@ export function ProjectTypeCard({
                 </span>
                 <Badge
                   className={cn(
-                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 cursor-pointer",
+                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 relative overflow-hidden",
                     type.isActive
                       ? "bg-green-500/10 text-green-500 border-green-500/20"
                       : "bg-white/5 text-white/40 border-white/5",
                   )}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    onToggleStatus(type._id, type.isActive);
-                  }}
                 >
                   {type.isActive ? "ACTIVE" : "INACTIVE"}
                 </Badge>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+            <div className="flex items-center gap-1 transition-all duration-200">
               <Button
                 variant="ghost"
                 size="icon"
@@ -114,12 +119,6 @@ export function ProjectTypeCard({
             </div>
           </div>
 
-          {/* Description Placeholder */}
-          <p className="text-xs text-white/40 line-clamp-2 leading-relaxed font-medium min-h-8">
-            Core project configuration for {type.name.toLowerCase()} workflows,
-            including specific fields and delivery states.
-          </p>
-
           {/* Footer Area */}
           <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
             <div className="flex items-center gap-2">
@@ -130,15 +129,30 @@ export function ProjectTypeCard({
                 Field Mapping Enabled
               </span>
             </div>
+
             <Button
-              asChild
+              onClick={handleToggleStatus}
+              disabled={toggleStatusMutation.isPending}
               variant="ghost"
               size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-2 shrink-0 transition-all active:scale-95"
+              className={cn(
+                "h-8 px-3 text-[9px] font-black uppercase tracking-widest rounded-lg gap-2 shrink-0 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                type.isActive
+                  ? "text-red-400/60 bg-red-400/5 hover:text-red-400 hover:bg-red-400/10"
+                  : "text-green-400/60 bg-green-400/5 hover:text-green-400 hover:bg-green-400/10",
+              )}
             >
-              <Link href={`/settings/project-types/${type._id}`}>
-                Configure <Settings2 className="h-3 w-3" />
-              </Link>
+              {toggleStatusMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : type.isActive ? (
+                <>
+                  DEACTIVATE <EyeOff className="h-3.5 w-3.5" />
+                </>
+              ) : (
+                <>
+                  ACTIVATE <Eye className="h-3.5 w-3.5" />
+                </>
+              )}
             </Button>
           </div>
         </div>

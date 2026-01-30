@@ -111,7 +111,7 @@ export function DataTable<TData, TValue>({
   serverPagination,
 }: DataTableProps<TData, TValue>) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(
-    renderCard ? defaultView : "table",
+    renderCard ? (defaultView ?? "cards") : "table",
   );
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -144,20 +144,6 @@ export function DataTable<TData, TValue>({
   });
 
   const showCards = renderCard && viewMode === "cards";
-
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.03 },
-    },
-  };
-
-  const rowVariants = {
-    hidden: { opacity: 0, y: 8 },
-    show: { opacity: 1, y: 0 },
-  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -226,33 +212,42 @@ export function DataTable<TData, TValue>({
       >
         {/* Card View */}
         {showCards && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-          >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <motion.div key={row.id} variants={rowVariants}>
-                  {renderCard(row.original)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <motion.div
+                    key={row.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {renderCard(row.original)}
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div
+                  key="empty-state"
+                  className="col-span-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <EmptyState
+                    icon={EmptyIcon}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
                 </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full">
-                <EmptyState
-                  icon={EmptyIcon}
-                  title={emptyTitle}
-                  description={emptyDescription}
-                />
-              </div>
-            )}
-          </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )}
 
         {/* Table View */}
         {!showCards && (
-          <div className="overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/2 overflow-x-auto">
+          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="bg-white/3">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -374,7 +369,7 @@ export function DataTableSkeleton({
       </div>
 
       {/* Table Skeleton */}
-      <div className="rounded-[1.5rem] border border-white/5 bg-white/2 overflow-hidden">
+      <div className="rounded-3xl border border-white/5 bg-white/2 overflow-hidden">
         <div className="bg-white/3 p-4">
           <div className="flex gap-8">
             {Array.from({ length: columns }).map((_, i) => (

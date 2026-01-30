@@ -40,6 +40,10 @@ export function getColumns(
         </div>
       ),
       filterFn: (row, id, value) => {
+        // If no filter value or empty array, show all rows
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          return true;
+        }
         return (value as string[]).includes(row.getValue(id));
       },
     },
@@ -62,6 +66,15 @@ export function getColumns(
             {isActive ? "ACTIVE" : "INACTIVE"}
           </Badge>
         );
+      },
+      filterFn: (row, id, value) => {
+        // If no filter value or empty array, show all rows
+        if (!value || (Array.isArray(value) && value.length === 0)) {
+          return true;
+        }
+        const rowValue = row.getValue(id);
+        const stringVal = String(rowValue);
+        return (value as string[]).includes(stringVal);
       },
     },
     {

@@ -3,25 +3,30 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { Plus } from "lucide-react";
+import { motion } from "motion/react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ListAlerts } from "./list-alerts";
-import { ListEmpty } from "./list-empty";
-import { ListHeader } from "./list-header";
+import { getColumns } from "./columns";
 import { StorageTierCard } from "./storage-tier-card";
 import {
   StorageTierDrawer,
   type StorageTierFormValues,
 } from "./storage-tier-drawer";
-
-interface StorageTier {
-  _id: string;
-  name: string;
-  sizeGB: number;
-  priceINR: number;
-  isActive: boolean;
-}
+import type { StorageTier } from "./types";
 
 export function StorageTiersList() {
   const storageTiers = useQuery(
@@ -33,9 +38,6 @@ export function StorageTiersList() {
   const updateStorageTier = useMutation(
     api.functions.storageTiers.mutations.updateStorageTier,
   );
-  const toggleStatusMutation = useMutation(
-    api.functions.storageTiers.mutations.toggleStorageTierActive,
-  );
   const deleteMutation = useMutation(
     api.functions.storageTiers.mutations.deleteStorageTier,
   );
@@ -43,24 +45,31 @@ export function StorageTiersList() {
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<StorageTier | null>(null);
-  const [tierToToggle, setTierToToggle] = useState<{
-    id: string;
-    current: boolean;
-    name: string;
-  } | null>(null);
   const [tierToDelete, setTierToDelete] = useState<{
-    id: string;
+    id: Id<"storageTiers">;
     name: string;
   } | null>(null);
+
+  // Transform data for the table
+  const data: StorageTier[] = useMemo(() => {
+    if (!storageTiers) return [];
+    return storageTiers.map((tier) => ({
+      ...tier,
+    }));
+  }, [storageTiers]);
+
+  const columns = useMemo(
+    () =>
+      getColumns((tier) => {
+        setEditingTier(tier);
+        setIsDrawerOpen(true);
+      }),
+    [],
+  );
 
   // Handlers
   const handleCreate = () => {
     setEditingTier(null);
-    setIsDrawerOpen(true);
-  };
-
-  const handleEdit = (tier: StorageTier) => {
-    setEditingTier(tier);
     setIsDrawerOpen(true);
   };
 
@@ -94,26 +103,10 @@ export function StorageTiersList() {
     }
   };
 
-  const handleToggleStatusConfirm = async () => {
-    if (!tierToToggle) return;
-    try {
-      await toggleStatusMutation({
-        id: tierToToggle.id as Id<"storageTiers">,
-        isActive: !tierToToggle.current,
-      });
-      toast.success(
-        `Storage tier ${!tierToToggle.current ? "activated" : "deactivated"}`,
-      );
-      setTierToToggle(null);
-    } catch (error) {
-      toast.error("Failed to update status");
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
+  const handleDelete = async () => {
     if (!tierToDelete) return;
     try {
-      await deleteMutation({ id: tierToDelete.id as Id<"storageTiers"> });
+      await deleteMutation({ id: tierToDelete.id });
       toast.success("Storage tier deleted permanently");
       setTierToDelete(null);
     } catch (error) {
@@ -125,49 +118,92 @@ export function StorageTiersList() {
     }
   };
 
-  const onToggleRequest = (id: string, current: boolean, name: string) => {
-    if (current) {
-      // Deactivating requires confirmation
-      setTierToToggle({ id, current, name });
-    } else {
-      // Activating can happen immediately
-      toggleStatusMutation({ id: id as Id<"storageTiers">, isActive: true });
-      toast.success("Storage tier activated");
-    }
-  };
-
   // Loading State
   if (storageTiers === undefined) {
     return (
-      <div className="space-y-8 p-8 md:p-12 w-full">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <Skeleton key={i} className="h-48 w-full bg-white/5 rounded-xl" />
-          ))}
+      <div className="w-full px-6 pt-6">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
+          </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
+        <DataTableSkeleton rows={6} columns={4} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-20 p-8 md:p-12 w-full">
-      <ListHeader onCreate={handleCreate} tierCount={storageTiers.length} />
+    <div className="w-full px-6 pt-6">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-2"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+            ADMINISTRATIVE CONTROL
+          </span>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white xl:text-5xl">
+            Storage Tiers
+          </h1>
+        </motion.div>
 
-      {storageTiers.length === 0 ? (
-        <ListEmpty onCreate={handleCreate} />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {storageTiers.map((tier) => (
-            <StorageTierCard
-              key={tier._id}
-              tier={tier}
-              onEdit={handleEdit}
-              onToggleStatus={onToggleRequest}
-              onDelete={(id, name) => setTierToDelete({ id, name })}
-            />
-          ))}
-        </div>
-      )}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Button
+            onClick={handleCreate}
+            className="h-12 gap-2 rounded-xl bg-primary px-8 text-[11px] font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" />
+            ADD STORAGE TIER
+          </Button>
+        </motion.div>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data}
+        emptyTitle="No storage tiers defined"
+        emptyDescription="Set up your storage tiers with capacity and pricing to get started."
+        renderCard={(tier) => (
+          <StorageTierCard
+            key={tier._id}
+            tier={tier}
+            onEdit={(tier) => {
+              setEditingTier(tier);
+              setIsDrawerOpen(true);
+            }}
+            onDelete={(id, name) => {
+              setTierToDelete({
+                id: id as Id<"storageTiers">,
+                name,
+              });
+            }}
+          />
+        )}
+        defaultView="cards"
+        showViewToggle={true}
+        toolbar={{
+          search: {
+            column: "name",
+            placeholder: "Search storage tiers...",
+          },
+          filters: [
+            {
+              column: "isActive",
+              title: "Status",
+              options: [
+                { label: "Active", value: "true" },
+                { label: "Inactive", value: "false" },
+              ],
+            },
+          ],
+        }}
+      />
 
       <StorageTierDrawer
         open={isDrawerOpen}
@@ -176,14 +212,34 @@ export function StorageTiersList() {
         initialData={editingTier}
       />
 
-      <ListAlerts
-        tierToToggle={tierToToggle}
-        setTierToToggle={setTierToToggle}
-        tierToDelete={tierToDelete}
-        setTierToDelete={setTierToDelete}
-        onToggleStatus={handleToggleStatusConfirm}
-        onDelete={handleDeleteConfirm}
-      />
+      <AlertDialog
+        open={!!tierToDelete}
+        onOpenChange={(open) => !open && setTierToDelete(null)}
+      >
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-3xl p-8">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Verify Deletion
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              Are you sure you want to remove{" "}
+              <span className="text-white">"{tierToDelete?.name}"</span>? This
+              may impact quotations using this storage tier.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

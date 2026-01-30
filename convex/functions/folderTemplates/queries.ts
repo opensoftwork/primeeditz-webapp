@@ -2,12 +2,21 @@ import { v } from "convex/values";
 import { adminQuery, authenticatedQuery } from "../../lib/customFunctions";
 
 /**
- * List all folder templates.
+ * List all folder templates with project type names.
  */
 export const list = adminQuery({
   args: {},
   handler: async (ctx) => {
-    return await ctx.db.query("folderTemplates").collect();
+    const templates = await ctx.db.query("folderTemplates").collect();
+    return await Promise.all(
+      templates.map(async (template) => {
+        const projectType = await ctx.db.get(template.projectTypeId);
+        return {
+          ...template,
+          projectTypeName: projectType?.name || "N/A",
+        };
+      }),
+    );
   },
 });
 

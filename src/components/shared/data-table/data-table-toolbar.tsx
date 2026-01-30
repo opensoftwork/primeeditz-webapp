@@ -65,11 +65,9 @@ export function DataTableToolbar<TData>({
     if (search) {
       const column = table.getColumn(search.column);
       const filterValue = column?.getFilterValue();
-      if (typeof filterValue === "string") {
-        setLocalSearchValue(filterValue);
-      }
+      setLocalSearchValue((filterValue as string) ?? "");
     }
-  }, [search, table]);
+  }, [search, table, columnFilters]);
 
   return (
     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

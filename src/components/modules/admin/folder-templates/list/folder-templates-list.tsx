@@ -3,7 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { toast } from "sonner";
 import {
   AlertDialog,
@@ -17,29 +17,27 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FolderTemplateCard } from "./folder-template-card";
-import { ListEmpty } from "./list-empty";
-import { ListHeader } from "./list-header";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
+import { getColumns } from "./columns";
+import { motion } from "motion/react";
+import { Plus } from "lucide-react";
 
-import type { FolderLevel1 } from "@convex/schema";
+import type { AdminFolderTemplate } from "./types";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-
-interface FolderTemplate {
-  _id: string;
-  _creationTime: number;
-  name: string;
-  folders: FolderLevel1[];
-  projectTypeId: Id<"projectTypes">;
-  projectTypeName: string;
-  variant?: string;
-  description?: string;
-  isDefault?: boolean;
-  isActive: boolean;
-}
 
 export function FolderTemplatesList() {
   const router = useRouter();
   const templates = useQuery(api.functions.folderTemplates.queries.list);
+  const deleteMutation = useMutation(
+    api.functions.folderTemplates.mutations.deleteFolderTemplate,
+  );
+
+  // State
+  const [templateToDelete, setTemplateToDelete] = useState<{
+    id: Id<"folderTemplates">;
+    name: string;
+  } | null>(null);
 
   const handleCreate = () => {
     router.push("/settings/folder-templates/new");
@@ -49,9 +47,34 @@ export function FolderTemplatesList() {
     router.push(`/settings/folder-templates/${id}`);
   };
 
+  const columns = useMemo(
+    () =>
+      getColumns(
+        (t) => handleEdit(t._id),
+        (id, name) => {
+          setTemplateToDelete({
+            id: id as Id<"folderTemplates">,
+            name,
+          });
+        },
+      ),
+    [handleEdit],
+  );
+
+  const handleDelete = async () => {
+    if (!templateToDelete) return;
+    try {
+      await deleteMutation({ id: templateToDelete.id });
+      toast.success("Template deleted successfully");
+      setTemplateToDelete(null);
+    } catch (error) {
+      toast.error("Failed to delete template");
+    }
+  };
+
   if (templates === undefined) {
     return (
-      <div className="w-full">
+      <div className="w-full px-6 pt-6">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -65,7 +88,7 @@ export function FolderTemplatesList() {
   }
 
   return (
-    <div className="w-full">
+    <div className="w-full px-6 pt-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
@@ -104,12 +127,15 @@ export function FolderTemplatesList() {
             key={template._id}
             template={template as any}
             onEdit={(t) => handleEdit(t._id)}
-            onDelete={() => {
-              // Handled in template-actions
+            onDelete={(id, name) => {
+              setTemplateToDelete({
+                id: id as Id<"folderTemplates">,
+                name,
+              });
             }}
           />
         )}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {
@@ -128,6 +154,35 @@ export function FolderTemplatesList() {
           ],
         }}
       />
+
+      <AlertDialog
+        open={!!templateToDelete}
+        onOpenChange={(open) => !open && setTemplateToDelete(null)}
+      >
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-3xl p-8">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
+              Verify Deletion
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
+              Are you sure you want to remove{" "}
+              <span className="text-white">"{templateToDelete?.name}"</span>?
+              This action is permanent and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDelete}
+              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl"
+            >
+              Delete Permanently
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

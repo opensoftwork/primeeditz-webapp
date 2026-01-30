@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import { Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { Button } from "@/components/ui/button";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { toast } from "sonner";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import {
   AlertDialog,
@@ -20,20 +19,21 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { columns } from "./columns";
 import { PackageCard } from "./package-card";
 import type { AdminServicePackage } from "./types";
-import type { Id } from "@convex/_generated/dataModel";
 
 export function ServicePackageList() {
   const router = useRouter();
 
   // Local state for filters and view
-  const [pageSize, setPageSize] = useState(15);
-  const [statusFilter, setStatusFilter] = useState<string | undefined>(
+  const [_pageSize, _setPageSize] = useState(15);
+  const [statusFilter, _setStatusFilter] = useState<string | undefined>(
     undefined,
   );
-  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(
+  const [categoryFilter, _setCategoryFilter] = useState<string | undefined>(
     undefined,
   );
   const [packageToDelete, setPackageToDelete] = useState<{
@@ -85,12 +85,6 @@ export function ServicePackageList() {
     }));
   }, [categories]);
 
-  const toggleActive = useMutation(
-    api.functions.servicePackages.mutations.toggleActive,
-  );
-  const duplicatePackage = useMutation(
-    api.functions.servicePackages.mutations.duplicate,
-  );
   const deletePackage = useMutation(
     api.functions.servicePackages.mutations.deleteServicePackage,
   );
@@ -114,35 +108,13 @@ export function ServicePackageList() {
     router.push("/settings/service-packages/new");
   };
 
-  const handleDuplicate = async (id: Id<"servicePackages">) => {
-    try {
-      const newId = await duplicatePackage({ id });
-      toast.success("Package duplicated successfully");
-      router.push(`/settings/service-packages/${newId}`);
-    } catch (error) {
-      toast.error("Failed to duplicate package");
-    }
-  };
-
-  const handleToggleActive = async (
-    id: Id<"servicePackages">,
-    currentState: boolean,
-  ) => {
-    try {
-      await toggleActive({ id, isActive: !currentState });
-      toast.success(currentState ? "Package deactivated" : "Package activated");
-    } catch (error) {
-      toast.error("Failed to update status");
-    }
-  };
-
   const handleDelete = async () => {
     if (!packageToDelete) return;
     try {
       await deletePackage({ id: packageToDelete.id });
       toast.success("Package deleted successfully");
       setPackageToDelete(null);
-    } catch (error) {
+    } catch (_error) {
       toast.error("Failed to delete package");
     }
   };
@@ -187,8 +159,6 @@ export function ServicePackageList() {
             key={pkg._id}
             pkg={pkg}
             onEdit={(id) => router.push(`/settings/service-packages/${id}`)}
-            onDuplicate={handleDuplicate}
-            onToggleActive={handleToggleActive}
             onDelete={(id, name) => setPackageToDelete({ id, name })}
             categoryName={pkg.categoryName}
             projectTypeName={pkg.projectTypeName}

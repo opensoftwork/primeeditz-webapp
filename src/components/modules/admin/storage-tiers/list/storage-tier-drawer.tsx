@@ -14,13 +14,13 @@ import {
   Drawer,
   DrawerContent,
   DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import type { StorageTier } from "./types";
 
 export interface StorageTierFormValues {
   name: string;
@@ -33,7 +33,7 @@ interface StorageTierDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (values: StorageTierFormValues) => Promise<void>;
-  initialData?: any | null;
+  initialData?: StorageTier | null;
 }
 
 export function StorageTierDrawer({
@@ -55,11 +55,12 @@ export function StorageTierDrawer({
   });
 
   // Reset form when initialData or open changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: form.reset() needs to happen when open state or initialData changes
   useEffect(() => {
     if (open) {
       form.reset();
     }
-  }, [initialData, open, form]);
+  }, [initialData, open]);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">

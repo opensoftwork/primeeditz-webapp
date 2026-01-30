@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Layout, Tag, IndianRupee } from "lucide-react";
+import { IndianRupee, Layout, Tag } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -37,6 +37,10 @@ export const columns: ColumnDef<AdminServicePackage>[] = [
       </div>
     ),
     filterFn: (row, id, value) => {
+      // If no filter value or empty array, show all rows
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        return true;
+      }
       return (value as string[]).includes(row.getValue(id));
     },
   },
@@ -70,6 +74,15 @@ export const columns: ColumnDef<AdminServicePackage>[] = [
           {isActive ? "ACTIVE" : "INACTIVE"}
         </Badge>
       );
+    },
+    filterFn: (row, id, value) => {
+      // If no filter value or empty array, show all rows
+      if (!value || (Array.isArray(value) && value.length === 0)) {
+        return true;
+      }
+      const rowValue = row.getValue(id);
+      const stringVal = String(rowValue);
+      return (value as string[]).includes(stringVal);
     },
   },
   {

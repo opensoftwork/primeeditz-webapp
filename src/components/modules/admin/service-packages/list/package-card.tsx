@@ -1,28 +1,30 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 import {
-  Pencil,
   Copy,
   Eye,
   EyeOff,
+  Info,
   Layout,
-  IndianRupee,
+  Loader2,
+  Pencil,
   Tag,
   Trash2,
-  Info,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { Card, CardContent } from "@/components/ui/card";
-import type { Doc, Id } from "@convex/_generated/dataModel";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
 
 interface PackageCardProps {
   pkg: Doc<"servicePackages">;
   onEdit: (id: Id<"servicePackages">) => void;
-  onDuplicate: (id: Id<"servicePackages">) => void;
-  onToggleActive: (id: Id<"servicePackages">, currentState: boolean) => void;
   onDelete: (id: Id<"servicePackages">, name: string) => void;
   categoryName?: string;
   projectTypeName?: string;
@@ -31,15 +33,48 @@ interface PackageCardProps {
 export function PackageCard({
   pkg,
   onEdit,
-  onDuplicate,
-  onToggleActive,
   onDelete,
   categoryName,
   projectTypeName,
 }: PackageCardProps) {
+  const router = useRouter();
+
+  // Mutations with status
+  const toggleStatusMutation = useMutationWithStatus(
+    api.functions.servicePackages.mutations.toggleActive,
+  );
+
+  const duplicateMutation = useMutationWithStatus(
+    api.functions.servicePackages.mutations.duplicate,
+  );
+
   // Calculate price range from line items
   const prices = pkg.lineItems.map((item) => item.rate * item.quantity);
   const maxPrice = prices.reduce((a, b) => a + b, 0);
+
+  const handleDuplicate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      const newId = await duplicateMutation.mutate({ id: pkg._id });
+      toast.success("Package duplicated successfully");
+      router.push(`/settings/service-packages/${newId}`);
+    } catch (_error) {
+      toast.error("Failed to duplicate package");
+    }
+  };
+
+  const handleToggleStatus = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    try {
+      await toggleStatusMutation.mutate({
+        id: pkg._id,
+        isActive: !pkg.isActive,
+      });
+      toast.success(pkg.isActive ? "Package deactivated" : "Package activated");
+    } catch (_error) {
+      toast.error("Failed to update status");
+    }
+  };
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
@@ -73,16 +108,18 @@ export function PackageCard({
 
             <div className="flex items-center gap-1.5 transition-all duration-200">
               <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDuplicate(pkg._id);
-                }}
+                onClick={handleDuplicate}
+                disabled={duplicateMutation.isPending}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/20 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/20 hover:text-white hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
                 title="Duplicate Package"
               >
-                <Copy className="h-3.5 w-3.5" />
+                {duplicateMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : (
+                  <Copy className="h-3.5 w-3.5" />
+                )}
               </Button>
               <Button
                 onClick={(e) => {
@@ -97,21 +134,21 @@ export function PackageCard({
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
               <Button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onToggleActive(pkg._id, pkg.isActive);
-                }}
+                onClick={handleToggleStatus}
+                disabled={toggleStatusMutation.isPending}
                 variant="ghost"
                 size="icon"
                 className={cn(
-                  "h-8 w-8 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-90",
+                  "h-8 w-8 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed",
                   pkg.isActive
                     ? "text-red-400/20 hover:text-red-400 hover:bg-red-400/5"
                     : "text-green-400/20 hover:text-green-400 hover:bg-green-400/5",
                 )}
                 title={pkg.isActive ? "Deactivate" : "Activate"}
               >
-                {pkg.isActive ? (
+                {toggleStatusMutation.isPending ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                ) : pkg.isActive ? (
                   <EyeOff className="h-3.5 w-3.5" />
                 ) : (
                   <Eye className="h-3.5 w-3.5" />
