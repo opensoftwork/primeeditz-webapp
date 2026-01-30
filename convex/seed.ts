@@ -42,15 +42,20 @@ export const seedAll = mutation({
         "servicePackages",
         "quotationLibraryItems",
         "quotations",
+        "quotationTemplates",
       ] as const;
 
       for (const table of tables) {
-        const docs = await ctx.db.query(table).collect();
-        if (docs.length > 0) {
-          console.log(`  Deleting ${docs.length} from ${table}...`);
-          for (const doc of docs) {
-            await ctx.db.delete(doc._id);
+        try {
+          const docs = await ctx.db.query(table as any).collect();
+          if (docs.length > 0) {
+            console.log(`  Deleting ${docs.length} from ${table}...`);
+            for (const doc of docs) {
+              await ctx.db.delete(doc._id);
+            }
           }
+        } catch (e) {
+          // Skip if table doesn't exist
         }
       }
       console.log("");

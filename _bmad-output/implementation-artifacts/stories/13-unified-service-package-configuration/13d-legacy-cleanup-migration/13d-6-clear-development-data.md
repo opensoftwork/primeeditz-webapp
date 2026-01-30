@@ -1,6 +1,6 @@
 # Story 13D.6: Clear Development Data
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 2  
 **Epic**: [13D: Legacy Cleanup & Migration](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)  
 **Depends On**: All previous 13D stories
@@ -244,12 +244,18 @@ After cleanup and reseed:
 
 ### Agent Model Used
 
-_To be filled by implementing agent_
+Antigravity (Gemini 2.0 Flash Thinking)
 
 ### Completion Notes
 
-_To be filled by implementing agent_
+- Created `convex/functions/admin/cleanup.ts` with `clearLegacyData` internal mutation.
+- Created `convex/functions/admin/mutations.ts` with `clearLegacyDataWithConfirmation` admin mutation for safe execution from UI/CLI.
+- Updated `convex/seed.ts` to include `quotationTemplates` in the clearing logic and handle non-schema tables gracefully.
+- Executed `npx convex run seed:seedAll '{"clearFirst": true}'` to clear all legacy data and re-seed with new service packages and folder templates.
+- Verified that `quotations`, `quotationTemplates`, and `projectTypeFields` are empty before seeding and populated with new data after.
 
 ### Files Changed
 
-_To be filled by implementing agent_
+- `convex/functions/admin/cleanup.ts`
+- `convex/functions/admin/mutations.ts`
+- `convex/seed.ts`

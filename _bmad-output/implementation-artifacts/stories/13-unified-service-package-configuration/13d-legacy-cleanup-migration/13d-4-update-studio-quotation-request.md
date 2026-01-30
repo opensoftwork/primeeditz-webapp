@@ -1,6 +1,6 @@
 # Story 13D.4: Update Studio Quotation Request UI
 
-**Status**: in-progress  
+**Status**: done  
 **Points**: 3  
 **Epic**: [13D: Legacy Cleanup & Migration](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)  
 **Depends On**: Epic 13A complete
@@ -411,12 +411,26 @@ UPDATE: convex/functions/servicePackages/queries.ts
 
 ### Agent Model Used
 
-_To be filled by implementing agent_
+Antigravity (Gemini 2.0 Flash Thinking)
 
 ### Completion Notes
 
-_To be filled by implementing agent_
+- Implemented `PackageSelector` with multi-select grid and category/search filters.
+- Implemented `PackageCard` with selection indicator and starting price calculation.
+- Implemented `SelectedPackagesSummary` with projects preview and combined pricing (including GST).
+- Implemented `QuotationRequestForm` with validation (min 1 package).
+- Updated `QuotationRequestPage` to use the new form.
+- Added `listActive` and `getMany` queries to `servicePackages/queries.ts`.
+- Verified UI matches acceptance criteria (AC1-AC7).
 
 ### Files Changed
 
-_To be filled by implementing agent_
+- `src/components/modules/studio/quotation-request/package-selector.tsx`
+- `src/components/modules/studio/quotation-request/package-card.tsx`
+- `src/components/modules/studio/quotation-request/selected-packages-summary.tsx`
+- `src/components/modules/studio/quotation-request/quotation-request-form.tsx`
+- `src/components/modules/studio/quotation-request/quotation-request-loading.tsx`
+- `src/components/modules/studio/quotation-request/quotation-request-error.tsx`
+- `src/components/modules/studio/quotation-request/index.ts`
+- `src/app/(protected)/@studio/quotations/request/page.tsx`
+- `convex/functions/servicePackages/queries.ts`

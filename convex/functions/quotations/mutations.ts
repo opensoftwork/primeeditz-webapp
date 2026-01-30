@@ -239,6 +239,9 @@ export const requestQuotation = authenticatedWithProfileMutation({
       0,
     );
 
+    // Generate share token for public sharing
+    const shareToken = crypto.randomUUID();
+
     const quotationId = await ctx.db.insert("quotations", {
       code,
       version: 1,
@@ -254,6 +257,7 @@ export const requestQuotation = authenticatedWithProfileMutation({
       eventName: args.eventName,
       eventDate: args.eventDate,
       studioNotes: args.notes,
+      shareToken,
       createdBy: "STUDIO",
       updatedAt: Date.now(),
     });

@@ -18,11 +18,13 @@ export function PackageCard({
   isSelected,
   onToggle,
 }: PackageCardProps) {
-  const projectType = useQuery(api.projectTypes.get, { id: pkg.projectTypeId });
+  const projectType = useQuery(api.functions.projectTypes.queries.get, {
+    id: pkg.projectTypeId,
+  });
 
   // Calculate starting price
   const startingPrice = pkg.lineItems.reduce(
-    (sum, item) => sum + item.rate * item.quantity,
+    (sum: number, item) => sum + item.rate * item.quantity,
     0,
   );
 

@@ -23,8 +23,10 @@ export function PackageSelector({
   selectedIds,
   onSelectionChange,
 }: PackageSelectorProps) {
-  const packages = useQuery(api.servicePackages.listActive);
-  const categories = useQuery(api.projectCategories.list);
+  const packages = useQuery(api.functions.servicePackages.queries.listActive);
+  const categories = useQuery(
+    api.functions.projectCategories.queries.getActiveCategories,
+  );
   const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -65,7 +67,7 @@ export function PackageSelector({
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">All Categories</SelectItem>
-            {categories?.map((cat) => (
+            {categories?.map((cat: any) => (
               <SelectItem key={cat._id} value={cat._id}>
                 {cat.name}
               </SelectItem>

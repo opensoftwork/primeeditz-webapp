@@ -14,8 +14,12 @@ interface SelectedPackagesSummaryProps {
 export function SelectedPackagesSummary({
   selectedIds,
 }: SelectedPackagesSummaryProps) {
-  const packages = useQuery(api.servicePackages.getMany, { ids: selectedIds });
-  const projectTypes = useQuery(api.projectTypes.getActiveProjectTypes);
+  const packages = useQuery(api.functions.servicePackages.queries.getMany, {
+    ids: selectedIds,
+  });
+  const projectTypes = useQuery(
+    api.functions.projectTypes.queries.getActiveProjectTypes,
+  );
 
   if (!selectedIds.length) {
     return (
@@ -27,12 +31,12 @@ export function SelectedPackagesSummary({
 
   // Calculate totals
   const totalLineItems =
-    packages?.flatMap((p) =>
-      p.lineItems.map((item) => ({ ...item, packageName: p.name })),
+    packages?.flatMap((pkg: any) =>
+      pkg.lineItems.map((item: any) => ({ ...item, packageName: pkg.name })),
     ) ?? [];
 
   const subtotal = totalLineItems.reduce(
-    (sum, item) => sum + item.rate * item.quantity,
+    (sum: number, item: any) => sum + item.rate * item.quantity,
     0,
   );
   const gstAmount = Math.round(subtotal * 0.18);
@@ -49,9 +53,9 @@ export function SelectedPackagesSummary({
         </CardHeader>
         <CardContent>
           <ul className="space-y-2">
-            {packages?.map((pkg) => {
-              const projectType = projectTypes?.find(
-                (t) => t._id === pkg.projectTypeId,
+            {packages?.map((pkg: any) => {
+              const projectType = (projectTypes as any[])?.find(
+                (t: any) => t._id === pkg.projectTypeId,
               );
               return (
                 <li key={pkg._id} className="flex items-center gap-2">
@@ -73,11 +77,11 @@ export function SelectedPackagesSummary({
         </CardHeader>
         <CardContent>
           {/* Group by package */}
-          {packages?.map((pkg) => (
+          {packages?.map((pkg: any) => (
             <div key={pkg._id} className="mb-4">
               <h4 className="font-medium mb-2">{pkg.name}</h4>
               <div className="pl-4 space-y-1 text-sm">
-                {pkg.lineItems.map((item) => (
+                {pkg.lineItems.map((item: any) => (
                   <div key={item.id} className="flex justify-between">
                     <span>{item.description}</span>
                     <span>₹{(item.rate * item.quantity).toLocaleString()}</span>

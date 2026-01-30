@@ -8,10 +8,10 @@ This directory contains all stories for Epic 13: Unified Service Package Configu
 
 | Epic                                                                   | Stories        | Total Points  | Status  |
 | ---------------------------------------------------------------------- | -------------- | ------------- | ------- |
-| [13A: Schema Consolidation](./13a-schema-consolidation/)               | 6              | 13            | backlog |
-| [13B: Folder Template Enhancement](./13b-folder-template-enhancement/) | 5              | 13            | backlog |
-| [13C: Service Package Builder UI](./13c-service-package-builder-ui/)   | 6              | 21            | backlog |
-| [13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration/)     | 6              | 13            | backlog |
+| [13A: Schema Consolidation](./13a-schema-consolidation/)               | 6              | 13            | done    |
+| [13B: Folder Template Enhancement](./13b-folder-template-enhancement/) | 5              | 13            | done    |
+| [13C: Service Package Builder UI](./13c-service-package-builder-ui/)   | 6              | 21            | done    |
+| [13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration/)     | 6              | 13            | done    |
 | [13E: Service Package Bundles](./13e-service-package-bundles/)         | 6              | 15            | planned |
 | **Total**                                                              | **29 stories** | **75 points** |         |
 
@@ -57,14 +57,14 @@ This directory contains all stories for Epic 13: Unified Service Package Configu
 
 ## 📁 Epic 13D: Legacy Cleanup & Migration
 
-| Story ID                                                                           | Story Title                       | Points | Status  |
-| ---------------------------------------------------------------------------------- | --------------------------------- | ------ | ------- |
-| [13D.1](./13d-legacy-cleanup-migration/13d-1-remove-old-quotation-templates-ui.md) | Remove Old Quotation Templates UI | 2      | backlog |
-| [13D.2](./13d-legacy-cleanup-migration/13d-2-simplify-project-types-ui.md)         | Simplify Project Types UI         | 2      | backlog |
-| [13D.3](./13d-legacy-cleanup-migration/13d-3-remove-quotation-sections-ui.md)      | Remove Quotation Sections UI      | 2      | backlog |
-| [13D.4](./13d-legacy-cleanup-migration/13d-4-update-studio-quotation-request.md)   | Update Studio Quotation Request   | 3      | backlog |
-| [13D.5](./13d-legacy-cleanup-migration/13d-5-update-quotation-request-mutation.md) | Update Quotation Request Mutation | 2      | backlog |
-| [13D.6](./13d-legacy-cleanup-migration/13d-6-clear-development-data.md)            | Clear Development Data            | 2      | backlog |
+| Story ID                                                                           | Story Title                       | Points | Status |
+| ---------------------------------------------------------------------------------- | --------------------------------- | ------ | ------ |
+| [13D.1](./13d-legacy-cleanup-migration/13d-1-remove-old-quotation-templates-ui.md) | Remove Old Quotation Templates UI | 2      | done   |
+| [13D.2](./13d-legacy-cleanup-migration/13d-2-simplify-project-types-ui.md)         | Simplify Project Types UI         | 2      | done   |
+| [13D.3](./13d-legacy-cleanup-migration/13d-3-remove-quotation-sections-ui.md)      | Remove Quotation Sections UI      | 2      | done   |
+| [13D.4](./13d-legacy-cleanup-migration/13d-4-update-studio-quotation-request.md)   | Update Studio Quotation Request   | 3      | done   |
+| [13D.5](./13d-legacy-cleanup-migration/13d-5-update-quotation-request-mutation.md) | Update Quotation Request Mutation | 2      | done   |
+| [13D.6](./13d-legacy-cleanup-migration/13d-6-clear-development-data.md)            | Clear Development Data            | 2      | done   |
 
 ---
 

@@ -1,6 +1,6 @@
 # Story 13D.5: Update Quotation Request Mutation
 
-**Status**: backlog  
+**Status**: done  
 **Points**: 2  
 **Epic**: [13D: Legacy Cleanup & Migration](../../../../planning-artifacts/epics/13d-legacy-cleanup-migration.md)  
 **Depends On**: Story 13A.5
@@ -237,12 +237,22 @@ try {
 
 ### Agent Model Used
 
-_To be filled by implementing agent_
+Antigravity (Gemini 2.0 Flash Thinking)
 
 ### Completion Notes
 
-_To be filled by implementing agent_
+- Updated `requestQuotation` mutation to:
+  - Accept `selectedPackageIds`.
+  - Use `aggregateLineItemsFromPackages` for multi-package line item aggregation.
+  - Calculate combined totals (subtotal, GST).
+  - Generate `shareToken` for public sharing.
+  - Set default status to `"initiated"`.
+- Verified mutation with `pnpm convex dev --once`.
+- Fixed TypeScript errors in the studio quotation request components.
 
 ### Files Changed
 
-_To be filled by implementing agent_
+- `convex/functions/quotations/mutations.ts`
+- `src/components/modules/studio/quotation-request/selected-packages-summary.tsx`
+- `src/components/modules/studio/quotation-request/quotation-request-form.tsx`
+- `src/components/modules/studio/quotation-request/package-card.tsx`

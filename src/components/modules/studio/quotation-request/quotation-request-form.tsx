@@ -1,28 +1,26 @@
 "use client";
 
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { useForm } from "@tanstack/react-form";
 import * as z from "zod";
 import { format } from "date-fns";
-import { CalendarIcon, Loader2 } from "lucide-react";
+import { CalendarIcon, Loader2, ArrowRight } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
+import { useState } from "react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+  Field,
+  FieldContent,
+  FieldDescription,
+  FieldError,
+  FieldLabel,
+} from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Popover,
@@ -35,212 +33,265 @@ import { PackageSelector } from "./package-selector";
 import { SelectedPackagesSummary } from "./selected-packages-summary";
 
 const formSchema = z.object({
-  selectedPackageIds: z.array(z.string()).min(1, {
-    message: "Please select at least one service package.",
-  }),
-  endClientName: z.string().min(2, {
-    message: "Client name must be at least 2 characters.",
-  }),
-  eventName: z.string().optional(),
+  selectedPackageIds: z
+    .array(z.string())
+    .min(1, "Please select at least one service package."),
+  endClientName: z
+    .string()
+    .min(2, "Client name must be at least 2 characters."),
+  eventName: z.string().default(""),
   eventDate: z.date().optional(),
-  notes: z.string().optional(),
+  notes: z.string().default(""),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
 export function QuotationRequestForm() {
   const router = useRouter();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const requestQuotation = useMutation(
-    api.quotations.mutations.requestQuotation,
+    api.functions.quotations.mutations.requestQuotation,
   );
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm({
     defaultValues: {
-      selectedPackageIds: [],
+      selectedPackageIds: [] as string[],
       endClientName: "",
       eventName: "",
+      eventDate: undefined as Date | undefined,
       notes: "",
+    },
+    onSubmit: async ({ value }) => {
+      const validation = formSchema.safeParse(value);
+      if (!validation.success) {
+        toast.error(validation.error.issues[0].message);
+        return;
+      }
+
+      setIsSubmitting(true);
+      try {
+        const quotationId = await requestQuotation({
+          selectedPackageIds:
+            value.selectedPackageIds as Id<"servicePackages">[],
+          endClientName: value.endClientName,
+          eventName: value.eventName || undefined,
+          eventDate: value.eventDate
+            ? (value.eventDate as Date).getTime()
+            : undefined,
+          notes: value.notes || undefined,
+        });
+
+        toast.success("Quotation request submitted!");
+        router.push(`/quotations/${quotationId}`);
+      } catch (error) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to submit request",
+        );
+      } finally {
+        setIsSubmitting(false);
+      }
     },
   });
 
-  const selectedPackages = form.watch(
-    "selectedPackageIds",
-  ) as Id<"servicePackages">[];
-
-  async function onSubmit(data: FormValues) {
-    try {
-      await requestQuotation({
-        selectedPackageIds: data.selectedPackageIds as Id<"servicePackages">[],
-        endClientName: data.endClientName,
-        eventName: data.eventName || undefined,
-        eventDate: data.eventDate ? data.eventDate.getTime() : undefined,
-        notes: data.notes || undefined,
-      });
-
-      toast.success("Quotation requested successfully");
-      router.push("/quotations"); // Redirect to quotations list
-    } catch (error) {
-      console.error(error);
-      toast.error("Failed to request quotation");
-    }
-  }
-
-  function handlePackageSelection(ids: Id<"servicePackages">[]) {
-    form.setValue("selectedPackageIds", ids);
-  }
-
   return (
-    <div className="space-y-8">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-          <div className="space-y-4">
-            <div>
-              <h2 className="text-lg font-semibold mb-2">1. Select Packages</h2>
-              <p className="text-sm text-muted-foreground mb-4">
-                Choose one or more distinct services you need. Each package will
-                create a separate project.
-              </p>
-              <FormField
-                control={form.control}
-                name="selectedPackageIds"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormControl>
-                      <PackageSelector
-                        selectedIds={selectedPackages}
-                        onSelectionChange={handlePackageSelection}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        form.handleSubmit();
+      }}
+      className="space-y-12 max-w-5xl mx-auto py-10"
+    >
+      {/* 1. Package Selection */}
+      <div className="space-y-6">
+        <div className="flex flex-col gap-1">
+          <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+            1. Select Service Packages
+          </h2>
+          <p className="text-white/40 font-medium text-sm">
+            Choose one or more packages for your project. Each package will
+            create a separate project upon approval.
+          </p>
+        </div>
 
-            <div className="grid gap-6 md:grid-cols-2">
-              <div className="space-y-6">
-                <h2 className="text-lg font-semibold">2. Project Details</h2>
-
-                <FormField
-                  control={form.control}
-                  name="endClientName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Client Name *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="e.g. Acme Corp" {...field} />
-                      </FormControl>
-                      <FormDescription>
-                        Who is this project for?
-                      </FormDescription>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+        <form.Field name="selectedPackageIds">
+          {(field) => (
+            <Field>
+              <FieldContent>
+                <PackageSelector
+                  selectedIds={field.state.value as Id<"servicePackages">[]}
+                  onSelectionChange={(ids) => field.handleChange(ids)}
                 />
+                <FieldError errors={field.state.meta.errors} />
+              </FieldContent>
+            </Field>
+          )}
+        </form.Field>
+      </div>
 
-                <FormField
-                  control={form.control}
-                  name="eventName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Event / Project Name</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="e.g. Annual Conference 2024"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="eventDate"
-                  render={({ field }) => (
-                    <FormItem className="flex flex-col">
-                      <FormLabel>Event Date</FormLabel>
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <FormControl>
-                            <Button
-                              variant={"outline"}
-                              className={cn(
-                                "w-full pl-3 text-left font-normal",
-                                !field.value && "text-muted-foreground",
-                              )}
-                            >
-                              {field.value ? (
-                                format(field.value, "PPP")
-                              ) : (
-                                <span>Pick a date</span>
-                              )}
-                              <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                            </Button>
-                          </FormControl>
-                        </PopoverTrigger>
-                        <PopoverContent className="w-auto p-0" align="start">
-                          <Calendar
-                            mode="single"
-                            selected={field.value}
-                            onSelect={field.onChange}
-                            disabled={(date) => date < new Date("1900-01-01")}
-                            initialFocus
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Additional Notes</FormLabel>
-                      <FormControl>
-                        <Textarea
-                          placeholder="Tell us any specific requirements..."
-                          className="resize-none"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-
-              <div>
-                <h2 className="text-lg font-semibold mb-4">3. Summary</h2>
-                <div className="sticky top-4">
-                  <SelectedPackagesSummary selectedIds={selectedPackages} />
-
-                  <Button
-                    type="submit"
-                    className="w-full mt-6"
-                    size="lg"
-                    disabled={form.formState.isSubmitting}
-                  >
-                    {form.formState.isSubmitting ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Requesting Quote...
-                      </>
-                    ) : (
-                      "Request Quote"
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </div>
+      <div className="grid gap-12 md:grid-cols-2 pt-10 border-t border-white/5">
+        {/* 2. Project Details */}
+        <div className="space-y-8">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+              2. Project Details
+            </h2>
+            <p className="text-white/40 font-medium text-sm">
+              Tell us a bit more about the client and the event.
+            </p>
           </div>
-        </form>
-      </Form>
-    </div>
+
+          <form.Field name="endClientName">
+            {(field) => (
+              <Field>
+                <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/50 ml-1">
+                  Client Name *
+                </FieldLabel>
+                <Input
+                  placeholder="e.g. Acme Corp"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner"
+                />
+                <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
+                  Who is this project for?
+                </FieldDescription>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="eventName">
+            {(field) => (
+              <Field>
+                <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/50 ml-1">
+                  Event / Project Name
+                </FieldLabel>
+                <Input
+                  placeholder="e.g. Annual Conference 2024"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner"
+                />
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="eventDate">
+            {(field) => (
+              <Field>
+                <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/50 ml-1">
+                  Event Date
+                </FieldLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full h-12 pl-3 text-left font-normal bg-white/5 border-white/5 hover:bg-white/10 rounded-xl transition-all shadow-inner",
+                        !field.state.value && "text-white/20",
+                      )}
+                    >
+                      {field.state.value ? (
+                        format(field.state.value as Date, "PPP")
+                      ) : (
+                        <span className="text-[13px] font-bold uppercase tracking-widest">
+                          Pick a date
+                        </span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent
+                    className="w-auto p-0 bg-zinc-950 border-white/10 rounded-xl"
+                    align="start"
+                  >
+                    <Calendar
+                      mode="single"
+                      selected={field.state.value as Date}
+                      onSelect={(date) => field.handleChange(date)}
+                      disabled={(date) => date < new Date("1900-01-01")}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
+
+          <form.Field name="notes">
+            {(field) => (
+              <Field>
+                <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/50 ml-1">
+                  Additional Notes
+                </FieldLabel>
+                <Textarea
+                  placeholder="Tell us any specific requirements..."
+                  className="bg-white/5 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none h-32 rounded-xl text-sm transition-all p-4 shadow-inner"
+                  value={field.state.value}
+                  onBlur={field.handleBlur}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                />
+                <FieldError errors={field.state.meta.errors} />
+              </Field>
+            )}
+          </form.Field>
+        </div>
+
+        {/* 3. Summary */}
+        <div className="space-y-8">
+          <div className="flex flex-col gap-1">
+            <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+              3. Summary
+            </h2>
+            <p className="text-white/40 font-medium text-sm">
+              Review your selection and project preview.
+            </p>
+          </div>
+
+          <form.Subscribe
+            selector={(state) => [state.values.selectedPackageIds]}
+          >
+            {([selectedIds]) => (
+              <SelectedPackagesSummary
+                selectedIds={selectedIds as Id<"servicePackages">[]}
+              />
+            )}
+          </form.Subscribe>
+
+          <div className="pt-6">
+            <form.Subscribe
+              selector={(state) => [state.canSubmit, state.isSubmitting]}
+            >
+              {([canSubmit, isSubmittingFromState]) => (
+                <Button
+                  type="submit"
+                  disabled={
+                    !canSubmit ||
+                    isSubmitting ||
+                    (isSubmittingFromState as boolean)
+                  }
+                  className="w-full h-16 bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-[0.3em] text-[12px] rounded-2xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all group"
+                >
+                  {isSubmitting ? (
+                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                  ) : (
+                    <>
+                      Submit Quotation Request
+                      <ArrowRight className="ml-3 h-5 w-5 transition-transform group-hover:translate-x-1" />
+                    </>
+                  )}
+                </Button>
+              )}
+            </form.Subscribe>
+          </div>
+        </div>
+      </div>
+    </form>
   );
 }
