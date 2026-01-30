@@ -1,44 +1,41 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import { useQuery } from "convex/react";
 import {
   ArrowLeft,
   ArrowRight,
-  FolderTree,
-  HardDrive,
   Info,
-  Layout,
+  Plus,
+  Package,
+  Layers,
 } from "lucide-react";
-import { useState } from "react";
+import { nanoid } from "nanoid";
 import * as z from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  Field,
-  FieldDescription,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useBuilder } from "./builder-context";
 import { FolderPreview } from "./components/folder-preview";
-import { StorageSelector } from "./components/storage-selector";
+import { ProjectConfigCard } from "./components/project-config-card";
 
-const step2Schema = z.object({
+const projectConfigSchema = z.object({
+  id: z.string(),
+  label: z.string().max(50, "Label too long"),
   projectTypeId: z.string().min(1, "Project type is required"),
   folderTemplateId: z.string().min(1, "Folder template is required"),
-  defaultStorageTierId: z.string(),
+  defaultStorageTierId: z.string().optional(),
 });
+
+const step2Schema = z.object({
+  projectConfigs: z
+    .array(projectConfigSchema)
+    .min(1, "At least one project configuration is required"),
+});
+
+type Step2FormValues = z.infer<typeof step2Schema>;
 
 export function Step2ProjectConfig() {
   const { step2Data, setStep2Data, setCurrentStep } = useBuilder();
@@ -48,195 +45,88 @@ export function Step2ProjectConfig() {
   const storageTiers =
     useQuery(api.functions.storageTiers.queries.listStorageTiers) || [];
 
-  // Local state for interactive filtering
-  const [selectedProjectTypeId, setSelectedProjectTypeId] = useState<string>(
-    step2Data?.projectTypeId ?? "",
-  );
-  const [selectedFolderTemplateId, setSelectedFolderTemplateId] =
-    useState<string>(step2Data?.folderTemplateId ?? "");
-
-  // Folder templates filtered by project type
-  const folderTemplates =
-    useQuery(
-      api.functions.folderTemplates.queries.listByProjectType,
-      selectedProjectTypeId
-        ? { projectTypeId: selectedProjectTypeId as Id<"projectTypes"> }
-        : "skip",
-    ) || [];
-
   const form = useForm({
     defaultValues: {
-      projectTypeId: step2Data?.projectTypeId ?? "",
-      folderTemplateId: step2Data?.folderTemplateId ?? "",
-      defaultStorageTierId: step2Data?.defaultStorageTierId ?? "",
-    },
+      projectConfigs: step2Data?.projectConfigs ?? [
+        {
+          id: nanoid(),
+          label: "Primary Project",
+          projectTypeId: "",
+          folderTemplateId: "",
+          defaultStorageTierId: "",
+        },
+      ],
+    } as Step2FormValues,
     validators: {
       onChange: step2Schema,
     },
     onSubmit: async ({ value }) => {
       setStep2Data({
-        projectTypeId: value.projectTypeId,
-        folderTemplateId: value.folderTemplateId,
-        defaultStorageTierId: value.defaultStorageTierId || undefined,
+        projectConfigs: value.projectConfigs as any,
       });
       setCurrentStep(3);
     },
   });
 
   return (
-    <div className="max-w-6xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="max-w-7xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div className="mb-10 space-y-2">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight">
-          Project Configuration
+        <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-3">
+          <Layers className="h-6 w-6 text-primary" />
+          Project Configurations
         </h2>
         <p className="text-white/40 font-medium text-sm">
-          Define the technical structure and delivery settings for projects
-          spawned from this package.
+          Define what projects get created when this package is selected. A
+          single package can spawn multiple projects.
         </p>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         {/* Form Column */}
-        <div className="lg:col-span-7">
+        <div className="lg:col-span-8">
           <form
             onSubmit={(e) => {
               e.preventDefault();
               e.stopPropagation();
               form.handleSubmit();
             }}
-            className="space-y-8"
+            className="space-y-6"
           >
-            {/* Project Type */}
-            <form.Field name="projectTypeId">
-              {(field) => {
-                const hasError = field.state.meta.errors.length > 0;
-                return (
-                  <Field data-invalid={hasError}>
-                    <div className="flex items-center gap-2 mb-2 ml-1">
-                      <Layout className="h-3.5 w-3.5 text-primary" />
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="text-[10px] font-black uppercase tracking-widest text-white/50"
-                      >
-                        Project Type *
-                      </FieldLabel>
-                    </div>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => {
-                        field.handleChange(value);
-                        setSelectedProjectTypeId(value);
-                        // Clear folder template when project type changes
-                        form.setFieldValue("folderTemplateId", "");
-                        setSelectedFolderTemplateId("");
-                      }}
-                    >
-                      <SelectTrigger
-                        id={field.name}
-                        aria-invalid={hasError}
-                        className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner"
-                      >
-                        <SelectValue placeholder="Select project type..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                        {projectTypes.map((type) => (
-                          <SelectItem
-                            key={type._id}
-                            value={type._id}
-                            className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                          >
-                            {type.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
-                      Determines the workflow and field requirements.
-                    </FieldDescription>
-                    <FieldError className="text-[10px] uppercase tracking-wider font-bold">
-                      {field.state.meta.errors
-                        .map((err) => err?.toString())
-                        .join(", ")}
-                    </FieldError>
-                  </Field>
-                );
-              }}
-            </form.Field>
-
-            {/* Folder Template */}
-            <form.Field name="folderTemplateId">
-              {(field) => {
-                const hasError = field.state.meta.errors.length > 0;
-                return (
-                  <Field data-invalid={hasError}>
-                    <div className="flex items-center gap-2 mb-2 ml-1">
-                      <FolderTree className="h-3.5 w-3.5 text-primary" />
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="text-[10px] font-black uppercase tracking-widest text-white/50"
-                      >
-                        Folder Hierarchy *
-                      </FieldLabel>
-                    </div>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => {
-                        field.handleChange(value);
-                        setSelectedFolderTemplateId(value);
-                      }}
-                      disabled={!selectedProjectTypeId}
-                    >
-                      <SelectTrigger
-                        id={field.name}
-                        aria-invalid={hasError}
-                        className="bg-white/5 border-white/5 focus:ring-primary/20 h-12 rounded-xl text-sm transition-all shadow-inner disabled:opacity-50"
-                      >
-                        <SelectValue
-                          placeholder={
-                            selectedProjectTypeId
-                              ? "Select folder structure..."
-                              : "Choose project type first"
-                          }
-                        />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                        {folderTemplates.map((template) => (
-                          <SelectItem
-                            key={template._id}
-                            value={template._id}
-                            className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                          >
-                            {template.name}
-                            {template.variant && (
-                              <span className="ml-2 text-[10px] opacity-40">
-                                ({template.variant})
-                              </span>
-                            )}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
-                      Defines the directory structure for asset uploads.
-                    </FieldDescription>
-                    <FieldError className="text-[10px] uppercase tracking-wider font-bold">
-                      {field.state.meta.errors
-                        .map((err) => err?.toString())
-                        .join(", ")}
-                    </FieldError>
-                  </Field>
-                );
-              }}
-            </form.Field>
-
-            {/* Storage Tier */}
-            <form.Field name="defaultStorageTierId">
+            <form.Field name="projectConfigs" mode="array">
               {(field) => (
-                <StorageSelector
-                  tiers={storageTiers}
-                  value={field.state.value}
-                  onChange={field.handleChange}
-                />
+                <div className="space-y-6">
+                  {field.state.value.map((_, index) => (
+                    <ProjectConfigCard
+                      key={field.state.value[index].id}
+                      form={form}
+                      index={index}
+                      onRemove={() => field.removeValue(index)}
+                      canRemove={field.state.value.length > 1}
+                      projectTypes={projectTypes}
+                      storageTiers={storageTiers}
+                    />
+                  ))}
+
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="w-full h-16 border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-transparent rounded-2xl text-white/40 hover:text-primary transition-all group"
+                    onClick={() =>
+                      field.pushValue({
+                        id: nanoid(),
+                        label: "",
+                        projectTypeId: "",
+                        folderTemplateId: "",
+                        defaultStorageTierId: "",
+                      })
+                    }
+                  >
+                    <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
+                    <span className="font-black uppercase tracking-widest text-xs">
+                      Add Another Project Configuration
+                    </span>
+                  </Button>
+                </div>
               )}
             </form.Field>
 
@@ -272,49 +162,104 @@ export function Step2ProjectConfig() {
         </div>
 
         {/* Preview Column */}
-        <div className="lg:col-span-5 space-y-6">
+        <div className="lg:col-span-4 space-y-6">
           <div className="flex items-center gap-2 ml-1">
             <Info className="h-4 w-4 text-primary" />
             <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-              Live Preview
+              Package Preview
             </h3>
           </div>
 
-          <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle flex flex-col min-h-[500px]">
-            <div className="p-6 border-b border-white/5 flex items-center justify-between">
-              <div>
-                <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                  Active Configuration
-                </p>
-                <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1">
-                  Folder Structure
-                </h4>
-              </div>
-              {selectedProjectTypeId && (
-                <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                  {
-                    projectTypes.find((t) => t._id === selectedProjectTypeId)
-                      ?.name
+          <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle flex flex-col min-h-[400px]">
+            <div className="p-6 border-b border-white/5">
+              <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                Unit Summary
+              </p>
+              <h4 className="text-sm font-black text-white uppercase tracking-tight mt-1 flex items-center gap-2">
+                <Package className="h-4 w-4 text-primary" />
+                Spawned Projects
+              </h4>
+            </div>
+
+            <div className="p-6 flex-1 space-y-4">
+              <form.Subscribe selector={(state) => state.values.projectConfigs}>
+                {(configs) => {
+                  const validConfigs = configs.filter(
+                    (c) => c.projectTypeId && c.folderTemplateId
+                  );
+
+                  if (validConfigs.length === 0) {
+                    return (
+                      <div className="h-full flex flex-col items-center justify-center text-center p-8">
+                        <div className="h-12 w-12 rounded-full bg-white/5 flex items-center justify-center mb-4">
+                          <Layers className="h-6 w-6 text-white/10" />
+                        </div>
+                        <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest leading-loose">
+                          No valid configurations
+                          <br />
+                          defined yet
+                        </p>
+                      </div>
+                    );
                   }
-                </Badge>
-              )}
-            </div>
 
-            <div className="flex-1 bg-zinc-950/20">
-              <FolderPreview templateId={selectedFolderTemplateId} />
-            </div>
+                  return (
+                    <div className="space-y-3">
+                      {validConfigs.map((config, i) => {
+                        const type = projectTypes.find(
+                          (t) => t._id === config.projectTypeId
+                        );
+                        return (
+                          <div
+                            key={config.id}
+                            className="p-4 rounded-2xl bg-white/5 border border-white/5 space-y-2 animate-in fade-in slide-in-from-right-2 duration-300"
+                            style={{ animationDelay: `${i * 100}ms` }}
+                          >
+                            <div className="flex items-center justify-between">
+                              <span className="text-[10px] font-black text-white uppercase tracking-tight">
+                                {config.label || `Project ${i + 1}`}
+                              </span>
+                              <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-full">
+                                {type?.name || "Unknown Type"}
+                              </Badge>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <div className="h-1 w-1 rounded-full bg-primary/40" />
+                              <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                                Folder structure configured
+                              </span>
+                            </div>
+                          </div>
+                        );
+                      })}
 
-            <div className="p-4 bg-white/2 border-t border-white/5">
-              <div className="flex items-center gap-2 px-3 py-2 bg-white/3 rounded-xl border border-white/5">
-                <HardDrive className="h-3.5 w-3.5 text-white/20" />
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                  {form.getFieldValue("defaultStorageTierId")
-                    ? `Default Tier: ${storageTiers.find((t) => t._id === form.getFieldValue("defaultStorageTierId"))?.name}`
-                    : "On-demand storage allocation"}
-                </span>
-              </div>
+                      <div className="pt-4 mt-6 border-t border-white/5">
+                        <div className="flex items-center justify-between p-3 bg-primary/5 rounded-xl border border-primary/10">
+                          <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">
+                            Total Projects
+                          </span>
+                          <span className="text-sm font-black text-primary">
+                            {validConfigs.length}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                }}
+              </form.Subscribe>
             </div>
           </Card>
+
+          <div className="p-6 bg-blue-500/5 rounded-[24px] border border-blue-500/10 space-y-3">
+            <h5 className="text-[10px] font-black text-blue-400 uppercase tracking-widest flex items-center gap-2">
+              <Info className="h-3 w-3" />
+              Pro Tip
+            </h5>
+            <p className="text-[10px] font-medium text-blue-400/60 leading-relaxed uppercase tracking-wider">
+              Use descriptive labels like "Hero Video" or "Social Cut" if your
+              package spawns multiple projects of the same type.
+            </p>
+          </div>
         </div>
       </div>
     </div>

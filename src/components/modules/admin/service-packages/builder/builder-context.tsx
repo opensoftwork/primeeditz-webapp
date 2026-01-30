@@ -1,7 +1,16 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { createContext, type ReactNode, useContext, useState } from "react";
+import { useQuery } from "convex/react";
+import {
+  createContext,
+  type ReactNode,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 
 export interface Step1Data {
   name: string;
@@ -9,16 +18,23 @@ export interface Step1Data {
   categoryId?: string;
 }
 
+export interface ProjectConfig {
+  id: string;
+  label: string;
+  projectTypeId: Id<"projectTypes">;
+  folderTemplateId: Id<"folderTemplates">;
+  defaultStorageTierId?: Id<"storageTiers">;
+}
+
 export interface Step2Data {
-  projectTypeId: string;
-  folderTemplateId: string;
-  defaultStorageTierId?: string;
+  projectConfigs: ProjectConfig[];
 }
 
 export interface LineItem {
   id: string;
   description: string;
   sectionId?: string;
+  projectConfigId?: string;
   rate: number;
   quantity: number;
   unit: string;
@@ -60,24 +76,92 @@ export function BuilderProvider({
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
   const [step3Data, setStep3Data] = useState<Step3Data | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Fetch package data if editing
+  const pkg = useQuery(
+    api.functions.servicePackages.queries.get,
+    packageId ? { id: packageId } : "skip",
+  );
+
+  useEffect(() => {
+    if (packageId && pkg && !isInitialized) {
+      // Initialize Step 1
+      setStep1Data({
+        name: pkg.name,
+        description: pkg.description,
+        categoryId: pkg.categoryId,
+      });
+
+      // Initialize Step 2
+      // Clone array to avoid read-only mutation
+      const projectConfigs = pkg.projectConfigs ? [...pkg.projectConfigs] : [];
+
+      // Handle legacy single-config packages
+      if (projectConfigs.length === 0 && pkg.projectTypeId) {
+        projectConfigs.push({
+          id: crypto.randomUUID(),
+          label: "Standard Config",
+          projectTypeId: pkg.projectTypeId,
+          folderTemplateId: pkg.folderTemplateId as Id<"folderTemplates">,
+          defaultStorageTierId: pkg.defaultStorageTierId,
+        });
+      }
+
+      setStep2Data({
+        projectConfigs: projectConfigs.map((config) => ({
+          ...config,
+          label: config.label ?? "Standard Config",
+        })) as ProjectConfig[],
+      });
+
+      // Initialize Step 3
+      setStep3Data({
+        lineItems: pkg.lineItems.map((item) => ({
+          ...item,
+          id: item.id || crypto.randomUUID(),
+        })),
+        terms: pkg.terms,
+        applyGST: pkg.applyGST ?? true,
+      });
+
+      setIsInitialized(true);
+    } else if (!packageId) {
+      setIsInitialized(true);
+    }
+  }, [packageId, pkg, isInitialized]);
+
+  const value = useMemo(
+    () => ({
+      currentStep,
+      setCurrentStep,
+      step1Data,
+      setStep1Data,
+      step2Data,
+      setStep2Data,
+      step3Data,
+      setStep3Data,
+      isEditing: !!packageId,
+      packageId: packageId || null,
+    }),
+    [currentStep, step1Data, step2Data, step3Data, packageId],
+  );
+
+  if (!isInitialized) {
+    return (
+      <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+        <div className="w-12 h-12 bg-primary/10 rounded-full mb-4 flex items-center justify-center">
+          <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+        </div>
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-widest">
+          Loading Configuration...
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <BuilderContext.Provider
-      value={{
-        currentStep,
-        setCurrentStep,
-        step1Data,
-        setStep1Data,
-        step2Data,
-        setStep2Data,
-        step3Data,
-        setStep3Data,
-        isEditing: !!packageId,
-        packageId: packageId || null,
-      }}
-    >
-      {children}
-    </BuilderContext.Provider>
+    <BuilderContext.Provider value={value}>{children}</BuilderContext.Provider>
   );
 }
 

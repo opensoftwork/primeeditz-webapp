@@ -2,7 +2,7 @@
 
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Doc } from "@convex/_generated/dataModel";
+import { Doc, Id } from "@convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -18,9 +18,14 @@ export function PackageCard({
   isSelected,
   onToggle,
 }: PackageCardProps) {
-  const projectType = useQuery(api.functions.projectTypes.queries.get, {
-    id: pkg.projectTypeId,
-  });
+  // For multi-project support, we can't easily fetch all types here without a more complex query
+  // or fetching them all at once in the parent. For now, let's just show "Multi-Project" or the single type.
+  const singleTypeId = pkg.projectTypeId || (pkg.projectConfigs && pkg.projectConfigs.length === 1 ? pkg.projectConfigs[0].projectTypeId : null);
+  
+  const projectType = useQuery(
+    api.functions.projectTypes.queries.getProjectType,
+    singleTypeId ? { projectTypeId: singleTypeId as Id<"projectTypes"> } : "skip"
+  );
 
   // Calculate starting price
   const startingPrice = pkg.lineItems.reduce(
@@ -52,7 +57,11 @@ export function PackageCard({
       )}
 
       <div className="mt-4 flex items-center justify-between">
-        <Badge variant="outline">{projectType?.name ?? "..."}</Badge>
+        <Badge variant="outline">
+          {pkg.projectConfigs && pkg.projectConfigs.length > 1
+            ? `Multi-Project (${pkg.projectConfigs.length})`
+            : projectType?.name || "Standard"}
+        </Badge>
         <span className="font-bold">₹{startingPrice.toLocaleString()}</span>
       </div>
     </div>

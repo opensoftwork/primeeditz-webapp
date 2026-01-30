@@ -67,7 +67,7 @@ export function isEmployee(role: Role | undefined): boolean {
  * Check if user is a client
  */
 export function isClient(role: Role | undefined): boolean {
-  return role === ROLES.client || role === ROLES.studio;
+  return role === ROLES.studio;
 }
 
 /**

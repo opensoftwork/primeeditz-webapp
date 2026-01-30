@@ -105,6 +105,15 @@ export const quotationStatusValidator = v.union(
   v.literal("superseded"),
 );
 
+// Project Config Validator - Links a package to project type and folder template
+export const projectConfigValidator = v.object({
+  id: v.string(), // Unique ID for referencing within the package
+  label: v.optional(v.string()), // e.g., "Photo Editing", "Video Editing"
+  projectTypeId: v.id("projectTypes"),
+  folderTemplateId: v.id("folderTemplates"),
+  defaultStorageTierId: v.optional(v.id("storageTiers")),
+});
+
 // Service Package Line Item Validator - PRICING ONLY, no spawning config
 export const servicePackageLineItemValidator = v.object({
   id: v.string(),
@@ -113,6 +122,7 @@ export const servicePackageLineItemValidator = v.object({
   unit: v.string(),
   rate: v.number(),
   quantity: v.number(),
+  projectConfigId: v.optional(v.string()), // NEW: Links to projectConfigs.id
   subItems: v.optional(
     v.array(
       v.object({
@@ -432,14 +442,18 @@ export default defineSchema({
     description: v.optional(v.string()),
     categoryId: v.optional(v.id("projectCategories")),
 
-    // Project Spawning Config (1 package = 1 project type)
-    projectTypeId: v.id("projectTypes"),
-    folderTemplateId: v.id("folderTemplates"),
+    // NEW: Multiple project configurations (Optional for migration)
+    projectConfigs: v.optional(v.array(projectConfigValidator)),
+
+    // @deprecated - Use projectConfigs instead. Kept for backward compat during migration.
+    projectTypeId: v.optional(v.id("projectTypes")),
+    folderTemplateId: v.optional(v.id("folderTemplates")),
     defaultStorageTierId: v.optional(v.id("storageTiers")),
 
     // Pricing (line items are JUST for display/pricing)
     lineItems: v.array(servicePackageLineItemValidator),
     terms: v.optional(v.string()),
+    applyGST: v.optional(v.boolean()),
 
     // Status
     isActive: v.boolean(),

@@ -541,13 +541,23 @@ export const approveQuotation = adminMutation({
       notes: "Admin approved the quotation",
     });
 
-    // Story 11B.3: Spawn projects based on line items
-    await spawnProjectsFromQuotation(ctx, {
+    // Story 11B.3 / 13F.4: Spawn projects based on line items/packages
+    const spawnedProjectIds = await spawnProjectsFromQuotation(ctx, {
       quotationId: args.quotationId,
       profileId: ctx.profile._id,
     });
 
-    return null;
+    // Update quotation with spawned project IDs
+    if (spawnedProjectIds.length > 0) {
+      const existingProjectIds = quotation.projectIds || [];
+      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      await ctx.db.patch(args.quotationId, {
+        projectIds: allProjectIds,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { projectIds: spawnedProjectIds };
   },
 });
 
@@ -697,13 +707,23 @@ export const acceptQuotation = studioMutation({
       notes: "Client approved the quotation",
     });
 
-    // Story 11B.3: Spawn projects based on line items
-    await spawnProjectsFromQuotation(ctx, {
+    // Story 11B.3 / 13F.4: Spawn projects based on line items/packages
+    const spawnedProjectIds = await spawnProjectsFromQuotation(ctx, {
       quotationId: args.quotationId,
       profileId: ctx.profile._id,
     });
 
-    return { success: true };
+    // Update quotation with spawned project IDs
+    if (spawnedProjectIds.length > 0) {
+      const existingProjectIds = quotation.projectIds || [];
+      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      await ctx.db.patch(args.quotationId, {
+        projectIds: allProjectIds,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { success: true, projectIds: spawnedProjectIds };
   },
 });
 

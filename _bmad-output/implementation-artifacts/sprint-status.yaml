@@ -282,3 +282,20 @@ development_status:
   13d-5-update-quotation-request-mutation: done # 2 points
   13d-6-clear-development-data: done # 2 points
   epic-13d-retrospective: optional
+
+  # Epic 13E: Service Package Bundles (planned - after 13F)
+  # Goal: Bundle discounts for multi-package combo pricing
+  epic-13e: planned
+  # Deferred until 13F is complete - bundles build on multi-project packages
+
+  # Epic 13F: Multi-Project Package Support (NEW - 2026-01-30)
+  # Goal: Single package can spawn MULTIPLE projects (combo packages)
+  # Use Case: "Complete Wedding Package" creates Photo + Video + Album projects
+  # Created via Party Mode discussion with Architect + PM + SM
+  epic-13f: in-progress
+  13f-1-schema-update-project-configs-array: done # 3 points
+  13f-2-builder-step-2-multi-project-config-ui: done # 5 points
+  13f-3-link-line-items-to-project-configs: done # 3 points
+  13f-4-update-spawning-logic-create-n-projects: done # 3 points
+  13f-5-update-view-detail-show-multiple-configs: done # 2 points
+  epic-13f-retrospective: optional

@@ -123,6 +123,8 @@ export interface Step1Data {
   projectTypeId: Id<"projectTypes"> | null;
   endClientName: string;
   venue: string;
+  eventName: string;
+  eventDate: number | null;
 }
 
 import type { FieldValue } from "@/components/shared/dynamic-form-fields";
@@ -174,6 +176,8 @@ export const INITIAL_FORM_DATA: WizardFormData = {
     projectTypeId: null,
     endClientName: "",
     venue: "",
+    eventName: "",
+    eventDate: null,
   },
   step2: {
     typeSpecificDetails: {},

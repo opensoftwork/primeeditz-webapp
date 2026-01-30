@@ -32,7 +32,7 @@ function QuoteRequestWizardContent() {
     handleBack,
     handleSubmit,
     isSubmitting,
-    selectedPackage,
+    selectedPackageIds,
   } = useRequestWizard();
   const { data: session } = authClient.useSession();
 
@@ -170,7 +170,7 @@ function QuoteRequestWizardContent() {
               {step < 3 ? (
                 <Button
                   onClick={handleNext}
-                  disabled={step === 1 && !selectedPackage}
+                  disabled={step === 1 && selectedPackageIds.length === 0}
                   className="h-12 px-10 rounded-xl bg-white text-black hover:bg-white/90 font-black uppercase tracking-widest text-[10px] transition-all shadow-[0_10px_40px_rgba(255,255,255,0.1)] group min-w-[160px]"
                 >
                   Next

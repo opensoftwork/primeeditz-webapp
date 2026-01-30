@@ -14,10 +14,13 @@ import {
 import { cn } from "@/lib/utils";
 import { SectionQuickCreate } from "./section-quick-create";
 
+import type { ProjectConfig } from "../builder-context";
+
 interface LineItemRowProps {
   form: any;
   index: number;
   sections: Doc<"quotationSections">[];
+  projectConfigs: ProjectConfig[];
   onRemove: () => void;
   canRemove: boolean;
 }
@@ -26,6 +29,7 @@ export function LineItemRow({
   form,
   index,
   sections,
+  projectConfigs,
   onRemove,
   canRemove,
 }: LineItemRowProps) {
@@ -35,9 +39,45 @@ export function LineItemRow({
         <GripVertical className="h-4 w-4 text-white/20" />
       </div>
 
-      <div className="flex-1 grid grid-cols-12 gap-4">
+      <div className="flex-1 grid grid-cols-12 gap-3">
+        {/* Project Selector */}
+        <div className="col-span-12 md:col-span-2">
+          <form.Field
+            name={`lineItems[${index}].projectConfigId`}
+            children={(field: any) => (
+              <Select
+                value={field.state.value || "__general__"}
+                onValueChange={(value) =>
+                  field.handleChange(value === "__general__" ? "" : value)
+                }
+              >
+                <SelectTrigger className="bg-white/5 border-white/5 focus:ring-primary/20 h-10 rounded-lg text-[10px] font-bold uppercase tracking-widest transition-all">
+                  <SelectValue placeholder="Project..." />
+                </SelectTrigger>
+                <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
+                  <SelectItem
+                    value="__general__"
+                    className="focus:bg-white/5 focus:text-white rounded-lg mx-1 my-0.5 italic text-white/40"
+                  >
+                    General / Shared
+                  </SelectItem>
+                  {projectConfigs.map((config) => (
+                    <SelectItem
+                      key={config.id}
+                      value={config.id}
+                      className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
+                    >
+                      {config.label || "Untitled Project"}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+        </div>
+
         {/* Description */}
-        <div className="col-span-12 md:col-span-4">
+        <div className="col-span-12 md:col-span-3">
           <form.Field
             name={`lineItems[${index}].description`}
             children={(field: any) => (
@@ -143,7 +183,7 @@ export function LineItemRow({
         </div>
 
         {/* Quantity */}
-        <div className="col-span-6 md:col-span-2">
+        <div className="col-span-6 md:col-span-1">
           <form.Field
             name={`lineItems[${index}].quantity`}
             children={(field: any) => (

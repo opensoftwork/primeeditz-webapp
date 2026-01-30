@@ -31,8 +31,8 @@ export default function QuoteRequestWizard() {
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [selectedPackage, setSelectedPackage] =
-    useState<Id<"quotationTemplates"> | null>(null);
+  const [selectedPackageId, setSelectedPackageId] =
+    useState<Id<"servicePackages"> | null>(null);
   const [formData, setFormData] = useState({
     endClientName: "",
     eventName: "",
@@ -45,9 +45,9 @@ export default function QuoteRequestWizard() {
   const categories = useQuery(
     api.functions.projectCategories.queries.getProjectCategories,
   );
-  const templates = useQuery(
-    api.functions.quotations.templates.queries.getTemplates,
-    { activeOnly: true },
+  const packages = useQuery(
+    api.functions.servicePackages.queries.listActive,
+    {},
   );
 
   // Mutations
@@ -65,12 +65,12 @@ export default function QuoteRequestWizard() {
   };
 
   const handleSubmit = async () => {
-    if (!selectedPackage) return;
+    if (!selectedPackageId) return;
 
     setIsSubmitting(true);
     try {
-      const res = await requestQuotation({
-        templateId: selectedPackage,
+      await requestQuotation({
+        selectedPackageIds: [selectedPackageId],
         endClientName: formData.endClientName,
         eventName: formData.eventName,
         eventDate: formData.eventDate
@@ -93,11 +93,12 @@ export default function QuoteRequestWizard() {
     }
   };
 
-  // Filter templates by category hint
-  const filteredTemplates = templates?.filter(
-    (t) =>
+  // Filter packages by category
+  const filteredPackages = packages?.filter(
+    (p) =>
       !selectedCategory ||
-      t.projectTypeHint?.toLowerCase() === selectedCategory.toLowerCase(),
+      categories?.find((c) => c._id === p.categoryId)?.name.toLowerCase() ===
+        selectedCategory.toLowerCase(),
   );
 
   return (
@@ -170,13 +171,13 @@ export default function QuoteRequestWizard() {
 
               {/* Packages Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {filteredTemplates?.map((pkg) => (
+                {filteredPackages?.map((pkg) => (
                   <Card
                     key={pkg._id}
-                    onClick={() => setSelectedPackage(pkg._id)}
+                    onClick={() => setSelectedPackageId(pkg._id)}
                     className={cn(
                       "group relative overflow-hidden bg-white/3 border-white/5 p-6 cursor-pointer transition-all duration-300 hover:border-primary/40",
-                      selectedPackage === pkg._id &&
+                      selectedPackageId === pkg._id &&
                         "border-primary bg-primary/5 ring-1 ring-primary/20",
                     )}
                   >
@@ -186,13 +187,13 @@ export default function QuoteRequestWizard() {
                           <Package
                             className={cn(
                               "h-5 w-5 transition-colors",
-                              selectedPackage === pkg._id
+                              selectedPackageId === pkg._id
                                 ? "text-primary"
                                 : "text-white/40",
                             )}
                           />
                         </div>
-                        {selectedPackage === pkg._id && (
+                        {selectedPackageId === pkg._id && (
                           <CheckCircle2 className="h-5 w-5 text-primary" />
                         )}
                       </div>
@@ -210,15 +211,13 @@ export default function QuoteRequestWizard() {
                           variant="outline"
                           className="text-[8px] font-black uppercase tracking-widest border-white/10 px-2 py-0.5"
                         >
-                          {pkg.projectTypeHint || "Standard"}
+                          {categories?.find((c) => c._id === pkg.categoryId)
+                            ?.name || "Standard"}
                         </Badge>
                         <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                          Starts from ₹
+                          Estimated ₹
                           {pkg.lineItems
-                            .reduce(
-                              (acc, i) => acc + i.unitPrice * i.defaultQuantity,
-                              0,
-                            )
+                            .reduce((acc, i) => acc + i.rate * i.quantity, 0)
                             .toLocaleString()}
                         </span>
                       </div>
@@ -346,7 +345,7 @@ export default function QuoteRequestWizard() {
                     Package
                   </span>
                   <span className="text-[11px] font-black uppercase text-primary">
-                    {templates?.find((t) => t._id === selectedPackage)?.name}
+                    {packages?.find((p) => p._id === selectedPackageId)?.name}
                   </span>
                 </div>
                 <div className="flex items-center justify-between border-b border-white/5 pb-4">
@@ -400,7 +399,7 @@ export default function QuoteRequestWizard() {
             {step < 3 ? (
               <Button
                 onClick={handleNext}
-                disabled={step === 1 && !selectedPackage}
+                disabled={step === 1 && !selectedPackageId}
                 className="h-12 px-10 rounded-xl bg-white text-black hover:bg-white/90 font-black uppercase tracking-widest text-[10px] transition-all group"
               >
                 Continue

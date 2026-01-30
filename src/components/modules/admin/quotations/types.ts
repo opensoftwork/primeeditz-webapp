@@ -170,4 +170,4 @@ export interface Project {
   projectTypeName?: string;
 }
 
-export type Template = Doc<"quotationTemplates">;
+export type Template = Doc<"servicePackages">;

@@ -87,6 +87,8 @@ export const getAdminProjectsPaginated = adminQuery({
           studioName: client?.name ?? "Unknown Client",
           studioId: project.studioId,
           source: project.source,
+          eventName: project.eventName,
+          eventDate: project.eventDate,
           deliveryConfig: projectType?.deliveryConfig,
           createdAt: project._creationTime,
           updatedAt: project.updatedAt,
@@ -327,6 +329,8 @@ export const getAdminProjects = adminQuery({
         (project.studioId ? clientMap.get(project.studioId) : null)?.name ??
         "Unknown Client",
       studioId: project.studioId,
+      eventName: project.eventName,
+      eventDate: project.eventDate,
       createdAt: project._creationTime,
       updatedAt: project.updatedAt,
     }));

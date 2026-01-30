@@ -29,13 +29,6 @@ export function ServicePackageList() {
   const router = useRouter();
 
   // Local state for filters and view
-  const [_pageSize, _setPageSize] = useState(15);
-  const [statusFilter, _setStatusFilter] = useState<string | undefined>(
-    undefined,
-  );
-  const [categoryFilter, _setCategoryFilter] = useState<string | undefined>(
-    undefined,
-  );
   const [packageToDelete, setPackageToDelete] = useState<{
     id: Id<"servicePackages">;
     name: string;
@@ -47,22 +40,9 @@ export function ServicePackageList() {
     [];
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
 
-  const rawPackages = useQuery(api.functions.servicePackages.queries.list, {
-    categoryId:
-      categoryFilter === "all"
-        ? undefined
-        : (categoryFilter as Id<"projectCategories">),
-    isActive:
-      statusFilter === "all"
-        ? undefined
-        : statusFilter === "active"
-          ? true
-          : statusFilter === "inactive"
-            ? false
-            : undefined,
-  });
+  const rawPackages = useQuery(api.functions.servicePackages.queries.list, {});
 
-  // Transform data for the table
+  // Transform data for the table/grid
   const packages: AdminServicePackage[] = useMemo(() => {
     if (!rawPackages) return [];
     return rawPackages.map((pkg) => ({
@@ -73,21 +53,32 @@ export function ServicePackageList() {
     }));
   }, [rawPackages, categories, projectTypes]);
 
-  const statusOptions = [
-    { label: "Active", value: "active" },
-    { label: "Inactive", value: "inactive" },
-  ];
-
-  const categoryOptions = useMemo(() => {
-    return categories.map((c) => ({
-      label: c.name,
-      value: c.name,
-    }));
-  }, [categories]);
-
   const deletePackage = useMutation(
     api.functions.servicePackages.mutations.deleteServicePackage,
   );
+
+  const handleCreate = () => {
+    router.push("/settings/service-packages/new");
+  };
+
+  const handleView = (id: Id<"servicePackages">) => {
+    router.push(`/settings/service-packages/${id}`);
+  };
+
+  const handleEdit = (id: Id<"servicePackages">) => {
+    router.push(`/settings/service-packages/${id}/edit`);
+  };
+
+  const handleDelete = async () => {
+    if (!packageToDelete) return;
+    try {
+      await deletePackage({ id: packageToDelete.id });
+      toast.success("Package deleted successfully");
+      setPackageToDelete(null);
+    } catch (_error) {
+      toast.error("Failed to delete package");
+    }
+  };
 
   if (rawPackages === undefined) {
     return (
@@ -104,20 +95,15 @@ export function ServicePackageList() {
     );
   }
 
-  const handleCreate = () => {
-    router.push("/settings/service-packages/new");
-  };
+  const statusOptions = [
+    { label: "Active", value: "active" },
+    { label: "Inactive", value: "inactive" },
+  ];
 
-  const handleDelete = async () => {
-    if (!packageToDelete) return;
-    try {
-      await deletePackage({ id: packageToDelete.id });
-      toast.success("Package deleted successfully");
-      setPackageToDelete(null);
-    } catch (_error) {
-      toast.error("Failed to delete package");
-    }
-  };
+  const categoryOptions = categories.map((c) => ({
+    label: c.name,
+    value: c.name,
+  }));
 
   return (
     <div className="w-full">
@@ -158,7 +144,8 @@ export function ServicePackageList() {
           <PackageCard
             key={pkg._id}
             pkg={pkg}
-            onEdit={(id) => router.push(`/settings/service-packages/${id}`)}
+            onView={handleView}
+            onEdit={handleEdit}
             onDelete={(id, name) => setPackageToDelete({ id, name })}
             categoryName={pkg.categoryName}
             projectTypeName={pkg.projectTypeName}

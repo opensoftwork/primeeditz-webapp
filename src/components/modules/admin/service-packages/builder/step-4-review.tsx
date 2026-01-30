@@ -15,10 +15,12 @@ import {
   Pencil,
   Rocket,
   Save,
+  Package,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -80,10 +82,21 @@ export function Step4Review() {
         description: step1Data.description,
         categoryId:
           (step1Data.categoryId as Id<"projectCategories">) || undefined,
-        projectTypeId: step2Data.projectTypeId as Id<"projectTypes">,
-        folderTemplateId: step2Data.folderTemplateId as Id<"folderTemplates">,
+        // NEW: Send projectConfigs array
+        projectConfigs: step2Data.projectConfigs.map((config) => ({
+          id: config.id,
+          label: config.label,
+          projectTypeId: config.projectTypeId as Id<"projectTypes">,
+          folderTemplateId: config.folderTemplateId as Id<"folderTemplates">,
+          defaultStorageTierId:
+            (config.defaultStorageTierId as Id<"storageTiers">) || undefined,
+        })),
+        // For backward compatibility until full migration
+        projectTypeId: step2Data.projectConfigs[0].projectTypeId as Id<"projectTypes">,
+        folderTemplateId: step2Data.projectConfigs[0].folderTemplateId as Id<"folderTemplates">,
         defaultStorageTierId:
-          (step2Data.defaultStorageTierId as Id<"storageTiers">) || undefined,
+          (step2Data.projectConfigs[0].defaultStorageTierId as Id<"storageTiers">) ||
+          undefined,
         lineItems: step3Data.lineItems.map((item) => ({
           id: item.id,
           sectionId: (item.sectionId as Id<"quotationSections">) || undefined,
@@ -93,6 +106,7 @@ export function Step4Review() {
           quantity: item.quantity,
         })),
         terms: step3Data.terms,
+        applyGST: step3Data.applyGST,
         isActive,
       };
 
@@ -120,15 +134,9 @@ export function Step4Review() {
     }
   }
 
-  const projectTypeName = projectTypes.find(
-    (t) => t._id === step2Data?.projectTypeId,
-  )?.name;
   const categoryName = categories.find(
     (c) => c._id === step1Data?.categoryId,
   )?.name;
-  const storageTier = storageTiers.find(
-    (t) => t._id === step2Data?.defaultStorageTierId,
-  );
 
   return (
     <div className="max-w-6xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -199,10 +207,12 @@ export function Step4Review() {
                     </span>
                   </div>
                   <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
-                    <Check className="h-3.5 w-3.5 text-primary" />
+                    <Package className="h-3.5 w-3.5 text-primary" />
                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
-                      Type:{" "}
-                      <span className="text-white">{projectTypeName}</span>
+                      Spawn Count:{" "}
+                      <span className="text-white">
+                        {step2Data?.projectConfigs.length || 0} Projects
+                      </span>
                     </span>
                   </div>
                 </div>
@@ -210,7 +220,7 @@ export function Step4Review() {
             </Card>
           </div>
 
-          {/* Section: Configuration */}
+          {/* Section: Configurations Summary */}
           <div className="group space-y-4">
             <div className="flex items-center justify-between ml-1">
               <div className="flex items-center gap-2">
@@ -232,38 +242,55 @@ export function Step4Review() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-                <CardContent className="p-6">
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-widest mb-4">
-                    Folder Structure Highlights
-                  </p>
-                  <div className="max-h-[300px] overflow-y-auto">
-                    <FolderPreview templateId={step2Data?.folderTemplateId} />
-                  </div>
-                </CardContent>
-              </Card>
+            <div className="space-y-4">
+              {step2Data?.projectConfigs.map((config, index) => {
+                const type = projectTypes.find((t) => t._id === config.projectTypeId);
+                const tier = storageTiers.find((t) => t._id === config.defaultStorageTierId);
 
-              <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle flex flex-col justify-center p-8">
-                <div className="flex items-center gap-4">
-                  <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-                    <HardDrive className="h-6 w-6 text-primary" />
-                  </div>
-                  <div>
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                      Storage Allocation
-                    </p>
-                    <h4 className="text-lg font-black text-white uppercase tracking-tight">
-                      {storageTier ? `${storageTier.name}` : "On-Demand"}
-                    </h4>
-                    <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest">
-                      {storageTier
-                        ? `${storageTier.sizeGB}GB Pre-allocated`
-                        : "Dynamic project storage"}
-                    </p>
-                  </div>
-                </div>
-              </Card>
+                return (
+                  <Card key={config.id} className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
+                    <CardContent className="p-8">
+                       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                          <div className="md:col-span-4 space-y-4">
+                            <div>
+                              <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                                Configuration {index + 1}
+                              </p>
+                              <h4 className="text-lg font-black text-white uppercase tracking-tight mt-1">
+                                {config.label || "Untitled Project"}
+                              </h4>
+                            </div>
+
+                            <div className="space-y-3">
+                              <div className="flex items-center gap-2">
+                                <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
+                                  {type?.name || "Unknown Type"}
+                                </Badge>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <HardDrive className="h-3.5 w-3.5 text-white/20" />
+                                <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
+                                  {tier ? `${tier.name} (${tier.sizeGB}GB)` : "On-Demand Storage"}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5">
+                            <div className="p-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
+                               <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+                                 Folder Structure Preview
+                               </span>
+                            </div>
+                            <div className="max-h-[200px] overflow-y-auto">
+                               <FolderPreview templateId={config.folderTemplateId} />
+                            </div>
+                          </div>
+                       </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           </div>
 

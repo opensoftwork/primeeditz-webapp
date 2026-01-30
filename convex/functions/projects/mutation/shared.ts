@@ -165,6 +165,8 @@ export const updateDraft = authenticatedMutation({
     // Step 1: Basic Info
     projectTypeId: v.optional(v.id("projectTypes")),
     endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     venue: v.optional(v.string()),
     // Step 2: Type-specific details
     typeSpecificDetails: v.optional(v.any()),

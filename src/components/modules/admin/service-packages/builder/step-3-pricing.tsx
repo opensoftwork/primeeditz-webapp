@@ -30,10 +30,12 @@ import { Separator } from "@/components/ui/separator";
 
 import { useBuilder } from "./builder-context";
 import { LineItemRow } from "./components/line-item-row";
+import { PricingSummary } from "./components/pricing-summary";
 
 const lineItemSchema = z.object({
   id: z.string(),
   sectionId: z.string().optional().or(z.literal("")),
+  projectConfigId: z.string().optional().or(z.literal("")),
   description: z.string().min(1, "Description is required"),
   unit: z.string(),
   rate: z.number().min(0, "Rate must be 0 or more"),
@@ -49,7 +51,8 @@ const step3Schema = z.object({
 });
 
 export function Step3Pricing() {
-  const { step3Data, setStep3Data, setCurrentStep } = useBuilder();
+  const { step2Data, step3Data, setStep3Data, setCurrentStep } = useBuilder();
+  const projectConfigs = step2Data?.projectConfigs ?? [];
   const sections =
     useQuery(api.functions.quotations.sections.queries.getSections, {
       activeOnly: true,
@@ -60,6 +63,7 @@ export function Step3Pricing() {
       lineItems: step3Data?.lineItems ?? [
         {
           id: crypto.randomUUID(),
+          projectConfigId: projectConfigs[0]?.id || "",
           sectionId: "",
           description: "Main Service Offering",
           unit: "per project",
@@ -86,13 +90,6 @@ export function Step3Pricing() {
   return (
     <form.Subscribe selector={(state) => state.values}>
       {(values) => {
-        const subtotal = values.lineItems.reduce(
-          (sum, item) => sum + (item.rate || 0) * (item.quantity || 1),
-          0,
-        );
-        const gstAmount = values.applyGST ? Math.round(subtotal * 0.18) : 0;
-        const total = subtotal + gstAmount;
-
         return (
           <div className="max-w-6xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div className="mb-10 space-y-2">
@@ -129,6 +126,7 @@ export function Step3Pricing() {
                     onClick={() => {
                       form.pushFieldValue("lineItems", {
                         id: crypto.randomUUID(),
+                        projectConfigId: projectConfigs[0]?.id || "",
                         sectionId: "",
                         description: "",
                         unit: "per project",
@@ -144,8 +142,13 @@ export function Step3Pricing() {
                 </div>
 
                 <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-                  <div className="bg-white/2 border-b border-white/5 px-8 py-3 grid grid-cols-12 gap-4 items-center">
-                    <div className="col-span-12 md:col-span-4 translate-x-4">
+                  <div className="bg-white/2 border-b border-white/5 px-8 py-3 grid grid-cols-12 gap-3 items-center">
+                    <div className="col-span-12 md:col-span-2 translate-x-4">
+                      <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                        Project
+                      </span>
+                    </div>
+                    <div className="col-span-12 md:col-span-3">
                       <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
                         Description
                       </span>
@@ -165,7 +168,7 @@ export function Step3Pricing() {
                         Rate
                       </span>
                     </div>
-                    <div className="hidden md:block col-span-2">
+                    <div className="hidden md:block col-span-1">
                       <span className="text-[9px] font-black text-white/20 uppercase tracking-widest text-right pr-4">
                         Qty
                       </span>
@@ -182,6 +185,7 @@ export function Step3Pricing() {
                               form={form}
                               index={index}
                               sections={sections}
+                              projectConfigs={projectConfigs}
                               canRemove={field.state.value.length > 1}
                               onRemove={() => {
                                 if (field.state.value.length > 1) {
@@ -199,8 +203,8 @@ export function Step3Pricing() {
                     </form.Field>
                   </CardContent>
 
-                  <div className="bg-white/2 p-8 space-y-4">
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-10">
+                  <div className="bg-white/2 p-8 space-y-8">
+                    <div className="flex flex-col xl:flex-row gap-10">
                       {/* Terms & Conditions */}
                       <div className="flex-1 w-full space-y-4">
                         <div className="flex items-center gap-2 ml-1">
@@ -236,65 +240,13 @@ export function Step3Pricing() {
                         </form.Field>
                       </div>
 
-                      {/* Subtotal & GST */}
-                      <div className="w-full md:w-80 space-y-6">
-                        <div className="space-y-3">
-                          <div className="flex justify-between items-center text-sm px-1">
-                            <span className="font-black text-white/20 uppercase tracking-widest text-[10px]">
-                              Subtotal
-                            </span>
-                            <span className="font-black text-white tracking-widest">
-                              ₹{subtotal.toLocaleString()}
-                            </span>
-                          </div>
-
-                          <div className="flex justify-between items-center px-4 py-3 bg-white/5 rounded-2xl border border-white/5 shadow-inner group">
-                            <div className="flex items-center gap-3">
-                              <form.Field
-                                name="applyGST"
-                                children={(field) => (
-                                  <Switch
-                                    id="applyGST"
-                                    checked={field.state.value}
-                                    onCheckedChange={field.handleChange}
-                                    className="data-[state=checked]:bg-primary"
-                                  />
-                                )}
-                              />
-                              <div className="flex items-center gap-1.5">
-                                <BadgePercent className="h-3.5 w-3.5 text-white/20 group-hover:text-primary transition-colors" />
-                                <label
-                                  htmlFor="applyGST"
-                                  className="text-[10px] font-black text-white/60 uppercase tracking-widest cursor-pointer"
-                                >
-                                  Apply GST (18%)
-                                </label>
-                              </div>
-                            </div>
-                            <span className="text-[10px] font-black text-primary tracking-widest">
-                              +₹{gstAmount.toLocaleString()}
-                            </span>
-                          </div>
-                        </div>
-
-                        <Separator className="bg-white/5" />
-
-                        <div className="flex justify-between items-center px-1">
-                          <div className="flex items-center gap-2">
-                            <ReceiptIndianRupee className="h-5 w-5 text-primary" />
-                            <span className="font-black text-white uppercase tracking-widest text-[11px]">
-                              Total Value
-                            </span>
-                          </div>
-                          <div className="text-right">
-                            <span className="text-2xl font-black text-white tracking-tighter">
-                              ₹{total.toLocaleString()}
-                            </span>
-                            <p className="text-[8px] font-black text-white/20 uppercase tracking-widest mt-1">
-                              all inclusive
-                            </p>
-                          </div>
-                        </div>
+                      {/* Pricing Summary Breakdown */}
+                      <div className="flex-[1.5] w-full">
+                         <PricingSummary 
+                           lineItems={values.lineItems}
+                           projectConfigs={projectConfigs}
+                           applyGST={values.applyGST}
+                         />
                       </div>
                     </div>
                   </div>
@@ -310,7 +262,7 @@ export function Step3Pricing() {
                   className="hover:bg-white/5 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-2xl transition-all gap-2"
                 >
                   <ArrowLeft className="h-4 w-4" />
-                  Config
+                  Back to Config
                 </Button>
 
                 <form.Subscribe
@@ -337,3 +289,4 @@ export function Step3Pricing() {
     </form.Subscribe>
   );
 }
+

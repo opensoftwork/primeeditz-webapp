@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 
 interface PackageCardProps {
   pkg: Doc<"servicePackages">;
+  onView: (id: Id<"servicePackages">) => void;
   onEdit: (id: Id<"servicePackages">) => void;
   onDelete: (id: Id<"servicePackages">, name: string) => void;
   categoryName?: string;
@@ -32,6 +33,7 @@ interface PackageCardProps {
 
 export function PackageCard({
   pkg,
+  onView,
   onEdit,
   onDelete,
   categoryName,
@@ -48,7 +50,7 @@ export function PackageCard({
     api.functions.servicePackages.mutations.duplicate,
   );
 
-  // Calculate price range from line items
+  // Calculate prices
   const prices = pkg.lineItems.map((item) => item.rate * item.quantity);
   const maxPrice = prices.reduce((a, b) => a + b, 0);
 
@@ -57,7 +59,7 @@ export function PackageCard({
     try {
       const newId = await duplicateMutation.mutate({ id: pkg._id });
       toast.success("Package duplicated successfully");
-      router.push(`/settings/service-packages/${newId}`);
+      router.push(`/settings/service-packages/${newId}/edit`);
     } catch (_error) {
       toast.error("Failed to duplicate package");
     }
@@ -77,7 +79,12 @@ export function PackageCard({
   };
 
   return (
-    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+    <motion.div 
+      whileHover={{ y: -4 }} 
+      transition={{ duration: 0.2 }}
+      onClick={() => onView(pkg._id)}
+      className="cursor-pointer"
+    >
       <Card className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
         {/* Glow Effect */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
@@ -91,11 +98,11 @@ export function PackageCard({
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                  {projectTypeName || "General"}
+                  {projectTypeName || (pkg.projectConfigs?.length ? "Multi-Project" : "General")}
                 </span>
                 <Badge
                   className={cn(
-                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5",
+                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 shadow-none",
                     pkg.isActive
                       ? "bg-green-500/10 text-green-500 border-green-500/20"
                       : "bg-white/5 text-white/40 border-white/5",
@@ -141,8 +148,8 @@ export function PackageCard({
                 className={cn(
                   "h-8 w-8 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed",
                   pkg.isActive
-                    ? "text-red-400/20 hover:text-red-400 hover:bg-red-400/5"
-                    : "text-green-400/20 hover:text-green-400 hover:bg-green-400/5",
+                    ? "text-red-400/20 hover:text-red-400 hover:bg-red-400/8"
+                    : "text-green-400/20 hover:text-green-400 hover:bg-green-400/8",
                 )}
                 title={pkg.isActive ? "Deactivate" : "Activate"}
               >
@@ -209,7 +216,7 @@ export function PackageCard({
 
           {/* Footer Area */}
           <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-            <div className="flex items-center gap-2 overflow-hidden">
+            <div className="flex items-center gap-2 overflow-hidden flex-1">
               <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
                 <Info className="h-3 w-3 text-white/20" />
               </div>
@@ -220,10 +227,13 @@ export function PackageCard({
               </span>
             </div>
             <Button
-              onClick={() => onEdit(pkg._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onEdit(pkg._id);
+              }}
               variant="ghost"
               size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-2 shrink-0 transition-all active:scale-95"
+              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-2 shrink-0 transition-all active:scale-95 ml-2"
             >
               Configure <Pencil className="h-3 w-3" />
             </Button>
