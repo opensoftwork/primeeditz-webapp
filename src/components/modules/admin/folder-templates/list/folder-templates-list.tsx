@@ -38,115 +38,96 @@ interface FolderTemplate {
 }
 
 export function FolderTemplatesList() {
-  const templates = useQuery(
-    api.functions.folderTemplates.queries.list,
-  );
   const router = useRouter();
-  const createMutation = useMutation(
-    api.functions.folderTemplates.mutations.createFolderTemplate,
-  );
-  const updateMutation = useMutation(
-    api.functions.folderTemplates.mutations.updateFolderTemplate,
-  );
-  const deleteMutation = useMutation(
-    api.functions.folderTemplates.mutations.deleteFolderTemplate,
-  );
+  const templates = useQuery(api.functions.folderTemplates.queries.list);
 
-  // State
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<FolderTemplate | null>(
-    null,
-  );
-  const [templateToDelete, setTemplateToDelete] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
-
-  // Handlers
   const handleCreate = () => {
     router.push("/settings/folder-templates/new");
   };
 
-  const handleEdit = (template: FolderTemplate) => {
-    router.push(`/settings/folder-templates/${template._id}`);
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!templateToDelete) return;
-    try {
-      await deleteMutation({
-        id: templateToDelete.id as Id<"folderTemplates">,
-      });
-      toast.success("Template deleted permanently");
-      setTemplateToDelete(null);
-    } catch (error) {
-      toast.error("Failed to delete template");
-    }
+  const handleEdit = (id: string) => {
+    router.push(`/settings/folder-templates/${id}`);
   };
 
   if (templates === undefined) {
     return (
-      <div className="p-8 md:p-12 space-y-8">
-        <Skeleton className="h-20 w-1/3 bg-white/5 rounded-3xl animate-pulse" />
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Skeleton
-              key={i}
-              className="h-64 w-full bg-white/5 rounded-[32px]"
-            />
-          ))}
+      <div className="w-full">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
+          </div>
+          <Skeleton className="h-12 w-48 bg-white/5 rounded-xl" />
         </div>
+        <DataTableSkeleton rows={6} columns={4} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-24 p-8 md:p-12">
-      <ListHeader onCreate={handleCreate} templateCount={templates.length} />
+    <div className="w-full">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-2"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+            ADMINISTRATIVE CONTROL
+          </span>
+          <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
+            Template Vault
+          </h1>
+        </motion.div>
 
-      {templates.length === 0 ? (
-        <ListEmpty onCreate={handleCreate} />
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {templates.map((template) => (
-            <FolderTemplateCard
-              key={template._id}
-              template={template as any}
-              onEdit={handleEdit}
-              onDelete={(id, name) => setTemplateToDelete({ id, name })}
-            />
-          ))}
-        </div>
-      )}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Button
+            onClick={handleCreate}
+            className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            CREATE NEW TEMPLATE
+          </Button>
+        </motion.div>
+      </div>
 
-      <AlertDialog
-        open={!!templateToDelete}
-        onOpenChange={() => setTemplateToDelete(null)}
-      >
-        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-[32px] p-8">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl font-black text-white uppercase tracking-tighter">
-              Verify Deletion
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-              Are you sure you want to remove{" "}
-              <span className="text-white">"{templateToDelete?.name}"</span>?
-              This action is permanent and cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-8 gap-4">
-            <AlertDialogCancel className="bg-white/5 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl">
-              Cancel
-            </AlertDialogCancel>
-            <Button
-              onClick={handleDeleteConfirm}
-              className="bg-red-500 hover:bg-red-600 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl"
-            >
-              Delete Permanently
-            </Button>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DataTable
+        columns={columns}
+        data={(templates as any) || []}
+        emptyTitle="No folder templates found"
+        emptyDescription="Define your folder structures once and reuse them across all projects."
+        renderCard={(template) => (
+          <FolderTemplateCard
+            key={template._id}
+            template={template as any}
+            onEdit={(t) => handleEdit(t._id)}
+            onDelete={() => {
+              // Handled in template-actions
+            }}
+          />
+        )}
+        defaultView="table"
+        showViewToggle={true}
+        toolbar={{
+          search: {
+            column: "name",
+            placeholder: "Search templates...",
+          },
+          filters: [
+            {
+              column: "isActive",
+              title: "Status",
+              options: [
+                { label: "Active", value: "true" },
+                { label: "Inactive", value: "false" },
+              ],
+            },
+          ],
+        }}
+      />
     </div>
   );
 }

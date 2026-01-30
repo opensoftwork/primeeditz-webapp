@@ -3,19 +3,31 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ListAlerts, ListContent, ListEmpty, ListHeader } from "./index";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { motion } from "motion/react";
+import { Button } from "@/components/ui/button";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
+import { ProjectTypeCard } from "./project-type-card";
+import { getColumns } from "./columns";
+import type { AdminProjectType } from "./types";
 import {
   ProjectTypeDrawer,
   type ProjectTypeFormValues,
 } from "./project-type-drawer";
 
 export function ProjectTypeList() {
+  const router = useRouter();
   const projectTypes = useQuery(
     api.functions.projectTypes.queries.getProjectTypes,
   );
+  const categories =
+    useQuery(api.functions.projectCategories.queries.getProjectCategories) ||
+    [];
+
   const createProjectType = useMutation(
     api.functions.projectTypes.mutations.createProjectType,
   );
@@ -31,24 +43,36 @@ export function ProjectTypeList() {
 
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingType, setEditingType] = useState<any>(null);
-  const [typeToToggle, setTypeToToggle] = useState<{
-    id: string;
-    current: boolean;
-  } | null>(null);
-  const [typeToDelete, setTypeToDelete] = useState<{
-    id: string;
-    name: string;
-  } | null>(null);
+  const [editingType, setEditingType] = useState<AdminProjectType | null>(null);
+
+  // Transform data
+  const data: AdminProjectType[] = useMemo(() => {
+    if (!projectTypes) return [];
+    return projectTypes.map((type) => ({
+      ...type,
+      categoryName: categories.find((c) => c._id === type.categoryId)?.name,
+    }));
+  }, [projectTypes, categories]);
+
+  const columns = useMemo(
+    () =>
+      getColumns((type) => {
+        setEditingType(type);
+        setIsDrawerOpen(true);
+      }),
+    [],
+  );
+
+  const categoryOptions = useMemo(() => {
+    return categories.map((c) => ({
+      label: c.name,
+      value: c.name,
+    }));
+  }, [categories]);
 
   // Handlers
   const handleCreate = () => {
     setEditingType(null);
-    setIsDrawerOpen(true);
-  };
-
-  const handleEdit = (type: any) => {
-    setEditingType(type);
     setIsDrawerOpen(true);
   };
 
@@ -80,85 +104,113 @@ export function ProjectTypeList() {
     }
   };
 
-  const handleToggleStatusConfirm = async () => {
-    if (!typeToToggle) return;
-    try {
-      await toggleStatusMutation({
-        id: typeToToggle.id as Id<"projectTypes">,
-        isActive: !typeToToggle.current,
-      });
-      toast.success(
-        `Project type ${!typeToToggle.current ? "activated" : "deactivated"}`,
-      );
-      setTypeToToggle(null);
-    } catch (error) {
-      toast.error("Failed to update status");
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!typeToDelete) return;
-    try {
-      await deleteMutation({ id: typeToDelete.id as Id<"projectTypes"> });
-      toast.success("Project type deleted permanently");
-      setTypeToDelete(null);
-    } catch (error) {
-      toast.error("Failed to delete project type");
-    }
-  };
-
-  const onToggleRequest = (id: string, current: boolean) => {
-    if (current) {
-      setTypeToToggle({ id, current });
-    } else {
-      toggleStatusMutation({ id: id as Id<"projectTypes">, isActive: true });
-      toast.success("Project type activated");
-    }
-  };
-
   // Loading State
   if (projectTypes === undefined) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-8 md:p-12">
-        {[1, 2, 3, 4].map((i) => (
-          <Skeleton
-            key={i}
-            className="h-40 w-full bg-white/5 rounded-[1.25rem]"
-          />
-        ))}
+      <div className="w-full">
+        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
+          </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
+        </div>
+        <DataTableSkeleton rows={6} columns={4} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8 pb-20 p-8 md:p-12">
-      <ListHeader onCreate={handleCreate} />
+    <div className="w-full">
+      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="space-y-2"
+        >
+          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
+            ADMINISTRATIVE CONTROL
+          </span>
+          <h1 className="text-4xl font-black uppercase tracking-tighter text-white xl:text-5xl">
+            Project Engine
+          </h1>
+        </motion.div>
 
-      {projectTypes.length === 0 ? (
-        <ListEmpty onCreate={handleCreate} />
-      ) : (
-        <ListContent
-          projectTypes={projectTypes}
-          onEdit={handleEdit}
-          onToggleStatus={onToggleRequest}
-          onDeleteRequest={(id, name) => setTypeToDelete({ id, name })}
-        />
-      )}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+        >
+          <Button
+            onClick={handleCreate}
+            className="h-12 gap-2 rounded-xl bg-primary px-8 text-[11px] font-black uppercase tracking-widest text-primary-foreground shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
+          >
+            <Plus className="h-4 w-4" />
+            DEFINE PROJECT TYPE
+          </Button>
+        </motion.div>
+      </div>
+
+      <DataTable
+        columns={columns}
+        data={data}
+        emptyTitle="No project types defined"
+        emptyDescription="Set up your project types and delivery workflows to get started."
+        renderCard={(type) => (
+          <ProjectTypeCard
+            key={type._id}
+            type={type}
+            onEdit={(type) => {
+              setEditingType(type);
+              setIsDrawerOpen(true);
+            }}
+            onToggleStatus={async (id, current) => {
+              await toggleStatusMutation({
+                id: id as Id<"projectTypes">,
+                isActive: !current,
+              });
+              toast.success(
+                `Project type ${!current ? "activated" : "deactivated"}`,
+              );
+            }}
+            onDelete={async (id) => {
+              // Note: handled in project-actions for consistency
+            }}
+          />
+        )}
+        defaultView="table"
+        showViewToggle={true}
+        toolbar={{
+          search: {
+            column: "name",
+            placeholder: "Search project types...",
+          },
+          filters: [
+            {
+              column: "isActive",
+              title: "Status",
+              options: [
+                { label: "Active", value: "true" },
+                { label: "Inactive", value: "false" },
+              ],
+            },
+            ...(categoryOptions.length > 0
+              ? [
+                  {
+                    column: "categoryName",
+                    title: "Category",
+                    options: categoryOptions,
+                  },
+                ]
+              : []),
+          ],
+        }}
+      />
 
       <ProjectTypeDrawer
         open={isDrawerOpen}
         onOpenChange={setIsDrawerOpen}
         onSave={handleSave}
         initialData={editingType}
-      />
-
-      <ListAlerts
-        typeToToggle={typeToToggle}
-        setTypeToToggle={setTypeToToggle}
-        typeToDelete={typeToDelete}
-        setTypeToDelete={setTypeToDelete}
-        onToggleStatus={handleToggleStatusConfirm}
-        onDelete={handleDeleteConfirm}
       />
     </div>
   );

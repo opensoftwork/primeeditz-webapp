@@ -87,3 +87,15 @@ export const duplicate = adminMutation({
     });
   },
 });
+
+/**
+ * Delete a service package.
+ */
+export const deleteServicePackage = adminMutation({
+  args: {
+    id: v.id("servicePackages"),
+  },
+  handler: async (ctx, { id }) => {
+    await ctx.db.delete(id);
+  },
+});

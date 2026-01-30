@@ -1,12 +1,12 @@
 "use client";
 
 import { Input } from "@/components/ui/input";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from "@/components/ui/select";
 import { Search, Filter, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -39,7 +39,7 @@ export function ListFilters({
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 items-end md:items-center bg-zinc-900/50 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
+    <div className="flex flex-col md:flex-row gap-4 items-end md:items-center bg-white/2 p-4 rounded-2xl border border-white/5 backdrop-blur-sm">
       <div className="relative flex-1 group">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-white/20 group-focus-within:text-primary transition-colors" />
         <Input
