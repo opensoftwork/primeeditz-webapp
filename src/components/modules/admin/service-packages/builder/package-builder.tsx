@@ -148,9 +148,9 @@ export function PackageBuilder() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-                  className="flex-1 p-12"
+                  className="flex-1 p-6 md:p-10"
                 >
-                  <div className="max-w-4xl mx-auto">{renderStep()}</div>
+                  {renderStep()}
                 </motion.div>
               </AnimatePresence>
             </div>

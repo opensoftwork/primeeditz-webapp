@@ -62,18 +62,23 @@ export function Step2ProjectConfig() {
 
   // Register submit trigger
   useEffect(() => {
-    setSubmitTrigger(() => form.handleSubmit());
+    setSubmitTrigger(() => () => form.handleSubmit());
     return () => setSubmitTrigger(null);
   }, [form, setSubmitTrigger]);
 
   return (
-    <div className="max-w-7xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-10 space-y-2 text-center max-w-2xl mx-auto">
-        <h2 className="text-3xl font-black text-white uppercase tracking-tight flex items-center justify-center gap-4">
-          <Layers className="h-8 w-8 text-primary" />
+    <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <div className="h-0.5 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/60">
+            Fulfillment Architecture
+          </span>
+        </div>
+        <h2 className="text-2xl font-black uppercase tracking-tighter text-white">
           Project Configuration
         </h2>
-        <p className="text-white/40 font-medium text-sm">
+        <p className="text-xs font-semibold text-white/40 max-w-lg leading-relaxed">
           Define what projects get created when this package is selected. A
           single package can spawn multiple separate projects.
         </p>

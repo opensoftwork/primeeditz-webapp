@@ -147,13 +147,20 @@ export function Step4Review() {
   )?.name;
 
   return (
-    <div className="max-w-6xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-10 space-y-2">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight">
-          Review & Finalize
+    <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+      <div className="space-y-1">
+        <div className="flex items-center gap-2">
+          <div className="h-0.5 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.5)]" />
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary/60">
+            Final Inspection
+          </span>
+        </div>
+        <h2 className="text-2xl font-black uppercase tracking-tighter text-white">
+          Package Review
         </h2>
-        <p className="text-white/40 font-medium text-sm">
-          A high-level overview of your service package before it goes live.
+        <p className="text-xs font-semibold text-white/40 max-w-lg leading-relaxed">
+          Verify all configurations, line items, and terms before finalizing the
+          service package.
         </p>
       </div>
 
