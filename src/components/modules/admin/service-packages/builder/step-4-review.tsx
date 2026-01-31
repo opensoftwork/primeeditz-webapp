@@ -24,6 +24,14 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
 import { useBuilder } from "./builder-context";
 import { FolderPreview } from "./components/folder-preview";
 export function Step4Review() {
@@ -295,16 +303,45 @@ export function Step4Review() {
                           </div>
                         </div>
 
-                        <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5">
-                          <div className="p-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
-                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                              Folder Structure Preview
-                            </span>
-                          </div>
-                          <div className="max-h-[200px] overflow-y-auto">
-                            <FolderPreview
-                              templateId={config.folderTemplateId}
-                            />
+                        <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5 relative group/preview">
+                          <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
+                          <div className="p-6 flex flex-col items-center justify-center text-center space-y-3 relative z-10">
+                            <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover/preview:scale-110 transition-transform duration-300">
+                              <Layers className="h-6 w-6 text-primary/40 group-hover/preview:text-primary transition-colors" />
+                            </div>
+                            <div className="space-y-1">
+                              <h5 className="text-sm font-bold text-white uppercase tracking-tight">
+                                Folder Structure
+                              </h5>
+                              <p className="text-[10px] text-white/40 font-medium max-w-[200px]">
+                                Click to view the complete folder hierarchy for this project config
+                              </p>
+                            </div>
+                            
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm"
+                                  className="h-8 text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 hover:bg-white/10 hover:text-white mt-1"
+                                >
+                                  View Structure
+                                </Button>
+                              </SheetTrigger>
+                              <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-white/10 p-0">
+                                <SheetHeader className="p-6 border-b border-white/10">
+                                  <SheetTitle className="text-lg font-black uppercase tracking-tight text-white">
+                                    Folder Structure Preview
+                                  </SheetTitle>
+                                  <SheetDescription className="text-xs text-white/40 font-medium uppercase tracking-wider">
+                                    {config.label || "Project Configuration"}
+                                  </SheetDescription>
+                                </SheetHeader>
+                                <div className="h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
+                                  <FolderPreview templateId={config.folderTemplateId} />
+                                </div>
+                              </SheetContent>
+                            </Sheet>
                           </div>
                         </div>
                       </div>

@@ -50,7 +50,7 @@ export function FolderPreview({ templateId }: FolderPreviewProps) {
   }
 
   return (
-    <div className="p-6 space-y-2 animate-in fade-in duration-500 overflow-y-auto max-h-[400px]">
+    <div className="p-6 space-y-2 animate-in fade-in duration-500">
       <div className="flex items-center gap-2 mb-6 ml-1">
         <div className="h-1.5 w-1.5 rounded-full bg-primary" />
         <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest">
