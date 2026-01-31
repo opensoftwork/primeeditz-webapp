@@ -61,6 +61,13 @@ interface BuilderContextValue {
 
   isEditing: boolean;
   packageId: Id<"servicePackages"> | null;
+
+  // Navigation
+  nextStep: () => void;
+  prevStep: () => void;
+  goToStep: (step: number) => void;
+  submitTrigger: (() => void) | null;
+  setSubmitTrigger: (fn: (() => void) | null) => void;
 }
 
 const BuilderContext = createContext<BuilderContextValue | null>(null);
@@ -131,6 +138,14 @@ export function BuilderProvider({
     }
   }, [packageId, pkg, isInitialized]);
 
+  const [submitTrigger, setSubmitTrigger] = useState<(() => void) | null>(null);
+
+  const nextStep = () => setCurrentStep((s) => Math.min(s + 1, 4));
+  const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
+  const goToStep = (step: number) => {
+    if (step >= 1 && step <= 4) setCurrentStep(step);
+  };
+
   const value = useMemo(
     () => ({
       currentStep,
@@ -143,8 +158,13 @@ export function BuilderProvider({
       setStep3Data,
       isEditing: !!packageId,
       packageId: packageId || null,
+      nextStep,
+      prevStep,
+      goToStep,
+      submitTrigger,
+      setSubmitTrigger,
     }),
-    [currentStep, step1Data, step2Data, step3Data, packageId],
+    [currentStep, step1Data, step2Data, step3Data, packageId, submitTrigger],
   );
 
   if (!isInitialized) {

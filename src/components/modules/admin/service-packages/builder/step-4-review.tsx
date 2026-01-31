@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -18,7 +19,6 @@ import {
   Package,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { useBuilder } from "./builder-context";
 import { FolderPreview } from "./components/folder-preview";
-
 export function Step4Review() {
   const router = useRouter();
   const {
@@ -34,9 +33,16 @@ export function Step4Review() {
     step2Data,
     step3Data,
     setCurrentStep,
+    setSubmitTrigger,
     isEditing,
     packageId,
   } = useBuilder();
+
+  // Register submit trigger
+  useEffect(() => {
+    setSubmitTrigger(() => () => handleSave(true));
+    return () => setSubmitTrigger(null);
+  }, [setSubmitTrigger]);
 
   // Queries
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
@@ -92,11 +98,13 @@ export function Step4Review() {
             (config.defaultStorageTierId as Id<"storageTiers">) || undefined,
         })),
         // For backward compatibility until full migration
-        projectTypeId: step2Data.projectConfigs[0].projectTypeId as Id<"projectTypes">,
-        folderTemplateId: step2Data.projectConfigs[0].folderTemplateId as Id<"folderTemplates">,
+        projectTypeId: step2Data.projectConfigs[0]
+          .projectTypeId as Id<"projectTypes">,
+        folderTemplateId: step2Data.projectConfigs[0]
+          .folderTemplateId as Id<"folderTemplates">,
         defaultStorageTierId:
-          (step2Data.projectConfigs[0].defaultStorageTierId as Id<"storageTiers">) ||
-          undefined,
+          (step2Data.projectConfigs[0]
+            .defaultStorageTierId as Id<"storageTiers">) || undefined,
         lineItems: step3Data.lineItems.map((item) => ({
           id: item.id,
           sectionId: (item.sectionId as Id<"quotationSections">) || undefined,
@@ -244,49 +252,60 @@ export function Step4Review() {
 
             <div className="space-y-4">
               {step2Data?.projectConfigs.map((config, index) => {
-                const type = projectTypes.find((t) => t._id === config.projectTypeId);
-                const tier = storageTiers.find((t) => t._id === config.defaultStorageTierId);
+                const type = projectTypes.find(
+                  (t) => t._id === config.projectTypeId,
+                );
+                const tier = storageTiers.find(
+                  (t) => t._id === config.defaultStorageTierId,
+                );
 
                 return (
-                  <Card key={config.id} className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
+                  <Card
+                    key={config.id}
+                    className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle"
+                  >
                     <CardContent className="p-8">
-                       <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                          <div className="md:col-span-4 space-y-4">
-                            <div>
-                              <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                                Configuration {index + 1}
-                              </p>
-                              <h4 className="text-lg font-black text-white uppercase tracking-tight mt-1">
-                                {config.label || "Untitled Project"}
-                              </h4>
-                            </div>
-
-                            <div className="space-y-3">
-                              <div className="flex items-center gap-2">
-                                <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                                  {type?.name || "Unknown Type"}
-                                </Badge>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                <HardDrive className="h-3.5 w-3.5 text-white/20" />
-                                <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
-                                  {tier ? `${tier.name} (${tier.sizeGB}GB)` : "On-Demand Storage"}
-                                </span>
-                              </div>
-                            </div>
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                        <div className="md:col-span-4 space-y-4">
+                          <div>
+                            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                              Configuration {index + 1}
+                            </p>
+                            <h4 className="text-lg font-black text-white uppercase tracking-tight mt-1">
+                              {config.label || "Untitled Project"}
+                            </h4>
                           </div>
 
-                          <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5">
-                            <div className="p-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
-                               <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                                 Folder Structure Preview
-                               </span>
+                          <div className="space-y-3">
+                            <div className="flex items-center gap-2">
+                              <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
+                                {type?.name || "Unknown Type"}
+                              </Badge>
                             </div>
-                            <div className="max-h-[200px] overflow-y-auto">
-                               <FolderPreview templateId={config.folderTemplateId} />
+                            <div className="flex items-center gap-2">
+                              <HardDrive className="h-3.5 w-3.5 text-white/20" />
+                              <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
+                                {tier
+                                  ? `${tier.name} (${tier.sizeGB}GB)`
+                                  : "On-Demand Storage"}
+                              </span>
                             </div>
                           </div>
-                       </div>
+                        </div>
+
+                        <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5">
+                          <div className="p-4 border-b border-white/5 bg-white/2 flex items-center justify-between">
+                            <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+                              Folder Structure Preview
+                            </span>
+                          </div>
+                          <div className="max-h-[200px] overflow-y-auto">
+                            <FolderPreview
+                              templateId={config.folderTemplateId}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </CardContent>
                   </Card>
                 );
@@ -398,30 +417,9 @@ export function Step4Review() {
                 </div>
               </div>
 
-              <Separator className="bg-white/10" />
+              <Separator className="bg-white/10 mt-6" />
 
-              <div className="space-y-3 pt-2">
-                <Button
-                  onClick={() => handleSave(true)}
-                  disabled={isSaving}
-                  className="w-full h-14 bg-white hover:bg-white/90 text-primary font-black uppercase tracking-widest text-xs rounded-[20px] shadow-xl shadow-zinc-950/20 gap-2 transition-all hover:scale-[1.02] active:scale-[0.98]"
-                >
-                  {isSaving ? "Saving..." : "Publish Package"}
-                  {!isSaving && <Rocket className="h-4 w-4" />}
-                </Button>
-
-                <Button
-                  variant="outline"
-                  onClick={() => handleSave(false)}
-                  disabled={isSaving}
-                  className="w-full h-14 bg-white/5 border-white/10 hover:bg-white/10 text-white font-black uppercase tracking-widest text-xs rounded-[20px] transition-all gap-2"
-                >
-                  <Save className="h-4 w-4" />
-                  Save as Draft
-                </Button>
-              </div>
-
-              <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
+              <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-2xl border border-white/5 mt-4">
                 <BadgeAlert className="h-4 w-4 text-white/40" />
                 <p className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-tight">
                   Proceeding will create a template used for studio quotations.
@@ -429,15 +427,6 @@ export function Step4Review() {
               </div>
             </div>
           </Card>
-
-          <Button
-            variant="ghost"
-            onClick={() => setCurrentStep(3)}
-            className="w-full h-12 bg-white/2 hover:bg-white/5 text-white/20 hover:text-white font-black uppercase tracking-widest text-[9px] rounded-2xl transition-all gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Pricing
-          </Button>
         </div>
       </div>
     </div>

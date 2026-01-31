@@ -1,32 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
-import {
-  Field,
-  FieldLabel,
-  FieldError,
-  FieldDescription,
-} from "@/components/ui/field";
-import { Switch } from "@/components/ui/switch";
-import {
-  Plus,
-  ArrowLeft,
-  ArrowRight,
-  IndianRupee,
-  ReceiptIndianRupee,
-  FileText,
-  BadgePercent,
-  Calculator,
-} from "lucide-react";
+import { Field, FieldError } from "@/components/ui/field";
+import { Plus, FileText, Calculator } from "lucide-react";
 
 import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 
 import { useBuilder } from "./builder-context";
 import { LineItemRow } from "./components/line-item-row";
@@ -51,7 +36,13 @@ const step3Schema = z.object({
 });
 
 export function Step3Pricing() {
-  const { step2Data, step3Data, setStep3Data, setCurrentStep } = useBuilder();
+  const {
+    step2Data,
+    step3Data,
+    setStep3Data,
+    setCurrentStep,
+    setSubmitTrigger,
+  } = useBuilder();
   const projectConfigs = step2Data?.projectConfigs ?? [];
   const sections =
     useQuery(api.functions.quotations.sections.queries.getSections, {
@@ -87,13 +78,19 @@ export function Step3Pricing() {
     },
   });
 
+  // Register submit trigger
+  useEffect(() => {
+    setSubmitTrigger(() => form.handleSubmit());
+    return () => setSubmitTrigger(null);
+  }, [form, setSubmitTrigger]);
+
   return (
     <form.Subscribe selector={(state) => state.values}>
       {(values) => {
         return (
           <div className="max-w-6xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-            <div className="mb-10 space-y-2">
-              <h2 className="text-2xl font-black text-white uppercase tracking-tight">
+            <div className="mb-10 space-y-2 text-center">
+              <h2 className="text-3xl font-black text-white uppercase tracking-tight">
                 Pricing & Terms
               </h2>
               <p className="text-white/40 font-medium text-sm">
@@ -113,8 +110,8 @@ export function Step3Pricing() {
               {/* Line Items Section */}
               <section className="space-y-6">
                 <div className="flex items-center justify-between ml-1">
-                  <div className="flex items-center gap-2">
-                    <Calculator className="h-4 w-4 text-primary" />
+                  <div className="flex items-center gap-3">
+                    <Calculator className="h-5 w-5 text-primary" />
                     <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">
                       Service Line Items
                     </h3>
@@ -141,8 +138,8 @@ export function Step3Pricing() {
                   </Button>
                 </div>
 
-                <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-                  <div className="bg-white/2 border-b border-white/5 px-8 py-3 grid grid-cols-12 gap-3 items-center">
+                <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/50">
+                  <div className="bg-white/5 border-b border-white/5 px-8 py-4 grid grid-cols-12 gap-3 items-center">
                     <div className="col-span-12 md:col-span-2 translate-x-4">
                       <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
                         Project
@@ -175,7 +172,7 @@ export function Step3Pricing() {
                     </div>
                   </div>
 
-                  <CardContent className="p-0 divide-y divide-white/5">
+                  <CardContent className="p-0 divide-y divide-white/5 bg-zinc-950/20">
                     <form.Field name="lineItems" mode="array">
                       {(field) => (
                         <>
@@ -203,12 +200,12 @@ export function Step3Pricing() {
                     </form.Field>
                   </CardContent>
 
-                  <div className="bg-white/2 p-8 space-y-8">
-                    <div className="flex flex-col xl:flex-row gap-10">
+                  <div className="bg-zinc-950/40 p-10 space-y-12 border-t border-white/5">
+                    <div className="flex flex-col xl:flex-row gap-12">
                       {/* Terms & Conditions */}
-                      <div className="flex-1 w-full space-y-4">
-                        <div className="flex items-center gap-2 ml-1">
-                          <FileText className="h-4 w-4 text-primary" />
+                      <div className="flex-1 w-full space-y-6">
+                        <div className="flex items-center gap-3 ml-1">
+                          <FileText className="h-5 w-5 text-primary" />
                           <h3 className="text-[10px] font-black text-white/40 uppercase tracking-widest">
                             Terms & Conditions
                           </h3>
@@ -227,11 +224,16 @@ export function Step3Pricing() {
                                     field.handleChange(e.target.value)
                                   }
                                   aria-invalid={hasError}
-                                  className="bg-zinc-950/40 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none h-32 rounded-2xl text-sm transition-all p-4 shadow-inner"
+                                  className="bg-zinc-950 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none h-48 rounded-[24px] text-base transition-all p-6 shadow-inner"
                                 />
                                 <FieldError className="text-[10px] uppercase tracking-wider font-bold">
                                   {field.state.meta.errors
-                                    .map((err) => err?.toString())
+                                    .map((err) =>
+                                      typeof err === "string"
+                                        ? err
+                                        : (err as any)?.message,
+                                    )
+                                    .filter(Boolean)
                                     .join(", ")}
                                 </FieldError>
                               </Field>
@@ -241,47 +243,17 @@ export function Step3Pricing() {
                       </div>
 
                       {/* Pricing Summary Breakdown */}
-                      <div className="flex-[1.5] w-full">
-                         <PricingSummary 
-                           lineItems={values.lineItems}
-                           projectConfigs={projectConfigs}
-                           applyGST={values.applyGST}
-                         />
+                      <div className="flex-[1.8] w-full">
+                        <PricingSummary
+                          lineItems={values.lineItems}
+                          projectConfigs={projectConfigs}
+                          applyGST={values.applyGST}
+                        />
                       </div>
                     </div>
                   </div>
                 </Card>
               </section>
-
-              {/* Navigation */}
-              <div className="pt-8 border-t border-white/5 flex items-center justify-between">
-                <Button
-                  type="button"
-                  variant="ghost"
-                  onClick={() => setCurrentStep(2)}
-                  className="hover:bg-white/5 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-2xl transition-all gap-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  Back to Config
-                </Button>
-
-                <form.Subscribe
-                  selector={(state) => [state.canSubmit, state.isSubmitting]}
-                >
-                  {([canSubmit, isSubmitting]) => (
-                    <Button
-                      type="submit"
-                      disabled={!canSubmit || isSubmitting}
-                      className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
-                    >
-                      {isSubmitting ? "Processing..." : "Next: Review"}
-                      {!isSubmitting && (
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      )}
-                    </Button>
-                  )}
-                </form.Subscribe>
-              </div>
             </form>
           </div>
         );
@@ -289,4 +261,3 @@ export function Step3Pricing() {
     </form.Subscribe>
   );
 }
-

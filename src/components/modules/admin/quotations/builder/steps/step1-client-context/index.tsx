@@ -122,7 +122,6 @@ export function Step1StudioContext() {
                         <StudioDataTable
                           onSelect={handleClientSelect}
                           selectedId={field.state.value}
-                          onlyWithProjects
                         />
                         {isInvalid && (
                           <FieldError className="mt-2 ml-1">

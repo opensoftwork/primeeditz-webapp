@@ -1,24 +1,16 @@
 "use client";
 
+import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
 import { useQuery } from "convex/react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Info,
-  Plus,
-  Package,
-  Layers,
-} from "lucide-react";
+import { Info, Plus, Package, Layers } from "lucide-react";
 import { nanoid } from "nanoid";
 import * as z from "zod";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useBuilder } from "./builder-context";
-import { FolderPreview } from "./components/folder-preview";
 import { ProjectConfigCard } from "./components/project-config-card";
 
 const projectConfigSchema = z.object({
@@ -36,9 +28,9 @@ const step2Schema = z.object({
 });
 
 type Step2FormValues = z.infer<typeof step2Schema>;
-
 export function Step2ProjectConfig() {
-  const { step2Data, setStep2Data, setCurrentStep } = useBuilder();
+  const { step2Data, setStep2Data, setCurrentStep, setSubmitTrigger } =
+    useBuilder();
 
   // Queries
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
@@ -68,20 +60,26 @@ export function Step2ProjectConfig() {
     },
   });
 
+  // Register submit trigger
+  useEffect(() => {
+    setSubmitTrigger(() => form.handleSubmit());
+    return () => setSubmitTrigger(null);
+  }, [form, setSubmitTrigger]);
+
   return (
     <div className="max-w-7xl mx-auto py-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-      <div className="mb-10 space-y-2">
-        <h2 className="text-2xl font-black text-white uppercase tracking-tight flex items-center gap-3">
-          <Layers className="h-6 w-6 text-primary" />
-          Project Configurations
+      <div className="mb-10 space-y-2 text-center max-w-2xl mx-auto">
+        <h2 className="text-3xl font-black text-white uppercase tracking-tight flex items-center justify-center gap-4">
+          <Layers className="h-8 w-8 text-primary" />
+          Project Configuration
         </h2>
         <p className="text-white/40 font-medium text-sm">
           Define what projects get created when this package is selected. A
-          single package can spawn multiple projects.
+          single package can spawn multiple separate projects.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
         {/* Form Column */}
         <div className="lg:col-span-8">
           <form
@@ -90,11 +88,11 @@ export function Step2ProjectConfig() {
               e.stopPropagation();
               form.handleSubmit();
             }}
-            className="space-y-6"
+            className="space-y-8"
           >
             <form.Field name="projectConfigs" mode="array">
               {(field) => (
-                <div className="space-y-6">
+                <div className="space-y-8">
                   {field.state.value.map((_, index) => (
                     <ProjectConfigCard
                       key={field.state.value[index].id}
@@ -110,7 +108,7 @@ export function Step2ProjectConfig() {
                   <Button
                     type="button"
                     variant="outline"
-                    className="w-full h-16 border-dashed border-white/10 hover:border-primary/50 hover:bg-primary/5 bg-transparent rounded-2xl text-white/40 hover:text-primary transition-all group"
+                    className="w-full h-20 border-dashed border-white/5 hover:border-primary/50 hover:bg-primary/5 bg-white/2 rounded-[24px] text-white/40 hover:text-primary transition-all group"
                     onClick={() =>
                       field.pushValue({
                         id: nanoid(),
@@ -121,43 +119,14 @@ export function Step2ProjectConfig() {
                       })
                     }
                   >
-                    <Plus className="h-5 w-5 mr-3 group-hover:scale-110 transition-transform" />
-                    <span className="font-black uppercase tracking-widest text-xs">
+                    <Plus className="h-6 w-6 mr-4 group-hover:scale-110 transition-transform" />
+                    <span className="font-black uppercase tracking-[0.2em] text-[10px]">
                       Add Another Project Configuration
                     </span>
                   </Button>
                 </div>
               )}
             </form.Field>
-
-            <div className="pt-8 border-t border-white/5 flex items-center justify-between">
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => setCurrentStep(1)}
-                className="hover:bg-white/5 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px] h-12 px-6 rounded-2xl transition-all gap-2"
-              >
-                <ArrowLeft className="h-4 w-4" />
-                Identity
-              </Button>
-
-              <form.Subscribe
-                selector={(state) => [state.canSubmit, state.isSubmitting]}
-              >
-                {([canSubmit, isSubmitting]) => (
-                  <Button
-                    type="submit"
-                    disabled={!canSubmit || isSubmitting}
-                    className="bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-2xl shadow-xl shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98] gap-2"
-                  >
-                    {isSubmitting ? "Processing..." : "Next: Pricing"}
-                    {!isSubmitting && (
-                      <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                    )}
-                  </Button>
-                )}
-              </form.Subscribe>
-            </div>
           </form>
         </div>
 
@@ -185,7 +154,7 @@ export function Step2ProjectConfig() {
               <form.Subscribe selector={(state) => state.values.projectConfigs}>
                 {(configs) => {
                   const validConfigs = configs.filter(
-                    (c) => c.projectTypeId && c.folderTemplateId
+                    (c) => c.projectTypeId && c.folderTemplateId,
                   );
 
                   if (validConfigs.length === 0) {
@@ -207,7 +176,7 @@ export function Step2ProjectConfig() {
                     <div className="space-y-3">
                       {validConfigs.map((config, i) => {
                         const type = projectTypes.find(
-                          (t) => t._id === config.projectTypeId
+                          (t) => t._id === config.projectTypeId,
                         );
                         return (
                           <div

@@ -43,7 +43,7 @@ export function ProjectConfigCard({
   // Get selected project type to filter folder templates
   const projectTypeId = useStore(
     form.store,
-    (state: any) => state.values.projectConfigs[index]?.projectTypeId
+    (state: any) => state.values.projectConfigs[index]?.projectTypeId,
   );
 
   const folderTemplates =
@@ -51,7 +51,7 @@ export function ProjectConfigCard({
       api.functions.folderTemplates.queries.listByProjectType,
       projectTypeId
         ? { projectTypeId: projectTypeId as Id<"projectTypes"> }
-        : "skip"
+        : "skip",
     ) || [];
 
   return (
@@ -127,7 +127,7 @@ export function ProjectConfigCard({
                       // Clear folder template when project type changes
                       form.setFieldValue(
                         `projectConfigs[${index}].folderTemplateId`,
-                        ""
+                        "",
                       );
                     }}
                   >
@@ -151,7 +151,12 @@ export function ProjectConfigCard({
                     </SelectContent>
                   </Select>
                   <FieldError className="text-[9px] uppercase tracking-wider font-bold mt-1">
-                    {field.state.meta.errors.map((err: any) => err?.toString()).join(", ")}
+                    {field.state.meta.errors
+                      .map((err: any) =>
+                        typeof err === "string" ? err : err?.message,
+                      )
+                      .filter(Boolean)
+                      .join(", ")}
                   </FieldError>
                 </Field>
               );
@@ -209,7 +214,12 @@ export function ProjectConfigCard({
                     </SelectContent>
                   </Select>
                   <FieldError className="text-[9px] uppercase tracking-wider font-bold mt-1">
-                    {field.state.meta.errors.map((err: any) => err?.toString()).join(", ")}
+                    {field.state.meta.errors
+                      .map((err: any) =>
+                        typeof err === "string" ? err : err?.message,
+                      )
+                      .filter(Boolean)
+                      .join(", ")}
                   </FieldError>
                 </Field>
               );

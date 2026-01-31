@@ -10,15 +10,16 @@ export const getStudios = adminQuery({
     includeDeactivated: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {
-    return await ctx.db
+    const studios = await ctx.db
       .query("profiles")
       .withIndex("by_role", (q) => q.eq("role", "studio"))
-      .filter((q) =>
-        args.includeDeactivated
-          ? q.neq(q.field("deactivatedAt"), -1)
-          : q.eq(q.field("deactivatedAt"), undefined),
-      )
       .collect();
+
+    if (args.includeDeactivated) {
+      return studios;
+    }
+
+    return studios.filter((s) => s.deactivatedAt === undefined);
   },
 });
 

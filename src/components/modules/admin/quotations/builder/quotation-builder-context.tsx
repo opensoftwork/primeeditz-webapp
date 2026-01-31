@@ -125,7 +125,7 @@ interface QuotationBuilderContextValue {
     step: K,
     data: Partial<QuotationFormData[K]>,
   ) => void;
-  goToStep: (step: QuotationStepId) => void;
+  goToStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
   applyTemplate: (templateId: string, projectId: string) => void;
@@ -311,8 +311,10 @@ export function QuotationBuilderProvider({
     }
   }, [formData.step2.projectIds, formData.step1.projectIds, setFormData]);
 
-  const goToStep = useCallback((step: QuotationStepId) => {
-    setCurrentStep(step);
+  const goToStep = useCallback((step: number) => {
+    if (step >= 1 && step <= 5) {
+      setCurrentStep(step as QuotationStepId);
+    }
   }, []);
 
   const nextStep = useCallback(() => {
