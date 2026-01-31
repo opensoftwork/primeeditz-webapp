@@ -6,30 +6,15 @@ import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import {
-  Pencil,
-  FolderTree,
-  Tag,
-  Loader2,
-  Save,
-  ChevronRight,
-  ShieldCheck,
-} from "lucide-react";
+import { Pencil, FolderTree, Tag, ChevronRight } from "lucide-react";
 import type { FolderLevel1, FolderLevel2, FolderLevel3 } from "@convex/schema";
 import { useMemo } from "react";
 import { cn } from "@/lib/utils";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
 
 export function Step3Review() {
-  const {
-    step1Data,
-    folders,
-    goToStep,
-    handleSubmit,
-    saveDraft,
-    isSubmitting,
-    isSavingDraft,
-    isEditing,
-  } = useProjectTypeWizard();
+  const { step1Data, folders, goToStep, isSubmitting, isSavingDraft } =
+    useProjectTypeWizard();
 
   // Get category name
   const categories = useQuery(
@@ -45,7 +30,7 @@ export function Step3Review() {
   const isLoading = isSubmitting || isSavingDraft;
 
   return (
-    <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
+    <div className="h-full overflow-y-auto custom-scrollbar space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
       {/* Step Header */}
       <div className="space-y-2">
         <div className="flex items-center gap-3">
@@ -101,10 +86,22 @@ export function Step3Review() {
                   value={step1Data?.description || "No description provided."}
                 />
               </div>
-              <SummaryField
-                label="Icon Reference"
-                value={step1Data?.icon || "Default Icon"}
-              />
+              <div className="flex flex-col gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
+                  Icon Reference
+                </span>
+                <div className="flex items-center gap-3 p-3 rounded-xl bg-white/3 border border-white/5 w-fit min-w-[140px]">
+                  <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                    <DynamicIcon
+                      name={step1Data?.icon || "Package"}
+                      className="h-4 w-4 text-primary"
+                    />
+                  </div>
+                  <span className="text-[11px] font-bold text-white uppercase tracking-tight">
+                    {step1Data?.icon || "Default (Package)"}
+                  </span>
+                </div>
+              </div>
               <div className="flex flex-col gap-2">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
                   Initial Status
@@ -180,49 +177,6 @@ export function Step3Review() {
             </div>
           </CardContent>
         </Card>
-      </div>
-
-      {/* Action Buttons */}
-      <div className="flex items-center justify-between pt-12 border-t border-white/5">
-        <Button
-          variant="outline"
-          onClick={saveDraft}
-          disabled={isLoading}
-          className="h-14 px-8 rounded-2xl border-white/10 bg-white/5 text-white/60 hover:text-white hover:bg-white/10 font-black uppercase tracking-widest text-[10px] gap-3 transition-all active:scale-95"
-        >
-          {isSavingDraft ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin text-primary" />
-              Persisting Progress...
-            </>
-          ) : (
-            <>
-              <Save className="h-4 w-4" />
-              Save Progress as Draft
-            </>
-          )}
-        </Button>
-
-        <Button
-          onClick={handleSubmit}
-          disabled={isLoading || folders.length === 0}
-          className="h-14 px-12 rounded-2xl bg-primary hover:bg-primary/90 text-primary-foreground font-black uppercase tracking-[0.2em] text-[10px] shadow-2xl shadow-primary/30 gap-3 transition-all hover:scale-[1.02] active:scale-95"
-        >
-          {isSubmitting ? (
-            <>
-              <Loader2 className="h-4 w-4 animate-spin" />
-              {isEditing ? "Synchronizing Updates..." : "Initializing Type..."}
-            </>
-          ) : (
-            <>
-              <ShieldCheck className="h-4 w-4" />
-              {isEditing
-                ? "Apply Configuration Changes"
-                : "Confirm & Finalize Creation"}
-              <ChevronRight className="h-4 w-4 ml-1 opacity-50" />
-            </>
-          )}
-        </Button>
       </div>
     </div>
   );

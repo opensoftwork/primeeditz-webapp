@@ -111,11 +111,15 @@ export function ProjectTypeWizardProvider({
   const canProceed = useCallback(() => {
     switch (step) {
       case 1:
-        return !!step1Data?.name && step1Data.name.length >= 2;
+        return (
+          !!step1Data?.name &&
+          step1Data.name.length >= 2 &&
+          !!step1Data?.categoryId
+        );
       case 2:
-        return folders.length > 0; // At least one folder required
+        return folders.length > 0;
       case 3:
-        return true; // Review step always allows submission
+        return true;
       default:
         return false;
     }

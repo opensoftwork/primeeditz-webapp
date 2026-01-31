@@ -55,8 +55,8 @@ export default function DashboardLayout({
     (pathname?.includes("/settings/service-packages/") &&
       pathname?.split("/").length > 3) ||
     pathname?.includes("/settings/project-types/new") ||
-    (pathname?.includes("/settings/project-types/") &&
-      pathname?.endsWith("/edit")) ||
+    // Match /settings/project-types/[id] but NOT /settings/project-types/[id]/folder-templates
+    pathname?.match(/\/settings\/project-types\/[^/]+$/) !== null ||
     pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
 

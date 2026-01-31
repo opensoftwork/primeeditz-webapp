@@ -34,6 +34,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { Textarea } from "@/components/ui/textarea";
 
 const projectTypeSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -191,15 +193,29 @@ export function ProjectTypeDrawer({
                       >
                         Step 02 / Define Type Name
                       </Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20 font-bold"
-                        placeholder="e.g. Cinematic Wedding Edit"
-                      />
+                      <div className="flex items-center gap-3">
+                        <div className="shrink-0 w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                          <form.Subscribe
+                            selector={(state) => state.values.icon}
+                          >
+                            {(icon) => (
+                              <DynamicIcon
+                                name={icon || "Package"}
+                                className="h-6 w-6 text-primary"
+                              />
+                            )}
+                          </form.Subscribe>
+                        </div>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20 font-bold flex-1"
+                          placeholder="e.g. Cinematic Wedding Edit"
+                        />
+                      </div>
                       {field.state.meta.errors.length > 0 && (
                         <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
                           {field.state.meta.errors.join(", ")}
@@ -218,13 +234,13 @@ export function ProjectTypeDrawer({
                       >
                         Description (Optional)
                       </Label>
-                      <Input
+                      <Textarea
                         id={field.name}
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20"
+                        className="bg-white/5 border-white/10 text-white h-24 rounded-2xl focus:ring-primary/20 resize-none"
                         placeholder="Briefly describe what this project type covers..."
                       />
                     </div>
@@ -240,14 +256,9 @@ export function ProjectTypeDrawer({
                       >
                         Icon Identifier (Optional)
                       </Label>
-                      <Input
-                        id={field.name}
-                        name={field.name}
+                      <IconPicker
                         value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20"
-                        placeholder="e.g. video, camera, music"
+                        onChange={(val) => field.handleChange(val)}
                       />
                     </div>
                   )}

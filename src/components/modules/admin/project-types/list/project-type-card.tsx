@@ -3,7 +3,6 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import {
-  Boxes,
   Edit2,
   Eye,
   EyeOff,
@@ -29,6 +28,7 @@ import {
 import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
 
 import type { AdminProjectType } from "./types";
 
@@ -96,7 +96,10 @@ export function ProjectTypeCard({
                     : "from-primary/20 to-primary/5 border-primary/20 group-hover:border-primary/30",
                 )}
               >
-                <Boxes
+                <DynamicIcon
+                  name={
+                    type.icon || (type.isDraft ? "DraftingCompass" : "Package")
+                  }
                   className={cn(
                     "h-5 w-5",
                     type.isDraft ? "text-amber-500" : "text-primary",

@@ -230,7 +230,7 @@ export function Step2Folders() {
       )}
 
       {/* Folder Tree - Takes remaining space */}
-      <div className="flex-1 min-h-0 bg-zinc-950/30 rounded-2xl border border-white/5 p-4 overflow-hidden">
+      <div className="flex-1 min-h-0 bg-zinc-950/30 rounded-2xl border border-white/5 p-4 overflow-y-auto custom-scrollbar">
         <FolderTreeComponent
           folders={folders}
           onAddRoot={addRootFolder}

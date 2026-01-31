@@ -1,26 +1,14 @@
 "use client";
 
-import { useForm } from "@tanstack/react-form";
-import { zodValidator } from "@tanstack/zod-form-adapter";
-import * as z from "zod";
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { useState, useMemo } from "react";
-import { toast } from "sonner";
+import { useForm, useStore } from "@tanstack/react-form";
+import { useMutation, useQuery } from "convex/react";
 import { Plus, Tag } from "lucide-react";
-import { useProjectTypeWizard } from "../wizard-context";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -29,6 +17,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { Textarea } from "@/components/ui/textarea";
+import { useProjectTypeWizard } from "../wizard-context";
 
 const step1Schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -39,7 +41,7 @@ const step1Schema = z.object({
 });
 
 export function Step1Identity() {
-  const { step1Data, setStep1Data, handleNext } = useProjectTypeWizard();
+  const { step1Data, setStep1Data } = useProjectTypeWizard();
   const [isAddingCategory, setIsAddingCategory] = useState(false);
   const [newCategoryName, setNewCategoryName] = useState("");
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
@@ -60,7 +62,11 @@ export function Step1Identity() {
       icon: step1Data?.icon ?? "",
     },
     validators: {
-      onChange: step1Schema,
+      onChange: ({ value }) => {
+        const result = step1Schema.safeParse(value);
+        if (result.success) return undefined;
+        return result.error.flatten().fieldErrors;
+      },
     },
     onSubmit: async ({ value }) => {
       setStep1Data({
@@ -70,9 +76,34 @@ export function Step1Identity() {
         icon: value.icon || undefined,
         isActive: value.isActive,
       });
-      handleNext();
     },
   });
+
+  // Auto-sync form state to context for single-page editor support
+  const formValues = useStore(form.store, (state) => state.values);
+
+  useEffect(() => {
+    if (!formValues) return;
+
+    // Only update if something actually changed to avoid render cycles
+    const hasChanged =
+      formValues.name !== step1Data?.name ||
+      formValues.description !== (step1Data?.description ?? "") ||
+      formValues.categoryId !== (step1Data?.categoryId ?? "") ||
+      formValues.icon !== (step1Data?.icon ?? "") ||
+      formValues.isActive !== (step1Data?.isActive ?? true);
+
+    if (hasChanged) {
+      setStep1Data({
+        name: formValues.name,
+        description: formValues.description || undefined,
+        categoryId:
+          (formValues.categoryId as Id<"projectCategories">) || undefined,
+        icon: formValues.icon || undefined,
+        isActive: formValues.isActive,
+      });
+    }
+  }, [formValues, setStep1Data, step1Data]);
 
   const handleAddCategory = async () => {
     if (!newCategoryName.trim()) return;
@@ -90,15 +121,6 @@ export function Step1Identity() {
       setIsCreatingCategory(false);
     }
   };
-
-  // Enable/Disable next button based on form state
-  const isFormValid = useMemo(() => {
-    return (
-      !!form.getFieldValue("name") &&
-      form.getFieldValue("name").length >= 2 &&
-      !!form.getFieldValue("categoryId")
-    );
-  }, [form.state.values]);
 
   return (
     <div className="h-full flex flex-col">
@@ -119,165 +141,185 @@ export function Step1Identity() {
           e.preventDefault();
           form.handleSubmit();
         }}
-        className="flex-1 min-h-0 flex flex-col gap-4"
+        className="flex-1 min-h-0 flex flex-col gap-6"
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-4">
-            {/* Name Field */}
-            <form.Field
-              name="name"
-              validators={{ onChange: step1Schema.shape.name }}
-            >
-              {(field) => (
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    Project Type Name *
-                  </Label>
+        {/* Top Row - Name and Icon */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Name Field */}
+          <form.Field
+            name="name"
+            validators={{ onChange: step1Schema.shape.name }}
+          >
+            {(field) => (
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Project Type Name *
+                </Label>
+                <div className="flex items-center gap-3">
+                  <div className="shrink-0 w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                    <form.Subscribe selector={(state) => state.values.icon}>
+                      {(icon) => (
+                        <DynamicIcon
+                          name={icon || "Package"}
+                          className="h-6 w-6 text-primary"
+                        />
+                      )}
+                    </form.Subscribe>
+                  </div>
                   <Input
                     value={field.state.value}
                     onBlur={field.handleBlur}
                     onChange={(e) => field.handleChange(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20 font-bold"
+                    className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20 font-bold flex-1"
                     placeholder="e.g. Wedding Photography"
                   />
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
-                  )}
                 </div>
-              )}
-            </form.Field>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                    {field.state.meta.errors.join(", ")}
+                  </p>
+                )}
+              </div>
+            )}
+          </form.Field>
 
-            {/* Category Field */}
-            <form.Field
-              name="categoryId"
-              validators={{ onChange: step1Schema.shape.categoryId }}
-            >
-              {(field) => (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      Category *
-                    </Label>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsAddingCategory(true)}
-                      className="h-7 px-2 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
-                    >
-                      <Plus className="h-3 w-3" /> New Category
-                    </Button>
-                  </div>
+          {/* Icon Field */}
+          <form.Field name="icon">
+            {(field) => (
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Icon Identifier (Optional)
+                </Label>
+                <IconPicker
+                  value={field.state.value}
+                  onChange={(val) => field.handleChange(val)}
+                />
+                <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
+                  Select a visual marker for this project type
+                </p>
+              </div>
+            )}
+          </form.Field>
+        </div>
 
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(val) => {
-                      if (val === "ADD_NEW") {
-                        setIsAddingCategory(true);
-                      } else {
-                        field.handleChange(val);
-                      }
-                    }}
+        {/* Second Row - Category and Availability */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Category Field */}
+          <form.Field
+            name="categoryId"
+            validators={{ onChange: step1Schema.shape.categoryId }}
+          >
+            {(field) => (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                    Category *
+                  </Label>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsAddingCategory(true)}
+                    className="h-7 px-2 text-[9px] font-black uppercase tracking-widest text-primary hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
                   >
-                    <SelectTrigger className="w-full bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20">
-                      <SelectValue placeholder="Select a category..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
+                    <Plus className="h-3 w-3" /> New Category
+                  </Button>
+                </div>
+
+                <Select
+                  value={field.state.value}
+                  onValueChange={(val) => {
+                    if (val === "ADD_NEW") {
+                      setIsAddingCategory(true);
+                    } else {
+                      field.handleChange(val);
+                    }
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20">
+                    <SelectValue placeholder="Select a category..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-zinc-900 border-white/10 text-white rounded-xl">
+                    <SelectItem
+                      value="ADD_NEW"
+                      className="rounded-lg focus:bg-primary/10 focus:text-primary py-3 border-b border-white/5"
+                    >
+                      <div className="flex items-center gap-3 text-primary">
+                        <Plus className="h-4 w-4" />
+                        <span className="font-black uppercase tracking-widest text-[10px]">
+                          Add New Category
+                        </span>
+                      </div>
+                    </SelectItem>
+                    {categories?.map((cat) => (
                       <SelectItem
-                        value="ADD_NEW"
-                        className="rounded-lg focus:bg-primary/10 focus:text-primary py-3 border-b border-white/5"
+                        key={cat._id}
+                        value={cat._id}
+                        className="rounded-lg focus:bg-primary/10 focus:text-primary py-3"
                       >
-                        <div className="flex items-center gap-3 text-primary">
-                          <Plus className="h-4 w-4" />
-                          <span className="font-black uppercase tracking-widest text-[10px]">
-                            Add New Category
-                          </span>
+                        <div className="flex items-center gap-3">
+                          <Tag className="h-4 w-4 text-white/20" />
+                          <span className="font-bold">{cat.name}</span>
                         </div>
                       </SelectItem>
-                      {categories?.map((cat) => (
-                        <SelectItem
-                          key={cat._id}
-                          value={cat._id}
-                          className="rounded-lg focus:bg-primary/10 focus:text-primary py-3"
-                        >
-                          <div className="flex items-center gap-3">
-                            <Tag className="h-4 w-4 text-white/20" />
-                            <span className="font-bold">{cat.name}</span>
-                          </div>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {field.state.meta.errors.length > 0 && (
-                    <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                      {field.state.meta.errors.join(", ")}
-                    </p>
-                  )}
-                </div>
-              )}
-            </form.Field>
-          </div>
-
-          <div className="space-y-4">
-            {/* Icon Field */}
-            <form.Field name="icon">
-              {(field) => (
-                <div className="space-y-3">
-                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    Icon Identifier (Optional)
-                  </Label>
-                  <Input
-                    value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
-                    className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20"
-                    placeholder="e.g. camera, video, music"
-                  />
-                  <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
-                    Use Lucide icon name
+                    ))}
+                  </SelectContent>
+                </Select>
+                {field.state.meta.errors.length > 0 && (
+                  <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                    {field.state.meta.errors.join(", ")}
                   </p>
-                </div>
-              )}
-            </form.Field>
+                )}
+              </div>
+            )}
+          </form.Field>
 
-            {/* Is Active Toggle */}
-            <form.Field name="isActive">
-              {(field) => (
-                <div className="flex items-center justify-between p-4 rounded-xl bg-white/3 border border-white/5 transition-colors hover:bg-white/5">
-                  <div className="space-y-1">
-                    <Label className="text-white font-black uppercase tracking-tight">
-                      Availability
-                    </Label>
-                    <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-black">
-                      Show in Studio Portal
-                    </p>
+          {/* Is Active Toggle */}
+          <form.Field name="isActive">
+            {(field) => (
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Status
+                </Label>
+                <div className="flex items-center justify-between p-4 rounded-xl bg-white/3 border border-white/5 transition-colors hover:bg-white/5 h-12">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`h-2 w-2 rounded-full ${field.state.value ? "bg-emerald-500 animate-pulse" : "bg-zinc-500"}`}
+                    />
+                    <span className="text-sm font-bold text-white">
+                      {field.state.value
+                        ? "Active in Studio Portal"
+                        : "Hidden from Studios"}
+                    </span>
                   </div>
                   <Switch
                     checked={field.state.value}
                     onCheckedChange={field.handleChange}
                   />
                 </div>
-              )}
-            </form.Field>
-          </div>
+              </div>
+            )}
+          </form.Field>
         </div>
 
-        {/* Description Field */}
+        {/* Description Field - Takes remaining space */}
         <form.Field name="description">
           {(field) => (
             <div className="space-y-3">
               <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
                 Description (Optional)
               </Label>
-              <Input
+              <Textarea
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                className="bg-white/5 border-white/10 text-white h-12 rounded-xl focus:ring-primary/20"
-                placeholder="Describe what this project type covers..."
+                className="h-50 bg-white/5 border-white/10 text-white rounded-xl focus:ring-primary/20 resize-none"
+                placeholder="Describe what this project type covers, typical deliverables, turnaround expectations, and any special requirements..."
               />
+              <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
+                This description will be visible to studio managers when
+                selecting project types
+              </p>
             </div>
           )}
         </form.Field>

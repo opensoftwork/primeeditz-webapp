@@ -171,7 +171,12 @@ function ProjectTypeWizardContent() {
                 <Button
                   onClick={handleNext}
                   disabled={!canProceed}
-                  className="h-14 px-12 rounded-2xl bg-white text-black hover:bg-zinc-200 font-black uppercase tracking-widest text-[10px] transition-all shadow-[0_10px_40px_rgba(255,255,255,0.1)] group min-w-[200px]"
+                  className={cn(
+                    "h-14 px-12 rounded-2xl font-black uppercase tracking-widest text-[10px] transition-all shadow-xl min-w-[200px] group",
+                    canProceed
+                      ? "bg-primary text-primary-foreground hover:bg-primary/90 shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]"
+                      : "bg-white/5 text-white/20 border border-white/10",
+                  )}
                 >
                   Continue
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />

@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
-import ProjectTypeWizard from "@/components/modules/admin/project-types/wizard";
 import type { Id } from "@convex/_generated/dataModel";
+
+import ProjectTypeEditor from "@/components/modules/admin/project-types/detail/project-type-editor";
 
 interface PageProps {
   params: Promise<{
@@ -16,5 +17,5 @@ export default async function EditProjectTypePage({ params }: PageProps) {
     notFound();
   }
 
-  return <ProjectTypeWizard projectTypeId={id as Id<"projectTypes">} />;
+  return <ProjectTypeEditor projectTypeId={id as Id<"projectTypes">} />;
 }
