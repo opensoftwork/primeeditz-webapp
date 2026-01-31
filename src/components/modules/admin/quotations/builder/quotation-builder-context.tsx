@@ -393,8 +393,8 @@ export function QuotationBuilderProvider({
           sectionId: li.sectionId,
           description: li.description,
           unit: li.unit,
-          rate: li.unitPrice,
-          quantity: li.defaultQuantity,
+          rate: li.rate,
+          quantity: li.quantity,
           projectId: projectId, // Assign to specific project
           spawnsProject: li.spawnsProject,
           projectTypeId: li.projectTypeId,
@@ -402,9 +402,9 @@ export function QuotationBuilderProvider({
           subItems: li.subItems?.map((si) => ({
             id: crypto.randomUUID(),
             description: si.description,
-            unit: si.unit,
-            rate: si.unitPrice,
-            quantity: si.defaultQuantity,
+            unit: "Unit",
+            rate: si.amount ?? 0,
+            quantity: 1,
           })),
         }),
       );
@@ -499,7 +499,26 @@ export function QuotationBuilderProvider({
         })),
       }));
 
-      // Prefer step2 projectIds, fallback to step1 if sync failed
+      // 1. Collect unique package IDs from all projects
+      const selectedPackageIds = Array.from(
+        new Set(
+          Object.values(step3.projectTemplates).filter((id) => id && id !== ""),
+        ),
+      ) as Id<"servicePackages">[];
+
+      // 2. Determine end client name (project name)
+      // Prefer the name of the first associated project
+      const firstProjectId =
+        step2.projectIds[0] || step1.projectIds[0] || step1.projectId;
+      const associatedProject = (projects as Project[])?.find(
+        (p) => p._id === firstProjectId,
+      );
+      const endClientName =
+        associatedProject?.eventName ||
+        selectedStudio?.name ||
+        "Untitled Quotation";
+
+      // 3. Preferred project IDs list
       const projectIds =
         step2.projectIds.length > 0
           ? step2.projectIds
@@ -514,15 +533,13 @@ export function QuotationBuilderProvider({
             ? (step1.projectId as Id<"projects">)
             : undefined,
         projectIds: projectIds as Id<"projects">[] | undefined,
-
-        // Template ID is ambiguous with multiple projects, passing undefined or we could pass a primary one.
-        // For now, let's omit it as the source of truth is the line items.
-        templateId: undefined as Id<"quotationTemplates"> | undefined,
+        selectedPackageIds,
         lineItems: lineItemsPayload as any,
         terms: step5.terms,
         taxRate: step5.taxRate / 100, // API expects decimal
         discountAmount: step5.discountAmount,
         validUntil: step1.validUntil?.getTime(),
+        endClientName,
         createdBy: "ADMIN",
       };
 
@@ -539,6 +556,8 @@ export function QuotationBuilderProvider({
               ? (step1.projectId as Id<"projects">)
               : undefined,
           projectIds: projectIds as Id<"projects">[] | undefined,
+          selectedPackageIds,
+          endClientName,
           validUntil: step1.validUntil?.getTime(),
         });
         toast.success("Quotation updated successfully");

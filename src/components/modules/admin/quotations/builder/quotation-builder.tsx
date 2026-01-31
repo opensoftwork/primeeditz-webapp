@@ -221,7 +221,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
                   className="flex-1 p-8"
                 >
-                  <div className="max-w-5xl mx-auto space-y-8">
+                  <div className="w-full mx-auto space-y-8">
                     {currentStep === 1 && <Step1StudioContext />}
                     {currentStep === 2 && <Step2ProjectSelection />}
                     {currentStep === 3 && <Step2TemplateSelection />}

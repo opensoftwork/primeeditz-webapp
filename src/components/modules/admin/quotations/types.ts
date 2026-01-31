@@ -113,19 +113,18 @@ export interface GroupedLineItems {
  */
 export interface TemplateSubItem {
   description: string;
-  unit: string;
-  unitPrice: number;
-  defaultQuantity: number;
+  amount?: number;
 }
 
 /**
  * Line item in a template (uses different field names than QuotationLineItem)
  */
 export interface TemplateLineItem {
+  id: string;
   description: string;
   unit: string;
-  unitPrice: number;
-  defaultQuantity: number;
+  rate: number;
+  quantity: number;
   sectionId?: string;
   subItems?: TemplateSubItem[];
   spawnsProject?: boolean;
