@@ -26,7 +26,7 @@ export function TemplateSelector({
   onSelect,
 }: TemplateSelectorProps) {
   const templates = useQuery(
-    api.functions.folderTemplates.queries.getTemplatesByProjectType,
+    api.functions.folderTemplates.queries.listByProjectType,
     { projectTypeId },
   );
 

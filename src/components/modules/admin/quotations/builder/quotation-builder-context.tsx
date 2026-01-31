@@ -235,7 +235,7 @@ export function QuotationBuilderProvider({
   );
 
   const templatesQuery = useQuery(
-    api.functions.quotations.templates.queries.getTemplates,
+    api.functions.quotations.templates.queries.getPackages,
     {
       activeOnly: true,
     },
