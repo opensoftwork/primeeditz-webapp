@@ -161,7 +161,7 @@ function EditorContent({
               <Step2Folders compact={true} />
             </div>
           </section>
-       
+      
         </div>
       </main>
 
