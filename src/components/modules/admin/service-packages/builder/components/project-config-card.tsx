@@ -3,12 +3,11 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { FolderTree, Layout, X } from "lucide-react";
+import { FolderTree, Layout, X, Database } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Field,
-  FieldDescription,
   FieldError,
   FieldLabel,
 } from "@/components/ui/field";
@@ -55,189 +54,194 @@ export function ProjectConfigCard({
     ) || [];
 
   return (
-    <Card className="relative bg-white/5 border-white/5 rounded-[24px] overflow-hidden glass-subtle mb-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+    <Card className="relative bg-zinc-900/30 border-white/5 rounded-3xl backdrop-blur-sm overflow-hidden group">
+      {/* Background effects - matching Step 1 */}
+      <div className="absolute inset-0 bg-grid-white/[0.02] bg-size-[32px_32px] pointer-events-none" />
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full -mr-16 -mt-16 pointer-events-none opacity-50 transition-opacity duration-1000 group-hover:opacity-100" />
+
       {/* Remove Button */}
       {canRemove && (
         <Button
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 h-8 w-8 rounded-full hover:bg-red-500/20 hover:text-red-500 transition-colors z-10"
+          className="absolute top-4 right-4 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-500 transition-all z-10"
           onClick={onRemove}
         >
           <X className="h-4 w-4" />
         </Button>
       )}
 
-      <CardContent className="p-6 space-y-6">
-        <div className="flex items-center gap-3 border-b border-white/5 pb-4 mb-2">
+      <CardContent className="relative p-6 lg:p-8 space-y-8 z-10">
+        {/* Header */}
+        <div className="flex items-center gap-3 border-b border-white/5 pb-4">
           <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center">
             <span className="text-xs font-black text-primary">{index + 1}</span>
           </div>
           <h3 className="text-xs font-black text-white uppercase tracking-widest">
-            Project configuration {index + 1}
+            Project Configuration {index + 1}
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Label field */}
+        <div className="space-y-8">
+          {/* Label field - Full Width */}
           <form.Field name={`projectConfigs[${index}].label`}>
             {(field: any) => (
-              <Field>
-                <div className="flex items-center gap-2 mb-2 ml-1">
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="text-[10px] font-black uppercase tracking-widest text-white/50"
-                  >
-                    Configuration Label
-                  </FieldLabel>
-                </div>
+              <Field className="space-y-3">
+                <FieldLabel
+                  htmlFor={field.name}
+                  className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
+                >
+                  Configuration Label
+                </FieldLabel>
                 <Input
+                  id={field.name}
                   value={field.state.value}
                   onChange={(e) => field.handleChange(e.target.value)}
-                  placeholder="e.g., Photo Editing, Video Editing"
-                  className="bg-white/5 border-white/5 focus:ring-primary/20 h-11 rounded-xl text-sm transition-all"
+                  placeholder="e.g., Primary Video Project"
+                  className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-white/10"
                 />
-                <FieldDescription className="text-[9px] text-white/20 uppercase tracking-widest font-black ml-1 mt-1">
-                  How this project is identified in the package.
-                </FieldDescription>
               </Field>
             )}
           </form.Field>
 
-          {/* Project Type selector */}
-          <form.Field name={`projectConfigs[${index}].projectTypeId`}>
-            {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0;
-              return (
-                <Field data-invalid={hasError}>
-                  <div className="flex items-center gap-2 mb-2 ml-1">
-                    <Layout className="h-3 w-3 text-primary" />
+          {/* Grouped Type & Structure */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            {/* Project Type selector */}
+            <form.Field name={`projectConfigs[${index}].projectTypeId`}>
+              {(field: any) => {
+                const hasError = field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={hasError} className="space-y-3">
                     <FieldLabel
                       htmlFor={field.name}
-                      className="text-[10px] font-black uppercase tracking-widest text-white/50"
+                      className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
                     >
-                      Project Type *
+                      <Layout className="h-3 w-3 text-primary" />
+                      Project Type <span className="text-primary">*</span>
                     </FieldLabel>
-                  </div>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => {
-                      field.handleChange(value);
-                      // Clear folder template when project type changes
-                      form.setFieldValue(
-                        `projectConfigs[${index}].folderTemplateId`,
-                        "",
-                      );
-                    }}
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      aria-invalid={hasError}
-                      className="bg-white/5 border-white/5 focus:ring-primary/20 h-11 rounded-xl text-sm transition-all shadow-inner"
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value);
+                        form.setFieldValue(
+                          `projectConfigs[${index}].folderTemplateId`,
+                          "",
+                        );
+                      }}
                     >
-                      <SelectValue placeholder="Select type..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                      {projectTypes.map((type) => (
-                        <SelectItem
-                          key={type._id}
-                          value={type._id}
-                          className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                        >
-                          {type.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError className="text-[9px] uppercase tracking-wider font-bold mt-1">
-                    {field.state.meta.errors
-                      .map((err: any) =>
-                        typeof err === "string" ? err : err?.message,
-                      )
-                      .filter(Boolean)
-                      .join(", ")}
-                  </FieldError>
-                </Field>
-              );
-            }}
-          </form.Field>
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={hasError}
+                        className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
+                      >
+                        <SelectValue placeholder="Select type..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
+                        {projectTypes.map((type) => (
+                          <SelectItem
+                            key={type._id}
+                            value={type._id}
+                            className="focus:bg-primary/20 focus:text-primary rounded-xl mx-1 my-1 cursor-pointer h-10"
+                          >
+                            {type.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                      {field.state.meta.errors
+                        .map((err: any) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </FieldError>
+                  </Field>
+                );
+              }}
+            </form.Field>
 
-          {/* Folder Template selector */}
-          <form.Field name={`projectConfigs[${index}].folderTemplateId`}>
-            {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0;
-              return (
-                <Field data-invalid={hasError}>
-                  <div className="flex items-center gap-2 mb-2 ml-1">
-                    <FolderTree className="h-3 w-3 text-primary" />
+            {/* Folder Template selector */}
+            <form.Field name={`projectConfigs[${index}].folderTemplateId`}>
+              {(field: any) => {
+                const hasError = field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={hasError} className="space-y-3">
                     <FieldLabel
                       htmlFor={field.name}
-                      className="text-[10px] font-black uppercase tracking-widest text-white/50"
+                      className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
                     >
-                      Folder Hierarchy *
+                      <FolderTree className="h-3 w-3 text-primary" />
+                      Folder Hierarchy <span className="text-primary">*</span>
                     </FieldLabel>
-                  </div>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value)}
-                    disabled={!projectTypeId}
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      aria-invalid={hasError}
-                      className="bg-white/5 border-white/5 focus:ring-primary/20 h-11 rounded-xl text-sm transition-all shadow-inner disabled:opacity-50"
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value)}
+                      disabled={!projectTypeId}
                     >
-                      <SelectValue
-                        placeholder={
-                          projectTypeId
-                            ? "Select structure..."
-                            : "Select type first"
-                        }
-                      />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-xl">
-                      {folderTemplates.map((template: any) => (
-                        <SelectItem
-                          key={template._id}
-                          value={template._id}
-                          className="focus:bg-primary/20 focus:text-primary rounded-lg mx-1 my-0.5"
-                        >
-                          {template.name}
-                          {template.variant && (
-                            <span className="ml-2 text-[10px] opacity-40">
-                              ({template.variant})
-                            </span>
-                          )}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError className="text-[9px] uppercase tracking-wider font-bold mt-1">
-                    {field.state.meta.errors
-                      .map((err: any) =>
-                        typeof err === "string" ? err : err?.message,
-                      )
-                      .filter(Boolean)
-                      .join(", ")}
-                  </FieldError>
-                </Field>
-              );
-            }}
-          </form.Field>
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={hasError}
+                        className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none disabled:opacity-50"
+                      >
+                        <SelectValue
+                          placeholder={
+                            projectTypeId
+                              ? "Select structure..."
+                              : "Select type first"
+                          }
+                        />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
+                        {folderTemplates.map((template: any) => (
+                          <SelectItem
+                            key={template._id}
+                            value={template._id}
+                            className="focus:bg-primary/20 focus:text-primary rounded-xl mx-1 my-1 cursor-pointer h-10"
+                          >
+                            {template.name}
+                            {template.variant && (
+                              <span className="ml-2 text-[10px] opacity-40">
+                                ({template.variant})
+                              </span>
+                            )}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                      {field.state.meta.errors
+                        .map((err: any) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </FieldError>
+                  </Field>
+                );
+              }}
+            </form.Field>
+          </div>
 
           {/* Storage Tier */}
-          <form.Field name={`projectConfigs[${index}].defaultStorageTierId`}>
-            {(field: any) => (
-              <div className="md:pt-1">
+          <div className="pt-2 border-t border-white/5">
+            <div className="flex items-center gap-2 mb-4 pl-2">
+              <Database className="h-3 w-3 text-primary" />
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40">
+                Default Storage Allocation
+              </span>
+            </div>
+            <form.Field name={`projectConfigs[${index}].defaultStorageTierId`}>
+              {(field: any) => (
                 <StorageSelector
                   tiers={storageTiers}
                   value={field.state.value}
                   onChange={field.handleChange}
                 />
-              </div>
-            )}
-          </form.Field>
+              )}
+            </form.Field>
+          </div>
         </div>
       </CardContent>
     </Card>
