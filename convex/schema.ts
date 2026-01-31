@@ -109,6 +109,7 @@ export const quotationStatusValidator = v.union(
 export const projectConfigValidator = v.object({
   id: v.string(), // Unique ID for referencing within the package
   label: v.optional(v.string()), // e.g., "Photo Editing", "Video Editing"
+  categoryId: v.optional(v.id("projectCategories")),
   projectTypeId: v.id("projectTypes"),
   folderTemplateId: v.id("folderTemplates"),
   defaultStorageTierId: v.optional(v.id("storageTiers")),

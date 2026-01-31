@@ -1,10 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
-import { useQuery } from "convex/react";
 import { Info } from "lucide-react";
 import * as z from "zod";
 import {
@@ -14,13 +11,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useBuilder } from "./builder-context";
 import { Card } from "@/components/ui/card";
@@ -33,21 +23,16 @@ const step1Schema = z.object({
   description: z
     .string()
     .max(500, "Description must be 500 characters or less"),
-  categoryId: z.string(),
 });
 
 export function Step1Identity() {
   const { step1Data, setStep1Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep } =
     useBuilder();
-  const categories =
-    useQuery(api.functions.projectCategories.queries.getProjectCategories) ||
-    [];
 
   const form = useForm({
     defaultValues: {
       name: step1Data?.name ?? "",
       description: step1Data?.description ?? "",
-      categoryId: step1Data?.categoryId ?? "",
     },
     validators: {
       onChange: step1Schema,
@@ -56,7 +41,6 @@ export function Step1Identity() {
       setStep1Data({
         name: value.name,
         description: value.description || undefined,
-        categoryId: (value.categoryId || undefined) as Id<"projectCategories"> | undefined,
       });
       setCurrentStep(2);
     },
@@ -75,7 +59,6 @@ export function Step1Identity() {
       setStep1Data({
         name: values.name,
         description: values.description || undefined,
-        categoryId: (values.categoryId || undefined) as Id<"projectCategories"> | undefined,
       });
     });
     return () => setSyncCurrentStep(null);
@@ -142,57 +125,6 @@ export function Step1Identity() {
                   </Field>
                 );
               }}
-            </form.Field>
-
-            <form.Field name="categoryId">
-              {(field) => (
-                <Field className="space-y-3">
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
-                  >
-                    Service Category
-                  </FieldLabel>
-                  <Select
-                    value={field.state.value || "__none__"}
-                    onValueChange={(value) =>
-                      field.handleChange(value === "__none__" ? "" : value)
-                    }
-                  >
-                    <SelectTrigger
-                      id={field.name}
-                      className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
-                    >
-                      <SelectValue placeholder="Select a category..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
-                      <SelectItem
-                        value="__none__"
-                        className="focus:bg-white/5 focus:text-white rounded-xl mx-1 my-1 cursor-pointer italic text-white/40 h-10"
-                      >
-                        No Category (Uncategorized)
-                      </SelectItem>
-                      {categories.map((cat) => (
-                        <SelectItem
-                          key={cat._id}
-                          value={cat._id}
-                          className="focus:bg-primary/20 focus:text-primary rounded-xl mx-1 my-1 cursor-pointer h-10"
-                        >
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
-                    {field.state.meta.errors
-                      .map((err) =>
-                        typeof err === "string" ? err : (err as any)?.message,
-                      )
-                      .filter(Boolean)
-                      .join(", ")}
-                  </FieldError>
-                </Field>
-              )}
             </form.Field>
 
             <form.Field name="description">

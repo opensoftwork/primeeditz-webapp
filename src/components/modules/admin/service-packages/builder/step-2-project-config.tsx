@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
 import { Info, Plus, Package, Layers } from "lucide-react";
@@ -17,6 +18,7 @@ import { ProjectConfigCard } from "./components/project-config-card";
 const projectConfigSchema = z.object({
   id: z.string(),
   label: z.string().max(50, "Label too long"),
+  categoryId: z.string().min(1, "Category is required"),
   projectTypeId: z.string().min(1, "Project type is required"),
   folderTemplateId: z.string().min(1, "Folder template is required"),
   defaultStorageTierId: z.string().optional(),
@@ -37,6 +39,8 @@ export function Step2ProjectConfig() {
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const storageTiers =
     useQuery(api.functions.storageTiers.queries.listStorageTiers) || [];
+  const categories =
+    useQuery(api.functions.projectCategories.queries.getProjectCategories) || [];
 
   const form = useForm({
     defaultValues: {
@@ -44,6 +48,7 @@ export function Step2ProjectConfig() {
         {
           id: nanoid(),
           label: "Primary Project",
+          categoryId: "",
           projectTypeId: "",
           folderTemplateId: "",
           defaultStorageTierId: "",
@@ -119,6 +124,7 @@ export function Step2ProjectConfig() {
                       canRemove={field.state.value.length > 1}
                       projectTypes={projectTypes}
                       storageTiers={storageTiers}
+                      categories={categories}
                     />
                   ))}
 
@@ -130,6 +136,7 @@ export function Step2ProjectConfig() {
                       field.pushValue({
                         id: nanoid(),
                         label: "",
+                        categoryId: "",
                         projectTypeId: "",
                         folderTemplateId: "",
                         defaultStorageTierId: "",

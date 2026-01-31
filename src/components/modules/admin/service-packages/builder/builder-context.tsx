@@ -19,12 +19,12 @@ import { toast } from "sonner";
 export interface Step1Data {
   name: string;
   description?: string;
-  categoryId?: Id<"projectCategories">;
 }
 
 export interface ProjectConfig {
   id: string;
   label: string;
+  categoryId?: Id<"projectCategories">;
   projectTypeId: Id<"projectTypes">;
   folderTemplateId: Id<"folderTemplates">;
   defaultStorageTierId?: Id<"storageTiers">;
@@ -132,7 +132,6 @@ export function BuilderProvider({
           lastStep: stepOverride ?? currentStep,
           name: step1Data?.name,
           description: step1Data?.description,
-          categoryId: step1Data?.categoryId,
           projectConfigs: step2Data?.projectConfigs,
           lineItems: step3Data?.lineItems,
           terms: step3Data?.terms,
@@ -157,7 +156,6 @@ export function BuilderProvider({
         setStep1Data({
           name: pkg.name,
           description: pkg.description,
-          categoryId: pkg.categoryId,
         });
 
         const projectConfigs = pkg.projectConfigs ? [...pkg.projectConfigs] : [];
@@ -165,6 +163,7 @@ export function BuilderProvider({
           projectConfigs.push({
             id: crypto.randomUUID(),
             label: "Standard Config",
+            categoryId: pkg.categoryId, // Legacy: apply package category to config
             projectTypeId: pkg.projectTypeId,
             folderTemplateId: pkg.folderTemplateId as Id<"folderTemplates">,
             defaultStorageTierId: pkg.defaultStorageTierId,
@@ -175,6 +174,7 @@ export function BuilderProvider({
           projectConfigs: projectConfigs.map((config) => ({
             ...config,
             label: config.label ?? "Standard Config",
+            categoryId: config.categoryId ?? pkg.categoryId, // Fallback to package category for legacy
           })) as ProjectConfig[],
         });
 
@@ -199,10 +199,12 @@ export function BuilderProvider({
           setStep1Data({
             name: activeDraft.name ?? "",
             description: activeDraft.description,
-            categoryId: activeDraft.categoryId,
           });
           setStep2Data({
-            projectConfigs: (activeDraft.projectConfigs ?? []) as ProjectConfig[],
+            projectConfigs: (activeDraft.projectConfigs ?? []).map((config: any) => ({
+              ...config,
+              categoryId: config.categoryId ?? activeDraft.categoryId, // Fallback for legacy drafts
+            })) as ProjectConfig[],
           });
           setStep3Data({
             lineItems: (activeDraft.lineItems ?? []) as LineItem[],

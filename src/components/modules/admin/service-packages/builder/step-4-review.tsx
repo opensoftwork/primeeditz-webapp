@@ -97,10 +97,11 @@ export function Step4Review() {
         const packageData = {
           name: step1Data.name,
           description: step1Data.description,
-          categoryId: (step1Data.categoryId as Id<"projectCategories">) || undefined,
+          categoryId: (step2Data.projectConfigs[0]?.categoryId as Id<"projectCategories">) || undefined,
           projectConfigs: step2Data.projectConfigs.map((config) => ({
             id: config.id,
             label: config.label,
+            categoryId: config.categoryId as Id<"projectCategories">,
             projectTypeId: config.projectTypeId,
             folderTemplateId: config.folderTemplateId,
             defaultStorageTierId: config.defaultStorageTierId,
@@ -145,9 +146,10 @@ export function Step4Review() {
     }
   }
 
-  const categoryName = categories.find(
-    (c) => c._id === step1Data?.categoryId,
-  )?.name;
+  // No longer a single global category for the package
+  // const categoryName = categories.find(
+  //   (c) => c._id === step2Data?.categoryId,
+  // )?.name;
 
   return (
     <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -216,20 +218,11 @@ export function Step4Review() {
 
                 <div className="flex flex-wrap gap-4 pt-4">
                   <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
-                    <Layers className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
-                      Category:{" "}
-                      <span className="text-white">
-                        {categoryName || "None"}
-                      </span>
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
                     <Package className="h-3.5 w-3.5 text-primary" />
                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
-                      Spawn Count:{" "}
+                      Configurations:{" "}
                       <span className="text-white">
-                        {step2Data?.projectConfigs.length || 0} Projects
+                        {step2Data?.projectConfigs.length || 0} Project Components
                       </span>
                     </span>
                   </div>
@@ -287,7 +280,12 @@ export function Step4Review() {
                           </div>
 
                           <div className="space-y-3">
-                            <div className="flex items-center gap-2">
+                            <div className="flex flex-wrap items-center gap-2">
+                              {config.categoryId && (
+                                <Badge className="bg-white/5 text-white/60 border-white/10 font-black text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-md">
+                                  {categories.find(c => c._id === config.categoryId)?.name}
+                                </Badge>
+                              )}
                               <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
                                 {type?.name || "Unknown Type"}
                               </Badge>

@@ -3,7 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { FolderTree, Layout, X, Database } from "lucide-react";
+import { FolderTree, Layout, X, Database, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -29,6 +29,7 @@ interface ProjectConfigCardProps {
   canRemove: boolean;
   projectTypes: any[];
   storageTiers: any[];
+  categories: any[];
 }
 
 export function ProjectConfigCard({
@@ -38,11 +39,23 @@ export function ProjectConfigCard({
   canRemove,
   projectTypes,
   storageTiers,
+  categories,
 }: ProjectConfigCardProps) {
+  // Get selected category to filter project types
+  const selectedCategoryId = useStore(
+    form.store,
+    (state: any) => state.values.projectConfigs[index]?.categoryId,
+  );
+
   // Get selected project type to filter folder templates
   const projectTypeId = useStore(
     form.store,
     (state: any) => state.values.projectConfigs[index]?.projectTypeId,
+  );
+
+  // Filter project types based on selected category
+  const filteredProjectTypes = projectTypes.filter(
+    (type) => !selectedCategoryId || type.categoryId === selectedCategoryId
   );
 
   const folderTemplates =
@@ -105,8 +118,62 @@ export function ProjectConfigCard({
             )}
           </form.Field>
 
-          {/* Grouped Type & Structure */}
+          {/* Grouped Category & Type */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+            {/* Category selector */}
+            <form.Field name={`projectConfigs[${index}].categoryId`}>
+              {(field: any) => {
+                const hasError = field.state.meta.errors.length > 0;
+                return (
+                  <Field data-invalid={hasError} className="space-y-3">
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-[9px] font-black uppercase tracking-[0.2em] text-white/40 flex items-center gap-2 pl-2"
+                    >
+                      <Layers className="h-3 w-3 text-primary" />
+                      Service Category <span className="text-primary">*</span>
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => {
+                        field.handleChange(value);
+                        // Reset dependent fields
+                        form.setFieldValue(`projectConfigs[${index}].projectTypeId`, "");
+                        form.setFieldValue(`projectConfigs[${index}].folderTemplateId`, "");
+                      }}
+                    >
+                      <SelectTrigger
+                        id={field.name}
+                        aria-invalid={hasError}
+                        className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
+                      >
+                        <SelectValue placeholder="Select category..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
+                        {categories.map((cat) => (
+                          <SelectItem
+                            key={cat._id}
+                            value={cat._id}
+                            className="focus:bg-primary/20 focus:text-primary rounded-xl mx-1 my-1 cursor-pointer h-10"
+                          >
+                            {cat.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                      {field.state.meta.errors
+                        .map((err: any) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </FieldError>
+                  </Field>
+                );
+              }}
+            </form.Field>
+
             {/* Project Type selector */}
             <form.Field name={`projectConfigs[${index}].projectTypeId`}>
               {(field: any) => {
@@ -122,6 +189,7 @@ export function ProjectConfigCard({
                     </FieldLabel>
                     <Select
                       value={field.state.value}
+                      disabled={!selectedCategoryId}
                       onValueChange={(value) => {
                         field.handleChange(value);
                         form.setFieldValue(
@@ -133,12 +201,12 @@ export function ProjectConfigCard({
                       <SelectTrigger
                         id={field.name}
                         aria-invalid={hasError}
-                        className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none"
+                        className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none disabled:opacity-50"
                       >
-                        <SelectValue placeholder="Select type..." />
+                        <SelectValue placeholder={selectedCategoryId ? "Select type..." : "Select category first"} />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
-                        {projectTypes.map((type) => (
+                        {filteredProjectTypes.map((type) => (
                           <SelectItem
                             key={type._id}
                             value={type._id}
@@ -161,7 +229,9 @@ export function ProjectConfigCard({
                 );
               }}
             </form.Field>
+          </div>
 
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
             {/* Folder Template selector */}
             <form.Field name={`projectConfigs[${index}].folderTemplateId`}>
               {(field: any) => {
