@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
 import { Info } from "lucide-react";
@@ -36,7 +37,7 @@ const step1Schema = z.object({
 });
 
 export function Step1Identity() {
-  const { step1Data, setStep1Data, setCurrentStep, setSubmitTrigger } =
+  const { step1Data, setStep1Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep } =
     useBuilder();
   const categories =
     useQuery(api.functions.projectCategories.queries.getProjectCategories) ||
@@ -55,7 +56,7 @@ export function Step1Identity() {
       setStep1Data({
         name: value.name,
         description: value.description || undefined,
-        categoryId: value.categoryId || undefined,
+        categoryId: (value.categoryId || undefined) as Id<"projectCategories"> | undefined,
       });
       setCurrentStep(2);
     },
@@ -66,6 +67,19 @@ export function Step1Identity() {
     setSubmitTrigger(() => () => form.handleSubmit());
     return () => setSubmitTrigger(null);
   }, [form, setSubmitTrigger]);
+
+  // Register sync callback - saves form data to context before navigation
+  useEffect(() => {
+    setSyncCurrentStep(() => () => {
+      const values = form.state.values;
+      setStep1Data({
+        name: values.name,
+        description: values.description || undefined,
+        categoryId: (values.categoryId || undefined) as Id<"projectCategories"> | undefined,
+      });
+    });
+    return () => setSyncCurrentStep(null);
+  }, [form, setStep1Data, setSyncCurrentStep]);
 
   return (
     <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">

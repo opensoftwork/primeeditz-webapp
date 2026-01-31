@@ -584,4 +584,29 @@ export default defineSchema({
     notes: v.optional(v.string()),
     createdAt: v.number(),
   }).index("by_projectId", ["projectId"]),
+
+  // --------------------------------------------------------------------------
+  // Service Package Drafts (Wizard Persistence)
+  // --------------------------------------------------------------------------
+  servicePackageDrafts: defineTable({
+    // Step tracking
+    lastStep: v.number(), // 1, 2, 3, or 4
+
+    // Step 1: Identity
+    name: v.optional(v.string()),
+    description: v.optional(v.string()),
+    categoryId: v.optional(v.id("projectCategories")),
+
+    // Step 2: Project Configuration
+    projectConfigs: v.optional(v.array(projectConfigValidator)),
+
+    // Step 3: Pricing & Terms
+    lineItems: v.optional(v.array(servicePackageLineItemValidator)),
+    terms: v.optional(v.string()),
+    applyGST: v.optional(v.boolean()),
+
+    // Audit
+    createdBy: v.id("profiles"), // Profile ID
+    updatedAt: v.number(),
+  }).index("by_createdBy", ["createdBy"]),
 });

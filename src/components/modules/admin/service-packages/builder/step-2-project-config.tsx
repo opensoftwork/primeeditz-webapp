@@ -30,7 +30,7 @@ const step2Schema = z.object({
 
 type Step2FormValues = z.infer<typeof step2Schema>;
 export function Step2ProjectConfig() {
-  const { step2Data, setStep2Data, setCurrentStep, setSubmitTrigger } =
+  const { step2Data, setStep2Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep } =
     useBuilder();
 
   // Queries
@@ -66,6 +66,17 @@ export function Step2ProjectConfig() {
     setSubmitTrigger(() => () => form.handleSubmit());
     return () => setSubmitTrigger(null);
   }, [form, setSubmitTrigger]);
+
+  // Register sync callback - saves form data to context before navigation
+  useEffect(() => {
+    setSyncCurrentStep(() => () => {
+      const values = form.state.values;
+      setStep2Data({
+        projectConfigs: values.projectConfigs as any,
+      });
+    });
+    return () => setSyncCurrentStep(null);
+  }, [form, setStep2Data, setSyncCurrentStep]);
 
   return (
     <div className="w-full space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
