@@ -36,6 +36,8 @@ export function Step4Review() {
     setSubmitTrigger,
     isEditing,
     packageId,
+    publishPackage,
+    isSubmitting,
   } = useBuilder();
 
   // Register submit trigger
@@ -79,62 +81,55 @@ export function Step4Review() {
 
     setIsSaving(true);
     const toastId = toast.loading(
-      isEditing ? "Updating package..." : "Creating package...",
+      isEditing ? "Updating package..." : "Publishing package...",
     );
 
     try {
-      const packageData = {
-        name: step1Data.name,
-        description: step1Data.description,
-        categoryId:
-          (step1Data.categoryId as Id<"projectCategories">) || undefined,
-        // NEW: Send projectConfigs array
-        projectConfigs: step2Data.projectConfigs.map((config) => ({
-          id: config.id,
-          label: config.label,
-          projectTypeId: config.projectTypeId as Id<"projectTypes">,
-          folderTemplateId: config.folderTemplateId as Id<"folderTemplates">,
-          defaultStorageTierId:
-            (config.defaultStorageTierId as Id<"storageTiers">) || undefined,
-        })),
-        // For backward compatibility until full migration
-        projectTypeId: step2Data.projectConfigs[0]
-          .projectTypeId as Id<"projectTypes">,
-        folderTemplateId: step2Data.projectConfigs[0]
-          .folderTemplateId as Id<"folderTemplates">,
-        defaultStorageTierId:
-          (step2Data.projectConfigs[0]
-            .defaultStorageTierId as Id<"storageTiers">) || undefined,
-        lineItems: step3Data.lineItems.map((item) => ({
-          id: item.id,
-          sectionId: (item.sectionId as Id<"quotationSections">) || undefined,
-          description: item.description,
-          unit: item.unit,
-          rate: item.rate,
-          quantity: item.quantity,
-        })),
-        terms: step3Data.terms,
-        applyGST: step3Data.applyGST,
-        isActive,
-      };
-
       if (isEditing && packageId) {
+        const packageData = {
+          name: step1Data.name,
+          description: step1Data.description,
+          categoryId: (step1Data.categoryId as Id<"projectCategories">) || undefined,
+          projectConfigs: step2Data.projectConfigs.map((config) => ({
+            id: config.id,
+            label: config.label,
+            projectTypeId: config.projectTypeId,
+            folderTemplateId: config.folderTemplateId,
+            defaultStorageTierId: config.defaultStorageTierId,
+          })),
+          // Legacy fields
+          projectTypeId: step2Data.projectConfigs[0].projectTypeId,
+          folderTemplateId: step2Data.projectConfigs[0].folderTemplateId,
+          defaultStorageTierId: step2Data.projectConfigs[0].defaultStorageTierId,
+          
+          lineItems: step3Data.lineItems.map((item) => ({
+            id: item.id,
+            sectionId: item.sectionId,
+            description: item.description,
+            unit: item.unit,
+            rate: item.rate,
+            quantity: item.quantity,
+          })),
+          terms: step3Data.terms,
+          applyGST: step3Data.applyGST,
+          isActive,
+        };
         await updatePackage({ id: packageId, ...packageData });
         toast.success(`Package "${step1Data.name}" updated successfully`, {
           id: toastId,
         });
+        router.push("/settings/service-packages");
       } else {
-        await createPackage(packageData);
-        toast.success(
-          `Package "${step1Data.name}" ${isActive ? "published" : "saved as draft"}`,
-          { id: toastId },
-        );
+        // Creation Flow using Draft Persistence
+        const newPackageId = await publishPackage();
+        if (newPackageId) {
+          toast.success(`Package "${step1Data.name}" published successfully`, { id: toastId });
+          router.push("/settings/service-packages");
+        }
       }
-
-      router.push("/settings/service-packages");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Save error:", error);
-      toast.error("Failed to save package. Check your values and try again.", {
+      toast.error(error.message || "Failed to save package. Check your values and try again.", {
         id: toastId,
       });
     } finally {

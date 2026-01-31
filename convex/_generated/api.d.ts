@@ -54,6 +54,8 @@ import type * as functions_quotations_sections_queries from "../functions/quotat
 import type * as functions_quotations_templates_mutations from "../functions/quotations/templates/mutations.js";
 import type * as functions_quotations_templates_queries from "../functions/quotations/templates/queries.js";
 import type * as functions_seed from "../functions/seed.js";
+import type * as functions_servicePackages_drafts_mutations from "../functions/servicePackages/drafts/mutations.js";
+import type * as functions_servicePackages_drafts_queries from "../functions/servicePackages/drafts/queries.js";
 import type * as functions_servicePackages_mutations from "../functions/servicePackages/mutations.js";
 import type * as functions_servicePackages_queries from "../functions/servicePackages/queries.js";
 import type * as functions_storage_actions from "../functions/storage/actions.js";
@@ -135,6 +137,8 @@ declare const fullApi: ApiFromModules<{
   "functions/quotations/templates/mutations": typeof functions_quotations_templates_mutations;
   "functions/quotations/templates/queries": typeof functions_quotations_templates_queries;
   "functions/seed": typeof functions_seed;
+  "functions/servicePackages/drafts/mutations": typeof functions_servicePackages_drafts_mutations;
+  "functions/servicePackages/drafts/queries": typeof functions_servicePackages_drafts_queries;
   "functions/servicePackages/mutations": typeof functions_servicePackages_mutations;
   "functions/servicePackages/queries": typeof functions_servicePackages_queries;
   "functions/storage/actions": typeof functions_storage_actions;

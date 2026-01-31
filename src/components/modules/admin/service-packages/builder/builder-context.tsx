@@ -2,20 +2,24 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import {
   createContext,
   type ReactNode,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { toast } from "sonner";
 
 export interface Step1Data {
   name: string;
   description?: string;
-  categoryId?: string;
+  categoryId?: Id<"projectCategories">;
 }
 
 export interface ProjectConfig {
@@ -33,7 +37,7 @@ export interface Step2Data {
 export interface LineItem {
   id: string;
   description: string;
-  sectionId?: string;
+  sectionId?: Id<"quotationSections">;
   projectConfigId?: string;
   rate: number;
   quantity: number;
@@ -61,6 +65,7 @@ interface BuilderContextValue {
 
   isEditing: boolean;
   packageId: Id<"servicePackages"> | null;
+  draftId: Id<"servicePackageDrafts"> | null;
 
   // Navigation
   nextStep: () => void;
@@ -68,6 +73,15 @@ interface BuilderContextValue {
   goToStep: (step: number) => void;
   submitTrigger: (() => void) | null;
   setSubmitTrigger: (fn: (() => void) | null) => void;
+  
+  // Step data sync - called before navigation to save current form data to context
+  syncCurrentStep: (() => void) | null;
+  setSyncCurrentStep: (fn: (() => void) | null) => void;
+
+  // Lifecycle
+  isSubmitting: boolean;
+  publishPackage: () => Promise<Id<"servicePackages"> | undefined>;
+  cancelWizard: () => Promise<void>;
 }
 
 const BuilderContext = createContext<BuilderContextValue | null>(null);
@@ -79,72 +93,192 @@ export function BuilderProvider({
   children: ReactNode;
   packageId?: Id<"servicePackages">;
 }) {
+  const router = useRouter();
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [step1Data, setStep1Data] = useState<Step1Data | null>(null);
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
   const [step3Data, setStep3Data] = useState<Step3Data | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [draftId, setDraftId] = useState<Id<"servicePackageDrafts"> | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Mutations
+  const createDraft = useMutation(api.functions.servicePackages.drafts.mutations.createDraft);
+  const updateDraft = useMutation(api.functions.servicePackages.drafts.mutations.updateDraft);
+  const deleteDraftMutation = useMutation(api.functions.servicePackages.drafts.mutations.deleteDraft);
+  const publishDraft = useMutation(api.functions.servicePackages.drafts.mutations.publishDraft);
+
+  // Query for existing draft (if not editing live package)
+  const activeDraft = useQuery(
+    api.functions.servicePackages.drafts.queries.getActiveDraft,
+    packageId ? "skip" : {}
+  );
 
   // Fetch package data if editing
   const pkg = useQuery(
     api.functions.servicePackages.queries.get,
-    packageId ? { id: packageId } : "skip",
+    packageId ? { id: packageId } : "skip"
   );
 
-  useEffect(() => {
-    if (packageId && pkg && !isInitialized) {
-      // Initialize Step 1
-      setStep1Data({
-        name: pkg.name,
-        description: pkg.description,
-        categoryId: pkg.categoryId,
-      });
+  // Persistence Helper
+  const saveDraft = useCallback(
+    async (stepOverride?: number) => {
+      // Only persist drafts during creation flow, not editing
+      if (packageId || !draftId) return;
 
-      // Initialize Step 2
-      // Clone array to avoid read-only mutation
-      const projectConfigs = pkg.projectConfigs ? [...pkg.projectConfigs] : [];
-
-      // Handle legacy single-config packages
-      if (projectConfigs.length === 0 && pkg.projectTypeId) {
-        projectConfigs.push({
-          id: crypto.randomUUID(),
-          label: "Standard Config",
-          projectTypeId: pkg.projectTypeId,
-          folderTemplateId: pkg.folderTemplateId as Id<"folderTemplates">,
-          defaultStorageTierId: pkg.defaultStorageTierId,
+      try {
+        await updateDraft({
+          draftId,
+          lastStep: stepOverride ?? currentStep,
+          name: step1Data?.name,
+          description: step1Data?.description,
+          categoryId: step1Data?.categoryId,
+          projectConfigs: step2Data?.projectConfigs,
+          lineItems: step3Data?.lineItems,
+          terms: step3Data?.terms,
+          applyGST: step3Data?.applyGST,
         });
+      } catch (err) {
+        console.error("Failed to save draft:", err);
       }
+    },
+    [draftId, currentStep, step1Data, step2Data, step3Data, updateDraft, packageId]
+  );
 
-      setStep2Data({
-        projectConfigs: projectConfigs.map((config) => ({
-          ...config,
-          label: config.label ?? "Standard Config",
-        })) as ProjectConfig[],
-      });
+  // Initialization
+  useEffect(() => {
+    if (isInitialized) return;
 
-      // Initialize Step 3
-      setStep3Data({
-        lineItems: pkg.lineItems.map((item) => ({
-          ...item,
-          id: item.id || crypto.randomUUID(),
-        })),
-        terms: pkg.terms,
-        applyGST: pkg.applyGST ?? true,
-      });
+    const init = async () => {
+      if (packageId) {
+        if (!pkg) return; // Wait for query
 
-      setIsInitialized(true);
-    } else if (!packageId) {
-      setIsInitialized(true);
-    }
-  }, [packageId, pkg, isInitialized]);
+        // Initialize from Live Package
+        setStep1Data({
+          name: pkg.name,
+          description: pkg.description,
+          categoryId: pkg.categoryId,
+        });
+
+        const projectConfigs = pkg.projectConfigs ? [...pkg.projectConfigs] : [];
+        if (projectConfigs.length === 0 && pkg.projectTypeId) {
+          projectConfigs.push({
+            id: crypto.randomUUID(),
+            label: "Standard Config",
+            projectTypeId: pkg.projectTypeId,
+            folderTemplateId: pkg.folderTemplateId as Id<"folderTemplates">,
+            defaultStorageTierId: pkg.defaultStorageTierId,
+          });
+        }
+
+        setStep2Data({
+          projectConfigs: projectConfigs.map((config) => ({
+            ...config,
+            label: config.label ?? "Standard Config",
+          })) as ProjectConfig[],
+        });
+
+        setStep3Data({
+          lineItems: pkg.lineItems.map((item) => ({
+            ...item,
+            id: item.id || crypto.randomUUID(),
+          })),
+          terms: pkg.terms,
+          applyGST: pkg.applyGST ?? true,
+        });
+
+        setIsInitialized(true);
+      } else {
+        // Creation Flow
+        if (activeDraft === undefined) return; // Loading
+
+        if (activeDraft) {
+          // Resume Draft
+          setDraftId(activeDraft._id);
+          setCurrentStep(activeDraft.lastStep);
+          setStep1Data({
+            name: activeDraft.name ?? "",
+            description: activeDraft.description,
+            categoryId: activeDraft.categoryId,
+          });
+          setStep2Data({
+            projectConfigs: (activeDraft.projectConfigs ?? []) as ProjectConfig[],
+          });
+          setStep3Data({
+            lineItems: (activeDraft.lineItems ?? []) as LineItem[],
+            terms: activeDraft.terms,
+            applyGST: activeDraft.applyGST ?? true,
+          });
+          toast.success("Resumed your previous draft", {
+             description: "We've loaded your progress."
+          });
+        } else {
+          // Start Fresh
+          const result = await createDraft({});
+          setDraftId(result.draftId);
+        }
+        setIsInitialized(true);
+      }
+    };
+
+    init();
+  }, [packageId, pkg, activeDraft, isInitialized, createDraft]);
 
   const [submitTrigger, setSubmitTrigger] = useState<(() => void) | null>(null);
+  const [syncCurrentStep, setSyncCurrentStep] = useState<(() => void) | null>(null);
+  
+  // Reference to hold the latest sync function (avoids stale closure issues)
+  const syncCurrentStepRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    syncCurrentStepRef.current = syncCurrentStep;
+  }, [syncCurrentStep]);
 
-  const nextStep = () => setCurrentStep((s) => Math.min(s + 1, 4));
-  const prevStep = () => setCurrentStep((s) => Math.max(s - 1, 1));
-  const goToStep = (step: number) => {
-    if (step >= 1 && step <= 4) setCurrentStep(step);
-  };
+  const goToStep = useCallback(
+    async (step: number) => {
+      if (step >= 1 && step <= 4) {
+        // First, sync the current step's form data to context
+        if (syncCurrentStepRef.current) {
+          syncCurrentStepRef.current();
+        }
+        // Then save to backend (draft persistence)
+        await saveDraft(step);
+        setCurrentStep(step);
+      }
+    },
+    [saveDraft]
+  );
+
+  const nextStep = useCallback(() => {
+    const next = Math.min(currentStep + 1, 4);
+    goToStep(next);
+  }, [currentStep, goToStep]);
+
+  const prevStep = useCallback(() => {
+    const prev = Math.max(currentStep - 1, 1);
+    goToStep(prev);
+  }, [currentStep, goToStep]);
+
+  const cancelWizard = useCallback(async () => {
+    if (draftId && !packageId) {
+      await deleteDraftMutation({ draftId });
+    }
+    router.push("/settings/service-packages");
+  }, [draftId, packageId, deleteDraftMutation, router]);
+
+  const publishPackage = useCallback(async () => {
+    if (!draftId || packageId) return;
+
+    setIsSubmitting(true);
+    try {
+      const newPackageId = await publishDraft({ draftId });
+      toast.success("Package published successfully!");
+      return newPackageId;
+    } catch (err: any) {
+      toast.error(err.message || "Failed to publish package");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [draftId, packageId, publishDraft]);
 
   const value = useMemo(
     () => ({
@@ -158,18 +292,39 @@ export function BuilderProvider({
       setStep3Data,
       isEditing: !!packageId,
       packageId: packageId || null,
+      draftId,
       nextStep,
       prevStep,
       goToStep,
       submitTrigger,
       setSubmitTrigger,
+      syncCurrentStep,
+      setSyncCurrentStep,
+      isSubmitting,
+      publishPackage,
+      cancelWizard,
     }),
-    [currentStep, step1Data, step2Data, step3Data, packageId, submitTrigger],
+    [
+      currentStep,
+      step1Data,
+      step2Data,
+      step3Data,
+      packageId,
+      draftId,
+      submitTrigger,
+      syncCurrentStep,
+      isSubmitting,
+      nextStep,
+      prevStep,
+      goToStep,
+      publishPackage,
+      cancelWizard,
+    ]
   );
 
   if (!isInitialized) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 animate-pulse">
+      <div className="flex flex-col items-center justify-center py-20 animate-pulse bg-zinc-950 h-screen w-full">
         <div className="w-12 h-12 bg-primary/10 rounded-full mb-4 flex items-center justify-center">
           <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
         </div>
