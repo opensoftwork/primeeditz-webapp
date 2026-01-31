@@ -8,7 +8,7 @@ import type { FolderLevel1, FolderLevel2, FolderLevel3 } from "@convex/schema";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
-export function Step2Folders() {
+export function Step2Folders({ compact = false }: { compact?: boolean }) {
   const { folders, setFolders, step1Data } = useProjectTypeWizard();
 
   // Calculate folder statistics
@@ -185,22 +185,24 @@ export function Step2Folders() {
   return (
     <div className="h-full flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Step Header - Compact */}
-      <div className="shrink-0 flex items-center justify-between pb-4">
-        <div className="flex items-center gap-4">
-          <div className="h-1 w-10 rounded-full bg-primary" />
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-            Step 02
-          </span>
-          <h2 className="text-xl font-black uppercase tracking-tight text-white">
-            Folder Hierarchy
-          </h2>
+      {!compact && (
+        <div className="shrink-0 flex items-center justify-between pb-4">
+          <div className="flex items-center gap-4">
+            <div className="h-1 w-10 rounded-full bg-primary" />
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
+              Step 02
+            </span>
+            <h2 className="text-xl font-black uppercase tracking-tight text-white">
+              Folder Hierarchy
+            </h2>
+          </div>
+          <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
+              Max 3 levels • 10 per level
+            </span>
+          </div>
         </div>
-        <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-          <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
-            Max 3 levels • 10 per level
-          </span>
-        </div>
-      </div>
+      )}
 
       {/* Validation Warning */}
       {folders.length === 0 && (
@@ -213,7 +215,7 @@ export function Step2Folders() {
       )}
 
       {/* Folder Stats - Inline with header style */}
-      {folders.length > 0 && (
+      {folders.length > 0 && !compact && (
         <div className="shrink-0 flex items-center gap-3 mb-4 px-4 py-3 rounded-xl bg-white/3 border border-white/5">
           <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
             <FolderOpen className="h-4 w-4 text-primary" />

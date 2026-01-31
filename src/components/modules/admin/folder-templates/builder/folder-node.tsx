@@ -98,7 +98,7 @@ export function FolderNode({
         }
       }}
       className={cn(
-        "group relative flex flex-col items-center justify-center p-6 rounded-2xl transition-all border cursor-pointer aspect-square text-center",
+        "group relative flex flex-col items-center justify-center p-4 rounded-2xl transition-all border cursor-pointer aspect-square text-center",
         isSelected
           ? "bg-primary/10 border-primary/50 ring-1 ring-primary/20"
           : "bg-white/2 border-white/5 hover:border-primary/30 hover:bg-primary/5",
@@ -108,21 +108,21 @@ export function FolderNode({
       {/* Selection Indicator */}
       <div
         className={cn(
-          "absolute top-3 left-3 h-5 w-5 rounded-full flex items-center justify-center transition-all duration-200",
+          "absolute top-2.5 left-2.5 h-4 w-4 rounded-full flex items-center justify-center transition-all duration-200",
           isSelected
             ? "bg-primary text-white scale-110"
             : "bg-white/5 text-white/20 opacity-0 group-hover:opacity-100 hover:bg-white/10",
         )}
       >
         {isSelected ? (
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <CheckCircle2 className="h-3 w-3" />
         ) : (
-          <Circle className="h-3.5 w-3.5" />
+          <Circle className="h-3 w-3" />
         )}
       </div>
 
       {/* Required Indicator */}
-      <div className="absolute top-3 left-10 flex items-center gap-2">
+      <div className="absolute top-2.5 left-8 flex items-center gap-2">
         <div
           className={cn(
             "h-1.5 w-1.5 rounded-full",
@@ -137,15 +137,15 @@ export function FolderNode({
       {/* Folder Icon */}
       <div
         className={cn(
-          "flex items-center justify-center rounded-2xl transition-all mb-4 shrink-0 shadow-xl",
+          "flex items-center justify-center rounded-xl transition-all mb-2 shrink-0 shadow-xl",
           level === 1
-            ? "h-16 w-16 bg-primary/10 text-primary group-hover:scale-110"
-            : "h-14 w-14 bg-white/5 text-white/40 group-hover:text-white/60 group-hover:scale-110",
+            ? "h-12 w-12 bg-primary/10 text-primary group-hover:scale-110"
+            : "h-10 w-10 bg-white/5 text-white/40 group-hover:text-white/60 group-hover:scale-110",
           isSelected && "text-primary bg-primary/20",
         )}
       >
         <Folder
-          className={cn("transition-all", level === 1 ? "h-8 w-8" : "h-6 w-6")}
+          className={cn("transition-all", level === 1 ? "h-6 w-6" : "h-5 w-5")}
         />
       </div>
 

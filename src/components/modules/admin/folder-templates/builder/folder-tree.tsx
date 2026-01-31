@@ -110,9 +110,9 @@ export function FolderTree({
   };
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-4">
       {/* Navigation Header */}
-      <div className="flex flex-col gap-4 border-b border-white/5 pb-6">
+      <div className="flex flex-col gap-4 border-b border-white/5 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3 shrink-0">
@@ -155,7 +155,7 @@ export function FolderTree({
         </div>
 
         {/* Breadcrumbs */}
-        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-2">
+        <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1">
           {breadcrumbs.map((bread, i) => (
             <div key={i} className="flex items-center shrink-0">
               {i > 0 && <ChevronRight className="h-3 w-3 mx-1 text-white/20" />}
@@ -182,7 +182,7 @@ export function FolderTree({
           {navPath.length > 0 ? (
             <button
               onClick={() => setNavPath(navPath.slice(0, -1))}
-              className="flex items-center gap-2 px-3 py-2 text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-white/5 rounded-lg transition-all w-fit"
+              className="flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold text-primary uppercase tracking-widest hover:bg-white/5 rounded-lg transition-all w-fit"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               Back to previous
@@ -207,27 +207,27 @@ export function FolderTree({
         </div>
 
         {currentFolders.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-24 px-8 border border-white/5 rounded-3xl bg-white/2">
-            <div className="p-5 rounded-2xl bg-white/5 mb-6">
-              <LayoutTemplate className="h-10 w-10 text-white/20" />
+          <div className="flex flex-col items-center justify-center py-16 px-8 border border-white/5 rounded-3xl bg-white/2">
+            <div className="p-4 rounded-2xl bg-white/5 mb-4">
+              <LayoutTemplate className="h-8 w-8 text-white/20" />
             </div>
             <h3 className="text-sm font-bold text-white uppercase tracking-widest mb-1">
               Folder Empty
             </h3>
-            <p className="text-xs text-white/30 font-medium mb-6">
-              No {navPath.length === 0 ? "root" : "child"} folders found here
+            <p className="text-xs text-white/30 font-medium mb-4">
+              No {navPath.length === 0 ? "root" : "child"} folders found
             </p>
             <Button
               variant="outline"
               size="sm"
               onClick={handleAdd}
-              className="bg-white/5 border-white/5 hover:bg-white/10 hover:text-white text-white/60 font-bold uppercase tracking-widest text-[10px] h-10 px-6 rounded-xl transition-all"
+              className="bg-white/5 border-white/5 hover:bg-white/10 hover:text-white text-white/60 font-bold uppercase tracking-widest text-[10px] h-9 px-6 rounded-xl transition-all"
             >
               Create First Folder
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             {currentFolders.map((folder, idx) => {
               const fullPath =
                 navPath.length === 0

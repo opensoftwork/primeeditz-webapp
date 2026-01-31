@@ -22,6 +22,7 @@ interface ProjectTypeWizardContextValue extends WizardState {
   handleNext: () => void;
   handleBack: () => void;
   canProceed: boolean;
+  isValid: boolean;
 
   // Data setters
   setStep1Data: (data: Step1Data) => void;
@@ -77,7 +78,7 @@ export function ProjectTypeWizardProvider({
   );
 
   // Derived state
-  const isEditing = !!projectTypeId && !!existingProjectType;
+  const isEditing = !!projectTypeId;
   const isDraft = existingProjectType?.isDraft ?? false;
 
   // Initialize from existing data (edit mode)
@@ -180,13 +181,20 @@ export function ProjectTypeWizardProvider({
   }, [step1Data, step, folders, projectTypeId, saveDraftMutation, router]);
 
   const handleSubmit = useCallback(async () => {
-    if (!step1Data) {
-      toast.error("Missing project type data");
-      return;
-    }
+    const isValid =
+      !!step1Data?.name &&
+      step1Data.name.length >= 2 &&
+      !!step1Data?.categoryId &&
+      folders.length > 0;
 
-    if (folders.length === 0) {
-      toast.error("At least one folder is required");
+    if (!isValid) {
+      if (!step1Data?.name || step1Data.name.length < 2) {
+        toast.error("Project type name is required (min 2 characters)");
+      } else if (!step1Data?.categoryId) {
+        toast.error("Please select a category");
+      } else if (folders.length === 0) {
+        toast.error("At least one folder is required");
+      }
       return;
     }
 
@@ -253,6 +261,11 @@ export function ProjectTypeWizardProvider({
     handleNext,
     handleBack,
     canProceed: canProceed(),
+    isValid:
+      !!step1Data?.name &&
+      step1Data.name.length >= 2 &&
+      !!step1Data?.categoryId &&
+      folders.length > 0,
 
     // Data setters
     setStep1Data,

@@ -36,6 +36,7 @@ import {
 import { Switch } from "@/components/ui/switch";
 import { IconPicker } from "@/components/ui/icon-picker";
 import { Textarea } from "@/components/ui/textarea";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
 
 const projectTypeSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
