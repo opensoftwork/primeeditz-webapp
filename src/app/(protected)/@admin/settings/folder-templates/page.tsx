@@ -1,5 +1,7 @@
-import { FolderTemplatesList } from "@/components/modules/admin/folder-templates";
+import { redirect } from "next/navigation";
 
-export default function FolderTemplatesPage() {
-  return <FolderTemplatesList />;
+// DEPRECATED: Folder templates are now accessed through Project Types
+// This redirect preserves bookmarks and existing links
+export default function DeprecatedFolderTemplatesPage() {
+  redirect("/settings/project-types");
 }

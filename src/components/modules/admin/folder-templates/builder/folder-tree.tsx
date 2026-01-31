@@ -251,16 +251,6 @@ export function FolderTree({
           </div>
         )}
       </div>
-
-      <div className="pt-8 border-t border-white/5">
-        <div className="flex items-center justify-center gap-2">
-          <div className="h-1 w-1 rounded-full bg-white/20" />
-          <p className="text-[9px] text-white/20 uppercase tracking-[0.2em] font-bold text-center">
-            Maximum 3 levels of nesting
-          </p>
-          <div className="h-1 w-1 rounded-full bg-white/20" />
-        </div>
-      </div>
     </div>
   );
 }

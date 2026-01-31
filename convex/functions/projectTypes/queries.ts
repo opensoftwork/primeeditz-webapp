@@ -73,7 +73,13 @@ export const getProjectTypes = adminQuery({
       }),
     );
 
-    return enriched;
+    // Sort: Drafts first, then by creation date (desc)
+    return enriched.sort((a, b) => {
+      const aDraft = a.isDraft ? 1 : 0;
+      const bDraft = b.isDraft ? 1 : 0;
+      if (aDraft !== bDraft) return bDraft - aDraft;
+      return b._creationTime - a._creationTime;
+    });
   },
 });
 
@@ -131,5 +137,15 @@ export const getProjectTypeWithFields = adminQuery({
       categoryName: category?.name || "Uncategorized",
       fields,
     };
+  },
+});
+
+/**
+ * Get a single project type by ID (Admin).
+ */
+export const getById = adminQuery({
+  args: { id: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
   },
 });

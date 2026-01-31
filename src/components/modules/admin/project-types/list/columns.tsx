@@ -22,9 +22,16 @@ export function getColumns(
           <div className="w-8 h-8 rounded-lg bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
             <Boxes className="h-4 w-4 text-primary" />
           </div>
-          <span className="text-sm font-black tracking-tight text-white uppercase group-hover:text-primary transition-colors">
-            {row.getValue("name")}
-          </span>
+          <div className="flex flex-col">
+            <span className="text-sm font-black tracking-tight text-white uppercase group-hover:text-primary transition-colors">
+              {row.getValue("name")}
+            </span>
+            {row.original.isDraft && (
+              <span className="text-[8px] font-black text-amber-500 uppercase tracking-widest mt-0.5">
+                Draft Mode
+              </span>
+            )}
+          </div>
         </div>
       ),
     },

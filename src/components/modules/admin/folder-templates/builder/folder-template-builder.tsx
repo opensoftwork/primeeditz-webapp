@@ -46,6 +46,7 @@ import {
   CheckCircle2,
   LayoutTemplate,
   Pencil,
+  Tag,
 } from "lucide-react";
 import {
   Popover,
@@ -93,18 +94,27 @@ const templateSchema = z.object({
 
 interface FolderTemplateBuilderProps {
   templateId?: Id<"folderTemplates">;
+  projectTypeId?: Id<"projectTypes">;
 }
 
 export function FolderTemplateBuilder({
   templateId,
+  projectTypeId: propProjectTypeId,
 }: FolderTemplateBuilderProps) {
   const router = useRouter();
+
+  // Determine if we're in project type context
+  const isProjectTypeContext = !!propProjectTypeId;
 
   // Convex Hooks
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const existingTemplate = useQuery(
     api.functions.folderTemplates.queries.get,
     templateId ? { id: templateId } : "skip",
+  );
+  const parentProjectType = useQuery(
+    api.functions.projectTypes.queries.getById,
+    propProjectTypeId ? { id: propProjectTypeId } : "skip",
   );
 
   const createTemplate = useMutation(
@@ -129,11 +139,18 @@ export function FolderTemplateBuilder({
     }
   }, [existingTemplate]);
 
+  // Compute the back URL based on context
+  // Note: Standalone folder templates route is deprecated, so fallback goes to project-types
+  const backUrl = isProjectTypeContext
+    ? `/settings/project-types/${propProjectTypeId}/folder-templates`
+    : "/settings/project-types";
+
   // Form setup
   const form = useForm({
     defaultValues: {
       name: (existingTemplate?.name || "") as string,
-      projectTypeId: ((existingTemplate?.projectTypeId as string) ||
+      projectTypeId: ((propProjectTypeId as string) ||
+        (existingTemplate?.projectTypeId as string) ||
         "") as string,
       variant: (existingTemplate?.variant || "") as string,
       description: (existingTemplate?.description || "") as string,
@@ -143,26 +160,42 @@ export function FolderTemplateBuilder({
     },
     onSubmit: async ({ value }) => {
       try {
+        // Validation
+        if (!value.name || value.name.trim() === "") {
+          toast.error("Template name is required");
+          return;
+        }
+
         if (folders.length === 0) {
-          toast.error("Template must have at least one folder");
+          toast.error("At least one folder is required");
+          return;
+        }
+
+        const effectiveProjectTypeId =
+          propProjectTypeId || (value.projectTypeId as Id<"projectTypes">);
+
+        if (!effectiveProjectTypeId) {
+          toast.error("Project type is required");
           return;
         }
 
         const data = {
           ...value,
-          projectTypeId: value.projectTypeId as Id<"projectTypes">,
+          projectTypeId: effectiveProjectTypeId,
           folders,
           isActive: existingTemplate?.isActive ?? true,
         };
 
         if (templateId) {
           await updateTemplate({ id: templateId, ...data });
-          toast.success("Folder template updated successfully");
+          toast.success("Template updated successfully");
         } else {
           await createTemplate(data);
-          toast.success("Folder template created successfully");
+          toast.success("Template created successfully");
         }
-        router.push("/settings/folder-templates");
+
+        // Navigate back to appropriate location
+        router.push(backUrl);
       } catch (error) {
         console.error("Save error:", error);
         toast.error("Failed to save template");
@@ -324,8 +357,45 @@ export function FolderTemplateBuilder({
     return <FolderTemplateBuilderError error="Folder template not found" />;
   }
 
+  // Wait for parent project type in context mode
+  if (isProjectTypeContext && parentProjectType === undefined) {
+    return <FolderTemplateBuilderLoading />;
+  }
+
+  if (isProjectTypeContext && parentProjectType === null) {
+    return <FolderTemplateBuilderError error="Project type not found" />;
+  }
+
   return (
     <div className="w-full space-y-12 pb-32 font-geist px-10 pt-16">
+      {/* Breadcrumb - Only show when in project type context */}
+      {isProjectTypeContext && parentProjectType && (
+        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40">
+          <Link
+            href="/settings/project-types"
+            className="hover:text-white transition-colors"
+          >
+            Project Types
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/settings/project-types/${propProjectTypeId}`}
+            className="hover:text-white transition-colors"
+          >
+            {parentProjectType.name}
+          </Link>
+          <span>/</span>
+          <Link
+            href={`/settings/project-types/${propProjectTypeId}/folder-templates`}
+            className="hover:text-white transition-colors"
+          >
+            Templates
+          </Link>
+          <span>/</span>
+          <span className="text-primary">{templateId ? "Edit" : "New"}</span>
+        </div>
+      )}
+
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-white/5">
         <div className="flex items-center gap-5 flex-1 min-w-0">
@@ -335,7 +405,7 @@ export function FolderTemplateBuilder({
             asChild
             className="shrink-0 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-11 w-11"
           >
-            <Link href="/settings/folder-templates">
+            <Link href={backUrl}>
               <ArrowLeft className="h-5 w-5" />
             </Link>
           </Button>
@@ -351,7 +421,6 @@ export function FolderTemplateBuilder({
                       value={field.state.value}
                       onBlur={() => {
                         field.handleBlur();
-                        // Optional: we can trigger the confirm here too, but user asked for the button
                       }}
                       onChange={(e) => field.handleChange(e.target.value)}
                       onKeyDown={(e) => {
@@ -433,6 +502,64 @@ export function FolderTemplateBuilder({
       </div>
 
       <div className="space-y-8">
+        {/* Show locked project type info when in context */}
+        {isProjectTypeContext && parentProjectType && (
+          <div className="flex items-center gap-4 p-5 rounded-2xl bg-primary/5 border border-primary/20">
+            <div className="p-3 rounded-xl bg-primary/10 border border-primary/20">
+              <Tag className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                Project Type (Locked)
+              </p>
+              <p className="text-sm font-bold text-white">
+                {parentProjectType.name}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* Variant Field */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <form.Field
+            name="variant"
+            children={(field) => (
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Variant Label (Optional)
+                </Label>
+                <Input
+                  value={field.state.value || ""}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5"
+                  placeholder="e.g. Premium, Standard, Minimal"
+                />
+                <p className="text-[10px] text-white/30 font-medium">
+                  Use to distinguish between multiple templates for the same
+                  project type
+                </p>
+              </div>
+            )}
+          />
+
+          <form.Field
+            name="description"
+            children={(field) => (
+              <div className="space-y-3">
+                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                  Description (Optional)
+                </Label>
+                <Input
+                  value={field.state.value || ""}
+                  onChange={(e) => field.handleChange(e.target.value)}
+                  className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5"
+                  placeholder="Brief description of this template..."
+                />
+              </div>
+            )}
+          />
+        </div>
+
         {/* Main Workspace */}
         <div className="space-y-8">
           <section className="space-y-4">
@@ -445,7 +572,7 @@ export function FolderTemplateBuilder({
                   Folder Hierarchy
                 </h2>
                 <p className="text-[10px] text-white/30 font-medium mt-0.5">
-                  Design the directory structure for this package
+                  Design the directory structure for this template
                 </p>
               </div>
             </div>
@@ -461,111 +588,114 @@ export function FolderTemplateBuilder({
                   onDelete={(path) => setDeletePath(path)}
                   onDeleteBulk={(paths) => setDeletePaths(paths)}
                   renderHeader={
-                    <form.Field
-                      name="projectTypeId"
-                      children={(field) => {
-                        const selectedType = projectTypes.find(
-                          (t) => t._id === field.state.value,
-                        );
-                        return (
-                          <Sheet>
-                            <SheetTrigger asChild>
-                              <Button
-                                variant="outline"
-                                className="h-9 bg-zinc-950/40 border-white/5 hover:bg-zinc-950/60 transition-all rounded-xl px-4 flex items-center gap-3 group"
+                    // Only show project type selector when NOT in project type context
+                    !isProjectTypeContext ? (
+                      <form.Field
+                        name="projectTypeId"
+                        children={(field) => {
+                          const selectedType = projectTypes.find(
+                            (t) => t._id === field.state.value,
+                          );
+                          return (
+                            <Sheet>
+                              <SheetTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  className="h-9 bg-zinc-950/40 border-white/5 hover:bg-zinc-950/60 transition-all rounded-xl px-4 flex items-center gap-3 group"
+                                >
+                                  <div className="flex flex-col items-start">
+                                    <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary/50 transition-colors">
+                                      Project Type
+                                    </span>
+                                    <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
+                                      {selectedType?.name || "Select Type"}
+                                    </span>
+                                  </div>
+                                  <div className="h-4 w-px bg-white/5 mx-1" />
+                                  <ChevronRight className="h-3 w-3 text-white/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
+                                </Button>
+                              </SheetTrigger>
+                              <SheetContent
+                                side="right"
+                                className="w-[400px] bg-zinc-950 border-l border-white/5 p-0 overflow-hidden"
                               >
-                                <div className="flex flex-col items-start">
-                                  <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20 group-hover:text-primary/50 transition-colors">
-                                    Project Type
-                                  </span>
-                                  <span className="text-[10px] font-bold uppercase tracking-widest text-white/80">
-                                    {selectedType?.name || "Select Type"}
-                                  </span>
-                                </div>
-                                <div className="h-4 w-px bg-white/5 mx-1" />
-                                <ChevronRight className="h-3 w-3 text-white/20 group-hover:text-primary group-hover:translate-x-0.5 transition-all" />
-                              </Button>
-                            </SheetTrigger>
-                            <SheetContent
-                              side="right"
-                              className="w-[400px] bg-zinc-950 border-l border-white/5 p-0 overflow-hidden"
-                            >
-                              <div className="absolute top-0 right-0 w-full h-[300px] bg-primary/5 blur-[100px] rounded-full -translate-y-1/2" />
+                                <div className="absolute top-0 right-0 w-full h-[300px] bg-primary/5 blur-[100px] rounded-full -translate-y-1/2" />
 
-                              <SheetHeader className="p-8 border-b border-white/5 relative z-10">
-                                <div className="flex items-center gap-4">
-                                  <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
-                                    <LayoutTemplate className="h-6 w-6 text-primary" />
+                                <SheetHeader className="p-8 border-b border-white/5 relative z-10">
+                                  <div className="flex items-center gap-4">
+                                    <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+                                      <LayoutTemplate className="h-6 w-6 text-primary" />
+                                    </div>
+                                    <div>
+                                      <SheetTitle className="text-xl font-black uppercase tracking-tight text-white font-sentient">
+                                        Project Types
+                                      </SheetTitle>
+                                      <SheetDescription className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
+                                        Select a category for this template
+                                      </SheetDescription>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <SheetTitle className="text-xl font-black uppercase tracking-tight text-white font-sentient">
-                                      Project Types
-                                    </SheetTitle>
-                                    <SheetDescription className="text-white/40 text-[10px] font-bold uppercase tracking-widest">
-                                      Select a category for this template
-                                    </SheetDescription>
-                                  </div>
-                                </div>
-                              </SheetHeader>
+                                </SheetHeader>
 
-                              <ScrollArea className="h-[calc(100vh-120px)] relative z-10">
-                                <div className="p-6 space-y-3">
-                                  {projectTypes.map((type: any) => (
-                                    <button
-                                      key={type._id}
-                                      onClick={() =>
-                                        field.handleChange(type._id)
-                                      }
-                                      className={cn(
-                                        "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group",
-                                        field.state.value === type._id
-                                          ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20"
-                                          : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
-                                      )}
-                                    >
-                                      <div
+                                <ScrollArea className="h-[calc(100vh-120px)] relative z-10">
+                                  <div className="p-6 space-y-3">
+                                    {projectTypes.map((type: any) => (
+                                      <button
+                                        key={type._id}
+                                        onClick={() =>
+                                          field.handleChange(type._id)
+                                        }
                                         className={cn(
-                                          "h-12 w-12 rounded-xl flex items-center justify-center transition-all",
+                                          "w-full flex items-center gap-4 p-4 rounded-2xl border transition-all text-left group",
                                           field.state.value === type._id
-                                            ? "bg-primary text-white"
-                                            : "bg-white/5 text-white/40 group-hover:text-white/60",
+                                            ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20"
+                                            : "bg-white/2 border-white/5 hover:bg-white/5 hover:border-white/10",
                                         )}
                                       >
-                                        <FolderTree className="h-6 w-6" />
-                                      </div>
-                                      <div className="flex-1 space-y-1">
-                                        <p
+                                        <div
                                           className={cn(
-                                            "text-xs font-black uppercase tracking-widest transition-colors",
+                                            "h-12 w-12 rounded-xl flex items-center justify-center transition-all",
                                             field.state.value === type._id
-                                              ? "text-primary"
-                                              : "text-white/80",
+                                              ? "bg-primary text-white"
+                                              : "bg-white/5 text-white/40 group-hover:text-white/60",
                                           )}
                                         >
-                                          {type.name}
-                                        </p>
-                                        {type.description ? (
-                                          <p className="text-[10px] text-white/30 font-medium line-clamp-1">
-                                            {type.description}
+                                          <FolderTree className="h-6 w-6" />
+                                        </div>
+                                        <div className="flex-1 space-y-1">
+                                          <p
+                                            className={cn(
+                                              "text-xs font-black uppercase tracking-widest transition-colors",
+                                              field.state.value === type._id
+                                                ? "text-primary"
+                                                : "text-white/80",
+                                            )}
+                                          >
+                                            {type.name}
                                           </p>
-                                        ) : (
-                                          <p className="text-[10px] text-white/20 italic">
-                                            No description provided
-                                          </p>
+                                          {type.description ? (
+                                            <p className="text-[10px] text-white/30 font-medium line-clamp-1">
+                                              {type.description}
+                                            </p>
+                                          ) : (
+                                            <p className="text-[10px] text-white/20 italic">
+                                              No description provided
+                                            </p>
+                                          )}
+                                        </div>
+                                        {field.state.value === type._id && (
+                                          <CheckCircle2 className="h-4 w-4 text-primary" />
                                         )}
-                                      </div>
-                                      {field.state.value === type._id && (
-                                        <CheckCircle2 className="h-4 w-4 text-primary" />
-                                      )}
-                                    </button>
-                                  ))}
-                                </div>
-                              </ScrollArea>
-                            </SheetContent>
-                          </Sheet>
-                        );
-                      }}
-                    />
+                                      </button>
+                                    ))}
+                                  </div>
+                                </ScrollArea>
+                              </SheetContent>
+                            </Sheet>
+                          );
+                        }}
+                      />
+                    ) : null
                   }
                 />
               </CardContent>

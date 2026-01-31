@@ -1,15 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { use } from "react";
-import { FolderTemplateBuilder } from "@/components/modules/admin/folder-templates/builder/folder-template-builder";
-import type { Id } from "@convex/_generated/dataModel";
-
-interface EditFolderTemplatePageProps {
-  params: Promise<{ templateId: string }>;
-}
-
-export default function EditFolderTemplatePage({ params }: EditFolderTemplatePageProps) {
-  const { templateId } = use(params);
-  
-  return <FolderTemplateBuilder templateId={templateId as Id<"folderTemplates">} />;
+// DEPRECATED: Folder templates are now accessed through Project Types
+// Edit templates via /settings/project-types/{id}/folder-templates/{templateId}
+export default function DeprecatedEditFolderTemplatePage() {
+  redirect("/settings/project-types");
 }

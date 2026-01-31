@@ -4,7 +4,6 @@ import {
   ClipboardList,
   FileText,
   FolderKanban,
-  FolderTree,
   HardDrive,
   LayoutDashboard,
   LayoutGrid,
@@ -111,11 +110,6 @@ export const adminNavGroups: NavGroup[] = [
         title: "Storage Tiers",
         url: "/settings/storage-tiers",
         icon: HardDrive,
-      },
-      {
-        title: "Folder Templates",
-        url: "/settings/folder-templates",
-        icon: FolderTree,
       },
       {
         title: "Service Packages",

@@ -1,12 +1,14 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
+import { motion } from "motion/react";
+import { Plus } from "lucide-react";
+import { toast } from "sonner";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
-import { Plus } from "lucide-react";
-import { motion } from "motion/react";
-import { useMemo, useState } from "react";
-import { toast } from "sonner";
+
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import {
   AlertDialog,
@@ -22,16 +24,10 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getColumns } from "./columns";
 import { ProjectTypeCard } from "./project-type-card";
-import {
-  ProjectTypeDrawer,
-  type ProjectTypeFormValues,
-} from "./project-type-drawer";
 import type { AdminProjectType } from "./types";
 
-// import { useRouter } from "next/navigation"; (removed from imports)
-
 export function ProjectTypeList() {
-  // const router = useRouter(); (removed)
+  const router = useRouter();
   const projectTypes = useQuery(
     api.functions.projectTypes.queries.getProjectTypes,
   );
@@ -39,23 +35,11 @@ export function ProjectTypeList() {
     useQuery(api.functions.projectCategories.queries.getProjectCategories) ||
     [];
 
-  const createProjectType = useMutation(
-    api.functions.projectTypes.mutations.createProjectType,
-  );
-  const updateProjectType = useMutation(
-    api.functions.projectTypes.mutations.updateProjectType,
-  );
-  /* const toggleStatusMutation = useMutation(
-    api.functions.projectTypes.mutations.toggleProjectTypeActive,
-  ); */ // removed
-
   const deleteMutation = useMutation(
     api.functions.projectTypes.mutations.deleteProjectType,
   );
 
   // State
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingType, setEditingType] = useState<AdminProjectType | null>(null);
   const [typeToDelete, setTypeToDelete] = useState<{
     id: Id<"projectTypes">;
     name: string;
@@ -70,13 +54,16 @@ export function ProjectTypeList() {
     }));
   }, [projectTypes, categories]);
 
+  const handleEdit = (id: string) => {
+    router.push(`/settings/project-types/${id}`);
+  };
+
   const columns = useMemo(
     () =>
       getColumns((type) => {
-        setEditingType(type);
-        setIsDrawerOpen(true);
+        handleEdit(type._id);
       }),
-    [],
+    [router],
   );
 
   const categoryOptions = useMemo(() => {
@@ -88,36 +75,7 @@ export function ProjectTypeList() {
 
   // Handlers
   const handleCreate = () => {
-    setEditingType(null);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSave = async (values: ProjectTypeFormValues) => {
-    try {
-      if (editingType) {
-        await updateProjectType({
-          id: editingType._id as Id<"projectTypes">,
-          name: values.name,
-          description: values.description,
-          icon: values.icon,
-          categoryId: values.categoryId as Id<"projectCategories">,
-          isActive: values.isActive,
-        });
-        toast.success("Project type updated successfully");
-      } else {
-        await createProjectType({
-          name: values.name,
-          description: values.description,
-          icon: values.icon,
-          categoryId: values.categoryId as Id<"projectCategories">,
-          isActive: values.isActive,
-        });
-        toast.success("New project type created");
-      }
-      setIsDrawerOpen(false);
-    } catch (_error) {
-      toast.error("An error occurred while saving");
-    }
+    router.push("/settings/project-types/new");
   };
 
   const handleDelete = async () => {
@@ -186,10 +144,7 @@ export function ProjectTypeList() {
           <ProjectTypeCard
             key={type._id}
             type={type}
-            onEdit={(editType) => {
-              setEditingType(editType);
-              setIsDrawerOpen(true);
-            }}
+            onEdit={(editType) => handleEdit(editType._id)}
             onDelete={async (id) => {
               setTypeToDelete({
                 id: id as Id<"projectTypes">,
@@ -225,13 +180,6 @@ export function ProjectTypeList() {
               : []),
           ],
         }}
-      />
-
-      <ProjectTypeDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        onSave={handleSave}
-        initialData={editingType}
       />
 
       <AlertDialog

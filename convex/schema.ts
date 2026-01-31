@@ -209,6 +209,14 @@ export default defineSchema({
     isActive: v.boolean(),
     displayOrder: v.optional(v.number()), // For ordering in UI
     defaultFolderTemplateId: v.optional(v.id("folderTemplates")),
+    // NEW: Draft support
+    isDraft: v.optional(v.boolean()),
+    draftData: v.optional(
+      v.object({
+        step: v.number(),
+        folders: v.array(folderLevel1Validator),
+      }),
+    ),
     // Delivery configuration for customizing the 'delivery' phase labels/behavior
     deliveryConfig: v.optional(
       v.object({
@@ -219,9 +227,11 @@ export default defineSchema({
         requiresSignoff: v.boolean(), // Client must sign for delivery
       }),
     ),
+    updatedAt: v.optional(v.number()),
   })
     .index("by_categoryId", ["categoryId"])
-    .index("by_isActive", ["isActive"]),
+    .index("by_isActive", ["isActive"])
+    .index("by_isDraft", ["isDraft"]),
 
   /**
    * @deprecated This table is deprecated as of Epic 13.

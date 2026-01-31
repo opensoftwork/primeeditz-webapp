@@ -1,7 +1,7 @@
-"use client";
+import { redirect } from "next/navigation";
 
-import { FolderTemplateBuilder } from "@/components/modules/admin/folder-templates/builder/folder-template-builder";
-
-export default function NewFolderTemplatePage() {
-  return <FolderTemplateBuilder />;
+// DEPRECATED: Folder templates are now accessed through Project Types
+// New templates should be created via /settings/project-types/{id}/folder-templates/new
+export default function DeprecatedNewFolderTemplatePage() {
+  redirect("/settings/project-types");
 }

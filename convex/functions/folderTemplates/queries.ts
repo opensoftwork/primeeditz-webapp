@@ -45,3 +45,39 @@ export const listByProjectType = authenticatedQuery({
       .collect();
   },
 });
+
+/**
+ * Get the default (or first) folder template for a project type.
+ */
+export const getByProjectTypeId = adminQuery({
+  args: { projectTypeId: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("folderTemplates")
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId)
+      )
+      .first();
+  },
+});
+
+/**
+ * List all folder templates for a specific project type (Admin).
+ */
+export const listAllByProjectType = adminQuery({
+  args: { projectTypeId: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    const projectType = await ctx.db.get(args.projectTypeId);
+    const templates = await ctx.db
+      .query("folderTemplates")
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId)
+      )
+      .collect();
+
+    return templates.map((template) => ({
+      ...template,
+      projectTypeName: projectType?.name || "N/A",
+    }));
+  },
+});

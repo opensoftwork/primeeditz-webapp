@@ -7,7 +7,9 @@ import {
   Edit2,
   Eye,
   EyeOff,
+  FolderTree,
   Loader2,
+  MoreVertical,
   Settings2,
   Trash2,
 } from "lucide-react";
@@ -17,8 +19,16 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 import type { AdminProjectType } from "./types";
 
@@ -33,6 +43,7 @@ export function ProjectTypeCard({
   onEdit,
   onDelete,
 }: ProjectTypeCardProps) {
+  const router = useRouter();
   const toggleStatusMutation = useMutationWithStatus(
     api.functions.projectTypes.mutations.toggleProjectTypeActive,
   );
@@ -57,61 +68,125 @@ export function ProjectTypeCard({
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-      <Card className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
+      <Card
+        className={cn(
+          "group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5",
+          type.isDraft && "border-amber-500/20 bg-amber-500/5",
+        )}
+      >
         {/* Glow Effect */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
+        <div
+          className={cn(
+            "absolute top-0 right-0 w-32 h-32 blur-[60px] rounded-full translate-x-16 -translate-y-16 transition-colors",
+            type.isDraft
+              ? "bg-amber-500/10 group-hover:bg-amber-500/20"
+              : "bg-primary/5 group-hover:bg-primary/10",
+          )}
+        />
 
         <div className="relative z-10 space-y-5">
           {/* Header */}
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/30 transition-colors">
-                <Boxes className="h-5 w-5 text-primary" />
+              <div
+                className={cn(
+                  "w-10 h-10 rounded-xl bg-linear-to-br border flex items-center justify-center transition-colors",
+                  type.isDraft
+                    ? "from-amber-500/20 to-amber-500/5 border-amber-500/20 group-hover:border-amber-500/30"
+                    : "from-primary/20 to-primary/5 border-primary/20 group-hover:border-primary/30",
+                )}
+              >
+                <Boxes
+                  className={cn(
+                    "h-5 w-5",
+                    type.isDraft ? "text-amber-500" : "text-primary",
+                  )}
+                />
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
                   {type.categoryName || "PROJECT ENGINE"}
                 </span>
-                <Badge
-                  className={cn(
-                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 relative overflow-hidden",
-                    type.isActive
-                      ? "bg-green-500/10 text-green-500 border-green-500/20"
-                      : "bg-white/5 text-white/40 border-white/5",
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Badge
+                    className={cn(
+                      "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md relative overflow-hidden",
+                      type.isActive
+                        ? "bg-green-500/10 text-green-500 border-green-500/20"
+                        : "bg-white/5 text-white/40 border-white/5",
+                    )}
+                  >
+                    {type.isActive ? "ACTIVE" : "INACTIVE"}
+                  </Badge>
+                  {type.isDraft && (
+                    <Badge className="w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md bg-amber-500/10 text-amber-500 border-amber-500/20">
+                      DRAFT
+                    </Badge>
                   )}
-                >
-                  {type.isActive ? "ACTIVE" : "INACTIVE"}
-                </Badge>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 transition-all duration-200">
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
-                onClick={() => onEdit(type)}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
+                >
+                  <MoreVertical className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-zinc-950 border-white/10 rounded-2xl p-2 glass"
               >
-                <Edit2 className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
-                onClick={() => onDelete(type._id, type.name)}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </div>
+                <DropdownMenuItem
+                  onClick={() => onEdit(type)}
+                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white focus:bg-white/5 cursor-pointer"
+                >
+                  <Edit2 className="h-3.5 w-3.5" />
+                  Edit Configuration
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  onClick={() =>
+                    router.push(
+                      `/settings/project-types/${type._id}/folder-templates`,
+                    )
+                  }
+                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white focus:bg-white/5 cursor-pointer"
+                >
+                  <FolderTree className="h-3.5 w-3.5" />
+                  Manage Templates
+                </DropdownMenuItem>
+                <DropdownMenuSeparator className="bg-white/5 mx-2 my-2" />
+                <DropdownMenuItem
+                  onClick={() => onDelete(type._id, type.name)}
+                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete Permanently
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Title Area */}
           <div className="space-y-1">
-            <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+            <h3
+              className={cn(
+                "text-xl font-black uppercase tracking-tight line-clamp-1 transition-colors",
+                type.isDraft
+                  ? "text-amber-500 group-hover:text-amber-400"
+                  : "text-white group-hover:text-primary",
+              )}
+            >
               {type.name}
             </h3>
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
-              System Architecture Configuration
+              {type.isDraft
+                ? "PRELIMINARY ARCHITECTURE DRAFT"
+                : "SYSTEM ARCHITECTURE CONFIGURATION"}
             </div>
           </div>
 

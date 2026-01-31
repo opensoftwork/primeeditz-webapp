@@ -299,3 +299,59 @@ development_status:
   13f-4-update-spawning-logic-create-n-projects: done # 3 points
   13f-5-update-view-detail-show-multiple-configs: done # 2 points
   epic-13f-retrospective: optional
+
+  # ============================================================================
+  # EPIC 14: Project Type + Folder Template Integration
+  # ============================================================================
+  # Context: Created 2026-01-31
+  # Goal: Restructure Project Types as parent containers for Folder Templates
+  # Key Change: Stepper-based wizard with mandatory folder structure
+  # Breaking Change: Deprecates standalone /settings/folder-templates route
+  epic-14: backlog
+
+  # Story 14.11: Schema & Backend Updates (Foundation - parallel with 14.1)
+  # Goal: Add isDraft, draftData, defaultFolderTemplateId to schema
+  14-11-schema-backend-updates: done # 2 points - FOUNDATION
+
+  # Story 14.1: Wizard Context & Infrastructure (Foundation)
+  # Goal: Create ProjectTypeWizardProvider with all state management
+  14-1-wizard-context-infrastructure: done # 3 points - FOUNDATION
+
+  # Story 14.2: Step 1 — Project Type Identity Form
+  # Goal: Form for name, category, description, icon, isActive
+  14-2-step-1-identity-form: done # 2 points
+
+  # Story 14.3: Step 2 — Folder Hierarchy Builder
+  # Goal: Integrate FolderTree, enforce min 1 folder
+  14-3-step-2-folder-hierarchy: done # 3 points
+
+  # Story 14.4: Step 3 — Review & Submit
+  # Goal: Summary view, draft save, atomic create/update
+  14-4-step-3-review-submit: done # 3 points
+
+  # Story 14.5: Project Type Wizard — Stepper Layout
+  # Goal: Full-screen layout matching Request Engagement flow
+  14-5-wizard-stepper-layout: in-progress # 3 points
+
+  # Story 14.6: Route Structure & Navigation
+  # Goal: Set up /new, /[id], /[id]/folder-templates routes
+  14-6-route-structure-navigation: done # 2 points
+
+  # Story 14.7: Draft Save & Resume Functionality
+  # Goal: Draft persistence, resume from last step
+  14-7-draft-save-resume: done # 3 points
+
+  # Story 14.8: Folder Templates List (Project Type Scoped)
+  # Goal: List templates under project type with add/edit/delete
+  14-8-folder-templates-list: done # 2 points
+
+  # Story 14.9: Folder Template Builder (Project Type Context)
+  # Goal: Pre-selected project type, variant field, contextual nav
+  14-9-folder-template-builder-context: done # 2 points
+
+  # Story 14.10: Deprecate Standalone Folder Templates Route
+  # Goal: Remove /settings/folder-templates, update sidebar
+  # ⚠️ LAST - Only after 14.1-14.9 complete and tested
+  14-10-deprecate-folder-templates-route: done # 2 points - FINAL
+
+  epic-14-retrospective: optional

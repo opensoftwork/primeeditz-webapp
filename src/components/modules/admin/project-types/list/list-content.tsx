@@ -10,17 +10,17 @@ interface ProjectType {
   fieldCount?: number;
 }
 
+import type { Id } from "@convex/_generated/dataModel";
+
 interface ListContentProps {
   projectTypes: ProjectType[];
   onEdit: (type: any) => void;
-  onToggleStatus: (id: string, current: boolean) => void;
-  onDeleteRequest: (id: string, name: string) => void;
+  onDeleteRequest: (id: Id<"projectTypes">, name: string) => void;
 }
 
 export function ListContent({
   projectTypes,
   onEdit,
-  onToggleStatus,
   onDeleteRequest,
 }: ListContentProps) {
   const categorizedTypes = projectTypes.reduce(
@@ -50,9 +50,8 @@ export function ListContent({
             {types.map((type) => (
               <ProjectTypeCard
                 key={type._id}
-                type={type}
+                type={type as any}
                 onEdit={onEdit}
-                onToggleStatus={onToggleStatus}
                 onDelete={onDeleteRequest}
               />
             ))}

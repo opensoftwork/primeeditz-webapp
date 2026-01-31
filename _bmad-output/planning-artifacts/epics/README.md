@@ -31,11 +31,12 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
   - [Epic 11C: Studio Portal Revamp](./11c-studio-portal.md)
   - [Epic 11D: Terminology & Routing Cleanup](./11d-terminology-cleanup.md)
 - [Epic 12: Employee Assignment & Team Management](./12-employee-assignment-team-management.md)
-- **[Epic 13: Unified Service Package Configuration (Master)](./13-unified-service-package-configuration.md)** ⬅️ NEW
+- **[Epic 13: Unified Service Package Configuration (Master)](./13-unified-service-package-configuration.md)**
   - [Epic 13A: Schema Consolidation](./13a-schema-consolidation.md)
   - [Epic 13B: Folder Template Enhancement](./13b-folder-template-enhancement.md)
   - [Epic 13C: Service Package Builder UI](./13c-service-package-builder-ui.md)
   - [Epic 13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration.md)
+- **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)** ⬅️ NEW
 
 ---
 

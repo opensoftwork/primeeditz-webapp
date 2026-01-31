@@ -50,9 +50,13 @@ export default function DashboardLayout({
   const isWizardPage =
     pathname?.includes("/projects/new") ||
     pathname?.includes("/quotations/new") ||
+    pathname?.includes("/quotations/request") ||
     pathname?.includes("/settings/service-packages/new") ||
     (pathname?.includes("/settings/service-packages/") &&
       pathname?.split("/").length > 3) ||
+    pathname?.includes("/settings/project-types/new") ||
+    (pathname?.includes("/settings/project-types/") &&
+      pathname?.endsWith("/edit")) ||
     pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
 
