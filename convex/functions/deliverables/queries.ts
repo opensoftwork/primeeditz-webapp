@@ -61,3 +61,32 @@ export const getDeliverable = query({
     };
   },
 });
+
+/**
+ * Get all versions of a deliverable by name.
+ */
+export const getDeliverableVersions = query({
+  args: {
+    projectId: v.id("projects"),
+    name: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    const versions = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .order("desc")
+      .collect();
+
+    return versions.map((v) => ({
+      _id: v._id,
+      version: v.version,
+      status: v.status,
+      sizeBytes: v.sizeBytes,
+      _creationTime: v._creationTime,
+    }));
+  },
+});

@@ -407,6 +407,7 @@ export default defineSchema({
     status: deliverableStatusValidator,
     minioKey: v.string(),
     sizeBytes: v.number(),
+    mimeType: v.optional(v.string()),
     uploadedBy: v.id("profiles"),
     qcReviewedBy: v.optional(v.id("profiles")),
     qcNotes: v.optional(v.string()),
