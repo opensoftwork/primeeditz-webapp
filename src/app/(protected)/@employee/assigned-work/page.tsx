@@ -15,7 +15,7 @@ export default function AssignedWorkPage() {
   });
 
   return (
-    <div className="flex-1 p-8 md:p-12 space-y-10 max-w-[1600px] mx-auto min-h-screen">
+    <div className="flex-1 p-8 md:p-12 space-y-10  min-h-screen">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="flex items-center gap-4">

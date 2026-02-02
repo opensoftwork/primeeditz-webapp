@@ -31,10 +31,6 @@ export function ProjectHeader({
             <ArrowLeft className="h-3 w-3" />
             Dashboard
           </Link>
-          <ChevronRight className="h-3 w-3 opacity-20" />
-          <span className="text-white/60">Projects</span>
-          <ChevronRight className="h-3 w-3 opacity-20" />
-          <span className="text-primary truncate max-w-[200px]">{title}</span>
         </div>
 
         <div className="flex items-center gap-3">

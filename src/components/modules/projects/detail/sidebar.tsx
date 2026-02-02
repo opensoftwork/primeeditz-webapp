@@ -4,7 +4,10 @@ import { format } from "date-fns";
 import { Calendar, Clock, Database, Sparkles } from "lucide-react";
 import { motion } from "motion/react";
 import React from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 import { Button } from "@/components/ui/button";
+import { StorageUsageBar } from "@/components/shared/storage-usage-bar";
 import { SidebarItem } from "./shared";
 
 interface DetailSidebarProps {
@@ -12,8 +15,26 @@ interface DetailSidebarProps {
 }
 
 export function DetailSidebar({ project }: DetailSidebarProps) {
+  const storage = useQuery(
+    api.functions.storage.queries.getProjectStorageUsage,
+    {
+      projectId: project._id,
+    },
+  );
+
   return (
-    <div className="space-y-10">
+    <div className="space-y-10 sticky top-24">
+      {/* Storage Status - Moved here */}
+      {storage && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.5 }}
+        >
+          <StorageUsageBar used={storage.used} allocated={storage.allocated} />
+        </motion.div>
+      )}
+
       {/* Context Card */}
       <motion.div
         initial={{ opacity: 0, x: 20 }}

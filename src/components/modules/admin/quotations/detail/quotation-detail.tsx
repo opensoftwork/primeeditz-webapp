@@ -173,7 +173,12 @@ export function QuotationDetail({
     );
   }
 
-  const { quotation, sections, projects = [] } = data;
+  const { quotation, sections, projects: rawProjects = [] } = data;
+
+  const projects = rawProjects.map((p: any) => ({
+    ...p,
+    eventName: p.endClientName || p.code,
+  }));
   const status = statusConfig[quotation.status] || statusConfig.draft;
 
   // Calculate totals
@@ -212,8 +217,7 @@ export function QuotationDetail({
       // 2. Catch items without sections (or invalid sections)
       const unsectionedItems = projectItems.filter(
         (item) =>
-          !item.sectionId ||
-          !sections.some((s) => s._id === item.sectionId),
+          !item.sectionId || !sections.some((s) => s._id === item.sectionId),
       );
 
       if (unsectionedItems.length > 0) {

@@ -42,7 +42,7 @@ function getBucket(): string {
  * Generate a pre-signed URL for a single file.
  * Used for secure, time-limited access to MinIO files.
  */
-export const getSignedFileUrl = internalAction({
+export const getSignedFileUrl = action({
   args: {
     storageKey: v.string(),
     expiresIn: v.optional(v.number()), // seconds, defaults to 3600 (1 hour)

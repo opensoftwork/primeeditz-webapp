@@ -33,7 +33,7 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   awaiting_assignment: ["assigned"],
 
   // Production Phase
-  assigned: ["work_in_progress"],
+  assigned: ["work_in_progress", "deliverables_ready"],
   work_in_progress: ["deliverables_ready"],
   deliverables_ready: ["awaiting_review", "work_in_progress"], // QC approve/reject
 

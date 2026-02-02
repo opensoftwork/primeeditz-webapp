@@ -14,3 +14,4 @@ export * from "./functions/admin/quotations";
 export * from "./functions/admin/squads";
 export * from "./functions/admin/studios";
 export * from "./functions/admin/wipeData";
+export * from "./functions/admin/seed";

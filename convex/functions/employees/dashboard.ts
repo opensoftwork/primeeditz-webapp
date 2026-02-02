@@ -42,9 +42,9 @@ export const getEmployeeDashboardStats = employeeQuery({
       Array.from(allProjectIds).map((id) => ctx.db.get(id)),
     );
 
-    const validProjects = allProjects.filter(
-      (p): p is NonNullable<typeof p> => !!p,
-    );
+    const validProjects = allProjects
+      .filter((p): p is NonNullable<typeof p> => !!p)
+      .filter((p) => !["setup", "onboarding"].includes(p.phase));
 
     return {
       totalAssigned: validProjects.length,
@@ -100,6 +100,9 @@ export const getEmployeeRecentProjects = employeeQuery({
 
     const validSortedProjects = projects
       .filter((p): p is NonNullable<typeof p> => !!p)
+      // Filter out projects not yet assigned (unless directly assigned)
+      // Filter out projects not yet in production
+      .filter((p) => !["setup", "onboarding"].includes(p.phase))
       .sort((a, b) => b.updatedAt - a.updatedAt)
       .slice(0, limit);
 

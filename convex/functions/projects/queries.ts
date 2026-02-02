@@ -95,7 +95,7 @@ export const getMyActiveDraft = studioQuery({
  * Verifies ownership for studios.
  * Enriches reference files with proper MinIO public URLs.
  */
-export const getProject = studioQuery({
+export const getProject = authenticatedWithProfileQuery({
   args: {
     projectId: v.id("projects"),
   },
@@ -106,10 +106,20 @@ export const getProject = studioQuery({
       throw new ConvexError("Project not found");
     }
 
-    // Verify ownership
-    if (project.studioId !== ctx.profile._id) {
+    // Verify access based on role
+    if (ctx.profile.role === "studio") {
+      // Studios can only see their own projects
+      if (project.studioId !== ctx.profile._id) {
+        throw new ConvexError("Access denied");
+      }
+    } else if (
+      ctx.profile.role !== "admin" &&
+      ctx.profile.role !== "employee"
+    ) {
+      // Unknown role
       throw new ConvexError("Access denied");
     }
+    // Admins and Employees can view all projects
 
     // Enrich with project type
     const projectType = await ctx.db.get(project.projectTypeId);

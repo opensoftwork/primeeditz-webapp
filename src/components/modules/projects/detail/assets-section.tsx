@@ -8,7 +8,6 @@ import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
-import { StorageUsageBar } from "@/components/shared/storage-usage-bar";
 
 interface AssetsSectionProps {
   projectId: string;
@@ -28,13 +27,6 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
   const folders = useQuery(api.functions.folders.queries.getMyProjectFolders, {
     projectId: projectId as Id<"projects">,
   });
-
-  const storage = useQuery(
-    api.functions.storage.queries.getProjectStorageUsage,
-    {
-      projectId: projectId as Id<"projects">,
-    },
-  );
 
   const isLocked = project?.uploadEligibility?.isAllowed === false;
 
@@ -82,8 +74,8 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
-        <div className="xl:col-span-2 relative">
+      <div className="relative">
+        <div className="relative">
           {isLocked && (
             <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] rounded-[2.5rem] flex items-center justify-center p-8 text-center border border-white/5">
               <div className="max-w-md space-y-6">
@@ -108,14 +100,6 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
             onFolderClick={handleFolderClick}
             onFolderComplete={handleFolderComplete}
           />
-        </div>
-        <div className="space-y-6">
-          {storage && (
-            <StorageUsageBar
-              used={storage.used}
-              allocated={storage.allocated}
-            />
-          )}
         </div>
       </div>
     </motion.div>

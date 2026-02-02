@@ -16,6 +16,7 @@ import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
 import { ProjectHeader } from "./project-header";
 import { ProjectHistory } from "./project-history";
+import { ProjectDeliverables } from "./project-deliverables";
 import { ProjectReferenceFiles } from "./project-reference-files";
 import { ProjectSpecs } from "./project-specs";
 import { ProjectDetailSkeleton } from "./skeleton";
@@ -176,6 +177,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 <ProjectFoldersList projectId={projectId as Id<"projects">} />
               </div>
             )}
+
+            <ProjectDeliverables projectId={projectId as Id<"projects">} />
 
             <ProjectHistory history={project.statusHistory} />
           </div>

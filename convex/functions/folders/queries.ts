@@ -82,6 +82,7 @@ export const getMyProjectFolders = studioQuery({
         return {
           _id: folder._id,
           name: folder.name,
+          path: folder.path,
           status: folder.status,
           assetCount: assets.length,
           totalSize,

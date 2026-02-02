@@ -33,6 +33,7 @@ const lineItemInput = v.object({
   projectTypeId: v.optional(v.id("projectTypes")),
   selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
   sourcePackageId: v.optional(v.id("servicePackages")),
+  projectConfigId: v.optional(v.string()),
   subItems: v.optional(
     v.array(
       v.object({
@@ -115,13 +116,25 @@ async function aggregateLineItemsFromPackages(
 
     // Add each line item with source tracking and spawning config
     for (const item of pkg.lineItems) {
+      // Lookup the specific project config if it exists
+      let projectTypeId = pkg.projectTypeId;
+      let selectedFolderTemplateId = pkg.folderTemplateId;
+
+      if (item.projectConfigId && pkg.projectConfigs) {
+        const config = pkg.projectConfigs.find(c => c.id === item.projectConfigId);
+        if (config) {
+          projectTypeId = config.projectTypeId;
+          selectedFolderTemplateId = config.folderTemplateId;
+        }
+      }
+
       allLineItems.push({
         ...item,
         id: crypto.randomUUID(), // New ID for quotation line item
         sourcePackageId: packageId,
         spawnsProject: true, // Packages always spawn projects now
-        projectTypeId: pkg.projectTypeId,
-        selectedFolderTemplateId: pkg.folderTemplateId,
+        projectTypeId,
+        selectedFolderTemplateId,
         subItems: item.subItems?.map((si) => ({
           id: crypto.randomUUID(),
           description: si.description,

@@ -1,17 +1,34 @@
 "use client";
 
-import { HardDrive, Image, Loader2 } from "lucide-react";
+import { ArrowLeft, HardDrive, Home, Image } from "lucide-react";
+import { useMemo, useState } from "react";
 import { FolderCard, formatBytes } from "./folder-card";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+
+interface Folder {
+  _id: string;
+  name: string;
+  path: string;
+  status: string;
+  assetCount?: number;
+  totalSize?: number;
+  [key: string]: any;
+}
 
 interface FolderGridProps {
-  folders: any[] | undefined;
-  onFolderClick?: (folder: any) => void;
+  folders: Folder[] | undefined;
+  onFolderClick?: (folder: Folder) => void;
   title?: string;
   showStats?: boolean;
   isLocked?: boolean;
-  onFolderComplete?: (folder: any) => void;
+  onFolderComplete?: (folder: Folder) => void;
 }
 
+/**
+ * Hierarchical folder grid that displays folders at the current navigation level.
+ * Click a folder to navigate into it and see its children.
+ */
 export function FolderGrid({
   folders,
   onFolderClick,
@@ -20,10 +37,88 @@ export function FolderGrid({
   isLocked = false,
   onFolderComplete,
 }: FolderGridProps) {
+  // Current navigation path (e.g., "" for root, "01_FOOTAGE" for inside that folder)
+  const [currentPath, setCurrentPath] = useState<string>("");
+
+  // Build hierarchical view from flat folder list
+  const { currentFolders, breadcrumbs, hasChildren } = useMemo(() => {
+    if (!folders || folders.length === 0) {
+      return {
+        currentFolders: [],
+        breadcrumbs: [],
+        hasChildren: new Map<string, boolean>(),
+      };
+    }
+
+    // Determine which folders are at the current level
+    const foldersAtCurrentLevel = folders.filter((folder) => {
+      const folderPath = folder.path;
+
+      // Safety check for missing path
+      if (typeof folderPath !== "string") return false;
+
+      if (currentPath === "") {
+        // Root level: folders without "/" in their path
+        return !folderPath.includes("/");
+      } else {
+        // Inside a folder: folders that start with currentPath/ and have no more slashes
+        const prefix = currentPath + "/";
+        if (!folderPath.startsWith(prefix)) return false;
+        const remainder = folderPath.slice(prefix.length);
+        return !remainder.includes("/");
+      }
+    });
+
+    // Check which folders have children
+    const hasChildrenMap = new Map<string, boolean>();
+    foldersAtCurrentLevel.forEach((folder) => {
+      if (!folder.path) return;
+      const childPrefix = folder.path + "/";
+      const hasChild = folders.some(
+        (f) => f.path && f.path.startsWith(childPrefix),
+      );
+      hasChildrenMap.set(folder._id, hasChild);
+    });
+
+    // Build breadcrumbs
+    const crumbs: { label: string; path: string }[] = [
+      { label: "Root", path: "" },
+    ];
+    if (currentPath) {
+      const parts = currentPath.split("/");
+      let accumulatedPath = "";
+      parts.forEach((part) => {
+        accumulatedPath = accumulatedPath ? `${accumulatedPath}/${part}` : part;
+        crumbs.push({ label: part, path: accumulatedPath });
+      });
+    }
+
+    return {
+      currentFolders: foldersAtCurrentLevel,
+      breadcrumbs: crumbs,
+      hasChildren: hasChildrenMap,
+    };
+  }, [folders, currentPath]);
+
+  const handleFolderClick = (folder: Folder) => {
+    // Check if this folder has children
+    if (hasChildren.get(folder._id)) {
+      // Navigate into the folder to show children
+      setCurrentPath(folder.path);
+    } else {
+      // Leaf folder - trigger the original onFolderClick (e.g., for upload)
+      onFolderClick?.(folder);
+    }
+  };
+
+  const navigateTo = (path: string) => {
+    setCurrentPath(path);
+  };
+
   if (folders === undefined) {
     return (
       <div className="flex items-center justify-center py-12">
-        <Loader2 className="h-6 w-6 animate-spin text-white/20" />
+        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
       </div>
     );
   }
@@ -62,21 +157,70 @@ export function FolderGrid({
         )}
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {folders.map((folder) => (
-          <FolderCard
-            key={folder._id}
-            name={folder.name}
-            status={folder.status}
-            assetCount={folder.assetCount || 0}
-            totalSize={folder.totalSize || 0}
-            isLocked={isLocked}
-            onClick={() => onFolderClick?.(folder)}
-            onComplete={() => onFolderComplete?.(folder)}
-          />
-        ))}
-      </div>
+      {/* Breadcrumb Navigation */}
+      {breadcrumbs.length > 1 && (
+        <div className="flex items-center gap-2 flex-wrap">
+          {breadcrumbs.map((crumb, idx) => (
+            <div key={crumb.path} className="flex items-center gap-2">
+              {idx > 0 && <span className="text-white/20 text-xs">/</span>}
+              <button
+                onClick={() => navigateTo(crumb.path)}
+                className={cn(
+                  "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all",
+                  idx === breadcrumbs.length - 1
+                    ? "bg-white/10 text-white"
+                    : "text-white/40 hover:text-white/70 hover:bg-white/5",
+                )}
+              >
+                {idx === 0 && <Home className="h-3 w-3" />}
+                {crumb.label}
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Back Button (when inside a folder) */}
+      {currentPath && (
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => {
+            const parentPath = currentPath.includes("/")
+              ? currentPath.substring(0, currentPath.lastIndexOf("/"))
+              : "";
+            setCurrentPath(parentPath);
+          }}
+          className="h-9 px-4 gap-2 text-primary text-[10px] font-bold uppercase tracking-widest hover:bg-white/5 rounded-xl"
+        >
+          <ArrowLeft className="h-3.5 w-3.5" />
+          Back to previous
+        </Button>
+      )}
+
+      {/* Folders Grid */}
+      {currentFolders.length === 0 ? (
+        <div className="p-8 rounded-2xl border border-dashed border-white/5 flex flex-col items-center justify-center text-center">
+          <p className="text-white/20 font-bold uppercase tracking-widest text-xs">
+            No subfolders at this level
+          </p>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {currentFolders.map((folder) => (
+            <FolderCard
+              key={folder._id}
+              name={folder.name}
+              status={folder.status}
+              assetCount={folder.assetCount || 0}
+              totalSize={folder.totalSize || 0}
+              isLocked={isLocked}
+              onClick={() => handleFolderClick(folder)}
+              onComplete={() => onFolderComplete?.(folder)}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

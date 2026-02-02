@@ -30,6 +30,11 @@ export const getEmployeeProject = employeeQuery({
       throw new ConvexError("Access denied: Not part of this project squad");
     }
 
+    // Restrict access until project is officially assigned
+    if (["setup", "onboarding"].includes(project.phase)) {
+      throw new ConvexError("Access denied: Project not yet assigned");
+    }
+
     // Enrich with project type data
     const projectType = await ctx.db.get(project.projectTypeId);
 

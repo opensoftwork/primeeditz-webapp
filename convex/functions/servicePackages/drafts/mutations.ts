@@ -43,6 +43,7 @@ export const updateDraft = adminMutation({
     projectConfigs: v.optional(v.array(v.object({
       id: v.string(),
       label: v.optional(v.string()),
+      categoryId: v.optional(v.id("projectCategories")),
       projectTypeId: v.id("projectTypes"),
       folderTemplateId: v.id("folderTemplates"),
       defaultStorageTierId: v.optional(v.id("storageTiers")),
@@ -93,17 +94,29 @@ export const publishDraft = adminMutation({
       throw new Error("At least one line item is required to publish");
     }
 
+    // Extract top-level fields from the first config for backward compatibility and filtering
+    const firstConfig = draft.projectConfigs[0];
+    const categoryId = firstConfig.categoryId || draft.categoryId;
+    const projectTypeId = firstConfig.projectTypeId;
+    const folderTemplateId = firstConfig.folderTemplateId;
+    const defaultStorageTierId = firstConfig.defaultStorageTierId;
+
     // Create the real package
     const packageId = await ctx.db.insert("servicePackages", {
       name: draft.name,
       description: draft.description,
-      categoryId: draft.categoryId,
+      categoryId,
       projectConfigs: draft.projectConfigs,
+      // Legacy fields for backward compatibility
+      projectTypeId,
+      folderTemplateId,
+      defaultStorageTierId,
+      
       lineItems: draft.lineItems,
       terms: draft.terms,
       applyGST: draft.applyGST ?? true,
       isActive: true,
-      createdBy: ctx.profile._id, // Set the creator
+      createdBy: ctx.profile._id,
       updatedAt: Date.now(),
     });
 

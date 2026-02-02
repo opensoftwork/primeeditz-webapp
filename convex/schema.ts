@@ -517,6 +517,7 @@ export default defineSchema({
         width: v.optional(v.string()),
         image: v.optional(v.string()),
         sourcePackageId: v.optional(v.id("servicePackages")), // NEW: Source package tracker
+        projectConfigId: v.optional(v.string()), // NEW: Link to project configuration
         subItems: v.optional(
           v.array(
             v.object({
