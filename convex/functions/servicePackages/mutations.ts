@@ -13,6 +13,7 @@ export const create = adminMutation({
     projectConfigs: v.optional(v.array(v.object({
       id: v.string(),
       label: v.optional(v.string()),
+      categoryId: v.optional(v.id("projectCategories")),
       projectTypeId: v.id("projectTypes"),
       folderTemplateId: v.id("folderTemplates"),
       defaultStorageTierId: v.optional(v.id("storageTiers")),
@@ -45,6 +46,7 @@ export const update = adminMutation({
     projectConfigs: v.optional(v.array(v.object({
       id: v.string(),
       label: v.optional(v.string()),
+      categoryId: v.optional(v.id("projectCategories")),
       projectTypeId: v.id("projectTypes"),
       folderTemplateId: v.id("folderTemplates"),
       defaultStorageTierId: v.optional(v.id("storageTiers")),

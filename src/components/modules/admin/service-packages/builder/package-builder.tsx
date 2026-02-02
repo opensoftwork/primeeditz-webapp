@@ -55,7 +55,7 @@ export function PackageBuilder() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 dark flex flex-col h-screen bg-zinc-950 overflow-hidden text-white selection:bg-primary/20">
+    <div className="flex flex-col h-full bg-zinc-950 overflow-hidden text-white selection:bg-primary/20">
       {/* 1. Global Utility Header */}
       <header className="shrink-0 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/95 backdrop-blur-xl z-20 py-4">
         <div className="flex items-center gap-6">

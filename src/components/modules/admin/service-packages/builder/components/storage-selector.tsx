@@ -16,30 +16,29 @@ export function StorageSelector({
   value,
   onChange,
 }: StorageSelectorProps) {
+  const currentValue = value || "";
+
   return (
     <Field>
-      <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/50 ml-1">
-        Default Storage Allocation
-      </FieldLabel>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
         {/* No Storage Option */}
         <button
           type="button"
           onClick={() => onChange("")}
           className={cn(
-            "relative p-4 rounded-xl border transition-all cursor-pointer group text-left",
-            value === ""
-              ? "bg-primary/10 border-primary shadow-lg shadow-primary/5"
-              : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10",
+            "relative p-4 rounded-2xl border-2 transition-all cursor-pointer group text-left",
+            currentValue === ""
+              ? "bg-primary/15 border-primary shadow-[0_0_20px_rgba(var(--primary),0.1)] ring-4 ring-primary/5"
+              : "bg-zinc-900/50 border-white/5 hover:bg-white/5 hover:border-white/10",
           )}
         >
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
               <div
                 className={cn(
-                  "p-2 rounded-lg transition-colors",
-                  value === ""
-                    ? "bg-primary/20 text-primary"
+                  "p-2 rounded-xl transition-colors",
+                  currentValue === ""
+                    ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
                     : "bg-white/5 text-white/20",
                 )}
               >
@@ -47,76 +46,86 @@ export function StorageSelector({
               </div>
               <div>
                 <p
-                  className={cn("text-xs font-black uppercase tracking-tight")}
+                  className={cn(
+                    "text-xs font-black uppercase tracking-tight",
+                    currentValue === "" ? "text-white" : "text-white/40"
+                  )}
                 >
                   No Default Tier
                 </p>
-                <p className="text-[9px] text-white/40 uppercase tracking-widest font-bold">
+                <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
                   On-demand allocation
                 </p>
               </div>
             </div>
-            {value === "" && (
-              <div className="h-5 w-5 rounded-full bg-primary flex items-center justify-center">
-                <Check className="h-3 w-3 text-white" />
+            {currentValue === "" && (
+              <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center shadow-lg shadow-primary/20">
+                <Check className="h-3.5 w-3.5 text-primary-foreground font-black" />
               </div>
             )}
           </div>
         </button>
 
         {/* Storage Tier Options */}
-        {tiers.map((tier) => (
-          <button
-            key={tier._id}
-            type="button"
-            onClick={() => onChange(tier._id)}
-            className={cn(
-              "relative p-4 rounded-xl border transition-all cursor-pointer group text-left",
-              value === tier._id
-                ? "bg-primary/10 border-primary shadow-lg shadow-primary/5"
-                : "bg-white/5 border-white/5 hover:bg-white/8 hover:border-white/10",
-            )}
-          >
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div
-                  className={cn(
-                    "p-2 rounded-lg transition-colors",
-                    value === tier._id
-                      ? "bg-primary/20 text-primary"
-                      : "bg-white/5 text-white/40",
-                  )}
-                >
-                  <HardDrive className="h-4 w-4" />
-                </div>
-                <div>
-                  <p
+        {tiers.map((tier) => {
+          const isSelected = currentValue === tier._id;
+          return (
+            <button
+              key={tier._id}
+              type="button"
+              onClick={() => onChange(tier._id)}
+              className={cn(
+                "relative p-4 rounded-2xl border-2 transition-all cursor-pointer group text-left",
+                isSelected
+                  ? "bg-primary/15 border-primary shadow-[0_0_20px_rgba(var(--primary),0.1)] ring-4 ring-primary/5"
+                  : "bg-zinc-900/50 border-white/5 hover:bg-white/5 hover:border-white/10",
+              )}
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <div
                     className={cn(
-                      "text-xs font-black uppercase tracking-tight",
+                      "p-2 rounded-xl transition-colors",
+                      isSelected
+                        ? "bg-primary text-primary-foreground shadow-lg shadow-primary/20"
+                        : "bg-white/5 text-white/40",
                     )}
                   >
-                    {tier.name}
+                    <HardDrive className="h-4 w-4" />
+                  </div>
+                  <div>
+                    <p
+                      className={cn(
+                        "text-xs font-black uppercase tracking-tight",
+                        isSelected ? "text-white" : "text-white/60"
+                      )}
+                    >
+                      {tier.name}
+                    </p>
+                    <p className="text-[9px] text-white/20 uppercase tracking-widest font-black">
+                      {tier.sizeGB}GB Allocation
+                    </p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <p className={cn(
+                    "text-sm font-black",
+                    isSelected ? "text-white" : "text-white/80"
+                  )}>
+                    ₹{tier.priceINR}
                   </p>
-                  <p className="text-[9px] text-white/40 uppercase tracking-widest font-bold">
-                    {tier.sizeGB}GB Allocation
-                  </p>
+                  {isSelected && (
+                    <div className="mt-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center ml-auto shadow-lg shadow-primary/20">
+                      <Check className="h-3.5 w-3.5 text-primary-foreground font-black" />
+                    </div>
+                  )}
                 </div>
               </div>
-              <div className="text-right">
-                <p className="text-sm font-black text-white">
-                  ₹{tier.priceINR}
-                </p>
-                {value === tier._id && (
-                  <div className="mt-1 h-4 w-4 rounded-full bg-primary flex items-center justify-center ml-auto">
-                    <Check className="h-2.5 w-2.5 text-white" />
-                  </div>
-                )}
-              </div>
-            </div>
-          </button>
-        ))}
+            </button>
+          );
+        })}
       </div>
-      <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black ml-1">
+      <FieldDescription className="text-[10px] text-white/20 uppercase tracking-widest font-black mt-4 ml-1">
         Pre-select a storage tier for projects using this package.
       </FieldDescription>
     </Field>

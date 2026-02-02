@@ -64,6 +64,7 @@ interface BuilderContextValue {
   setStep3Data: (data: Step3Data) => void;
 
   isEditing: boolean;
+  isEditor: boolean;
   packageId: Id<"servicePackages"> | null;
   draftId: Id<"servicePackageDrafts"> | null;
 
@@ -81,6 +82,7 @@ interface BuilderContextValue {
   // Lifecycle
   isSubmitting: boolean;
   publishPackage: () => Promise<Id<"servicePackages"> | undefined>;
+  savePackageUpdate: () => Promise<void>;
   cancelWizard: () => Promise<void>;
 }
 
@@ -101,6 +103,26 @@ export function BuilderProvider({
   const [isInitialized, setIsInitialized] = useState(false);
   const [draftId, setDraftId] = useState<Id<"servicePackageDrafts"> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Refs for immediate access to data during async saves
+  const step1DataRef = useRef<Step1Data | null>(null);
+  const step2DataRef = useRef<Step2Data | null>(null);
+  const step3DataRef = useRef<Step3Data | null>(null);
+
+  const setStep1DataWithRef = useCallback((data: Step1Data) => {
+    step1DataRef.current = data;
+    setStep1Data(data);
+  }, []);
+
+  const setStep2DataWithRef = useCallback((data: Step2Data) => {
+    step2DataRef.current = data;
+    setStep2Data(data);
+  }, []);
+
+  const setStep3DataWithRef = useCallback((data: Step3Data) => {
+    step3DataRef.current = data;
+    setStep3Data(data);
+  }, []);
 
   // Mutations
   const createDraft = useMutation(api.functions.servicePackages.drafts.mutations.createDraft);
@@ -130,12 +152,12 @@ export function BuilderProvider({
         await updateDraft({
           draftId,
           lastStep: stepOverride ?? currentStep,
-          name: step1Data?.name,
-          description: step1Data?.description,
-          projectConfigs: step2Data?.projectConfigs,
-          lineItems: step3Data?.lineItems,
-          terms: step3Data?.terms,
-          applyGST: step3Data?.applyGST,
+          name: step1DataRef.current?.name,
+          description: step1DataRef.current?.description,
+          projectConfigs: step2DataRef.current?.projectConfigs,
+          lineItems: step3DataRef.current?.lineItems,
+          terms: step3DataRef.current?.terms,
+          applyGST: step3DataRef.current?.applyGST,
         });
       } catch (err) {
         console.error("Failed to save draft:", err);
@@ -153,7 +175,7 @@ export function BuilderProvider({
         if (!pkg) return; // Wait for query
 
         // Initialize from Live Package
-        setStep1Data({
+        setStep1DataWithRef({
           name: pkg.name,
           description: pkg.description,
         });
@@ -170,7 +192,7 @@ export function BuilderProvider({
           });
         }
 
-        setStep2Data({
+        setStep2DataWithRef({
           projectConfigs: projectConfigs.map((config) => ({
             ...config,
             label: config.label ?? "Standard Config",
@@ -178,7 +200,7 @@ export function BuilderProvider({
           })) as ProjectConfig[],
         });
 
-        setStep3Data({
+        setStep3DataWithRef({
           lineItems: pkg.lineItems.map((item) => ({
             ...item,
             id: item.id || crypto.randomUUID(),
@@ -196,17 +218,17 @@ export function BuilderProvider({
           // Resume Draft
           setDraftId(activeDraft._id);
           setCurrentStep(activeDraft.lastStep);
-          setStep1Data({
+          setStep1DataWithRef({
             name: activeDraft.name ?? "",
             description: activeDraft.description,
           });
-          setStep2Data({
+          setStep2DataWithRef({
             projectConfigs: (activeDraft.projectConfigs ?? []).map((config: any) => ({
               ...config,
               categoryId: config.categoryId ?? activeDraft.categoryId, // Fallback for legacy drafts
             })) as ProjectConfig[],
           });
-          setStep3Data({
+          setStep3DataWithRef({
             lineItems: (activeDraft.lineItems ?? []) as LineItem[],
             terms: activeDraft.terms,
             applyGST: activeDraft.applyGST ?? true,
@@ -282,17 +304,46 @@ export function BuilderProvider({
     }
   }, [draftId, packageId, publishDraft]);
 
+  const updatePackageMutation = useMutation(api.functions.servicePackages.mutations.update);
+
+  const savePackageUpdate = useCallback(async () => {
+    if (!packageId) return;
+
+    setIsSubmitting(true);
+    try {
+      await updatePackageMutation({
+        id: packageId,
+        name: step1DataRef.current?.name,
+        description: step1DataRef.current?.description,
+        projectConfigs: step2DataRef.current?.projectConfigs as any,
+        lineItems: step3DataRef.current?.lineItems?.map(item => ({
+          ...item,
+          sectionId: item.sectionId as Id<"quotationSections">,
+          projectConfigId: item.projectConfigId || undefined,
+        })),
+        terms: step3DataRef.current?.terms,
+        applyGST: step3DataRef.current?.applyGST,
+      });
+      toast.success("Section updated successfully");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update package");
+    } finally {
+      setIsSubmitting(false);
+    }
+  }, [packageId, step1Data, step2Data, step3Data, updatePackageMutation]);
+
   const value = useMemo(
     () => ({
       currentStep,
       setCurrentStep,
       step1Data,
-      setStep1Data,
+      setStep1Data: setStep1DataWithRef,
       step2Data,
-      setStep2Data,
+      setStep2Data: setStep2DataWithRef,
       step3Data,
-      setStep3Data,
+      setStep3Data: setStep3DataWithRef,
       isEditing: !!packageId,
+      isEditor: !!packageId, // If we have a packageId, we are in the standard dashboard edit mode
       packageId: packageId || null,
       draftId,
       nextStep,
@@ -304,6 +355,7 @@ export function BuilderProvider({
       setSyncCurrentStep,
       isSubmitting,
       publishPackage,
+      savePackageUpdate,
       cancelWizard,
     }),
     [
@@ -320,6 +372,7 @@ export function BuilderProvider({
       prevStep,
       goToStep,
       publishPackage,
+      savePackageUpdate,
       cancelWizard,
     ]
   );

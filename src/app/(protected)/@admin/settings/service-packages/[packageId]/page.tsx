@@ -9,7 +9,7 @@ export default function ServicePackageDetailPage() {
   const packageId = params.packageId as Id<"servicePackages">;
 
   return (
-    <div className="p-8 md:p-12">
+    <div>
       <PackageDetail packageId={packageId} />
     </div>
   );

@@ -10,6 +10,7 @@ import type { AdminServicePackage } from "./types";
 
 export const columns: ColumnDef<AdminServicePackage>[] = [
   {
+    id: "name",
     accessorKey: "name",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Package Name" />
@@ -26,6 +27,7 @@ export const columns: ColumnDef<AdminServicePackage>[] = [
     ),
   },
   {
+    id: "categoryName",
     accessorKey: "categoryName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Category" />
@@ -45,6 +47,7 @@ export const columns: ColumnDef<AdminServicePackage>[] = [
     },
   },
   {
+    id: "projectTypeName",
     accessorKey: "projectTypeName",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Project Type" />
@@ -56,6 +59,7 @@ export const columns: ColumnDef<AdminServicePackage>[] = [
     ),
   },
   {
+    id: "isActive",
     accessorKey: "isActive",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />

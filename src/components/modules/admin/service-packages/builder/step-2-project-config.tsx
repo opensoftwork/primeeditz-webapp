@@ -32,7 +32,7 @@ const step2Schema = z.object({
 
 type Step2FormValues = z.infer<typeof step2Schema>;
 export function Step2ProjectConfig() {
-  const { step2Data, setStep2Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep } =
+  const { step2Data, setStep2Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep, isEditor } =
     useBuilder();
 
   // Queries
@@ -62,7 +62,9 @@ export function Step2ProjectConfig() {
       setStep2Data({
         projectConfigs: value.projectConfigs as any,
       });
-      setCurrentStep(3);
+      if (!isEditor) {
+        setCurrentStep(3);
+      }
     },
   });
 
@@ -226,11 +228,30 @@ export function Step2ProjectConfig() {
                                     {type?.name || "Unknown Type"}
                                   </Badge>
                                 </div>
-                                <div className="flex items-center gap-2">
-                                  <div className="h-1 w-1 rounded-full bg-primary/40" />
-                                  <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
-                                    Folder structure configured
-                                  </span>
+                                <div className="space-y-2">
+                                  <div className="flex items-center gap-2">
+                                    <div className="h-1 w-1 rounded-full bg-primary/40" />
+                                    <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                                      Folder structure configured
+                                    </span>
+                                  </div>
+                                  {config.defaultStorageTierId && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-1 w-1 rounded-full bg-green-500/40" />
+                                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                                        Storage: {storageTiers.find(s => s._id === config.defaultStorageTierId)?.name} 
+                                        ({storageTiers.find(s => s._id === config.defaultStorageTierId)?.sizeGB}GB)
+                                      </span>
+                                    </div>
+                                  )}
+                                  {!config.defaultStorageTierId && (
+                                    <div className="flex items-center gap-2">
+                                      <div className="h-1 w-1 rounded-full bg-zinc-500/40" />
+                                      <span className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+                                        No Default Storage
+                                      </span>
+                                    </div>
+                                  )}
                                 </div>
                               </div>
                             );

@@ -51,6 +51,7 @@ export function Step3Pricing() {
     setSubmitTrigger,
     setSyncCurrentStep,
     goToStep,
+    isEditor,
   } = useBuilder();
   
   const projectConfigs = step2Data?.projectConfigs ?? [];
@@ -61,23 +62,20 @@ export function Step3Pricing() {
 
   const form = useForm({
     defaultValues: {
-      lineItems: step3Data?.lineItems && step3Data.lineItems.length > 0
-        ? step3Data.lineItems.map(item => ({
-            ...item,
-            sectionId: (item.sectionId as string) || "",
-            projectConfigId: item.projectConfigId || "",
-          }))
-        : [
-            {
-              id: crypto.randomUUID(),
-              projectConfigId: projectConfigs[0]?.id || "",
-              sectionId: "",
-              description: "Main Service Offering",
-              unit: "per project",
-              rate: 0,
-              quantity: 1,
-            },
-          ],
+      lineItems:
+        step3Data && step3Data.lineItems.length > 0
+          ? step3Data.lineItems
+          : [
+              {
+                id: crypto.randomUUID(),
+                projectConfigId: projectConfigs[0]?.id || "",
+                sectionId: "",
+                description: "Main Service Offering",
+                unit: "per project",
+                rate: 0,
+                quantity: 1,
+              },
+            ],
       terms: step3Data?.terms ?? "",
       applyGST: step3Data?.applyGST ?? true,
     },
@@ -88,13 +86,17 @@ export function Step3Pricing() {
       setStep3Data({
         lineItems: value.lineItems.map((item: any) => ({
           ...item,
-          sectionId: item.sectionId ? (item.sectionId as Id<"quotationSections">) : undefined,
+          sectionId: item.sectionId
+            ? (item.sectionId as Id<"quotationSections">)
+            : undefined,
           projectConfigId: item.projectConfigId || undefined,
         })),
         terms: value.terms || undefined,
         applyGST: value.applyGST,
       });
-      goToStep(4);
+      if (!isEditor) {
+        goToStep(4);
+      }
     },
   });
 

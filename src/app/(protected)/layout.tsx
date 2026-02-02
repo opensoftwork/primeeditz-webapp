@@ -52,8 +52,7 @@ export default function DashboardLayout({
     pathname?.includes("/quotations/new") ||
     pathname?.includes("/quotations/request") ||
     pathname?.includes("/settings/service-packages/new") ||
-    (pathname?.includes("/settings/service-packages/") &&
-      pathname?.split("/").length > 3) ||
+    pathname?.includes("/settings/service-packages/") && pathname?.includes("/edit") ||
     pathname?.includes("/settings/project-types/new") ||
     pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
@@ -139,11 +138,21 @@ export default function DashboardLayout({
     }
   };
 
+  if (isWizardPage) {
+    return <div className="h-screen w-screen overflow-hidden">{renderRoleContent()}</div>;
+  }
+
+  const showGlobalHeader = !isWizardPage && !pathname?.includes("/settings/service-packages/") || (pathname?.includes("/settings/service-packages/") && !pathname?.includes("/new") && !pathname?.includes("/edit"));
+  
+  // Simplification: We want the sidebar for everyone except wizard pages
+  // We want the global header for everyone except wizard pages and editors
+  const isEditorPage = pathname?.includes("/settings/service-packages/") && pathname?.includes("/edit");
+
   return (
     <SidebarProvider>
       {!isWizardPage && <AppSidebar />}
       <SidebarInset>
-        {!isWizardPage && (
+        {!isWizardPage && !isEditorPage && (
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />

@@ -4,7 +4,7 @@ import { PackageBuilder, BuilderProvider } from "@/components/modules/admin/serv
 
 export default function NewServicePackagePage() {
   return (
-    <div className="p-8 md:p-12">
+    <div className="h-full">
       <BuilderProvider>
         <PackageBuilder />
       </BuilderProvider>

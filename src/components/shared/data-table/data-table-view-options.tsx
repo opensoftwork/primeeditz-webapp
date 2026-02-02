@@ -49,11 +49,13 @@ export function DataTableViewOptions<TData>({
         <DropdownMenuSeparator className="bg-white/5" />
         {table
           .getAllColumns()
-          .filter(
-            (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide(),
-          )
+          .filter((column) => column.getCanHide())
           .map((column) => {
+            const title =
+              typeof column.columnDef.header === "string"
+                ? column.columnDef.header
+                : column.id.replace(/([A-Z])/g, " $1").trim();
+
             return (
               <DropdownMenuCheckboxItem
                 key={column.id}
@@ -62,8 +64,9 @@ export function DataTableViewOptions<TData>({
                 onCheckedChange={(value: boolean) =>
                   column.toggleVisibility(value)
                 }
+                onSelect={(e) => e.preventDefault()}
               >
-                {column.id.replace(/([A-Z])/g, " $1").trim()}
+                {title}
               </DropdownMenuCheckboxItem>
             );
           })}

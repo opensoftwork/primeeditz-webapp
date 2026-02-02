@@ -26,7 +26,7 @@ const step1Schema = z.object({
 });
 
 export function Step1Identity() {
-  const { step1Data, setStep1Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep } =
+  const { step1Data, setStep1Data, setCurrentStep, setSubmitTrigger, setSyncCurrentStep, isEditor } =
     useBuilder();
 
   const form = useForm({
@@ -42,7 +42,9 @@ export function Step1Identity() {
         name: value.name,
         description: value.description || undefined,
       });
-      setCurrentStep(2);
+      if (!isEditor) {
+        setCurrentStep(2);
+      }
     },
   });
 
