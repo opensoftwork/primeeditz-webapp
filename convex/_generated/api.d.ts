@@ -12,16 +12,15 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as employees from "../employees.js";
-import type * as functions_admin_cleanup from "../functions/admin/cleanup.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_admin_employees from "../functions/admin/employees.js";
 import type * as functions_admin_maintenance from "../functions/admin/maintenance.js";
-import type * as functions_admin_mutations from "../functions/admin/mutations.js";
 import type * as functions_admin_projectTypes from "../functions/admin/projectTypes.js";
 import type * as functions_admin_projects from "../functions/admin/projects.js";
 import type * as functions_admin_quotations from "../functions/admin/quotations.js";
 import type * as functions_admin_squads from "../functions/admin/squads.js";
 import type * as functions_admin_studios from "../functions/admin/studios.js";
+import type * as functions_admin_wipeData from "../functions/admin/wipeData.js";
 import type * as functions_assets_mutations from "../functions/assets/mutations.js";
 import type * as functions_deliverables_mutations from "../functions/deliverables/mutations.js";
 import type * as functions_employees_dashboard from "../functions/employees/dashboard.js";
@@ -38,7 +37,6 @@ import type * as functions_projectCategories_mutations from "../functions/projec
 import type * as functions_projectCategories_queries from "../functions/projectCategories/queries.js";
 import type * as functions_projectTypeFields_mutations from "../functions/projectTypeFields/mutations.js";
 import type * as functions_projectTypeFields_queries from "../functions/projectTypeFields/queries.js";
-import type * as functions_projectTypeFields_seed from "../functions/projectTypeFields/seed.js";
 import type * as functions_projectTypes_mutations from "../functions/projectTypes/mutations.js";
 import type * as functions_projectTypes_queries from "../functions/projectTypes/queries.js";
 import type * as functions_projects_mutation_admin from "../functions/projects/mutation/admin.js";
@@ -53,7 +51,6 @@ import type * as functions_quotations_sections_mutations from "../functions/quot
 import type * as functions_quotations_sections_queries from "../functions/quotations/sections/queries.js";
 import type * as functions_quotations_templates_mutations from "../functions/quotations/templates/mutations.js";
 import type * as functions_quotations_templates_queries from "../functions/quotations/templates/queries.js";
-import type * as functions_seed from "../functions/seed.js";
 import type * as functions_servicePackages_drafts_mutations from "../functions/servicePackages/drafts/mutations.js";
 import type * as functions_servicePackages_drafts_queries from "../functions/servicePackages/drafts/queries.js";
 import type * as functions_servicePackages_mutations from "../functions/servicePackages/mutations.js";
@@ -73,16 +70,6 @@ import type * as lib_uploadGate from "../lib/uploadGate.js";
 import type * as lib_validators from "../lib/validators.js";
 import type * as migrations from "../migrations.js";
 import type * as profiles from "../profiles.js";
-import type * as seed from "../seed.js";
-import type * as seeds_devUtils from "../seeds/devUtils.js";
-import type * as seeds_folderTemplates from "../seeds/folderTemplates.js";
-import type * as seeds_projectStructure from "../seeds/projectStructure.js";
-import type * as seeds_projectTypeFields from "../seeds/projectTypeFields.js";
-import type * as seeds_quotationLibraryItems from "../seeds/quotationLibraryItems.js";
-import type * as seeds_quotationSections from "../seeds/quotationSections.js";
-import type * as seeds_quotationTemplates from "../seeds/quotationTemplates.js";
-import type * as seeds_servicePackages from "../seeds/servicePackages.js";
-import type * as seeds_storageTiers from "../seeds/storageTiers.js";
 
 import type {
   ApiFromModules,
@@ -95,16 +82,15 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
   employees: typeof employees;
-  "functions/admin/cleanup": typeof functions_admin_cleanup;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/admin/employees": typeof functions_admin_employees;
   "functions/admin/maintenance": typeof functions_admin_maintenance;
-  "functions/admin/mutations": typeof functions_admin_mutations;
   "functions/admin/projectTypes": typeof functions_admin_projectTypes;
   "functions/admin/projects": typeof functions_admin_projects;
   "functions/admin/quotations": typeof functions_admin_quotations;
   "functions/admin/squads": typeof functions_admin_squads;
   "functions/admin/studios": typeof functions_admin_studios;
+  "functions/admin/wipeData": typeof functions_admin_wipeData;
   "functions/assets/mutations": typeof functions_assets_mutations;
   "functions/deliverables/mutations": typeof functions_deliverables_mutations;
   "functions/employees/dashboard": typeof functions_employees_dashboard;
@@ -121,7 +107,6 @@ declare const fullApi: ApiFromModules<{
   "functions/projectCategories/queries": typeof functions_projectCategories_queries;
   "functions/projectTypeFields/mutations": typeof functions_projectTypeFields_mutations;
   "functions/projectTypeFields/queries": typeof functions_projectTypeFields_queries;
-  "functions/projectTypeFields/seed": typeof functions_projectTypeFields_seed;
   "functions/projectTypes/mutations": typeof functions_projectTypes_mutations;
   "functions/projectTypes/queries": typeof functions_projectTypes_queries;
   "functions/projects/mutation/admin": typeof functions_projects_mutation_admin;
@@ -136,7 +121,6 @@ declare const fullApi: ApiFromModules<{
   "functions/quotations/sections/queries": typeof functions_quotations_sections_queries;
   "functions/quotations/templates/mutations": typeof functions_quotations_templates_mutations;
   "functions/quotations/templates/queries": typeof functions_quotations_templates_queries;
-  "functions/seed": typeof functions_seed;
   "functions/servicePackages/drafts/mutations": typeof functions_servicePackages_drafts_mutations;
   "functions/servicePackages/drafts/queries": typeof functions_servicePackages_drafts_queries;
   "functions/servicePackages/mutations": typeof functions_servicePackages_mutations;
@@ -156,16 +140,6 @@ declare const fullApi: ApiFromModules<{
   "lib/validators": typeof lib_validators;
   migrations: typeof migrations;
   profiles: typeof profiles;
-  seed: typeof seed;
-  "seeds/devUtils": typeof seeds_devUtils;
-  "seeds/folderTemplates": typeof seeds_folderTemplates;
-  "seeds/projectStructure": typeof seeds_projectStructure;
-  "seeds/projectTypeFields": typeof seeds_projectTypeFields;
-  "seeds/quotationLibraryItems": typeof seeds_quotationLibraryItems;
-  "seeds/quotationSections": typeof seeds_quotationSections;
-  "seeds/quotationTemplates": typeof seeds_quotationTemplates;
-  "seeds/servicePackages": typeof seeds_servicePackages;
-  "seeds/storageTiers": typeof seeds_storageTiers;
 }>;
 
 /**

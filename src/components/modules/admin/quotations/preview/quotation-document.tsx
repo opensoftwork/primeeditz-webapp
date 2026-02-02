@@ -178,6 +178,8 @@ export const QuotationDocument = React.forwardRef<
             const projectItems = filteredLineItems.filter(
               (item) => item.projectId === project._id,
             );
+
+            // 1. Group by existing sections
             const sectionGroups = filteredSections
               .map((section) => ({
                 section,
@@ -186,6 +188,25 @@ export const QuotationDocument = React.forwardRef<
                 ),
               }))
               .filter((g) => g.items.length > 0);
+
+            // 2. Catch items without sections (or invalid sections)
+            const unsectionedItems = projectItems.filter(
+              (item) =>
+                !item.sectionId ||
+                !sections.some((s) => s._id === item.sectionId),
+            );
+
+            if (unsectionedItems.length > 0) {
+              sectionGroups.push({
+                section: {
+                  _id: "unsectioned",
+                  name: "Standard Services",
+                  color: "zinc",
+                } as any,
+                items: unsectionedItems,
+              });
+            }
+
             return {
               project,
               sectionGroups,
@@ -204,10 +225,31 @@ export const QuotationDocument = React.forwardRef<
       : [];
 
     // Fallback: Group items by section only (for backward compatibility)
-    const groupedBySection = filteredSections.map((section) => ({
-      section,
-      items: filteredLineItems.filter((item) => item.sectionId === section._id),
-    }));
+    const groupedBySection = filteredSections
+      .map((section) => ({
+        section,
+        items: filteredLineItems.filter(
+          (item) => item.sectionId === section._id,
+        ),
+      }))
+      .filter((g) => g.items.length > 0);
+
+    // Add global unsectioned items
+    const globalUnsectioned = filteredLineItems.filter(
+      (item) =>
+        !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+    );
+
+    if (globalUnsectioned.length > 0) {
+      groupedBySection.push({
+        section: {
+          _id: "unsectioned",
+          name: "Standard Services",
+          color: "zinc",
+        } as any,
+        items: globalUnsectioned,
+      });
+    }
 
     // Default company info for PrimeEditz
     const company = companyInfo || {

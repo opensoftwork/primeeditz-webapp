@@ -368,34 +368,6 @@ export function FolderTemplateBuilder({
 
   return (
     <div className="w-full space-y-12 pb-32 font-geist px-10 pt-16">
-      {/* Breadcrumb - Only show when in project type context */}
-      {isProjectTypeContext && parentProjectType && (
-        <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40">
-          <Link
-            href="/settings/project-types"
-            className="hover:text-white transition-colors"
-          >
-            Project Types
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/settings/project-types/${propProjectTypeId}`}
-            className="hover:text-white transition-colors"
-          >
-            {parentProjectType.name}
-          </Link>
-          <span>/</span>
-          <Link
-            href={`/settings/project-types/${propProjectTypeId}/folder-templates`}
-            className="hover:text-white transition-colors"
-          >
-            Templates
-          </Link>
-          <span>/</span>
-          <span className="text-primary">{templateId ? "Edit" : "New"}</span>
-        </div>
-      )}
-
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 pb-8 border-b border-white/5">
         <div className="flex items-center gap-5 flex-1 min-w-0">
@@ -520,45 +492,6 @@ export function FolderTemplateBuilder({
         )}
 
         {/* Variant Field */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <form.Field
-            name="variant"
-            children={(field) => (
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                  Variant Label (Optional)
-                </Label>
-                <Input
-                  value={field.state.value || ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5"
-                  placeholder="e.g. Premium, Standard, Minimal"
-                />
-                <p className="text-[10px] text-white/30 font-medium">
-                  Use to distinguish between multiple templates for the same
-                  project type
-                </p>
-              </div>
-            )}
-          />
-
-          <form.Field
-            name="description"
-            children={(field) => (
-              <div className="space-y-3">
-                <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                  Description (Optional)
-                </Label>
-                <Input
-                  value={field.state.value || ""}
-                  onChange={(e) => field.handleChange(e.target.value)}
-                  className="bg-white/5 border-white/10 text-white h-14 rounded-2xl px-5"
-                  placeholder="Brief description of this template..."
-                />
-              </div>
-            )}
-          />
-        </div>
 
         {/* Main Workspace */}
         <div className="space-y-8">

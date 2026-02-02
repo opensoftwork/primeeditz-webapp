@@ -1,5 +1,5 @@
-import { FolderTemplateBuilder } from "@/components/modules/admin/folder-templates/builder/folder-template-builder";
 import type { Id } from "@convex/_generated/dataModel";
+import FolderTemplateDetail from "@/components/modules/admin/folder-templates/detail/folder-template-detail";
 
 interface PageProps {
   params: Promise<{
@@ -8,10 +8,10 @@ interface PageProps {
   }>;
 }
 
-export default async function EditFolderTemplatePage({ params }: PageProps) {
+export default async function FolderTemplateDetailPage({ params }: PageProps) {
   const { id, templateId } = await params;
   return (
-    <FolderTemplateBuilder
+    <FolderTemplateDetail
       projectTypeId={id as Id<"projectTypes">}
       templateId={templateId as Id<"folderTemplates">}
     />

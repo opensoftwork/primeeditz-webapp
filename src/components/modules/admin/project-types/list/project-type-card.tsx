@@ -3,13 +3,11 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import {
+  ChevronRight,
   Edit2,
   Eye,
   EyeOff,
-  FolderTree,
   Loader2,
-  MoreVertical,
-  Settings2,
   Trash2,
 } from "lucide-react";
 import { motion } from "motion/react";
@@ -18,13 +16,6 @@ import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
@@ -34,13 +25,15 @@ import type { AdminProjectType } from "./types";
 
 interface ProjectTypeCardProps {
   type: AdminProjectType;
-  onEdit: (type: AdminProjectType) => void;
+  onView: (type: AdminProjectType) => void;
+  onConfigure: (type: AdminProjectType) => void;
   onDelete: (id: Id<"projectTypes">, name: string) => void;
 }
 
 export function ProjectTypeCard({
   type,
-  onEdit,
+  onView,
+  onConfigure,
   onDelete,
 }: ProjectTypeCardProps) {
   const router = useRouter();
@@ -69,8 +62,9 @@ export function ProjectTypeCard({
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card
+        onClick={() => onView(type)}
         className={cn(
-          "group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5",
+          "group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer",
           type.isDraft && "border-amber-500/20 bg-amber-500/5",
         )}
       >
@@ -130,48 +124,30 @@ export function ProjectTypeCard({
               </div>
             </div>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
-                >
-                  <MoreVertical className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-56 bg-zinc-950 border-white/10 rounded-2xl p-2 glass"
+            <div className="flex items-center gap-1 transition-all duration-200">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onConfigure(type);
+                }}
               >
-                <DropdownMenuItem
-                  onClick={() => onEdit(type)}
-                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white focus:bg-white/5 cursor-pointer"
-                >
-                  <Edit2 className="h-3.5 w-3.5" />
-                  Edit Configuration
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={() =>
-                    router.push(
-                      `/settings/project-types/${type._id}/folder-templates`,
-                    )
-                  }
-                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-white/60 focus:text-white focus:bg-white/5 cursor-pointer"
-                >
-                  <FolderTree className="h-3.5 w-3.5" />
-                  Manage Templates
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-white/5 mx-2 my-2" />
-                <DropdownMenuItem
-                  onClick={() => onDelete(type._id, type.name)}
-                  className="rounded-xl flex items-center gap-3 p-3 text-[10px] font-black uppercase tracking-widest text-red-400 focus:text-red-400 focus:bg-red-400/10 cursor-pointer"
-                >
-                  <Trash2 className="h-3.5 w-3.5" />
-                  Delete Permanently
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <Edit2 className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(type._id, type.name);
+                }}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </div>
           </div>
 
           {/* Title Area */}
@@ -195,12 +171,17 @@ export function ProjectTypeCard({
 
           {/* Footer Area */}
           <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-            <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                <Settings2 className="h-3.5 w-3.5 text-white/20" />
-              </div>
+            <div className="flex flex-col">
               <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
-                Field Mapping Enabled
+                Current Status
+              </span>
+              <span
+                className={cn(
+                  "text-xs font-black uppercase tracking-wider",
+                  type.isActive ? "text-primary" : "text-white/40",
+                )}
+              >
+                {type.isActive ? "System Live" : "Draft Mode"}
               </span>
             </div>
 

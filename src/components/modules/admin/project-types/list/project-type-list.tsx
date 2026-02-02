@@ -54,14 +54,18 @@ export function ProjectTypeList() {
     }));
   }, [projectTypes, categories]);
 
-  const handleEdit = (id: string) => {
+  const handleView = (id: string) => {
     router.push(`/settings/project-types/${id}`);
+  };
+
+  const handleConfigure = (id: string) => {
+    router.push(`/settings/project-types/${id}/edit`);
   };
 
   const columns = useMemo(
     () =>
       getColumns((type) => {
-        handleEdit(type._id);
+        handleView(type._id);
       }),
     [router],
   );
@@ -144,7 +148,8 @@ export function ProjectTypeList() {
           <ProjectTypeCard
             key={type._id}
             type={type}
-            onEdit={(editType) => handleEdit(editType._id)}
+            onView={(vType) => handleView(vType._id)}
+            onConfigure={(cType) => handleConfigure(cType._id)}
             onDelete={async (id) => {
               setTypeToDelete({
                 id: id as Id<"projectTypes">,

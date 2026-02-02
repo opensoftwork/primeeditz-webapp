@@ -21,13 +21,16 @@ import { Plus, ArrowLeft, FolderTree } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { cn } from "@/lib/utils";
 
 interface FolderTemplatesListProps {
   projectTypeId: Id<"projectTypes">;
+  minimal?: boolean;
 }
 
 export function FolderTemplatesList({
   projectTypeId,
+  minimal = false,
 }: FolderTemplatesListProps) {
   const router = useRouter();
 
@@ -57,9 +60,15 @@ export function FolderTemplatesList({
     );
   };
 
-  const handleEdit = (id: string) => {
+  const handleView = (id: string) => {
     router.push(
       `/settings/project-types/${projectTypeId}/folder-templates/${id}`,
+    );
+  };
+
+  const handleEdit = (id: string) => {
+    router.push(
+      `/settings/project-types/${projectTypeId}/folder-templates/${id}/edit`,
     );
   };
 
@@ -92,54 +101,54 @@ export function FolderTemplatesList({
 
   return (
     <div className="w-full px-10 pt-8 pb-20 font-geist">
-      {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-white/40 mb-6">
-        <Link href="/settings" className="hover:text-white transition-colors">
-          Settings
-        </Link>
-        <span>/</span>
-        <Link
-          href="/settings/project-types"
-          className="hover:text-white transition-colors"
-        >
-          Project Types
-        </Link>
-        <span>/</span>
-        <span className="text-white">{projectType.name}</span>
-        <span>/</span>
-        <span className="text-primary">Folder Templates</span>
-      </div>
-
-      {/* Header */}
-      <div className="flex flex-col gap-8 mb-12">
-        <div className="flex items-center gap-4">
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="shrink-0 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-10 w-10"
-          >
-            <Link href="/settings/project-types">
-              <ArrowLeft className="h-4 w-4" />
-            </Link>
-          </Button>
-          <div className="flex flex-col gap-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
-              {projectType.name} • {templateCount} TEMPLATE
-              {templateCount !== 1 ? "S" : ""}
-            </span>
-            <h1 className="text-4xl font-black uppercase tracking-tighter text-white font-sentient">
-              Folder Templates
-            </h1>
+      {/* Header - Compact in minimal mode */}
+      <div className={cn("flex flex-col mb-12", minimal ? "gap-4" : "gap-8")}>
+        {!minimal && (
+          <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="shrink-0 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-10 w-10"
+            >
+              <Link href="/settings/project-types">
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <div className="flex flex-col gap-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary">
+                {projectType.name} • {templateCount} TEMPLATE
+                {templateCount !== 1 ? "S" : ""}
+              </span>
+              <h1 className="text-4xl font-black uppercase tracking-tighter text-white font-sentient">
+                Folder Templates
+              </h1>
+            </div>
           </div>
-        </div>
+        )}
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 border-y border-white/5 py-8">
+        <div
+          className={cn(
+            "flex flex-col md:flex-row md:items-center justify-between gap-6 py-8",
+            minimal ? "border-b border-white/5" : "border-y border-white/5",
+          )}
+        >
           <div className="max-w-md">
+            {minimal && (
+              <div className="flex items-center gap-3 mb-2">
+                <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
+                  <FolderTree className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-sm font-black uppercase tracking-widest text-white">
+                  Folder Templates
+                </h3>
+              </div>
+            )}
             <p className="text-sm font-medium text-white/40 leading-relaxed">
-              Manage multiple directory hierarchies for this project type. These
-              templates will be available for quick-start during project
-              initialization.
+              Manage {minimal ? "directory" : "multiple directory"} hierarchies
+              for this project engine. These templates{" "}
+              {minimal ? "are used" : "will be available"} for quick-start
+              during project initialization.
             </p>
           </div>
 
@@ -161,6 +170,7 @@ export function FolderTemplatesList({
               key={template._id}
               template={template as any}
               isDefault={template._id === defaultTemplateId}
+              onView={() => handleView(template._id)}
               onEdit={() => handleEdit(template._id)}
               onDelete={
                 template._id !== defaultTemplateId
@@ -230,9 +240,6 @@ export function FolderTemplatesList({
 function FolderTemplatesListLoading() {
   return (
     <div className="w-full px-10 pt-8">
-      {/* Breadcrumb skeleton */}
-      <Skeleton className="h-4 w-64 bg-white/5 mb-6" />
-
       <div className="flex flex-col gap-8 mb-12">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />

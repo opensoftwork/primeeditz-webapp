@@ -101,6 +101,8 @@ export function StudioQuotationDetail() {
         const projectItems = quotation.lineItems.filter(
           (item: { projectId?: string }) => item.projectId === project._id,
         );
+
+        // 1. Group by existing sections
         const sectionGroups = sections
           .map((section: { _id: string; name: string; color?: string }) => ({
             section,
@@ -109,6 +111,24 @@ export function StudioQuotationDetail() {
             ),
           }))
           .filter((g) => g.items.length > 0);
+
+        // 2. Catch items without sections (or with invalid sections)
+        const unsectionedItems = projectItems.filter(
+          (item: { sectionId?: string }) =>
+            !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+        );
+
+        if (unsectionedItems.length > 0) {
+          sectionGroups.push({
+            section: {
+              _id: "unsectioned",
+              name: "Standard Services",
+              color: "zinc",
+            } as any,
+            items: unsectionedItems,
+          });
+        }
+
         return {
           project,
           sectionGroups,
@@ -120,14 +140,31 @@ export function StudioQuotationDetail() {
     .filter((pg) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
-  const groupedBySection = sections.map(
-    (section: { _id: string; name: string; color?: string }) => ({
+  const groupedBySection = sections
+    .map((section: { _id: string; name: string; color?: string }) => ({
       section,
       items: quotation.lineItems.filter(
         (item: { sectionId?: string }) => item.sectionId === section._id,
       ),
-    }),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  // Add unsectioned items to global fallback if not empty
+  const globalUnsectioned = quotation.lineItems.filter(
+    (item: { sectionId?: string }) =>
+      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
   );
+
+  if (globalUnsectioned.length > 0) {
+    groupedBySection.push({
+      section: {
+        _id: "unsectioned",
+        name: "Standard Services",
+        color: "zinc",
+      } as any,
+      items: globalUnsectioned,
+    });
+  }
 
   return (
     <div className="min-h-screen p-6 md:p-12 space-y-12 w-full">

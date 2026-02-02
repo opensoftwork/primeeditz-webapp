@@ -64,7 +64,7 @@ function EditorContent({
       {/* 1. Page Header Area */}
       <div className="px-6 py-6 lg:px-10 lg:py-8 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-white/5 bg-white/1">
         <div className="flex items-center gap-5">
-          <Link href="/settings/project-types">
+          <Link href={`/settings/project-types/${projectTypeId}`}>
             <Button
               variant="ghost"
               size="icon"
@@ -80,7 +80,7 @@ function EditorContent({
               </span>
               <div className="h-1 w-1 rounded-full bg-white/20" />
               <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/20">
-                ID: {projectTypeId.slice(0, 8)}...
+                System Core
               </span>
             </div>
             <h1 className="text-3xl font-black uppercase tracking-tighter text-white xl:text-4xl leading-none">
@@ -100,7 +100,7 @@ function EditorContent({
             ) : (
               <div className="flex items-center gap-2">
                 <Save className="h-4 w-4" />
-                <span>Save Changes</span>
+                <span>Save Identity</span>
               </div>
             )}
           </Button>
@@ -108,60 +108,29 @@ function EditorContent({
       </div>
 
       {/* 2. Main Content Area */}
-      <main className="flex-1 p-6 lg:p-10 pb-24 overflow-y-auto">
-        <div className="w-full mx-auto flex flex-col gap-8">
-          {/* Identity Section */}
-          <section className="bg-white/3 border border-white/5 rounded-[32px] overflow-hidden">
-            <div className="p-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
+      <main className="flex-1 p-6 lg:p-10 pb-24 overflow-y-auto bg-white/2">
+        <div className="flex flex-col gap-8">
+          {/* Identity Section - Now the primary focus of this editor */}
+          <section className="bg-zinc-950/40 rounded-4xl overflow-hidden group hover:bg-white/5 transition-all glass-subtle shadow-2xl">
+            <div className="p-8 bg-white/3 flex items-center justify-between">
               <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
-                  <Layout className="h-5 w-5 text-primary" />
+                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-xl shadow-primary/5 group-hover:scale-105 transition-transform">
+                  <Layout className="h-6 w-6 text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-base font-black uppercase tracking-tight text-white">
-                    Identity & Info
+                  <h2 className="text-xl font-black uppercase tracking-tight text-white">
+                    Engine Identity
                   </h2>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 leading-none mt-1">
-                    Basic information and classification
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40 leading-none mt-1">
+                    System classification & metadata
                   </p>
                 </div>
               </div>
             </div>
-            <div className="p-6">
+            <div className="p-10">
               <Step1Identity compact={true} />
             </div>
           </section>
-
-          {/* Hierarchy Section */}
-          <section className="bg-white/3 border border-white/5 rounded-[32px] overflow-hidden">
-            <div className="p-6 border-b border-white/5 bg-white/2 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-                  <FolderTree className="h-5 w-5 text-blue-400" />
-                </div>
-                <div>
-                  <h2 className="text-base font-black uppercase tracking-tight text-white">
-                    Folder Template
-                  </h2>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-white/20 leading-none mt-1">
-                    Delivery directory structure
-                  </p>
-                </div>
-              </div>
-              {folders.length > 0 && (
-                <div className="px-3 py-1.5 rounded-xl bg-white/5 border border-white/10 flex items-center gap-2">
-                  <Sparkles className="h-3 w-3 text-primary animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                    {folders.length} Root Folders
-                  </span>
-                </div>
-              )}
-            </div>
-            <div className="p-6">
-              <Step2Folders compact={true} />
-            </div>
-          </section>
-      
         </div>
       </main>
 

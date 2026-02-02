@@ -86,7 +86,6 @@ export function ProjectTypeWizardProvider({
     if (existingProjectType && !step1Data) {
       setStep1DataState({
         name: existingProjectType.name,
-        description: existingProjectType.description,
         categoryId: existingProjectType.categoryId,
         icon: existingProjectType.icon,
         isActive: existingProjectType.isActive,
@@ -163,7 +162,6 @@ export function ProjectTypeWizardProvider({
         step,
         formData: {
           name: step1Data?.name || "",
-          description: step1Data?.description,
           categoryId: step1Data?.categoryId as Id<"projectCategories">,
           icon: step1Data?.icon,
           isActive: step1Data?.isActive ?? true,
@@ -206,7 +204,6 @@ export function ProjectTypeWizardProvider({
           templateId: existingTemplate?._id,
           projectType: {
             name: step1Data.name,
-            description: step1Data.description,
             categoryId: step1Data.categoryId as Id<"projectCategories">,
             icon: step1Data.icon,
             isActive: step1Data.isActive,
@@ -218,7 +215,6 @@ export function ProjectTypeWizardProvider({
         await createWithTemplate({
           projectType: {
             name: step1Data.name,
-            description: step1Data.description,
             categoryId: step1Data.categoryId as Id<"projectCategories">,
             icon: step1Data.icon,
             isActive: step1Data.isActive,

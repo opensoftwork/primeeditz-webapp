@@ -82,14 +82,31 @@ export function PublicQuotationView() {
   };
 
   // Group by section (public view doesn't have project data)
-  const groupedBySection = sections.map(
-    (section: { _id: string; name: string; color?: string }) => ({
+  const groupedBySection = sections
+    .map((section: { _id: string; name: string; color?: string }) => ({
       section,
       items: quotation.lineItems.filter(
         (item: { sectionId?: string }) => item.sectionId === section._id,
       ),
-    }),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  // Add unsectioned items
+  const unsectionedItems = quotation.lineItems.filter(
+    (item: { sectionId?: string }) =>
+      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
   );
+
+  if (unsectionedItems.length > 0) {
+    groupedBySection.push({
+      section: {
+        _id: "unsectioned",
+        name: "Standard Services",
+        color: "zinc",
+      } as any,
+      items: unsectionedItems,
+    });
+  }
 
   return (
     <div className="max-w-7xl mx-auto px-6 space-y-12">

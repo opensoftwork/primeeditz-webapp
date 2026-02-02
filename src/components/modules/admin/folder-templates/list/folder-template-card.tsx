@@ -21,16 +21,21 @@ interface FolderTemplate extends Doc<"folderTemplates"> {
 
 export function FolderTemplateCard({
   template,
-  onEdit,
+  onView,
+  onConfigure,
   onDelete,
 }: {
   template: FolderTemplate;
-  onEdit: (template: FolderTemplate) => void;
+  onView: (template: FolderTemplate) => void;
+  onConfigure: (template: FolderTemplate) => void;
   onDelete: (id: string, name: string) => void;
 }) {
   return (
     <motion.div layout whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-      <Card className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
+      <Card
+        onClick={() => onView(template)}
+        className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer"
+      >
         {/* Glow Effect */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
@@ -70,7 +75,10 @@ export function FolderTemplateCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
-                onClick={() => onDelete(template._id, template.name)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(template._id, template.name);
+                }}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -127,7 +135,10 @@ export function FolderTemplateCard({
               </span>
             </div>
             <Button
-              onClick={() => onEdit(template)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onConfigure(template);
+              }}
               variant="ghost"
               size="sm"
               className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-2 shrink-0 transition-all active:scale-95"

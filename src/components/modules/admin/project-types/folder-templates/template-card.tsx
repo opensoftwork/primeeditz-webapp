@@ -3,13 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { FolderTree, MoreVertical, Pencil, Trash2 } from "lucide-react";
+import { FolderTree } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
@@ -23,6 +17,7 @@ interface TemplateCardProps {
     _creationTime?: number;
   };
   isDefault: boolean;
+  onView: () => void;
   onEdit: () => void;
   onDelete?: () => void;
 }
@@ -30,6 +25,7 @@ interface TemplateCardProps {
 export function TemplateCard({
   template,
   isDefault,
+  onView,
   onEdit,
   onDelete,
 }: TemplateCardProps) {
@@ -45,8 +41,9 @@ export function TemplateCard({
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card
+        onClick={onView}
         className={cn(
-          "relative overflow-hidden bg-white/2 border-white/5 rounded-3xl transition-all hover:bg-white/4 hover:border-white/10 group",
+          "relative overflow-hidden bg-white/2 border-white/5 rounded-3xl transition-all hover:bg-white/4 hover:border-white/10 group cursor-pointer",
           isDefault && "border-primary/30 bg-primary/5",
         )}
       >
@@ -88,36 +85,6 @@ export function TemplateCard({
               )}
             </div>
           </div>
-
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-              >
-                <MoreVertical className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="bg-zinc-900 border-white/10 rounded-xl"
-            >
-              <DropdownMenuItem onClick={onEdit} className="gap-2">
-                <Pencil className="h-4 w-4" />
-                Edit Template
-              </DropdownMenuItem>
-              {onDelete && (
-                <DropdownMenuItem
-                  onClick={onDelete}
-                  className="text-red-400 focus:text-red-400 gap-2"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Delete
-                </DropdownMenuItem>
-              )}
-            </DropdownMenuContent>
-          </DropdownMenu>
         </CardHeader>
 
         <CardContent className="relative z-10 p-6 pt-0 space-y-4">

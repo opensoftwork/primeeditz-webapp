@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Id } from "@convex/_generated/dataModel";
 
-import ProjectTypeEditor from "@/components/modules/admin/project-types/detail/project-type-editor";
+import ProjectTypeDetail from "@/components/modules/admin/project-types/detail/project-type-detail";
 
 interface PageProps {
   params: Promise<{
@@ -9,7 +9,7 @@ interface PageProps {
   }>;
 }
 
-export default async function EditProjectTypePage({ params }: PageProps) {
+export default async function ProjectTypeDetailPage({ params }: PageProps) {
   const { id } = await params;
 
   // Validate ID format (basic check to avoid obvious bad IDs)
@@ -17,5 +17,5 @@ export default async function EditProjectTypePage({ params }: PageProps) {
     notFound();
   }
 
-  return <ProjectTypeEditor projectTypeId={id as Id<"projectTypes">} />;
+  return <ProjectTypeDetail projectTypeId={id as Id<"projectTypes">} />;
 }

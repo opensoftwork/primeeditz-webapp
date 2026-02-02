@@ -198,6 +198,8 @@ export function QuotationDetail({
       const projectItems = quotation.lineItems.filter(
         (item: any) => item.projectId === project._id,
       );
+
+      // 1. Group by existing sections
       const sectionGroups = sections
         .map((section: any) => ({
           section,
@@ -206,6 +208,25 @@ export function QuotationDetail({
           ),
         }))
         .filter((g: any) => g.items.length > 0);
+
+      // 2. Catch items without sections (or invalid sections)
+      const unsectionedItems = projectItems.filter(
+        (item) =>
+          !item.sectionId ||
+          !sections.some((s) => s._id === item.sectionId),
+      );
+
+      if (unsectionedItems.length > 0) {
+        sectionGroups.push({
+          section: {
+            _id: "unsectioned",
+            name: "Standard Services",
+            color: "zinc",
+          },
+          items: unsectionedItems,
+        });
+      }
+
       return {
         project,
         sectionGroups,
@@ -214,12 +235,31 @@ export function QuotationDetail({
     .filter((pg: any) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
-  const groupedBySection = sections.map((section: any) => ({
-    section,
-    items: quotation.lineItems.filter(
-      (item: any) => item.sectionId === section._id,
-    ),
-  }));
+  const groupedBySection = sections
+    .map((section) => ({
+      section,
+      items: quotation.lineItems.filter(
+        (item) => item.sectionId === section._id,
+      ),
+    }))
+    .filter((g) => g.items.length > 0);
+
+  // Add global unsectioned items
+  const globalUnsectioned = quotation.lineItems.filter(
+    (item) =>
+      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+  );
+
+  if (globalUnsectioned.length > 0) {
+    groupedBySection.push({
+      section: {
+        _id: "unsectioned",
+        name: "Standard Services",
+        color: "zinc",
+      },
+      items: globalUnsectioned,
+    });
+  }
 
   const handleDuplicate = async () => {
     try {

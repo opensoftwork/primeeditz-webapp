@@ -25,6 +25,7 @@ interface FolderTreeProps {
   onDelete: (path: string) => void;
   onDeleteBulk: (paths: string[]) => void;
   renderHeader?: React.ReactNode;
+  readOnly?: boolean;
 }
 
 export function FolderTree({
@@ -35,6 +36,7 @@ export function FolderTree({
   onDelete,
   onDeleteBulk,
   renderHeader,
+  readOnly = false,
 }: FolderTreeProps) {
   // Navigation state: array of indices [idx1, idx2]
   const [navPath, setNavPath] = useState<number[]>([]);
@@ -129,29 +131,31 @@ export function FolderTree({
             {/* Custom Header Injection (Project Type Select) */}
             {navPath.length === 0 && renderHeader}
           </div>
-          <div className="flex items-center gap-2">
-            {selectedPaths.length > 0 && (
+          {!readOnly && (
+            <div className="flex items-center gap-2">
+              {selectedPaths.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleBulkDelete}
+                  className="h-9 px-4 gap-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all animate-in fade-in zoom-in-95 duration-200"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                  Delete ({selectedPaths.length})
+                </Button>
+              )}
               <Button
                 size="sm"
-                variant="ghost"
-                onClick={handleBulkDelete}
-                className="h-9 px-4 gap-2 bg-red-500/10 border border-red-500/20 hover:bg-red-500/20 text-red-500 font-black uppercase tracking-widest text-[10px] rounded-xl transition-all animate-in fade-in zoom-in-95 duration-200"
+                variant="outline"
+                onClick={handleAdd}
+                disabled={currentFolders.length >= 10}
+                className="h-9 px-4 gap-2 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-                Delete ({selectedPaths.length})
+                <Plus className="h-3.5 w-3.5" />
+                Add {navPath.length === 0 ? "Root " : "Sub-"}Folder
               </Button>
-            )}
-            <Button
-              size="sm"
-              variant="outline"
-              onClick={handleAdd}
-              disabled={currentFolders.length >= 10}
-              className="h-9 px-4 gap-2 bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20 text-white font-black uppercase tracking-widest text-[10px] rounded-xl transition-all disabled:opacity-30 disabled:cursor-not-allowed"
-            >
-              <Plus className="h-3.5 w-3.5" />
-              Add {navPath.length === 0 ? "Root " : "Sub-"}Folder
-            </Button>
-          </div>
+            </div>
+          )}
         </div>
 
         {/* Breadcrumbs */}
@@ -217,14 +221,16 @@ export function FolderTree({
             <p className="text-xs text-white/30 font-medium mb-4">
               No {navPath.length === 0 ? "root" : "child"} folders found
             </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleAdd}
-              className="bg-white/5 border-white/5 hover:bg-white/10 hover:text-white text-white/60 font-bold uppercase tracking-widest text-[10px] h-9 px-6 rounded-xl transition-all"
-            >
-              Create First Folder
-            </Button>
+            {!readOnly && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleAdd}
+                className="bg-white/5 border-white/5 hover:bg-white/10 hover:text-white text-white/60 font-bold uppercase tracking-widest text-[10px] h-9 px-6 rounded-xl transition-all"
+              >
+                Create First Folder
+              </Button>
+            )}
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
@@ -240,11 +246,14 @@ export function FolderTree({
                   folder={folder}
                   level={currentLevel}
                   path={fullPath}
+                  readOnly={readOnly}
                   onEdit={onEdit}
                   onDelete={onDelete}
                   onOpen={() => handleOpenFolder(idx)}
                   isSelected={selectedPaths.includes(fullPath)}
-                  onSelect={() => toggleSelection(fullPath)}
+                  onSelect={
+                    readOnly ? undefined : () => toggleSelection(fullPath)
+                  }
                 />
               );
             })}

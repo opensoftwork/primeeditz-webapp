@@ -59,7 +59,8 @@ export function StorageTierCard({
     tier.isActive,
   ]);
 
-  const handleToggleStatus = () => {
+  const handleToggleStatus = (e: React.MouseEvent) => {
+    e.stopPropagation();
     toggleStatusMutation.mutate({
       id: tier._id as Id<"storageTiers">,
       isActive: !tier.isActive,
@@ -68,7 +69,10 @@ export function StorageTierCard({
 
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
-      <Card className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5">
+      <Card
+        onClick={() => onEdit(tier)}
+        className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer"
+      >
         {/* Glow Effect */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
@@ -101,7 +105,10 @@ export function StorageTierCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
-                onClick={() => onEdit(tier)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(tier);
+                }}
               >
                 <Edit2 className="h-3.5 w-3.5" />
               </Button>
@@ -109,7 +116,10 @@ export function StorageTierCard({
                 variant="ghost"
                 size="icon"
                 className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
-                onClick={() => onDelete(tier._id, tier.name)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(tier._id, tier.name);
+                }}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
