@@ -119,77 +119,54 @@ function FolderItem({
       <motion.div
         initial={false}
         className={cn(
-          "group relative flex items-center pr-3 py-2 pl-3 rounded-xl transition-all duration-300 cursor-pointer border border-transparent select-none",
-          "hover:bg-white/5 hover:border-white/5",
-           // Active/Open state styling if needed, currently kept subtle
+          "group relative flex items-center gap-3 py-2.5 px-3 rounded-lg transition-all duration-200 cursor-pointer select-none",
+          "hover:bg-white/5",
+           // Highlight active/open parents slightly
            isOpen && hasChildren ? "bg-white/2" : ""
         )}
-        style={{ marginLeft: `${level * 16}px` }}
         onClick={() => hasChildren && setIsOpen(!isOpen)}
       >
-         {/* Tree Connector Line (Vertical) */}
-         {level > 0 && (
-           <div 
-             className="absolute left-[-8px] top-[-14px] bottom-1/2 w-px bg-white/5" 
-             style={{ marginLeft: "0px" }}
-           />
-         )}
-          {/* Tree Connector Line (Horizontal) */}
-         {level > 0 && (
-           <div 
-             className="absolute left-[-8px] top-1/2 w-3 h-px bg-white/5" 
-             style={{ marginLeft: "0px" }}
-           />
-         )}
-
         {/* Icon Container */}
         <div className={cn(
-            "relative z-10 shrink-0 h-8 w-8 rounded-lg flex items-center justify-center transition-all duration-300 mr-3",
+            "relative z-10 shrink-0 h-7 w-7 rounded-md flex items-center justify-center transition-all duration-300",
             folder.isRequired 
-              ? "bg-red-500/5 text-red-500/60 group-hover:bg-red-500/10 group-hover:text-red-400"
-              : "bg-white/5 text-white/30 group-hover:bg-white/10 group-hover:text-white/80 group-hover:scale-105"
+              ? "text-red-400 bg-red-400/10"
+              : "text-white/40 bg-white/5 group-hover:text-white/80 group-hover:bg-white/10"
         )}>
            <Folder 
              className={cn(
-               "h-4 w-4 transition-transform duration-300", 
-               folder.isRequired && "fill-red-500/10"
+               "h-3.5 w-3.5",
+               folder.isRequired && "fill-red-400/20"
               )} 
            />
         </div>
         
         {/* Content */}
-        <div className="flex-1 min-w-0 py-0.5">
-           <div className="flex items-center justify-between">
-              <span className={cn(
-                "text-[13px] font-medium tracking-tight transition-colors truncate",
-                folder.isRequired ? "text-white/90" : "text-white/60 group-hover:text-white/90"
-              )}>
-                {folder.name}
-              </span>
-              
-              {/* Expand/Collapse Chevron */}
-              {hasChildren && (
-                <ChevronRight className={cn(
-                  "h-3 w-3 text-white/20 transition-transform duration-300 ml-2",
-                  isOpen ? "rotate-90" : ""
-                )} />
-              )}
+        <div className="flex-1 min-w-0 flex items-center justify-between gap-4">
+           <span className={cn(
+             "text-sm font-medium tracking-tight transition-colors truncate",
+             folder.isRequired ? "text-white/90" : "text-white/60 group-hover:text-white/90"
+           )}>
+             {folder.name}
+           </span>
+
+           <div className="flex items-center gap-2">
+             {/* Required Badge */}
+             {folder.isRequired && (
+                <span className="text-[9px] font-black text-red-400 uppercase tracking-widest bg-red-400/10 px-1.5 py-0.5 rounded border border-red-400/10">
+                  Required
+                </span>
+             )}
+             
+             {/* Expand/Collapse Chevron */}
+             {hasChildren && (
+               <ChevronRight className={cn(
+                 "h-3.5 w-3.5 text-white/20 transition-transform duration-200",
+                 isOpen ? "rotate-90 text-white/60" : ""
+               )} />
+             )}
            </div>
         </div>
-
-        {/* Required Badge */}
-        {folder.isRequired && (
-          <div className="absolute right-3 top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-             <span className="text-[8px] font-black text-red-400 uppercase tracking-widest bg-zinc-950/80 px-1.5 py-0.5 rounded border border-red-500/20 backdrop-blur-sm">
-               Required
-             </span>
-          </div>
-        )}
-        
-        {/* Hover Glow Effect */}
-         <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-xl pointer-events-none">
-            <div className="absolute inset-0 bg-linear-to-r from-white/5 to-transparent" />
-         </div>
       </motion.div>
 
       {/* Children Recursion */}
@@ -200,15 +177,12 @@ function FolderItem({
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
             transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="overflow-hidden relative"
+            className="overflow-hidden relative pl-4"
           >
-             {/* Continuous Vertical Line for Children Scope */}
-             <div 
-               className="absolute left-[19px] top-0 bottom-0 w-px bg-linear-to-b from-white/5 via-white/5 to-transparent" 
-               style={{ marginLeft: `${level * 16}px` }}
-             />
+             {/* Scope Line: Subtle guide for children content */}
+             <div className="absolute left-[16.5px] top-1 bottom-1 w-px bg-white/5" />
              
-            <div>
+            <div className="pl-4 border-l border-transparent">
               {folder.children.map((child: any, i: number) => (
                 <FolderItem 
                   key={i} 

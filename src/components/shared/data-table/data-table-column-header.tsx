@@ -76,7 +76,7 @@ export function DataTableColumnHeader<TData, TValue>({
             <>
               <DropdownMenuSeparator className="bg-white/5" />
               <DropdownMenuItem
-                onClick={() => column.toggleVisibility(false)}
+                onSelect={() => column.toggleVisibility(false)}
                 className="text-[10px] font-bold uppercase tracking-widest focus:bg-white/10"
               >
                 <EyeOff className="mr-2 h-3.5 w-3.5 text-white/40" />
