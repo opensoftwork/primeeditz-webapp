@@ -111,8 +111,8 @@ export function LineItemDrawer({
     api.functions.projectTypes.queries.getActiveProjectTypes,
   );
   const folderTemplates = useQuery(
-    api.functions.folderTemplates.queries.listFolderTemplates,
-    {},
+    api.functions.folderTemplates.queries.getFolderTemplates,
+    { activeOnly: true },
   );
 
   const filteredFolderTemplates = useMemo(() => {

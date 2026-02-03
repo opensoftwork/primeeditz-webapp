@@ -347,118 +347,89 @@ export function Step4ItemsTerms() {
   return (
     <div className="w-full flex flex-col h-full overflow-y-auto custom-scrollbar pr-2">
       <div className="flex-1 space-y-8 pb-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
-          <div className="space-y-1">
-            <h2 className="text-xl font-black tracking-tight uppercase text-white">
-              Items & Terms
-            </h2>
-            <p className="text-sm text-white/40 font-medium">
-              Define line items, pricing, and terms for this quotation
-            </p>
+        {/* Projects & Items Section */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <h2 className="text-xl font-black uppercase tracking-tight text-white">
+                Line Items
+              </h2>
+              <p className="text-sm text-white/40 font-medium">
+                Configure services and pricing for each associated project
+              </p>
+            </div>
+            {!hasProjects && (
+              <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-yellow-500/10 border border-yellow-500/20">
+                <AlertCircle className="h-4 w-4 text-yellow-500" />
+                <span className="text-[10px] font-black text-yellow-500 uppercase tracking-widest">
+                  No projects selected
+                </span>
+              </div>
+            )}
           </div>
-          <div className="flex items-center gap-3">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => openLibrary()}
-              disabled={!hasProjects}
-              className="h-10 px-4 rounded-xl bg-white/5 hover:bg-white/10 border-white/10 text-white font-bold uppercase tracking-widest text-[10px] disabled:opacity-50"
-            >
-              <BookOpen className="h-4 w-4 mr-2 text-primary" />
-              Library
-            </Button>
-            <Button
-              type="button"
-              onClick={() => openAddItemDrawer()}
-              disabled={!hasProjects}
-              className="h-10 px-4 rounded-xl font-bold uppercase tracking-widest text-[10px] disabled:opacity-50"
-            >
-              <Plus className="h-4 w-4 mr-2" />
-              Add Item
-            </Button>
+
+          <div className="space-y-6">
+            {filteredProjects.map((project) => (
+              <ProjectSectionItems
+                key={project._id}
+                project={project}
+                sections={sections}
+                lineItems={allItemsWithIdx.filter(
+                  (i) => i.projectId === project._id,
+                )}
+                isExpanded={expandedProjects.has(project._id)}
+                onToggleExpand={() => handleToggleProject(project._id)}
+                onAddItem={(sectionId) =>
+                  openAddItemDrawer(project._id, sectionId)
+                }
+                onEditItem={openEditItemDrawer}
+                onRemoveItem={removeLineItem}
+                onOpenLibrary={openLibrary}
+              />
+            ))}
+
+            {/* Custom/General Section (Items with no project) */}
+            <ProjectSectionItems
+              project={null}
+              sections={sections}
+              lineItems={allItemsWithIdx.filter((i) => !i.projectId)}
+              isExpanded={expandedProjects.has("general")}
+              onToggleExpand={() => handleToggleProject("general")}
+              onAddItem={(sectionId) => openAddItemDrawer(undefined, sectionId)}
+              onEditItem={openEditItemDrawer}
+              onRemoveItem={removeLineItem}
+              onOpenLibrary={openLibrary}
+            />
           </div>
         </div>
 
-        {/* Line Items Section */}
-        <div className="p-5 rounded-2xl bg-white/2 border border-white/5">
-          <ProjectSectionItems
-            projects={filteredProjects}
-            sections={sections}
-            items={allItemsWithIdx}
-            expandedProjects={expandedProjects}
-            onToggleProject={handleToggleProject}
-            onEditItem={openEditItemDrawer}
-            onRemoveItem={removeLineItem}
-            onAddItem={(projectId, sectionId) =>
-              openAddItemDrawer(projectId, sectionId)
-            }
-            onAddFromLibrary={(projectId, sectionId) =>
-              openLibrary(sectionId || null, projectId)
-            }
-          />
-        </div>
-
-        {/* Subtotal & Tax Section */}
-        <div className="p-5 rounded-2xl bg-white/2 border border-white/5">
-          <div className="flex items-center gap-2 mb-4">
-            <Calculator className="h-4 w-4 text-primary" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">
-              Quotation Summary
+        {/* Pricing Summary (Quick view) */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="p-6 rounded-2xl bg-white/2 border border-white/5 flex flex-col items-center justify-center space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
+              Subtotal
+            </span>
+            <span className="text-2xl font-black text-white italic">
+              ₹{subtotal.toLocaleString()}
             </span>
           </div>
-
-          <div className="space-y-3">
-            {/* Subtotal */}
-            <div className="flex items-center justify-between py-2">
-              <span className="text-sm font-bold text-white/60">Subtotal</span>
-              <div className="flex items-center gap-1">
-                <IndianRupee className="h-4 w-4 text-white/40" />
-                <span className="text-lg font-black text-white tracking-tight">
-                  {subtotal.toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
-
-            {/* Discount */}
-            <div className="flex items-center justify-between py-2 border-t border-white/5">
-              <span className="text-sm font-bold text-white/60">Discount</span>
-              <div className="flex items-center gap-1">
-                <Minus className="h-4 w-4 text-red-400" />
-                <span className="text-sm font-bold text-red-400 tracking-tight">
-                  {formData.step5.discountAmount.toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
-
-            {/* Tax */}
-            <div className="flex items-center justify-between py-2 border-t border-white/5">
-              <span className="text-sm font-bold text-white/60">
-                Tax ({formData.step5.taxRate}%)
-              </span>
-              <div className="flex items-center gap-1">
-                <Plus className="h-4 w-4 text-white/40" />
-                <span className="text-sm font-bold text-white/60 tracking-tight">
-                  {taxAmount.toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
-
-            {/* Grand Total */}
-            <div className="flex items-center justify-between py-4 border-t-2 border-primary/30 mt-2">
-              <span className="text-sm font-black text-primary uppercase tracking-wider">
-                Grand Total
-              </span>
-              <div className="flex items-center gap-1">
-                <IndianRupee className="h-5 w-5 text-primary" />
-                <span className="text-2xl font-black text-primary tracking-tight">
-                  {grandTotal.toLocaleString("en-IN")}
-                </span>
-              </div>
-            </div>
+          <div className="p-6 rounded-2xl bg-white/2 border border-white/5 flex flex-col items-center justify-center space-y-2">
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary/60">
+              Tax (GST {formData.step5.taxRate}%)
+            </span>
+            <span className="text-2xl font-black text-primary/60 italic">
+              ₹{taxAmount.toLocaleString()}
+            </span>
+          </div>
+          <div className="p-6 rounded-2xl bg-primary/10 border border-primary/20 flex flex-col items-center justify-center space-y-2 shadow-2xl shadow-primary/5">
+            <span className="text-[10px] font-black uppercase tracking-widest text-primary">
+              Grand Total
+            </span>
+            <span className="text-3xl font-black text-primary italic">
+              ₹{grandTotal.toLocaleString()}
+            </span>
           </div>
         </div>
-
         {/* Terms & Conditions Section */}
         <div className="p-5 rounded-2xl bg-white/2 border border-white/5">
           <button
@@ -548,7 +519,7 @@ export function Step4ItemsTerms() {
                   value={terms}
                   onChange={(e) => handleTermsChange(e.target.value)}
                   placeholder="Enter your terms and conditions here..."
-                  className="min-h-[200px] bg-white/5 border-white/5 rounded-xl p-4 text-white text-sm leading-relaxed focus:ring-primary/20 resize-none font-mono"
+                  className="min-h-[500px] bg-white/5 border-white/5 rounded-xl p-4 text-white text-sm leading-relaxed focus:ring-primary/20 resize-none font-mono"
                 />
               </motion.div>
             )}

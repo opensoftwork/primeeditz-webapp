@@ -91,9 +91,9 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
       case 1:
         return !!formData.step1.studioId;
       case 2:
-        return true; // Packages can be optional (start from scratch)
+        return formData.step2.packageIds.length > 0;
       case 3:
-        return true; // Informational/automatic configuration step
+        return formData.step3.projectIds.length > 0;
       case 4:
         return formData.step4.lineItems.length > 0;
       case 5:

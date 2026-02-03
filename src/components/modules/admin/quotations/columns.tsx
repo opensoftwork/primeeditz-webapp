@@ -7,6 +7,7 @@ import Link from "next/link";
 import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { Button } from "@/components/ui/button";
 import type { AdminQuotation } from "./list-types";
+import { DeleteQuotationAction } from "./delete-quotation-action";
 
 export const columns: ColumnDef<AdminQuotation>[] = [
   {
@@ -102,7 +103,7 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     cell: ({ row }) => {
       const quotation = row.original;
       return (
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center gap-1">
           <Link href={`/quotations/${quotation._id}`}>
             <Button
               variant="ghost"
@@ -112,6 +113,10 @@ export const columns: ColumnDef<AdminQuotation>[] = [
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
+          <DeleteQuotationAction
+            quotationId={quotation._id}
+            quotationCode={quotation.code}
+          />
         </div>
       );
     },

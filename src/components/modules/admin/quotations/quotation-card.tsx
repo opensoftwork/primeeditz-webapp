@@ -6,6 +6,7 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import type { AdminQuotation } from "./list-types";
+import { DeleteQuotationAction } from "./delete-quotation-action";
 
 interface QuotationCardProps {
   quotation: AdminQuotation;
@@ -39,19 +40,26 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
                 {format(quotation._creationTime, "MMM dd, yyyy")}
               </div>
             </div>
-            <QuotationStatusBadge
-              status={quotation.status as AdminQuotation["status"]}
-              className="scale-[0.85] origin-top-right transform-gpu"
-            />
+            <div className="flex items-center gap-2">
+              <DeleteQuotationAction
+                quotationId={quotation._id}
+                quotationCode={quotation.code}
+                className="h-7 w-7 opacity-0 group-hover:opacity-100 transition-opacity"
+              />
+              <QuotationStatusBadge
+                status={quotation.status as AdminQuotation["status"]}
+                className="scale-[0.85] origin-top-right transform-gpu"
+              />
+            </div>
           </div>
 
           {/* Divider */}
-          <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+          <div className="h-px w-full bg-linear-to-r from-transparent via-white/10 to-transparent" />
 
           {/* Middle: Client Info */}
           <div className="space-y-2">
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-gradient-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/30 transition-colors">
+              <div className="w-7 h-7 rounded-full bg-linear-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/30 transition-colors">
                 <User className="w-3.5 h-3.5 text-white/60 group-hover:text-primary transition-colors" />
               </div>
               <span className="text-xs font-bold text-white/90 uppercase tracking-wide truncate">

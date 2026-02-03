@@ -32,6 +32,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useQuotationBuilder } from "../../quotation-builder-context";
 import type { Project } from "../../types";
+import { ProjectListingDrawer } from "../shared/project-list";
 
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
@@ -186,7 +187,64 @@ export function Step3ProjectTemplates() {
         </div>
 
         {/* Unified Projects List (Requirements from Packages) */}
-     
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/60">
+              Target Projects
+            </h3>
+            <div className="flex items-center gap-2">
+              <ProjectListingDrawer
+                studioId={formData.step1.studioId}
+                selectedProjectIds={selectedProjectIds}
+                onAddProject={(id) => {
+                  setFormData("step3", {
+                    projectIds: [...selectedProjectIds, id],
+                  });
+                }}
+                onRemoveProject={(id) => {
+                  setFormData("step3", {
+                    projectIds: selectedProjectIds.filter((pid) => pid !== id),
+                  });
+                }}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {selectedProjectIds.map((projectId) => {
+              const project = (projects as Project[])?.find(
+                (p) => p._id === projectId,
+              );
+              if (!project) return null;
+
+              return (
+                <ProjectRequirementCard
+                  key={projectId}
+                  config={{
+                    projectTypeName: project.projectTypeName,
+                    folderTemplateName:
+                      folderTemplates.find(
+                        (t) => t._id === projectFolderTemplates[projectId],
+                      )?.name || "Auto-Selected Structure",
+                    packageName: "Manual Selection",
+                    folders: folderTemplates.find(
+                      (t) => t._id === projectFolderTemplates[projectId],
+                    )?.folders,
+                  }}
+                />
+              );
+            })}
+
+            {selectedProjectIds.length === 0 && (
+              <div className="col-span-full py-12 flex flex-col items-center justify-center border border-dashed border-white/10 rounded-4xl bg-white/1">
+                <p className="text-xs text-white/20 font-black uppercase tracking-widest">
+                  No projects selected yet. Use the button above to add
+                  projects.
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
 
         {/* Package Items Summary */}
         {selectedPackages.length > 0 && (
