@@ -33,7 +33,7 @@ export function PackageDetailsDrawer({
   if (!pkg) return null;
 
   const totalAmount = pkg.lineItems.reduce(
-    (acc: number, item: any) => acc + item.unitPrice * item.defaultQuantity,
+    (acc: number, item: any) => acc + item.rate * item.quantity,
     0,
   );
 
@@ -85,7 +85,7 @@ export function PackageDetailsDrawer({
           <div className="flex-1 overflow-y-auto custom-scrollbar p-10 relative z-10 space-y-12">
             {/* Overview Section */}
             <div className="space-y-4">
-              <h3 className="text-[10px] font-black text-white/40 uppercase tracking-[0.5em] whitespace-nowrap flex items-center gap-3">
+              <h3 className="text-[11px] font-black text-white/40 uppercase tracking-[0.5em] whitespace-nowrap flex items-center gap-3">
                 <div className="w-1 h-1 rounded-full bg-white/20" />
                 Overview
               </h3>
@@ -132,7 +132,7 @@ export function PackageDetailsDrawer({
                         </div>
                         <div className="text-right">
                           <p className="text-sm font-black text-primary tracking-tighter">
-                            ₹{item.unitPrice.toLocaleString()}
+                            ₹{item.rate.toLocaleString()}
                           </p>
                         </div>
                       </div>
@@ -202,7 +202,7 @@ export function PackageDetailsDrawer({
 
             <Button
               className={cn(
-                "w-full h-16 rounded-2xl font-black uppercase tracking-[0.2em] text-[11px] transition-all duration-500",
+                "w-full h-16 rounded-[1.2rem] font-black uppercase tracking-[0.2em] text-[10px] transition-all duration-500",
                 isSelected
                   ? "bg-white/10 text-white border border-white/10 cursor-default"
                   : "bg-primary text-black shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98]",
