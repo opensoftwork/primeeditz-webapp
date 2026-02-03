@@ -223,9 +223,11 @@ export function QuotationDetail({
       if (unsectionedItems.length > 0) {
         sectionGroups.push({
           section: {
-            _id: "unsectioned",
+            _id: "unsectioned" as Id<"quotationSections">,
+            _creationTime: 0,
             name: "Standard Services",
             color: "zinc",
+            isActive: true,
           },
           items: unsectionedItems,
         });
@@ -257,9 +259,11 @@ export function QuotationDetail({
   if (globalUnsectioned.length > 0) {
     groupedBySection.push({
       section: {
-        _id: "unsectioned",
+        _id: "unsectioned" as Id<"quotationSections">,
+        _creationTime: 0,
         name: "Standard Services",
         color: "zinc",
+        isActive: true,
       },
       items: globalUnsectioned,
     });
@@ -308,7 +312,7 @@ export function QuotationDetail({
         </div>
 
         <div className="space-y-6">
-          <ReviewActions quotation={quotation as any} />
+          <ReviewActions quotation={quotation} />
           <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}

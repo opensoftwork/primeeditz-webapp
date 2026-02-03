@@ -15,10 +15,9 @@ import {
 import { cn } from "@/lib/utils";
 
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
-import { InvolvedProjects } from "../../builder/steps/step3-line-items/involved-projects";
-import { LibraryItemsDrawer } from "../../builder/steps/step3-line-items/library-items-drawer";
-import { LineItemDrawer } from "../../builder/steps/step3-line-items/line-item-drawer";
-import { LineItemsTable } from "../../builder/steps/step3-line-items/line-items-table";
+import { LibraryItemsDrawer } from "../../builder/steps/shared/library-items-drawer";
+import { LineItemDrawer } from "../../builder/steps/shared/line-item-drawer";
+import { LineItemsTable } from "../../builder/steps/shared/line-items-table";
 import type {
   LibraryItem,
   Project,
@@ -46,7 +45,7 @@ export function EditorLineItemsSection() {
   } = useQuotationBuilder();
 
   const { lineItems } = formData.step4;
-  const selectedProjectIds = formData.step1.projectIds;
+  const selectedProjectIds = formData.step3.projectIds || [];
   const filteredProjects =
     (projects as Project[])?.filter((p) =>
       selectedProjectIds.includes(p._id),
@@ -125,7 +124,7 @@ export function EditorLineItemsSection() {
 
   const handleAddProject = useCallback(
     (val: string) => {
-      setFormData("step1", {
+      setFormData("step3", {
         projectIds: [...selectedProjectIds, val],
       });
     },
@@ -134,7 +133,7 @@ export function EditorLineItemsSection() {
 
   const handleRemoveProject = useCallback(
     (projectId: string) => {
-      setFormData("step1", {
+      setFormData("step3", {
         projectIds: selectedProjectIds.filter((id) => id !== projectId),
       });
       lineItems.forEach((li, idx) => {
@@ -222,14 +221,28 @@ export function EditorLineItemsSection() {
         </div>
       </div>
 
-      <InvolvedProjects
-        projects={projects as Project[]}
-        selectedProjectIds={selectedProjectIds}
-        filteredProjects={filteredProjects}
-        studioId={formData.step1.studioId}
-        onAddProject={handleAddProject}
-        onRemoveProject={handleRemoveProject}
-      />
+      {/* Projects Section - simplified inline version */}
+      {filteredProjects.length > 0 && (
+        <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
+              Involved Projects ({filteredProjects.length})
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {filteredProjects.map((project) => (
+              <div
+                key={project._id}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/5 border border-white/10"
+              >
+                <span className="text-xs font-bold text-white">
+                  {project.eventName || project.code}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="p-1 rounded-[2rem] bg-white/2 border border-white/5">
         <div className="p-6">

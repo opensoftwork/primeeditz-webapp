@@ -639,9 +639,7 @@ export const deleteQuotation = adminMutation({
     if (!quotation) throw new Error("Quotation not found");
 
     await ctx.db.patch(args.quotationId, {
-      status: "rejected",
-      studioNotes: "Deleted by admin",
-      rejectedAt: Date.now(),
+      isDeleted: true,
       updatedAt: Date.now(),
     });
 

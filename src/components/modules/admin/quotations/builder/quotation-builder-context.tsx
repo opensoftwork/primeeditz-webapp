@@ -34,7 +34,7 @@ import type {
 // Types
 // ============================================================================
 
-export type QuotationStepId = 1 | 2 | 3 | 4 | 5;
+export type QuotationStepId = 1 | 2 | 3 | 4;
 
 export interface QuotationFormData {
   step1: {
@@ -46,7 +46,7 @@ export interface QuotationFormData {
     packageIds: string[];
   };
   step3: {
-    // Project & Template Selection
+    // Project & Template Selection (Legacy Step 3 data moved here or implicitly handled)
     projectIds: string[];
     projectTemplates: Record<string, string>; // projectId -> templateId
   };
@@ -89,9 +89,8 @@ export const INITIAL_FORM_DATA: QuotationFormData = {
 export const QUOTATION_STEPS = [
   { id: 1 as const, label: "Studio & Context" },
   { id: 2 as const, label: "Package Selection" },
-  { id: 3 as const, label: "Project & Templates" },
-  { id: 4 as const, label: "Items & Terms" },
-  { id: 5 as const, label: "Review & Send" },
+  { id: 3 as const, label: "Items & Terms" },
+  { id: 4 as const, label: "Review & Send" },
 ];
 
 // ============================================================================
@@ -133,6 +132,7 @@ interface QuotationBuilderContextValue {
   updateLineItem: (idx: number, updates: Partial<QuotationLineItem>) => void;
   removeLineItem: (idx: number) => void;
   saveQuotation: () => Promise<void>;
+  saveQuotationAndReturn: () => Promise<string | null>;
   setSubmitTrigger: (fn: (() => void) | null) => void;
 }
 
@@ -285,6 +285,123 @@ export function QuotationBuilderProvider({
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
+  // Navigation
+  const goToStep = useCallback((step: number) => {
+    if (step >= 1 && step <= 4) {
+      setCurrentStep(step as QuotationStepId);
+    }
+  }, []);
+
+  const nextStep = useCallback(() => {
+    setCurrentStep((prev) => Math.min(prev + 1, 4) as QuotationStepId);
+  }, []);
+
+  const prevStep = useCallback(() => {
+    setCurrentStep((prev) => Math.max(prev - 1, 1) as QuotationStepId);
+  }, []);
+
+  // Item Management
+  const addLineItem = useCallback((data?: Partial<QuotationLineItem>) => {
+    const newItem: QuotationLineItem = {
+      id: crypto.randomUUID(),
+      description: "",
+      rate: 0,
+      quantity: 1,
+      unit: "ea",
+      ...data,
+    };
+    setFormDataState((prev) => ({
+      ...prev,
+      step4: {
+        ...prev.step4,
+        lineItems: [...prev.step4.lineItems, newItem],
+      },
+    }));
+    setIsDirty(true);
+  }, []);
+
+  const updateLineItem = useCallback(
+    (idx: number, updates: Partial<QuotationLineItem>) => {
+      setFormDataState((prev) => {
+        const newItems = [...prev.step4.lineItems];
+        newItems[idx] = { ...newItems[idx], ...updates };
+        return {
+          ...prev,
+          step4: { ...prev.step4, lineItems: newItems },
+        };
+      });
+      setIsDirty(true);
+    },
+    [],
+  );
+
+  const removeLineItem = useCallback((idx: number) => {
+    setFormDataState((prev) => {
+      const newItems = [...prev.step4.lineItems];
+      newItems.splice(idx, 1);
+      return {
+        ...prev,
+        step4: { ...prev.step4, lineItems: newItems },
+      };
+    });
+    setIsDirty(true);
+  }, []);
+
+  // Package Logic
+  const applyPackageItems = useCallback(() => {
+    // Only apply if we have packages and no items yet (or logic to merge)
+    // For now, let's simply append items from selected packages if they aren't already there?
+    // Or closer to original: Reset items based on packages?
+    // Let's implement a safe add: Add items from packages if the list is empty.
+
+    if (!templates) return;
+
+    const { step2, step4 } = formData;
+
+    // IF line items are already populated, we might not want to nuke them every time we nav.
+    // However, if the user fundamentally changed packages, we might expect updates.
+    // For this refactor, let's assume we populate if empty to avoid accidental data loss.
+    if (step4.lineItems.length > 0) return;
+
+    const selectedTemplates = templates.filter((t) =>
+      step2.packageIds.includes(t._id),
+    );
+
+    const newItems: QuotationLineItem[] = [];
+
+    selectedTemplates.forEach((template) => {
+      template.lineItems.forEach((item) => {
+        newItems.push({
+          id: crypto.randomUUID(),
+          description: item.description,
+          unit: item.unit,
+          rate: item.rate,
+          quantity: item.quantity,
+          sectionId: item.sectionId,
+          spawnsProject: item.spawnsProject,
+          projectTypeId: item.projectTypeId as string,
+          selectedFolderTemplateId: item.selectedFolderTemplateId as string,
+          subItems: item.subItems?.map((s) => ({
+            description: s.description,
+            unit: "unit",
+            rate: s.amount || 0,
+            quantity: 1,
+          })),
+        });
+      });
+    });
+
+    if (newItems.length > 0) {
+      setFormDataState((prev) => ({
+        ...prev,
+        step4: {
+          ...prev.step4,
+          lineItems: newItems,
+        },
+      }));
+    }
+  }, [formData, templates]);
+
   // Update form data for a specific step
   const setFormData = useCallback(
     <K extends keyof QuotationFormData>(
@@ -300,136 +417,6 @@ export function QuotationBuilderProvider({
     [],
   );
 
-  const goToStep = useCallback((step: number) => {
-    if (step >= 1 && step <= 5) {
-      setCurrentStep(step as QuotationStepId);
-    }
-  }, []);
-
-  const nextStep = useCallback(() => {
-    const nextStepId = Math.min(currentStep + 1, 5) as QuotationStepId;
-    setCurrentStep(nextStepId);
-  }, [currentStep]);
-
-  const prevStep = useCallback(() => {
-    const prevStepId = Math.max(currentStep - 1, 1) as QuotationStepId;
-    setCurrentStep(prevStepId);
-  }, [currentStep]);
-
-  // Template application
-  const applyPackageItems = useCallback(() => {
-    if (!templates) return;
-
-    setFormDataState((prev) => {
-      const selectedPkgIds = prev.step2.packageIds;
-      const selectedPkgs = templates.filter((t) =>
-        selectedPkgIds.includes(t._id),
-      );
-
-      if (selectedPkgs.length === 0) return prev;
-
-      let newTerms = prev.step4.terms;
-      const newLineItems = [...prev.step4.lineItems];
-
-      selectedPkgs.forEach((pkg) => {
-        // Terms
-        if (pkg.terms && !newTerms.includes(pkg.terms.substring(0, 20))) {
-          newTerms = newTerms ? `${newTerms}\n\n${pkg.terms}` : pkg.terms;
-        }
-
-        // Line Items
-        // Filter out items that are already "from this package" to avoid duplicates
-        // But keep custom items or items from other packages
-        const existingPkgItemIds = new Set(
-          newLineItems
-            .filter((i) => i.sourcePackageId === pkg._id)
-            .map((i) => i.id),
-        );
-
-        if (existingPkgItemIds.size === 0) {
-          pkg.lineItems.forEach((li) => {
-            // Find a suitable project for this item if possible
-            // If the package has a config for a specific project type, and we have a project of that type...
-            const targetProject = prev.step3.projectIds
-              .map((id) => (projects as Project[])?.find((p) => p._id === id))
-              .find((p) =>
-                pkg.projectConfigs?.some(
-                  (c) => c.projectTypeId === p?.projectTypeId,
-                ),
-              );
-
-            newLineItems.push({
-              id: crypto.randomUUID(),
-              sectionId: li.sectionId,
-              description: li.description,
-              unit: li.unit,
-              rate: li.rate,
-              quantity: li.quantity,
-              projectId: targetProject?._id,
-              spawnsProject: li.spawnsProject,
-              projectTypeId: li.projectTypeId,
-              selectedFolderTemplateId: li.selectedFolderTemplateId,
-              sourcePackageId: pkg._id as Id<"servicePackages">,
-              subItems: li.subItems?.map((si) => ({
-                id: crypto.randomUUID(),
-                description: si.description,
-                unit: "Unit",
-                rate: si.amount ?? 0,
-                quantity: 1,
-              })),
-            });
-          });
-        }
-      });
-
-      return {
-        ...prev,
-        step4: {
-          ...prev.step4,
-          terms: newTerms,
-          lineItems: newLineItems,
-        },
-      };
-    });
-  }, [templates, projects]);
-
-  // Line Item management
-  const addLineItem = useCallback(
-    (initialData?: Partial<QuotationLineItem>) => {
-      const newItem: QuotationLineItem = {
-        id: crypto.randomUUID(),
-        sectionId: (initialData?.sectionId ||
-          sections?.[0]?._id) as Id<"quotationSections">,
-        description: initialData?.description || "",
-        unit: initialData?.unit || "ls",
-        rate: initialData?.rate || 0,
-        quantity: initialData?.quantity || 1,
-        projectId: initialData?.projectId,
-      };
-      setFormData("step4", {
-        lineItems: [...formData.step4.lineItems, newItem],
-      });
-    },
-    [sections, formData.step4.lineItems, setFormData],
-  );
-
-  const updateLineItem = useCallback(
-    (idx: number, updates: Partial<QuotationLineItem>) => {
-      const newItems = [...formData.step4.lineItems];
-      newItems[idx] = { ...newItems[idx], ...updates };
-      setFormData("step4", { lineItems: newItems });
-    },
-    [formData.step4.lineItems, setFormData],
-  );
-
-  const removeLineItem = useCallback(
-    (idx: number) => {
-      const newItems = formData.step4.lineItems.filter((_, i) => i !== idx);
-      setFormData("step4", { lineItems: newItems });
-    },
-    [formData.step4.lineItems, setFormData],
-  );
-
   // Save quotation
   const saveQuotation = useCallback(async () => {
     setIsLoading(true);
@@ -439,8 +426,10 @@ export function QuotationBuilderProvider({
       const { step1, step2, step3, step4, step5 } = formData;
 
       if (!step1.studioId) throw new Error("Please select a client");
-      if (step4.lineItems.length === 0)
-        throw new Error("Please add at least one line item");
+
+      // Allow empty line items if we have packages selected (validation can be looser or handled by applyPackageItems)
+      if (step4.lineItems.length === 0 && step2.packageIds.length === 0)
+        throw new Error("Please add packages or line items");
 
       const lineItemsPayload = step4.lineItems.map((item) => ({
         id: item.id || crypto.randomUUID(),
@@ -466,20 +455,7 @@ export function QuotationBuilderProvider({
         })),
       }));
 
-      // 1. Collect unique package IDs from all projects
-      const selectedPackageIds = Array.from(
-        new Set(
-          Object.values(step3.projectTemplates)
-            .filter((id) => id && id !== "" && !id.startsWith("__pkg_"))
-            .concat(
-              Object.values(step3.projectTemplates)
-                .filter((id) => id?.startsWith("__pkg_"))
-                .map((id) => id.replace("__pkg_", "")),
-            ),
-        ),
-      ) as Id<"servicePackages">[];
-
-      // 2. Determine end client name (project name)
+      // Determine end client name (project name)
       // Prefer the name of the first associated project
       const firstProjectId = step3.projectIds[0];
       const associatedProject = (projects as Project[])?.find(
@@ -494,11 +470,15 @@ export function QuotationBuilderProvider({
       const projectIds =
         step3.projectIds.length > 0 ? step3.projectIds : undefined;
 
+      // NOTE: We pass an empty array for selectedPackageIds because the lineItems
+      // already contain items from packages (applied in applyPackageItems).
+      // This prevents the backend from doubling items by re-aggregating package data.
+      // The selectedPackageIds field is kept for record/reference purposes but not for item aggregation.
       const payload = {
         studioId: step1.studioId as Id<"profiles">,
         projectIds: projectIds as Id<"projects">[] | undefined,
-        selectedPackageIds,
-        lineItems: lineItemsPayload as any,
+        selectedPackageIds: [] as Id<"servicePackages">[],
+        lineItems: lineItemsPayload,
         terms: step4.terms,
         taxRate: step5.taxRate / 100, // API expects decimal
         discountAmount: step5.discountAmount,
@@ -510,13 +490,13 @@ export function QuotationBuilderProvider({
       if (quotationId) {
         await updateQuotation({
           quotationId: quotationId as Id<"quotations">,
-          lineItems: lineItemsPayload as any,
+          lineItems: lineItemsPayload,
           terms: step4.terms,
           taxRate: step5.taxRate / 100,
           discountAmount: step5.discountAmount,
           studioId: step1.studioId as Id<"profiles">,
           projectIds: projectIds as Id<"projects">[] | undefined,
-          selectedPackageIds,
+          selectedPackageIds: [] as Id<"servicePackages">[],
           endClientName,
           validUntil: step1.validUntil?.getTime(),
         });
@@ -579,6 +559,124 @@ export function QuotationBuilderProvider({
     createQuotation,
     updateQuotation,
     router,
+    projects,
+    selectedStudio,
+  ]);
+
+  // Save quotation and return ID without navigating (for Send to Studio flow)
+  const saveQuotationAndReturn = useCallback(async (): Promise<
+    string | null
+  > => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const { step1, step2, step3, step4, step5 } = formData;
+
+      if (!step1.studioId) throw new Error("Please select a client");
+
+      if (step4.lineItems.length === 0 && step2.packageIds.length === 0)
+        throw new Error("Please add packages or line items");
+
+      const lineItemsPayload = step4.lineItems.map((item) => ({
+        id: item.id || crypto.randomUUID(),
+        sectionId: (item.sectionId ||
+          sections?.[0]?._id ||
+          "") as Id<"quotationSections">,
+        projectId: item.projectId,
+        description: item.description,
+        unit: item.unit,
+        rate: item.rate,
+        quantity: item.quantity,
+        spawnsProject: item.spawnsProject,
+        projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
+        selectedFolderTemplateId: item.selectedFolderTemplateId as
+          | Id<"folderTemplates">
+          | undefined,
+        subItems: item.subItems?.map((s) => ({
+          id: s.id || crypto.randomUUID(),
+          description: s.description,
+          unit: s.unit,
+          rate: s.rate,
+          quantity: s.quantity,
+        })),
+      }));
+
+      const firstProjectId = step3.projectIds[0];
+      const associatedProject = (projects as Project[])?.find(
+        (p) => p._id === firstProjectId,
+      );
+      const endClientName =
+        associatedProject?.eventName ||
+        selectedStudio?.name ||
+        "Untitled Quotation";
+
+      const projectIds =
+        step3.projectIds.length > 0 ? step3.projectIds : undefined;
+
+      // NOTE: We pass an empty array for selectedPackageIds because the lineItems
+      // already contain items from packages (applied in applyPackageItems).
+      // This prevents the backend from doubling items by re-aggregating package data.
+      const payload = {
+        studioId: step1.studioId as Id<"profiles">,
+        projectIds: projectIds as Id<"projects">[] | undefined,
+        selectedPackageIds: [] as Id<"servicePackages">[],
+        lineItems: lineItemsPayload as any,
+        terms: step4.terms,
+        taxRate: step5.taxRate / 100,
+        discountAmount: step5.discountAmount,
+        validUntil: step1.validUntil?.getTime(),
+        endClientName,
+        createdBy: "ADMIN",
+      };
+
+      let resultId: string;
+
+      if (quotationId) {
+        await updateQuotation({
+          quotationId: quotationId as Id<"quotations">,
+          lineItems: lineItemsPayload as any,
+          terms: step4.terms,
+          taxRate: step5.taxRate / 100,
+          discountAmount: step5.discountAmount,
+          studioId: step1.studioId as Id<"profiles">,
+          projectIds: projectIds as Id<"projects">[] | undefined,
+          selectedPackageIds: [] as Id<"servicePackages">[],
+          endClientName,
+          validUntil: step1.validUntil?.getTime(),
+        });
+        resultId = quotationId;
+        toast.success("Quotation saved successfully");
+      } else {
+        const res = await createQuotation(payload);
+        setQuotationId(res);
+        resultId = res;
+        toast.success("Quotation created successfully");
+      }
+
+      setIsDirty(false);
+      return resultId;
+    } catch (err: unknown) {
+      let message = "Failed to save quotation";
+
+      if (err instanceof Error) {
+        message = err.message;
+      }
+
+      setError(message);
+      toast.error(message);
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [
+    formData,
+    quotationId,
+    sections,
+    createQuotation,
+    updateQuotation,
+    projects,
+    selectedStudio,
   ]);
 
   const setSubmitTrigger = useCallback((fn: (() => void) | null) => {
@@ -612,6 +710,7 @@ export function QuotationBuilderProvider({
         updateLineItem,
         removeLineItem,
         saveQuotation,
+        saveQuotationAndReturn,
         setSubmitTrigger,
       }}
     >

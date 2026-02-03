@@ -73,6 +73,7 @@ export function ProjectSectionItems({
 }: ProjectSectionItemsProps) {
   // Group items by project, then by section
   const groupedByProject = useMemo(() => {
+    if (!projects) return [];
     return projects.map((project) => {
       const projectItems = items.filter(
         (item) => item.projectId === project._id,
@@ -102,7 +103,7 @@ export function ProjectSectionItems({
   // Check if any project has items
   const hasAnyItems = groupedByProject.some((pg) => pg.totalItems > 0);
 
-  if (projects.length === 0) {
+  if (!projects || projects.length === 0) {
     return (
       <div className="py-16 flex flex-col items-center justify-center text-center space-y-4">
         <div className="h-16 w-16 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
@@ -329,7 +330,7 @@ export function ProjectSectionItems({
       </AnimatePresence>
 
       {/* Overall Empty State */}
-      {!hasAnyItems && projects.length > 0 && (
+      {!hasAnyItems && projects && projects.length > 0 && (
         <div className="py-12 flex flex-col items-center justify-center text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
             <Layers className="h-8 w-8 text-white/10" />

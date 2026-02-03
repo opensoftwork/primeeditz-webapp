@@ -1,7 +1,7 @@
 # Story 4-17: Quotation Builder Step Restructure
 
 **Epic**: Epic 4 - Quotation System  
-**Status**: done  
+**Status**: in-progress
 **Complexity**: Medium (5 points)  
 **Created**: 2026-02-03  
 **Priority**: HIGH — UX improvement for quotation creation workflow
@@ -31,23 +31,22 @@ The current quotation builder had 5 steps that were optimized:
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                 CURRENT STRUCTURE (5 Steps)                      │
+│                 PREVIOUS STRUCTURE (5 Steps)                     │
 ├─────────────────────────────────────────────────────────────────┤
 │  Step 1: Studio & Context      → Select studio, validity        │
-│  Step 2: Projects              → Select projects                 │
-│  Step 3: Template Selection    → Choose templates per project    │
-│  Step 4: Calculate Worth       → Line items and pricing          │
-│  Step 5: Terms & Conditions    → Terms editor + save             │
+│  Step 2: Package Selection     → Select service packages        │
+│  Step 3: Project & Templates   → Project + folder template combo│
+│  Step 4: Items & Terms         → Line items + subtotal + T&C    │
+│  Step 5: Review & Send         → Review summary + send to client│
 └─────────────────────────────────────────────────────────────────┘
 
 ┌─────────────────────────────────────────────────────────────────┐
-│                 NEW STRUCTURE (5 Steps)                          │
+│                 NEW STRUCTURE (4 Steps)                          │
 ├─────────────────────────────────────────────────────────────────┤
 │  Step 1: Studio & Context      → Select studio + validity ✅    │
-│  Step 2: Package Selection     → Select service packages ✅      │
-│  Step 3: Project & Templates   → Project + folder template combo ✅│
-│  Step 4: Items & Terms         → Line items + subtotal + T&C ✅  │
-│  Step 5: Review & Send         → Review summary + send to client ✅│
+│  Step 2: Package Selection     → Enhanced UI + Project Intel ✅  │
+│  Step 3: Items & Terms         → Line items + subtotal + T&C ✅  │
+│  Step 4: Review & Send         → Review summary + send to client ✅│
 └─────────────────────────────────────────────────────────────────┘
 ```
 
@@ -57,30 +56,24 @@ The current quotation builder had 5 steps that were optimized:
 
 ### Step Labels Update
 
-- [x] The steps show: 1. Studio & Context, 2. Package Selection, 3. Project & Templates, 4. Items & Terms, 5. Review & Send.
+- [x] The steps show: 1. Studio & Context, 2. Package Selection, 3. Items & Terms, 4. Review & Send.
 
 ### Step 2: Package Selection
 
 - [x] Multi-package selection support.
+- [x] Enhanced UI matching Studio side "Request Engagement" design (Split view).
+- [x] "Project Intelligence" displays automatically generated folder structures/projects based on package.
+- [x] "Financial Breakdown" preview within selection card.
 - [x] Proceed without selecting any package (Custom Quote).
-- [x] Package selection auto-populates folder templates and line items.
 
-### Step 3: Project & Folder Template Selection
-
-- [x] Select projects for the quotation.
-- [x] Choose a folder template for each project.
-- [x] Multi-project support with template mapping.
-- [x] **Package Selection Summary**: Show included services and subtotal from selected packages.
-- [x] **Visual Cues**: Badge projects matched with selected packages.
-
-### Step 4: Items & Terms Combined
+### Step 3: Items & Terms Combined (Formerly Step 4)
 
 - [x] Line items table with pricing.
 - [x] Subtotal, tax, and grand total calculations.
 - [x] Terms & Conditions editor in the same view.
 - [x] **Default Expanded**: Terms & Conditions section is expanded by default for easier review.
 
-### Step 5: Review & Send
+### Step 4: Review & Send (Formerly Step 5)
 
 - [x] Complete summary of the quotation (Client, Projects, Packages, Pricing).
 - [x] Preview of Terms & Conditions.
@@ -100,4 +93,4 @@ The current quotation builder had 5 steps that were optimized:
 | ---------- | ----------- | ------------------------------------------------------------------------- |
 | 2026-02-03 | in-progress | Story created, beginning work                                             |
 | 2026-02-03 | refining    | Refined Step 3 with Package Summary and Step 4 with default T&C expansion |
-| 2026-02-03 | done        | Restructuring complete with multi-package support and pricing visibility  |
+| 2026-02-03 | iterating   | Removing Step 3 (Projects) and merging logic into upgraded Step 2         |

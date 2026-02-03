@@ -24,12 +24,14 @@ interface DeleteQuotationActionProps {
   quotationId: Id<"quotations">;
   quotationCode: string;
   className?: string;
+  children?: React.ReactNode;
 }
 
 export function DeleteQuotationAction({
   quotationId,
   quotationCode,
   className,
+  children,
 }: DeleteQuotationActionProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -52,11 +54,27 @@ export function DeleteQuotationAction({
   };
 
   return (
-    <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-      <AlertDialogTrigger asChild onClick={(e) => e.stopPropagation()}>
+    <>
+      {children ? (
+        <span
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(true);
+          }}
+          className="cursor-pointer"
+        >
+          {children}
+        </span>
+      ) : (
         <Button
           variant="ghost"
           size="sm"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setIsOpen(true);
+          }}
           className={cn(
             "h-8 w-8 p-0 rounded-lg text-white/20 hover:text-red-400 hover:bg-red-400/10 transition-all",
             className,
@@ -64,34 +82,42 @@ export function DeleteQuotationAction({
         >
           <Trash2 className="h-4 w-4" />
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="bg-zinc-900 border-white/10">
-        <AlertDialogHeader>
-          <AlertDialogTitle className="text-white font-black uppercase tracking-widest">
-            Delete Quotation
-          </AlertDialogTitle>
-          <AlertDialogDescription className="text-white/40 font-medium">
-            Are you sure you want to delete quotation{" "}
-            <span className="text-white font-bold">{quotationCode}</span>? This
-            action will mark the quotation as rejected and log the deletion.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel className="bg-transparent border-white/10 text-white hover:bg-white/5 uppercase text-[10px] font-black tracking-widest">
-            Cancel
-          </AlertDialogCancel>
-          <AlertDialogAction
-            onClick={(e) => {
-              e.preventDefault();
-              handleDelete();
-            }}
-            disabled={isDeleting}
-            className="bg-red-500 text-white hover:bg-red-600 uppercase text-[10px] font-black tracking-widest"
-          >
-            {isDeleting ? "Deleting..." : "Delete Quotation"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      )}
+
+      <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+        <AlertDialogContent className="bg-zinc-900 border-white/10">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-white font-black uppercase tracking-widest">
+              Delete Quotation
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-medium">
+              Are you sure you want to delete quotation{" "}
+              <span className="text-white font-bold">{quotationCode}</span>?
+              This action will mark the quotation as rejected and log the
+              deletion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={(e) => e.stopPropagation()}
+              className="bg-transparent border-white/10 text-white hover:bg-white/5 uppercase text-[10px] font-black tracking-widest"
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleDelete();
+              }}
+              disabled={isDeleting}
+              className="bg-red-500 text-white hover:bg-red-600 uppercase text-[10px] font-black tracking-widest"
+            >
+              {isDeleting ? "Deleting..." : "Delete Quotation"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 }

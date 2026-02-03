@@ -22,17 +22,17 @@ const TERMS_TEMPLATES = [
 
 export function EditorTermsSection() {
   const { formData, setFormData } = useQuotationBuilder();
-  const [localTerms, setLocalTerms] = useState(formData.step5.terms);
+  const [localTerms, setLocalTerms] = useState(formData.step4.terms);
 
   useEffect(() => {
-    if (formData.step5.terms !== localTerms) {
-      setLocalTerms(formData.step5.terms);
+    if (formData.step4.terms !== localTerms) {
+      setLocalTerms(formData.step4.terms);
     }
-  }, [formData.step5.terms]);
+  }, [formData.step4.terms]);
 
   const handleTermsChange = (value: string) => {
     setLocalTerms(value);
-    setFormData("step5", { terms: value });
+    setFormData("step4", { terms: value });
   };
 
   const applyTemplate = (content: string) => {

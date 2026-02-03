@@ -553,6 +553,7 @@ export default defineSchema({
     changeRequestedAt: v.optional(v.number()),
     rejectionReason: v.optional(v.string()),
     assignedEmployeeId: v.optional(v.id("profiles")),
+    isDeleted: v.optional(v.boolean()),
     updatedAt: v.optional(v.number()),
   })
     .index("by_code", ["code"])

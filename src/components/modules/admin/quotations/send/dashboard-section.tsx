@@ -46,11 +46,11 @@ export function DashboardSection({
 
         <Button
           onClick={onSend}
-          disabled={isSending || !studioId}
+          disabled={isSending || !studioId || isSent}
           className={cn(
             "w-full h-12 rounded-2xl font-black uppercase tracking-widest transition-all",
             isSent
-              ? "bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20"
+              ? "bg-green-500/10 border border-green-500/20 text-green-400 cursor-not-allowed opacity-70"
               : "bg-blue-600 hover:bg-blue-700 text-white",
           )}
         >
@@ -59,7 +59,7 @@ export function DashboardSection({
           ) : isSent ? (
             <CheckCircle2 className="h-4 w-4 mr-2" />
           ) : null}
-          {isSent ? "Resend to Dashboard" : "Mark as Sent to Dashboard"}
+          {isSent ? "Sent to Dashboard" : "Mark as Sent to Dashboard"}
         </Button>
       </div>
     </div>

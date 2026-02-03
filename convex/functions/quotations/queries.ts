@@ -76,7 +76,9 @@ export const getAdminQuotationsPaginated = adminQuery({
           )
       : ctx.db.query("quotations");
 
-    const results = await query.order("desc").paginate(args.paginationOpts);
+    const activeQuery = query.filter((q) => q.neq(q.field("isDeleted"), true));
+
+    const results = await activeQuery.order("desc").paginate(args.paginationOpts);
 
     // Get all profiles for client name enrichment
     const studioIds = [
@@ -466,13 +468,21 @@ export const getMyQuotationsPaginated = studioQuery({
 
     // Applying status filter if provided, otherwise filter by visible statuses
     if (args.status) {
-      query = query.filter((q) => q.eq(q.field("status"), args.status!));
+      query = query.filter((q) =>
+        q.and(
+          q.eq(q.field("status"), args.status!),
+          q.neq(q.field("isDeleted"), true),
+        ),
+      );
     } else {
       query = query.filter((q) =>
-        q.or(
-          ...studioVisibleStatus.map((status) =>
-            q.eq(q.field("status"), status),
+        q.and(
+          q.or(
+            ...studioVisibleStatus.map((status) =>
+              q.eq(q.field("status"), status),
+            ),
           ),
+          q.neq(q.field("isDeleted"), true),
         ),
       );
     }

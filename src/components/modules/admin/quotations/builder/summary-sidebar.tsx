@@ -30,7 +30,7 @@ export function SummarySidebar({
   const { formData, setFormData, taxAmount, projects } = useQuotationBuilder();
   const { taxRate, discountAmount } = formData.step5;
   const selectedProjects = projects?.filter((p) =>
-    formData.step2.projectIds.includes(p._id),
+    formData.step3.projectIds?.includes(p._id),
   );
 
   return (
