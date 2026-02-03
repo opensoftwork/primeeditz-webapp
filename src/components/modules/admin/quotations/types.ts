@@ -165,8 +165,31 @@ export type Client = Doc<"profiles">;
 export interface Project {
   _id: Id<"projects"> | string;
   code: string;
+  projectTypeId: Id<"projectTypes"> | string;
   eventName?: string;
+  endClientName?: string;
   projectTypeName?: string;
 }
 
-export type Template = Doc<"servicePackages">;
+/**
+ * Configuration for a project within a service package
+ */
+export interface ProjectConfig {
+  id: string;
+  label?: string;
+  categoryId?: Id<"projectCategories">;
+  projectTypeId: Id<"projectTypes">;
+  folderTemplateId: Id<"folderTemplates">;
+  defaultStorageTierId?: Id<"storageTiers">;
+}
+
+/**
+ * Service Package (formerly Template)
+ */
+export interface ServicePackage extends Omit<Doc<"servicePackages">, "projectConfigs" | "lineItems"> {
+  projectConfigs?: ProjectConfig[];
+  lineItems: TemplateLineItem[];
+  price?: number; // Calculated/overridden price for UI
+}
+
+export type Template = ServicePackage;

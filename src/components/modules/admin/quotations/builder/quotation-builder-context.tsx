@@ -39,59 +39,59 @@ export type QuotationStepId = 1 | 2 | 3 | 4 | 5;
 export interface QuotationFormData {
   step1: {
     studioId: string;
-    projectId: string; // Left for compatibility
-    projectIds: string[]; // Master list, but we sync with step2
     validUntil: Date | undefined;
   };
   step2: {
-    // Project Selection
-    projectIds: string[];
+    // Package Selection
+    packageIds: string[];
   };
   step3: {
-    // Template Selection (Per Project)
+    // Project & Template Selection
+    projectIds: string[];
     projectTemplates: Record<string, string>; // projectId -> templateId
   };
   step4: {
-    // Calculate Worth
+    // Items & Terms
     lineItems: QuotationLineItem[];
+    terms: string;
   };
   step5: {
-    // Terms
-    terms: string;
+    // Review & Send
     taxRate: number;
     discountAmount: number;
+    shareLinkEnabled: boolean;
   };
 }
 
 export const INITIAL_FORM_DATA: QuotationFormData = {
   step1: {
     studioId: "",
-    projectId: "",
-    projectIds: [],
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   },
   step2: {
-    projectIds: [],
+    packageIds: [],
   },
   step3: {
+    projectIds: [],
     projectTemplates: {},
   },
   step4: {
     lineItems: [],
+    terms: "",
   },
   step5: {
-    terms: "",
     taxRate: 18,
     discountAmount: 0,
+    shareLinkEnabled: true,
   },
 };
 
 export const QUOTATION_STEPS = [
   { id: 1 as const, label: "Studio & Context" },
-  { id: 2 as const, label: "Projects" },
-  { id: 3 as const, label: "Template Selection" },
-  { id: 4 as const, label: "Calculate Worth" },
-  { id: 5 as const, label: "Terms & Conditions" },
+  { id: 2 as const, label: "Package Selection" },
+  { id: 3 as const, label: "Project & Templates" },
+  { id: 4 as const, label: "Items & Terms" },
+  { id: 5 as const, label: "Review & Send" },
 ];
 
 // ============================================================================
@@ -128,8 +128,8 @@ interface QuotationBuilderContextValue {
   goToStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
-  applyTemplate: (templateId: string, projectId: string) => void;
-  addLineItem: (initialData?: Partial<QuotationLineItem>) => void;
+  applyPackageItems: () => void;
+  addLineItem: (data?: Partial<QuotationLineItem>) => void;
   updateLineItem: (idx: number, updates: Partial<QuotationLineItem>) => void;
   removeLineItem: (idx: number) => void;
   saveQuotation: () => Promise<void>;
@@ -196,28 +196,28 @@ export function QuotationBuilderProvider({
       setFormDataState({
         step1: {
           studioId: existingQuotation.studioId || "",
-          projectId: existingQuotation.projectId || "",
-          projectIds: existingQuotation.projectIds || [],
           validUntil: existingQuotation.validUntil
             ? new Date(existingQuotation.validUntil)
             : undefined,
         },
         step2: {
-          projectIds: existingQuotation.projectIds || [],
+          packageIds: (existingQuotation.selectedPackageIds as string[]) || [],
         },
         step3: {
-          projectTemplates: {}, // TODO: Can we infer this from existing items? For now start empty or rely on stored separate field if we add one
+          projectIds: existingQuotation.projectIds || [],
+          projectTemplates: {},
         },
         step4: {
           lineItems: existingQuotation.lineItems.map((item: any) => ({
             ...item,
             id: item.id || crypto.randomUUID(),
           })),
+          terms: existingQuotation.terms || "",
         },
         step5: {
-          terms: existingQuotation.terms || "",
-          taxRate: (existingQuotation.taxRate || 0.18) * 100, // API stores as decimal
+          taxRate: (existingQuotation.taxRate || 0.18) * 100,
           discountAmount: existingQuotation.discountAmount || 0,
+          shareLinkEnabled: true,
         },
       });
     }
@@ -300,17 +300,6 @@ export function QuotationBuilderProvider({
     [],
   );
 
-  // Navigation
-  // Update step1.projectIds whenever step2 changes for syncing
-  useEffect(() => {
-    if (
-      JSON.stringify(formData.step2.projectIds) !==
-      JSON.stringify(formData.step1.projectIds)
-    ) {
-      setFormData("step1", { projectIds: formData.step2.projectIds });
-    }
-  }, [formData.step2.projectIds, formData.step1.projectIds, setFormData]);
-
   const goToStep = useCallback((step: number) => {
     if (step >= 1 && step <= 5) {
       setCurrentStep(step as QuotationStepId);
@@ -328,103 +317,81 @@ export function QuotationBuilderProvider({
   }, [currentStep]);
 
   // Template application
-  const applyTemplate = useCallback(
-    (templateId: string, projectId: string) => {
-      // Logic for "Start from Scratch" (empty templateId)
-      if (!templateId) {
-        setFormDataState((prev) => {
-          const currentItems = prev.step4.lineItems;
-          // Remove items for this project
-          const filteredItems = currentItems.filter(
-            (item) => item.projectId !== projectId,
-          );
-          return {
-            ...prev,
-            step3: {
-              ...prev.step3,
-              projectTemplates: {
-                ...prev.step3.projectTemplates,
-                [projectId]: "",
-              },
-            },
-            step4: {
-              ...prev.step4,
-              lineItems: filteredItems,
-            },
-          };
-        });
-        return;
-      }
+  const applyPackageItems = useCallback(() => {
+    if (!templates) return;
 
-      const template = templates?.find((t) => t._id === templateId);
-      if (!template) return;
-
-      // Update project template mapping
-      setFormDataState((prev) => ({
-        ...prev,
-        step3: {
-          ...prev.step3,
-          projectTemplates: {
-            ...prev.step3.projectTemplates,
-            [projectId]: templateId,
-          },
-        },
-      }));
-
-      // Append terms if they are not already there (simple logic for now)
-      setFormDataState((prev) => {
-        const currentTerms = prev.step5.terms;
-        const newTerms = template.terms || "";
-        // Only add if not present to avoid duplication on re-select
-        const combinedTerms = currentTerms.includes(newTerms.substring(0, 20))
-          ? currentTerms
-          : currentTerms
-            ? `${currentTerms}\n\n${newTerms}`
-            : newTerms;
-        return {
-          ...prev,
-          step5: { ...prev.step5, terms: combinedTerms },
-        };
-      });
-
-      const mappedItems: QuotationLineItem[] = template.lineItems.map(
-        (li: TemplateLineItem) => ({
-          id: crypto.randomUUID(),
-          sectionId: li.sectionId,
-          description: li.description,
-          unit: li.unit,
-          rate: li.rate,
-          quantity: li.quantity,
-          projectId: projectId, // Assign to specific project
-          spawnsProject: li.spawnsProject,
-          projectTypeId: li.projectTypeId,
-          selectedFolderTemplateId: li.selectedFolderTemplateId,
-          subItems: li.subItems?.map((si) => ({
-            id: crypto.randomUUID(),
-            description: si.description,
-            unit: "Unit",
-            rate: si.amount ?? 0,
-            quantity: 1,
-          })),
-        }),
+    setFormDataState((prev) => {
+      const selectedPkgIds = prev.step2.packageIds;
+      const selectedPkgs = templates.filter((t) =>
+        selectedPkgIds.includes(t._id),
       );
 
-      // Merge items: Remove old items for this project, add new ones
-      setFormDataState((prev) => {
-        const otherItems = prev.step4.lineItems.filter(
-          (item) => item.projectId !== projectId,
+      if (selectedPkgs.length === 0) return prev;
+
+      let newTerms = prev.step4.terms;
+      const newLineItems = [...prev.step4.lineItems];
+
+      selectedPkgs.forEach((pkg) => {
+        // Terms
+        if (pkg.terms && !newTerms.includes(pkg.terms.substring(0, 20))) {
+          newTerms = newTerms ? `${newTerms}\n\n${pkg.terms}` : pkg.terms;
+        }
+
+        // Line Items
+        // Filter out items that are already "from this package" to avoid duplicates
+        // But keep custom items or items from other packages
+        const existingPkgItemIds = new Set(
+          newLineItems
+            .filter((i) => i.sourcePackageId === pkg._id)
+            .map((i) => i.id),
         );
-        return {
-          ...prev,
-          step4: {
-            ...prev.step4,
-            lineItems: [...otherItems, ...mappedItems],
-          },
-        };
+
+        if (existingPkgItemIds.size === 0) {
+          pkg.lineItems.forEach((li) => {
+            // Find a suitable project for this item if possible
+            // If the package has a config for a specific project type, and we have a project of that type...
+            const targetProject = prev.step3.projectIds
+              .map((id) => (projects as Project[])?.find((p) => p._id === id))
+              .find((p) =>
+                pkg.projectConfigs?.some(
+                  (c) => c.projectTypeId === p?.projectTypeId,
+                ),
+              );
+
+            newLineItems.push({
+              id: crypto.randomUUID(),
+              sectionId: li.sectionId,
+              description: li.description,
+              unit: li.unit,
+              rate: li.rate,
+              quantity: li.quantity,
+              projectId: targetProject?._id,
+              spawnsProject: li.spawnsProject,
+              projectTypeId: li.projectTypeId,
+              selectedFolderTemplateId: li.selectedFolderTemplateId,
+              sourcePackageId: pkg._id as Id<"servicePackages">,
+              subItems: li.subItems?.map((si) => ({
+                id: crypto.randomUUID(),
+                description: si.description,
+                unit: "Unit",
+                rate: si.amount ?? 0,
+                quantity: 1,
+              })),
+            });
+          });
+        }
       });
-    },
-    [templates],
-  );
+
+      return {
+        ...prev,
+        step4: {
+          ...prev.step4,
+          terms: newTerms,
+          lineItems: newLineItems,
+        },
+      };
+    });
+  }, [templates, projects]);
 
   // Line Item management
   const addLineItem = useCallback(
@@ -502,14 +469,19 @@ export function QuotationBuilderProvider({
       // 1. Collect unique package IDs from all projects
       const selectedPackageIds = Array.from(
         new Set(
-          Object.values(step3.projectTemplates).filter((id) => id && id !== ""),
+          Object.values(step3.projectTemplates)
+            .filter((id) => id && id !== "" && !id.startsWith("__pkg_"))
+            .concat(
+              Object.values(step3.projectTemplates)
+                .filter((id) => id?.startsWith("__pkg_"))
+                .map((id) => id.replace("__pkg_", "")),
+            ),
         ),
       ) as Id<"servicePackages">[];
 
       // 2. Determine end client name (project name)
       // Prefer the name of the first associated project
-      const firstProjectId =
-        step2.projectIds[0] || step1.projectIds[0] || step1.projectId;
+      const firstProjectId = step3.projectIds[0];
       const associatedProject = (projects as Project[])?.find(
         (p) => p._id === firstProjectId,
       );
@@ -518,24 +490,16 @@ export function QuotationBuilderProvider({
         selectedStudio?.name ||
         "Untitled Quotation";
 
-      // 3. Preferred project IDs list
+      // 3. Project IDs list
       const projectIds =
-        step2.projectIds.length > 0
-          ? step2.projectIds
-          : step1.projectIds.length > 0
-            ? step1.projectIds
-            : undefined;
+        step3.projectIds.length > 0 ? step3.projectIds : undefined;
 
       const payload = {
         studioId: step1.studioId as Id<"profiles">,
-        projectId:
-          step1.projectId && step1.projectId !== "none"
-            ? (step1.projectId as Id<"projects">)
-            : undefined,
         projectIds: projectIds as Id<"projects">[] | undefined,
         selectedPackageIds,
         lineItems: lineItemsPayload as any,
-        terms: step5.terms,
+        terms: step4.terms,
         taxRate: step5.taxRate / 100, // API expects decimal
         discountAmount: step5.discountAmount,
         validUntil: step1.validUntil?.getTime(),
@@ -547,14 +511,10 @@ export function QuotationBuilderProvider({
         await updateQuotation({
           quotationId: quotationId as Id<"quotations">,
           lineItems: lineItemsPayload as any,
-          terms: step5.terms,
+          terms: step4.terms,
           taxRate: step5.taxRate / 100,
           discountAmount: step5.discountAmount,
           studioId: step1.studioId as Id<"profiles">,
-          projectId:
-            step1.projectId && step1.projectId !== "none"
-              ? (step1.projectId as Id<"projects">)
-              : undefined,
           projectIds: projectIds as Id<"projects">[] | undefined,
           selectedPackageIds,
           endClientName,
@@ -647,7 +607,7 @@ export function QuotationBuilderProvider({
         goToStep,
         nextStep,
         prevStep,
-        applyTemplate,
+        applyPackageItems,
         addLineItem,
         updateLineItem,
         removeLineItem,

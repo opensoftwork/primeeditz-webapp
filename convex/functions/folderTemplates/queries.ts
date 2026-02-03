@@ -81,3 +81,24 @@ export const listAllByProjectType = adminQuery({
     }));
   },
 });
+
+/**
+ * Get all folder templates (for selection in Quotation Builder).
+ */
+export const getFolderTemplates = adminQuery({
+  args: {
+    activeOnly: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("folderTemplates");
+
+    const templates = await query.collect();
+
+    if (args.activeOnly) {
+      return templates.filter((t) => t.isActive);
+    }
+
+    return templates;
+  },
+});
+

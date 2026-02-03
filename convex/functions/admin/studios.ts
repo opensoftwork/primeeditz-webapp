@@ -155,6 +155,7 @@ export const getAdminProjectsSimple = adminQuery({
         return {
           _id: p._id,
           code: p.code,
+          projectTypeId: p.projectTypeId,
           eventName: p.endClientName,
           projectTypeName: type?.name ?? "Unknown",
         };

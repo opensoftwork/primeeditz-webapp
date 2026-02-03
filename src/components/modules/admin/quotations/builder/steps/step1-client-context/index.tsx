@@ -40,13 +40,11 @@ export function Step1StudioContext() {
   const form = useForm({
     defaultValues: {
       studioId: step1Data.studioId,
-      projectId: step1Data.projectId,
       validUntil: step1Data.validUntil,
     },
     onSubmit: async ({ value }) => {
       setFormData("step1", {
         studioId: value.studioId,
-        projectId: value.projectId,
         validUntil: value.validUntil ?? undefined,
       });
       nextStep();

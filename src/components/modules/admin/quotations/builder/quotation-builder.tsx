@@ -32,10 +32,10 @@ import {
 import { QuotationStepNavigation } from "./quotation-step-navigation";
 import {
   Step1StudioContext,
-  Step2ProjectSelection,
-  Step2TemplateSelection,
-  Step3LineItems,
-  Step4Terms,
+  Step2PackageSelection,
+  Step3ProjectTemplates,
+  Step4ItemsTerms,
+  Step5ReviewSend,
 } from "./steps";
 
 // ============================================================================
@@ -64,6 +64,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     isLoading,
     formData,
     subtotal,
+    taxAmount,
     grandTotal,
     selectedStudio,
     goToStep,
@@ -77,7 +78,11 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
         nextStep();
       }
     } else {
-      saveQuotation();
+      if (submitTrigger) {
+        submitTrigger();
+      } else {
+        saveQuotation();
+      }
     }
   };
 
@@ -86,9 +91,9 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
       case 1:
         return !!formData.step1.studioId;
       case 2:
-        return formData.step2.projectIds.length > 0;
+        return true; // Packages can be optional (start from scratch)
       case 3:
-        return true;
+        return true; // Informational/automatic configuration step
       case 4:
         return formData.step4.lineItems.length > 0;
       case 5:
@@ -180,16 +185,37 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
             <div className="p-5 rounded-2xl bg-white/2 border border-white/5 space-y-4 relative overflow-hidden group">
               <div className="absolute top-0 right-0 h-20 w-20 bg-primary/10 blur-2xl -mr-10 -mt-10 opacity-50 group-hover:opacity-100 transition-opacity" />
               <div className="relative">
-                <p className="text-[9px] font-black uppercase tracking-widest text-white/30 mb-1">
-                  Current Valuation
-                </p>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-sm font-black text-white/40 tracking-tighter italic">
-                    ₹
-                  </span>
-                  <span className="text-2xl font-black text-white tracking-tighter">
-                    {grandTotal.toLocaleString("en-IN")}
-                  </span>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest">
+                      Subtotal
+                    </span>
+                    <span className="text-xs font-bold text-white/60 italic">
+                      ₹{subtotal.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[10px] font-bold text-primary/60 uppercase tracking-widest">
+                      Tax (GST)
+                    </span>
+                    <span className="text-xs font-bold text-primary/60 italic">
+                      ₹{taxAmount.toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div className="h-px bg-white/5 my-1" />
+                  <div className="flex justify-between items-baseline">
+                    <span className="text-[10px] font-black text-white uppercase tracking-widest">
+                      Total
+                    </span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-xs font-black text-white/40 tracking-tighter italic">
+                        ₹
+                      </span>
+                      <span className="text-xl font-black text-white tracking-tighter">
+                        {grandTotal.toLocaleString("en-IN")}
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -223,10 +249,10 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                 >
                   <div className="w-full mx-auto space-y-8">
                     {currentStep === 1 && <Step1StudioContext />}
-                    {currentStep === 2 && <Step2ProjectSelection />}
-                    {currentStep === 3 && <Step2TemplateSelection />}
-                    {currentStep === 4 && <Step3LineItems />}
-                    {currentStep === 5 && <Step4Terms />}
+                    {currentStep === 2 && <Step2PackageSelection />}
+                    {currentStep === 3 && <Step3ProjectTemplates />}
+                    {currentStep === 4 && <Step4ItemsTerms />}
+                    {currentStep === 5 && <Step5ReviewSend />}
                   </div>
                 </motion.div>
               </AnimatePresence>
