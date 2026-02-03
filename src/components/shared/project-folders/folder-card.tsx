@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckCircle2, Clock, Folder, Lock, Upload } from "lucide-react";
+import { CheckCircle2, Clock, Eye, Folder, Lock, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type FolderStatus = "pending_upload" | "in_progress" | "completed";
@@ -43,6 +43,7 @@ interface FolderCardProps {
   onClick?: () => void;
   className?: string;
   isLocked?: boolean;
+  isViewOnly?: boolean;
 }
 
 export function FolderCard({
@@ -53,19 +54,24 @@ export function FolderCard({
   onClick,
   className,
   isLocked,
+  isViewOnly,
   onComplete,
 }: FolderCardProps) {
   const config = statusConfig[status as keyof typeof statusConfig];
-  const StatusIcon = isLocked ? Lock : config?.icon || Folder;
+  const StatusIcon = isLocked && !isViewOnly ? Lock : config?.icon || Folder;
+
+  // In view-only mode, allow clicks for viewing but indicate restricted functionality
+  const isClickable = !isLocked || isViewOnly;
 
   return (
     <div
-      onClick={!isLocked ? onClick : undefined}
+      onClick={isClickable ? onClick : undefined}
       className={cn(
-        "p-5 rounded-3xl bg-white/3 border border-white/5 transition-all duration-300 group",
-        !isLocked
+        "p-5 rounded-3xl bg-white/3 border border-white/5 transition-all duration-300 group relative overflow-hidden",
+        isClickable
           ? "hover:bg-white/5 cursor-pointer"
           : "opacity-50 cursor-not-allowed",
+        isViewOnly && "ring-1 ring-inset ring-primary/10",
         className,
       )}
     >
@@ -73,14 +79,14 @@ export function FolderCard({
         <div
           className={cn(
             "p-3 rounded-2xl transition-transform duration-300",
-            !isLocked && "group-hover:scale-110",
+            isClickable && "group-hover:scale-110",
             config?.bgColor || "bg-white/5",
           )}
         >
           <Folder
             className={cn(
               "h-5 w-5",
-              isLocked ? "text-white/20" : config?.color || "text-white/40",
+              isLocked && !isViewOnly ? "text-white/20" : config?.color || "text-white/40",
             )}
           />
         </div>
@@ -88,7 +94,7 @@ export function FolderCard({
           <p
             className={cn(
               "text-white font-black uppercase tracking-tight text-sm truncate transition-colors",
-              !isLocked && "group-hover:text-primary",
+              isClickable && "group-hover:text-primary",
             )}
           >
             {name}
@@ -114,18 +120,25 @@ export function FolderCard({
           <StatusIcon
             className={cn(
               "h-3.5 w-3.5",
-              isLocked ? "text-white/20" : config?.color,
+              isLocked && !isViewOnly ? "text-white/20" : config?.color,
             )}
           />
           <span
             className={cn(
               "text-[9px] font-black uppercase tracking-[0.2em]",
-              isLocked ? "text-white/20" : config?.color,
+              isLocked && !isViewOnly ? "text-white/20" : config?.color,
             )}
           >
-            {isLocked ? "LOCKED" : config?.label}
+            {isLocked && !isViewOnly ? "LOCKED" : config?.label}
           </span>
         </div>
+
+        {isViewOnly && (
+          <span className="text-[9px] font-black uppercase tracking-[0.15em] text-primary/60 flex items-center gap-1">
+            <Eye className="h-3 w-3" />
+            View
+          </span>
+        )}
 
         {status === "in_progress" && onComplete && !isLocked && (
           <button
@@ -139,11 +152,11 @@ export function FolderCard({
           </button>
         )}
 
-        {status !== "in_progress" && (
+        {status !== "in_progress" && !isViewOnly && (
           <div
             className={cn(
               "h-1.5 w-1.5 rounded-full transition-colors",
-              !isLocked
+              isClickable
                 ? "bg-white/10 group-hover:bg-primary animate-pulse"
                 : "bg-white/5",
             )}

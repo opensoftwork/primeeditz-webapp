@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { useMutation, useQuery } from "convex/react";
+import { useQuery } from "convex/react";
 import {
   ArrowRight,
   CheckCheck,
@@ -13,11 +13,12 @@ import {
   Users,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { ProjectSpecs } from "@/components/modules/admin/projects/project-detail/project-specs";
 import { ReferenceMaterials } from "@/components/modules/projects/detail/reference-materials";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FinalizeWorkDrawer } from "./finalize-work-drawer";
 import { SquadMemberCard } from "./squad-member-card";
 
@@ -30,10 +31,30 @@ export default function EmployeeProjectDetail({
 }: EmployeeProjectDetailProps) {
   const router = useRouter();
   const [isFinalizeOpen, setIsFinalizeOpen] = useState(false);
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const project = useQuery(api.employees.getEmployeeProject, {
     projectId: projectId as Id<"projects">,
   });
+
+  // Set breadcrumb override for project name
+  useEffect(() => {
+    const label = project?.eventName || project?.projectTypeName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
+    }
+
+    return () => {
+      removeOverride(projectId);
+    };
+  }, [
+    projectId,
+    project?.eventName,
+    project?.projectTypeName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   if (project === undefined) return <EmployeeProjectDetailSkeleton />;
 

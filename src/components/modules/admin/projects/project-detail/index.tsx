@@ -48,11 +48,19 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   }) as AdminProjectDetail | null | undefined;
 
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    const label = project?.eventName || project?.projectTypeName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
     }
     return () => removeOverride(projectId);
-  }, [projectId, project?.eventName, setOverride, removeOverride]);
+  }, [
+    projectId,
+    project?.eventName,
+    project?.projectTypeName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   const deliveryLabel = useMemo(() => {
     return getDeliveryPhaseLabel(project?.deliveryConfig);

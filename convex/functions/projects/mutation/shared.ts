@@ -412,6 +412,7 @@ export const updateOnboarding = authenticatedMutation({
 /**
  * Finalize project onboarding.
  * Moves project from 'awaiting_uploads' to 'uploads_complete'.
+ * Also marks all folders as completed to maintain consistency.
  */
 export const completeOnboarding = authenticatedMutation({
   args: {
@@ -440,9 +441,22 @@ export const completeOnboarding = authenticatedMutation({
       throw new ConvexError("Project is not in onboarding phase");
     }
 
+    // Mark all folders as completed
+    const folders = await ctx.db
+      .query("folders")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    for (const folder of folders) {
+      if (folder.status !== "completed") {
+        await ctx.db.patch(folder._id, { status: "completed" });
+      }
+    }
+
     await ctx.db.patch(args.projectId, {
       actionState: "uploads_complete",
       awaitingActorRole: "admin",
+      uploadsCompletedAt: now(),
       updatedAt: now(),
     });
 
@@ -457,7 +471,7 @@ export const completeOnboarding = authenticatedMutation({
       newAwaitingActorRole: "admin",
       changedBy: profile._id,
       changedAt: now(),
-      notes: "Project onboarding completed by studio",
+      notes: `Project onboarding completed by ${profile.name} (${profile.role}). ${folders.length} folders marked as completed.`,
     });
 
     return { success: true };

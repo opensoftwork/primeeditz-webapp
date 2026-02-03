@@ -114,35 +114,35 @@ function ProjectCard({ project }: { project: any }) {
   return (
     <Link href={`/projects/${project._id}`}>
       <motion.div
-        whileHover={{ y: -5 }}
-        className="group relative p-6 rounded-3xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
+        whileHover={{ y: -3 }}
+        className="group relative p-5 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
       >
         {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[50px] rounded-full translate-x-12 -translate-y-12 group-hover:bg-primary/10 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-primary/10 transition-colors" />
 
-        <div className="relative space-y-6 flex-1 flex flex-col">
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <div className="flex items-center gap-2">
+        <div className="relative space-y-4 flex-1 flex flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-0.5 min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
                 <Hash className="h-3 w-3 text-primary/40" />
-                <span className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tighter">
+                <span className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tighter truncate">
                   {project.code}
                 </span>
               </div>
-              <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+              <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.15em]">
                 {project.projectTypeName}
               </div>
             </div>
             <StudioStatusBadge status={project.actionState} />
           </div>
 
-          <div className="space-y-2">
-            <h3 className="text-lg font-black text-white leading-tight uppercase tracking-tight">
+          <div className="space-y-1">
+            <h3 className="text-base font-black text-white leading-tight uppercase tracking-tight truncate">
               {project.eventName || "General Project"}
             </h3>
             {project.eventDate && (
-              <div className="flex items-center gap-1.5 text-[10px] font-bold text-white/20 uppercase tracking-widest">
-                <Calendar className="h-3 w-3" />
+              <div className="flex items-center gap-1 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+                <Calendar className="h-2.5 w-2.5" />
                 {new Date(project.eventDate).toLocaleDateString()}
               </div>
             )}
@@ -153,27 +153,27 @@ function ProjectCard({ project }: { project: any }) {
               href={`/projects/${project._id}/onboarding`}
               className="block"
             >
-              <div className="p-4 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-all group/onb">
-                <p className="text-[10px] font-bold text-primary leading-relaxed text-center uppercase tracking-widest italic flex items-center justify-center gap-2">
+              <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-all group/onb">
+                <p className="text-[9px] font-bold text-primary leading-relaxed text-center uppercase tracking-widest italic flex items-center justify-center gap-1.5">
                   Complete Onboarding{" "}
-                  <ChevronRight className="h-3 w-3 group-hover/onb:translate-x-1 transition-transform" />
+                  <ChevronRight className="h-2.5 w-2.5 group-hover/onb:translate-x-1 transition-transform" />
                 </p>
               </div>
             </Link>
           ) : (
-            <div className="h-[52px]" /> /* Spacer to keep layout consistent */
+            <div className="h-10" /> /* Spacer to keep layout consistent */
           )}
 
-          <div className="mt-auto pt-6 border-t border-white/5">
+          <div className="mt-auto pt-4 border-t border-white/5">
             <PhaseProgress currentPhase={project.phase} compact={true} />
           </div>
 
-          <div className="flex items-center justify-between pt-4">
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest px-2 py-1 rounded-md bg-white/5">
-              Spawned from Quotation
+          <div className="flex items-center justify-between pt-3">
+            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest px-2 py-0.5 rounded-md bg-white/5">
+              From Quotation
             </span>
-            <div className="flex items-center gap-1 text-[10px] font-black text-primary/60 group-hover:text-primary transition-colors uppercase tracking-[0.2em]">
-              VIEW Details <ChevronRight className="h-3 w-3" />
+            <div className="flex items-center gap-1 text-[9px] font-black text-primary/60 group-hover:text-primary transition-colors uppercase tracking-[0.15em]">
+              View <ChevronRight className="h-2.5 w-2.5" />
             </div>
           </div>
         </div>

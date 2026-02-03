@@ -54,8 +54,10 @@ export function FolderDetailView({
 
   // Handle Breadcrumb Overrides
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    const projectLabel =
+      project?.eventName || project?.projectTypeName || project?.code;
+    if (projectLabel) {
+      setOverride(projectId, projectLabel);
     }
     if (folder?.name) {
       setOverride(folderId, folder.name);
@@ -69,6 +71,8 @@ export function FolderDetailView({
     projectId,
     folderId,
     project?.eventName,
+    project?.projectTypeName,
+    project?.code,
     folder?.name,
     setOverride,
     removeOverride,

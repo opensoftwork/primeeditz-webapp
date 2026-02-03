@@ -3,11 +3,12 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { Lock } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, Lock, Upload } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
+import { cn } from "@/lib/utils";
 
 interface AssetsSectionProps {
   projectId: string;
@@ -29,14 +30,18 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
   });
 
   const isLocked = project?.uploadEligibility?.isAllowed === false;
+  const isUploadComplete = project?.uploadEligibility?.reason?.toLowerCase().includes("complete");
 
   const handleFolderClick = (folder: any) => {
-    if (isLocked) return;
-    // Navigate to the dedicated folder page
+    // Allow viewing folders even when locked (view-only mode)
     router.push(`/projects/${projectId}/folders/${folder._id}`);
   };
 
   const handleFolderComplete = async (folder: any) => {
+    if (isLocked) {
+      toast.error("Upload phase is complete. Contact admin to re-enable uploads.");
+      return;
+    }
     try {
       await updateFolderStatus({
         folderId: folder._id,
@@ -54,54 +59,92 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: 0.3, duration: 0.5 }}
       viewport={{ once: true }}
-      className="space-y-10"
+      className="space-y-6"
     >
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
             Project Assets
             {isLocked && (
-              <span className="px-3 py-1 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] tracking-[0.2em] font-black">
-                LOCKED
+              <span className={cn(
+                "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
+                isUploadComplete
+                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                  : "bg-amber-500/10 border-amber-500/20 text-amber-500"
+              )}>
+                {isUploadComplete ? "UPLOAD COMPLETE" : "LOCKED"}
               </span>
             )}
           </h2>
           <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-1">
             {isLocked
-              ? "Uploads will be enabled once your quotation is approved"
+              ? "View-only mode • Uploads are disabled"
               : "Click a folder to upload files"}
           </p>
         </div>
       </div>
 
-      <div className="relative">
-        <div className="relative">
-          {isLocked && (
-            <div className="absolute inset-0 z-20 bg-black/40 backdrop-blur-[2px] rounded-[2.5rem] flex items-center justify-center p-8 text-center border border-white/5">
-              <div className="max-w-md space-y-6">
-                <div className="mx-auto w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-500">
-                  <Lock className="h-8 w-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-black uppercase tracking-tight text-white">
-                    Upload Gated
-                  </h3>
-                  <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-2 px-4">
-                    {project?.uploadEligibility?.reason ||
-                      "Awaiting quotation approval to unlock project storage."}
-                  </p>
-                </div>
-              </div>
-            </div>
+      {/* Upload Status Banner - Non-blocking alert */}
+      {isLocked && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "flex items-center gap-4 p-4 rounded-2xl border backdrop-blur-sm",
+            isUploadComplete
+              ? "bg-emerald-500/5 border-emerald-500/20"
+              : "bg-amber-500/5 border-amber-500/20"
           )}
-          <FolderGrid
-            folders={folders}
-            isLocked={isLocked}
-            onFolderClick={handleFolderClick}
-            onFolderComplete={handleFolderComplete}
-          />
-        </div>
-      </div>
+        >
+          <div className={cn(
+            "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+            isUploadComplete
+              ? "bg-emerald-500/10 text-emerald-500"
+              : "bg-amber-500/10 text-amber-500"
+          )}>
+            {isUploadComplete ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : (
+              <Lock className="h-5 w-5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4 className={cn(
+              "text-sm font-black uppercase tracking-tight",
+              isUploadComplete ? "text-emerald-500" : "text-amber-500"
+            )}>
+              {isUploadComplete ? "Upload Phase Complete" : "Uploads Temporarily Locked"}
+            </h4>
+            <p className="text-xs text-white/50 mt-0.5">
+              {isUploadComplete
+                ? "Your files have been received. You can still view your uploaded assets below. Contact admin if you need to upload additional files."
+                : project?.uploadEligibility?.reason || "Awaiting quotation approval to unlock project storage."}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <div className={cn(
+              "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
+              isUploadComplete
+                ? "bg-emerald-500/10 text-emerald-400"
+                : "bg-amber-500/10 text-amber-400"
+            )}>
+              <Eye className="h-3.5 w-3.5" />
+              View Only
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Folder Grid - Always accessible for viewing */}
+      <FolderGrid
+        folders={folders}
+        isLocked={isLocked}
+        onFolderClick={handleFolderClick}
+        onFolderComplete={handleFolderComplete}
+        showViewModeHint={isLocked}
+      />
     </motion.div>
   );
 }
+

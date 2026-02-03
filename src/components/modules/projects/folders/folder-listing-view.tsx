@@ -6,9 +6,11 @@ import { useMutation, useQuery } from "convex/react";
 import { ArrowLeft, CheckCircle2, FolderTree, Loader2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
 import { Button } from "@/components/ui/button";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface FolderListingViewProps {
   projectId: string;
@@ -22,6 +24,7 @@ export function FolderListingView({
   isEmployee = false,
 }: FolderListingViewProps) {
   const router = useRouter();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
   const isStaff = isAdmin || isEmployee;
 
   // Queries
@@ -42,6 +45,25 @@ export function FolderListingView({
       projectId: projectId as Id<"projects">,
     },
   );
+
+  // Set breadcrumb override for project name
+  useEffect(() => {
+    const label = project?.eventName || project?.projectTypeName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
+    }
+
+    return () => {
+      removeOverride(projectId);
+    };
+  }, [
+    projectId,
+    project?.eventName,
+    project?.projectTypeName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   // Mutations
   const markAllComplete = useMutation(

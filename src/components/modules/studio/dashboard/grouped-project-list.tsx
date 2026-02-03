@@ -121,30 +121,30 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
   return (
     <Link href={`/projects/${project._id}`}>
       <motion.div
-        whileHover={{ y: -5 }}
+        whileHover={{ y: -3 }}
         className={cn(
-          "group relative h-full rounded-[2.5rem] p-8 transition-all duration-500 overflow-hidden flex flex-col",
+          "group relative h-full rounded-2xl p-5 transition-all duration-300 overflow-hidden flex flex-col",
           project.actionState === "awaiting_uploads"
             ? "bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/40"
             : "bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/30",
         )}
       >
         {/* Hover Highlight Effect */}
-        <div className="absolute top-0 right-0 w-48 h-48 bg-primary/5 blur-[80px] rounded-full translate-x-24 -translate-y-24 group-hover:bg-primary/10 transition-colors" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
-        <div className="relative z-10 space-y-6 flex-1 flex flex-col">
+        <div className="relative z-10 space-y-4 flex-1 flex flex-col">
           {/* Header */}
-          <div className="flex items-start justify-between">
-            <div className="space-y-1">
-              <h3 className="text-lg font-black uppercase tracking-tight text-white group-hover:text-primary transition-colors">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-0.5 min-w-0 flex-1">
+              <h3 className="text-base font-black uppercase tracking-tight text-white group-hover:text-primary transition-colors truncate">
                 {project.eventName || project.projectTypeName}
               </h3>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black text-white/20 uppercase tracking-[0.2em]">
+                <span className="text-[9px] font-black text-white/20 uppercase tracking-[0.15em]">
                   {project.code}
                 </span>
-                <div className="h-1 w-1 rounded-full bg-white/10" />
-                <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.2em]">
+                <div className="h-0.5 w-0.5 rounded-full bg-white/10" />
+                <span className="text-[9px] font-black text-primary/60 uppercase tracking-[0.15em] truncate">
                   {project.projectTypeName}
                 </span>
               </div>
@@ -153,28 +153,28 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
           </div>
 
           {/* Metadata */}
-          <div className="flex flex-wrap gap-4 pt-4 border-t border-white/5">
+          <div className="flex flex-wrap gap-3 pt-3 border-t border-white/5">
             {project.eventDate && (
-              <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">
-                <Calendar className="h-3.5 w-3.5 text-white/20" />
+              <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+                <Calendar className="h-3 w-3 text-white/20" />
                 {new Date(project.eventDate).toLocaleDateString()}
               </div>
             )}
-            <div className="flex items-center gap-2 text-[10px] font-bold text-white/40 uppercase tracking-widest">
-              <Layers className="h-3.5 w-3.5 text-white/20" />
+            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/40 uppercase tracking-widest">
+              <Layers className="h-3 w-3 text-white/20" />
               {project.phase}
             </div>
           </div>
 
-          <div className="flex-1" />
+          <div className="flex-1 min-h-2" />
 
           {/* Progress */}
-          <div className="space-y-3">
+          <div className="space-y-2">
             <div className="flex justify-between items-end">
-              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/20">
-                Production Progress
+              <span className="text-[8px] font-black uppercase tracking-[0.2em] text-white/20">
+                Progress
               </span>
-              <span className="text-[9px] font-black text-primary uppercase">
+              <span className="text-[8px] font-black text-primary uppercase">
                 {project.phase}
               </span>
             </div>
@@ -183,20 +183,20 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
 
           {/* Onboarding Action (Story 11C.4 & 11C.5) */}
           {project.actionState === "awaiting_uploads" ? (
-            <div className="pt-6">
+            <div className="pt-4">
               <Link href={`/projects/${project._id}/onboarding`}>
-                <Button className="w-full h-11 rounded-2xl bg-primary text-black font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 gap-2">
-                  <Rocket className="h-4 w-4" />
+                <Button className="w-full h-9 rounded-xl bg-primary text-black font-black uppercase tracking-widest text-[9px] hover:scale-[1.02] transition-all shadow-lg shadow-primary/20 gap-2">
+                  <Rocket className="h-3.5 w-3.5" />
                   Complete Onboarding
                 </Button>
               </Link>
             </div>
           ) : (
             (project.phase === "setup" || project.phase === "onboarding") && (
-              <div className="pt-6">
+              <div className="pt-4">
                 <Link href={`/projects/${project._id}/onboarding`}>
-                  <Button className="w-full h-11 rounded-2xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] hover:bg-white/10 transition-all gap-2">
-                    <Rocket className="h-4 w-4 opacity-40" />
+                  <Button className="w-full h-9 rounded-xl bg-white/5 border border-white/10 text-white font-black uppercase tracking-widest text-[9px] hover:bg-white/10 transition-all gap-2">
+                    <Rocket className="h-3.5 w-3.5 opacity-40" />
                     Resume Onboarding
                   </Button>
                 </Link>
@@ -205,14 +205,14 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
           )}
 
           {/* Footer */}
-          <div className="pt-6 border-t border-white/5 mt-auto flex items-center justify-between">
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest leading-none">
+          <div className="pt-4 border-t border-white/5 mt-auto flex items-center justify-between">
+            <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest leading-none">
               {project.phase === "setup" ? "Approved" : "Started"}{" "}
               {new Date(project.createdAt).toLocaleDateString()}
             </span>
-            <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-primary/40 group-hover:text-primary transition-all">
-              Details{" "}
-              <ArrowRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-1" />
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/40 group-hover:text-primary transition-all">
+              View{" "}
+              <ArrowRight className="h-3 w-3 transition-transform group-hover:translate-x-1" />
             </div>
           </div>
         </div>

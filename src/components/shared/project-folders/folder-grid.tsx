@@ -23,6 +23,7 @@ interface FolderGridProps {
   showStats?: boolean;
   isLocked?: boolean;
   onFolderComplete?: (folder: Folder) => void;
+  showViewModeHint?: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export function FolderGrid({
   showStats = true,
   isLocked = false,
   onFolderComplete,
+  showViewModeHint = false,
 }: FolderGridProps) {
   // Current navigation path (e.g., "" for root, "01_FOOTAGE" for inside that folder)
   const [currentPath, setCurrentPath] = useState<string>("");
@@ -215,6 +217,7 @@ export function FolderGrid({
               assetCount={folder.assetCount || 0}
               totalSize={folder.totalSize || 0}
               isLocked={isLocked}
+              isViewOnly={showViewModeHint}
               onClick={() => handleFolderClick(folder)}
               onComplete={() => onFolderComplete?.(folder)}
             />

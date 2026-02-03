@@ -35,11 +35,19 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   });
 
   useEffect(() => {
-    if (project?.endClientName) {
-      setOverride(projectId, project.endClientName);
+    const label = project?.endClientName || project?.eventName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
     }
     return () => removeOverride(projectId);
-  }, [projectId, project?.endClientName, setOverride, removeOverride]);
+  }, [
+    projectId,
+    project?.endClientName,
+    project?.eventName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   const fields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
