@@ -1,5 +1,5 @@
 import { v } from "convex/values";
-import { adminQuery, authenticatedQuery } from "../../lib/customFunctions";
+import { adminQuery, authenticatedQuery, authenticatedWithProfileQuery } from "../../lib/customFunctions";
 
 /**
  * List all folder templates with project type names.
@@ -84,8 +84,9 @@ export const listAllByProjectType = adminQuery({
 
 /**
  * Get all folder templates (for selection in Quotation Builder).
+ * Now accessible to authenticated users for the wizard flow.
  */
-export const getFolderTemplates = adminQuery({
+export const getFolderTemplates = authenticatedWithProfileQuery({
   args: {
     activeOnly: v.optional(v.boolean()),
   },
@@ -101,4 +102,3 @@ export const getFolderTemplates = adminQuery({
     return templates;
   },
 });
-

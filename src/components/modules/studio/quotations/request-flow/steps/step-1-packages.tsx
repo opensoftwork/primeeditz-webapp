@@ -15,6 +15,15 @@ export function Step1Packages() {
       exit={{ opacity: 0, y: -20 }}
       className="pb-20"
     >
+      <div className="mb-8 space-y-1">
+        <h2 className="text-xl font-black tracking-tight uppercase text-white">
+          Service Packages
+        </h2>
+        <p className="text-sm text-white/40 font-medium">
+          Select one or more packages for this quote
+        </p>
+      </div>
+
       <PackageSelector
         selectedIds={selectedPackageIds}
         onSelectionChange={setSelectedPackageIds}

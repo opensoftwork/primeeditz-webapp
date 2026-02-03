@@ -41,6 +41,17 @@ export const list = adminQuery({
 
 /**
  * Get a specific service package by ID.
+ * Exposing this to authenticated profiles for the detail view.
+ */
+export const getById = authenticatedWithProfileQuery({
+  args: { id: v.id("servicePackages") },
+  handler: async (ctx, { id }) => {
+    return await ctx.db.get(id);
+  },
+});
+
+/**
+ * Get a specific service package by ID (Admin).
  */
 export const get = adminQuery({
   args: { id: v.id("servicePackages") },
