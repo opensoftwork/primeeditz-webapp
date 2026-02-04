@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { DownloadQuotation } from "../../preview";
+import { Project } from "../../types";
 
 interface DetailHeaderProps {
   quotation: {
@@ -28,12 +29,7 @@ interface DetailHeaderProps {
     [key: string]: unknown;
   };
   sections: { _id: string; name: string; color?: string }[];
-  projects?: {
-    _id: string;
-    code: string;
-    eventName?: string;
-    projectTypeName?: string;
-  }[];
+  projects?: Project[];
   status: {
     label: string;
     icon: React.ComponentType<{ className?: string }>;

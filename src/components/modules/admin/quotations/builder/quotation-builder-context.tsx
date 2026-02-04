@@ -104,6 +104,7 @@ interface QuotationBuilderContextValue {
   formData: QuotationFormData;
   isDirty: boolean;
   isLoading: boolean;
+  isDataReady: boolean;
   error: string | null;
   submitTrigger: (() => void) | null;
 
@@ -160,11 +161,13 @@ export function useQuotationBuilder() {
 interface QuotationBuilderProviderProps {
   children: React.ReactNode;
   initialQuotationId?: string;
+  initialStep?: 1 | 2 | 3 | 4;
 }
 
 export function QuotationBuilderProvider({
   children,
   initialQuotationId,
+  initialStep = 1,
 }: QuotationBuilderProviderProps) {
   const router = useRouter();
 
@@ -172,7 +175,7 @@ export function QuotationBuilderProvider({
   const [quotationId, setQuotationId] = useState<string | null>(
     initialQuotationId ?? null,
   );
-  const [currentStep, setCurrentStep] = useState<QuotationStepId>(1);
+  const [currentStep, setCurrentStep] = useState<QuotationStepId>(initialStep);
   const [formData, setFormDataState] =
     useState<QuotationFormData>(INITIAL_FORM_DATA);
   const [isDirty, setIsDirty] = useState(false);
@@ -284,6 +287,11 @@ export function QuotationBuilderProvider({
   const taxAmount =
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
+
+  // Data loading state - ready when:
+  // 1. Not editing (no initialQuotationId), OR
+  // 2. Editing and existingQuotation has loaded
+  const isDataReady = !initialQuotationId || existingQuotation !== undefined;
 
   // Navigation
   const goToStep = useCallback((step: number) => {
@@ -477,7 +485,7 @@ export function QuotationBuilderProvider({
       const payload = {
         studioId: step1.studioId as Id<"profiles">,
         projectIds: projectIds as Id<"projects">[] | undefined,
-        selectedPackageIds: [] as Id<"servicePackages">[],
+        selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
         lineItems: lineItemsPayload,
         terms: step4.terms,
         taxRate: step5.taxRate / 100, // API expects decimal
@@ -496,7 +504,7 @@ export function QuotationBuilderProvider({
           discountAmount: step5.discountAmount,
           studioId: step1.studioId as Id<"profiles">,
           projectIds: projectIds as Id<"projects">[] | undefined,
-          selectedPackageIds: [] as Id<"servicePackages">[],
+          selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
           endClientName,
           validUntil: step1.validUntil?.getTime(),
         });
@@ -620,7 +628,7 @@ export function QuotationBuilderProvider({
       const payload = {
         studioId: step1.studioId as Id<"profiles">,
         projectIds: projectIds as Id<"projects">[] | undefined,
-        selectedPackageIds: [] as Id<"servicePackages">[],
+        selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
         lineItems: lineItemsPayload as any,
         terms: step4.terms,
         taxRate: step5.taxRate / 100,
@@ -641,7 +649,7 @@ export function QuotationBuilderProvider({
           discountAmount: step5.discountAmount,
           studioId: step1.studioId as Id<"profiles">,
           projectIds: projectIds as Id<"projects">[] | undefined,
-          selectedPackageIds: [] as Id<"servicePackages">[],
+          selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
           endClientName,
           validUntil: step1.validUntil?.getTime(),
         });
@@ -691,6 +699,7 @@ export function QuotationBuilderProvider({
         formData,
         isDirty,
         isLoading,
+        isDataReady,
         error,
         submitTrigger,
         studios,

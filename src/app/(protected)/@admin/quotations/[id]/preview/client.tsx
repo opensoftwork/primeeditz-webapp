@@ -87,7 +87,7 @@ export function QuotationPreviewClient({
       }}
       sections={sections}
       projects={projects}
-      onBack={() => router.back()}
+      onBack={() => router.push(`/quotations/${quotationId}/builder?step=4`)}
     />
   );
 }

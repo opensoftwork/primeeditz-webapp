@@ -238,6 +238,7 @@ export const getQuotationWithSections = adminQuery({
           _id: project._id,
           code: project.code,
           endClientName: project.endClientName,
+          projectTypeId: project.projectTypeId,
           projectTypeName: projectType?.name || "Unknown",
         };
       }),
@@ -570,6 +571,7 @@ export const getMyQuotationDetail = studioQuery({
           _id: project._id,
           code: project.code,
           endClientName: project.endClientName,
+          projectTypeId: project.projectTypeId,
           projectTypeName: projectType?.name || "Unknown",
         };
       }),

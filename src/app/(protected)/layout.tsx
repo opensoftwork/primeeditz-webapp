@@ -51,8 +51,10 @@ export default function DashboardLayout({
     pathname?.includes("/projects/new") ||
     pathname?.includes("/quotations/new") ||
     pathname?.includes("/quotations/request") ||
+    (pathname?.includes("/quotations/") && pathname?.includes("/builder")) ||
     pathname?.includes("/settings/service-packages/new") ||
-    pathname?.includes("/settings/service-packages/") && pathname?.includes("/edit") ||
+    (pathname?.includes("/settings/service-packages/") &&
+      pathname?.includes("/edit")) ||
     pathname?.includes("/settings/project-types/new") ||
     pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
@@ -139,14 +141,24 @@ export default function DashboardLayout({
   };
 
   if (isWizardPage) {
-    return <div className="h-screen w-screen overflow-hidden">{renderRoleContent()}</div>;
+    return (
+      <div className="h-screen w-screen overflow-hidden">
+        {renderRoleContent()}
+      </div>
+    );
   }
 
-  const showGlobalHeader = !isWizardPage && !pathname?.includes("/settings/service-packages/") || (pathname?.includes("/settings/service-packages/") && !pathname?.includes("/new") && !pathname?.includes("/edit"));
-  
+  const showGlobalHeader =
+    (!isWizardPage && !pathname?.includes("/settings/service-packages/")) ||
+    (pathname?.includes("/settings/service-packages/") &&
+      !pathname?.includes("/new") &&
+      !pathname?.includes("/edit"));
+
   // Simplification: We want the sidebar for everyone except wizard pages
   // We want the global header for everyone except wizard pages and editors
-  const isEditorPage = pathname?.includes("/settings/service-packages/") && pathname?.includes("/edit");
+  const isEditorPage =
+    pathname?.includes("/settings/service-packages/") &&
+    pathname?.includes("/edit");
 
   return (
     <SidebarProvider>

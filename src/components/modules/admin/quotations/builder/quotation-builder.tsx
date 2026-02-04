@@ -41,9 +41,18 @@ import {
 // Main Export (with Provider wrapper)
 // ============================================================================
 
-export function QuotationBuilder({ quotationId }: { quotationId?: string }) {
+export function QuotationBuilder({
+  quotationId,
+  initialStep = 1,
+}: {
+  quotationId?: string;
+  initialStep?: 1 | 2 | 3 | 4;
+}) {
   return (
-    <QuotationBuilderProvider initialQuotationId={quotationId}>
+    <QuotationBuilderProvider
+      initialQuotationId={quotationId}
+      initialStep={initialStep}
+    >
       <QuotationBuilderContent quotationId={quotationId} />
     </QuotationBuilderProvider>
   );
@@ -61,6 +70,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     saveQuotation,
     submitTrigger,
     isLoading,
+    isDataReady,
     formData,
     subtotal,
     taxAmount,
@@ -102,6 +112,20 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
         return false;
     }
   }, [currentStep, formData]);
+
+  // Show loading state while fetching existing quotation data
+  if (!isDataReady) {
+    return (
+      <div className="dark flex flex-col h-screen bg-zinc-950 overflow-hidden text-white items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          <p className="text-sm font-medium text-white/50">
+            Loading quotation data...
+          </p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="dark flex flex-col h-screen bg-zinc-950 overflow-hidden text-white selection:bg-primary/20">

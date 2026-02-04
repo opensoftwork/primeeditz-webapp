@@ -15,6 +15,7 @@ import {
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Project } from "../types";
 import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -174,19 +175,19 @@ export function QuotationDetail({
   }
 
   const { quotation, sections, projects: rawProjects = [] } = data;
-
-  const projects = rawProjects.map((p: any) => ({
+  const projects: Project[] = rawProjects.map((p) => ({
     ...p,
     eventName: p.endClientName || p.code,
+    projectTypeId: p.projectTypeId,
   }));
   const status = statusConfig[quotation.status] || statusConfig.draft;
 
   // Calculate totals
-  const subtotal = quotation.lineItems.reduce((acc: number, item: any) => {
+  const subtotal = quotation.lineItems.reduce((acc: number, item) => {
     const itemTotal = item.rate * item.quantity;
     const subItemsTotal =
       item.subItems?.reduce(
-        (s: number, sub: any) => s + sub.rate * sub.quantity,
+        (s: number, sub) => s + sub.rate * sub.quantity,
         0,
       ) ?? 0;
     return acc + itemTotal + subItemsTotal;
@@ -199,20 +200,18 @@ export function QuotationDetail({
 
   // Group line items by project, then by section (new project-based grouping)
   const groupedByProject = projects
-    .map((project: any) => {
+    .map((project) => {
       const projectItems = quotation.lineItems.filter(
-        (item: any) => item.projectId === project._id,
+        (item) => item.projectId === project._id,
       );
 
       // 1. Group by existing sections
       const sectionGroups = sections
-        .map((section: any) => ({
+        .map((section) => ({
           section,
-          items: projectItems.filter(
-            (item: any) => item.sectionId === section._id,
-          ),
+          items: projectItems.filter((item) => item.sectionId === section._id),
         }))
-        .filter((g: any) => g.items.length > 0);
+        .filter((g) => g.items.length > 0);
 
       // 2. Catch items without sections (or invalid sections)
       const unsectionedItems = projectItems.filter(
@@ -238,7 +237,7 @@ export function QuotationDetail({
         sectionGroups,
       };
     })
-    .filter((pg: any) => pg.sectionGroups.length > 0);
+    .filter((pg) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
   const groupedBySection = sections
@@ -312,7 +311,7 @@ export function QuotationDetail({
         </div>
 
         <div className="space-y-6">
-          <ReviewActions quotation={quotation} />
+          {/* <ReviewActions quotation={quotation} /> */}
           <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}

@@ -307,9 +307,9 @@ export const createQuotation = adminMutation({
     const code = await generateQuotationCode(ctx);
     const taxRate = args.taxRate ?? 0.18;
 
-    // Aggregate line items from packages if provided
+    // Aggregate line items from packages if provided AND no line items were explicitly passed
     let combinedLineItems = [...(args.lineItems || [])];
-    if (args.selectedPackageIds.length > 0) {
+    if (args.selectedPackageIds.length > 0 && combinedLineItems.length === 0) {
       const packageLineItems = await aggregateLineItemsFromPackages(
         ctx,
         args.selectedPackageIds,

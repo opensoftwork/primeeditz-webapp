@@ -83,6 +83,23 @@ export function Step2PackageSelection() {
 
   const [focusedPackageId, setFocusedPackageId] = useState<string | null>(null);
 
+  // Auto-focus first selected package on mount or when data loads
+  useEffect(() => {
+    if (
+      !focusedPackageId &&
+      selectedPackageIds.length > 0 &&
+      packages.length > 0
+    ) {
+      // Find the first selected package that exists in the current package list
+      const firstSelected = packages.find((p) =>
+        selectedPackageIds.includes(p._id),
+      );
+      if (firstSelected) {
+        setFocusedPackageId(firstSelected._id);
+      }
+    }
+  }, [packages, selectedPackageIds, focusedPackageId]);
+
   const focusedPackage = packages.find((p) => p._id === focusedPackageId);
   const isFocusedSelected = focusedPackageId
     ? selectedPackageIds.includes(focusedPackageId)
