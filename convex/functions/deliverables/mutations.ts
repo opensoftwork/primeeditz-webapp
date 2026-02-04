@@ -233,3 +233,97 @@ export const sendToStudio = mutation({
     return { success: true, studioId: project.studioId };
   },
 });
+
+/**
+ * Client approves all deliverables.
+ * Transitions project to delivery phase.
+ */
+export const clientApproveDeliverables = mutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // Verify studio ownership
+    if (profile.role !== "admin" && project.studioId !== profile._id) {
+      throw new Error("Unauthorized to approve these deliverables");
+    }
+
+    // Transition to delivery phase
+    await ctx.db.patch(args.projectId, {
+      phase: "delivery",
+      actionState: "review_approved",
+      awaitingActorRole: "admin",
+      reviewApprovedAt: now(),
+      updatedAt: now(),
+    });
+
+    // Create status history entry
+    await ctx.db.insert("statusHistory", {
+      projectId: args.projectId,
+      previousPhase: "review",
+      newPhase: "delivery",
+      previousActionState: "awaiting_review",
+      newActionState: "review_approved",
+      changedBy: profile._id,
+      changedAt: now(),
+      notes: "Client approved all deliverables",
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Client requests revision on deliverables.
+ * Transitions project back to production.
+ */
+export const clientRequestRevision = mutation({
+  args: {
+    projectId: v.id("projects"),
+    revisionNotes: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // Verify studio ownership
+    if (profile.role !== "admin" && project.studioId !== profile._id) {
+      throw new Error("Unauthorized to request revisions");
+    }
+
+    const currentRevisions = project.revisionCount || 0;
+
+    // Transition back to production
+    await ctx.db.patch(args.projectId, {
+      actionState: "revisions_requested",
+      awaitingActorRole: "employee",
+      awaitingActorId: project.assignedEmployeeId,
+      revisionCount: currentRevisions + 1,
+      updatedAt: now(),
+    });
+
+    // Create handoff log
+    await ctx.db.insert("handoffLogs", {
+      projectId: args.projectId,
+      fromProfileId: profile._id,
+      toProfileId: project.assignedEmployeeId,
+      fromActionState: "awaiting_review",
+      toActionState: "revisions_requested",
+      notes: args.revisionNotes,
+      createdAt: now(),
+    });
+
+    return {
+      success: true,
+      revisionCount: currentRevisions + 1,
+      isOverLimit: currentRevisions + 1 >= 3,
+    };
+  },
+});

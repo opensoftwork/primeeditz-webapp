@@ -12,20 +12,25 @@ export function DetailSection({
   title,
   icon,
   children,
+  action,
 }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
+  action?: React.ReactNode;
 }) {
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary">
-          {icon}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/20 text-primary">
+            {icon}
+          </div>
+          <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/60">
+            {title}
+          </h3>
         </div>
-        <h3 className="text-[11px] font-black uppercase tracking-[0.4em] text-white/60">
-          {title}
-        </h3>
+        {action}
       </div>
       <div className="p-10 md:p-14 rounded-[2.5rem] bg-white/3 border border-white/5 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.005] bg-size-[40px_40px]" />

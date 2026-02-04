@@ -3,9 +3,9 @@
 ## Epic Overview
 
 - **ID**: 06-deliverables-qc
-- **Status**: backlog
+- **Status**: in_progress
 - **Priority**: high
-- **Estimated Points**: 21
+- **Estimated Points**: 34 (revised from 21)
 - **Depends On**: Epic 5A (Project Status Workflow System)
 
 ## Business Value
@@ -23,6 +23,8 @@ Editors can submit deliverables, QC can review and approve/reject, and clients c
 - Client review page (view deliverables)
 - Client approve/request revision flow
 - Revision tracking with limits
+- **NEW**: Real-time UI reactions for role-based visibility
+- **NEW**: Component architecture refactoring (list/detail/create/edit pattern)
 
 **Standalone:** ✅ Complete deliverables and QC workflow.
 
@@ -50,9 +52,22 @@ This epic uses the new Phase + ActionState model:
 
 ---
 
+## Implementation Status
+
+| Story                        | Status     | Notes                                                   |
+| ---------------------------- | ---------- | ------------------------------------------------------- |
+| 6.1 Upload Deliverables      | ✅ Done    | `uploadDeliverable` mutation with auto-versioning       |
+| 6.2 QC Review & Approval     | ✅ Done    | `approveDeliverable`, `requestRevision`, `sendToStudio` |
+| 6.3 Client View Deliverables | 🔄 Partial | Query exists, UI needs refinement                       |
+| 6.4 Client Approve/Revise    | 📋 Backlog | Waiting for client portal work                          |
+| 6.5 UI Reactions (NEW)       | 📋 Backlog | Real-time feedback on approve/revise                    |
+| 6.6 Component Refactor (NEW) | 📋 Backlog | Restructure to list/detail/create/edit pattern          |
+
+---
+
 ## Stories
 
-### Story 6.1: Upload Deliverables (Admin/Employee)
+### Story 6.1: Upload Deliverables (Admin/Employee) ✅ DONE
 
 **As an** Admin or Employee,
 **I want** to upload final deliverables for a project,
@@ -68,14 +83,15 @@ This epic uses the new Phase + ActionState model:
 **And** if this is the first deliverable upload, project `actionState` must transition to `work_in_progress` (if not already).
 **And** if a previous version was rejected, the rejection notes must be displayed clearly.
 
-**Status Integration:**
+**Implementation Notes:**
 
-- Uses `canUploadDeliverable(projectId, role)` from Epic 5A
-- Triggers `transitionProject()` when applicable
+- ✅ `convex/functions/deliverables/mutations.ts::uploadDeliverable`
+- ✅ Auto-versioning implemented (queries existing, increments)
+- ✅ Initial status set to `pending_qc`
 
 ---
 
-### Story 6.2: QC Review & Approval
+### Story 6.2: QC Review & Approval ✅ DONE
 
 **As an** Admin (QC role),
 **I want** to review and approve/reject deliverables,
@@ -87,16 +103,23 @@ This epic uses the new Phase + ActionState model:
 **And** a deliverable with status `pending_qc`
 **When** I click "Review"
 **Then** I must be able to preview the deliverable.
-**And** I can "Approve" (deliverable status → `approved`, project → `awaiting_review`) or "Reject" with notes (deliverable status → `revision_needed`, project → `work_in_progress`).
+**And** I can "Approve" (deliverable status → `approved`, project → `awaiting_review`) or "Reject" with notes (deliverable status → `revision_requested`, project → `work_in_progress`).
 **And** approved deliverables become visible to the client.
 **And** the `awaitingActorRole` must update accordingly:
 
-- Approve → `client`
+- Approve → `studio`
 - Reject → `employee`
+
+**Implementation Notes:**
+
+- ✅ `approveDeliverable` mutation - sets status to `approved`, transitions project
+- ✅ `requestRevision` mutation - sets status to `revision_requested`, records handoff log
+- ✅ `sendToStudio` mutation - transitions project to `awaiting_review` with actor `studio`
+- ✅ Handoff logging implemented for audit trail
 
 ---
 
-### Story 6.3: Client View Approved Deliverables
+### Story 6.3: Client View Approved Deliverables 🔄 PARTIAL
 
 **As a** Client,
 **I want** to view deliverables that have been approved by QC,
@@ -108,13 +131,18 @@ This epic uses the new Phase + ActionState model:
 **And** approved deliverables exist
 **When** I navigate to the Deliverables tab
 **Then** I must only see deliverables with status `approved` (QC Gate).
-**And** `pending_qc` or `revision_needed` deliverables must NOT be visible.
+**And** `pending_qc` or `revision_requested` deliverables must NOT be visible.
 **And** I can preview each deliverable.
 **And** an info banner must show: "Review your deliverables and approve or request changes"
 
+**Implementation Notes:**
+
+- ✅ Backend query filters by status
+- 🔄 UI components need Studio portal integration
+
 ---
 
-### Story 6.4: Client Approve or Request Revision
+### Story 6.4: Client Approve or Request Revision 📋 BACKLOG
 
 **As a** Client,
 **I want** to approve deliverables or request revisions,
@@ -139,19 +167,139 @@ This epic uses the new Phase + ActionState model:
 
 ---
 
+### Story 6.5: UI Reactions for Approve/Revise Actions 📋 NEW
+
+**As a** User (Studio, Employee, or Admin),
+**I want** to see real-time feedback when deliverables are approved or revised,
+**So that** I understand the current state without refreshing.
+
+**Acceptance Criteria:**
+
+#### Admin Approves Deliverable:
+
+**Given** Admin clicks "Approve" on a deliverable
+**When** the mutation succeeds
+**Then** Admin sees success toast: "Deliverable approved successfully!"
+**And** Studio portal (if online) sees the deliverable appear in their view (real-time via Convex subscription)
+**And** Employee portal (if online) sees success banner: "Your deliverable has been approved! 🎉"
+
+#### Admin Revises Deliverable:
+
+**Given** Admin clicks "Revise" on a deliverable with notes
+**When** the mutation succeeds
+**Then** Admin sees success toast: "Revision requested! Employee will be notified."
+**And** The current version is archived (stays as v1)
+**And** Employee portal (if online) sees warning banner: "Revision requested on [Deliverable Name]. Please review the feedback and upload a new version."
+**And** The revision notes are displayed prominently on employee's view
+
+#### Real-time Updates:
+
+**Given** Any role is viewing a deliverable detail page
+**When** Another user changes the deliverable status
+**Then** The UI updates automatically without manual refresh (Convex subscription)
+
+**Implementation Notes:**
+
+- Leverage Convex real-time subscriptions (already built-in)
+- Add toast notifications on mutation success
+- Add status banners in Studio and Employee portals
+- Deliverable version history already preserves old versions
+
+---
+
+### Story 6.6: Component Architecture Refactor 📋 NEW
+
+**As a** Developer,
+**I want** the Deliverables components to follow the `list/detail/create/edit` pattern,
+**So that** the codebase is maintainable and consistent.
+
+**Acceptance Criteria:**
+
+**Given** the existing monolithic `individual-delivrable.tsx` (432 lines)
+**When** I refactor following the established pattern
+**Then** the folder structure must be:
+
+```
+src/components/modules/admin/projects/project-detail/deliverables/
+├── list/
+│   ├── index.ts                    # Barrel export
+│   ├── deliverables-list.tsx       # Main list component
+│   ├── deliverable-card.tsx        # Individual card in list
+│   └── deliverables-empty.tsx      # Empty state
+├── detail/
+│   ├── index.ts                    # Barrel export
+│   ├── deliverable-detail-view.tsx # Main container
+│   ├── deliverable-header.tsx      # Back button, title, version info
+│   ├── deliverable-preview.tsx     # File preview section
+│   ├── deliverable-actions.tsx     # Approve/Revise buttons
+│   ├── deliverable-meta-card.tsx   # Status, submitter, QC info
+│   ├── revision-dialog.tsx         # Revision request modal
+│   └── version-history.tsx         # Version history panel
+├── create/                         # Future: Upload wizard
+│   └── (placeholder)
+├── edit/                           # Future: Edit metadata
+│   └── (placeholder)
+└── index.ts                        # Root barrel export
+```
+
+**Pattern Reference:** `src/components/modules/admin/project-types/detail/`
+
+**Sub-component Guidelines:**
+
+- Each sub-component should be < 150 lines
+- Props should be explicit (no drilling context)
+- Use barrel exports for clean imports
+- Shared types in a `types.ts` file if needed
+
+**Files to Refactor:**
+
+1. `individual-delivrable.tsx` → Split into `detail/` components
+2. `deliverables-listing.tsx` → Move to `list/` folder
+3. `project-deliverables.tsx` → Orchestrator that imports from list/detail
+
+---
+
 ## Dependencies
 
-| Dependency                       | Status   | Notes                  |
-| -------------------------------- | -------- | ---------------------- |
-| Epic 5A: Project Status Workflow | Required | Status transitions     |
-| Epic 5: Asset Upload             | Required | Upload patterns reused |
-| MinIO Configuration              | ✅ Done  | S3-compatible storage  |
+| Dependency                       | Status  | Notes                  |
+| -------------------------------- | ------- | ---------------------- |
+| Epic 5A: Project Status Workflow | ✅ Done | Status transitions     |
+| Epic 5: Asset Upload             | ✅ Done | Upload patterns reused |
+| MinIO Configuration              | ✅ Done | S3-compatible storage  |
 
 ---
 
 ## Technical Notes
 
-- Reuse upload patterns from Epic 5
-- All status transitions go through `transitionProject()` utility
-- QC Gate implemented via query filter on `deliverable.status`
-- Revision notes stored in `statusHistory` with notes field
+### Backend (Completed)
+
+- All mutations in `convex/functions/deliverables/mutations.ts`
+- Versioning: Auto-increments on `uploadDeliverable`
+- Handoff logging: Records in `handoffLogs` table
+- Status history: Records in `statusHistory` table
+- Real-time: Convex subscriptions handle automatic UI updates
+
+### Frontend (To Do)
+
+- Refactor monolithic components following list/detail/create/edit
+- Add toast notifications using `sonner`
+- Add status banners for role-specific feedback
+- Ensure all queries use Convex `useQuery` for real-time updates
+
+### Component Pattern (New Standard)
+
+```
+modules/{domain}/{entity}/
+├── list/       # Listing view components
+├── detail/     # Detail view components
+├── create/     # Creation form components
+├── edit/       # Edit form components
+└── index.ts    # Barrel exports
+```
+
+This pattern:
+
+- Improves maintainability (smaller files)
+- Enables easy handoff to other developers
+- Provides consistent structure across the app
+- Supports parallel development of list vs detail views

@@ -23,6 +23,8 @@ import { ProjectHeader } from "./header";
 import { ReferenceMaterials } from "./reference-materials";
 import { DetailSidebar } from "./sidebar";
 import { ProjectSpecifications } from "./specifications";
+import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
+import { DeliverablesSection } from "./deliverables-section";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -88,6 +90,10 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
       animate={{ opacity: 1 }}
       className="w-full space-y-12 p-6 md:p-12 relative"
     >
+      <DeliverableStatusBanner
+        projectId={projectId as Id<"projects">}
+        role="studio"
+      />
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -111,6 +117,14 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
         >
           <ProjectSpecifications project={project} fields={fields} />
           <ReferenceMaterials files={project.referenceFiles} />
+
+          {project.phase !== "setup" && (
+            <DeliverablesSection 
+              projectId={projectId} 
+              actionState={project.actionState}
+              revisionCount={project.revisionCount}
+            />
+          )}
 
           {project.phase !== "setup" && <AssetsSection projectId={projectId} />}
         </motion.div>

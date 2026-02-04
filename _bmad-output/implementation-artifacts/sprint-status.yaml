@@ -159,14 +159,14 @@ development_status:
   # ============================================================================
   # EPIC 6: Deliverables & QC Workflow
   # ============================================================================
-  # Updated: 2026-02-02 - Enhanced scope with file preview, QC actions, versioning
-  epic-6: in-progress
-  6-1-upload-deliverables-admin-employee: in-progress # Core done, multi-upload pending
-  6-2-enhanced-file-preview: ready-for-dev # P0 - PDF/Video/Image inline viewers
-  6-3-qc-review-approval-flow: ready-for-dev # P0 - Approve/Reject/Revise actions
-  6-4-version-history-comparison: backlog # P1 - Version timeline & comparison
-  6-5-send-to-studio-flow: backlog # P1 - Notification flow to studio
-  6-6-studio-deliverable-review: backlog # P2 - Studio accepts/rejects deliverables
+  # Updated: 2026-02-04 - Split into technical actions and UI reactions
+  epic-6: done
+  6-1-upload-deliverables: done
+  6-2-qc-review-approval: done
+  6-3-client-view-deliverables: done
+  6-4-client-approve-revise: done
+  6-5-ui-reactions: done
+  6-6-component-architecture-refactor: done
   epic-6-retrospective: optional
 
   # ============================================================================

@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FinalizeWorkDrawer } from "./finalize-work-drawer";
+import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { SquadMemberCard } from "./squad-member-card";
 
 interface EmployeeProjectDetailProps {
@@ -139,7 +140,12 @@ export default function EmployeeProjectDetail({
         </div>
       </div>
 
-      <div className="max-w-[1700px] mx-auto space-y-12">
+      <div className="max-w-[1700px] mx-auto space-y-8">
+        <DeliverableStatusBanner
+          projectId={projectId as Id<"projects">}
+          role="employee"
+        />
+
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
           {/* Main Production Feed */}
           <div className="lg:col-span-8 space-y-12">

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
 import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
+import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
 import { ProjectHeader } from "./project-header";
@@ -159,7 +160,12 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         <PhaseProgress currentPhase={project.phase} />
       </div>
 
-      <div className="max-w-[1600px] mx-auto">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <DeliverableStatusBanner
+          projectId={projectId as Id<"projects">}
+          role="admin"
+        />
+
         <AdminActionBanner
           project={project}
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}

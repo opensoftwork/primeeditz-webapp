@@ -335,6 +335,7 @@ export default defineSchema({
     deletedAt: v.optional(v.number()),
     deletedBy: v.optional(v.id("profiles")),
     // Timestamp (uses _creationTime for created)
+    revisionCount: v.optional(v.number()), // NEW: Track client revisions
     updatedAt: v.number(),
   })
     .index("by_studioId", ["studioId"])

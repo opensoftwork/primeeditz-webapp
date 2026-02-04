@@ -1,5 +1,5 @@
-import DeliverableDetailPage from "@/components/modules/admin/projects/project-detail/individual-delivrable";
+import { DeliverableDetailView } from "@/components/modules/admin/projects/project-detail/deliverables/detail";
 
 export default function DeliverableDetail() {
-  return <DeliverableDetailPage />;
+  return <DeliverableDetailView />;
 }

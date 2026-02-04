@@ -90,3 +90,61 @@ export const getDeliverableVersions = query({
     }));
   },
 });
+
+/**
+ * Get recent status changes for deliverables (Approved or Revision Requested).
+ * Used for in-app status banners.
+ */
+export const getRecentStatusChanges = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    // Get deliverables changed in last 24 hours
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+
+    const deliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .filter((q) =>
+        q.and(
+          q.gte(q.field("_creationTime"), oneDayAgo),
+          q.or(
+            q.eq(q.field("status"), "approved"),
+            q.eq(q.field("status"), "revision_requested"),
+          ),
+        ),
+      )
+      .order("desc")
+      .take(5);
+
+    return deliverables;
+  },
+});
+
+/**
+ * Get deliverables for client/studio view.
+ * ENFORCES QC GATE: Only approved deliverables are visible.
+ */
+export const getClientDeliverables = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) throw new Error("Unauthenticated");
+
+    // Fetch deliverables for this project
+    const deliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("status"), "approved"))
+      .order("desc") // Newest first
+      .collect();
+
+    return deliverables;
+  },
+});
