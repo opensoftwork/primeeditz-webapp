@@ -6,6 +6,8 @@ import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface Asset {
   _id: string;
@@ -33,12 +35,15 @@ export function FolderAssetList({
 
   if (isLoading) {
     return (
-      <div className="animate-pulse space-y-3">
-        {[1, 2, 3].map((i) => (
-          <Card key={i}>
-            <CardContent className="p-4 h-16 bg-white/3" />
-          </Card>
-        ))}
+      <div className="space-y-4">
+        <h2 className="text-lg font-black uppercase tracking-tight text-white/20">
+          Loading Files...
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />
+          ))}
+        </div>
       </div>
     );
   }
@@ -72,7 +77,7 @@ export function FolderAssetList({
         Uploaded Files ({assets.length})
       </h2>
 
-      <div className="grid gap-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {assets.map((asset) => {
           const isImage = asset.mimeType.startsWith("image/");
           const hasSignedUrl = isImage && signedUrls[asset.minioKey];
@@ -80,35 +85,41 @@ export function FolderAssetList({
           return (
             <Card
               key={asset._id}
-              className="hover:bg-white/5 transition-colors"
+              className={cn(
+                "transition-all border-white/5 bg-white/2 group/asset",
+                hasSignedUrl 
+                  ? "hover:bg-white/5 cursor-pointer hover:border-primary/20 hover:scale-[1.02] active:scale-[0.98]" 
+                  : "opacity-80"
+              )}
+              onClick={hasSignedUrl ? () => openImageViewer(asset._id) : undefined}
             >
-              <CardContent className="p-4 flex items-center gap-4">
-                <div className="p-3 rounded-xl bg-primary/10">
-                  <FileImage className="h-5 w-5 text-primary" />
+              <CardContent className="p-3 flex items-center gap-3">
+                <div className={cn(
+                  "p-2 rounded-lg shrink-0 transition-colors",
+                  hasSignedUrl ? "bg-primary/10 group-hover/asset:bg-primary/20" : "bg-white/5"
+                )}>
+                  <FileImage className={cn(
+                    "h-4 w-4",
+                    hasSignedUrl ? "text-primary" : "text-white/20"
+                  )} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-white truncate">
+                  <p className="text-sm font-black text-white truncate tracking-tight">
                     {asset.filename}
                   </p>
-                  <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest flex items-center gap-2">
+                  <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.15em] flex items-center gap-2 mt-0.5">
                     {formatBytes(asset.sizeBytes)} • {asset.mimeType}
-                    {asset.uploaderName && (
-                      <span className="px-1.5 py-0.5 rounded-md bg-white/5 text-white/30 border border-white/5">
-                        Uploaded by {asset.uploaderName} ({asset.uploaderRole})
-                      </span>
-                    )}
                   </p>
+                  {asset.uploaderName && (
+                    <p className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                      {asset.uploaderName} ({asset.uploaderRole})
+                    </p>
+                  )}
                 </div>
                 {hasSignedUrl && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="rounded-full"
-                    onClick={() => openImageViewer(asset._id)}
-                  >
-                    <Eye className="h-4 w-4 mr-1" />
-                    View
-                  </Button>
+                  <div className="h-8 w-8 flex items-center justify-center text-primary/20 group-hover/asset:text-primary/60 transition-colors">
+                    <Eye className="h-4 w-4" />
+                  </div>
                 )}
               </CardContent>
             </Card>
