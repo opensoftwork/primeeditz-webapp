@@ -165,7 +165,7 @@ export type Client = Doc<"profiles">;
 export interface Project {
   _id: Id<"projects"> | string;
   code: string;
-  projectTypeId: Id<"projectTypes"> | string;
+  projectTypeId?: Id<"projectTypes"> | string;
   eventName?: string;
   endClientName?: string;
   projectTypeName?: string;
