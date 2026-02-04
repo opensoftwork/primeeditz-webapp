@@ -139,8 +139,12 @@ export function QuotationDetail({
   }, [quotationId, data?.quotation?.code, setOverride, removeOverride]);
 
   const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const duplicateMutation = useMutation(
     api.functions.quotations.mutations.duplicateQuotation,
+  );
+  const approveQuotation = useMutation(
+    api.functions.quotations.mutations.approveQuotation,
   );
 
   if (data === undefined) {
@@ -284,6 +288,26 @@ export function QuotationDetail({
     }
   };
 
+  const handleApprove = async () => {
+    try {
+      setIsApproving(true);
+      const toastId = toast.loading(
+        "Approving quotation and creating projects...",
+      );
+      await approveQuotation({
+        quotationId: quotationId as Id<"quotations">,
+      });
+      toast.success("Quotation approved and projects created!", {
+        id: toastId,
+      });
+    } catch (error) {
+      toast.error("Failed to approve quotation");
+      console.error(error);
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
       <DetailHeader
@@ -293,6 +317,7 @@ export function QuotationDetail({
         status={status}
         quotationId={quotationId}
         onSend={() => setIsSendDrawerOpen(true)}
+        onApprove={handleApprove}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -311,7 +336,7 @@ export function QuotationDetail({
         </div>
 
         <div className="space-y-6">
-          {/* <ReviewActions quotation={quotation} /> */}
+          <ReviewActions quotation={quotation} />
           <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}

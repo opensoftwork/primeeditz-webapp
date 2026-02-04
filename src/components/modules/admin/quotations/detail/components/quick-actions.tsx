@@ -97,18 +97,20 @@ export function QuickActions({
           Duplicate as New
         </Button>
 
-        <DeleteQuotationAction
-          quotationId={quotation._id as Id<"quotations">}
-          quotationCode={quotation.code}
-        >
-          <Button
-            variant="outline"
-            className="w-full justify-start h-10 rounded-xl bg-red-500/5 border-red-500/20 text-red-400 font-bold text-xs hover:bg-red-500/10 hover:text-red-300"
+        {quotation.status === "draft" && (
+          <DeleteQuotationAction
+            quotationId={quotation._id as Id<"quotations">}
+            quotationCode={quotation.code}
           >
-            <Trash2 className="h-4 w-4 mr-2" />
-            Delete Quotation
-          </Button>
-        </DeleteQuotationAction>
+            <Button
+              variant="outline"
+              className="w-full justify-start h-10 rounded-xl bg-red-500/5 border-red-500/20 text-red-400 font-bold text-xs hover:bg-red-500/10 hover:text-red-300"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Quotation
+            </Button>
+          </DeleteQuotationAction>
+        )}
       </div>
     </motion.div>
   );

@@ -1,7 +1,7 @@
 "use client";
 
 import { useMutation } from "convex/react";
-import { Receipt, Send, X } from "lucide-react";
+import { Receipt, Send } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -66,18 +66,10 @@ export function SendQuotationDrawer({
       <SheetContent className="w-full sm:max-w-md bg-zinc-950 border-white/5 p-0 overflow-hidden flex flex-col">
         <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
           <SheetHeader className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
                 <Send className="h-6 w-6 text-primary" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
             <div className="space-y-1">
               <SheetTitle className="text-2xl font-black text-white uppercase tracking-tighter">
@@ -90,7 +82,7 @@ export function SendQuotationDrawer({
           </SheetHeader>
 
           {/* Quotation Summary */}
-          <div className="rounded-[2rem] border border-white/5 bg-white/2 p-6 space-y-4">
+          <div className="rounded-4xl border border-white/5 bg-white/2 p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Receipt className="h-5 w-5 text-white/20" />

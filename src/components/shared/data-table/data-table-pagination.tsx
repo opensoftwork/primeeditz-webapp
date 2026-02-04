@@ -54,45 +54,50 @@ export function DataTablePagination<TData>({
 
     return (
       <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/5 gap-4">
-        {/* Left: Info */}
-        <div className="flex items-center gap-4">
-          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 bg-white/5 px-5 py-2.5 rounded-xl border border-white/5">
-            Page <span className="text-white">{currentPage}</span>
+        {/* Left: Info & Page Size */}
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 bg-white/5 px-5 py-2.5 rounded-xl border border-white/5">
+              Page <span className="text-white">{currentPage}</span>
+            </div>
+            {selectedRows > 0 && (
+              <div className="text-[10px] font-bold text-primary uppercase tracking-widest">
+                {selectedRows} selected
+              </div>
+            )}
           </div>
-          {selectedRows > 0 && (
-            <div className="text-[10px] font-bold text-primary uppercase tracking-widest">
-              {selectedRows} selected
+
+          {/* Page Size (if setPageSize provided) */}
+          {setPageSize && (
+            <div className="hidden md:flex items-center gap-3  pl-6">
+              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
+                Rows
+              </span>
+              <Select
+                value={`${pageSize}`}
+                onValueChange={(value) => setPageSize(Number(value))}
+              >
+                <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent
+                  side="top"
+                  className="bg-zinc-950 border-white/10"
+                >
+                  {[10, 15, 20, 25, 50].map((size) => (
+                    <SelectItem
+                      key={size}
+                      value={`${size}`}
+                      className="text-xs focus:bg-white/10"
+                    >
+                      {size}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
         </div>
-
-        {/* Center: Page Size (if setPageSize provided) */}
-        {setPageSize && (
-          <div className="hidden md:flex items-center gap-3">
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-              Rows
-            </span>
-            <Select
-              value={`${pageSize}`}
-              onValueChange={(value) => setPageSize(Number(value))}
-            >
-              <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent side="top" className="bg-zinc-950 border-white/10">
-                {[10, 15, 20, 25, 50].map((size) => (
-                  <SelectItem
-                    key={size}
-                    value={`${size}`}
-                    className="text-xs focus:bg-white/10"
-                  >
-                    {size}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        )}
 
         {/* Right: Navigation */}
         <div className="flex items-center gap-2">
@@ -127,43 +132,45 @@ export function DataTablePagination<TData>({
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/5 gap-4">
-      {/* Left: Info */}
-      <div className="flex items-center gap-4">
-        <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 bg-white/5 px-5 py-2.5 rounded-xl border border-white/5">
-          Page <span className="text-white">{currentPage}</span> of{" "}
-          <span className="text-white">{totalPages}</span>
-        </div>
-        {selectedRows > 0 && (
-          <div className="text-[10px] font-bold text-primary uppercase tracking-widest">
-            {selectedRows} of {totalRows} selected
+      {/* Left: Info & Page Size */}
+      <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <div className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 bg-white/5 px-5 py-2.5 rounded-xl border border-white/5">
+            Page <span className="text-white">{currentPage}</span> of{" "}
+            <span className="text-white">{totalPages}</span>
           </div>
-        )}
-      </div>
+          {selectedRows > 0 && (
+            <div className="text-[10px] font-bold text-primary uppercase tracking-widest">
+              {selectedRows} of {totalRows} selected
+            </div>
+          )}
+        </div>
 
-      {/* Center: Page Size */}
-      <div className="hidden md:flex items-center gap-3">
-        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-          Rows
-        </span>
-        <Select
-          value={`${table.getState().pagination.pageSize}`}
-          onValueChange={(value) => table.setPageSize(Number(value))}
-        >
-          <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent side="top" className="bg-zinc-950 border-white/10">
-            {[10, 15, 20, 25, 50].map((size) => (
-              <SelectItem
-                key={size}
-                value={`${size}`}
-                className="text-xs focus:bg-white/10"
-              >
-                {size}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        {/* Page Size */}
+        <div className="hidden md:flex items-center gap-3 border-l border-white/5 pl-6">
+          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
+            Rows
+          </span>
+          <Select
+            value={`${table.getState().pagination.pageSize}`}
+            onValueChange={(value) => table.setPageSize(Number(value))}
+          >
+            <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent side="top" className="bg-zinc-950 border-white/10">
+              {[10, 15, 20, 25, 50].map((size) => (
+                <SelectItem
+                  key={size}
+                  value={`${size}`}
+                  className="text-xs focus:bg-white/10"
+                >
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Right: Navigation */}

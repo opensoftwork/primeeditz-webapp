@@ -47,24 +47,10 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
               {format(quotation._creationTime, "MMM dd, yyyy")}
             </div>
           </div>
-          <div className="flex items-center gap-2">
-            <div
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-              }}
-            >
-              <DeleteQuotationAction
-                quotationId={quotation._id}
-                quotationCode={quotation.code}
-                className="h-7 w-7 transition-colors hover:text-red-400"
-              />
-            </div>
-            <QuotationStatusBadge
-              status={quotation.status as AdminQuotation["status"]}
-              className="scale-[0.85] origin-top-right transform-gpu"
-            />
-          </div>
+          <QuotationStatusBadge
+            status={quotation.status as AdminQuotation["status"]}
+            className="scale-[0.85] origin-top-right transform-gpu"
+          />
         </div>
 
         {/* Divider */}
@@ -90,8 +76,18 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
 
       {/* Footer: Price */}
       <div className="relative z-10 mt-5 pt-3 border-t border-white/5 flex items-end justify-between">
-        <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest pb-1">
-          Valuation
+        <div className="flex items-center gap-3 pb-1">
+          
+          <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+            Valuation
+          </div>
+          <div onClick={(e) => e.stopPropagation()}>
+            <DeleteQuotationAction
+              quotationId={quotation._id}
+              quotationCode={quotation.code}
+              className="h-7 w-7 text-white/20 hover:text-red-400 transition-colors"
+            />
+          </div>
         </div>
         <div className="flex items-baseline gap-0.5">
           <span className="text-xs font-bold text-primary/60">₹</span>

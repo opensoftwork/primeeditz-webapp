@@ -3,13 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import {
-  CheckCircle2,
-  Loader2,
-  ShieldAlert,
-  UserPlus,
-  XCircle,
-} from "lucide-react";
+import { CheckCircle2, Loader2, ShieldAlert, XCircle } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -22,13 +16,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 
 interface ReviewActionsProps {
@@ -46,28 +33,12 @@ export function ReviewActions({ quotation }: ReviewActionsProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Queries & Mutations
-  const employees = useQuery(api.functions.admin.employees.getEmployees, {});
-  const assignEmployee = useMutation(
-    api.functions.quotations.mutations.assignEmployeeToQuotation,
-  );
   const approveQuotation = useMutation(
     api.functions.quotations.mutations.approveQuotation,
   );
   const rejectQuotation = useMutation(
     api.functions.quotations.mutations.rejectQuotationByAdmin,
   );
-
-  const handleAssign = async (employeeId: string) => {
-    try {
-      await assignEmployee({
-        quotationId: quotation._id,
-        assignedEmployeeId: employeeId as Id<"profiles">,
-      });
-      toast.success("Team member assigned successfully");
-    } catch (err) {
-      toast.error("Failed to assign team member");
-    }
-  };
 
   const handleApprove = async () => {
     setIsSubmitting(true);
@@ -137,34 +108,6 @@ export function ReviewActions({ quotation }: ReviewActionsProps) {
       </div>
 
       <div className="space-y-4">
-        {/* Team Assignment */}
-        <div className="space-y-2">
-          <label className="text-[10px] font-black uppercase tracking-widest text-white/40 ml-1">
-            Assign Lead / Team
-          </label>
-          <Select
-            onValueChange={handleAssign}
-            defaultValue={quotation.assignedEmployeeId}
-          >
-            <SelectTrigger className="h-11 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs">
-              <SelectValue placeholder="Select Team Member" />
-            </SelectTrigger>
-            <SelectContent className="bg-zinc-900 border-white/10 text-white">
-              {employees?.map((emp) => (
-                <SelectItem
-                  key={emp._id}
-                  value={emp._id}
-                  className="hover:bg-white/5 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-[10px]">
-                    {emp.name}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
         {/* Action Buttons */}
         <div className="grid grid-cols-2 gap-3">
           <Button
@@ -172,7 +115,7 @@ export function ReviewActions({ quotation }: ReviewActionsProps) {
             className="h-11 rounded-xl bg-emerald-500 text-black font-black uppercase tracking-widest text-[10px] hover:bg-emerald-400 transition-all hover:scale-[1.02]"
           >
             <CheckCircle2 className="h-4 w-4 mr-2" />
-            Approve
+            Approve Quotation
           </Button>
           <Button
             onClick={() => setIsRejectDialogOpen(true)}

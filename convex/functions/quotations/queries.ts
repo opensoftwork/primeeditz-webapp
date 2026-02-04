@@ -401,16 +401,17 @@ export const getMyQuotations = studioQuery({
       .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .collect();
 
-    // Filter by status (visible to client)
+    // Filter by status (visible to client) and exclude deleted quotations
     const studioVisibleStatus = [
+      "initiated",
       "sent",
       "viewed",
       "approved",
       "changes_requested",
       "rejected",
     ];
-    const visibleQuotations = quotations.filter((q) =>
-      studioVisibleStatus.includes(q.status),
+    const visibleQuotations = quotations.filter(
+      (q) => studioVisibleStatus.includes(q.status) && q.isDeleted !== true,
     );
 
     // Get project names for enrichment
@@ -766,6 +767,92 @@ export const getQuotationStorageSummary = adminQuery({
         remainingBytes: totalBytes - allocatedBytes,
       },
       linkedProjects: enrichedProjects,
+    };
+  },
+});
+
+/**
+ * Get pending quotations for admin dashboard notification widget.
+ * Shows quotations created by studios that need Admin review/approval.
+ * Story: 15.3
+ */
+export const getPendingQuotationsForAdmin = adminQuery({
+  args: {
+    limit: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    // Get quotations with pending statuses (created by studios, awaiting admin review)
+    // 'initiated' = studio just created it
+    // 'sent' = awaiting response (but for studio-created, this means they submitted)
+    const pendingStatuses = ["initiated", "sent", "draft"];
+
+    // Fetch all quotations and filter by pending statuses
+    const allQuotations = await ctx.db
+      .query("quotations")
+      .filter((q) =>
+        q.and(
+          q.neq(q.field("isDeleted"), true),
+          q.or(
+            ...pendingStatuses.map((status) => q.eq(q.field("status"), status)),
+          ),
+        ),
+      )
+      .order("desc")
+      .collect();
+
+    // Filter to only quotations that have a studioId (created by studios)
+    const studioQuotations = allQuotations.filter((q) => q.studioId);
+
+    // Apply limit
+    const limited = args.limit
+      ? studioQuotations.slice(0, args.limit)
+      : studioQuotations;
+
+    // Get all profiles for studio name enrichment
+    const studioIds = [
+      ...new Set(
+        limited.map((q) => q.studioId).filter((id): id is Id<"profiles"> => !!id),
+      ),
+    ];
+    const studios = await Promise.all(studioIds.map((id) => ctx.db.get(id)));
+    const studioNameMap = new Map(
+      studios
+        .filter((s): s is Doc<"profiles"> => !!s)
+        .map((s) => [s._id as string, s.name]),
+    );
+
+    // Get project names for enrichment
+    const projectIds = [
+      ...new Set(
+        limited
+          .map((q) => q.projectId)
+          .filter((id): id is Id<"projects"> => !!id),
+      ),
+    ];
+    const projects = await Promise.all(projectIds.map((id) => ctx.db.get(id)));
+    const projectMap = new Map(
+      projects
+        .filter((p): p is Doc<"projects"> => !!p)
+        .map((p) => [p._id as string, p.endClientName || p.code]),
+    );
+
+    const enrichedQuotations = limited.map((q) => ({
+      _id: q._id,
+      code: q.code,
+      status: q.status,
+      total: q.total,
+      studioId: q.studioId,
+      studioName: q.studioId ? studioNameMap.get(q.studioId) : undefined,
+      projectId: q.projectId,
+      projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
+      endClientName: q.endClientName,
+      _creationTime: q._creationTime,
+      sentAt: q.sentAt,
+    }));
+
+    return {
+      quotations: enrichedQuotations,
+      totalCount: studioQuotations.length,
     };
   },
 });

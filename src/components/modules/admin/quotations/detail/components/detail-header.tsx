@@ -1,7 +1,15 @@
 "use client";
 
 import { format } from "date-fns";
-import { ArrowLeft, Copy, Edit, FileText, Receipt, Send } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Copy,
+  Edit,
+  FileText,
+  Receipt,
+  Send,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -39,6 +47,7 @@ interface DetailHeaderProps {
   };
   quotationId: string;
   onSend: () => void;
+  onApprove: () => void;
 }
 
 export function DetailHeader({
@@ -48,6 +57,7 @@ export function DetailHeader({
   status,
   quotationId,
   onSend,
+  onApprove,
 }: DetailHeaderProps) {
   const router = useRouter();
   const StatusIcon = status.icon;
@@ -139,23 +149,33 @@ export function DetailHeader({
           className="h-10 px-4 rounded-xl font-bold text-xs"
         />
 
-        <Button
-          onClick={onSend}
-          disabled={
-            !["draft", "sent", "viewed", "changes_requested"].includes(
-              quotation.status,
-            )
-          }
-          className={cn(
-            "h-10 px-6 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95",
-            quotation.status === "draft"
-              ? "bg-primary hover:bg-primary/90 text-zinc-950 shadow-primary/20"
-              : "bg-white/5 border border-white/10 text-white hover:bg-white/10",
-          )}
-        >
-          <Send className="h-4 w-4 mr-2" />
-          {quotation.status === "draft" ? "Send to Studio" : "Resend"}
-        </Button>
+        {quotation.status === "initiated" ? (
+          <Button
+            onClick={onApprove}
+            className="h-10 px-6 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-black font-black uppercase tracking-widest text-xs shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+          >
+            <CheckCircle2 className="h-4 w-4 mr-2" />
+            Approve Quotation
+          </Button>
+        ) : (
+          <Button
+            onClick={onSend}
+            disabled={
+              !["draft", "sent", "viewed", "changes_requested"].includes(
+                quotation.status,
+              )
+            }
+            className={cn(
+              "h-10 px-6 rounded-xl font-black uppercase tracking-widest text-xs shadow-lg transition-all active:scale-95",
+              quotation.status === "draft"
+                ? "bg-primary hover:bg-primary/90 text-zinc-950 shadow-primary/20"
+                : "bg-white/5 border border-white/10 text-white hover:bg-white/10",
+            )}
+          >
+            <Send className="h-4 w-4 mr-2" />
+            {quotation.status === "draft" ? "Send to Studio" : "Resend"}
+          </Button>
+        )}
       </div>
     </div>
   );
