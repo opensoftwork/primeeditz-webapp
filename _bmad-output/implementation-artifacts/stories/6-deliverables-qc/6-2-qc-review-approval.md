@@ -73,8 +73,7 @@ Admin Portal
 - [x] **Given** I am viewing a `pending_qc` deliverable
 - [x] **When** I click "Approve"
 - [x] **Then** deliverable status → `approved`
-- [x] **And** project → `awaiting_review`
-- [x] **And** `awaitingActorRole` → `studio`
+- [x] **And** project state DOES NOT change automatically (manual gate)
 
 ### AC3: Revise/Reject Action
 

@@ -77,15 +77,8 @@ export const approveDeliverable = mutation({
       qcNotes: args.qcNotes,
     });
 
-    // Optionally update project state
-    const project = await ctx.db.get(deliverable.projectId);
-    if (project && project.actionState === "deliverables_ready") {
-      await ctx.db.patch(deliverable.projectId, {
-        actionState: "awaiting_review",
-        awaitingActorRole: "studio",
-        updatedAt: now(),
-      });
-    }
+    // Removal of automatic transition to awaiting_review.
+    // Admin must now manually click "Send to Studio".
 
     return { success: true };
   },

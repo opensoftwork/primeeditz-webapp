@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { 
   FileIcon, 
   Search, 
@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { toast } from "sonner";
 
 interface Deliverable {
   _id: Id<"deliverables">;
@@ -48,6 +49,8 @@ export function DeliverablesList() {
     { projectId }
   );
 
+  const sendToStudioMutation = useMutation(api.functions.deliverables.mutations.sendToStudio);
+
   const project = useQuery(api.admin.getAdminProject, { projectId });
 
   useEffect(() => {
@@ -64,6 +67,15 @@ export function DeliverablesList() {
     setOverride,
     removeOverride,
   ]);
+
+  const handleSendToStudio = async (deliverableId: Id<"deliverables">) => {
+    try {
+      await sendToStudioMutation({ deliverableId });
+      toast.success("Deliverables sent to studio review!");
+    } catch (error: any) {
+      toast.error(error.message || "Failed to send to studio");
+    }
+  };
 
   const columns: ColumnDef<Deliverable>[] = [
     {
@@ -148,14 +160,15 @@ export function DeliverablesList() {
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
-          {row.original.status === "approved" && (
+          {row.original.status === "approved" && 
+           project?.actionState !== "awaiting_review" && 
+           project?.actionState !== "review_approved" && 
+           project?.phase !== "delivery" && (
             <Button
               variant="ghost"
               size="icon"
               className="h-9 w-9 rounded-xl border border-white/5 hover:bg-white/5 hover:text-emerald-400 hover:border-emerald-500/30"
-              onClick={() => {
-                // Future handoff action
-              }}
+              onClick={() => handleSendToStudio(row.original._id)}
             >
               <Send className="h-4 w-4" />
             </Button>

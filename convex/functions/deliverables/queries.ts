@@ -137,6 +137,21 @@ export const getClientDeliverables = query({
     const identity = await ctx.auth.getUserIdentity();
     if (!identity) throw new Error("Unauthenticated");
 
+    // Fetch project to check state
+    const project = await ctx.db.get(args.projectId);
+    if (!project) return [];
+
+    // Client can only see deliverables if project is in review or delivery phase
+    const isVisibleToClient = 
+      project.actionState === "awaiting_review" || 
+      project.actionState === "review_approved" || 
+      project.actionState === "revisions_requested" ||
+      project.phase === "delivery";
+
+    if (!isVisibleToClient) {
+      return [];
+    }
+
     // Fetch deliverables for this project
     const deliverables = await ctx.db
       .query("deliverables")

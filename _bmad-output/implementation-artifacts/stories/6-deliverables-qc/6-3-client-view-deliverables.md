@@ -71,7 +71,8 @@ Project Detail Page
 - [x] **Given** a project with `actionState: 'awaiting_review'`
 - [x] **When** I (client) view the Deliverables tab
 - [x] **Then** I only see deliverables with status `approved`
-- [x] **And** `pending_qc` or `revision_requested` deliverables are NOT visible
+- [x] **And** if project is NOT in `awaiting_review` (or later), I see NO deliverables even if they are approved by QC
+- [x] **And** `pending_qc` or `revision_requested` deliverables are NEVER visible
 
 ### AC2: Info Banner
 

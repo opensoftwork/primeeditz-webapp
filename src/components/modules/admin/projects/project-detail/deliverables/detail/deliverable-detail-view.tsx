@@ -38,6 +38,11 @@ export function DeliverableDetailView({
   const isAdmin = myProfile?.role === "admin";
 
   // Queries
+  const project = useQuery(
+    api.functions.projects.queries.getProject,
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+  );
+
   const deliverable = useQuery(
     api.functions.deliverables.queries.getDeliverable,
     deliverableId ? { deliverableId } : "skip"
@@ -158,7 +163,13 @@ export function DeliverableDetailView({
   const canRequestRevision =
     deliverable.status === "pending_qc" ||
     deliverable.status === "revision_needed";
-  const canSendToStudio = deliverable.status === "approved";
+  
+  // Can send to studio if deliverable is approved AND project isn't already in review/delivery
+  const canSendToStudio = 
+    deliverable.status === "approved" && 
+    project?.actionState !== "awaiting_review" &&
+    project?.actionState !== "review_approved" &&
+    project?.phase !== "delivery";
 
   return (
     <div className="p-8 md:p-12 space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
