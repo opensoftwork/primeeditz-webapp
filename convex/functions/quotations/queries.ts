@@ -781,27 +781,28 @@ export const getPendingQuotationsForAdmin = adminQuery({
     limit: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
-    // Get quotations with pending statuses (created by studios, awaiting admin review)
-    // 'initiated' = studio just created it
-    // 'sent' = awaiting response (but for studio-created, this means they submitted)
-    const pendingStatuses = ["initiated", "sent", "draft"];
+    // Get quotations that actually need Admin action (Input from Studio):
+    // 'initiated' = Studio just requested a quote
+    // 'changes_requested' = Studio sent it back with feedback
+    const pendingStatuses = ["initiated", "changes_requested"];
 
-    // Fetch all quotations and filter by pending statuses
+    // Fetch and filter
     const allQuotations = await ctx.db
       .query("quotations")
       .filter((q) =>
         q.and(
           q.neq(q.field("isDeleted"), true),
+          q.eq(q.field("createdBy"), "STUDIO"), // Strictly Studio-initiated ONLY
           q.or(
             ...pendingStatuses.map((status) => q.eq(q.field("status"), status)),
-          ),
+          )
         ),
       )
       .order("desc")
       .collect();
 
-    // Filter to only quotations that have a studioId (created by studios)
-    const studioQuotations = allQuotations.filter((q) => q.studioId);
+    // The rest of the logic remains the same...
+    const studioQuotations = allQuotations;
 
     // Apply limit
     const limited = args.limit

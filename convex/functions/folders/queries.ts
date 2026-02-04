@@ -10,6 +10,7 @@ import {
 /**
  * Get all folders for a project (staff view).
  * Returns folder details with asset counts.
+ * Parent folders aggregate file counts and status from child folders.
  */
 export const getProjectFolders = staffQuery({
   args: {
@@ -21,26 +22,130 @@ export const getProjectFolders = staffQuery({
       .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
       .collect();
 
-    // Enrich with asset counts
-    const enrichedFolders = await Promise.all(
+    // First pass: get direct asset counts for each folder
+    const folderAssetData = await Promise.all(
       folders.map(async (folder) => {
         const assets = await ctx.db
           .query("assets")
           .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
           .collect();
 
-        const totalSize = assets.reduce(
+        const directAssetCount = assets.length;
+        const directTotalSize = assets.reduce(
           (sum, asset) => sum + asset.sizeBytes,
           0,
         );
 
         return {
-          ...folder,
-          assetCount: assets.length,
-          totalSize,
+          folder,
+          directAssetCount,
+          directTotalSize,
         };
       }),
     );
+
+    // Build a map for quick lookup
+    const folderDataMap = new Map(
+      folderAssetData.map((data) => [data.folder.path, data]),
+    );
+
+    // Second pass: compute aggregated counts and status for each folder
+    const enrichedFolders = folderAssetData.map((data) => {
+      const { folder, directAssetCount, directTotalSize } = data;
+
+      // Find all descendant folders (folders whose path starts with this folder's path + "/")
+      const childPrefix = folder.path + "/";
+      const descendants = folderAssetData.filter(
+        (d) => d.folder.path.startsWith(childPrefix),
+      );
+
+      // Aggregate totals from descendants
+      const totalAssetCount =
+        directAssetCount +
+        descendants.reduce((sum, d) => sum + d.directAssetCount, 0);
+      const totalSize =
+        directTotalSize +
+        descendants.reduce((sum, d) => sum + d.directTotalSize, 0);
+
+      // Determine display status based on hierarchy
+      let displayStatus = folder.status;
+
+      // Check if this folder has children (is a parent folder)
+      const hasChildren = descendants.length > 0;
+
+      if (hasChildren) {
+        // For parent folders, compute status from direct children
+        const directChildren = folderAssetData.filter((d) => {
+          if (!d.folder.path.startsWith(childPrefix)) return false;
+          const remainder = d.folder.path.slice(childPrefix.length);
+          return !remainder.includes("/");
+        });
+
+        if (directChildren.length > 0) {
+          // Get the computed status for each direct child
+          const childStatuses = directChildren.map((child) => {
+            // Recursively compute child's display status
+            const childHasOwnFiles = child.directAssetCount > 0;
+            const childStoredStatus = child.folder.status;
+
+            if (child.directAssetCount === 0) {
+              // Check if this child has its own descendants with files
+              const childDescPrefix = child.folder.path + "/";
+              const childDescendants = folderAssetData.filter((d) =>
+                d.folder.path.startsWith(childDescPrefix),
+              );
+              const childTotalFiles = childDescendants.reduce(
+                (sum, d) => sum + d.directAssetCount,
+                0,
+              );
+
+              if (childTotalFiles === 0) {
+                return "pending_upload";
+              }
+              // Has descendant files, check if all descendants are completed
+              const allDescCompleted = childDescendants.every(
+                (d) => d.folder.status === "completed",
+              );
+              return allDescCompleted ? "completed" : "in_progress";
+            }
+
+            // Child has direct files
+            if (childStoredStatus === "pending_upload") {
+              return "in_progress";
+            }
+            return childStoredStatus;
+          });
+
+          const allCompleted = childStatuses.every((s) => s === "completed");
+          const anyInProgress = childStatuses.some(
+            (s) => s === "in_progress" || s === "completed",
+          );
+          const allPending = childStatuses.every((s) => s === "pending_upload");
+
+          if (allCompleted) {
+            displayStatus = "completed";
+          } else if (allPending) {
+            displayStatus = "pending_upload";
+          } else {
+            displayStatus = "in_progress";
+          }
+        }
+      } else {
+        // Leaf folder - compute status based on its own file count
+        if (directAssetCount === 0) {
+          displayStatus = "pending_upload";
+        } else if (folder.status === "pending_upload" && directAssetCount > 0) {
+          displayStatus = "in_progress";
+        }
+      }
+
+      return {
+        ...folder,
+        status: displayStatus,
+        assetCount: totalAssetCount,
+        totalSize,
+      };
+    });
 
     return enrichedFolders;
   },
@@ -49,6 +154,7 @@ export const getProjectFolders = staffQuery({
 /**
  * Get project folders for client view.
  * Shows only the client's own project folders.
+ * Parent folders aggregate file counts and status from child folders.
  */
 export const getMyProjectFolders = studioQuery({
   args: {
@@ -66,29 +172,122 @@ export const getMyProjectFolders = studioQuery({
       .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
       .collect();
 
-    // Enrich with asset counts
-    const enrichedFolders = await Promise.all(
+    // First pass: get direct asset counts for each folder
+    const folderAssetData = await Promise.all(
       folders.map(async (folder) => {
         const assets = await ctx.db
           .query("assets")
           .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
           .collect();
 
-        const totalSize = assets.reduce(
+        const directAssetCount = assets.length;
+        const directTotalSize = assets.reduce(
           (sum, asset) => sum + asset.sizeBytes,
           0,
         );
 
         return {
-          _id: folder._id,
-          name: folder.name,
-          path: folder.path,
-          status: folder.status,
-          assetCount: assets.length,
-          totalSize,
+          folder,
+          directAssetCount,
+          directTotalSize,
         };
       }),
     );
+
+    // Second pass: compute aggregated counts and status for each folder
+    const enrichedFolders = folderAssetData.map((data) => {
+      const { folder, directAssetCount, directTotalSize } = data;
+
+      // Find all descendant folders (folders whose path starts with this folder's path + "/")
+      const childPrefix = folder.path + "/";
+      const descendants = folderAssetData.filter(
+        (d) => d.folder.path.startsWith(childPrefix),
+      );
+
+      // Aggregate totals from descendants
+      const totalAssetCount =
+        directAssetCount +
+        descendants.reduce((sum, d) => sum + d.directAssetCount, 0);
+      const totalSize =
+        directTotalSize +
+        descendants.reduce((sum, d) => sum + d.directTotalSize, 0);
+
+      // Determine display status based on hierarchy
+      let displayStatus = folder.status;
+
+      // Check if this folder has children (is a parent folder)
+      const hasChildren = descendants.length > 0;
+
+      if (hasChildren) {
+        // For parent folders, compute status from direct children
+        const directChildren = folderAssetData.filter((d) => {
+          if (!d.folder.path.startsWith(childPrefix)) return false;
+          const remainder = d.folder.path.slice(childPrefix.length);
+          return !remainder.includes("/");
+        });
+
+        if (directChildren.length > 0) {
+          // Get the computed status for each direct child
+          const childStatuses = directChildren.map((child) => {
+            const childStoredStatus = child.folder.status;
+
+            if (child.directAssetCount === 0) {
+              // Check if this child has its own descendants with files
+              const childDescPrefix = child.folder.path + "/";
+              const childDescendants = folderAssetData.filter((d) =>
+                d.folder.path.startsWith(childDescPrefix),
+              );
+              const childTotalFiles = childDescendants.reduce(
+                (sum, d) => sum + d.directAssetCount,
+                0,
+              );
+
+              if (childTotalFiles === 0) {
+                return "pending_upload";
+              }
+              // Has descendant files, check if all descendants are completed
+              const allDescCompleted = childDescendants.every(
+                (d) => d.folder.status === "completed",
+              );
+              return allDescCompleted ? "completed" : "in_progress";
+            }
+
+            // Child has direct files
+            if (childStoredStatus === "pending_upload") {
+              return "in_progress";
+            }
+            return childStoredStatus;
+          });
+
+          const allCompleted = childStatuses.every((s) => s === "completed");
+          const allPending = childStatuses.every((s) => s === "pending_upload");
+
+          if (allCompleted) {
+            displayStatus = "completed";
+          } else if (allPending) {
+            displayStatus = "pending_upload";
+          } else {
+            displayStatus = "in_progress";
+          }
+        }
+      } else {
+        // Leaf folder - compute status based on its own file count
+        if (directAssetCount === 0) {
+          displayStatus = "pending_upload";
+        } else if (folder.status === "pending_upload" && directAssetCount > 0) {
+          displayStatus = "in_progress";
+        }
+      }
+
+      return {
+        _id: folder._id,
+        name: folder.name,
+        path: folder.path,
+        status: displayStatus,
+        assetCount: totalAssetCount,
+        totalSize,
+      };
+    });
 
     return enrichedFolders;
   },

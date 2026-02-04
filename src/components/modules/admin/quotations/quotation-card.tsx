@@ -77,17 +77,18 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
       {/* Footer: Price */}
       <div className="relative z-10 mt-5 pt-3 border-t border-white/5 flex items-end justify-between">
         <div className="flex items-center gap-3 pb-1">
-          
           <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
             Valuation
           </div>
-          <div onClick={(e) => e.stopPropagation()}>
-            <DeleteQuotationAction
-              quotationId={quotation._id}
-              quotationCode={quotation.code}
-              className="h-7 w-7 text-white/20 hover:text-red-400 transition-colors"
-            />
-          </div>
+          {quotation.status === "draft" && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <DeleteQuotationAction
+                quotationId={quotation._id}
+                quotationCode={quotation.code}
+                className="h-7 w-7 text-white/20 hover:text-red-400 transition-colors"
+              />
+            </div>
+          )}
         </div>
         <div className="flex items-baseline gap-0.5">
           <span className="text-xs font-bold text-primary/60">₹</span>

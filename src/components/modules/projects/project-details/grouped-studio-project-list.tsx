@@ -5,6 +5,7 @@ import { useQuery } from "convex/react";
 import { Calendar, ChevronRight, Eye, Hash, Users } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { DataTableSkeleton } from "@/components/shared/data-table";
 import { PhaseProgress } from "../phase-progress";
@@ -109,6 +110,7 @@ export function GroupedStudioProjectList() {
 }
 
 function ProjectCard({ project }: { project: any }) {
+  const router = useRouter();
   const needsOnboarding = project.actionState === "awaiting_uploads";
 
   return (
@@ -149,9 +151,13 @@ function ProjectCard({ project }: { project: any }) {
           </div>
 
           {needsOnboarding ? (
-            <Link
-              href={`/projects/${project._id}/onboarding`}
-              className="block"
+            <div
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                router.push(`/projects/${project._id}/onboarding`);
+              }}
+              className="block cursor-pointer"
             >
               <div className="p-3 rounded-xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-all group/onb">
                 <p className="text-[9px] font-bold text-primary leading-relaxed text-center uppercase tracking-widest italic flex items-center justify-center gap-1.5">
@@ -159,7 +165,7 @@ function ProjectCard({ project }: { project: any }) {
                   <ChevronRight className="h-2.5 w-2.5 group-hover/onb:translate-x-1 transition-transform" />
                 </p>
               </div>
-            </Link>
+            </div>
           ) : (
             <div className="h-10" /> /* Spacer to keep layout consistent */
           )}

@@ -114,6 +114,24 @@ export function SidebarNavGroup({ label, items }: SidebarNavGroupProps) {
                             </span>
                           </div>
 
+                          {/* Badge - Premium Neon Style */}
+                          {item.badgeCount !== undefined &&
+                            item.badgeCount > 0 && (
+                              <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className={cn(
+                                  "flex items-center justify-center shrink-0 ml-auto z-10",
+                                  "min-w-[18px] h-[18px] px-1 rounded-full",
+                                  "bg-primary text-black text-[9px] font-black tracking-tight",
+                                  "shadow-[0_0_12px_rgba(var(--primary-rgb),0.5)]",
+                                  "group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-2 group-data-[collapsible=icon]:right-2 group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:p-0",
+                                )}
+                              >
+                                {item.badgeCount}
+                              </motion.div>
+                            )}
+
                           {/* Futuristic Glow Effect on Hover */}
                           <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">
                             <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent pointer-events-none" />

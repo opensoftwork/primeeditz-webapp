@@ -38,11 +38,47 @@ export function AppSidebar() {
   // Fetch current user's profile
   const profile = useQuery(api.profiles.getMyProfile);
 
+  // Fetch counts for badges (Admin only)
+  const dashboardStats = useQuery(
+    api.functions.admin.dashboard.getAdminDashboardStats,
+    profile?.role === "admin" ? {} : "skip",
+  );
+
+  const pendingQuotations = useQuery(
+    api.functions.quotations.queries.getPendingQuotationsForAdmin,
+    profile?.role === "admin" ? { limit: 1 } : "skip",
+  );
+
   // Build navigation items based on role
   const mainNavItems = useMemo(() => {
     if (!profile) return [];
-    return getNavItemsForRole(profile.role);
-  }, [profile]);
+    const baseNav = getNavItemsForRole(profile.role);
+
+    if (profile.role === "admin" && isNavGroupArray(baseNav)) {
+      return baseNav.map((group) => ({
+        ...group,
+        items: group.items.map((item) => {
+          // Inject Project Badge
+          if (item.url === "/projects") {
+            return {
+              ...item,
+              badgeCount: dashboardStats?.pendingRequestsCount,
+            };
+          }
+          // Inject Quotation Badge
+          if (item.url === "/quotations") {
+            return {
+              ...item,
+              badgeCount: pendingQuotations?.totalCount,
+            };
+          }
+          return item;
+        }),
+      }));
+    }
+
+    return baseNav;
+  }, [profile, dashboardStats, pendingQuotations]);
 
   // Get user display info
   const displayName = profile?.name || "User";

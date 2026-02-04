@@ -104,6 +104,12 @@ export const columns: ColumnDef<AdminQuotation>[] = [
       const quotation = row.original;
       return (
         <div className="flex justify-end items-center gap-1">
+          {quotation.status === "draft" && (
+            <DeleteQuotationAction
+              quotationId={quotation._id}
+              quotationCode={quotation.code}
+            />
+          )}
           <Link href={`/quotations/${quotation._id}`}>
             <Button
               variant="ghost"
@@ -113,10 +119,6 @@ export const columns: ColumnDef<AdminQuotation>[] = [
               <Eye className="h-4 w-4" />
             </Button>
           </Link>
-          <DeleteQuotationAction
-            quotationId={quotation._id}
-            quotationCode={quotation.code}
-          />
         </div>
       );
     },
