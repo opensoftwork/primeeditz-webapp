@@ -1,7 +1,7 @@
 "use client";
 
 import { BadgeAlert } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 
 interface TotalsCardProps {
@@ -12,8 +12,8 @@ interface TotalsCardProps {
 
 export function TotalsCard({ total, subtotal, gstAmount }: TotalsCardProps) {
   return (
-    <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/20">
-      <div className="p-0">
+    <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/20 p-0">
+      <CardContent className="p-0">
         <div className="px-8 py-6 border-b border-white/5 bg-white/5 space-y-1">
           <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">
             Total Package Value
@@ -52,7 +52,7 @@ export function TotalsCard({ total, subtotal, gstAmount }: TotalsCardProps) {
             </p>
           </div>
         </div>
-      </div>
+      </CardContent>
     </Card>
   );
 }

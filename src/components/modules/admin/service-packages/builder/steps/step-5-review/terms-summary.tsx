@@ -27,7 +27,7 @@ export function TermsSummary() {
         </button>
       </div>
 
-      <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle hover:border-white/10 transition-colors shadow-2xl shadow-black/20">
+      <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle hover:border-white/10 transition-colors shadow-2xl shadow-black/20 p-0">
         <CardContent className="p-0">
           <div className="px-8 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
             <div className="flex items-center gap-3">
