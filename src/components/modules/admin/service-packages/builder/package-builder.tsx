@@ -8,11 +8,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
 import { PackageStepNavigation } from "./package-step-navigation";
-import { Step1Identity } from "./step-1-identity";
-import { Step2ProjectConfig } from "./step-2-project-config";
-import { Step3Pricing } from "./step-3-pricing";
-import { Step4Terms } from "./step-4-terms";
-import { Step5Review } from "./step-5-review";
+import { Step1Identity } from "./steps/step-1-identity";
+import { Step2ProjectConfig } from "./steps/step-2-config";
+import { Step3Pricing } from "./steps/step-3-pricing";
+import { Step4Terms } from "./steps/step-4-terms";
+import { Step5Review } from "./steps/step-5-review";
 
 const STEPS = [
   { id: 1, label: "Identity", description: "Basic Info" },

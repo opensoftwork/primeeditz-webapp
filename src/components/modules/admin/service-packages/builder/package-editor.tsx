@@ -15,11 +15,11 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
-import { Step1Identity } from "./step-1-identity";
-import { Step2ProjectConfig } from "./step-2-project-config";
-import { Step3Pricing } from "./step-3-pricing";
-import { Step4Terms } from "./step-4-terms";
-import { Step5Review } from "./step-5-review";
+import { Step1Identity } from "./steps/step-1-identity";
+import { Step2ProjectConfig } from "./steps/step-2-config";
+import { Step3Pricing } from "./steps/step-3-pricing";
+import { Step4Terms } from "./steps/step-4-terms";
+import { Step5Review } from "./steps/step-5-review";
 
 const SECTIONS = [
   { id: 1, label: "Basic Identity", icon: Info, component: Step1Identity },
@@ -139,7 +139,7 @@ export function PackageEditor() {
                       </span>
                     </div>
                     {isActive && (
-                      <div className="absolute inset-0 bg-gradient-to-r from-primary/5 to-transparent pointer-events-none" />
+                      <div className="absolute inset-0 bg-linear-to-r from-primary/5 to-transparent pointer-events-none" />
                     )}
                   </button>
                 );
