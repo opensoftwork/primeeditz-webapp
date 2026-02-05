@@ -48,6 +48,7 @@ export interface Step3Data {
   lineItems: LineItem[];
   terms?: string;
   applyGST: boolean;
+  gstPercentage: number;
 }
 
 interface BuilderContextValue {
@@ -172,6 +173,7 @@ export function BuilderProvider({
           })),
           terms: step3DataRef.current?.terms,
           applyGST: step3DataRef.current?.applyGST,
+          gstPercentage: step3DataRef.current?.gstPercentage,
         });
       } catch (err) {
         console.error("Failed to save draft:", err);
@@ -231,6 +233,7 @@ export function BuilderProvider({
           })),
           terms: pkg.terms,
           applyGST: pkg.applyGST ?? true,
+          gstPercentage: (pkg as any).gstPercentage ?? 18,
         });
 
         setIsInitialized(true);
@@ -258,6 +261,7 @@ export function BuilderProvider({
             lineItems: (activeDraft.lineItems ?? []) as LineItem[],
             terms: activeDraft.terms,
             applyGST: activeDraft.applyGST ?? true,
+            gstPercentage: activeDraft.gstPercentage ?? 18,
           });
           toast.success("Resumed your previous draft", {
             description: "We've loaded your progress.",
@@ -353,6 +357,7 @@ export function BuilderProvider({
         })),
         terms: step3DataRef.current?.terms,
         applyGST: step3DataRef.current?.applyGST,
+        gstPercentage: step3DataRef.current?.gstPercentage,
       });
       toast.success("Section updated successfully");
     } catch (err: any) {

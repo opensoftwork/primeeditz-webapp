@@ -24,6 +24,7 @@ export const create = adminMutation({
     lineItems: v.array(servicePackageLineItemValidator),
     terms: v.optional(v.string()),
     applyGST: v.optional(v.boolean()),
+    gstPercentage: v.optional(v.number()),
     isActive: v.boolean(),
   },
   handler: async (ctx, args) => {
@@ -57,6 +58,7 @@ export const update = adminMutation({
     lineItems: v.optional(v.array(servicePackageLineItemValidator)),
     terms: v.optional(v.string()),
     applyGST: v.optional(v.boolean()),
+    gstPercentage: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
   },
   handler: async (ctx, args) => {

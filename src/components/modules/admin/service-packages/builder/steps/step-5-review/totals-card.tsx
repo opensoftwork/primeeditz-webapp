@@ -8,9 +8,15 @@ interface TotalsCardProps {
   total: number;
   subtotal: number;
   gstAmount: number;
+  gstPercentage: number;
 }
 
-export function TotalsCard({ total, subtotal, gstAmount }: TotalsCardProps) {
+export function TotalsCard({
+  total,
+  subtotal,
+  gstAmount,
+  gstPercentage,
+}: TotalsCardProps) {
   return (
     <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/20">
       <div className="p-0">
@@ -37,7 +43,9 @@ export function TotalsCard({ total, subtotal, gstAmount }: TotalsCardProps) {
             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
               <div className="flex items-center gap-1.5">
                 <div className="h-1 w-1 rounded-full bg-white/40" />
-                <span className="opacity-40">GST Component (18%)</span>
+                <span className="opacity-40">
+                  GST Component ({gstPercentage}%)
+                </span>
               </div>
               <span className="text-white">₹{gstAmount.toLocaleString()}</span>
             </div>

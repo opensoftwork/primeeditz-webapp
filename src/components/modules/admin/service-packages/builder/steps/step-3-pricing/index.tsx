@@ -37,6 +37,7 @@ const step3Schema = z.object({
     .array(lineItemSchema)
     .min(1, "At least one line item is required"),
   applyGST: z.boolean(),
+  gstPercentage: z.number().min(0).max(100),
 });
 
 export function Step3Pricing() {
@@ -70,6 +71,7 @@ export function Step3Pricing() {
               },
             ],
       applyGST: step3Data?.applyGST ?? true,
+      gstPercentage: step3Data?.gstPercentage ?? 18,
     },
     validators: {
       onSubmit: step3Schema,
@@ -85,6 +87,7 @@ export function Step3Pricing() {
         })),
         terms: step3Data?.terms, // Preserve existing terms from step 4
         applyGST: value.applyGST,
+        gstPercentage: value.gstPercentage,
       });
       if (!isEditor) {
         goToStep(4);
@@ -112,6 +115,7 @@ export function Step3Pricing() {
         })),
         terms: step3Data?.terms, // Preserve terms from step 4
         applyGST: values.applyGST,
+        gstPercentage: values.gstPercentage,
       });
     });
     return () => setSyncCurrentStep(null);
@@ -248,8 +252,12 @@ export function Step3Pricing() {
                   lineItems={values.lineItems as any}
                   projectConfigs={projectConfigs}
                   applyGST={values.applyGST}
+                  gstPercentage={values.gstPercentage}
                   onToggleGST={(checked) =>
                     form.setFieldValue("applyGST", checked)
+                  }
+                  onUpdateGSTPercentage={(value) =>
+                    form.setFieldValue("gstPercentage", value)
                   }
                 />
               </div>

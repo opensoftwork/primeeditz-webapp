@@ -18,14 +18,18 @@ interface PricingSidebarProps {
   lineItems: LineItem[];
   projectConfigs: ProjectConfig[];
   applyGST: boolean;
+  gstPercentage: number;
   onToggleGST: (checked: boolean) => void;
+  onUpdateGSTPercentage: (value: number) => void;
 }
 
 export function PricingSidebar({
   lineItems,
   projectConfigs,
   applyGST,
+  gstPercentage,
   onToggleGST,
+  onUpdateGSTPercentage,
 }: PricingSidebarProps) {
   const groupedTotals = useMemo(() => {
     const totals: Record<string, { label: string; subtotal: number }> = {};
@@ -51,11 +55,11 @@ export function PricingSidebar({
   const subtotal = useMemo(() => {
     return lineItems.reduce(
       (sum, item) => sum + (item.rate || 0) * (item.quantity || 1),
-      0
+      0,
     );
   }, [lineItems]);
 
-  const gstAmount = applyGST ? Math.round(subtotal * 0.18) : 0;
+  const gstAmount = applyGST ? Math.round(subtotal * (gstPercentage / 100)) : 0;
   const total = subtotal + gstAmount;
 
   return (
@@ -78,7 +82,7 @@ export function PricingSidebar({
       {/* Breakdown Card */}
       <Card className="bg-zinc-900/30 border-white/5 rounded-[32px] p-8 space-y-8 backdrop-blur-xl shadow-2xl shadow-black/40 group overflow-hidden relative">
         <div className="absolute inset-0 bg-grid-white/[0.01] pointer-events-none" />
-        
+
         {/* Project Breakdown */}
         <div className="space-y-4 relative">
           {groupedTotals.length === 0 ? (
@@ -87,9 +91,12 @@ export function PricingSidebar({
             </p>
           ) : (
             groupedTotals.map((group) => (
-              <div key={group.id} className="flex justify-between items-center group/item transition-all">
+              <div
+                key={group.id}
+                className="flex justify-between items-center group/item transition-all"
+              >
                 <span className="text-[10px] font-bold text-white/40 group-hover/item:text-white/60 transition-colors">
-                   {group.label}
+                  {group.label}
                 </span>
                 <span className="text-xs font-black text-white italic tabular-nums">
                   ₹{group.subtotal.toLocaleString()}
@@ -107,7 +114,9 @@ export function PricingSidebar({
             <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
               Subtotal
             </span>
-            <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest">Before Taxes</p>
+            <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest">
+              Before Taxes
+            </p>
           </div>
           <span className="text-sm font-black text-white italic tabular-nums">
             ₹{subtotal.toLocaleString()}
@@ -115,31 +124,58 @@ export function PricingSidebar({
         </div>
 
         {/* GST Toggle - Using Field with horizontal orientation */}
-        <div className="p-5 bg-black/40 rounded-[28px] border border-white/5 relative group/gst hover:border-primary/20 transition-all shadow-inner">
-          <Field orientation="horizontal" className="justify-between items-center">
-            <Switch
-              checked={applyGST}
-              onCheckedChange={onToggleGST}
-              id="gst-toggle"
-              className="data-[state=checked]:bg-primary"
-            />
-            <FieldContent className="flex-1 ml-4 gap-0">
-              <FieldLabel 
-                htmlFor="gst-toggle" 
-                className="cursor-pointer text-[10px] font-black uppercase tracking-widest text-white/60 group-hover/gst:text-white transition-colors"
-              >
-                Apply GST (18%)
-              </FieldLabel>
-              <FieldDescription className="text-[8px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
-                {applyGST 
-                  ? `Incl. ₹${gstAmount.toLocaleString()}` 
-                  : "Tax Not Applied"}
-              </FieldDescription>
-            </FieldContent>
-            <span className="text-[10px] font-black text-primary tabular-nums italic ml-2">
+        <div className="px-5 py-6 bg-black/40 rounded-[28px] border border-white/5 relative group/gst hover:border-primary/20 transition-all shadow-inner space-y-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Switch
+                checked={applyGST}
+                onCheckedChange={onToggleGST}
+                id="gst-toggle"
+                className="data-[state=checked]:bg-primary"
+              />
+              <div className="flex flex-col gap-0.5">
+                <Label
+                  htmlFor="gst-toggle"
+                  className="cursor-pointer text-[10px] font-black uppercase tracking-widest text-white/60 group-hover/gst:text-white transition-colors"
+                >
+                  Apply GST
+                </Label>
+                {applyGST ? (
+                  <div className="flex items-center gap-1.5 bg-white/5 border border-white/10 rounded-lg px-2 py-1 mt-1 animate-in fade-in slide-in-from-top-1 duration-200 w-fit group-hover/gst:border-primary/30 transition-colors">
+                    <input
+                      type="number"
+                      value={gstPercentage}
+                      onChange={(e) =>
+                        onUpdateGSTPercentage(Number(e.target.value))
+                      }
+                      className="bg-transparent border-none p-0 w-6 text-[10px] font-black text-primary focus:ring-0 outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                    />
+                    <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">
+                      %
+                    </span>
+                  </div>
+                ) : (
+                  <p className="text-[8px] font-bold text-white/10 uppercase tracking-widest mt-0.5">
+                    Not Applied
+                  </p>
+                )}
+              </div>
+            </div>
+            <span className="text-[10px] font-black text-primary tabular-nums italic">
               {applyGST ? `+₹${gstAmount.toLocaleString()}` : "—"}
             </span>
-          </Field>
+          </div>
+
+          {applyGST && (
+            <div className="pt-3 border-t border-white/5 flex items-center justify-between">
+              <span className="text-[8px] font-bold text-white/20 uppercase tracking-widest">
+                Tax Component
+              </span>
+              <span className="text-[9px] font-black text-white/40 tabular-nums lowercase italic">
+                incl. ₹{gstAmount.toLocaleString()}
+              </span>
+            </div>
+          )}
         </div>
 
         <Separator className="bg-white/5" />
@@ -155,10 +191,10 @@ export function PricingSidebar({
             </div>
             <div className="text-right">
               <div className="flex items-center gap-1.5 justify-end">
-                 <span className="text-[10px] font-black text-white/20">₹</span>
-                 <span className="text-3xl font-black text-primary italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">
-                   {total.toLocaleString()}
-                 </span>
+                <span className="text-[10px] font-black text-white/20">₹</span>
+                <span className="text-3xl font-black text-primary italic tracking-tighter tabular-nums drop-shadow-[0_0_15px_rgba(var(--primary),0.3)]">
+                  {total.toLocaleString()}
+                </span>
               </div>
               <p className="text-[8px] font-bold text-white/20 uppercase tracking-[0.2em] mt-1 pr-1">
                 Final project cost
@@ -167,13 +203,14 @@ export function PricingSidebar({
           </div>
         </div>
       </Card>
-      
+
       {/* Visual Hint */}
       <div className="p-5 rounded-2xl bg-primary/5 border border-primary/10 flex items-start gap-3">
-         <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1 shadow-[0_0_10px_rgba(var(--primary),1)]" />
-         <p className="text-[9px] font-bold text-white/40 leading-relaxed uppercase tracking-wider">
-            This pricing is a template. Final costs can be adjusted per project in the studio pipeline.
-         </p>
+        <div className="h-1.5 w-1.5 rounded-full bg-primary mt-1 shadow-[0_0_10px_rgba(var(--primary),1)]" />
+        <p className="text-[9px] font-bold text-white/40 leading-relaxed uppercase tracking-wider">
+          This pricing is a template. Final costs can be adjusted per project in
+          the studio pipeline.
+        </p>
       </div>
     </div>
   );

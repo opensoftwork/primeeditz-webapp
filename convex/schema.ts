@@ -467,6 +467,7 @@ export default defineSchema({
     lineItems: v.array(servicePackageLineItemValidator),
     terms: v.optional(v.string()),
     applyGST: v.optional(v.boolean()),
+    gstPercentage: v.optional(v.number()),
 
     // Status
     isActive: v.boolean(),
@@ -609,6 +610,7 @@ export default defineSchema({
     lineItems: v.optional(v.array(servicePackageLineItemValidator)),
     terms: v.optional(v.string()),
     applyGST: v.optional(v.boolean()),
+    gstPercentage: v.optional(v.number()),
 
     // Audit
     createdBy: v.id("profiles"), // Profile ID

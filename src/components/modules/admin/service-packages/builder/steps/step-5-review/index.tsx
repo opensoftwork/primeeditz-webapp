@@ -35,7 +35,8 @@ export function Step5Review() {
   // Queries
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const categories =
-    useQuery(api.functions.projectCategories.queries.getProjectCategories) || [];
+    useQuery(api.functions.projectCategories.queries.getProjectCategories) ||
+    [];
   const storageTiers =
     useQuery(api.functions.storageTiers.queries.listStorageTiers) || [];
 
@@ -52,7 +53,10 @@ export function Step5Review() {
     (sum, item) => sum + (item.rate || 0) * (item.quantity || 1),
     0,
   );
-  const gstAmount = step3Data?.applyGST ? Math.round(subtotal * 0.18) : 0;
+  const gstPercentage = step3Data?.gstPercentage ?? 18;
+  const gstAmount = step3Data?.applyGST
+    ? Math.round(subtotal * (gstPercentage / 100))
+    : 0;
   const total = subtotal + gstAmount;
 
   async function handleSave(isActive: boolean) {
@@ -167,6 +171,7 @@ export function Step5Review() {
             total={total}
             subtotal={subtotal}
             gstAmount={gstAmount}
+            gstPercentage={gstPercentage}
           />
         </div>
       </div>

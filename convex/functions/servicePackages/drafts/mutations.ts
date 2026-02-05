@@ -52,6 +52,7 @@ export const updateDraft = adminMutation({
     lineItems: v.optional(v.array(servicePackageLineItemValidator)),
     terms: v.optional(v.string()),
     applyGST: v.optional(v.boolean()),
+    gstPercentage: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const { draftId, ...updates } = args;
@@ -115,6 +116,7 @@ export const publishDraft = adminMutation({
       lineItems: draft.lineItems,
       terms: draft.terms,
       applyGST: draft.applyGST ?? true,
+      gstPercentage: draft.gstPercentage,
       isActive: true,
       createdBy: ctx.profile._id,
       updatedAt: Date.now(),
