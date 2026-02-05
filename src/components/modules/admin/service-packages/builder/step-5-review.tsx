@@ -9,10 +9,13 @@ import {
   BadgeAlert,
   Check,
   CreditCard,
+  Database,
   Eye,
   FileText,
+  FolderTree,
   HardDrive,
   Layers,
+  Layout,
   Pencil,
   Rocket,
   Save,
@@ -204,38 +207,50 @@ export function Step5Review() {
               </Button>
             </div>
 
-            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-              <CardContent className="p-6 space-y-6">
-                <div className="space-y-1">
-                  <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                    Package Title
-                  </p>
-                  <h4 className="text-xl font-black text-white uppercase tracking-tight">
-                    {step1Data?.name}
-                  </h4>
-                </div>
-
-                {step1Data?.description && (
-                  <div className="space-y-2">
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                      Public Description
-                    </p>
-                    <p className="text-sm text-white/50 leading-relaxed max-w-2xl">
-                      {step1Data.description}
-                    </p>
+            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle hover:border-white/10 transition-colors shadow-2xl shadow-black/20 p-0">
+              <CardContent className="p-0">
+                <div className="px-8 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <Layout className="h-4 w-4 text-primary" />
+                    </div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                      Package Profile
+                    </h4>
                   </div>
-                )}
+                </div>
+                <div className="p-8 space-y-6">
+                  <div className="space-y-1">
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                      Package Title
+                    </p>
+                    <h4 className="text-xl font-black text-white uppercase tracking-tight">
+                      {step1Data?.name}
+                    </h4>
+                  </div>
 
-                <div className="flex flex-wrap gap-4 pt-4">
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
-                    <Package className="h-3.5 w-3.5 text-primary" />
-                    <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
-                      Configurations:{" "}
-                      <span className="text-white">
-                        {step2Data?.projectConfigs.length || 0} Project
-                        Components
+                  {step1Data?.description && (
+                    <div className="space-y-2">
+                      <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                        Public Description
+                      </p>
+                      <p className="text-xs text-white/50 leading-relaxed max-w-2xl font-medium">
+                        {step1Data.description}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="flex flex-wrap gap-4 pt-2">
+                    <div className="flex items-center gap-2.5 px-4 py-2 bg-white/5 rounded-2xl border border-white/5">
+                      <Package className="h-3.5 w-3.5 text-primary/60" />
+                      <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
+                        Composition:{" "}
+                        <span className="text-white">
+                          {step2Data?.projectConfigs.length || 0} Project Module
+                          {step2Data?.projectConfigs.length !== 1 ? "s" : ""}
+                        </span>
                       </span>
-                    </span>
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -276,59 +291,80 @@ export function Step5Review() {
                 return (
                   <Card
                     key={config.id}
-                    className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle"
+                    className="group bg-zinc-900/40 border-white/5 rounded-[24px] overflow-hidden glass-subtle hover:border-primary/20 transition-all duration-300 shadow-xl"
                   >
-                    <CardContent className="p-8">
-                      <div className="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
-                        <div className="md:col-span-4 space-y-4">
-                          <div>
-                            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                              Configuration {index + 1}
-                            </p>
-                            <h4 className="text-lg font-black text-white uppercase tracking-tight mt-1">
-                              {config.label || "Untitled Project"}
-                            </h4>
+                    <CardContent className="p-0">
+                      {/* Compact Header */}
+                      <div className="px-5 py-3 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div className="h-6 w-6 rounded-lg bg-primary/10 flex items-center justify-center border border-primary/20">
+                            <Layers className="h-3 w-3 text-primary" />
                           </div>
-
-                          <div className="space-y-3">
-                            <div className="flex flex-wrap items-center gap-2">
-                              {config.categoryId && (
-                                <Badge className="bg-white/5 text-white/60 border-white/10 font-black text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-md">
-                                  {
-                                    categories.find(
-                                      (c) => c._id === config.categoryId,
-                                    )?.name
-                                  }
-                                </Badge>
-                              )}
-                              <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
-                                {type?.name || "Unknown Type"}
-                              </Badge>
-                            </div>
-                            <div className="flex items-center gap-2">
-                              <HardDrive className="h-3.5 w-3.5 text-white/20" />
-                              <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">
-                                {tier
-                                  ? `${tier.name} (${tier.sizeGB}GB)`
-                                  : "On-Demand Storage"}
-                              </span>
-                            </div>
-                          </div>
+                          <h4 className="text-xs font-black text-white uppercase tracking-widest">
+                            {config.label || "Untitled Project"}
+                          </h4>
                         </div>
+                        <Badge className="bg-white/5 text-white/40 border-white/10 font-bold text-[8px] uppercase tracking-[0.2em] px-2 py-0 rounded-sm leading-none h-5 flex items-center">
+                          CFG {(index + 1).toString().padStart(2, "0")}
+                        </Badge>
+                      </div>
 
-                        <div className="md:col-span-8 bg-zinc-950/20 rounded-2xl overflow-hidden border border-white/5 relative group/preview">
-                          <div className="absolute inset-0 bg-grid-white/[0.02] pointer-events-none" />
-                          <div className="p-6 flex flex-col items-center justify-center text-center space-y-3 relative z-10">
-                            <div className="p-3 bg-white/5 rounded-2xl border border-white/5 group-hover/preview:scale-110 transition-transform duration-300">
-                              <Layers className="h-6 w-6 text-primary/40 group-hover/preview:text-primary transition-colors" />
+                      <div className="p-5">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                          {/* Metadata Details - Left Side */}
+                          <div className="space-y-4">
+                            {/* Framework Info */}
+                            <div className="space-y-2">
+                              <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                                <Rocket className="h-2.5 w-2.5 text-primary/60" />{" "}
+                                Framework
+                              </p>
+                              <div className="flex flex-wrap gap-2">
+                                {config.categoryId && (
+                                  <Badge className="bg-white/5 text-white/60 border-white/10 font-bold text-[8px] uppercase tracking-widest px-2 py-1 rounded-md">
+                                    {
+                                      categories.find(
+                                        (c) => c._id === config.categoryId,
+                                      )?.name
+                                    }
+                                  </Badge>
+                                )}
+                                <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-2 py-1 rounded-md">
+                                  {type?.name || "Standard"}
+                                </Badge>
+                              </div>
                             </div>
+
+                            {/* Storage Info */}
+                            <div className="space-y-2">
+                              <p className="text-[8px] font-black text-white/20 uppercase tracking-[0.2em] flex items-center gap-1.5">
+                                <HardDrive className="h-2.5 w-2.5 text-primary/60" />{" "}
+                                Storage
+                              </p>
+                              <div className="flex items-center gap-2">
+                                <Database className="h-3 w-3 text-primary/40" />
+                                <span className="text-[10px] font-bold text-white uppercase tracking-wider">
+                                  {tier?.name || "Dynamic"}
+                                </span>
+                                <span className="text-[10px] text-white/20">
+                                  •
+                                </span>
+                                <span className="text-[9px] font-bold text-white/40 uppercase tracking-wider">
+                                  {tier?.sizeGB || "Uncapped"} GB
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Folder Structure - Right Side (Integrated) */}
+                          <div className="relative pl-6 md:border-l border-white/5 flex flex-col justify-center space-y-3">
                             <div className="space-y-1">
-                              <h5 className="text-sm font-bold text-white uppercase tracking-tight">
-                                Folder Structure
+                              <h5 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center gap-2">
+                                <FolderTree className="h-3.5 w-3.5 text-primary" />
+                                Folder Hierarchy
                               </h5>
-                              <p className="text-[10px] text-white/40 font-medium max-w-[200px]">
-                                Click to view the complete folder hierarchy for
-                                this project config
+                              <p className="text-[9px] text-white/30 font-medium max-w-[200px] leading-relaxed">
+                                Includes standardized directory structure for {type?.name || "this project type"}.
                               </p>
                             </div>
 
@@ -337,21 +373,29 @@ export function Step5Review() {
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  className="h-8 text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 hover:bg-white/10 hover:text-white mt-1"
+                                  className="w-fit h-7 text-[9px] uppercase font-black tracking-[0.2em] bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/30 text-white/60 hover:text-white rounded-lg transition-all px-3"
                                 >
-                                  View Structure
+                                  View Architecture
                                 </Button>
                               </SheetTrigger>
-                              <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-white/10 p-0">
-                                <SheetHeader className="p-6 border-b border-white/10">
-                                  <SheetTitle className="text-lg font-black uppercase tracking-tight text-white">
-                                    Folder Structure Preview
-                                  </SheetTitle>
-                                  <SheetDescription className="text-xs text-white/40 font-medium uppercase tracking-wider">
-                                    {config.label || "Project Configuration"}
-                                  </SheetDescription>
+                              <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-white/10 p-0 shadow-2xl">
+                                <SheetHeader className="p-8 border-b border-white/10 bg-zinc-900/20 backdrop-blur-xl">
+                                  <div className="flex items-center gap-3 mb-2">
+                                    <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                                      <FolderTree className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                      <SheetTitle className="text-xl font-black uppercase tracking-tight text-white leading-none">
+                                        Hierarchy Architecture
+                                      </SheetTitle>
+                                      <SheetDescription className="text-[9px] text-primary/60 font-black uppercase tracking-widest mt-2">
+                                        {config.label ||
+                                          "Project Configuration"}
+                                      </SheetDescription>
+                                    </div>
+                                  </div>
                                 </SheetHeader>
-                                <div className="h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
+                                <div className="h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar p-6">
                                   <FolderPreview
                                     templateId={config.folderTemplateId}
                                   />
@@ -390,24 +434,34 @@ export function Step5Review() {
               </Button>
             </div>
 
-            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
+            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle hover:border-white/10 transition-colors shadow-2xl shadow-black/20">
               <CardContent className="p-0">
-                <div className="p-8 space-y-6">
+                <div className="px-8 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <CreditCard className="h-4 w-4 text-primary" />
+                    </div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                      Cost Structure
+                    </h4>
+                  </div>
+                </div>
+                <div className="p-8 space-y-8">
                   <div className="space-y-4">
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                      Package Line Items
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest flex items-center gap-2">
+                      <Save className="h-3 w-3" /> Itemized Breakdown
                     </p>
                     <div className="space-y-3">
                       {lineItems.map((item) => (
                         <div
                           key={item.id}
-                          className="flex items-center justify-between py-2 border-b border-white/5"
+                          className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 group/item hover:bg-white/5 -mx-2 px-2 rounded-xl transition-colors"
                         >
                           <div>
-                            <p className="text-xs font-black text-white uppercase tracking-tight">
+                            <p className="text-xs font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors">
                               {item.description}
                             </p>
-                            <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest">
+                            <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
                               {item.quantity} × {item.unit}
                             </p>
                           </div>
@@ -445,28 +499,40 @@ export function Step5Review() {
               </Button>
             </div>
 
-            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-              <CardContent className="p-8">
-                {step3Data?.terms ? (
-                  <div className="space-y-2">
-                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                      Terms of Service
-                    </p>
-                    <p className="text-[11px] text-white/40 leading-relaxed italic whitespace-pre-line">
-                      {step3Data.terms}
-                    </p>
+            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle hover:border-white/10 transition-colors shadow-2xl shadow-black/20">
+              <CardContent className="p-0">
+                <div className="px-8 py-5 border-b border-white/5 bg-white/5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-xl bg-primary/10 flex items-center justify-center border border-primary/20">
+                      <FileText className="h-4 w-4 text-primary" />
+                    </div>
+                    <h4 className="text-sm font-black text-white uppercase tracking-tight">
+                      Agreement Compliance
+                    </h4>
                   </div>
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-6 text-center">
-                    <FileText className="h-8 w-8 text-white/10 mb-3" />
-                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
-                      No terms defined
-                    </p>
-                    <p className="text-[9px] text-white/20 mt-1">
-                      Click Edit to add terms and conditions
-                    </p>
-                  </div>
-                )}
+                </div>
+                <div className="p-8">
+                  {step3Data?.terms ? (
+                    <div className="space-y-4">
+                      <p className="text-[9px] font-black text-white/20 uppercase tracking-widest flex items-center gap-2">
+                        <Check className="h-3 w-3" /> Standardized Terms
+                      </p>
+                      <p className="text-[11px] text-white/50 leading-relaxed italic whitespace-pre-line font-medium bg-black/20 p-4 rounded-2xl border border-white/5">
+                        {step3Data.terms}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center py-6 text-center">
+                      <FileText className="h-10 w-10 text-white/5 mb-4" />
+                      <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                        No terms defined
+                      </p>
+                      <p className="text-[9px] text-white/20 mt-1 uppercase font-bold tracking-widest">
+                        Standard legal backup will be applied
+                      </p>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </div>
@@ -474,10 +540,10 @@ export function Step5Review() {
 
         {/* Right Column: Final CTA & Totals */}
         <div className="lg:col-span-4 lg:sticky lg:top-8 h-fit space-y-6">
-          <Card className="bg-primary border-primary/20 rounded-[40px] overflow-hidden shadow-2xl shadow-primary/20">
-            <div className="p-8 space-y-8 bg-zinc-950/20 backdrop-blur-xl">
-              <div className="space-y-1">
-                <p className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+          <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/20">
+            <div className="p-0">
+              <div className="px-8 py-6 border-b border-white/5 bg-white/5 space-y-1">
+                <p className="text-[9px] font-black text-white/40 uppercase tracking-widest">
                   Total Package Value
                 </p>
                 <div className="flex items-end gap-2">
@@ -490,29 +556,31 @@ export function Step5Review() {
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-60">
-                  <span>Base Subtotal</span>
-                  <span>₹{subtotal.toLocaleString()}</span>
-                </div>
-                <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
-                  <div className="flex items-center gap-1.5">
-                    <div className="h-1 w-1 rounded-full bg-white/40" />
-                    <span className="opacity-40">GST Component (18%)</span>
+              <div className="p-8 space-y-6">
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest opacity-60">
+                    <span>Base Subtotal</span>
+                    <span>₹{subtotal.toLocaleString()}</span>
                   </div>
-                  <span className="text-white">
-                    ₹{gstAmount.toLocaleString()}
-                  </span>
+                  <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest">
+                    <div className="flex items-center gap-1.5">
+                      <div className="h-1 w-1 rounded-full bg-white/40" />
+                      <span className="opacity-40">GST Component (18%)</span>
+                    </div>
+                    <span className="text-white">
+                      ₹{gstAmount.toLocaleString()}
+                    </span>
+                  </div>
                 </div>
-              </div>
 
-              <Separator className="bg-white/10 mt-6" />
+                <Separator className="bg-white/5" />
 
-              <div className="flex items-center gap-3 px-4 py-3 bg-white/5 rounded-2xl border border-white/5 mt-4">
-                <BadgeAlert className="h-4 w-4 text-white/40" />
-                <p className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-tight">
-                  Proceeding will create a template used for studio quotations.
-                </p>
+                <div className="flex items-start gap-3 px-4 py-3 bg-white/5 rounded-2xl border border-white/5">
+                  <BadgeAlert className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <p className="text-[9px] font-bold text-white/40 uppercase tracking-wide leading-relaxed">
+                    Proceeding will create a template used for studio quotations.
+                  </p>
+                </div>
               </div>
             </div>
           </Card>
