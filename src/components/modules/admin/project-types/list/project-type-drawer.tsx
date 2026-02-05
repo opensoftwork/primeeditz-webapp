@@ -219,7 +219,12 @@ export function ProjectTypeDrawer({
                       </div>
                       {field.state.meta.errors.length > 0 && (
                         <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                          {field.state.meta.errors.join(", ")}
+                          {field.state.meta.errors
+                            .map((err: any) =>
+                              typeof err === "string" ? err : err?.message,
+                            )
+                            .filter(Boolean)
+                            .join(", ")}
                         </p>
                       )}
                     </div>
@@ -319,7 +324,7 @@ export function ProjectTypeDrawer({
       </Drawer>
 
       <Dialog open={isAddingCategory} onOpenChange={setIsAddingCategory}>
-        <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px] rounded-[2rem]">
+        <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px] rounded-4xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-white uppercase tracking-tighter">
               New Master Category

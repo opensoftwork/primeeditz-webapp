@@ -103,6 +103,7 @@ export function Step5Review() {
           })),
           terms: step3Data.terms,
           applyGST: step3Data.applyGST,
+          gstPercentage: step3Data.gstPercentage,
           isActive,
         };
         await updatePackage({ id: packageId, ...packageData });

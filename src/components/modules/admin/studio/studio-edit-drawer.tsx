@@ -152,7 +152,12 @@ export function StudioEditDrawer({
                   />
                   {field.state.meta.errors ? (
                     <em className="text-[10px] text-destructive font-bold uppercase tracking-widest px-1">
-                      {field.state.meta.errors.join(", ")}
+                      {field.state.meta.errors
+                        .map((err: any) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
                     </em>
                   ) : null}
                 </div>

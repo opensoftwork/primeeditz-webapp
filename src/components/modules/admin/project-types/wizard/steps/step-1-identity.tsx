@@ -3,6 +3,7 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useForm, useStore } from "@tanstack/react-form";
+import { zodValidator } from "@tanstack/zod-form-adapter";
 import { useMutation, useQuery } from "convex/react";
 import { Plus, Tag } from "lucide-react";
 import { useEffect, useState } from "react";
@@ -59,12 +60,9 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
       isActive: step1Data?.isActive ?? true,
       icon: step1Data?.icon ?? "",
     },
+    validatorAdapter: zodValidator(),
     validators: {
-      onChange: ({ value }) => {
-        const result = step1Schema.safeParse(value);
-        if (result.success) return undefined;
-        return result.error.flatten().fieldErrors;
-      },
+      onChange: step1Schema,
     },
     onSubmit: async ({ value }) => {
       setStep1Data({
@@ -188,7 +186,12 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
                 </div>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                    {field.state.meta.errors.join(", ")}
+                    {field.state.meta.errors
+                      .map((err: any) =>
+                        typeof err === "string" ? err : err?.message,
+                      )
+                      .filter(Boolean)
+                      .join(", ")}
                   </p>
                 )}
               </div>
@@ -276,7 +279,12 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
                 </Select>
                 {field.state.meta.errors.length > 0 && (
                   <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                    {field.state.meta.errors.join(", ")}
+                    {field.state.meta.errors
+                      .map((err: any) =>
+                        typeof err === "string" ? err : err?.message,
+                      )
+                      .filter(Boolean)
+                      .join(", ")}
                   </p>
                 )}
               </div>
