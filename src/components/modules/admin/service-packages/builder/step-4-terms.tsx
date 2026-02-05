@@ -6,20 +6,11 @@
 
 "use client";
 
-import {
-  Check,
-  ChevronDown,
-  Copy,
-  FileText,
-  Sparkles,
-  AlertCircle,
-} from "lucide-react";
-import { AnimatePresence, motion } from "motion/react";
+import { Check, Copy, FileText, Sparkles, AlertCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
 
@@ -185,163 +176,97 @@ export function Step4Terms() {
         <h2 className="text-3xl font-black uppercase tracking-tighter text-white">
           Terms & Conditions
         </h2>
-        <p className="text-sm font-semibold text-white/40 max-w-lg leading-relaxed">
+        <p className="text-sm font-semibold text-white/40 leading-relaxed">
           Define the legal guardrails and terms that will be included with
           quotations using this package.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-start">
-        {/* Main Content Area */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Terms Section */}
-          <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden">
-            <CardContent className="p-8 space-y-6">
-              {/* Quick Templates */}
-              <div>
-                <div className="flex items-center gap-2 mb-4">
-                  <Sparkles className="h-4 w-4 text-primary" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white/60">
-                    Quick Templates
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-3">
-                  {TERMS_TEMPLATES.map((template) => (
-                    <Button
-                      key={template.id}
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => applyTemplate(template.id)}
-                      className="h-10 px-5 rounded-xl bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10 text-[10px] font-black uppercase tracking-widest"
-                    >
-                      {template.name}
-                    </Button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Terms Editor Header */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <FileText className="h-5 w-5 text-primary" />
-                  <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/60">
-                    Terms of Service
-                  </FieldLabel>
-                  {terms && (
-                    <span
-                      className={cn(
-                        "text-[9px] font-black uppercase tracking-widest",
-                        terms.length > 1800 ? "text-red-500" : "text-white/20",
-                      )}
-                    >
-                      {terms.length} / 2000
-                    </span>
-                  )}
-                </div>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={copyToClipboard}
-                  disabled={!terms}
-                  className="h-8 px-3 rounded-lg text-[9px] font-bold uppercase tracking-wider text-white/30 hover:text-white disabled:opacity-30"
-                >
-                  {copied ? (
-                    <>
-                      <Check className="h-3 w-3 mr-1 text-green-400" />
-                      Copied
-                    </>
-                  ) : (
-                    <>
-                      <Copy className="h-3 w-3 mr-1" />
-                      Copy
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* Terms Textarea */}
-              <div className="relative group">
-                <Textarea
-                  value={terms}
-                  onChange={(e) => handleTermsChange(e.target.value)}
-                  placeholder="Define payment milestones, cancellation policies, delivery timelines..."
-                  className="bg-zinc-900/30 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none min-h-[400px] rounded-[24px] text-sm transition-all p-8 shadow-inner placeholder:text-white/10 backdrop-blur-sm font-mono leading-relaxed"
-                />
-                {/* Decorative Corner */}
-                <div className="absolute bottom-6 right-6 pointer-events-none opacity-20">
-                  <FileText className="h-10 w-10 text-white" />
-                </div>
-              </div>
-
-              {/* Info Note */}
-              <div className="flex items-center gap-2 px-4">
-                <AlertCircle className="h-3 w-3 text-white/20" />
-                <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                  These terms will be appended to the final quotation PDF.
-                </p>
-              </div>
-            </CardContent>
-          </Card>
+      <div className="space-y-8 w-full">
+        {/* Quick Templates */}
+        <div>
+          <div className="flex items-center gap-2 mb-4">
+            <Sparkles className="h-4 w-4 text-primary" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/60">
+              Quick Templates
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-3">
+            {TERMS_TEMPLATES.map((template) => (
+              <Button
+                key={template.id}
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => applyTemplate(template.id)}
+                className="h-10 px-5 rounded-xl bg-white/5 border-white/10 text-white/60 hover:text-white hover:bg-white/10 text-[10px] font-black uppercase tracking-widest"
+              >
+                {template.name}
+              </Button>
+            ))}
+          </div>
         </div>
 
-        {/* Sidebar - Tips */}
-        <div className="lg:col-span-4 lg:sticky lg:top-8 space-y-6">
-          <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden">
-            <CardContent className="p-8 space-y-6">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
-                  <FileText className="h-5 w-5 text-primary" />
-                </div>
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-white/60">
-                  Terms Tips
-                </h3>
-              </div>
+        {/* Terms Editor Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-primary" />
+            <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/60">
+              Terms of Service
+            </FieldLabel>
+            {terms && (
+              <span
+                className={cn(
+                  "text-[9px] font-black uppercase tracking-widest",
+                  terms.length > 1800 ? "text-red-500" : "text-white/20",
+                )}
+              >
+                {terms.length} / 2000
+              </span>
+            )}
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={copyToClipboard}
+            disabled={!terms}
+            className="h-8 px-3 rounded-lg text-[9px] font-bold uppercase tracking-wider text-white/30 hover:text-white disabled:opacity-30"
+          >
+            {copied ? (
+              <>
+                <Check className="h-3 w-3 mr-1 text-green-400" />
+                Copied
+              </>
+            ) : (
+              <>
+                <Copy className="h-3 w-3 mr-1" />
+                Copy
+              </>
+            )}
+          </Button>
+        </div>
 
-              <div className="space-y-4">
-                <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
-                    Payment Terms
-                  </p>
-                  <p className="text-xs text-white/50 leading-relaxed">
-                    Clearly define payment milestones, accepted methods, and due
-                    dates.
-                  </p>
-                </div>
+        {/* Terms Textarea */}
+        <div className="relative group">
+          <Textarea
+            value={terms}
+            onChange={(e) => handleTermsChange(e.target.value)}
+            placeholder="Define payment milestones, cancellation policies, delivery timelines..."
+            className="bg-zinc-900/30 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none min-h-[500px] rounded-[12px] text-sm transition-all p-8 shadow-inner placeholder:text-white/10 backdrop-blur-sm font-mono leading-relaxed"
+          />
+          {/* Decorative Corner */}
+          <div className="absolute bottom-6 right-6 pointer-events-none opacity-20">
+            <FileText className="h-10 w-10 text-white" />
+          </div>
+        </div>
 
-                <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
-                    Revision Policy
-                  </p>
-                  <p className="text-xs text-white/50 leading-relaxed">
-                    Specify the number of included revisions and charges for
-                    additional rounds.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
-                    Cancellation
-                  </p>
-                  <p className="text-xs text-white/50 leading-relaxed">
-                    Outline refund policies and cancellation fees at different
-                    project stages.
-                  </p>
-                </div>
-
-                <div className="p-4 rounded-2xl bg-white/2 border border-white/5">
-                  <p className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
-                    IP Rights
-                  </p>
-                  <p className="text-xs text-white/50 leading-relaxed">
-                    Clarify ownership transfer, usage rights, and raw file
-                    availability.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+        {/* Info Note */}
+        <div className="flex items-center gap-2 px-4">
+          <AlertCircle className="h-3 w-3 text-white/20" />
+          <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+            These terms will be appended to the final quotation PDF.
+          </p>
         </div>
       </div>
     </div>

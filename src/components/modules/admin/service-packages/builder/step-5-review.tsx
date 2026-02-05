@@ -109,14 +109,15 @@ export function Step5Review() {
             defaultStorageTierId: config.defaultStorageTierId,
           })),
           // Legacy fields
-          projectTypeId: step2Data.projectConfigs[0].projectTypeId,
-          folderTemplateId: step2Data.projectConfigs[0].folderTemplateId,
+          projectTypeId: step2Data.projectConfigs[0]?.projectTypeId,
+          folderTemplateId: step2Data.projectConfigs[0]?.folderTemplateId,
           defaultStorageTierId:
-            step2Data.projectConfigs[0].defaultStorageTierId,
+            step2Data.projectConfigs[0]?.defaultStorageTierId,
 
           lineItems: step3Data.lineItems.map((item) => ({
             id: item.id,
-            sectionId: item.sectionId,
+            sectionId: item.sectionId as Id<"quotationSections">,
+            projectConfigId: item.projectConfigId,
             description: item.description,
             unit: item.unit,
             rate: item.rate,
@@ -204,7 +205,7 @@ export function Step5Review() {
             </div>
 
             <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
-              <CardContent className="p-8 space-y-6">
+              <CardContent className="p-6 space-y-6">
                 <div className="space-y-1">
                   <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
                     Package Title
@@ -263,7 +264,7 @@ export function Step5Review() {
               </Button>
             </div>
 
-            <div className="space-y-4">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {step2Data?.projectConfigs.map((config, index) => {
                 const type = projectTypes.find(
                   (t) => t._id === config.projectTypeId,

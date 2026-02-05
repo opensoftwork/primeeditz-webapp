@@ -165,7 +165,11 @@ export function BuilderProvider({
           name: step1DataRef.current?.name,
           description: step1DataRef.current?.description,
           projectConfigs: step2DataRef.current?.projectConfigs,
-          lineItems: step3DataRef.current?.lineItems,
+          lineItems: step3DataRef.current?.lineItems?.map((item) => ({
+            ...item,
+            sectionId: item.sectionId as Id<"quotationSections">,
+            projectConfigId: item.projectConfigId || undefined,
+          })),
           terms: step3DataRef.current?.terms,
           applyGST: step3DataRef.current?.applyGST,
         });
