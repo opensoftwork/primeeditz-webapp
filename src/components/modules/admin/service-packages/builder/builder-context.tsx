@@ -74,7 +74,7 @@ interface BuilderContextValue {
   goToStep: (step: number) => void;
   submitTrigger: (() => void) | null;
   setSubmitTrigger: (fn: (() => void) | null) => void;
-  
+
   // Step data sync - called before navigation to save current form data to context
   syncCurrentStep: (() => void) | null;
   setSyncCurrentStep: (fn: (() => void) | null) => void;
@@ -101,7 +101,9 @@ export function BuilderProvider({
   const [step2Data, setStep2Data] = useState<Step2Data | null>(null);
   const [step3Data, setStep3Data] = useState<Step3Data | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [draftId, setDraftId] = useState<Id<"servicePackageDrafts"> | null>(null);
+  const [draftId, setDraftId] = useState<Id<"servicePackageDrafts"> | null>(
+    null,
+  );
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Refs for immediate access to data during async saves
@@ -125,21 +127,29 @@ export function BuilderProvider({
   }, []);
 
   // Mutations
-  const createDraft = useMutation(api.functions.servicePackages.drafts.mutations.createDraft);
-  const updateDraft = useMutation(api.functions.servicePackages.drafts.mutations.updateDraft);
-  const deleteDraftMutation = useMutation(api.functions.servicePackages.drafts.mutations.deleteDraft);
-  const publishDraft = useMutation(api.functions.servicePackages.drafts.mutations.publishDraft);
+  const createDraft = useMutation(
+    api.functions.servicePackages.drafts.mutations.createDraft,
+  );
+  const updateDraft = useMutation(
+    api.functions.servicePackages.drafts.mutations.updateDraft,
+  );
+  const deleteDraftMutation = useMutation(
+    api.functions.servicePackages.drafts.mutations.deleteDraft,
+  );
+  const publishDraft = useMutation(
+    api.functions.servicePackages.drafts.mutations.publishDraft,
+  );
 
   // Query for existing draft (if not editing live package)
   const activeDraft = useQuery(
     api.functions.servicePackages.drafts.queries.getActiveDraft,
-    packageId ? "skip" : {}
+    packageId ? "skip" : {},
   );
 
   // Fetch package data if editing
   const pkg = useQuery(
     api.functions.servicePackages.queries.get,
-    packageId ? { id: packageId } : "skip"
+    packageId ? { id: packageId } : "skip",
   );
 
   // Persistence Helper
@@ -163,7 +173,15 @@ export function BuilderProvider({
         console.error("Failed to save draft:", err);
       }
     },
-    [draftId, currentStep, step1Data, step2Data, step3Data, updateDraft, packageId]
+    [
+      draftId,
+      currentStep,
+      step1Data,
+      step2Data,
+      step3Data,
+      updateDraft,
+      packageId,
+    ],
   );
 
   // Initialization
@@ -180,7 +198,9 @@ export function BuilderProvider({
           description: pkg.description,
         });
 
-        const projectConfigs = pkg.projectConfigs ? [...pkg.projectConfigs] : [];
+        const projectConfigs = pkg.projectConfigs
+          ? [...pkg.projectConfigs]
+          : [];
         if (projectConfigs.length === 0 && pkg.projectTypeId) {
           projectConfigs.push({
             id: crypto.randomUUID(),
@@ -223,10 +243,12 @@ export function BuilderProvider({
             description: activeDraft.description,
           });
           setStep2DataWithRef({
-            projectConfigs: (activeDraft.projectConfigs ?? []).map((config: any) => ({
-              ...config,
-              categoryId: config.categoryId ?? activeDraft.categoryId, // Fallback for legacy drafts
-            })) as ProjectConfig[],
+            projectConfigs: (activeDraft.projectConfigs ?? []).map(
+              (config: any) => ({
+                ...config,
+                categoryId: config.categoryId ?? activeDraft.categoryId, // Fallback for legacy drafts
+              }),
+            ) as ProjectConfig[],
           });
           setStep3DataWithRef({
             lineItems: (activeDraft.lineItems ?? []) as LineItem[],
@@ -234,7 +256,7 @@ export function BuilderProvider({
             applyGST: activeDraft.applyGST ?? true,
           });
           toast.success("Resumed your previous draft", {
-             description: "We've loaded your progress."
+            description: "We've loaded your progress.",
           });
         } else {
           // Start Fresh
@@ -249,8 +271,10 @@ export function BuilderProvider({
   }, [packageId, pkg, activeDraft, isInitialized, createDraft]);
 
   const [submitTrigger, setSubmitTrigger] = useState<(() => void) | null>(null);
-  const [syncCurrentStep, setSyncCurrentStep] = useState<(() => void) | null>(null);
-  
+  const [syncCurrentStep, setSyncCurrentStep] = useState<(() => void) | null>(
+    null,
+  );
+
   // Reference to hold the latest sync function (avoids stale closure issues)
   const syncCurrentStepRef = useRef<(() => void) | null>(null);
   useEffect(() => {
@@ -259,7 +283,7 @@ export function BuilderProvider({
 
   const goToStep = useCallback(
     async (step: number) => {
-      if (step >= 1 && step <= 4) {
+      if (step >= 1 && step <= 5) {
         // First, sync the current step's form data to context
         if (syncCurrentStepRef.current) {
           syncCurrentStepRef.current();
@@ -269,11 +293,11 @@ export function BuilderProvider({
         setCurrentStep(step);
       }
     },
-    [saveDraft]
+    [saveDraft],
   );
 
   const nextStep = useCallback(() => {
-    const next = Math.min(currentStep + 1, 4);
+    const next = Math.min(currentStep + 1, 5);
     goToStep(next);
   }, [currentStep, goToStep]);
 
@@ -304,7 +328,9 @@ export function BuilderProvider({
     }
   }, [draftId, packageId, publishDraft]);
 
-  const updatePackageMutation = useMutation(api.functions.servicePackages.mutations.update);
+  const updatePackageMutation = useMutation(
+    api.functions.servicePackages.mutations.update,
+  );
 
   const savePackageUpdate = useCallback(async () => {
     if (!packageId) return;
@@ -316,7 +342,7 @@ export function BuilderProvider({
         name: step1DataRef.current?.name,
         description: step1DataRef.current?.description,
         projectConfigs: step2DataRef.current?.projectConfigs as any,
-        lineItems: step3DataRef.current?.lineItems?.map(item => ({
+        lineItems: step3DataRef.current?.lineItems?.map((item) => ({
           ...item,
           sectionId: item.sectionId as Id<"quotationSections">,
           projectConfigId: item.projectConfigId || undefined,
@@ -374,7 +400,7 @@ export function BuilderProvider({
       publishPackage,
       savePackageUpdate,
       cancelWizard,
-    ]
+    ],
   );
 
   if (!isInitialized) {

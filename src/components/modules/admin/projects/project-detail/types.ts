@@ -56,4 +56,5 @@ export interface AdminProjectDetail {
     digitalDeliveryLabel?: string;
     requiresSignoff: boolean;
   };
+  hasEmployeeUploads?: boolean;
 }

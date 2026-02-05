@@ -17,20 +17,24 @@ import { DeliverableMetaCard } from "./deliverable-meta-card";
 import { RevisionDialog } from "./revision-dialog";
 import { VersionHistory } from "./version-history";
 
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+
 interface DeliverableDetailViewProps {
   projectId?: string;
   deliverableId?: string;
 }
 
-export function DeliverableDetailView({ 
-  projectId: propProjectId, 
-  deliverableId: propDeliverableId 
+export function DeliverableDetailView({
+  projectId: propProjectId,
+  deliverableId: propDeliverableId,
 }: DeliverableDetailViewProps = {}) {
   const params = useParams();
   const router = useRouter();
-  
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
   const projectId = propProjectId || (params.projectId as string);
-  const deliverableIdString = propDeliverableId || (params.deliverableId as string);
+  const deliverableIdString =
+    propDeliverableId || (params.deliverableId as string);
   const deliverableId = deliverableIdString as Id<"deliverables">;
 
   // Role check
@@ -40,35 +44,43 @@ export function DeliverableDetailView({
   // Queries
   const project = useQuery(
     api.functions.projects.queries.getProject,
-    projectId ? { projectId: projectId as Id<"projects"> } : "skip"
+    projectId ? { projectId: projectId as Id<"projects"> } : "skip",
   );
 
   const deliverable = useQuery(
     api.functions.deliverables.queries.getDeliverable,
-    deliverableId ? { deliverableId } : "skip"
+    deliverableId ? { deliverableId } : "skip",
   );
+
+  // Set breadcrumb overrides
+  useEffect(() => {
+    if (deliverable) {
+      setOverride(deliverableIdString, deliverable.name);
+    }
+    return () => removeOverride(deliverableIdString);
+  }, [deliverableIdString, deliverable, setOverride, removeOverride]);
 
   const versions = useQuery(
     api.functions.deliverables.queries.getDeliverableVersions,
     deliverable
       ? { projectId: deliverable.projectId, name: deliverable.name }
-      : "skip"
+      : "skip",
   );
 
   // Mutations
   const approveDeliverable = useMutation(
-    api.functions.deliverables.mutations.approveDeliverable
+    api.functions.deliverables.mutations.approveDeliverable,
   );
   const requestRevision = useMutation(
-    api.functions.deliverables.mutations.requestRevision
+    api.functions.deliverables.mutations.requestRevision,
   );
   const sendToStudio = useMutation(
-    api.functions.deliverables.mutations.sendToStudio
+    api.functions.deliverables.mutations.sendToStudio,
   );
 
   // Actions
   const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl
+    api.functions.storage.actions.getSignedFileUrl,
   );
 
   // Local state
@@ -163,10 +175,10 @@ export function DeliverableDetailView({
   const canRequestRevision =
     deliverable.status === "pending_qc" ||
     deliverable.status === "revision_needed";
-  
+
   // Can send to studio if deliverable is approved AND project isn't already in review/delivery
-  const canSendToStudio = 
-    deliverable.status === "approved" && 
+  const canSendToStudio =
+    deliverable.status === "approved" &&
     project?.actionState !== "awaiting_review" &&
     project?.actionState !== "review_approved" &&
     project?.phase !== "delivery";
@@ -178,10 +190,14 @@ export function DeliverableDetailView({
         version={deliverable.version}
         sizeBytes={deliverable.sizeBytes}
         createdAt={deliverable._creationTime}
-        hasMultipleVersions={versions !== undefined && versions !== null && versions.length > 1}
+        hasMultipleVersions={
+          versions !== undefined && versions !== null && versions.length > 1
+        }
         versionCount={versions?.length || 0}
         showVersionHistory={showVersionHistory}
-        onToggleVersionHistory={() => setShowVersionHistory(!showVersionHistory)}
+        onToggleVersionHistory={() =>
+          setShowVersionHistory(!showVersionHistory)
+        }
         onBack={() => router.back()}
         downloadUrl={fileUrl}
       />

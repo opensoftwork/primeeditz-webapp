@@ -2,8 +2,9 @@
 
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { useAction, useQuery } from "convex/react";
+import { useAction, useQuery, useMutation } from "convex/react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import { File as FileIcon, Send, ShieldCheck } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -15,12 +16,20 @@ import { DeliverableCard } from "./deliverables/list/deliverable-card";
 
 interface ProjectDeliverablesProps {
   projectId: Id<"projects">;
+  isVisible?: boolean;
 }
 
-export function ProjectDeliverables({ projectId }: ProjectDeliverablesProps) {
+export function ProjectDeliverables({
+  projectId,
+  isVisible = true,
+}: ProjectDeliverablesProps) {
   const deliverables = useQuery(
     api.functions.deliverables.queries.getProjectDeliverables,
     { projectId },
+  );
+
+  const sendToStudio = useMutation(
+    api.functions.deliverables.mutations.sendToStudio,
   );
 
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
@@ -51,6 +60,10 @@ export function ProjectDeliverables({ projectId }: ProjectDeliverablesProps) {
     fetchUrls();
   }, [deliverables, getSignedUrlsAction]);
 
+  if (!isVisible) {
+    return null;
+  }
+
   if (deliverables === undefined) {
     return <Skeleton className="h-32 w-full rounded-2xl bg-white/5" />;
   }
@@ -66,9 +79,7 @@ export function ProjectDeliverables({ projectId }: ProjectDeliverablesProps) {
           className="text-[10px] font-black uppercase tracking-widest text-indigo-400 hover:text-indigo-300 hover:bg-indigo-400/10 rounded-lg h-8"
           asChild
         >
-          <Link href={`/projects/${projectId}/deliverables`}>
-            View All
-          </Link>
+          <Link href={`/projects/${projectId}/deliverables`}>View All</Link>
         </Button>
       }
     >
@@ -92,7 +103,20 @@ export function ProjectDeliverables({ projectId }: ProjectDeliverablesProps) {
                 status={item.status}
                 createdAt={item._creationTime}
                 uploadedByName={item.uploadedByName}
-                onSend={() => console.log("Send clicked", item._id)}
+                onSend={
+                  item.status === "approved"
+                    ? () => {
+                        toast.promise(
+                          sendToStudio({ deliverableId: item._id }),
+                          {
+                            loading: "Sending to studio...",
+                            success: "Deliverable sent to studio review!",
+                            error: "Failed to send deliverable",
+                          },
+                        );
+                      }
+                    : undefined
+                }
               />
             ))}
           </div>

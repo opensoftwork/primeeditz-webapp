@@ -5,19 +5,17 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
-import { 
-  Field, 
-  FieldError, 
+import {
+  Field,
+  FieldError,
   FieldLabel,
-  FieldGroup
+  FieldGroup,
 } from "@/components/ui/field";
-import { Plus, FileText, Calculator, AlertCircle } from "lucide-react";
+import { Plus, Calculator } from "lucide-react";
 
 import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Card, CardContent } from "@/components/ui/card";
 
 import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
@@ -26,7 +24,7 @@ import { PricingSidebar } from "./components/pricing-sidebar";
 
 const lineItemSchema = z.object({
   id: z.string(),
-  sectionId: z.string(),
+  sectionId: z.string().optional(),
   projectConfigId: z.string(),
   description: z.string().min(1, "Description is required"),
   unit: z.string().min(1, "Unit is required"),
@@ -38,7 +36,6 @@ const step3Schema = z.object({
   lineItems: z
     .array(lineItemSchema)
     .min(1, "At least one line item is required"),
-  terms: z.string().max(2000, "Terms must be 2000 chars or less"),
   applyGST: z.boolean(),
 });
 
@@ -53,12 +50,8 @@ export function Step3Pricing() {
     goToStep,
     isEditor,
   } = useBuilder();
-  
+
   const projectConfigs = step2Data?.projectConfigs ?? [];
-  const sections =
-    useQuery(api.functions.quotations.sections.queries.getSections, {
-      activeOnly: true,
-    }) || [];
 
   const form = useForm({
     defaultValues: {
@@ -69,14 +62,13 @@ export function Step3Pricing() {
               {
                 id: crypto.randomUUID(),
                 projectConfigId: projectConfigs[0]?.id || "",
-                sectionId: "",
+                sectionId: undefined as string | undefined,
                 description: "Main Service Offering",
                 unit: "per project",
                 rate: 0,
                 quantity: 1,
               },
             ],
-      terms: step3Data?.terms ?? "",
       applyGST: step3Data?.applyGST ?? true,
     },
     validators: {
@@ -91,7 +83,7 @@ export function Step3Pricing() {
             : undefined,
           projectConfigId: item.projectConfigId || undefined,
         })),
-        terms: value.terms || undefined,
+        terms: step3Data?.terms, // Preserve existing terms from step 4
         applyGST: value.applyGST,
       });
       if (!isEditor) {
@@ -113,15 +105,17 @@ export function Step3Pricing() {
       setStep3Data({
         lineItems: values.lineItems.map((item: any) => ({
           ...item,
-          sectionId: item.sectionId ? (item.sectionId as Id<"quotationSections">) : undefined,
+          sectionId: item.sectionId
+            ? (item.sectionId as Id<"quotationSections">)
+            : undefined,
           projectConfigId: item.projectConfigId || undefined,
         })),
-        terms: values.terms || undefined,
+        terms: step3Data?.terms, // Preserve terms from step 4
         applyGST: values.applyGST,
       });
     });
     return () => setSyncCurrentStep(null);
-  }, [form, setStep3Data, setSyncCurrentStep]);
+  }, [form, setStep3Data, setSyncCurrentStep, step3Data?.terms]);
 
   return (
     <form.Subscribe selector={(state) => state.values}>
@@ -140,7 +134,8 @@ export function Step3Pricing() {
                 Pricing & Terms
               </h2>
               <p className="text-sm font-semibold text-white/40 max-w-lg leading-relaxed">
-                Construct your default cost structure and legal guardrails for this package.
+                Construct your default cost structure and legal guardrails for
+                this package.
               </p>
             </div>
 
@@ -154,7 +149,6 @@ export function Step3Pricing() {
             >
               {/* Main Content Area */}
               <div className="lg:col-span-8 space-y-12">
-                
                 {/* Line Items Section */}
                 <section className="space-y-6">
                   <div className="flex items-center justify-between ml-1">
@@ -172,7 +166,6 @@ export function Step3Pricing() {
                         form.pushFieldValue("lineItems", {
                           id: crypto.randomUUID(),
                           projectConfigId: projectConfigs[0]?.id || "",
-                          sectionId: "",
                           description: "",
                           unit: "per project",
                           rate: 0,
@@ -192,29 +185,35 @@ export function Step3Pricing() {
                         <>
                           {field.state.value.length === 0 ? (
                             <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/5 rounded-[32px] bg-white/2 gap-4">
-                               <div className="p-4 rounded-full bg-white/5">
-                                 <Plus className="h-8 w-8 text-white/10" />
-                               </div>
-                               <div className="text-center">
-                                 <p className="text-xs font-black text-white/40 uppercase tracking-widest">No line items added</p>
-                                 <p className="text-[10px] text-white/20 uppercase tracking-widest mt-1">Start by adding your first service offering</p>
-                               </div>
-                               <Button
-                                 type="button"
-                                 variant="outline"
-                                 onClick={() => field.pushValue({
-                                   id: crypto.randomUUID(),
-                                   projectConfigId: projectConfigs[0]?.id || "",
-                                   sectionId: "",
-                                   description: "",
-                                   unit: "per project",
-                                   rate: 0,
-                                   quantity: 1,
-                                 })}
-                                 className="mt-2 h-9 px-6 rounded-xl text-[9px] font-black uppercase tracking-widest bg-primary text-black hover:bg-primary/90 border-none"
-                               >
-                                 Add First Item
-                               </Button>
+                              <div className="p-4 rounded-full bg-white/5">
+                                <Plus className="h-8 w-8 text-white/10" />
+                              </div>
+                              <div className="text-center">
+                                <p className="text-xs font-black text-white/40 uppercase tracking-widest">
+                                  No line items added
+                                </p>
+                                <p className="text-[10px] text-white/20 uppercase tracking-widest mt-1">
+                                  Start by adding your first service offering
+                                </p>
+                              </div>
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  field.pushValue({
+                                    id: crypto.randomUUID(),
+                                    projectConfigId:
+                                      projectConfigs[0]?.id || "",
+                                    description: "",
+                                    unit: "per project",
+                                    rate: 0,
+                                    quantity: 1,
+                                  })
+                                }
+                                className="mt-2 h-9 px-6 rounded-xl text-[9px] font-black uppercase tracking-widest bg-primary text-black hover:bg-primary/90 border-none"
+                              >
+                                Add First Item
+                              </Button>
                             </div>
                           ) : (
                             field.state.value.map((_, index) => (
@@ -222,14 +221,15 @@ export function Step3Pricing() {
                                 key={field.state.value[index]?.id ?? index}
                                 form={form}
                                 index={index}
-                                sections={sections}
                                 projectConfigs={projectConfigs}
                                 canRemove={field.state.value.length > 1}
                                 onRemove={() => {
                                   if (field.state.value.length > 1) {
                                     field.removeValue(index);
                                   } else {
-                                    toast.error("At least one line item is required");
+                                    toast.error(
+                                      "At least one line item is required",
+                                    );
                                   }
                                 }}
                               />
@@ -240,75 +240,18 @@ export function Step3Pricing() {
                     </form.Field>
                   </div>
                 </section>
-
-                {/* Terms & Conditions Section */}
-                <section className="space-y-6">
-                  <div className="flex items-center justify-between ml-1">
-                    <div className="flex items-center gap-3">
-                      <FileText className="h-5 w-5 text-primary" />
-                      <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                        Terms & Conditions
-                      </h3>
-                    </div>
-                    <form.Field name="terms">
-                      {(field) => (
-                        <div className="flex items-center gap-2">
-                           <span className={cn(
-                             "text-[9px] font-black uppercase tracking-widest",
-                             field.state.value.length > 1800 ? "text-red-500" : "text-white/20"
-                           )}>
-                             {field.state.value.length} / 2000
-                           </span>
-                        </div>
-                      )}
-                    </form.Field>
-                  </div>
-
-                  <form.Field name="terms">
-                    {(field) => {
-                      const hasError = field.state.meta.errors.length > 0;
-                      return (
-                        <Field data-invalid={hasError} className="space-y-3">
-                          <div className="relative group">
-                            <Textarea
-                              id={field.name}
-                              placeholder="Define payment milestones, cancellation policies, delivery timelines..."
-                              value={field.state.value}
-                              onBlur={field.handleBlur}
-                              onChange={(e) => field.handleChange(e.target.value)}
-                              aria-invalid={hasError}
-                              className="bg-zinc-900/30 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none min-h-[250px] rounded-[32px] text-sm transition-all p-8 shadow-inner placeholder:text-white/10 backdrop-blur-sm"
-                            />
-                            {/* Decorative Corner */}
-                            <div className="absolute bottom-6 right-6 pointer-events-none opacity-20">
-                               <FileText className="h-10 w-10 text-white" />
-                            </div>
-                          </div>
-                          
-                          <div className="flex items-center justify-between px-4">
-                             <div className="flex items-center gap-2">
-                               <AlertCircle className="h-3 w-3 text-white/20" />
-                               <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                                 These terms will be appended to the final quotation PDF.
-                               </p>
-                             </div>
-                             <FieldError errors={field.state.meta.errors} />
-                          </div>
-                        </Field>
-                      );
-                    }}
-                  </form.Field>
-                </section>
               </div>
 
               {/* Sidebar Sidebar Area */}
               <div className="lg:col-span-4 lg:sticky lg:top-8">
-                 <PricingSidebar 
-                   lineItems={values.lineItems as any}
-                   projectConfigs={projectConfigs}
-                   applyGST={values.applyGST}
-                   onToggleGST={(checked) => form.setFieldValue("applyGST", checked)}
-                 />
+                <PricingSidebar
+                  lineItems={values.lineItems as any}
+                  projectConfigs={projectConfigs}
+                  applyGST={values.applyGST}
+                  onToggleGST={(checked) =>
+                    form.setFieldValue("applyGST", checked)
+                  }
+                />
               </div>
             </form>
           </div>
@@ -317,4 +260,3 @@ export function Step3Pricing() {
     </form.Subscribe>
   );
 }
-

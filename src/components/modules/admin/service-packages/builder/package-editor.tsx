@@ -1,6 +1,15 @@
 "use client";
 
-import { Save, Eye, Layers, ReceiptIndianRupee, Info, ArrowLeft, Loader2 } from "lucide-react";
+import {
+  Save,
+  Eye,
+  Layers,
+  ReceiptIndianRupee,
+  Info,
+  ArrowLeft,
+  Loader2,
+  FileText,
+} from "lucide-react";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
@@ -9,13 +18,25 @@ import { useBuilder } from "./builder-context";
 import { Step1Identity } from "./step-1-identity";
 import { Step2ProjectConfig } from "./step-2-project-config";
 import { Step3Pricing } from "./step-3-pricing";
-import { Step4Review } from "./step-4-review";
+import { Step4Terms } from "./step-4-terms";
+import { Step5Review } from "./step-5-review";
 
 const SECTIONS = [
   { id: 1, label: "Basic Identity", icon: Info, component: Step1Identity },
-  { id: 2, label: "Project Setup", icon: Layers, component: Step2ProjectConfig },
-  { id: 3, label: "Cost & Pricing", icon: ReceiptIndianRupee, component: Step3Pricing },
-  { id: 4, label: "Final Review", icon: Eye, component: Step4Review },
+  {
+    id: 2,
+    label: "Project Setup",
+    icon: Layers,
+    component: Step2ProjectConfig,
+  },
+  {
+    id: 3,
+    label: "Cost & Pricing",
+    icon: ReceiptIndianRupee,
+    component: Step3Pricing,
+  },
+  { id: 4, label: "Terms & Conditions", icon: FileText, component: Step4Terms },
+  { id: 5, label: "Final Review", icon: Eye, component: Step5Review },
 ];
 
 export function PackageEditor() {
@@ -27,7 +48,7 @@ export function PackageEditor() {
     setCurrentStep,
     syncCurrentStep,
   } = useBuilder();
-  
+
   const [activeSection, setActiveSection] = useState(1);
 
   // Keep currentStep in sync with activeSection for step components logic
@@ -42,7 +63,8 @@ export function PackageEditor() {
     await savePackageUpdate();
   };
 
-  const ActiveComponent = SECTIONS.find(s => s.id === activeSection)?.component || Step1Identity;
+  const ActiveComponent =
+    SECTIONS.find((s) => s.id === activeSection)?.component || Step1Identity;
 
   return (
     <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
@@ -52,7 +74,9 @@ export function PackageEditor() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => router.push(`/settings/service-packages/${packageId}`)}
+            onClick={() =>
+              router.push(`/settings/service-packages/${packageId}`)
+            }
             className="h-9 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
           >
             <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
@@ -60,12 +84,12 @@ export function PackageEditor() {
           </Button>
           <div className="h-4 w-px bg-white/10" />
           <div className="flex flex-col">
-             <h1 className="text-sm font-black uppercase tracking-widest text-white">
-               Package Editor
-             </h1>
-             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest leading-none">
-               Modifying Live Service Configuration
-             </p>
+            <h1 className="text-sm font-black uppercase tracking-widest text-white">
+              Package Editor
+            </h1>
+            <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest leading-none">
+              Modifying Live Service Configuration
+            </p>
           </div>
         </div>
 
@@ -98,11 +122,18 @@ export function PackageEditor() {
                       "w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
                       isActive
                         ? "bg-primary/10 border border-primary/20 text-primary shadow-[0_4px_20px_rgba(var(--primary),0.05)]"
-                        : "text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent"
+                        : "text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent",
                     )}
                   >
                     <div className="flex items-center gap-3 relative z-10">
-                      <Icon className={cn("h-4 w-4", isActive ? "text-primary" : "text-white/20 group-hover:text-white/40")} />
+                      <Icon
+                        className={cn(
+                          "h-4 w-4",
+                          isActive
+                            ? "text-primary"
+                            : "text-white/20 group-hover:text-white/40",
+                        )}
+                      />
                       <span className="text-[11px] font-black uppercase tracking-widest">
                         {section.label}
                       </span>
@@ -134,38 +165,46 @@ export function PackageEditor() {
 
         {/* Main Content Area */}
         <main className="flex-1 overflow-y-auto relative p-8 md:p-12 custom-scrollbar bg-black/20 pb-32">
-           <div className="w-full">
-             <ActiveComponent />
-           </div>
+          <div className="w-full">
+            <ActiveComponent />
+          </div>
         </main>
       </div>
 
       {/* FIXED FOOTER */}
       <footer className="shrink-0 h-20 border-t border-white/5 bg-zinc-950/90 backdrop-blur-xl flex items-center justify-between px-8 z-50">
         <div className="flex items-center gap-6">
-           <div className="flex flex-col">
-             <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Active Selection</span>
-             <span className="text-xs font-black uppercase tracking-widest text-primary">
-               {SECTIONS.find(s => s.id === activeSection)?.label}
-             </span>
-           </div>
+          <div className="flex flex-col">
+            <span className="text-[10px] font-black uppercase tracking-widest text-white/20">
+              Active Selection
+            </span>
+            <span className="text-xs font-black uppercase tracking-widest text-primary">
+              {SECTIONS.find((s) => s.id === activeSection)?.label}
+            </span>
+          </div>
         </div>
 
         <div className="flex items-center gap-6">
-           {isSubmitting && (
-             <div className="flex items-center gap-2 text-primary">
-               <Loader2 className="h-4 w-4 animate-spin" />
-               <span className="text-[10px] font-black uppercase tracking-widest animate-pulse">Syncing to cloud...</span>
-             </div>
-           )}
-           <Button
-             onClick={handleUpdate}
-             disabled={isSubmitting}
-             className="h-12 px-8 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all gap-3 border border-primary/20"
-           >
-             {isSubmitting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
-             Commit Changes
-           </Button>
+          {isSubmitting && (
+            <div className="flex items-center gap-2 text-primary">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span className="text-[10px] font-black uppercase tracking-widest animate-pulse">
+                Syncing to cloud...
+              </span>
+            </div>
+          )}
+          <Button
+            onClick={handleUpdate}
+            disabled={isSubmitting}
+            className="h-12 px-8 rounded-2xl bg-primary text-primary-foreground font-black uppercase tracking-widest text-[11px] shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all gap-3 border border-primary/20"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Save className="h-4 w-4" />
+            )}
+            Commit Changes
+          </Button>
         </div>
       </footer>
     </div>

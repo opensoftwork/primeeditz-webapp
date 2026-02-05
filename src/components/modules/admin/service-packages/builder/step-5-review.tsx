@@ -34,7 +34,7 @@ import {
 } from "@/components/ui/sheet";
 import { useBuilder } from "./builder-context";
 import { FolderPreview } from "./components/folder-preview";
-export function Step4Review() {
+export function Step5Review() {
   const router = useRouter();
   const {
     step1Data,
@@ -97,7 +97,9 @@ export function Step4Review() {
         const packageData = {
           name: step1Data.name,
           description: step1Data.description,
-          categoryId: (step2Data.projectConfigs[0]?.categoryId as Id<"projectCategories">) || undefined,
+          categoryId:
+            (step2Data.projectConfigs[0]
+              ?.categoryId as Id<"projectCategories">) || undefined,
           projectConfigs: step2Data.projectConfigs.map((config) => ({
             id: config.id,
             label: config.label,
@@ -109,8 +111,9 @@ export function Step4Review() {
           // Legacy fields
           projectTypeId: step2Data.projectConfigs[0].projectTypeId,
           folderTemplateId: step2Data.projectConfigs[0].folderTemplateId,
-          defaultStorageTierId: step2Data.projectConfigs[0].defaultStorageTierId,
-          
+          defaultStorageTierId:
+            step2Data.projectConfigs[0].defaultStorageTierId,
+
           lineItems: step3Data.lineItems.map((item) => ({
             id: item.id,
             sectionId: item.sectionId,
@@ -132,15 +135,21 @@ export function Step4Review() {
         // Creation Flow using Draft Persistence
         const newPackageId = await publishPackage();
         if (newPackageId) {
-          toast.success(`Package "${step1Data.name}" published successfully`, { id: toastId });
+          toast.success(`Package "${step1Data.name}" published successfully`, {
+            id: toastId,
+          });
           router.push("/settings/service-packages");
         }
       }
     } catch (error: any) {
       console.error("Save error:", error);
-      toast.error(error.message || "Failed to save package. Check your values and try again.", {
-        id: toastId,
-      });
+      toast.error(
+        error.message ||
+          "Failed to save package. Check your values and try again.",
+        {
+          id: toastId,
+        },
+      );
     } finally {
       setIsSaving(false);
     }
@@ -222,7 +231,8 @@ export function Step4Review() {
                     <span className="text-[9px] font-black text-white/40 uppercase tracking-widest">
                       Configurations:{" "}
                       <span className="text-white">
-                        {step2Data?.projectConfigs.length || 0} Project Components
+                        {step2Data?.projectConfigs.length || 0} Project
+                        Components
                       </span>
                     </span>
                   </div>
@@ -283,7 +293,11 @@ export function Step4Review() {
                             <div className="flex flex-wrap items-center gap-2">
                               {config.categoryId && (
                                 <Badge className="bg-white/5 text-white/60 border-white/10 font-black text-[8px] uppercase tracking-widest px-2 py-0.5 rounded-md">
-                                  {categories.find(c => c._id === config.categoryId)?.name}
+                                  {
+                                    categories.find(
+                                      (c) => c._id === config.categoryId,
+                                    )?.name
+                                  }
                                 </Badge>
                               )}
                               <Badge className="bg-primary/10 text-primary border-primary/20 font-black text-[9px] uppercase tracking-widest px-3 py-1 rounded-full">
@@ -312,14 +326,15 @@ export function Step4Review() {
                                 Folder Structure
                               </h5>
                               <p className="text-[10px] text-white/40 font-medium max-w-[200px]">
-                                Click to view the complete folder hierarchy for this project config
+                                Click to view the complete folder hierarchy for
+                                this project config
                               </p>
                             </div>
-                            
+
                             <Sheet>
                               <SheetTrigger asChild>
-                                <Button 
-                                  variant="outline" 
+                                <Button
+                                  variant="outline"
                                   size="sm"
                                   className="h-8 text-[10px] uppercase font-black tracking-widest bg-white/5 border-white/10 hover:bg-white/10 hover:text-white mt-1"
                                 >
@@ -336,7 +351,9 @@ export function Step4Review() {
                                   </SheetDescription>
                                 </SheetHeader>
                                 <div className="h-[calc(100vh-100px)] overflow-y-auto custom-scrollbar">
-                                  <FolderPreview templateId={config.folderTemplateId} />
+                                  <FolderPreview
+                                    templateId={config.folderTemplateId}
+                                  />
                                 </div>
                               </SheetContent>
                             </Sheet>
@@ -358,7 +375,7 @@ export function Step4Review() {
                   <CreditCard className="h-4 w-4 text-primary" />
                 </div>
                 <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                  Pricing & Terms Summary
+                  Pricing Summary
                 </h3>
               </div>
               <Button
@@ -400,21 +417,55 @@ export function Step4Review() {
                       ))}
                     </div>
                   </div>
-
-                  {step3Data?.terms && (
-                    <div className="pt-4 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-3.5 w-3.5 text-white/20" />
-                        <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
-                          Terms of Service
-                        </p>
-                      </div>
-                      <p className="text-[11px] text-white/40 leading-relaxed italic">
-                        {step3Data.terms}
-                      </p>
-                    </div>
-                  )}
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Section: Terms & Conditions */}
+          <div className="group space-y-4">
+            <div className="flex items-center justify-between ml-1">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-primary/10 border border-primary/20">
+                  <FileText className="h-4 w-4 text-primary" />
+                </div>
+                <h3 className="text-[10px] font-black text-white/60 uppercase tracking-widest">
+                  Terms & Conditions
+                </h3>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setCurrentStep(4)}
+                className="h-8 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest gap-1.5"
+              >
+                <Pencil className="h-3 w-3" />
+                Edit
+              </Button>
+            </div>
+
+            <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle">
+              <CardContent className="p-8">
+                {step3Data?.terms ? (
+                  <div className="space-y-2">
+                    <p className="text-[9px] font-black text-white/20 uppercase tracking-widest">
+                      Terms of Service
+                    </p>
+                    <p className="text-[11px] text-white/40 leading-relaxed italic whitespace-pre-line">
+                      {step3Data.terms}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="flex flex-col items-center justify-center py-6 text-center">
+                    <FileText className="h-8 w-8 text-white/10 mb-3" />
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-widest">
+                      No terms defined
+                    </p>
+                    <p className="text-[9px] text-white/20 mt-1">
+                      Click Edit to add terms and conditions
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>

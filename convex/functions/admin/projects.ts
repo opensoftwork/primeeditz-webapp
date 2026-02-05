@@ -234,6 +234,29 @@ export const getAdminProject = staffQuery({
 
     const uploadEligibility = await checkUploadEligibility(ctx, args.projectId);
 
+    // Check if any files have been uploaded by an employee
+    const deliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    const assets = await ctx.db
+      .query("assets")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    let hasEmployeeUploads = deliverables.length > 0;
+
+    if (!hasEmployeeUploads && assets.length > 0) {
+      for (const asset of assets) {
+        const uploader = await ctx.db.get(asset.uploadedBy);
+        if (uploader?.role === "employee") {
+          hasEmployeeUploads = true;
+          break;
+        }
+      }
+    }
+
     // Enrich reference files with URLs
     const referenceFiles = enrichReferenceFilesWithUrls(project.referenceFiles);
 
@@ -260,6 +283,7 @@ export const getAdminProject = staffQuery({
         : undefined,
       statusHistory: enrichedHistory,
       uploadEligibility,
+      hasEmployeeUploads,
     };
   },
 });

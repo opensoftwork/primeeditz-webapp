@@ -38,25 +38,6 @@ export default function EmployeeProjectDetail({
     projectId: projectId as Id<"projects">,
   });
 
-  // Set breadcrumb override for project name
-  useEffect(() => {
-    const label = project?.eventName || project?.projectTypeName || project?.code;
-    if (label) {
-      setOverride(projectId, label);
-    }
-
-    return () => {
-      removeOverride(projectId);
-    };
-  }, [
-    projectId,
-    project?.eventName,
-    project?.projectTypeName,
-    project?.code,
-    setOverride,
-    removeOverride,
-  ]);
-
   if (project === undefined) return <EmployeeProjectDetailSkeleton />;
 
   if (project === null) {

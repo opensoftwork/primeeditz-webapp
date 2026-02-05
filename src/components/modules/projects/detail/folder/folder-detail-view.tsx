@@ -3,7 +3,14 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useAction, useMutation, useQuery } from "convex/react";
-import { ArrowLeft, CheckCircle2, Eye, HardDrive, Loader2, Lock } from "lucide-react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  HardDrive,
+  Loader2,
+  Lock,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -62,33 +69,20 @@ export function FolderDetailView({
   );
 
   const isLocked = uploadEligibility?.isAllowed === false;
-  const isUploadComplete = uploadEligibility?.reason?.toLowerCase().includes("complete");
+  const isUploadComplete = uploadEligibility?.reason
+    ?.toLowerCase()
+    .includes("complete");
 
   // Handle Breadcrumb Overrides
   useEffect(() => {
-    const projectLabel =
-      project?.eventName || project?.projectTypeName || project?.code;
-    if (projectLabel) {
-      setOverride(projectId, projectLabel);
-    }
     if (folder?.name) {
       setOverride(folderId, folder.name);
     }
 
     return () => {
-      removeOverride(projectId);
       removeOverride(folderId);
     };
-  }, [
-    projectId,
-    folderId,
-    project?.eventName,
-    project?.projectTypeName,
-    project?.code,
-    folder?.name,
-    setOverride,
-    removeOverride,
-  ]);
+  }, [folderId, folder?.name, setOverride, removeOverride]);
 
   const assets = useQuery(api.functions.folders.queries.getFolderAssets, {
     folderId: folderId as Id<"folders">,
@@ -113,7 +107,9 @@ export function FolderDetailView({
     async function fetchUrls() {
       if (!assets || assets.length === 0) return;
 
-      const imageAssets = assets.filter((a: any) => a.mimeType.startsWith("image/"));
+      const imageAssets = assets.filter((a: any) =>
+        a.mimeType.startsWith("image/"),
+      );
       const keys = imageAssets.map((a: any) => a.minioKey);
 
       if (keys.length > 0) {
@@ -294,7 +290,10 @@ export function FolderDetailView({
           <Skeleton className="h-6 w-32 bg-white/5" />
           <div className="grid gap-3">
             {[1, 2, 3].map((i) => (
-              <Skeleton key={i} className="h-20 w-full rounded-2xl bg-white/5" />
+              <Skeleton
+                key={i}
+                className="h-20 w-full rounded-2xl bg-white/5"
+              />
             ))}
           </div>
         </div>
@@ -327,12 +326,14 @@ export function FolderDetailView({
                 {folder.name}
               </h1>
               {isLocked && (
-                <span className={cn(
-                  "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
-                  isUploadComplete
-                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                    : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-                )}>
+                <span
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
+                    isUploadComplete
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-500",
+                  )}
+                >
                   {isUploadComplete ? "UPLOAD COMPLETE" : "LOCKED"}
                 </span>
               )}
@@ -367,15 +368,17 @@ export function FolderDetailView({
             "flex items-center gap-4 p-4 rounded-2xl border backdrop-blur-sm",
             isUploadComplete
               ? "bg-emerald-500/5 border-emerald-500/20"
-              : "bg-amber-500/5 border-amber-500/20"
+              : "bg-amber-500/5 border-amber-500/20",
           )}
         >
-          <div className={cn(
-            "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
-            isUploadComplete
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-amber-500/10 text-amber-500"
-          )}>
+          <div
+            className={cn(
+              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+              isUploadComplete
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "bg-amber-500/10 text-amber-500",
+            )}
+          >
             {isUploadComplete ? (
               <CheckCircle2 className="h-5 w-5" />
             ) : (
@@ -383,25 +386,32 @@ export function FolderDetailView({
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className={cn(
-              "text-sm font-black uppercase tracking-tight",
-              isUploadComplete ? "text-emerald-500" : "text-amber-500"
-            )}>
-              {isUploadComplete ? "Upload Phase Complete" : "Uploads Temporarily Locked"}
+            <h4
+              className={cn(
+                "text-sm font-black uppercase tracking-tight",
+                isUploadComplete ? "text-emerald-500" : "text-amber-500",
+              )}
+            >
+              {isUploadComplete
+                ? "Upload Phase Complete"
+                : "Uploads Temporarily Locked"}
             </h4>
             <p className="text-xs text-white/50 mt-0.5">
               {isUploadComplete
                 ? "Your files have been received. You can still view your uploaded assets below. Contact admin if you need to upload additional files."
-                : uploadEligibility?.reason || "Awaiting quotation approval to unlock project storage."}
+                : uploadEligibility?.reason ||
+                  "Awaiting quotation approval to unlock project storage."}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <div className={cn(
-              "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
-              isUploadComplete
-                ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-amber-500/10 text-amber-400"
-            )}>
+            <div
+              className={cn(
+                "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
+                isUploadComplete
+                  ? "bg-emerald-500/10 text-emerald-400"
+                  : "bg-amber-500/10 text-amber-400",
+              )}
+            >
               <Eye className="h-3.5 w-3.5" />
               View Only
             </div>

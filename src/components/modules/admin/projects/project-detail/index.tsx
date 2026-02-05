@@ -48,21 +48,6 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
 
-  useEffect(() => {
-    const label = project?.eventName || project?.projectTypeName || project?.code;
-    if (label) {
-      setOverride(projectId, label);
-    }
-    return () => removeOverride(projectId);
-  }, [
-    projectId,
-    project?.eventName,
-    project?.projectTypeName,
-    project?.code,
-    setOverride,
-    removeOverride,
-  ]);
-
   const deliveryLabel = useMemo(() => {
     return getDeliveryPhaseLabel(project?.deliveryConfig);
   }, [project?.deliveryConfig]);
@@ -192,7 +177,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               </div>
             )}
 
-            <ProjectDeliverables projectId={projectId as Id<"projects">} />
+            <ProjectDeliverables
+              projectId={projectId as Id<"projects">}
+              isVisible={project.hasEmployeeUploads}
+            />
 
             <ProjectHistory history={project.statusHistory} />
           </div>

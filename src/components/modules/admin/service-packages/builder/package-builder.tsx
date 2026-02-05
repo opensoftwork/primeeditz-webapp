@@ -11,13 +11,15 @@ import { PackageStepNavigation } from "./package-step-navigation";
 import { Step1Identity } from "./step-1-identity";
 import { Step2ProjectConfig } from "./step-2-project-config";
 import { Step3Pricing } from "./step-3-pricing";
-import { Step4Review } from "./step-4-review";
+import { Step4Terms } from "./step-4-terms";
+import { Step5Review } from "./step-5-review";
 
 const STEPS = [
   { id: 1, label: "Identity", description: "Basic Info" },
   { id: 2, label: "Config", description: "Project Setup" },
   { id: 3, label: "Pricing", description: "Line Items" },
-  { id: 4, label: "Review", description: "Publishing" },
+  { id: 4, label: "Terms", description: "Conditions" },
+  { id: 5, label: "Review", description: "Publishing" },
 ];
 
 export function PackageBuilder() {
@@ -48,7 +50,9 @@ export function PackageBuilder() {
       case 3:
         return <Step3Pricing />;
       case 4:
-        return <Step4Review />;
+        return <Step4Terms />;
+      case 5:
+        return <Step5Review />;
       default:
         return null;
     }
@@ -73,7 +77,7 @@ export function PackageBuilder() {
           <div className="flex items-center gap-5">
             <div className="flex flex-col items-start gap-1">
               <span className="text-[9px] font-black uppercase tracking-widest text-primary">
-                Step {currentStep} of 4
+                Step {currentStep} of 5
               </span>
               <div className="flex gap-1">
                 {STEPS.map((s) => (
@@ -170,22 +174,22 @@ export function PackageBuilder() {
 
             <div className="flex items-center gap-4">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mr-2">
-                Step 0{currentStep} / 04
+                Step 0{currentStep} / 05
               </span>
               <Button
                 onClick={handlePrimaryAction}
                 className={cn(
                   "h-12 px-10 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all min-w-[180px] group",
-                  currentStep === 4
+                  currentStep === 5
                     ? "bg-primary text-black hover:bg-primary/90 shadow-[0_10px_40px_rgba(var(--primary),0.2)]"
                     : "bg-white text-black hover:bg-white/90 shadow-[0_10px_40px_rgba(255,255,255,0.1)]",
                 )}
               >
-                {currentStep === 4 ? "Finalize Package" : "Next Step"}
-                {currentStep < 4 && (
+                {currentStep === 5 ? "Finalize Package" : "Next Step"}
+                {currentStep < 5 && (
                   <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                 )}
-                {currentStep === 4 && <Check className="ml-2 h-4 w-4" />}
+                {currentStep === 5 && <Check className="ml-2 h-4 w-4" />}
               </Button>
             </div>
           </footer>

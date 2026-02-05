@@ -17,15 +17,12 @@ import {
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
-import type { Doc } from "@convex/_generated/dataModel";
 import { ProjectConfig } from "../builder-context";
-import { SectionQuickCreateInline } from "./section-quick-create-inline";
-
+import { NestedUnitSelector } from "@/components/ui/nested-unit-selector";
 
 interface LineItemCardProps {
   form: any; // TanStack Form instance - complex generics not worth the overhead
   index: number;
-  sections: Doc<"quotationSections">[];
   projectConfigs: ProjectConfig[];
   onRemove: () => void;
   canRemove: boolean;
@@ -34,7 +31,6 @@ interface LineItemCardProps {
 export function LineItemCard({
   form,
   index,
-  sections,
   projectConfigs,
   onRemove,
   canRemove,
@@ -62,17 +58,27 @@ export function LineItemCard({
           {/* Project Field */}
           <form.Field name={`lineItems[${index}].projectConfigId`}>
             {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
+              const hasError =
+                field.state.meta.errors.length > 0 &&
+                field.state.meta.isTouched;
               return (
-                <Field className="col-span-12 md:col-span-4" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`project-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
+                <Field
+                  className="col-span-12 md:col-span-4"
+                  data-invalid={hasError}
+                >
+                  <FieldLabel
+                    htmlFor={`project-${index}`}
+                    className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2"
+                  >
                     Project Configuration
                   </FieldLabel>
                   <Select
                     value={field.state.value || "__general__"}
-                    onValueChange={(val) => field.handleChange(val === "__general__" ? "" : val)}
+                    onValueChange={(val) =>
+                      field.handleChange(val === "__general__" ? "" : val)
+                    }
                   >
-                    <SelectTrigger 
+                    <SelectTrigger
                       id={`project-${index}`}
                       className="h-10 bg-black/20 border-white/5 rounded-xl text-xs hover:bg-black/40 transition-colors"
                       aria-invalid={hasError}
@@ -80,11 +86,18 @@ export function LineItemCard({
                       <SelectValue placeholder="Select project..." />
                     </SelectTrigger>
                     <SelectContent className="bg-zinc-950 border-white/10 rounded-xl overflow-hidden shadow-2xl">
-                      <SelectItem value="__general__" className="focus:bg-white/5 rounded-lg mx-1 my-0.5 italic text-white/40 text-xs">
+                      <SelectItem
+                        value="__general__"
+                        className="focus:bg-white/5 rounded-lg mx-1 my-0.5 italic text-white/40 text-xs"
+                      >
                         General / Shared Item
                       </SelectItem>
                       {projectConfigs.map((config) => (
-                        <SelectItem key={config.id} value={config.id} className="focus:bg-primary/20 rounded-lg mx-1 my-0.5 text-xs">
+                        <SelectItem
+                          key={config.id}
+                          value={config.id}
+                          className="focus:bg-primary/20 rounded-lg mx-1 my-0.5 text-xs"
+                        >
                           {config.label || "Untitled Config"}
                         </SelectItem>
                       ))}
@@ -99,10 +112,18 @@ export function LineItemCard({
           {/* Description Field */}
           <form.Field name={`lineItems[${index}].description`}>
             {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
+              const hasError =
+                field.state.meta.errors.length > 0 &&
+                field.state.meta.isTouched;
               return (
-                <Field className="col-span-12 md:col-span-8" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`description-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
+                <Field
+                  className="col-span-12 md:col-span-8"
+                  data-invalid={hasError}
+                >
+                  <FieldLabel
+                    htmlFor={`description-${index}`}
+                    className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2"
+                  >
                     Description
                   </FieldLabel>
                   <Input
@@ -121,57 +142,30 @@ export function LineItemCard({
           </form.Field>
         </FieldGroup>
 
-        {/* Details Row: Section + Unit + Rate × Qty = Amount */}
+        {/* Details Row: Unit + Rate × Qty = Amount */}
         <FieldGroup className="grid grid-cols-12 gap-4 items-end">
-          {/* Section Field */}
-          <form.Field name={`lineItems[${index}].sectionId`}>
-            {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
-              return (
-                <Field className="col-span-6 md:col-span-3" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`section-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
-                    Phase / Section
-                  </FieldLabel>
-                  <Select value={field.state.value} onValueChange={field.handleChange}>
-                    <SelectTrigger 
-                      id={`section-${index}`}
-                      className="h-10 bg-black/20 border-white/5 rounded-xl text-xs hover:bg-black/40 transition-colors"
-                      aria-invalid={hasError}
-                    >
-                      <SelectValue placeholder="Phase..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-zinc-950 border-white/10 rounded-xl max-h-[300px] shadow-2xl">
-                      {sections.map((section) => (
-                        <SelectItem key={section._id} value={section._id} className="focus:bg-primary/20 rounded-lg mx-1 my-0.5 text-xs">
-                          {section.name}
-                        </SelectItem>
-                      ))}
-                      <SectionQuickCreateInline onCreated={field.handleChange} />
-                    </SelectContent>
-                  </Select>
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              );
-            }}
-          </form.Field>
-
           {/* Unit Field */}
           <form.Field name={`lineItems[${index}].unit`}>
             {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
+              const hasError =
+                field.state.meta.errors.length > 0 &&
+                field.state.meta.isTouched;
               return (
-                <Field className="col-span-6 md:col-span-2" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`unit-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
+                <Field
+                  className="col-span-12 md:col-span-3"
+                  data-invalid={hasError}
+                >
+                  <FieldLabel
+                    htmlFor={`unit-${index}`}
+                    className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2"
+                  >
                     Unit
                   </FieldLabel>
-                  <Input
-                    id={`unit-${index}`}
+                  <NestedUnitSelector
                     value={field.state.value}
-                    onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onValueChange={field.handleChange}
+                    triggerClassName="h-10 w-full"
                     placeholder="e.g. video"
-                    aria-invalid={hasError}
-                    className="h-10 bg-black/20 border-white/5 rounded-xl text-xs placeholder:text-white/10 focus:bg-black/40 transition-colors"
                   />
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
@@ -182,10 +176,18 @@ export function LineItemCard({
           {/* Rate Field */}
           <form.Field name={`lineItems[${index}].rate`}>
             {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
+              const hasError =
+                field.state.meta.errors.length > 0 &&
+                field.state.meta.isTouched;
               return (
-                <Field className="col-span-4 md:col-span-2" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`rate-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
+                <Field
+                  className="col-span-4 md:col-span-2"
+                  data-invalid={hasError}
+                >
+                  <FieldLabel
+                    htmlFor={`rate-${index}`}
+                    className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2"
+                  >
                     Rate (₹)
                   </FieldLabel>
                   <Input
@@ -212,10 +214,18 @@ export function LineItemCard({
           {/* Quantity Field */}
           <form.Field name={`lineItems[${index}].quantity`}>
             {(field: any) => {
-              const hasError = field.state.meta.errors.length > 0 && field.state.meta.isTouched;
+              const hasError =
+                field.state.meta.errors.length > 0 &&
+                field.state.meta.isTouched;
               return (
-                <Field className="col-span-3 md:col-span-2" data-invalid={hasError}>
-                  <FieldLabel htmlFor={`quantity-${index}`} className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
+                <Field
+                  className="col-span-3 md:col-span-2"
+                  data-invalid={hasError}
+                >
+                  <FieldLabel
+                    htmlFor={`quantity-${index}`}
+                    className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2"
+                  >
                     Qty
                   </FieldLabel>
                   <Input
@@ -235,7 +245,7 @@ export function LineItemCard({
           </form.Field>
 
           {/* Computed Amount (Read-only display) */}
-          <div className="col-span-4 md:col-span-2">
+          <div className="col-span-4 md:col-span-4">
             <FieldLabel className="text-[9px] font-black uppercase tracking-widest text-white/40 mb-2">
               Amount
             </FieldLabel>
