@@ -37,7 +37,7 @@ export interface Step2Data {
 export interface LineItem {
   id: string;
   description: string;
-  sectionId?: Id<"quotationSections">;
+  sectionId?: string;
   projectConfigId?: string;
   rate: number;
   quantity: number;
