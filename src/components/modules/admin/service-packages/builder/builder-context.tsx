@@ -111,6 +111,7 @@ export function BuilderProvider({
   const step1DataRef = useRef<Step1Data | null>(null);
   const step2DataRef = useRef<Step2Data | null>(null);
   const step3DataRef = useRef<Step3Data | null>(null);
+  const draftWasSeen = useRef(false);
 
   const setStep1DataWithRef = useCallback((data: Step1Data) => {
     step1DataRef.current = data;
@@ -278,6 +279,32 @@ export function BuilderProvider({
     init();
   }, [packageId, pkg, activeDraft, isInitialized, createDraft]);
 
+  // Update draftWasSeen when activeDraft is available
+  useEffect(() => {
+    if (activeDraft) {
+      draftWasSeen.current = true;
+    }
+  }, [activeDraft]);
+
+  // Reactive monitor for draft existence
+  // This handles the scenario where another machine/tab publishes or deletes the active draft
+  useEffect(() => {
+    if (isInitialized && !packageId && draftId) {
+      // If activeDraft is null and we've already seen it once, it means it was deleted/published
+      if (activeDraft === null && draftWasSeen.current && !isSubmitting) {
+        // Prevent multiple redirects
+        setIsSubmitting(true);
+        
+        toast.error("Draft session ended", {
+          description: "This package has already been published or the draft was removed in another session.",
+        });
+        
+        // Redirect back to the package list
+        router.replace("/settings/service-packages");
+      }
+    }
+  }, [activeDraft, isInitialized, packageId, draftId, isSubmitting, router]);
+
   const [submitTrigger, setSubmitTrigger] = useState<(() => void) | null>(null);
   const [syncCurrentStep, setSyncCurrentStep] = useState<(() => void) | null>(
     null,
@@ -330,7 +357,15 @@ export function BuilderProvider({
       toast.success("Package published successfully!");
       return newPackageId;
     } catch (err: any) {
-      toast.error(err.message || "Failed to publish package");
+      const isNotFound = err.message?.includes("not found");
+      toast.error(
+        isNotFound
+          ? "This draft has already been published or removed."
+          : err.message || "Failed to publish package",
+      );
+      if (isNotFound) {
+        router.replace("/settings/service-packages");
+      }
     } finally {
       setIsSubmitting(false);
     }
