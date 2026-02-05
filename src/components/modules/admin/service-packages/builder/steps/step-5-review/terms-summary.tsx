@@ -2,7 +2,7 @@
 
 import { FileText, Pencil, Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { useBuilder } from "../../../builder-context";
+import { useBuilder } from "../../builder-context";
 
 export function TermsSummary() {
   const { step3Data, setCurrentStep } = useBuilder();

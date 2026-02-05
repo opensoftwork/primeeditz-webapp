@@ -3,7 +3,7 @@
 import { CreditCard, Pencil, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useBuilder } from "../../../builder-context";
+import { useBuilder } from "../../builder-context";
 
 interface PricingSummaryProps {
   lineItems: any[];

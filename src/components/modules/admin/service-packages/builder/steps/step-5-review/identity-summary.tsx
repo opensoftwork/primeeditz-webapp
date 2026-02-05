@@ -3,7 +3,7 @@
 import { Eye, Pencil, Layout, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { useBuilder } from "../../../builder-context";
+import { useBuilder } from "../../builder-context";
 
 export function IdentitySummary() {
   const { step1Data, step2Data, setCurrentStep } = useBuilder();

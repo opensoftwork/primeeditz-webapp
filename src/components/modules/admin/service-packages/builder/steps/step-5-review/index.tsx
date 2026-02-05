@@ -7,11 +7,11 @@ import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useBuilder } from "../../builder-context";
-import { IdentitySummary } from "./components/identity-summary";
-import { ConfigSummary } from "./components/config-summary";
-import { PricingSummary } from "./components/pricing-summary";
-import { TermsSummary } from "./components/terms-summary";
-import { TotalsCard } from "./components/totals-card";
+import { IdentitySummary } from "./identity-summary";
+import { ConfigSummary } from "./config-summary";
+import { PricingSummary } from "./pricing-summary";
+import { TermsSummary } from "./terms-summary";
+import { TotalsCard } from "./totals-card";
 
 export function Step5Review() {
   const router = useRouter();

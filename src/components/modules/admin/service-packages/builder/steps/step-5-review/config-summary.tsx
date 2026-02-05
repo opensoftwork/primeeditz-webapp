@@ -12,8 +12,8 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { useBuilder } from "../../../builder-context";
-import { FolderPreview } from "../../../components/folder-preview";
+import { useBuilder } from "../../builder-context";
+import { FolderPreview } from "../../components/folder-preview";
 
 interface ConfigSummaryProps {
   projectTypes: any[];
