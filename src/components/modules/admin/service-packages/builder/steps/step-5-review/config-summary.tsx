@@ -138,7 +138,7 @@ export function ConfigSummary({
                             size="sm"
                             className="w-fit h-7 text-[9px] uppercase font-black tracking-[0.2em] bg-white/5 border-white/10 hover:bg-white/10 hover:border-primary/30 text-white/60 hover:text-white rounded-lg transition-all px-3"
                           >
-                            View Architecture
+                            View Structure
                           </Button>
                         </SheetTrigger>
                         <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-white/10 p-0 shadow-2xl">

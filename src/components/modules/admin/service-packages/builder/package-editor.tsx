@@ -72,14 +72,14 @@ export function PackageEditor() {
       <header className="shrink-0 h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-xl z-50">
         <div className="flex items-center gap-4">
           <Button
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() =>
               router.push(`/settings/service-packages/${packageId}`)
             }
-            className="h-9 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-xl transition-all group"
+            className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-white/10 border-white/30 text-white hover:text-primary hover:border-primary/50 hover:bg-primary/5 rounded-xl transition-all group shadow-2xl shadow-black/50"
           >
-            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform text-primary" />
             Back to Catalog
           </Button>
           <div className="h-4 w-px bg-white/10" />
