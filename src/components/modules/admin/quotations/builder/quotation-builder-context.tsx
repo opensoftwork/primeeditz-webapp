@@ -197,10 +197,28 @@ export function QuotationBuilderProvider({
     quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
   );
 
+  // Auto-resume logic: If no specific ID provided, check for the latest un-finalized draft
+  const latestDraft = useQuery(
+    api.functions.quotations.queries.getMyLatestDraft,
+    !quotationId ? {} : "skip",
+  );
+
+  // Redirection effect for auto-resume
+  useEffect(() => {
+    if (!quotationId && latestDraft && !isLoading) {
+      // Small delay to let user see "Redirecting to your draft..." if we added a message
+      // But for now, let's just do it.
+      router.replace(`/quotations/${latestDraft._id}/builder`);
+    }
+  }, [latestDraft, quotationId, router, isLoading]);
+
   // Data loading state - ready when:
-  // 1. Not editing (no initialQuotationId), OR
+  // 1. Not editing AND no draft found (truly new), OR
   // 2. Editing and existingQuotation has loaded
-  const isDataReady = !initialQuotationId || existingQuotation !== undefined;
+  // 3. We are in the middle of a redirect (hide content)
+  const isDataReady =
+    (quotationId && existingQuotation !== undefined) ||
+    (!quotationId && latestDraft === null);
 
   // Populate form data if editing
   useEffect(() => {
@@ -459,7 +477,11 @@ export function QuotationBuilderProvider({
   const goToStep = useCallback(async (step: number) => {
     if (step >= 1 && step <= 4) {
       setCurrentStep(step as QuotationStepId);
-      await performSave(true, { lastStep: step });
+      toast.promise(performSave(true, { lastStep: step }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
     }
   }, [performSave]);
 
@@ -467,7 +489,11 @@ export function QuotationBuilderProvider({
     const next = Math.min(currentStep + 1, 4) as QuotationStepId;
     if (next !== currentStep) {
       setCurrentStep(next);
-      await performSave(true, { lastStep: next });
+      toast.promise(performSave(true, { lastStep: next }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
     }
   }, [currentStep, performSave]);
 
@@ -475,7 +501,11 @@ export function QuotationBuilderProvider({
     const prev = Math.max(currentStep - 1, 1) as QuotationStepId;
     if (prev !== currentStep) {
       setCurrentStep(prev);
-      await performSave(true, { lastStep: prev });
+      toast.promise(performSave(true, { lastStep: prev }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
     }
   }, [currentStep, performSave]);
 

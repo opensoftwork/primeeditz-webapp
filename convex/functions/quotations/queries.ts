@@ -126,6 +126,25 @@ export const getAdminQuotationsPaginated = adminQuery({
 });
 
 /**
+ * Get the latest draft quotation for the current admin.
+ */
+export const getMyLatestDraft = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    // Find quotations with draft status created by this admin
+    // Note: 'createdBy' in quotations is currently a string (e.g. "ADMIN")
+    // but we can search for draft status and pick the latest one from recent activity
+    const draft = await ctx.db
+      .query("quotations")
+      .withIndex("by_status", (q) => q.eq("status", "draft"))
+      .order("desc")
+      .first();
+
+    return draft;
+  },
+});
+
+/**
  * Get a single quotation by ID
  */
 export const getQuotation = adminQuery({

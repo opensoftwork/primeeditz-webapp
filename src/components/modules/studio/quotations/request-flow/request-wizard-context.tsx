@@ -247,7 +247,11 @@ export function RequestWizardProvider({
     async (newStep: RequestStepId) => {
       setStepState(newStep);
       stepRef.current = newStep; // Update ref immediately for the save call
-      await saveProgress({ lastStep: newStep });
+      toast.promise(saveProgress({ lastStep: newStep }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
     },
     [saveProgress],
   );

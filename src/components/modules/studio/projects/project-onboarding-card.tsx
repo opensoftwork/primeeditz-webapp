@@ -7,14 +7,19 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface ProjectOnboardingCardProps {
-  projectId: string;
+  project: {
+    _id: string;
+    actionState: string;
+  };
   className?: string;
 }
 
 export function ProjectOnboardingCard({
-  projectId,
+  project,
   className,
 }: ProjectOnboardingCardProps) {
+  const isAwaitingUploads = project.actionState === "awaiting_uploads";
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -51,13 +56,16 @@ export function ProjectOnboardingCard({
               </span>
             </div>
             <h3 className="text-lg font-black uppercase tracking-tight text-white">
-              Initialize Project Manifest
+              {isAwaitingUploads
+                ? "Initiate Asset Intake"
+                : "Initialize Project Manifest"}
             </h3>
           </div>
 
           <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest leading-relaxed max-w-sm">
-            Your project manifest is ready. Please upload reference files and
-            technical notes to initiate the creative protocol.
+            {isAwaitingUploads
+              ? "Your project is ready for files. Please upload your photos, videos or documents to the asset vault to begin production."
+              : "Your project manifest is ready. Please upload reference files and technical notes to initiate the creative protocol."}
           </p>
 
           {/* Checklist */}
@@ -81,9 +89,15 @@ export function ProjectOnboardingCard({
 
         {/* CTA */}
         <div className="shrink-0 w-full md:w-auto">
-          <Link href={`/projects/${projectId}/onboarding`}>
+          <Link
+            href={
+              isAwaitingUploads
+                ? `/projects/${project._id}`
+                : `/projects/${project._id}/onboarding`
+            }
+          >
             <Button className="w-full md:w-auto h-12 px-6 rounded-xl bg-primary text-black font-black uppercase tracking-widest text-[10px] hover:scale-[1.02] active:scale-[0.98] transition-all shadow-[0_15px_30px_rgba(var(--primary),0.2)] gap-2 group border-0">
-              Complete Onboarding
+              {isAwaitingUploads ? "Explore Project" : "Complete Onboarding"}
               <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </Link>
