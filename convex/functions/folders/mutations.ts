@@ -427,10 +427,12 @@ export const openProjectForUpload = adminMutation({
 });
 
 
+import { internalMutation } from "../../_generated/server";
+
 /**
  * Maintenance: Fixes folder hierarchy for a project.
  */
-export const repairProjectFolders = adminMutation({
+export const repairProjectFolders = internalMutation({
   args: {
     projectId: v.id("projects"),
   },
