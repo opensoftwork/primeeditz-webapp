@@ -540,3 +540,73 @@ export const getFolderAssets = authenticatedWithProfileQuery({
     );
   },
 });
+
+/**
+ * Get all assets in a folder and all its descendants.
+ * Used for zipping entire folder trees.
+ */
+export const getFolderAssetsRecursive = authenticatedWithProfileQuery({
+  args: {
+    folderId: v.id("folders"),
+  },
+  handler: async (ctx, args) => {
+    const rootFolder = await ctx.db.get(args.folderId);
+    if (!rootFolder) throw new Error("Folder not found");
+
+    // Verify access
+    const project = await ctx.db.get(rootFolder.projectId);
+    if (!project) throw new Error("Project not found");
+
+    if (ctx.profile.role === "studio") {
+      if (project.studioId !== ctx.profile._id) {
+        throw new Error("Access denied");
+      }
+    }
+
+    // Find all descendant folders including the root
+    const allProjectFolders = await ctx.db
+      .query("folders")
+      .withIndex("by_projectId", (q) => q.eq("projectId", rootFolder.projectId))
+      .collect();
+
+    const descendantFolders = allProjectFolders.filter(
+      (f) => f.path.startsWith(rootFolder.path)
+    );
+
+    // Get assets for all these folders
+    const allAssets = await Promise.all(
+      descendantFolders.map(async (folder) => {
+        const assets = await ctx.db
+          .query("assets")
+          .withIndex("by_folderId", (q) => q.eq("folderId", folder._id))
+          .collect();
+        
+        // Return assets with their relative path within the root folder
+        const relativePath = folder.path === rootFolder.path 
+          ? "" 
+          : folder.path.slice(rootFolder.path.length + 1);
+
+        return assets.map(asset => ({
+          ...asset,
+          relativePath
+        }));
+      })
+    );
+
+    const flattenedAssets = allAssets.flat();
+
+    // Enrich with uploader info
+    return await Promise.all(
+      flattenedAssets.map(async (asset) => {
+        const uploader = asset.uploadedBy
+          ? await ctx.db.get(asset.uploadedBy)
+          : null;
+        return {
+          ...asset,
+          uploaderName: uploader?.name || "Unknown",
+          uploaderRole: (uploader as any)?.role || "client",
+        };
+      }),
+    );
+  },
+});

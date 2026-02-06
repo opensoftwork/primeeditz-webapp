@@ -239,6 +239,7 @@ export function FolderGrid({
           {currentFolders.map((folder) => (
             <FolderCard
               key={folder._id}
+              id={folder._id}
               name={folder.name}
               status={folder.status}
               assetCount={folder.assetCount || 0}

@@ -2,6 +2,7 @@
 
 import { CheckCircle2, Clock, Eye, Folder, Lock, Upload } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { DownloadFolderZip } from "./download-folder-zip";
 
 export type FolderStatus = "pending_upload" | "in_progress" | "completed";
 
@@ -35,6 +36,7 @@ export function formatBytes(bytes: number): string {
 }
 
 interface FolderCardProps {
+  id?: string;
   name: string;
   status: string;
   assetCount: number;
@@ -47,6 +49,7 @@ interface FolderCardProps {
 }
 
 export function FolderCard({
+  id,
   name,
   status,
   assetCount,
@@ -153,14 +156,26 @@ export function FolderCard({
         )}
 
         {status !== "in_progress" && !isViewOnly && (
-          <div
-            className={cn(
-              "h-1.5 w-1.5 rounded-full transition-colors",
-              isClickable
-                ? "bg-white/10 group-hover:bg-primary animate-pulse"
-                : "bg-white/5",
+          <div className="flex items-center gap-2">
+            {id && assetCount > 0 && (
+              <DownloadFolderZip
+                folderId={id}
+                folderName={name}
+                showIconOnly
+                size="icon"
+                variant="ghost"
+                className="h-8 w-8 text-white/20 hover:text-primary hover:bg-primary/10 rounded-xl"
+              />
             )}
-          />
+            <div
+              className={cn(
+                "h-1.5 w-1.5 rounded-full transition-colors",
+                isClickable
+                  ? "bg-white/10 group-hover:bg-primary animate-pulse"
+                  : "bg-white/5",
+              )}
+            />
+          </div>
         )}
       </div>
     </div>

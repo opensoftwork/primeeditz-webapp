@@ -24,6 +24,8 @@ import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FolderAssetList } from "./folder-asset-list";
 import { FolderDropZone } from "./folder-drop-zone";
 import { type StagedFile, StagedUploadQueue } from "./staged-upload-queue";
+import { DownloadFolderZip } from "@/components/shared/project-folders";
+
 
 interface FolderDetailViewProps {
   projectId: string;
@@ -350,6 +352,14 @@ export function FolderDetailView({
         </div>
 
         <div className="flex items-center gap-3">
+          {assets && assets.length > 0 && (
+            <DownloadFolderZip
+              folderId={folderId}
+              folderName={folder.name}
+              variant="outline"
+              className="rounded-full border-primary/20 text-primary hover:bg-primary/10"
+            />
+          )}
           {folder.status === "in_progress" && !isLocked && !isEmployee && (
             <Button
               variant="outline"
