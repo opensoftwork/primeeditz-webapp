@@ -144,7 +144,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {displayFiles.map((file, idx) => {
               const imageUrl = file.storageKey
                 ? signedUrls[file.storageKey]
@@ -175,9 +175,9 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                       unoptimized
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-2 text-white/20">
-                      <FileText className="h-7 w-7" />
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em]">
+                    <div className="flex flex-col items-center justify-center h-full gap-2.5 text-white/20">
+                      <FileText className="h-8 w-8" />
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em]">
                         {file.fileType?.split("/")[1]?.toUpperCase() || "FILE"}
                       </span>
                     </div>
