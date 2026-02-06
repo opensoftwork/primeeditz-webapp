@@ -120,8 +120,8 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   }, [files, signedUrls, loading]);
 
   const hasFiles = files.length > 0;
-  const displayFiles = files.slice(0, 10);
-  const remainingCount = files.length - 10;
+  const displayFiles = files.slice(0, 5);
+  const remainingCount = files.length - 5;
 
   return (
     <DetailSection
