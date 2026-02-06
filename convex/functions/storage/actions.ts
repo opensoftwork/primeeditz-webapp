@@ -10,6 +10,7 @@
 import {
   GetObjectCommand,
   PutObjectCommand,
+  DeleteObjectCommand,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
@@ -216,5 +217,31 @@ export const getTusConfig = action({
         projectId: args.projectId,
       },
     };
+  },
+});
+
+/**
+ * Delete a file from MinIO storage.
+ */
+export const deleteFile = action({
+  args: {
+    storageKey: v.string(),
+  },
+  handler: async (_ctx, args): Promise<boolean> => {
+    if (!args.storageKey) return false;
+
+    try {
+      const s3Client = getS3Client();
+      const command = new DeleteObjectCommand({
+        Bucket: getBucket(),
+        Key: args.storageKey,
+      });
+
+      await s3Client.send(command);
+      return true;
+    } catch (error) {
+      console.error(`Error deleting file ${args.storageKey}:`, error);
+      return false;
+    }
   },
 });

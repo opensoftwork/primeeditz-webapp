@@ -22,7 +22,10 @@ export function FilePreviewOverlay({
 }: FilePreviewOverlayProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl w-[90vw] h-[80vh] bg-zinc-950 border-white/10 p-0 overflow-hidden flex flex-col gap-0 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] focus:outline-none">
+      <DialogContent
+        showCloseButton={false}
+        className="max-w-4xl w-[90vw] h-[80vh] bg-zinc-950 border-white/10 p-0 overflow-hidden flex flex-col gap-0 rounded-[2rem] shadow-[0_0_100px_rgba(0,0,0,0.8)] focus:outline-none"
+      >
         <DialogTitle className="sr-only">Preview: {fileName}</DialogTitle>
 
         {/* Header Overlay */}

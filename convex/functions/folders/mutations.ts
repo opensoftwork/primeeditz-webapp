@@ -430,61 +430,98 @@ export const openProjectForUpload = adminMutation({
 import { internalMutation } from "../../_generated/server";
 
 /**
- * Maintenance: Fixes folder hierarchy for a project.
+ * Maintenance: Fixes folder hierarchy for a project generically using templates.
  */
 export const repairProjectFolders = internalMutation({
   args: {
     projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const folders = await ctx.db
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // 1. Find the suitable template
+    let template;
+    const projectType = await ctx.db.get(project.projectTypeId);
+    if (projectType?.defaultFolderTemplateId) {
+      template = await ctx.db.get(projectType.defaultFolderTemplateId);
+    }
+    
+    if (!template && project.quotationId) {
+      const quotation = await ctx.db.get(project.quotationId);
+      if (quotation && quotation.selectedPackageIds?.length > 0) {
+        for (const pkgId of quotation.selectedPackageIds) {
+          const pkg = await ctx.db.get(pkgId);
+          if (pkg?.projectConfigs) {
+            const config = pkg.projectConfigs.find(c => c.projectTypeId === project.projectTypeId);
+            if (config?.folderTemplateId) {
+              template = await ctx.db.get(config.folderTemplateId);
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    if (!template) {
+      template = await ctx.db
+        .query("folderTemplates")
+        .withIndex("by_projectTypeId", q => q.eq("projectTypeId", project.projectTypeId))
+        .filter(q => q.eq(q.field("isActive"), true))
+        .first();
+    }
+
+    if (!template) throw new Error("No folder template found to repair from");
+
+    // 2. Load all project folders
+    const allFolders = await ctx.db
       .query("folders")
       .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
       .collect();
 
-    const nameToFolder = new Map<string, any[]>();
-    folders.forEach((f) => {
-      const list = nameToFolder.get(f.name) || [];
-      list.push(f);
-      nameToFolder.set(f.name, list);
-    });
+    let repairedCount = 0;
+    const assignedIds = new Set<string>();
 
-    for (const folder of folders) {
-      let newPath = folder.path.replace(/^\/+/, ""); // Strip leading slashes
+    /**
+     * Recursively matches template nodes to project folders and updates their paths.
+     */
+    async function matchNodes(items: FolderItem[], parentPath = "") {
+      for (const item of items) {
+        // Find a matching folder that hasn't been assigned yet
+        // Match by name (case-insensitive)
+        const match = allFolders.find(f => 
+          !assignedIds.has(f._id) && 
+          f.name.toLowerCase() === item.name.toLowerCase()
+        );
 
-      if (folder.name.toLowerCase() === "wedding") {
-        newPath = "images/wedding";
-      }
+        const itemPathPart = item.path.replace(/^\/+|\/+$/g, "");
+        const fullPath = parentPath ? `${parentPath}/${itemPathPart}` : itemPathPart;
 
-      const audioFolders = nameToFolder.get("audio");
-      if (folder.name.toLowerCase() === "audio" && audioFolders && audioFolders.length > 1) {
-          const latest = audioFolders.reduce((prev, curr) =>
-            prev._creationTime > curr._creationTime ? prev : curr,
-          );
-          if (folder._id === latest._id) {
-            newPath = "audio/audio";
-          } else {
-            newPath = "audio";
+        if (match) {
+          assignedIds.add(match._id);
+          if (match.path !== fullPath) {
+            await ctx.db.patch(match._id, { path: fullPath });
+            repairedCount++;
           }
-      }
-
-      const videoFolders = nameToFolder.get("video");
-      if (folder.name.toLowerCase() === "video" && videoFolders && videoFolders.length > 1) {
-          const latest = videoFolders.reduce((prev, curr) =>
-            prev._creationTime > curr._creationTime ? prev : curr,
-          );
-          if (folder._id === latest._id) {
-            newPath = "video/video";
-          } else {
-            newPath = "video";
+          
+          // Recursively match children using the current fullPath as parentPath
+          if ("children" in item && item.children && item.children.length > 0) {
+            await matchNodes(item.children, fullPath);
           }
-      }
-
-      if (newPath !== folder.path) {
-        await ctx.db.patch(folder._id, { path: newPath });
+        }
       }
     }
 
-    return "Hierarchy repaired";
+    await matchNodes(template.folders);
+
+    // 3. Final pass: ensure any remaining unassigned folders have clean paths (no leading slashes)
+    for (const folder of allFolders) {
+      if (!assignedIds.has(folder._id) && folder.path.startsWith("/")) {
+        await ctx.db.patch(folder._id, { path: folder.path.replace(/^\/+/, "") });
+        repairedCount++;
+      }
+    }
+
+    return `Repaired ${repairedCount} folder paths for project ${project.code} using structural template matching.`;
   },
 });
