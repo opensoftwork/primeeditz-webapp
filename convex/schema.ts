@@ -44,6 +44,7 @@ export const projectActionStateValidator = v.union(
   v.literal("storage_allocated"),
 
   // Onboarding Phase
+  v.literal("awaiting_onboarding"), // NEW: Studio needs to complete onboarding first
   v.literal("awaiting_uploads"),
   v.literal("uploads_complete"),
   v.literal("awaiting_assignment"),

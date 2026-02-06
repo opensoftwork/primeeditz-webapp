@@ -21,6 +21,7 @@ export type ActionState =
   | "quotation_approved"
   | "quotation_rejected"
   | "storage_allocated"
+  | "awaiting_onboarding"
   | "awaiting_uploads"
   | "uploads_complete"
   | "awaiting_assignment"
@@ -76,6 +77,11 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
   },
 
   // Onboarding Phase
+  awaiting_onboarding: {
+    label: "Awaiting Onboarding",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10 border-amber-500/20",
+  },
   awaiting_uploads: {
     label: "Ready to Upload",
     color: "text-amber-400",
@@ -264,6 +270,13 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "Almost ready for your files",
     color: "text-blue-400",
     isActionNeeded: false,
+  },
+  awaiting_onboarding: {
+    label: "Complete Onboarding",
+    description: "Complete project setup to begin uploading",
+    color: "text-amber-400",
+    isActionNeeded: true,
+    cta: { label: "Complete Onboarding", href: (id) => `/projects/${id}/onboarding` },
   },
   awaiting_uploads: {
     label: "Upload Files",

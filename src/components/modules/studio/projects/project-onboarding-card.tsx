@@ -20,7 +20,7 @@ export function ProjectOnboardingCard({
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
       className={cn(
-        "relative overflow-hidden rounded-[2rem] border border-primary/20 bg-primary/5 p-6",
+        "relative overflow-hidden rounded-4xl border border-primary/20 bg-primary/5 p-6",
         className,
       )}
     >

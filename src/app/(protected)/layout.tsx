@@ -51,6 +51,7 @@ export default function DashboardLayout({
     pathname?.includes("/projects/new") ||
     pathname?.includes("/quotations/new") ||
     pathname?.includes("/quotations/request") ||
+    pathname?.includes("/onboarding") ||
     (pathname?.includes("/quotations/") && pathname?.includes("/builder")) ||
     pathname?.includes("/settings/service-packages/new") ||
     (pathname?.includes("/settings/service-packages/") &&

@@ -59,6 +59,11 @@ function getAwaitingConfig(role: string, state: string, employeeName?: string) {
         message:
           "Client is reviewing the quotation. They will be notified to approve or request changes.",
       },
+      awaiting_onboarding: {
+        title: "Client Onboarding",
+        message:
+          "Client needs to complete project onboarding before uploading files.",
+      },
       awaiting_uploads: {
         title: "Client Uploading",
         message:

@@ -29,6 +29,7 @@ export async function canUpload(
   if (source === "admin_init" && userRole === "admin") {
     const allowedAdminStates = [
       "storage_allocated",
+      "awaiting_onboarding",
       "awaiting_uploads",
       "uploads_complete",
       "assigned",
@@ -48,6 +49,8 @@ export async function canUpload(
   // 2. Client Permissions
   if (userRole === "studio") {
     switch (actionState) {
+      case "awaiting_onboarding":
+        return { allowed: false, reason: "Complete onboarding first" };
       case "awaiting_uploads":
         return { allowed: true, reason: "Ready to upload" };
       case "uploads_complete":
@@ -70,6 +73,7 @@ export async function canUpload(
   if (userRole === "admin") {
     switch (actionState) {
       case "storage_allocated":
+      case "awaiting_onboarding":
       case "uploads_complete":
       case "awaiting_assignment":
       case "assigned":

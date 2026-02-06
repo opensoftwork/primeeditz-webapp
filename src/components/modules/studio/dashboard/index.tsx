@@ -37,7 +37,11 @@ export default function StudioDashboard() {
     projects?.filter((p) => p.phase === "completed").length ?? 0;
 
   const projectsAwaitingOnboarding =
-    projects?.filter((p) => p.actionState === "awaiting_uploads") ?? [];
+    projects?.filter(
+      (p) =>
+        p.actionState === "awaiting_onboarding" ||
+        p.actionState === "awaiting_uploads",
+    ) ?? [];
 
   if (!profile) {
     return (

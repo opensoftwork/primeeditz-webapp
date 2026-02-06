@@ -25,9 +25,10 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   ],
   quotation_approved: ["storage_allocated", "cancelled"],
   quotation_rejected: ["awaiting_quotation", "cancelled"],
-  storage_allocated: ["awaiting_uploads"],
+  storage_allocated: ["awaiting_onboarding"],
 
   // Onboarding Phase
+  awaiting_onboarding: ["awaiting_uploads"], // Studio completes onboarding first
   awaiting_uploads: ["uploads_complete"],
   uploads_complete: ["awaiting_assignment", "assigned"],
   awaiting_assignment: ["assigned"],
@@ -62,6 +63,7 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   quotation_rejected: "setup",
   storage_allocated: "setup",
 
+  awaiting_onboarding: "onboarding",
   awaiting_uploads: "onboarding",
   uploads_complete: "onboarding",
   awaiting_assignment: "onboarding",
@@ -91,6 +93,7 @@ const STATE_TO_ACTOR: Record<ActionState, Role> = {
   quotation_approved: "admin",
   quotation_rejected: "admin",
   storage_allocated: "admin",
+  awaiting_onboarding: "studio",
   awaiting_uploads: "studio",
   uploads_complete: "admin",
   awaiting_assignment: "admin",

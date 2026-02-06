@@ -10,6 +10,7 @@ export function StatusBadge({ status }: { status: string }) {
   const statusColors: Record<string, string> = {
     awaiting_quotation: "border-amber-500/40 text-amber-500 bg-amber-500/10",
     quotation_sent: "border-amber-500/40 text-amber-500 bg-amber-500/10",
+    awaiting_onboarding: "border-amber-500/40 text-amber-500 bg-amber-500/10",
     awaiting_uploads: "border-amber-500/40 text-amber-500 bg-amber-500/10",
     work_in_progress: "border-purple-500/40 text-purple-500 bg-purple-500/10",
     completed: "border-emerald-500/40 text-emerald-500 bg-emerald-500/10",

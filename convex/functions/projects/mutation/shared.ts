@@ -390,8 +390,8 @@ export const updateOnboarding = authenticatedMutation({
         throw new ConvexError("Access denied");
     }
 
-    // Only allow in onboarding phase
-    if (project.actionState !== "awaiting_uploads") {
+    // Only allow in onboarding phase (awaiting_onboarding or awaiting_uploads)
+    if (project.actionState !== "awaiting_onboarding" && project.actionState !== "awaiting_uploads") {
       throw new ConvexError("Project is not in onboarding phase");
     }
 
@@ -411,8 +411,9 @@ export const updateOnboarding = authenticatedMutation({
 
 /**
  * Finalize project onboarding.
- * Moves project from 'awaiting_uploads' to 'uploads_complete'.
- * Also marks all folders as completed to maintain consistency.
+ * Handles two transitions:
+ * 1. 'awaiting_onboarding' → 'awaiting_uploads' (initial onboarding done, ready for uploads)
+ * 2. 'awaiting_uploads' → 'uploads_complete' (all files uploaded)
  */
 export const completeOnboarding = authenticatedMutation({
   args: {
@@ -436,44 +437,69 @@ export const completeOnboarding = authenticatedMutation({
         throw new ConvexError("Access denied");
     }
 
-    // Only allow finalizing if in awaiting_uploads
-    if (project.actionState !== "awaiting_uploads") {
-      throw new ConvexError("Project is not in onboarding phase");
+    // Handle state transition based on current state
+    if (project.actionState === "awaiting_onboarding") {
+      // Transition to awaiting_uploads - ready to upload files
+      await ctx.db.patch(args.projectId, {
+        actionState: "awaiting_uploads",
+        awaitingActorRole: "studio",
+        updatedAt: now(),
+      });
+
+      // Record status change
+      await ctx.db.insert("statusHistory", {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: project.phase,
+        previousActionState: "awaiting_onboarding",
+        newActionState: "awaiting_uploads",
+        previousAwaitingActorRole: "studio",
+        newAwaitingActorRole: "studio",
+        changedBy: profile._id,
+        changedAt: now(),
+        notes: `Onboarding completed by ${profile.name}. Project is now ready for file uploads.`,
+      });
+
+      return { success: true, newState: "awaiting_uploads" };
     }
 
-    // Mark all folders as completed
-    const folders = await ctx.db
-      .query("folders")
-      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
-      .collect();
+    if (project.actionState === "awaiting_uploads") {
+      // Mark all folders as completed
+      const folders = await ctx.db
+        .query("folders")
+        .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+        .collect();
 
-    for (const folder of folders) {
-      if (folder.status !== "completed") {
-        await ctx.db.patch(folder._id, { status: "completed" });
+      for (const folder of folders) {
+        if (folder.status !== "completed") {
+          await ctx.db.patch(folder._id, { status: "completed" });
+        }
       }
+
+      await ctx.db.patch(args.projectId, {
+        actionState: "uploads_complete",
+        awaitingActorRole: "admin",
+        uploadsCompletedAt: now(),
+        updatedAt: now(),
+      });
+
+      // Record status change
+      await ctx.db.insert("statusHistory", {
+        projectId: args.projectId,
+        previousPhase: project.phase,
+        newPhase: project.phase,
+        previousActionState: "awaiting_uploads",
+        newActionState: "uploads_complete",
+        previousAwaitingActorRole: "studio",
+        newAwaitingActorRole: "admin",
+        changedBy: profile._id,
+        changedAt: now(),
+        notes: `File uploads completed by ${profile.name} (${profile.role}). ${folders.length} folders marked as completed.`,
+      });
+
+      return { success: true, newState: "uploads_complete" };
     }
 
-    await ctx.db.patch(args.projectId, {
-      actionState: "uploads_complete",
-      awaitingActorRole: "admin",
-      uploadsCompletedAt: now(),
-      updatedAt: now(),
-    });
-
-    // Record status change
-    await ctx.db.insert("statusHistory", {
-      projectId: args.projectId,
-      previousPhase: project.phase,
-      newPhase: project.phase, // Stays in current phase (usually 'onboarding' or 'setup')
-      previousActionState: "awaiting_uploads",
-      newActionState: "uploads_complete",
-      previousAwaitingActorRole: "studio",
-      newAwaitingActorRole: "admin",
-      changedBy: profile._id,
-      changedAt: now(),
-      notes: `Project onboarding completed by ${profile.name} (${profile.role}). ${folders.length} folders marked as completed.`,
-    });
-
-    return { success: true };
+    throw new ConvexError("Project is not in onboarding phase");
   },
 });
