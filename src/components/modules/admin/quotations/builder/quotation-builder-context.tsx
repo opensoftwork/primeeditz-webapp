@@ -17,6 +17,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { toast } from "sonner";
@@ -185,19 +186,32 @@ export function QuotationBuilderProvider({
     null,
   );
 
+  // Refs for tracking draft state and preventing race conditions (merging pattern from studio wizard)
+  const lastUpdateTimestamp = useRef<number>(0);
+  const isLocalUpdate = useRef(false);
+  const draftWasSeen = useRef(false);
+
   // Query existing quotation if editing
   const existingQuotation = useQuery(
     api.functions.quotations.queries.getQuotation,
     quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
   );
 
+  // Data loading state - ready when:
+  // 1. Not editing (no initialQuotationId), OR
+  // 2. Editing and existingQuotation has loaded
+  const isDataReady = !initialQuotationId || existingQuotation !== undefined;
+
   // Populate form data if editing
   useEffect(() => {
     // Only overwrite local state if we have data from DB and either:
     // 1. We are not dirty (no unsaved local changes)
     // 2. This is the first time we're getting data for this quotation
-    if (existingQuotation && quotationId) {
-      if (!isDirty) {
+    // AND it's not a local update echo
+    if (existingQuotation && quotationId && !isLocalUpdate.current) {
+      const serverTimestamp = existingQuotation.updatedAt || 0;
+
+      if (!isDirty || serverTimestamp > lastUpdateTimestamp.current) {
         setFormDataState({
           step1: {
             studioId: existingQuotation.studioId || "",
@@ -226,9 +240,31 @@ export function QuotationBuilderProvider({
             shareLinkEnabled: true,
           },
         });
+        lastUpdateTimestamp.current = serverTimestamp;
       }
     }
+    // Reset local update flag after processing echo
+    isLocalUpdate.current = false;
   }, [existingQuotation, quotationId, isDirty]);
+
+  // Update draftWasSeen when data is available
+  useEffect(() => {
+    if (existingQuotation) {
+      draftWasSeen.current = true;
+    }
+  }, [existingQuotation]);
+
+  // Reactive monitor for quotation existence
+  useEffect(() => {
+    if (isDataReady && quotationId && !isLoading) {
+      if (existingQuotation === null && draftWasSeen.current) {
+        toast.error("Quotation session ended", {
+          description: "This quotation has been removed or finalized in another session.",
+        });
+        router.push("/quotations");
+      }
+    }
+  }, [existingQuotation, isDataReady, quotationId, isLoading, router]);
 
   // Queries - cast to proper types
   const studiosQuery = useQuery(api.admin.getStudios, {});
@@ -292,10 +328,6 @@ export function QuotationBuilderProvider({
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
-  // Data loading state - ready when:
-  // 1. Not editing (no initialQuotationId), OR
-  // 2. Editing and existingQuotation has loaded
-  const isDataReady = !initialQuotationId || existingQuotation !== undefined;
 
   // Navigation
   const goToStep = useCallback((step: number) => {
@@ -440,6 +472,11 @@ export function QuotationBuilderProvider({
       if (!isAutoSave && !step1.studioId)
         throw new Error("Please select a client");
 
+      // Skip auto-save if no packages or line items (backend would reject anyway)
+      if (isAutoSave && step4.lineItems.length === 0 && step2.packageIds.length === 0) {
+        return null;
+      }
+
       // Validation for line items only on final submission, unless we have package IDs
       if (
         !isAutoSave &&
@@ -449,29 +486,32 @@ export function QuotationBuilderProvider({
         throw new Error("Please add packages or line items");
       }
 
-      const lineItemsPayload = step4.lineItems.map((item) => ({
-        id: item.id || crypto.randomUUID(),
-        sectionId: (item.sectionId || sections?.[0]?._id) as
-          | Id<"quotationSections">
-          | undefined,
-        projectId: item.projectId,
-        description: item.description,
-        unit: item.unit,
-        rate: item.rate,
-        quantity: item.quantity,
-        spawnsProject: item.spawnsProject,
-        projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
-        selectedFolderTemplateId: item.selectedFolderTemplateId as
-          | Id<"folderTemplates">
-          | undefined,
-        subItems: item.subItems?.map((s) => ({
-          id: s.id || crypto.randomUUID(),
-          description: s.description,
-          unit: s.unit,
-          rate: s.rate,
-          quantity: s.quantity,
-        })),
-      }));
+      const lineItemsPayload = step4.lineItems.map((item) => {
+        // Ensure sectionId is either a valid ID or undefined, never an empty string
+        const sectionId = item.sectionId || sections?.[0]?._id;
+
+        return {
+          id: item.id || crypto.randomUUID(),
+          sectionId: sectionId as Id<"quotationSections"> | undefined,
+          projectId: item.projectId,
+          description: item.description,
+          unit: item.unit,
+          rate: item.rate,
+          quantity: item.quantity,
+          spawnsProject: item.spawnsProject,
+          projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
+          selectedFolderTemplateId: item.selectedFolderTemplateId as
+            | Id<"folderTemplates">
+            | undefined,
+          subItems: item.subItems?.map((s) => ({
+            id: s.id || crypto.randomUUID(),
+            description: s.description,
+            unit: s.unit,
+            rate: s.rate,
+            quantity: s.quantity,
+          })),
+        };
+      });
 
       const firstProjectId = step3.projectIds[0];
       const associatedProject = (projects as Project[])?.find(
@@ -487,7 +527,8 @@ export function QuotationBuilderProvider({
           ? (step3.projectIds as Id<"projects">[])
           : undefined;
 
-      const payload = {
+      // Base payload shared between create and update
+      const basePayload = {
         studioId: step1.studioId as Id<"profiles">,
         projectIds: projectIds,
         selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
@@ -497,17 +538,25 @@ export function QuotationBuilderProvider({
         discountAmount: step5.discountAmount,
         validUntil: step1.validUntil?.getTime(),
         endClientName,
-        createdBy: "ADMIN",
       };
 
       if (quotationId) {
+        // Update existing quotation (no createdBy field)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
         await updateQuotation({
           quotationId: quotationId as Id<"quotations">,
-          ...payload,
+          ...basePayload,
         });
         return quotationId;
       } else {
-        const res = await createQuotation(payload);
+        // Create new quotation (includes createdBy)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
+        const res = await createQuotation({
+          ...basePayload,
+          createdBy: "ADMIN",
+        });
         setQuotationId(res);
         // Silently update URL if we created a new quotation via auto-save
         if (isAutoSave) {

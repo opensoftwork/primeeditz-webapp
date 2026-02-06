@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { Badge } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { Layers, CheckCircle2 } from "lucide-react";
 import {
@@ -43,8 +44,65 @@ export function PackagePreviewPanel({
 
   if (!pkg) {
     return (
-      <div className="h-full flex items-center justify-center border-l border-white/5 bg-zinc-950/50 p-10">
-        <p className="text-white/20 text-sm font-medium">Loading package details...</p>
+      <div className="flex flex-col border-l border-white/5 bg-zinc-950/30 animate-pulse">
+        {/* Header Skeleton */}
+        <div className="p-8 border-b border-white/5 bg-white/2 space-y-4">
+          <div className="flex items-start justify-between">
+            <div className="space-y-3 flex-1">
+              <Skeleton className="h-8 w-3/4 bg-white/5 rounded-xl" />
+              <div className="flex items-center gap-3">
+                <Skeleton className="h-5 w-24 bg-white/5 rounded-full" />
+                <Skeleton className="h-5 w-20 bg-white/5 rounded-full" />
+              </div>
+            </div>
+            <Skeleton className="h-10 w-28 bg-white/5 rounded-lg" />
+          </div>
+          <Skeleton className="h-16 w-full bg-white/5 rounded-xl" />
+        </div>
+
+        {/* Content Skeleton */}
+        <div className="p-8 space-y-10">
+          {/* Project Intelligence Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-40 bg-white/5 rounded-md" />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <Skeleton className="h-20 w-full bg-white/5 rounded-2xl" />
+              <Skeleton className="h-20 w-full bg-white/5 rounded-2xl" />
+            </div>
+          </div>
+
+          {/* Financial Breakdown Skeleton */}
+          <div className="space-y-4">
+            <Skeleton className="h-4 w-36 bg-white/5 rounded-md" />
+            <div className="rounded-2xl border border-white/5 overflow-hidden">
+              <div className="bg-white/5 p-3">
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-24 bg-white/10 rounded" />
+                  <Skeleton className="h-3 w-12 bg-white/10 rounded" />
+                  <Skeleton className="h-3 w-16 bg-white/10 rounded" />
+                  <Skeleton className="h-3 w-16 bg-white/10 rounded" />
+                </div>
+              </div>
+              <div className="p-4 space-y-4">
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex justify-between items-center">
+                    <div className="space-y-1 flex-1">
+                      <Skeleton className="h-3 w-3/4 bg-white/5 rounded" />
+                      <Skeleton className="h-2 w-1/4 bg-white/10 rounded" />
+                    </div>
+                    <Skeleton className="h-3 w-8 bg-white/5 rounded" />
+                    <Skeleton className="h-3 w-16 bg-white/5 rounded ml-4" />
+                    <Skeleton className="h-3 w-16 bg-white/5 rounded ml-4" />
+                  </div>
+                ))}
+              </div>
+              <div className="bg-white/10 p-4 flex justify-between items-center border-t border-white/5">
+                <Skeleton className="h-4 w-28 bg-white/5 rounded" />
+                <Skeleton className="h-5 w-24 bg-white/10 rounded" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
