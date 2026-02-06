@@ -240,10 +240,15 @@ export function QuotationBuilderProvider({
             shareLinkEnabled: true,
           },
         });
+
+        if (existingQuotation.lastStep) {
+          setCurrentStep(existingQuotation.lastStep as QuotationStepId);
+        }
+        
         lastUpdateTimestamp.current = serverTimestamp;
       }
     }
-    // Reset local update flag after processing echo
+    // Always reset local update flag after processing
     isLocalUpdate.current = false;
   }, [existingQuotation, quotationId, isDirty]);
 
@@ -329,20 +334,150 @@ export function QuotationBuilderProvider({
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
 
+  // Save quotation core logic (shared between Finalize and Auto-save)
+  const performSave = useCallback(
+    async (isAutoSave = false, overrides: any = {}) => {
+      const { step1, step2, step3, step4, step5 } = formData;
+
+      // For auto-save, we can be more lenient, but we at least need a studio
+      if (isAutoSave && !step1.studioId) return null;
+      if (!isAutoSave && !step1.studioId)
+        throw new Error("Please select a client");
+
+      // Skip auto-save if no packages or line items (backend would reject anyway)
+      if (isAutoSave && step4.lineItems.length === 0 && step2.packageIds.length === 0) {
+        return null;
+      }
+
+      // Validation for line items only on final submission, unless we have package IDs
+      if (
+        !isAutoSave &&
+        step4.lineItems.length === 0 &&
+        step2.packageIds.length === 0
+      ) {
+        throw new Error("Please add packages or line items");
+      }
+
+      const lineItemsPayload = step4.lineItems.map((item) => {
+        // Ensure sectionId is either a valid ID or undefined, never an empty string
+        const sectionId = item.sectionId || sections?.[0]?._id;
+
+        return {
+          id: item.id || crypto.randomUUID(),
+          sectionId: sectionId as Id<"quotationSections"> | undefined,
+          projectId: item.projectId,
+          description: item.description,
+          unit: item.unit,
+          rate: item.rate,
+          quantity: item.quantity,
+          spawnsProject: item.spawnsProject,
+          projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
+          selectedFolderTemplateId: item.selectedFolderTemplateId as
+            | Id<"folderTemplates">
+            | undefined,
+          subItems: item.subItems?.map((s) => ({
+            id: s.id || crypto.randomUUID(),
+            description: s.description,
+            unit: s.unit,
+            rate: s.rate,
+            quantity: s.quantity,
+          })),
+        };
+      });
+
+      const firstProjectId = step3.projectIds[0];
+      const associatedProject = (projects as Project[])?.find(
+        (p) => p._id === firstProjectId,
+      );
+      const endClientName =
+        associatedProject?.eventName ||
+        selectedStudio?.name ||
+        "Untitled Quotation";
+
+      const projectIds =
+        step3.projectIds.length > 0
+          ? (step3.projectIds as Id<"projects">[])
+          : undefined;
+
+      // Base payload shared between create and update
+      const basePayload = {
+        studioId: step1.studioId as Id<"profiles">,
+        projectIds: projectIds,
+        selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
+        lineItems: lineItemsPayload,
+        terms: step4.terms,
+        taxRate: step5.taxRate / 100,
+        discountAmount: step5.discountAmount,
+        validUntil: step1.validUntil?.getTime(),
+        endClientName,
+        lastStep: currentStep,
+        ...overrides,
+      };
+
+      if (quotationId) {
+        // Update existing quotation (no createdBy field)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
+        await updateQuotation({
+          quotationId: quotationId as Id<"quotations">,
+          ...basePayload,
+        });
+        return quotationId;
+      } else {
+        // Create new quotation (includes createdBy)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
+        const res = await createQuotation({
+          ...basePayload,
+          createdBy: "ADMIN",
+        });
+        setQuotationId(res);
+        // Silently update URL if we created a new quotation via auto-save
+        if (isAutoSave) {
+          window.history.replaceState(
+            null,
+            "",
+            `/quotations/${res}/builder?step=${currentStep}`,
+          );
+        }
+        return res;
+      }
+    },
+    [
+      formData,
+      sections,
+      projects,
+      selectedStudio,
+      currentStep,
+      quotationId,
+      updateQuotation,
+      createQuotation,
+    ],
+  );
+
   // Navigation
-  const goToStep = useCallback((step: number) => {
+  const goToStep = useCallback(async (step: number) => {
     if (step >= 1 && step <= 4) {
       setCurrentStep(step as QuotationStepId);
+      await performSave(true, { lastStep: step });
     }
-  }, []);
+  }, [performSave]);
 
-  const nextStep = useCallback(() => {
-    setCurrentStep((prev) => Math.min(prev + 1, 4) as QuotationStepId);
-  }, []);
+  const nextStep = useCallback(async () => {
+    const next = Math.min(currentStep + 1, 4) as QuotationStepId;
+    if (next !== currentStep) {
+      setCurrentStep(next);
+      await performSave(true, { lastStep: next });
+    }
+  }, [currentStep, performSave]);
 
-  const prevStep = useCallback(() => {
-    setCurrentStep((prev) => Math.max(prev - 1, 1) as QuotationStepId);
-  }, []);
+  const prevStep = useCallback(async () => {
+    const prev = Math.max(currentStep - 1, 1) as QuotationStepId;
+    if (prev !== currentStep) {
+      setCurrentStep(prev);
+      await performSave(true, { lastStep: prev });
+    }
+  }, [currentStep, performSave]);
 
   // Item Management
   const addLineItem = useCallback((data?: Partial<QuotationLineItem>) => {
@@ -462,124 +597,7 @@ export function QuotationBuilderProvider({
     [],
   );
 
-  // Save quotation core logic (shared between Finalize and Auto-save)
-  const performSave = useCallback(
-    async (isAutoSave = false) => {
-      const { step1, step2, step3, step4, step5 } = formData;
 
-      // For auto-save, we can be more lenient, but we at least need a studio
-      if (isAutoSave && !step1.studioId) return null;
-      if (!isAutoSave && !step1.studioId)
-        throw new Error("Please select a client");
-
-      // Skip auto-save if no packages or line items (backend would reject anyway)
-      if (isAutoSave && step4.lineItems.length === 0 && step2.packageIds.length === 0) {
-        return null;
-      }
-
-      // Validation for line items only on final submission, unless we have package IDs
-      if (
-        !isAutoSave &&
-        step4.lineItems.length === 0 &&
-        step2.packageIds.length === 0
-      ) {
-        throw new Error("Please add packages or line items");
-      }
-
-      const lineItemsPayload = step4.lineItems.map((item) => {
-        // Ensure sectionId is either a valid ID or undefined, never an empty string
-        const sectionId = item.sectionId || sections?.[0]?._id;
-
-        return {
-          id: item.id || crypto.randomUUID(),
-          sectionId: sectionId as Id<"quotationSections"> | undefined,
-          projectId: item.projectId,
-          description: item.description,
-          unit: item.unit,
-          rate: item.rate,
-          quantity: item.quantity,
-          spawnsProject: item.spawnsProject,
-          projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
-          selectedFolderTemplateId: item.selectedFolderTemplateId as
-            | Id<"folderTemplates">
-            | undefined,
-          subItems: item.subItems?.map((s) => ({
-            id: s.id || crypto.randomUUID(),
-            description: s.description,
-            unit: s.unit,
-            rate: s.rate,
-            quantity: s.quantity,
-          })),
-        };
-      });
-
-      const firstProjectId = step3.projectIds[0];
-      const associatedProject = (projects as Project[])?.find(
-        (p) => p._id === firstProjectId,
-      );
-      const endClientName =
-        associatedProject?.eventName ||
-        selectedStudio?.name ||
-        "Untitled Quotation";
-
-      const projectIds =
-        step3.projectIds.length > 0
-          ? (step3.projectIds as Id<"projects">[])
-          : undefined;
-
-      // Base payload shared between create and update
-      const basePayload = {
-        studioId: step1.studioId as Id<"profiles">,
-        projectIds: projectIds,
-        selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
-        lineItems: lineItemsPayload,
-        terms: step4.terms,
-        taxRate: step5.taxRate / 100,
-        discountAmount: step5.discountAmount,
-        validUntil: step1.validUntil?.getTime(),
-        endClientName,
-      };
-
-      if (quotationId) {
-        // Update existing quotation (no createdBy field)
-        isLocalUpdate.current = true;
-        lastUpdateTimestamp.current = Date.now();
-        await updateQuotation({
-          quotationId: quotationId as Id<"quotations">,
-          ...basePayload,
-        });
-        return quotationId;
-      } else {
-        // Create new quotation (includes createdBy)
-        isLocalUpdate.current = true;
-        lastUpdateTimestamp.current = Date.now();
-        const res = await createQuotation({
-          ...basePayload,
-          createdBy: "ADMIN",
-        });
-        setQuotationId(res);
-        // Silently update URL if we created a new quotation via auto-save
-        if (isAutoSave) {
-          window.history.replaceState(
-            null,
-            "",
-            `/quotations/${res}/builder?step=${currentStep}`,
-          );
-        }
-        return res;
-      }
-    },
-    [
-      formData,
-      quotationId,
-      sections,
-      createQuotation,
-      updateQuotation,
-      projects,
-      selectedStudio,
-      currentStep,
-    ],
-  );
 
   // Save quotation (Public Action)
   const saveQuotation = useCallback(async () => {

@@ -297,6 +297,7 @@ export const createQuotation = adminMutation({
     eventName: v.optional(v.string()),
     eventDate: v.optional(v.number()),
     createdBy: v.string(),
+    lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     // Validation
@@ -343,6 +344,7 @@ export const createQuotation = adminMutation({
       eventName: args.eventName,
       eventDate: args.eventDate,
       createdBy: args.createdBy,
+      lastStep: args.lastStep,
       updatedAt: Date.now(),
     });
 
@@ -379,6 +381,7 @@ export const updateQuotation = adminMutation({
     projectId: v.optional(v.id("projects")),
     projectIds: v.optional(v.array(v.id("projects"))),
     selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
+    lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);

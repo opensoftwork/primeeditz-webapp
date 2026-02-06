@@ -500,6 +500,7 @@ export default defineSchema({
     projectId: v.optional(v.id("projects")), // Associated project ID (for project-centric quotes)
     projectIds: v.optional(v.array(v.id("projects"))), // Multi-project links
     selectedPackageIds: v.array(v.id("servicePackages")), // NEW: Multi-package link (Required)
+    lastStep: v.optional(v.number()), // To track wizard progress (1-4)
     status: quotationStatusValidator,
     // Event details
     endClientName: v.string(),
