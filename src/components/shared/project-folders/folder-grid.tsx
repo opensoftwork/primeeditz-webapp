@@ -168,15 +168,15 @@ export function FolderGrid({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-white font-black uppercase tracking-tight text-sm">
-          {title}
+      <div className="flex items-center justify-between pb-2 border-b border-white/5">
+        <h3 className="text-white font-black uppercase tracking-[0.2em] text-[10px] opacity-40">
+          {title || "Folder Structure"}
         </h3>
         {showStats && (
-          <div className="flex items-center gap-6 text-white/40 text-[9px] font-black uppercase tracking-[0.2em]">
+          <div className="flex items-center gap-6 text-white/40 text-[10px] font-black uppercase tracking-[0.2em]">
             <span className="flex items-center gap-2">
               <Image className="h-3.5 w-3.5 text-primary/40" />
-              {totalAssets} files
+              {totalAssets} FILES
             </span>
             <span className="flex items-center gap-2">
               <HardDrive className="h-3.5 w-3.5 text-primary/40" />

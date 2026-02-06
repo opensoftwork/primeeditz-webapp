@@ -118,14 +118,14 @@ export function FolderListingView({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-white/5 shadow-inner">
               <FolderTree className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tight text-white">
+              <h1 className="text-2xl font-black uppercase tracking-tight text-white leading-none">
                 Project Folders
               </h1>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1">
                 {project.code} • {folders.length} Folders Configured
               </p>
             </div>
@@ -152,7 +152,7 @@ export function FolderListingView({
         <FolderGrid
           folders={folders}
           onFolderClick={handleFolderClick}
-          title=""
+          title="Project Folders"
         />
       </motion.div>
 

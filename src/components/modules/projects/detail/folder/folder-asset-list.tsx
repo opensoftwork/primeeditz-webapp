@@ -1,7 +1,8 @@
 "use client";
 
-import { Eye, FileImage, Film, Music, Pause, Play, Trash2 } from "lucide-react";
+import { Download, Eye, FileImage, Film, Music, Pause, Play, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
+import { saveAs } from "file-saver";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { VideoSlider } from "@/components/shared/video-viewer";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
@@ -99,6 +100,19 @@ export function FolderAssetList({
       audio.play();
       audioRef.current = audio;
       setPlayingAudioId(asset._id);
+    }
+  };
+
+  const handleDownload = async (fileId: string, fileName: string, url: string) => {
+    const toastId = toast.loading(`Downloading ${fileName}...`);
+    try {
+      const response = await fetch(url);
+      if (!response.ok) throw new Error("Download failed");
+      const blob = await response.blob();
+      saveAs(blob, fileName);
+      toast.success("Download complete", { id: toastId });
+    } catch (error) {
+      toast.error("Failed to download file", { id: toastId });
     }
   };
 
@@ -252,6 +266,20 @@ export function FolderAssetList({
                   )}
                 </div>
                 <div className="flex items-center gap-1">
+                  {hasSignedUrl && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-primary/20 group-hover/asset:text-primary transition-colors hover:bg-primary/10 rounded-xl"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDownload(asset._id, asset.filename, hasSignedUrl);
+                      }}
+                      title="Download file"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  )}
                   {isImage && hasSignedUrl && (
                     <div
                       className="h-8 w-8 flex items-center justify-center text-primary/20 group-hover/asset:text-primary/60 transition-colors"
@@ -324,6 +352,7 @@ export function FolderAssetList({
         initialIndex={sliderIndex}
         open={sliderOpen}
         onOpenChange={setSliderOpen}
+        onDownload={handleDownload}
       />
 
       {/* Video Slider */}

@@ -356,8 +356,8 @@ export function FolderDetailView({
             <DownloadFolderZip
               folderId={folderId}
               folderName={folder.name}
-              variant="outline"
-              className="rounded-full border-primary/20 text-primary hover:bg-primary/10"
+              variant="default"
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white border-none px-6 h-10 shadow-lg shadow-blue-500/20"
             />
           )}
           {folder.status === "in_progress" && !isLocked && !isEmployee && (

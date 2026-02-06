@@ -98,7 +98,7 @@ export function DownloadFolderZip({
     <Button
       variant={variant}
       size={size}
-      className={cn("rounded-xl", className)}
+      className={cn("", className)}
       onClick={handleDownload}
       disabled={isDisabled}
       title={assets?.length === 0 ? "Folder is empty" : "Download folder as ZIP"}

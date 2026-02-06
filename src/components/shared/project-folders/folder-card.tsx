@@ -96,7 +96,7 @@ export function FolderCard({
         <div className="flex-1 min-w-0">
           <p
             className={cn(
-              "text-white font-black uppercase tracking-tight text-sm truncate transition-colors",
+              "text-white font-black uppercase tracking-widest text-sm truncate transition-colors",
               isClickable && "group-hover:text-primary",
             )}
           >
@@ -104,7 +104,7 @@ export function FolderCard({
           </p>
           <div className="flex items-center gap-2 mt-1.5">
             <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">
-              {assetCount} files
+              {assetCount} FILES
             </span>
             {totalSize > 0 && (
               <>
@@ -122,7 +122,7 @@ export function FolderCard({
         <div className="flex items-center gap-2">
           <StatusIcon
             className={cn(
-              "h-3.5 w-3.5",
+              "h-3 w-3",
               isLocked && !isViewOnly ? "text-white/20" : config?.color,
             )}
           />
@@ -156,15 +156,15 @@ export function FolderCard({
         )}
 
         {status !== "in_progress" && !isViewOnly && (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {id && assetCount > 0 && (
               <DownloadFolderZip
                 folderId={id}
                 folderName={name}
-                showIconOnly
-                size="icon"
+                size="sm"
                 variant="ghost"
-                className="h-8 w-8 text-white/20 hover:text-primary hover:bg-primary/10 rounded-xl"
+                label="Download ZIP"
+                className="h-8 px-3 text-[9px] font-black uppercase tracking-widest bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border-blue-600/20 rounded-xl transition-all"
               />
             )}
             <div
