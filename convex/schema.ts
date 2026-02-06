@@ -616,4 +616,27 @@ export default defineSchema({
     createdBy: v.id("profiles"), // Profile ID
     updatedAt: v.number(),
   }).index("by_createdBy", ["createdBy"]),
+
+  // --------------------------------------------------------------------------
+  // Quotation Request Drafts (Studio Wizard Persistence)
+  // --------------------------------------------------------------------------
+  quotationRequestDrafts: defineTable({
+    // Step tracking
+    lastStep: v.number(), // 1, 2, or 3
+
+    // Step 1: Selection
+    selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
+    selectedCategory: v.optional(v.string()),
+
+    // Step 2: Details
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.string()), // String from form input
+    venue: v.optional(v.string()),
+    notes: v.optional(v.string()),
+
+    // Audit
+    createdBy: v.id("profiles"), // Profile ID
+    updatedAt: v.number(),
+  }).index("by_createdBy", ["createdBy"]),
 });

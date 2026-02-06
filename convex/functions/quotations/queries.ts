@@ -857,3 +857,16 @@ export const getPendingQuotationsForAdmin = adminQuery({
     };
   },
 });
+
+/**
+ * Get the current quotation request draft for the studio.
+ */
+export const getMyDraft = studioQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db
+      .query("quotationRequestDrafts")
+      .withIndex("by_createdBy", (q) => q.eq("createdBy", ctx.profile._id))
+      .first();
+  },
+});
