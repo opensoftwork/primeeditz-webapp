@@ -26,7 +26,6 @@ import { FolderDropZone } from "./folder-drop-zone";
 import { type StagedFile, StagedUploadQueue } from "./staged-upload-queue";
 import { DownloadFolderZip } from "@/components/shared/project-folders";
 
-
 interface FolderDetailViewProps {
   projectId: string;
   folderId: string;
@@ -474,6 +473,8 @@ export function FolderDetailView({
           signedUrls={signedUrls}
           isEmployee={isEmployee}
           isReadOnly={isLocked || folder?.status === "completed"}
+          folderId={folderId}
+          folderName={folder.name}
         />
       </motion.div>
 

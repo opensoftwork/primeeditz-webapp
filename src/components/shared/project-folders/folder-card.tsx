@@ -89,19 +89,36 @@ export function FolderCard({
           <Folder
             className={cn(
               "h-5 w-5",
-              isLocked && !isViewOnly ? "text-white/20" : config?.color || "text-white/40",
+              isLocked && !isViewOnly
+                ? "text-white/20"
+                : config?.color || "text-white/40",
             )}
           />
         </div>
         <div className="flex-1 min-w-0">
-          <p
-            className={cn(
-              "text-white font-black uppercase tracking-widest text-sm truncate transition-colors",
-              isClickable && "group-hover:text-primary",
-            )}
-          >
-            {name}
-          </p>
+          <div className="flex items-center justify-between gap-4">
+            <p
+              className={cn(
+                "text-white font-black uppercase tracking-widest text-sm truncate transition-colors",
+                isClickable && "group-hover:text-primary",
+              )}
+            >
+              {name}
+            </p>
+            {status !== "in_progress" &&
+              !isViewOnly &&
+              id &&
+              assetCount > 0 && (
+                <DownloadFolderZip
+                  folderId={id}
+                  folderName={name}
+                  size="sm"
+                  variant="ghost"
+                  label="DOWNLOAD ZIP"
+                  className="h-8 px-3 text-[9px] font-black uppercase tracking-widest bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border-blue-600/20 rounded-xl transition-all"
+                />
+              )}
+          </div>
           <div className="flex items-center gap-2 mt-1.5">
             <span className="text-white/30 text-[10px] font-bold uppercase tracking-widest">
               {assetCount} FILES
@@ -156,26 +173,14 @@ export function FolderCard({
         )}
 
         {status !== "in_progress" && !isViewOnly && (
-          <div className="flex items-center gap-3">
-            {id && assetCount > 0 && (
-              <DownloadFolderZip
-                folderId={id}
-                folderName={name}
-                size="sm"
-                variant="ghost"
-                label="Download ZIP"
-                className="h-8 px-3 text-[9px] font-black uppercase tracking-widest bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border-blue-600/20 rounded-xl transition-all"
-              />
+          <div
+            className={cn(
+              "h-1.5 w-1.5 rounded-full transition-colors",
+              isClickable
+                ? "bg-white/10 group-hover:bg-primary animate-pulse"
+                : "bg-white/5",
             )}
-            <div
-              className={cn(
-                "h-1.5 w-1.5 rounded-full transition-colors",
-                isClickable
-                  ? "bg-white/10 group-hover:bg-primary animate-pulse"
-                  : "bg-white/5",
-              )}
-            />
-          </div>
+          />
         )}
       </div>
     </div>

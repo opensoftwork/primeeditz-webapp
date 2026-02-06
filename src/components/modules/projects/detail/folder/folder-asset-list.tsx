@@ -1,6 +1,15 @@
 "use client";
 
-import { Download, Eye, FileImage, Film, Music, Pause, Play, Trash2 } from "lucide-react";
+import {
+  Download,
+  Eye,
+  FileImage,
+  Film,
+  Music,
+  Pause,
+  Play,
+  Trash2,
+} from "lucide-react";
 import { useRef, useState } from "react";
 import { saveAs } from "file-saver";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
@@ -25,6 +34,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Id } from "@convex/_generated/dataModel";
+import { DownloadFolderZip } from "@/components/shared/project-folders";
 
 interface Asset {
   _id: string;
@@ -42,6 +52,8 @@ interface FolderAssetListProps {
   isLoading?: boolean;
   isEmployee?: boolean;
   isReadOnly?: boolean;
+  folderId?: string;
+  folderName?: string;
 }
 
 export function FolderAssetList({
@@ -50,6 +62,8 @@ export function FolderAssetList({
   isLoading,
   isEmployee = false,
   isReadOnly = false,
+  folderId,
+  folderName = "Folder",
 }: FolderAssetListProps) {
   const [sliderOpen, setSliderOpen] = useState(false);
   const [sliderIndex, setSliderIndex] = useState(0);
@@ -103,7 +117,11 @@ export function FolderAssetList({
     }
   };
 
-  const handleDownload = async (fileId: string, fileName: string, url: string) => {
+  const handleDownload = async (
+    fileId: string,
+    fileName: string,
+    url: string,
+  ) => {
     const toastId = toast.loading(`Downloading ${fileName}...`);
     try {
       const response = await fetch(url);
@@ -176,9 +194,21 @@ export function FolderAssetList({
 
   return (
     <div className="space-y-4">
-      <h2 className="text-lg font-black uppercase tracking-tight text-white/60">
-        Uploaded Files ({assets.length})
-      </h2>
+      <div className="flex items-center justify-between gap-4">
+        <h2 className="text-lg font-black uppercase tracking-tight text-white/60">
+          Uploaded Files ({assets.length})
+        </h2>
+        {assets.length > 0 && folderId && (
+          <DownloadFolderZip
+            folderId={folderId}
+            folderName={folderName}
+            size="sm"
+            variant="ghost"
+            label="DOWNLOAD ZIP"
+            className="h-8 px-3 text-[9px] font-black uppercase tracking-widest bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border-blue-600/20 rounded-xl transition-all"
+          />
+        )}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {assets.map((asset) => {

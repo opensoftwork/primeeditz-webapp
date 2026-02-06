@@ -7,6 +7,7 @@ import { VideoSliderHeader } from "./video-slider-header";
 import { VideoSliderStage } from "./video-slider-stage";
 import { VideoSliderThumbnails } from "./video-slider-thumbnails";
 
+
 interface VideoSliderProps {
   videos: Array<{
     url: string;
