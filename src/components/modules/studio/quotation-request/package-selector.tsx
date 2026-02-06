@@ -20,17 +20,31 @@ import { PackagePreviewPanel } from "./package-preview-panel";
 interface PackageSelectorProps {
   selectedIds: Id<"servicePackages">[];
   onSelectionChange: (ids: Id<"servicePackages">[]) => void;
+  initialCategory?: string | null;
+  onCategoryChange?: (category: string | null) => void;
 }
 
 export function PackageSelector({
   selectedIds,
   onSelectionChange,
+  initialCategory,
+  onCategoryChange,
 }: PackageSelectorProps) {
   const packages = useQuery(api.functions.servicePackages.queries.listActive);
   const categories = useQuery(
     api.functions.projectCategories.queries.getActiveCategories,
   );
-  const [categoryFilter, setCategoryFilter] = useState<string | null>(null);
+  const [internalCategoryFilter, setInternalCategoryFilter] = useState<string | null>(null);
+  
+  const categoryFilter = initialCategory !== undefined ? initialCategory : internalCategoryFilter;
+  const setCategoryFilter = (v: string | null) => {
+    if (onCategoryChange) {
+      onCategoryChange(v);
+    } else {
+      setInternalCategoryFilter(v);
+    }
+  };
+
   const [searchTerm, setSearchTerm] = useState("");
   const [activePreviewId, setActivePreviewId] = useState<Id<"servicePackages"> | null>(
     null,

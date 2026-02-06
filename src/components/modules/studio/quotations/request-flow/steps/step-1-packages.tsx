@@ -4,8 +4,22 @@ import { motion } from "motion/react";
 import { useRequestWizard } from "../request-wizard-context";
 import { PackageSelector } from "../../../quotation-request/package-selector";
 
+import { Step1Loader } from "./step-1-loader";
+
 export function Step1Packages() {
-  const { selectedPackageIds, setSelectedPackageIds } = useRequestWizard();
+  const { 
+    selectedPackageIds, 
+    setSelectedPackageIds, 
+    selectedCategory,
+    setSelectedCategory,
+    isInitialized, 
+    packages, 
+    categories 
+  } = useRequestWizard();
+
+  if (!isInitialized || packages === undefined || categories === undefined) {
+    return <Step1Loader />;
+  }
 
   return (
     <motion.div
@@ -27,6 +41,8 @@ export function Step1Packages() {
       <PackageSelector
         selectedIds={selectedPackageIds}
         onSelectionChange={setSelectedPackageIds}
+        initialCategory={selectedCategory}
+        onCategoryChange={setSelectedCategory}
       />
     </motion.div>
   );

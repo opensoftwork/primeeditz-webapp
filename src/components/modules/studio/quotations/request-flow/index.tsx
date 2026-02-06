@@ -34,6 +34,7 @@ function QuoteRequestWizardContent() {
     handleSubmit,
     isSubmitting,
     selectedPackageIds,
+    cancelWizard,
   } = useRequestWizard();
   const { data: session } = authClient.useSession();
 
@@ -83,15 +84,18 @@ function QuoteRequestWizardContent() {
         </div>
 
         <div className="flex items-center gap-4">
-          <Link href="/dashboard">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-all"
-            >
-              Cancel
-            </Button>
-          </Link>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              if (confirm("Are you sure you want to cancel? This will delete your draft progress.")) {
+                cancelWizard();
+              }
+            }}
+            className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-all"
+          >
+            Cancel
+          </Button>
           <Link href="/dashboard">
             <Button
               variant="outline"
@@ -103,6 +107,7 @@ function QuoteRequestWizardContent() {
           </Link>
         </div>
       </header>
+
 
       {/* 2. Main Content Layout */}
       <div className="flex flex-1 overflow-hidden">
