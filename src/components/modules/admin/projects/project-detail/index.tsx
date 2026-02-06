@@ -23,6 +23,9 @@ import { ProjectSpecs } from "./project-specs";
 import { ProjectDetailSkeleton } from "./skeleton";
 import { StudioCard } from "./studio-card";
 import { SystemControls } from "./system-controls";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
+import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import type { VaultFile } from "@/components/shared/files-vault/types";
 
 interface ProjectDetailProps {
   projectId: string;
@@ -40,6 +43,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
+  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+    null,
+  );
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
@@ -94,6 +101,33 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         : undefined,
     }));
   }, [project?.referenceFiles, signedUrls]);
+
+  const imagesForSlider = useMemo(() => {
+    return vaultFiles
+      .filter((f) => f.type.startsWith("image/") && f.url)
+      .map((f) => ({
+        url: f.url!,
+        fileName: f.name,
+        fileId: f.id,
+      }));
+  }, [vaultFiles]);
+
+  const handleFileClick = (fileId: string) => {
+    const file = vaultFiles.find((f) => f.id === fileId);
+    if (!file || !file.url) {
+      setIsVaultOpen(true);
+      return;
+    }
+
+    if (file.type.startsWith("image/")) {
+      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+      if (index !== -1) {
+        setSelectedImageIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
+    }
+  };
 
   const handleFolderSetupSuccess = useCallback(() => {
     toast.success("Project folders configured successfully!");
@@ -168,6 +202,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               referenceFilesCount={project.referenceFiles?.length || 0}
               vaultFiles={vaultFiles}
               onOpenVault={() => setIsVaultOpen(true)}
+              onFileClick={handleFileClick}
             />
 
             {/* Project Folders Section */}
@@ -221,6 +256,30 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         subtitle={`Viewing secure reference materials for ${project.code}`}
         files={vaultFiles}
         primaryColor="amber-500"
+        onImageClick={handleFileClick}
+      />
+
+      {/* Image Slider for Admin */}
+      <ImageSlider
+        images={imagesForSlider}
+        initialIndex={selectedImageIndex ?? 0}
+        open={selectedImageIndex !== null}
+        onOpenChange={(open) => !open && setSelectedImageIndex(null)}
+        onDownload={(fileId, fileName, url) => {
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          link.click();
+        }}
+      />
+
+      {/* Universal File Projection Slider for Admin */}
+      <FilePreviewOverlay
+        open={!!previewFile}
+        onOpenChange={(open) => !open && setPreviewFile(null)}
+        url={previewFile?.url || null}
+        fileName={previewFile?.name || ""}
+        mimeType={previewFile?.type}
       />
 
       {/* Folder Setup Drawer */}

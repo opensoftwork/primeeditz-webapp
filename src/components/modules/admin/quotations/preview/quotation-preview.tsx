@@ -52,7 +52,7 @@ export function QuotationPreview({
     <div className="min-h-screen bg-zinc-100 print:bg-white">
       {/* Control Panel - Hidden on Print */}
       <div className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-white/5 print:hidden">
-        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
+        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row justify-between items-center p-6 gap-4">
           <div className="flex items-center gap-4">
             {onBack && (
               <Button

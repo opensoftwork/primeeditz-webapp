@@ -79,8 +79,8 @@ export function PackageCard({
   };
 
   return (
-    <motion.div 
-      whileHover={{ y: -4 }} 
+    <motion.div
+      whileHover={{ y: -4 }}
       transition={{ duration: 0.2 }}
       onClick={() => onView(pkg._id)}
       className="cursor-pointer"
@@ -98,29 +98,42 @@ export function PackageCard({
               </div>
               <div className="flex flex-col">
                 <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
-                  {projectTypeName || (pkg.projectConfigs?.length ? "Multi-Project" : "General")}
+                  {projectTypeName ||
+                    (pkg.projectConfigs?.length ? "Multi-Project" : "General")}
                 </span>
-                <Badge
-                  className={cn(
-                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 shadow-none",
-                    pkg.isActive
-                      ? "bg-green-500/10 text-green-500 border-green-500/20"
-                      : "bg-white/5 text-white/40 border-white/5",
-                  )}
-                >
-                  {pkg.isActive ? "ACTIVE" : "INACTIVE"}
-                </Badge>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <Badge
+                    className={cn(
+                      "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md shadow-none",
+                      pkg.isActive
+                        ? "bg-green-500/10 text-green-500 border-green-500/20"
+                        : "bg-white/5 text-white/40 border-white/5",
+                    )}
+                  >
+                    {pkg.isActive ? "ACTIVE" : "INACTIVE"}
+                  </Badge>
+                </div>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 transition-all duration-200">
+            <div className="flex items-center gap-1 transition-all duration-200">
               <Button
-                onClick={handleDuplicate}
-                disabled={duplicateMutation.isPending}
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/20 hover:text-white hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Duplicate Package"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(pkg._id);
+                }}
+              >
+                <Pencil className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                onClick={handleDuplicate}
+                disabled={duplicateMutation.isPending}
               >
                 {duplicateMutation.isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -129,37 +142,15 @@ export function PackageCard({
                 )}
               </Button>
               <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(pkg._id, pkg.name);
                 }}
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/20 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
-                title="Delete Package"
               >
                 <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-              <Button
-                onClick={handleToggleStatus}
-                disabled={toggleStatusMutation.isPending}
-                variant="ghost"
-                size="icon"
-                className={cn(
-                  "h-8 w-8 rounded-lg border border-white/5 bg-white/5 hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed",
-                  pkg.isActive
-                    ? "text-red-400/20 hover:text-red-400 hover:bg-red-400/8"
-                    : "text-green-400/20 hover:text-green-400 hover:bg-green-400/8",
-                )}
-                title={pkg.isActive ? "Deactivate" : "Activate"}
-              >
-                {toggleStatusMutation.isPending ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                ) : pkg.isActive ? (
-                  <EyeOff className="h-3.5 w-3.5" />
-                ) : (
-                  <Eye className="h-3.5 w-3.5" />
-                )}
               </Button>
             </div>
           </div>
@@ -169,12 +160,9 @@ export function PackageCard({
             <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
               {pkg.name}
             </h3>
-            {categoryName && (
-              <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
-                <Tag className="h-3 w-3" />
-                {categoryName}
-              </div>
-            )}
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+              {categoryName || "SERVICE PACKAGE CONFIGURATION"}
+            </div>
           </div>
 
           {/* Description */}
@@ -188,7 +176,7 @@ export function PackageCard({
             </p>
           )}
 
-          {/* Quick Info Grid */}
+          {/* Quick Info Grid - Kept but styled within the new structure */}
           <div className="grid grid-cols-2 gap-3 pt-2">
             <div className="p-3 rounded-xl bg-white/2 border border-white/5 space-y-1">
               <span className="text-[8px] font-black text-white/20 uppercase tracking-widest block">
@@ -214,28 +202,45 @@ export function PackageCard({
             </div>
           </div>
 
-          {/* Footer Area */}
+          {/* Footer Area - Aligned with ProjectTypeCard */}
           <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
-            <div className="flex items-center gap-2 overflow-hidden flex-1">
-              <div className="w-6 h-6 rounded-lg bg-white/5 flex items-center justify-center shrink-0">
-                <Info className="h-3 w-3 text-white/20" />
-              </div>
-              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest truncate">
-                {pkg.lineItems.length > 0
-                  ? pkg.lineItems[0].description
-                  : "NOT CONFIGURED"}
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+                Current Status
+              </span>
+              <span
+                className={cn(
+                  "text-xs font-black uppercase tracking-wider",
+                  pkg.isActive ? "text-primary" : "text-white/40",
+                )}
+              >
+                {pkg.isActive ? "System Live" : "Inactive Mode"}
               </span>
             </div>
+
             <Button
-              onClick={(e) => {
-                e.stopPropagation();
-                onEdit(pkg._id);
-              }}
+              onClick={handleToggleStatus}
+              disabled={toggleStatusMutation.isPending}
               variant="ghost"
               size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-2 shrink-0 transition-all active:scale-95 ml-2"
+              className={cn(
+                "h-8 px-3 text-[9px] font-black uppercase tracking-widest rounded-lg gap-2 shrink-0 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                pkg.isActive
+                  ? "text-red-400/60 bg-red-400/5 hover:text-red-400 hover:bg-red-400/10"
+                  : "text-green-400/60 bg-green-400/5 hover:text-green-400 hover:bg-green-400/10",
+              )}
             >
-              Configure <Pencil className="h-3 w-3" />
+              {toggleStatusMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : pkg.isActive ? (
+                <>
+                  DEACTIVATE <EyeOff className="h-3.5 w-3.5" />
+                </>
+              ) : (
+                <>
+                  ACTIVATE <Eye className="h-3.5 w-3.5" />
+                </>
+              )}
             </Button>
           </div>
         </div>

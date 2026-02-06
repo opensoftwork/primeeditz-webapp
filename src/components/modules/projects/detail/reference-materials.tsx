@@ -20,6 +20,7 @@ import {
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { Button } from "@/components/ui/button";
 import { DetailSection } from "./shared";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 
 interface ReferenceFile {
   fileId: string;
@@ -43,6 +44,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   );
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
 
   // Action to get signed URLs
   const getSignedUrls = useAction(
@@ -87,10 +89,20 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
       .filter((img) => img.url !== "");
   }, [files, signedUrls]);
 
-  const handleImageClick = (fileId: string) => {
-    const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
-    if (index !== -1) {
-      setSelectedImageIndex(index);
+  const handleFileClick = (fileId: string) => {
+    const file = vaultFiles.find((f) => f.id === fileId);
+    if (!file || !file.url) {
+      setIsDrawerOpen(true);
+      return;
+    }
+
+    if (file.type.startsWith("image/")) {
+      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+      if (index !== -1) {
+        setSelectedImageIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
     }
   };
 
@@ -148,11 +160,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.05, duration: 0.3 }}
                   className="group relative aspect-square rounded-2xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer"
-                  onClick={() =>
-                    isImage
-                      ? handleImageClick(file.fileId)
-                      : setIsDrawerOpen(true)
-                  }
+                  onClick={() => handleFileClick(file.fileId)}
                 >
                   {isLoadingUrl ? (
                     <div className="flex items-center justify-center h-full">
@@ -215,7 +223,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
         title="Production Vault"
         subtitle={`Reference Materials • ${files.length} items`}
         files={vaultFiles}
-        onImageClick={handleImageClick}
+        onImageClick={handleFileClick}
         onDownload={(file) => {
           if (file.url) {
             const link = document.createElement("a");
@@ -240,6 +248,15 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
           link.download = fileName;
           link.click();
         }}
+      />
+
+      {/* Universal File Projection Slider */}
+      <FilePreviewOverlay
+        open={!!previewFile}
+        onOpenChange={(open) => !open && setPreviewFile(null)}
+        url={previewFile?.url || null}
+        fileName={previewFile?.name || ""}
+        mimeType={previewFile?.type}
       />
     </DetailSection>
   );

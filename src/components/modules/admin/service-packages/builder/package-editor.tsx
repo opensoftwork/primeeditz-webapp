@@ -69,22 +69,22 @@ export function PackageEditor() {
   return (
     <div className="flex flex-col h-screen bg-zinc-950 overflow-hidden">
       {/* FIXED HEADER */}
-      <header className="shrink-0 h-16 border-b border-white/5 flex items-center justify-between px-8 bg-zinc-950/80 backdrop-blur-xl z-50">
-        <div className="flex items-center gap-4">
+      <header className="shrink-0 h-20 border-b border-white/5 flex items-center justify-between px-12 bg-zinc-950/80 backdrop-blur-xl z-50">
+        <div className="flex items-center gap-8">
           <Button
-            variant="outline"
+            variant="default"
             size="sm"
             onClick={() =>
               router.push(`/settings/service-packages/${packageId}`)
             }
-            className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-white/10 border-white/30 text-white hover:text-primary hover:border-primary/50 hover:bg-primary/5 rounded-xl transition-all group shadow-2xl shadow-black/50"
+            className="h-9 px-4 text-[10px] font-black uppercase tracking-widest bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] rounded-xl transition-all group shadow-2xl shadow-primary/20 border border-primary/20"
           >
-            <ArrowLeft className="h-4 w-4 mr-2 group-hover:-translate-x-1 transition-transform text-primary" />
-            Back to Catalog
+            <ArrowLeft className="h-4 w-4  group-hover:-translate-x-1 transition-transform" />
+            Back
           </Button>
           <div className="h-4 w-px bg-white/10" />
           <div className="flex flex-col">
-            <h1 className="text-sm font-black uppercase tracking-widest text-white">
+            <h1 className="text-xl font-black uppercase tracking-widest text-white">
               Package Editor
             </h1>
             <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest leading-none">
@@ -119,22 +119,22 @@ export function PackageEditor() {
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
                     className={cn(
-                      "w-full flex items-center justify-between px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden",
+                      "w-full flex items-center justify-start px-4 py-3.5 rounded-2xl transition-all duration-300 group relative overflow-hidden text-left",
                       isActive
                         ? "bg-primary/10 border border-primary/20 text-primary shadow-[0_4px_20px_rgba(var(--primary),0.05)]"
                         : "text-white/40 hover:text-white/60 hover:bg-white/5 border border-transparent",
                     )}
                   >
-                    <div className="flex items-center gap-3 relative z-10">
+                    <div className="flex items-center gap-3 relative z-10 w-full">
                       <Icon
                         className={cn(
-                          "h-4 w-4",
+                          "h-4 w-4 shrink-0",
                           isActive
                             ? "text-primary"
                             : "text-white/20 group-hover:text-white/40",
                         )}
                       />
-                      <span className="text-[11px] font-black uppercase tracking-widest">
+                      <span className="text-[11px] font-black uppercase tracking-widest leading-tight text-left">
                         {section.label}
                       </span>
                     </div>
@@ -172,7 +172,7 @@ export function PackageEditor() {
       </div>
 
       {/* FIXED FOOTER */}
-      <footer className="shrink-0 h-20 border-t border-white/5 bg-zinc-950/90 backdrop-blur-xl flex items-center justify-between px-8 z-50">
+      <footer className="shrink-0 h-20 border-t border-white/5 bg-zinc-950/90 backdrop-blur-xl flex items-center justify-between px-12 z-50">
         <div className="flex items-center gap-6">
           <div className="flex flex-col">
             <span className="text-[10px] font-black uppercase tracking-widest text-white/20">

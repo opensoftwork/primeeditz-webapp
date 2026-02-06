@@ -4,6 +4,7 @@ import React, { useMemo, useRef, useState } from "react";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 
 // Types
 export type { FileTypeCounts, VaultFile, VaultTabType } from "./types";
@@ -52,6 +53,7 @@ export function FilesVaultDrawer({
   const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
     null,
   );
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset tab when drawer opens with a specific tab
@@ -88,9 +90,17 @@ export function FilesVaultDrawer({
       onImageClick(fileId);
       return;
     }
-    const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
-    if (index !== -1) {
-      setSelectedImageIndex(index);
+
+    const file = files.find((f) => f.id === fileId);
+    if (!file || !file.url) return;
+
+    if (file.type.startsWith("image/")) {
+      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+      if (index !== -1) {
+        setSelectedImageIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
     }
   };
 
@@ -196,6 +206,17 @@ export function FilesVaultDrawer({
               link.click();
             }
           }}
+        />
+      )}
+
+      {/* Internal File Preview Overlay (Fallback if no parent handler) */}
+      {!onImageClick && (
+        <FilePreviewOverlay
+          open={!!previewFile}
+          onOpenChange={(isOpen) => !isOpen && setPreviewFile(null)}
+          url={previewFile?.url || null}
+          fileName={previewFile?.name || ""}
+          mimeType={previewFile?.type}
         />
       )}
     </>
