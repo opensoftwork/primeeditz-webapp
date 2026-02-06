@@ -1,7 +1,7 @@
 "use client";
 
-import { Eye, FileImage, Trash2 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { Eye, FileImage, Music, Pause, Play, Trash2 } from "lucide-react";
+import { useRef, useState } from "react";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
 import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
@@ -37,17 +37,21 @@ interface FolderAssetListProps {
   assets: Asset[] | undefined;
   signedUrls: Record<string, string | null>;
   isLoading?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderAssetList({
   assets,
   signedUrls,
   isLoading,
+  isEmployee = false,
 }: FolderAssetListProps) {
   const [sliderOpen, setSliderOpen] = useState(false);
   const [sliderIndex, setSliderIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
+  const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const deleteAsset = useMutation(api.functions.assets.mutations.deleteAsset);
   const deleteFile = useAction(api.functions.storage.actions.deleteFile);
@@ -71,6 +75,24 @@ export function FolderAssetList({
       toast.error(error.message || "Failed to delete file", { id: toastId });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  const handleAudioPlayPause = (asset: Asset, url: string) => {
+    if (playingAudioId === asset._id) {
+      // Currently playing this audio, pause it
+      audioRef.current?.pause();
+      setPlayingAudioId(null);
+    } else {
+      // Play new audio
+      if (audioRef.current) {
+        audioRef.current.pause();
+      }
+      const audio = new Audio(url);
+      audio.onended = () => setPlayingAudioId(null);
+      audio.play();
+      audioRef.current = audio;
+      setPlayingAudioId(asset._id);
     }
   };
 
@@ -121,36 +143,61 @@ export function FolderAssetList({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {assets.map((asset) => {
           const isImage = asset.mimeType.startsWith("image/");
-          const hasSignedUrl = isImage && signedUrls[asset.minioKey];
+          const isAudio = asset.mimeType.startsWith("audio/");
+          const hasSignedUrl = signedUrls[asset.minioKey];
+          const isPlaying = playingAudioId === asset._id;
 
           return (
             <Card
               key={asset._id}
               className={cn(
                 "transition-all border-white/5 bg-white/2 group/asset",
-                hasSignedUrl
+                (isImage && hasSignedUrl) || (isAudio && hasSignedUrl)
                   ? "hover:bg-white/5 cursor-pointer hover:border-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                   : "opacity-80",
               )}
               onClick={
-                hasSignedUrl ? () => openImageViewer(asset._id) : undefined
+                isImage && hasSignedUrl
+                  ? () => openImageViewer(asset._id)
+                  : isAudio && hasSignedUrl
+                    ? () => handleAudioPlayPause(asset, hasSignedUrl)
+                    : undefined
               }
             >
               <CardContent className="p-3 flex items-center gap-3">
                 <div
                   className={cn(
                     "p-2 rounded-lg shrink-0 transition-colors",
-                    hasSignedUrl
-                      ? "bg-primary/10 group-hover/asset:bg-primary/20"
-                      : "bg-white/5",
+                    isAudio && hasSignedUrl
+                      ? isPlaying
+                        ? "bg-emerald-500/20"
+                        : "bg-amber-500/10 group-hover/asset:bg-amber-500/20"
+                      : hasSignedUrl && isImage
+                        ? "bg-primary/10 group-hover/asset:bg-primary/20"
+                        : "bg-white/5",
                   )}
                 >
-                  <FileImage
-                    className={cn(
-                      "h-4 w-4",
-                      hasSignedUrl ? "text-primary" : "text-white/20",
-                    )}
-                  />
+                  {isAudio ? (
+                    <Music
+                      className={cn(
+                        "h-4 w-4",
+                        isPlaying
+                          ? "text-emerald-400"
+                          : hasSignedUrl
+                            ? "text-amber-400"
+                            : "text-white/20",
+                      )}
+                    />
+                  ) : (
+                    <FileImage
+                      className={cn(
+                        "h-4 w-4",
+                        hasSignedUrl && isImage
+                          ? "text-primary"
+                          : "text-white/20",
+                      )}
+                    />
+                  )}
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="text-sm font-black text-white truncate tracking-tight">
@@ -166,7 +213,7 @@ export function FolderAssetList({
                   )}
                 </div>
                 <div className="flex items-center gap-1">
-                  {hasSignedUrl && (
+                  {isImage && hasSignedUrl && (
                     <div
                       className="h-8 w-8 flex items-center justify-center text-primary/20 group-hover/asset:text-primary/60 transition-colors"
                       onClick={(e) => {
@@ -177,17 +224,41 @@ export function FolderAssetList({
                       <Eye className="h-4 w-4" />
                     </div>
                   )}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-xl opacity-0 group-hover/asset:opacity-100 transition-all duration-200"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setAssetToDelete(asset);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  {isAudio && hasSignedUrl && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className={cn(
+                        "h-8 w-8 rounded-xl transition-all",
+                        isPlaying
+                          ? "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
+                          : "text-amber-400/40 hover:text-amber-400 hover:bg-amber-500/10",
+                      )}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleAudioPlayPause(asset, hasSignedUrl);
+                      }}
+                    >
+                      {isPlaying ? (
+                        <Pause className="h-4 w-4" />
+                      ) : (
+                        <Play className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                  {!isEmployee && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-white/20 hover:text-red-500 hover:bg-red-500/10 rounded-xl opacity-0 group-hover/asset:opacity-100 transition-all duration-200"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setAssetToDelete(asset);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>

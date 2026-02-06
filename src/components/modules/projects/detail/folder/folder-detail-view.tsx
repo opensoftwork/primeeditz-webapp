@@ -102,15 +102,17 @@ export function FolderDetailView({
     api.functions.storage.actions.getSignedFileUrls,
   );
 
-  // Fetch signed URLs for viewing images
+  // Fetch signed URLs for viewing images and playing audio
   useEffect(() => {
     async function fetchUrls() {
       if (!assets || assets.length === 0) return;
 
-      const imageAssets = assets.filter((a: any) =>
-        a.mimeType.startsWith("image/"),
+      // Include both image and audio assets for signed URL fetching
+      const mediaAssets = assets.filter(
+        (a: any) =>
+          a.mimeType.startsWith("image/") || a.mimeType.startsWith("audio/"),
       );
-      const keys = imageAssets.map((a: any) => a.minioKey);
+      const keys = mediaAssets.map((a: any) => a.minioKey);
 
       if (keys.length > 0) {
         try {
@@ -304,7 +306,7 @@ export function FolderDetailView({
   const totalSize = assets?.reduce((sum, a: any) => sum + a.sizeBytes, 0) || 0;
 
   return (
-    <div className="flex-1 space-y-8 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
+    <div className="flex-1 space-y-4 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -346,7 +348,7 @@ export function FolderDetailView({
         </div>
 
         <div className="flex items-center gap-3">
-          {folder.status === "in_progress" && !isLocked && (
+          {folder.status === "in_progress" && !isLocked && !isEmployee && (
             <Button
               variant="outline"
               className="rounded-full border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10"
@@ -419,8 +421,8 @@ export function FolderDetailView({
         </motion.div>
       )}
 
-      {/* Drop Zone - Locked out if isLocked is true */}
-      {!isLocked ? (
+      {/* Drop Zone - Locked out if isLocked is true or user is an employee */}
+      {!isLocked && !isEmployee ? (
         <>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -447,9 +449,7 @@ export function FolderDetailView({
             />
           </motion.div>
         </>
-      ) : (
-        <div className="h-4" /> /* Spacer when locked */
-      )}
+      ) : null}
 
       {/* Asset List */}
       <motion.div
@@ -457,7 +457,11 @@ export function FolderDetailView({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <FolderAssetList assets={assets} signedUrls={signedUrls} />
+        <FolderAssetList
+          assets={assets}
+          signedUrls={signedUrls}
+          isEmployee={isEmployee}
+        />
       </motion.div>
 
       {/* Empty State */}
