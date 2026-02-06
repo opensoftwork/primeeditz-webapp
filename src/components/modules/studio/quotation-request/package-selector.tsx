@@ -5,7 +5,7 @@ import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { PackageCard } from "./package-card";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -35,6 +35,13 @@ export function PackageSelector({
   const [activePreviewId, setActivePreviewId] = useState<Id<"servicePackages"> | null>(
     null,
   );
+
+  // Initialize active preview to first selected ID if nothing is active
+  useEffect(() => {
+    if (!activePreviewId && selectedIds.length > 0) {
+      setActivePreviewId(selectedIds[0]);
+    }
+  }, [activePreviewId, selectedIds]);
 
   // Filter packages
   let filtered = packages ?? [];

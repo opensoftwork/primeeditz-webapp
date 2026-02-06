@@ -905,3 +905,78 @@ export const reinitiateQuotation = studioMutation({
     return { success: true };
   },
 });
+
+/**
+ * Create or get an existing quotation request draft for the current studio.
+ */
+export const getOrCreateDraft = studioMutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db
+      .query("quotationRequestDrafts")
+      .withIndex("by_createdBy", (q) => q.eq("createdBy", ctx.profile._id))
+      .first();
+
+    if (existing) {
+      return { draftId: existing._id, isNew: false, draft: existing };
+    }
+
+    const draftId = await ctx.db.insert("quotationRequestDrafts", {
+      lastStep: 1,
+      createdBy: ctx.profile._id,
+      updatedAt: Date.now(),
+    });
+
+    const draft = await ctx.db.get(draftId);
+    return { draftId, isNew: true, draft };
+  },
+});
+
+/**
+ * Update a quotation request draft.
+ */
+export const updateDraft = studioMutation({
+  args: {
+    draftId: v.id("quotationRequestDrafts"),
+    lastStep: v.optional(v.number()),
+    // Step 1
+    selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
+    selectedCategory: v.optional(v.string()),
+    // Step 2
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.string()),
+    venue: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { draftId, ...updates } = args;
+
+    const draft = await ctx.db.get(draftId);
+    if (!draft || draft.createdBy !== ctx.profile._id) {
+      throw new Error("Draft not found or unauthorized");
+    }
+
+    await ctx.db.patch(draftId, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Delete a quotation request draft.
+ */
+export const deleteDraft = studioMutation({
+  args: {
+    draftId: v.id("quotationRequestDrafts"),
+  },
+  handler: async (ctx, { draftId }) => {
+    const draft = await ctx.db.get(draftId);
+    if (!draft || draft.createdBy !== ctx.profile._id) {
+      throw new Error("Draft not found or unauthorized");
+    }
+
+    await ctx.db.delete(draftId);
+  },
+});
