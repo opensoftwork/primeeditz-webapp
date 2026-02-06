@@ -58,7 +58,7 @@ export function ConfigSummary({
           return (
             <Card
               key={config.id}
-              className="group bg-zinc-900/40 border-white/5 rounded-[24px] overflow-hidden glass-subtle hover:border-primary/20 transition-all duration-300 shadow-xl p-0"
+              className="group bg-zinc-900/40 border-white/5 rounded-[24px] overflow-hidden glass-subtle hover:border-primary/20 transition-all duration-300 shadow-xl p-0 lg:col-span-2"
             >
               <CardContent className="p-0">
                 {/* Compact Header */}

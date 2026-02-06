@@ -125,7 +125,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
   const needsUploads = project.actionState === "awaiting_uploads";
 
   const handleCardClick = () => {
-    if (needsOnboarding || needsUploads) {
+    if (needsOnboarding) {
       router.push(`/projects/${project._id}/onboarding`);
     } else {
       router.push(`/projects/${project._id}`);

@@ -40,8 +40,16 @@ import type { StudioProject } from "./types";
 // ============================================================================
 
 function ProjectCard({ project }: { project: StudioProject }) {
+  const needsOnboarding = project.actionState === "awaiting_onboarding";
+
   return (
-    <Link href={`/projects/${project._id}`}>
+    <Link
+      href={
+        needsOnboarding
+          ? `/projects/${project._id}/onboarding`
+          : `/projects/${project._id}`
+      }
+    >
       <motion.div
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}

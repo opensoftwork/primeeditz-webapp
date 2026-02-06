@@ -111,7 +111,7 @@ export function GroupedStudioProjectList() {
 
 function ProjectCard({ project }: { project: any }) {
   const router = useRouter();
-  const needsOnboarding = project.actionState === "awaiting_uploads";
+  const needsOnboarding = project.actionState === "awaiting_onboarding";
 
   return (
     <Link

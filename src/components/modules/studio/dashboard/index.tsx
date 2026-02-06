@@ -90,7 +90,7 @@ export default function StudioDashboard() {
 
       {/* Onboarding Callout (Story 11C.4) */}
       {projectsAwaitingOnboarding.length > 0 && (
-        <ProjectOnboardingCard projectId={projectsAwaitingOnboarding[0]._id} />
+        <ProjectOnboardingCard project={projectsAwaitingOnboarding[0] as any} />
       )}
 
       {/* Quotations Section */}
