@@ -28,6 +28,7 @@ export default function QuoteRequestWizard() {
 function QuoteRequestWizardContent() {
   const {
     step,
+    setStep,
     handleNext,
     handleBack,
     handleSubmit,
@@ -114,6 +115,7 @@ function QuoteRequestWizardContent() {
               description: s.description,
             }))}
             currentStep={step}
+            onStepClick={(s) => setStep(s as any)}
           />
 
           <div className="mt-auto">

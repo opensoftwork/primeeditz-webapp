@@ -451,9 +451,9 @@ export function QuotationBuilderProvider({
 
       const lineItemsPayload = step4.lineItems.map((item) => ({
         id: item.id || crypto.randomUUID(),
-        sectionId: (item.sectionId ||
-          sections?.[0]?._id ||
-          "") as Id<"quotationSections">,
+        sectionId: (item.sectionId || sections?.[0]?._id) as
+          | Id<"quotationSections">
+          | undefined,
         projectId: item.projectId,
         description: item.description,
         unit: item.unit,

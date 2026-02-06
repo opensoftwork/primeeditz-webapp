@@ -12,8 +12,8 @@ interface DashboardHeaderProps {
 
 export function DashboardHeader({ userName }: DashboardHeaderProps) {
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-      <div className="space-y-4">
+    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="space-y-3">
         <div className="flex items-center gap-3">
           <div className="h-0.5 w-8 bg-primary rounded-full shadow-[0_0_10px_rgba(var(--primary),0.6)]" />
           <span className="text-[9px] font-black uppercase tracking-[0.4em] text-primary">

@@ -8,6 +8,7 @@ import {
   Building,
   Calendar,
   CheckCircle2,
+  ChevronRight,
   Clock,
   Eye,
   FolderKanban,
@@ -21,6 +22,8 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { PhaseProgress } from "@/components/modules/projects/phase-progress";
+import { StudioStatusBadge } from "@/components/modules/projects/studio-status-badge";
 import { cn } from "@/lib/utils";
 
 // ============================================================================
@@ -99,22 +102,7 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
 
 import { getStatusConfig } from "@/lib/status-display";
 
-function StatusBadge({ status }: { status: string }) {
-  const config = getStatusConfig(status);
-
-  return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[8px] font-black uppercase tracking-widest border",
-        config.bgColor,
-        config.color,
-      )}
-    >
-      <span className="w-1.5 h-1.5 rounded-full bg-current" />
-      {config.label}
-    </span>
-  );
-}
+// StatusBadge is no longer used locally, using StudioStatusBadge from projects module.
 
 // ============================================================================
 // Project Card Component
@@ -133,80 +121,51 @@ function ProjectCard({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 * index }}
-        whileHover={{ scale: 1.01, y: -2 }}
-        whileTap={{ scale: 0.99 }}
-        className="group p-5 rounded-2xl bg-white/2 border border-white/5 hover:bg-white/4 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        whileHover={{ y: -3 }}
+        className="group relative p-4 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
       >
         {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-primary/10 transition-colors" />
 
-        <div className="relative space-y-4">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
-                <Hash className="h-3.5 w-3.5 text-primary/60" />
-                <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors">
+        <div className="relative space-y-3 flex-1 flex flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-0.5 min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <Hash className="h-3 w-3 text-primary/40" />
+                <span className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tighter truncate">
                   {project.code}
                 </span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
-                  {project.projectTypeName}
-                </span>
+              <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.15em]">
+                {project.projectTypeName}
               </div>
             </div>
-            <StatusBadge status={project.actionState} />
+            <StudioStatusBadge status={project.actionState} />
           </div>
 
-          {/* Event Details */}
-          {project.eventName && (
-            <div className="p-3 rounded-xl bg-white/2 border border-white/5">
-              <div className="font-bold text-white/70 text-sm truncate">
-                {project.eventName}
+          <div className="space-y-0.5">
+            <h3 className="text-[14px] font-black text-white leading-tight uppercase tracking-tight truncate">
+              {project.eventName || "General Project"}
+            </h3>
+            {project.eventDate && (
+              <div className="flex items-center gap-1 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+                <Calendar className="h-2.5 w-2.5" />
+                {new Date(project.eventDate).toLocaleDateString()}
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2">
-                {project.eventDate && (
-                  <div className="flex items-center gap-1.5 text-white/40">
-                    <Calendar className="h-3 w-3" />
-                    <span className="text-[10px] font-medium">
-                      {new Date(project.eventDate).toLocaleDateString("en-GB", {
-                        day: "numeric",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </span>
-                  </div>
-                )}
-                {project.venue && (
-                  <div className="flex items-center gap-1.5 text-white/40">
-                    <MapPin className="h-3 w-3" />
-                    <span className="text-[10px] font-medium truncate max-w-[150px]">
-                      {project.venue}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
 
-          {/* Footer */}
-          <div className="flex items-center justify-between pt-3 border-t border-white/5">
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
-              Created{" "}
-              {new Date(project.createdAt).toLocaleDateString("en-GB", {
-                day: "numeric",
-                month: "short",
-                year: "numeric",
-              })}
+          <div className="mt-auto pt-3 border-t border-white/5">
+            <PhaseProgress currentPhase={project.phase} compact={true} />
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-white/5">
+              Created {new Date(project.createdAt).toLocaleDateString()}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-7 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1.5"
-            >
-              View <Eye className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-1 text-[8px] font-black text-primary/60 group-hover:text-primary transition-colors uppercase tracking-[0.15em]">
+              View <ChevronRight className="h-2.5 w-2.5" />
+            </div>
           </div>
         </div>
       </motion.div>

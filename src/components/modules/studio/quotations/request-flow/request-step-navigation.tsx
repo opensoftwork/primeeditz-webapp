@@ -24,8 +24,7 @@ export function RequestStepNavigation({
         const stepNum = index + 1;
         const isCompleted = stepNum < currentStep;
         const isCurrent = stepNum === currentStep;
-        const isClickable =
-          onStepClick && (isCompleted || stepNum < currentStep);
+        const isClickable = onStepClick && (isCompleted || isCurrent);
 
         return (
           <button

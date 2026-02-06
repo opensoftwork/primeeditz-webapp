@@ -40,18 +40,18 @@ export function QuotationsSection() {
   }
 
   return (
-    <section className="space-y-8">
+    <section className="space-y-6">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <div className="h-10 w-10 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center">
-            <Receipt className="h-5 w-5 text-primary" />
+          <div className="p-2 rounded-lg bg-primary/10 border border-primary/30 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]">
+            <Receipt className="h-4 w-4" />
           </div>
           <div className="flex flex-col">
-            <h2 className="text-xl font-black text-white uppercase tracking-tighter">
+            <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70 font-mono">
               Review Quotations
-            </h2>
-            <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em]">
-              {quotations.length} total • Action required on pending
+            </h3>
+            <p className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+              {quotations.length} pending • Action required
             </p>
           </div>
         </div>
@@ -74,7 +74,7 @@ export function QuotationsSection() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
           >
-            <QuotationCard quotation={quotation} />
+            <QuotationCard quotation={quotation} variant="compact" />
           </motion.div>
         ))}
       </div>

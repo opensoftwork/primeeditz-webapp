@@ -53,12 +53,12 @@ export default function StudioDashboard() {
   }
 
   return (
-    <div className="w-full space-y-12 p-6 md:p-12">
+    <div className="w-full space-y-8 p-5 md:p-8">
       {/* Header Section */}
       <DashboardHeader userName={profile.name} />
 
       {/* Stats Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 lg:gap-6">
         <StatCard
           icon={<LayoutGrid className="h-3.5 w-3.5" />}
           label="History"

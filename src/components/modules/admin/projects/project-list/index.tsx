@@ -6,6 +6,7 @@ import { useMutation, useQuery } from "convex/react";
 import {
   AlertTriangle,
   Calendar,
+  ChevronRight,
   Eye,
   FileEdit,
   Hash,
@@ -32,7 +33,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
 import { columns } from "./columns";
-import { StatusBadge } from "./status-badge";
+import { PhaseProgress } from "@/components/modules/projects/phase-progress";
+import { StudioStatusBadge } from "@/components/modules/projects/studio-status-badge";
 import type { AdminProject } from "./types";
 
 // ============================================================================
@@ -40,65 +42,65 @@ import type { AdminProject } from "./types";
 // ============================================================================
 
 function ProjectCard({ project }: { project: AdminProject }) {
+  const router = useRouter();
+
   return (
     <Link href={`/projects/${project._id}`}>
       <motion.div
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-3xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        whileHover={{ y: -3 }}
+        className="group relative p-4 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
+        {/* Glow effect */}
+        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-primary/10 transition-colors" />
 
-        <div className="relative space-y-4">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-2">
-                <Hash className="h-3.5 w-3.5 text-primary/40" />
-                <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors">
+        <div className="relative space-y-3 flex-1 flex flex-col">
+          <div className="flex items-start justify-between gap-3">
+            <div className="space-y-0.5 min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <Hash className="h-3 w-3 text-primary/40" />
+                <span className="text-sm font-black text-white group-hover:text-primary transition-colors tracking-tighter truncate">
                   {project.code}
                 </span>
               </div>
-              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+              <div className="text-[9px] font-black text-white/30 uppercase tracking-[0.15em]">
                 {project.projectTypeName}
-              </span>
+              </div>
             </div>
-            <StatusBadge status={project.status} />
+            <StudioStatusBadge status={project.actionState} />
           </div>
 
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors">
-              <User className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors">
+              <User className="h-2.5 w-2.5 text-white/40 group-hover:text-primary transition-colors" />
             </div>
-            <span className="font-black text-white/80 uppercase tracking-tight text-sm">
+            <span className="font-black text-white/60 uppercase tracking-tight text-[10px] truncate">
               {project.studioName}
             </span>
           </div>
 
-          {project.eventName && (
-            <div className="pt-3 border-t border-white/5">
-              <div className="font-bold text-white/50 truncate">
-                {project.eventName}
+          <div className="space-y-0.5">
+            <h3 className="text-[14px] font-black text-white leading-tight uppercase tracking-tight truncate">
+              {project.eventName || "General Project"}
+            </h3>
+            {project.eventDate && (
+              <div className="flex items-center gap-1 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+                <Calendar className="h-2.5 w-2.5" />
+                {new Date(project.eventDate).toLocaleDateString()}
               </div>
-              {project.eventDate && (
-                <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest flex items-center gap-1.5 mt-1">
-                  <Calendar className="h-3 w-3" />
-                  {new Date(project.eventDate).toLocaleDateString()}
-                </div>
-              )}
-            </div>
-          )}
+            )}
+          </div>
 
-          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
+          <div className="mt-auto pt-3 border-t border-white/5">
+            <PhaseProgress currentPhase={project.phase} compact={true} />
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <span className="text-[7px] font-bold text-white/20 uppercase tracking-widest px-1.5 py-0.5 rounded-md bg-white/5">
               {new Date(project.createdAt).toLocaleDateString()}
             </span>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
-            >
-              View <Eye className="h-3 w-3" />
-            </Button>
+            <div className="flex items-center gap-1 text-[8px] font-black text-primary/60 group-hover:text-primary transition-colors uppercase tracking-[0.15em]">
+              View <ChevronRight className="h-2 w-2" />
+            </div>
           </div>
         </div>
       </motion.div>
