@@ -101,39 +101,39 @@ export function PackageCard({
                   {projectTypeName ||
                     (pkg.projectConfigs?.length ? "Multi-Project" : "General")}
                 </span>
-                <div className="flex items-center gap-1.5 mt-0.5">
-                  <Badge
-                    className={cn(
-                      "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md shadow-none",
-                      pkg.isActive
-                        ? "bg-green-500/10 text-green-500 border-green-500/20"
-                        : "bg-white/5 text-white/40 border-white/5",
-                    )}
-                  >
-                    {pkg.isActive ? "ACTIVE" : "INACTIVE"}
-                  </Badge>
-                </div>
+                <Badge
+                  className={cn(
+                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 shadow-none",
+                    pkg.isActive
+                      ? "bg-green-500/10 text-green-500 border-green-500/20"
+                      : "bg-white/5 text-white/40 border-white/5",
+                  )}
+                >
+                  {pkg.isActive ? "ACTIVE" : "INACTIVE"}
+                </Badge>
               </div>
             </div>
 
-            <div className="flex items-center gap-1 transition-all duration-200">
+            <div className="flex items-center gap-1.5 transition-all duration-200">
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(pkg._id);
                 }}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                title="Configure Package"
               >
                 <Pencil className="h-3.5 w-3.5" />
               </Button>
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                 onClick={handleDuplicate}
                 disabled={duplicateMutation.isPending}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Duplicate Package"
               >
                 {duplicateMutation.isPending ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -142,13 +142,14 @@ export function PackageCard({
                 )}
               </Button>
               <Button
-                variant="ghost"
-                size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(pkg._id, pkg.name);
                 }}
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
+                title="Delete Package"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -160,46 +161,12 @@ export function PackageCard({
             <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
               {pkg.name}
             </h3>
-            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
-              {categoryName || "SERVICE PACKAGE CONFIGURATION"}
-            </div>
-          </div>
-
-          {/* Description */}
-          {pkg.description ? (
-            <p className="text-xs text-white/40 line-clamp-2 leading-relaxed font-medium min-h-8">
-              {pkg.description}
-            </p>
-          ) : (
-            <p className="text-xs text-white/10 italic leading-relaxed font-medium min-h-8">
-              No description provided for this package.
-            </p>
-          )}
-
-          {/* Quick Info Grid - Kept but styled within the new structure */}
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <div className="p-3 rounded-xl bg-white/2 border border-white/5 space-y-1">
-              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest block">
-                Total Value
-              </span>
-              <div className="flex items-baseline gap-1 text-white">
-                <span className="text-[10px] font-black opacity-40">₹</span>
-                <span className="text-lg font-black tracking-tight">
-                  {maxPrice.toLocaleString()}
-                </span>
+            {categoryName && (
+              <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+                <Tag className="h-3 w-3" />
+                {categoryName}
               </div>
-            </div>
-            <div className="p-3 rounded-xl bg-white/2 border border-white/5 space-y-1 text-right">
-              <span className="text-[8px] font-black text-white/20 uppercase tracking-widest block">
-                Items
-              </span>
-              <div className="text-lg font-black text-white tracking-tight">
-                {pkg.lineItems.length.toString().padStart(2, "0")}
-                <span className="text-[9px] font-black opacity-30 ml-1 uppercase">
-                  Units
-                </span>
-              </div>
-            </div>
+            )}
           </div>
 
           {/* Footer Area - Aligned with ProjectTypeCard */}
@@ -214,7 +181,7 @@ export function PackageCard({
                   pkg.isActive ? "text-primary" : "text-white/40",
                 )}
               >
-                {pkg.isActive ? "System Live" : "Inactive Mode"}
+                {pkg.isActive ? "System Live" : "Inactive"}
               </span>
             </div>
 

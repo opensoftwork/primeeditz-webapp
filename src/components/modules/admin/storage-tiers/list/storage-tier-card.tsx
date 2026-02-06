@@ -89,7 +89,7 @@ export function StorageTierCard({
                 </span>
                 <Badge
                   className={cn(
-                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 relative overflow-hidden",
+                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 shadow-none",
                     tier.isActive
                       ? "bg-green-500/10 text-green-500 border-green-500/20"
                       : "bg-white/5 text-white/40 border-white/5",
@@ -100,26 +100,28 @@ export function StorageTierCard({
               </div>
             </div>
 
-            <div className="flex items-center gap-1 transition-all duration-200">
+            <div className="flex items-center gap-1.5 transition-all duration-200">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   onEdit(tier);
                 }}
+                title="Edit Tier"
               >
                 <Edit2 className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDelete(tier._id, tier.name);
                 }}
+                title="Delete Tier"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
@@ -128,22 +130,32 @@ export function StorageTierCard({
 
           {/* Title Area */}
           <div className="space-y-1">
-            <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
-              {tier.name}
-            </h3>
-            <div className="text-3xl font-black text-white tracking-tight">
-              {formatStorage(tier.sizeGB)}
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+                {tier.name}
+              </h3>
+              <div className="text-lg font-black text-white tracking-tight shrink-0">
+                {formatStorage(tier.sizeGB)}
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+              Professional Capacity • {formatPrice(tier.priceINR)}
             </div>
           </div>
 
-          {/* Footer Area */}
+          {/* Footer Area - Aligned with ProjectTypeCard & PackageCard */}
           <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
-                Price
+                Current Status
               </span>
-              <span className="text-lg font-black text-primary">
-                {formatPrice(tier.priceINR)}
+              <span
+                className={cn(
+                  "text-xs font-black uppercase tracking-wider",
+                  tier.isActive ? "text-primary" : "text-white/40",
+                )}
+              >
+                {tier.isActive ? "System Live" : "Inactive"}
               </span>
             </div>
 
