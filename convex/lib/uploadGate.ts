@@ -49,8 +49,9 @@ export async function canUpload(
   if (userRole === "studio") {
     switch (actionState) {
       case "awaiting_uploads":
-      case "uploads_complete":
         return { allowed: true, reason: "Ready to upload" };
+      case "uploads_complete":
+        return { allowed: false, reason: "Upload phase is complete" };
       case "draft":
         return { allowed: false, reason: "Project request not submitted" };
       case "awaiting_quotation":

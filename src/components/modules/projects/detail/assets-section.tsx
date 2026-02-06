@@ -3,11 +3,13 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { AlertCircle, CheckCircle2, Eye, Lock, Upload } from "lucide-react";
+import { AlertCircle, CheckCircle2, Eye, Loader2, Lock, Send, Upload } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface AssetsSectionProps {
@@ -29,8 +31,35 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
     projectId: projectId as Id<"projects">,
   });
 
+  const completeOnboarding = useMutation(
+    api.functions.projects.mutations.completeOnboarding,
+  );
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const isLocked = project?.uploadEligibility?.isAllowed === false;
   const isUploadComplete = project?.uploadEligibility?.reason?.toLowerCase().includes("complete");
+
+  const canSubmit = 
+    project?.actionState === "awaiting_uploads" && 
+    folders && 
+    folders.length > 0 && 
+    folders.every((f: any) => f.status === "completed");
+
+  const handleProjectSubmit = async () => {
+    if (!canSubmit) return;
+    setIsSubmitting(true);
+    try {
+      await completeOnboarding({
+        projectId: projectId as Id<"projects">,
+      });
+      toast.success("Assets submitted successfully. Uploads are now disabled.");
+    } catch (error) {
+      toast.error("Failed to submit assets");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleFolderClick = (folder: any) => {
     // Allow viewing folders even when locked (view-only mode)
@@ -83,6 +112,21 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
               : "Click a folder to upload files"}
           </p>
         </div>
+
+        {canSubmit && (
+          <Button
+            onClick={handleProjectSubmit}
+            disabled={isSubmitting}
+            className="rounded-2xl h-11 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+          >
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {isSubmitting ? "Submitting..." : "Mark as Submit"}
+          </Button>
+        )}
       </div>
 
       {/* Upload Status Banner - Non-blocking alert */}
