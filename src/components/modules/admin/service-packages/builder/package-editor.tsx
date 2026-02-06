@@ -15,6 +15,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "./builder-context";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { Step1Identity } from "./steps/step-1-identity";
 import { Step2ProjectConfig } from "./steps/step-2-config";
 import { Step3Pricing } from "./steps/step-3-pricing";
@@ -47,9 +48,21 @@ export function PackageEditor() {
     packageId,
     setCurrentStep,
     syncCurrentStep,
+    step1Data,
   } = useBuilder();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const [activeSection, setActiveSection] = useState(1);
+
+  // Update breadcrumb name
+  useEffect(() => {
+    if (packageId && step1Data?.name) {
+      setOverride(packageId, step1Data.name);
+    }
+    return () => {
+      if (packageId) removeOverride(packageId);
+    };
+  }, [packageId, step1Data?.name, setOverride, removeOverride]);
 
   // Keep currentStep in sync with activeSection for step components logic
   useEffect(() => {
