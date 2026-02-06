@@ -8,7 +8,6 @@ import {
   CheckCheck,
   ChevronLeft,
   FolderOpen,
-  MessageSquare,
   Shield,
   Users,
 } from "lucide-react";
@@ -100,15 +99,6 @@ export default function EmployeeProjectDetail({
             </span>
           </Button>
 
-          <Button
-            variant="outline"
-            className="rounded-2xl h-14 border-white/5 bg-white/2 gap-3 px-6 hover:bg-white/5"
-          >
-            <MessageSquare className="h-4 w-4 text-white/40" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Squad Chat
-            </span>
-          </Button>
           <Button
             className="rounded-2xl h-14 bg-indigo-600 hover:bg-indigo-500 text-white gap-3 px-8 shadow-lg shadow-indigo-600/20"
             onClick={() => router.push(`/assigned-work/${projectId}/folders`)}

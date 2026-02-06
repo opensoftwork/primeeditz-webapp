@@ -120,8 +120,8 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   }, [files, signedUrls, loading]);
 
   const hasFiles = files.length > 0;
-  const displayFiles = files.slice(0, 5);
-  const remainingCount = files.length - 5;
+  const displayFiles = files.slice(0, 10);
+  const remainingCount = files.length - 10;
 
   return (
     <DetailSection
@@ -144,7 +144,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-3">
             {displayFiles.map((file, idx) => {
               const imageUrl = file.storageKey
                 ? signedUrls[file.storageKey]
@@ -159,12 +159,12 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.05, duration: 0.3 }}
-                  className="group relative aspect-square rounded-2xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer"
+                  className="group relative aspect-square rounded-xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer shadow-sm hover:shadow-indigo-500/10"
                   onClick={() => handleFileClick(file.fileId)}
                 >
                   {isLoadingUrl ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-6 w-6 animate-spin text-white/20" />
+                      <Loader2 className="h-4 w-4 animate-spin text-white/20" />
                     </div>
                   ) : imageUrl && isImage ? (
                     <Image
@@ -176,7 +176,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-2 text-white/20">
-                      <FileText className="h-8 w-8" />
+                      <FileText className="h-7 w-7" />
                       <span className="text-[8px] font-black uppercase tracking-[0.2em]">
                         {file.fileType?.split("/")[1]?.toUpperCase() || "FILE"}
                       </span>
@@ -184,7 +184,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   )}
 
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <ExternalLink className="h-5 w-5 text-white" />
+                    <ExternalLink className="h-4 w-4 text-white" />
                   </div>
                 </motion.div>
               );
@@ -196,20 +196,20 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
                 onClick={() => setIsDrawerOpen(true)}
-                className="group relative aspect-square rounded-2xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-2 transition-all duration-500 hover:bg-white/10"
+                className="group relative aspect-square rounded-xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-1 transition-all duration-500 hover:bg-white/10"
               >
-                <span className="text-lg font-black text-white">
+                <span className="text-sm font-black text-white">
                   +{remainingCount}
                 </span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-white/30">
-                  More Files
+                <span className="text-[7px] font-black uppercase tracking-widest text-white/30">
+                  More
                 </span>
               </motion.button>
             )}
           </div>
         </div>
       ) : (
-        <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-[2rem] bg-white/1">
+        <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/1">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
             No assets tagged in this production
           </p>
