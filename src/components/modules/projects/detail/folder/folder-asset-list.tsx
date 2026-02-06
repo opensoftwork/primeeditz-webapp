@@ -1,8 +1,10 @@
 "use client";
 
-import { Eye, FileImage, Music, Pause, Play, Trash2 } from "lucide-react";
+import { Eye, FileImage, Film, Music, Pause, Play, Trash2 } from "lucide-react";
 import { useRef, useState } from "react";
 import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { VideoSlider } from "@/components/shared/video-viewer";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +40,7 @@ interface FolderAssetListProps {
   signedUrls: Record<string, string | null>;
   isLoading?: boolean;
   isEmployee?: boolean;
+  isReadOnly?: boolean;
 }
 
 export function FolderAssetList({
@@ -45,12 +48,15 @@ export function FolderAssetList({
   signedUrls,
   isLoading,
   isEmployee = false,
+  isReadOnly = false,
 }: FolderAssetListProps) {
   const [sliderOpen, setSliderOpen] = useState(false);
   const [sliderIndex, setSliderIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
+  const [videoSliderOpen, setVideoSliderOpen] = useState(false);
+  const [videoSliderIndex, setVideoSliderIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const deleteAsset = useMutation(api.functions.assets.mutations.deleteAsset);
@@ -134,6 +140,26 @@ export function FolderAssetList({
     }
   };
 
+  const videoAssets = assets.filter((a) => a.mimeType.startsWith("video/"));
+
+  // Prepare videos for slider
+  const sliderVideos = videoAssets
+    .map((asset) => ({
+      url: signedUrls[asset.minioKey] || "",
+      fileName: asset.filename,
+      fileId: asset._id,
+      mimeType: asset.mimeType,
+    }))
+    .filter((v) => v.url);
+
+  const openVideoViewer = (assetId: string) => {
+    const index = videoAssets.findIndex((a) => a._id === assetId);
+    if (index >= 0) {
+      setVideoSliderIndex(index);
+      setVideoSliderOpen(true);
+    }
+  };
+
   return (
     <div className="space-y-4">
       <h2 className="text-lg font-black uppercase tracking-tight text-white/60">
@@ -144,6 +170,7 @@ export function FolderAssetList({
         {assets.map((asset) => {
           const isImage = asset.mimeType.startsWith("image/");
           const isAudio = asset.mimeType.startsWith("audio/");
+          const isVideo = asset.mimeType.startsWith("video/");
           const hasSignedUrl = signedUrls[asset.minioKey];
           const isPlaying = playingAudioId === asset._id;
 
@@ -152,16 +179,19 @@ export function FolderAssetList({
               key={asset._id}
               className={cn(
                 "transition-all border-white/5 bg-white/2 group/asset",
-                (isImage && hasSignedUrl) || (isAudio && hasSignedUrl)
+                ((isImage || isVideo) && hasSignedUrl) ||
+                  (isAudio && hasSignedUrl)
                   ? "hover:bg-white/5 cursor-pointer hover:border-primary/20 hover:scale-[1.02] active:scale-[0.98]"
                   : "opacity-80",
               )}
               onClick={
                 isImage && hasSignedUrl
                   ? () => openImageViewer(asset._id)
-                  : isAudio && hasSignedUrl
-                    ? () => handleAudioPlayPause(asset, hasSignedUrl)
-                    : undefined
+                  : isVideo && hasSignedUrl
+                    ? () => openVideoViewer(asset._id)
+                    : isAudio && hasSignedUrl
+                      ? () => handleAudioPlayPause(asset, hasSignedUrl)
+                      : undefined
               }
             >
               <CardContent className="p-3 flex items-center gap-3">
@@ -172,9 +202,11 @@ export function FolderAssetList({
                       ? isPlaying
                         ? "bg-emerald-500/20"
                         : "bg-amber-500/10 group-hover/asset:bg-amber-500/20"
-                      : hasSignedUrl && isImage
-                        ? "bg-primary/10 group-hover/asset:bg-primary/20"
-                        : "bg-white/5",
+                      : isVideo && hasSignedUrl
+                        ? "bg-purple-500/10 group-hover/asset:bg-purple-500/20"
+                        : hasSignedUrl && isImage
+                          ? "bg-primary/10 group-hover/asset:bg-primary/20"
+                          : "bg-white/5",
                   )}
                 >
                   {isAudio ? (
@@ -186,6 +218,13 @@ export function FolderAssetList({
                           : hasSignedUrl
                             ? "text-amber-400"
                             : "text-white/20",
+                      )}
+                    />
+                  ) : isVideo ? (
+                    <Film
+                      className={cn(
+                        "h-4 w-4",
+                        hasSignedUrl ? "text-purple-400" : "text-white/20",
                       )}
                     />
                   ) : (
@@ -224,6 +263,19 @@ export function FolderAssetList({
                       <Eye className="h-4 w-4" />
                     </div>
                   )}
+                  {isVideo && hasSignedUrl && (
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openVideoViewer(asset._id);
+                      }}
+                    >
+                      <Eye className="h-4 w-4" />
+                    </Button>
+                  )}
                   {isAudio && hasSignedUrl && (
                     <Button
                       variant="ghost"
@@ -246,7 +298,7 @@ export function FolderAssetList({
                       )}
                     </Button>
                   )}
-                  {!isEmployee && (
+                  {!isEmployee && !isReadOnly && (
                     <Button
                       variant="ghost"
                       size="icon"
@@ -272,6 +324,14 @@ export function FolderAssetList({
         initialIndex={sliderIndex}
         open={sliderOpen}
         onOpenChange={setSliderOpen}
+      />
+
+      {/* Video Slider */}
+      <VideoSlider
+        videos={sliderVideos}
+        initialIndex={videoSliderIndex}
+        open={videoSliderOpen}
+        onOpenChange={setVideoSliderOpen}
       />
 
       {/* Delete Confirmation Dialog */}

@@ -102,15 +102,17 @@ export function FolderDetailView({
     api.functions.storage.actions.getSignedFileUrls,
   );
 
-  // Fetch signed URLs for viewing images and playing audio
+  // Fetch signed URLs for viewing images, playing audio, and viewing videos
   useEffect(() => {
     async function fetchUrls() {
       if (!assets || assets.length === 0) return;
 
-      // Include both image and audio assets for signed URL fetching
+      // Include image, audio, and video assets for signed URL fetching
       const mediaAssets = assets.filter(
         (a: any) =>
-          a.mimeType.startsWith("image/") || a.mimeType.startsWith("audio/"),
+          a.mimeType.startsWith("image/") ||
+          a.mimeType.startsWith("audio/") ||
+          a.mimeType.startsWith("video/"),
       );
       const keys = mediaAssets.map((a: any) => a.minioKey);
 
@@ -461,6 +463,7 @@ export function FolderDetailView({
           assets={assets}
           signedUrls={signedUrls}
           isEmployee={isEmployee}
+          isReadOnly={isLocked || folder?.status === "completed"}
         />
       </motion.div>
 
