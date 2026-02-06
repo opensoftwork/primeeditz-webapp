@@ -52,6 +52,11 @@ export function FolderGrid({
       };
     }
 
+    // Normalize current path by removing potential leading slash for consistent matching
+    const normalizedCurrentPath = currentPath.startsWith("/")
+      ? currentPath.slice(1)
+      : currentPath;
+
     // Determine which folders are at the current level
     const foldersAtCurrentLevel = folders.filter((folder) => {
       const folderPath = folder.path;
@@ -59,14 +64,19 @@ export function FolderGrid({
       // Safety check for missing path
       if (typeof folderPath !== "string") return false;
 
-      if (currentPath === "") {
-        // Root level: folders without "/" in their path
-        return !folderPath.includes("/");
+      // Normalize folder path removal leading slash
+      const normalizedPath = folderPath.startsWith("/")
+        ? folderPath.slice(1)
+        : folderPath;
+
+      if (normalizedCurrentPath === "") {
+        // Root level: folders without "/" in their normalized path
+        return !normalizedPath.includes("/");
       } else {
-        // Inside a folder: folders that start with currentPath/ and have no more slashes
-        const prefix = currentPath + "/";
-        if (!folderPath.startsWith(prefix)) return false;
-        const remainder = folderPath.slice(prefix.length);
+        // Inside a folder: folders that start with normalizedCurrentPath/ and have no more slashes
+        const prefix = normalizedCurrentPath + "/";
+        if (!normalizedPath.startsWith(prefix)) return false;
+        const remainder = normalizedPath.slice(prefix.length);
         return !remainder.includes("/");
       }
     });
@@ -75,10 +85,20 @@ export function FolderGrid({
     const hasChildrenMap = new Map<string, boolean>();
     foldersAtCurrentLevel.forEach((folder) => {
       if (!folder.path) return;
-      const childPrefix = folder.path + "/";
-      const hasChild = folders.some(
-        (f) => f.path && f.path.startsWith(childPrefix),
-      );
+
+      const folderPath = folder.path;
+      const normalizedPath = folderPath.startsWith("/")
+        ? folderPath.slice(1)
+        : folderPath;
+
+      const childPrefix = normalizedPath + "/";
+      const hasChild = folders.some((f) => {
+        if (!f.path) return false;
+        const normalizedFPath = f.path.startsWith("/")
+          ? f.path.slice(1)
+          : f.path;
+        return normalizedFPath.startsWith(childPrefix);
+      });
       hasChildrenMap.set(folder._id, hasChild);
     });
 
@@ -86,12 +106,19 @@ export function FolderGrid({
     const crumbs: { label: string; path: string }[] = [
       { label: "Root", path: "" },
     ];
-    if (currentPath) {
-      const parts = currentPath.split("/");
+    if (normalizedCurrentPath) {
+      const parts = normalizedCurrentPath.split("/");
       let accumulatedPath = "";
       parts.forEach((part) => {
+        // Maintain leading slash in accumulated path if original paths had them
+        // This ensures navigateTo works correctly with existing folder paths
+        const hasLeadingSlash = folders.some((f) => f.path?.startsWith("/"));
         accumulatedPath = accumulatedPath ? `${accumulatedPath}/${part}` : part;
-        crumbs.push({ label: part, path: accumulatedPath });
+        const breadcrumbPath =
+          hasLeadingSlash && !accumulatedPath.startsWith("/")
+            ? `/${accumulatedPath}`
+            : accumulatedPath;
+        crumbs.push({ label: part, path: breadcrumbPath });
       });
     }
 

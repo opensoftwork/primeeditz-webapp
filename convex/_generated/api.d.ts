@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as employees from "../employees.js";
+import type * as fix from "../fix.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_admin_employees from "../functions/admin/employees.js";
 import type * as functions_admin_maintenance from "../functions/admin/maintenance.js";
@@ -32,6 +33,7 @@ import type * as functions_employees_projects from "../functions/employees/proje
 import type * as functions_employees_public from "../functions/employees/public.js";
 import type * as functions_folderTemplates_mutations from "../functions/folderTemplates/mutations.js";
 import type * as functions_folderTemplates_queries from "../functions/folderTemplates/queries.js";
+import type * as functions_folders_fix from "../functions/folders/fix.js";
 import type * as functions_folders_mutations from "../functions/folders/mutations.js";
 import type * as functions_folders_queries from "../functions/folders/queries.js";
 import type * as functions_profiles_mutations from "../functions/profiles/mutations.js";
@@ -85,6 +87,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
   employees: typeof employees;
+  fix: typeof fix;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/admin/employees": typeof functions_admin_employees;
   "functions/admin/maintenance": typeof functions_admin_maintenance;
@@ -105,6 +108,7 @@ declare const fullApi: ApiFromModules<{
   "functions/employees/public": typeof functions_employees_public;
   "functions/folderTemplates/mutations": typeof functions_folderTemplates_mutations;
   "functions/folderTemplates/queries": typeof functions_folderTemplates_queries;
+  "functions/folders/fix": typeof functions_folders_fix;
   "functions/folders/mutations": typeof functions_folders_mutations;
   "functions/folders/queries": typeof functions_folders_queries;
   "functions/profiles/mutations": typeof functions_profiles_mutations;

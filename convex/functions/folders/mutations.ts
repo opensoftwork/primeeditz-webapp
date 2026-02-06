@@ -63,10 +63,18 @@ export async function setupFoldersInternal(
     parentPath = "",
   ) {
     for (const item of items) {
+      // Clean up the item's own path by stripping leading/trailing slashes
+      const itemPathPart = item.path.replace(/^\/+|\/+$/g, "");
+      
+      // Build the hierarchical path
+      const fullPath = parentPath 
+        ? `${parentPath}/${itemPathPart}` 
+        : itemPathPart;
+
       const folderId = await ctx.db.insert("folders", {
         projectId: args.projectId,
         name: item.name,
-        path: item.path,
+        path: fullPath,
         description: item.description,
         isRequired: item.isRequired,
         status: "pending_upload",
@@ -74,7 +82,7 @@ export async function setupFoldersInternal(
       folderIds.push(folderId);
 
       if ("children" in item && item.children && item.children.length > 0) {
-        await createFoldersRecursively(item.children, item.path);
+        await createFoldersRecursively(item.children, fullPath);
       }
     }
   }
@@ -418,3 +426,63 @@ export const openProjectForUpload = adminMutation({
   },
 });
 
+
+/**
+ * Maintenance: Fixes folder hierarchy for a project.
+ */
+export const repairProjectFolders = adminMutation({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const folders = await ctx.db
+      .query("folders")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    const nameToFolder = new Map<string, any[]>();
+    folders.forEach((f) => {
+      const list = nameToFolder.get(f.name) || [];
+      list.push(f);
+      nameToFolder.set(f.name, list);
+    });
+
+    for (const folder of folders) {
+      let newPath = folder.path.replace(/^\/+/, ""); // Strip leading slashes
+
+      if (folder.name.toLowerCase() === "wedding") {
+        newPath = "images/wedding";
+      }
+
+      const audioFolders = nameToFolder.get("audio");
+      if (folder.name.toLowerCase() === "audio" && audioFolders && audioFolders.length > 1) {
+          const latest = audioFolders.reduce((prev, curr) =>
+            prev._creationTime > curr._creationTime ? prev : curr,
+          );
+          if (folder._id === latest._id) {
+            newPath = "audio/audio";
+          } else {
+            newPath = "audio";
+          }
+      }
+
+      const videoFolders = nameToFolder.get("video");
+      if (folder.name.toLowerCase() === "video" && videoFolders && videoFolders.length > 1) {
+          const latest = videoFolders.reduce((prev, curr) =>
+            prev._creationTime > curr._creationTime ? prev : curr,
+          );
+          if (folder._id === latest._id) {
+            newPath = "video/video";
+          } else {
+            newPath = "video";
+          }
+      }
+
+      if (newPath !== folder.path) {
+        await ctx.db.patch(folder._id, { path: newPath });
+      }
+    }
+
+    return "Hierarchy repaired";
+  },
+});

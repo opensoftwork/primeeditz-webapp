@@ -211,7 +211,7 @@ export function FolderTemplateBuilder({
     }
     const newRoot: FolderLevel1 = {
       name: "New Root Folder",
-      path: "/new-folder",
+      path: "new-folder",
       description: "",
       isRequired: false,
       children: [],
