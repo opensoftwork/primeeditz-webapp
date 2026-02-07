@@ -3,11 +3,11 @@
 import { Download, LayoutGrid, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-interface SliderHeaderProps {
+interface AssetHeaderProps {
   fileName: string;
   fileId: string;
   currentIndex: number;
-  totalImages: number;
+  totalAssets: number;
   showThumbnails: boolean;
   onToggleThumbnails: () => void;
   onClose: () => void;
@@ -15,29 +15,29 @@ interface SliderHeaderProps {
   currentUrl: string;
 }
 
-export function SliderHeader({
+export function AssetHeader({
   fileName,
   fileId,
   currentIndex,
-  totalImages,
+  totalAssets,
   showThumbnails,
   onToggleThumbnails,
   onClose,
   onDownload,
   currentUrl,
-}: SliderHeaderProps) {
+}: AssetHeaderProps) {
   return (
     <div className="absolute top-0 inset-x-0 z-50 flex items-center justify-between px-8 py-6 pointer-events-none">
       {/* Left - File Info */}
       <div className="flex flex-col gap-1 pointer-events-auto">
         <div className="flex items-center gap-3">
           <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white/90">
-            {fileName || "Reference Artifact"}
+          <h3 className="text-sm font-black uppercase tracking-[0.2em] text-white/90 truncate max-w-[200px] md:max-w-[400px]">
+            {fileName || "Asset Artifact"}
           </h3>
         </div>
         <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em]">
-          Source ID: {fileId.slice(0, 8)}...
+          Source ID: {fileId?.slice(0, 8)}...
         </p>
       </div>
 
@@ -45,7 +45,7 @@ export function SliderHeader({
       <div className="absolute left-1/2 -translate-x-1/2 bg-white/5 border border-white/10 backdrop-blur-md rounded-full px-5 py-1.5 pointer-events-auto">
         <span className="text-[11px] font-black text-white/80 tracking-widest uppercase">
           {currentIndex + 1} <span className="text-white/20 px-1">/</span>{" "}
-          {totalImages}
+          {totalAssets}
         </span>
       </div>
 
@@ -59,6 +59,7 @@ export function SliderHeader({
             e.stopPropagation();
             onToggleThumbnails();
           }}
+          title="Toggle thumbnails"
         >
           <LayoutGrid className="w-4 h-4" />
         </Button>
@@ -71,6 +72,7 @@ export function SliderHeader({
               e.stopPropagation();
               onDownload(fileId, fileName, currentUrl);
             }}
+            title="Download"
           >
             <Download className="w-4 h-4" />
           </Button>
@@ -84,6 +86,7 @@ export function SliderHeader({
             e.stopPropagation();
             onClose();
           }}
+          title="Close"
         >
           <X className="w-4 h-4" />
         </Button>

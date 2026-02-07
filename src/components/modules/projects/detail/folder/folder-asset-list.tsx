@@ -10,10 +10,9 @@ import {
   Play,
   Trash2,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { saveAs } from "file-saver";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
-import { VideoSlider } from "@/components/shared/video-viewer";
+import { AssetSlider } from "@/components/shared/asset-viewer";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
@@ -65,13 +64,11 @@ export function FolderAssetList({
   folderId,
   folderName = "Folder",
 }: FolderAssetListProps) {
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
   const [sliderOpen, setSliderOpen] = useState(false);
-  const [sliderIndex, setSliderIndex] = useState(0);
   const [isDeleting, setIsDeleting] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
-  const [videoSliderOpen, setVideoSliderOpen] = useState(false);
-  const [videoSliderIndex, setVideoSliderIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const deleteAsset = useMutation(api.functions.assets.mutations.deleteAsset);
@@ -153,42 +150,24 @@ export function FolderAssetList({
     return null;
   }
 
-  const imageAssets = assets.filter((a) => a.mimeType.startsWith("image/"));
+  const sliderAssets = useMemo(() => {
+    if (!assets) return [];
+    return assets
+      .filter((a) => a.mimeType.startsWith("image/") || a.mimeType.startsWith("video/") || a.mimeType === "application/pdf")
+      .map((asset) => ({
+        url: signedUrls[asset.minioKey] || "",
+        fileName: asset.filename,
+        fileId: asset._id,
+        mimeType: asset.mimeType,
+      }))
+      .filter((a) => a.url);
+  }, [assets, signedUrls]);
 
-  // Prepare images for slider
-  const sliderImages = imageAssets
-    .map((asset) => ({
-      url: signedUrls[asset.minioKey] || "",
-      fileName: asset.filename,
-      fileId: asset._id,
-    }))
-    .filter((img) => img.url);
-
-  const openImageViewer = (assetId: string) => {
-    const index = imageAssets.findIndex((a) => a._id === assetId);
+  const openAssetViewer = (assetId: string) => {
+    const index = sliderAssets.findIndex((a) => a.fileId === assetId);
     if (index >= 0) {
-      setSliderIndex(index);
+      setSelectedAssetIndex(index);
       setSliderOpen(true);
-    }
-  };
-
-  const videoAssets = assets.filter((a) => a.mimeType.startsWith("video/"));
-
-  // Prepare videos for slider
-  const sliderVideos = videoAssets
-    .map((asset) => ({
-      url: signedUrls[asset.minioKey] || "",
-      fileName: asset.filename,
-      fileId: asset._id,
-      mimeType: asset.mimeType,
-    }))
-    .filter((v) => v.url);
-
-  const openVideoViewer = (assetId: string) => {
-    const index = videoAssets.findIndex((a) => a._id === assetId);
-    if (index >= 0) {
-      setVideoSliderIndex(index);
-      setVideoSliderOpen(true);
     }
   };
 
@@ -229,13 +208,11 @@ export function FolderAssetList({
                   : "opacity-80",
               )}
               onClick={
-                isImage && hasSignedUrl
-                  ? () => openImageViewer(asset._id)
-                  : isVideo && hasSignedUrl
-                    ? () => openVideoViewer(asset._id)
-                    : isAudio && hasSignedUrl
-                      ? () => handleAudioPlayPause(asset, hasSignedUrl)
-                      : undefined
+                (isImage || isVideo || asset.mimeType === "application/pdf") && hasSignedUrl
+                  ? () => openAssetViewer(asset._id)
+                  : isAudio && hasSignedUrl
+                    ? () => handleAudioPlayPause(asset, hasSignedUrl)
+                    : undefined
               }
             >
               <CardContent className="p-3 flex items-center gap-3">
@@ -310,26 +287,19 @@ export function FolderAssetList({
                       <Download className="h-4 w-4" />
                     </Button>
                   )}
-                  {isImage && hasSignedUrl && (
-                    <div
-                      className="h-8 w-8 flex items-center justify-center text-primary/20 group-hover/asset:text-primary/60 transition-colors"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openImageViewer(asset._id);
-                      }}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </div>
-                  )}
-                  {isVideo && hasSignedUrl && (
+                  {(isImage || isVideo || asset.mimeType === "application/pdf") && hasSignedUrl && (
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-8 w-8 text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10 rounded-xl transition-all"
+                      className={cn(
+                        "h-8 w-8 transition-all rounded-xl",
+                        isVideo ? "text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10" : "text-primary/20 hover:text-primary hover:bg-primary/10"
+                      )}
                       onClick={(e) => {
                         e.stopPropagation();
-                        openVideoViewer(asset._id);
+                        openAssetViewer(asset._id);
                       }}
+                      title="View file"
                     >
                       <Eye className="h-4 w-4" />
                     </Button>
@@ -376,21 +346,13 @@ export function FolderAssetList({
         })}
       </div>
 
-      {/* Image Slider */}
-      <ImageSlider
-        images={sliderImages}
-        initialIndex={sliderIndex}
+      {/* Unified Asset Slider */}
+      <AssetSlider
+        assets={sliderAssets}
+        initialIndex={selectedAssetIndex ?? 0}
         open={sliderOpen}
         onOpenChange={setSliderOpen}
         onDownload={handleDownload}
-      />
-
-      {/* Video Slider */}
-      <VideoSlider
-        videos={sliderVideos}
-        initialIndex={videoSliderIndex}
-        open={videoSliderOpen}
-        onOpenChange={setVideoSliderOpen}
       />
 
       {/* Delete Confirmation Dialog */}

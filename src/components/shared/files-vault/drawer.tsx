@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useRef, useState } from "react";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { AssetSlider } from "@/components/shared/asset-viewer";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
@@ -50,7 +50,7 @@ export function FilesVaultDrawer({
   initialTab = "all",
 }: FilesVaultDrawerProps) {
   const [activeTab, setActiveTab] = useState<VaultTabType>(initialTab);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
     null,
   );
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
@@ -74,13 +74,14 @@ export function FilesVaultDrawer({
     [files, activeTab],
   );
 
-  const imagesForSlider = useMemo(() => {
+  const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => f.type.startsWith("image/") && f.url)
+      .filter((f) => (f.type.startsWith("image/") || f.type.startsWith("video/") || f.type.startsWith("audio/") || f.type.includes("pdf")) && f.url)
       .map((f) => ({
         url: f.url!,
         fileName: f.name,
         fileId: f.id,
+        mimeType: f.type,
       }));
   }, [files]);
 
@@ -94,10 +95,15 @@ export function FilesVaultDrawer({
     const file = files.find((f) => f.id === fileId);
     if (!file || !file.url) return;
 
-    if (file.type.startsWith("image/")) {
-      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+    const isSliderType = file.type.startsWith("image/") || 
+                        file.type.startsWith("video/") || 
+                        file.type.startsWith("audio/") || 
+                        file.type.includes("pdf");
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
       if (index !== -1) {
-        setSelectedImageIndex(index);
+        setSelectedAssetIndex(index);
       }
     } else {
       setPreviewFile(file);
@@ -183,13 +189,13 @@ export function FilesVaultDrawer({
         </DrawerContent>
       </Drawer>
 
-      {/* Internal Image Slider (Fallback if no parent handler) */}
+      {/* Internal Asset Slider (Fallback if no parent handler) */}
       {!onImageClick && (
-        <ImageSlider
-          images={imagesForSlider}
-          initialIndex={selectedImageIndex ?? 0}
-          open={selectedImageIndex !== null}
-          onOpenChange={(isOpen) => !isOpen && setSelectedImageIndex(null)}
+        <AssetSlider
+          assets={assetsForSlider}
+          initialIndex={selectedAssetIndex ?? 0}
+          open={selectedAssetIndex !== null}
+          onOpenChange={(isOpen) => !isOpen && setSelectedAssetIndex(null)}
           onDownload={(fileId, fileName, url) => {
             if (onDownload) {
               onDownload({

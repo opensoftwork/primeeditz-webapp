@@ -3,35 +3,41 @@
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
-import { SliderHeader } from "./slider-header";
-import { SliderStage } from "./slider-stage";
-import { SliderThumbnails } from "./slider-thumbnails";
+import { AssetHeader } from "./asset-header";
+import { AssetStage } from "./asset-stage";
+import { AssetThumbnails } from "./asset-thumbnails";
 
-interface ImageSliderProps {
-  images: Array<{
-    url: string;
-    fileName: string;
-    fileId: string;
-  }>;
+export type AssetType = "image" | "video" | "pdf" | "audio" | "other";
+
+export interface ViewerAsset {
+  url: string;
+  fileName: string;
+  fileId: string;
+  mimeType?: string;
+  type?: AssetType;
+}
+
+interface AssetSliderProps {
+  assets: ViewerAsset[];
   initialIndex?: number;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onDownload?: (fileId: string, fileName: string, url: string) => void;
 }
 
-export function ImageSlider({
-  images,
+export function AssetSlider({
+  assets,
   initialIndex = 0,
   open,
   onOpenChange,
   onDownload,
-}: ImageSliderProps) {
+}: AssetSliderProps) {
   const [currentIndex, setCurrentIndex] = useState(initialIndex);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [imageError, setImageError] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   const [showThumbnails, setShowThumbnails] = useState(true);
-  const [imageKey, setImageKey] = useState(0);
+  const [assetKey, setAssetKey] = useState(0);
 
   const thumbnailRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -39,10 +45,10 @@ export function ImageSlider({
   useEffect(() => {
     if (open) {
       setCurrentIndex(initialIndex);
-      setImageError(false);
+      setHasError(false);
       setIsZoomed(false);
-      setIsImageLoading(true);
-      setImageKey((prev) => prev + 1);
+      setIsLoading(true);
+      setAssetKey((prev) => prev + 1);
     }
   }, [open, initialIndex]);
 
@@ -57,8 +63,7 @@ export function ImageSlider({
     }
   }, [currentIndex, open]);
 
-  // Keyboard navigation for slider specific actions (Arrows)
-  // Esc is handled by Dialog
+  // Keyboard navigation
   useEffect(() => {
     if (!open) return;
 
@@ -69,33 +74,33 @@ export function ImageSlider({
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [open, images.length]);
+  }, [open, assets.length]);
 
   const handlePrevious = () => {
-    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : images.length - 1));
-    resetImageState();
+    setCurrentIndex((prev) => (prev > 0 ? prev - 1 : assets.length - 1));
+    resetAssetState();
   };
 
   const handleNext = () => {
-    setCurrentIndex((prev) => (prev < images.length - 1 ? prev + 1 : 0));
-    resetImageState();
+    setCurrentIndex((prev) => (prev < assets.length - 1 ? prev + 1 : 0));
+    resetAssetState();
   };
 
-  const resetImageState = () => {
-    setImageError(false);
+  const resetAssetState = () => {
+    setHasError(false);
     setIsZoomed(false);
-    setIsImageLoading(true);
-    setImageKey((prev) => prev + 1);
+    setIsLoading(true);
+    setAssetKey((prev) => prev + 1);
   };
 
   const handleThumbnailClick = (index: number) => {
     setCurrentIndex(index);
-    resetImageState();
+    resetAssetState();
   };
 
-  const currentImage = images[currentIndex];
+  const currentAsset = assets[currentIndex];
 
-  if (images.length === 0 && !open) return null;
+  if (assets.length === 0 && !open) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -103,11 +108,12 @@ export function ImageSlider({
         className="fixed inset-0! top-0! left-0! z-100 flex h-screen! max-h-screen! w-screen! max-w-none! translate-x-0! translate-y-0! flex-col border-none bg-black/98 p-0 overflow-hidden focus:outline-none data-[state=open]:animate-none data-[state=closed]:animate-none border-0 rounded-none shadow-none transition-none"
         showCloseButton={false}
       >
-        <DialogTitle className="sr-only">Image Projection Viewer</DialogTitle>
+        <DialogTitle className="sr-only">Asset Projection Viewer</DialogTitle>
 
-        <AnimatePresence>
+        <AnimatePresence mode="wait">
           {open && (
             <motion.div
+              key="viewer-root"
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{
@@ -116,41 +122,39 @@ export function ImageSlider({
                 transition: { duration: 0.3, ease: "easeInOut" },
               }}
               transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              style={{ willChange: "transform, opacity" }}
               className="relative flex h-full flex-col"
             >
-              <SliderHeader
-                fileName={currentImage?.fileName}
-                fileId={currentImage?.fileId}
+              <AssetHeader
+                fileName={currentAsset?.fileName}
+                fileId={currentAsset?.fileId}
                 currentIndex={currentIndex}
-                totalImages={images.length}
+                totalAssets={assets.length}
                 showThumbnails={showThumbnails}
                 onToggleThumbnails={() => setShowThumbnails(!showThumbnails)}
                 onClose={() => onOpenChange(false)}
                 onDownload={onDownload}
-                currentUrl={currentImage?.url}
+                currentUrl={currentAsset?.url}
               />
 
-              <SliderStage
-                currentUrl={currentImage?.url}
-                fileName={currentImage?.fileName}
+              <AssetStage
+                asset={currentAsset}
                 currentIndex={currentIndex}
-                imageKey={imageKey}
-                isImageLoading={isImageLoading}
-                imageError={imageError}
+                assetKey={assetKey}
+                isLoading={isLoading}
+                hasError={hasError}
                 isZoomed={isZoomed}
-                onSetIsImageLoading={setIsImageLoading}
-                onSetImageError={setImageError}
+                onSetIsLoading={setIsLoading}
+                onSetHasError={setHasError}
                 onSetIsZoomed={setIsZoomed}
-                onResetImageState={resetImageState}
+                onResetAssetState={resetAssetState}
                 onPrevious={handlePrevious}
                 onNext={handleNext}
               />
 
               <AnimatePresence>
-                {showThumbnails && (
-                  <SliderThumbnails
-                    images={images}
+                {showThumbnails && assets.length > 1 && (
+                  <AssetThumbnails
+                    assets={assets}
                     currentIndex={currentIndex}
                     onThumbnailClick={handleThumbnailClick}
                     thumbnailRefs={thumbnailRefs}

@@ -49,10 +49,17 @@ const generateFileId = (): string => {
 };
 
 /**
- * Create a preview URL for image files
+ * Create a preview URL for previewable files
  */
 const createPreviewUrl = (file: File): string | null => {
-  if (file.type.startsWith("image/")) {
+  const previewableTypes = [
+    "image/",
+    "video/",
+    "audio/",
+    "application/pdf"
+  ];
+
+  if (previewableTypes.some(type => file.type.startsWith(type))) {
     return URL.createObjectURL(file);
   }
   return null;

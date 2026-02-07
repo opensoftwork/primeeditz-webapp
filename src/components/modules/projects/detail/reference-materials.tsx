@@ -17,7 +17,7 @@ import {
   FilesVaultDrawer,
   type VaultFile,
 } from "@/components/shared/files-vault/drawer";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { AssetSlider } from "@/components/shared/asset-viewer";
 import { Button } from "@/components/ui/button";
 import { DetailSection } from "./shared";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
@@ -41,7 +41,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   );
   const [loading, setLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
     null,
   );
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
@@ -76,17 +76,18 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   }, [storageKeys, getSignedUrls]);
 
   // Filter images for the slider
-  const imagesForSlider = useMemo(() => {
+  const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => f.fileType.startsWith("image/"))
+      .filter((f) => f.fileType.startsWith("image/") || f.fileType.startsWith("video/") || f.fileType === "application/pdf")
       .map((file) => ({
         url:
           (file.storageKey ? signedUrls[file.storageKey] : file.previewUrl) ||
           "",
         fileName: file.fileName,
         fileId: file.fileId,
+        mimeType: file.fileType,
       }))
-      .filter((img) => img.url !== "");
+      .filter((asset) => asset.url !== "");
   }, [files, signedUrls]);
 
   const handleFileClick = (fileId: string) => {
@@ -96,10 +97,14 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
       return;
     }
 
-    if (file.type.startsWith("image/")) {
-      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+    const isSliderType = file.type.startsWith("image/") || 
+                        file.type.startsWith("video/") || 
+                        file.type === "application/pdf";
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
       if (index !== -1) {
-        setSelectedImageIndex(index);
+        setSelectedAssetIndex(index);
       }
     } else {
       setPreviewFile(file);
@@ -234,13 +239,13 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
         }}
       />
 
-      {/* Unified Image Projection Slider */}
-      <ImageSlider
-        images={imagesForSlider}
-        initialIndex={selectedImageIndex ?? 0}
-        open={selectedImageIndex !== null}
+      {/* Unified Asset Projection Slider */}
+      <AssetSlider
+        assets={assetsForSlider}
+        initialIndex={selectedAssetIndex ?? 0}
+        open={selectedAssetIndex !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedImageIndex(null);
+          if (!open) setSelectedAssetIndex(null);
         }}
         onDownload={(fileId, fileName, url) => {
           const link = document.createElement("a");

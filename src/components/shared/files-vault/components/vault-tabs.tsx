@@ -1,6 +1,6 @@
 "use client";
 
-import { File, FileText, Image as ImageIcon, Video } from "lucide-react";
+import { File, FileText, Image as ImageIcon, Video, Music } from "lucide-react";
 import { motion } from "motion/react";
 import React from "react";
 import { cn } from "@/lib/utils";
@@ -17,6 +17,7 @@ const TABS = [
   { id: "all" as const, label: "All Items", icon: File },
   { id: "image" as const, label: "Images", icon: ImageIcon },
   { id: "video" as const, label: "Videos", icon: Video },
+  { id: "audio" as const, label: "Audio", icon: Music },
   { id: "document" as const, label: "Docs", icon: FileText },
 ];
 
@@ -34,6 +35,8 @@ export function VaultTabs({
         return fileTypeCounts.image;
       case "video":
         return fileTypeCounts.video;
+      case "audio":
+        return fileTypeCounts.audio;
       case "document":
         return fileTypeCounts.document;
       default:

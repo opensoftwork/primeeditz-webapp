@@ -24,7 +24,7 @@ import { ProjectDetailSkeleton } from "./skeleton";
 import { StudioCard } from "./studio-card";
 import { SystemControls } from "./system-controls";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { AssetSlider } from "@/components/shared/asset-viewer";
 import type { VaultFile } from "@/components/shared/files-vault/types";
 
 interface ProjectDetailProps {
@@ -44,7 +44,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
     null,
   );
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
@@ -102,13 +102,14 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
     }));
   }, [project?.referenceFiles, signedUrls]);
 
-  const imagesForSlider = useMemo(() => {
+  const assetsForSlider = useMemo(() => {
     return vaultFiles
-      .filter((f) => f.type.startsWith("image/") && f.url)
+      .filter((f) => (f.type.startsWith("image/") || f.type.startsWith("video/") || f.type === "application/pdf") && f.url)
       .map((f) => ({
         url: f.url!,
         fileName: f.name,
         fileId: f.id,
+        mimeType: f.type,
       }));
   }, [vaultFiles]);
 
@@ -119,10 +120,14 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
       return;
     }
 
-    if (file.type.startsWith("image/")) {
-      const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
+    const isSliderType = file.type.startsWith("image/") || 
+                        file.type.startsWith("video/") || 
+                        file.type === "application/pdf";
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
       if (index !== -1) {
-        setSelectedImageIndex(index);
+        setSelectedAssetIndex(index);
       }
     } else {
       setPreviewFile(file);
@@ -259,12 +264,12 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         onImageClick={handleFileClick}
       />
 
-      {/* Image Slider for Admin */}
-      <ImageSlider
-        images={imagesForSlider}
-        initialIndex={selectedImageIndex ?? 0}
-        open={selectedImageIndex !== null}
-        onOpenChange={(open) => !open && setSelectedImageIndex(null)}
+      {/* Asset Slider for Admin (Images, Videos, PDFs) */}
+      <AssetSlider
+        assets={assetsForSlider}
+        initialIndex={selectedAssetIndex ?? 0}
+        open={selectedAssetIndex !== null}
+        onOpenChange={(open) => !open && setSelectedAssetIndex(null)}
         onDownload={(fileId, fileName, url) => {
           const link = document.createElement("a");
           link.href = url;

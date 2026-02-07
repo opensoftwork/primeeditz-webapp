@@ -14,10 +14,11 @@ export interface VaultFile {
   isLoading?: boolean;
 }
 
-export type VaultTabType = "all" | "image" | "video" | "document";
+export type VaultTabType = "all" | "image" | "video" | "audio" | "document";
 
 export interface FileTypeCounts {
   image: number;
   video: number;
+  audio: number;
   document: number;
 }
