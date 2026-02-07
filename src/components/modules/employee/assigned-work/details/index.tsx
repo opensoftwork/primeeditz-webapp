@@ -22,7 +22,6 @@ import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FinalizeWorkDrawer } from "./finalize-work-drawer";
 import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { SquadMemberCard } from "./squad-member-card";
-import { MusicVisualizer } from "./music-visualizer";
 
 interface EmployeeProjectDetailProps {
   projectId: string;
@@ -120,26 +119,13 @@ export default function EmployeeProjectDetail({
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main Production Feed with Visualizer */}
-          <div className="lg:col-span-8 flex flex-col items-center justify-center space-y-12">
-            <div className="relative w-full flex justify-center py-10">
-              <MusicVisualizer
-                isPlaying={true}
-                className="w-[300px] h-[300px] md:w-[500px] md:h-[500px]"
-              >
-                <div className="flex flex-col items-center gap-2 z-50">
-                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400 animate-pulse">
-                    Current Status
-                  </h3>
-                  <h1 className="text-3xl font-black uppercase text-white tracking-tighter drop-shadow-2xl">
-                    {project.actionState?.replace(/_/g, " ")}
-                  </h1>
-                  <p className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-bold">
-                    Project {project.code}
-                  </p>
-                </div>
-              </MusicVisualizer>
-            </div>
+          {/* Main Production Content */}
+          <div className="lg:col-span-8 space-y-10">
+            {/* Project Specs */}
+            <ProjectSpecs project={project as any} />
+
+            {/* Reference Materials */}
+            <ReferenceMaterials files={project.referenceFiles as any} />
           </div>
 
           {/* Squad Sidebar */}
@@ -165,12 +151,6 @@ export default function EmployeeProjectDetail({
             </div>
           </div>
         </div>
-
-        {/* Full-Width Project Specs */}
-        <ProjectSpecs project={project as any} />
-
-        {/* Standardized Project Reference - Full Width with signing capability */}
-        <ReferenceMaterials files={project.referenceFiles as any} />
       </div>
 
       <FinalizeWorkDrawer

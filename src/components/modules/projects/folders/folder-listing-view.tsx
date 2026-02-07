@@ -10,6 +10,8 @@ import { useEffect } from "react";
 import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FolderGridSkeleton } from "@/components/shared/project-folders";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface FolderListingViewProps {
@@ -48,7 +50,8 @@ export function FolderListingView({
 
   // Set breadcrumb override for project name
   useEffect(() => {
-    const label = project?.eventName || project?.projectTypeName || project?.code;
+    const label =
+      project?.eventName || project?.projectTypeName || project?.code;
     if (label) {
       setOverride(projectId, label);
     }
@@ -92,11 +95,23 @@ export function FolderListingView({
 
   if (!project || folders === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-          Loading Folders...
-        </p>
+      <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in">
+        {/* Header Skeleton */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />
+            <div className="flex items-center gap-3">
+              <Skeleton className="h-12 w-12 rounded-2xl bg-white/5" />
+              <div className="space-y-2">
+                <Skeleton className="h-6 w-48 bg-white/5 rounded-lg" />
+                <Skeleton className="h-3 w-32 bg-white/5 rounded-lg" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Grid Skeleton */}
+        <FolderGridSkeleton />
       </div>
     );
   }
@@ -165,7 +180,9 @@ export function FolderListingView({
           <p className="text-xs text-white/50 leading-relaxed font-bold uppercase tracking-wide">
             Select a folder above to start uploading your assets. Once you have
             uploaded files to all folders, click the
-            <span className="text-emerald-400 mx-1">Finalize My Uploads</span>{" "}
+            <span className="text-emerald-400 mx-1">
+              Finalize My Uploads
+            </span>{" "}
             button to notify our team.
           </p>
         </div>

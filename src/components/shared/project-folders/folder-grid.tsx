@@ -5,6 +5,7 @@ import { useMemo, useState } from "react";
 import { FolderCard, formatBytes } from "./folder-card";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { FolderGridSkeleton } from "./folder-grid-skeleton";
 
 interface Folder {
   _id: string;
@@ -145,11 +146,7 @@ export function FolderGrid({
   };
 
   if (folders === undefined) {
-    return (
-      <div className="flex items-center justify-center py-12">
-        <div className="h-6 w-6 animate-spin rounded-full border-2 border-white/20 border-t-primary" />
-      </div>
-    );
+    return <FolderGridSkeleton />;
   }
 
   if (folders.length === 0) {
