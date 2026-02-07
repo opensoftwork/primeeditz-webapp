@@ -12,7 +12,7 @@ interface UploadedFilesDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoveFile: (fileId: string) => void;
-  initialTab?: "all" | "image" | "video" | "document";
+  initialTab?: "all" | "image" | "video" | "audio" | "document";
 }
 
 /**

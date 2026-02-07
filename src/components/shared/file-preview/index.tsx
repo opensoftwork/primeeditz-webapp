@@ -29,6 +29,7 @@ interface FilePreviewProps {
   fileName: string;
   mimeType?: string;
   className?: string;
+  hideDownload?: boolean;
 }
 
 /**
@@ -156,6 +157,7 @@ export function FilePreview({
   fileName,
   mimeType,
   className,
+  hideDownload,
 }: FilePreviewProps) {
   const previewType = getPreviewType(mimeType);
 
@@ -173,7 +175,7 @@ export function FilePreview({
 
   switch (previewType) {
     case "pdf":
-      return <PDFViewer url={url} fileName={fileName} />;
+      return <PDFViewer url={url} fileName={fileName} hideDownload={hideDownload} />;
 
     case "image":
       return <ImageViewer url={url} fileName={fileName} />;

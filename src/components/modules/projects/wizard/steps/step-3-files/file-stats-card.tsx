@@ -6,13 +6,14 @@ import {
   LucideIcon,
   RotateCcw,
   Video,
+  Music,
 } from "lucide-react";
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface FileStatsCardProps {
-  type: "image" | "video" | "document";
+  type: "image" | "video" | "audio" | "document";
   count: number;
   onClick: () => void;
 }
@@ -44,6 +45,15 @@ const TYPE_CONFIG = {
     manageBg: "bg-blue-500/10",
     manageBorder: "border-blue-500/20",
     manageText: "text-blue-500",
+  },
+  audio: {
+    label: "Audio",
+    icon: Music,
+    colorClass: "text-emerald-500",
+    hoverBorder: "hover:border-emerald-500/20",
+    manageBg: "bg-emerald-500/10",
+    manageBorder: "border-emerald-500/20",
+    manageText: "text-emerald-500",
   },
 };
 

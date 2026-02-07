@@ -20,9 +20,10 @@ pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/b
 interface PDFViewerProps {
   url: string;
   fileName: string;
+  hideDownload?: boolean;
 }
 
-export default function PDFViewer({ url, fileName }: PDFViewerProps) {
+export default function PDFViewer({ url, fileName, hideDownload = false }: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);
@@ -148,16 +149,18 @@ export default function PDFViewer({ url, fileName }: PDFViewerProps) {
           >
             <Maximize2 className="h-4 w-4" />
           </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            asChild
-            className="h-8 w-8 rounded-lg hover:bg-white/10"
-          >
-            <a href={url} download={fileName} title="Download PDF">
-              <Download className="h-4 w-4" />
-            </a>
-          </Button>
+          {!hideDownload && (
+            <Button
+              variant="ghost"
+              size="icon"
+              asChild
+              className="h-8 w-8 rounded-lg hover:bg-white/10"
+            >
+              <a href={url} download={fileName} title="Download PDF">
+                <Download className="h-4 w-4" />
+              </a>
+            </Button>
+          )}
         </div>
       </div>
 

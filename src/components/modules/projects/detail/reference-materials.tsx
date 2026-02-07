@@ -9,6 +9,8 @@ import {
   FileText,
   LayoutGrid,
   Loader2,
+  Video,
+  Music,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -155,6 +157,10 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                 ? signedUrls[file.storageKey]
                 : file.previewUrl;
               const isImage = file.fileType?.startsWith("image/");
+              const isVideo = file.fileType?.startsWith("video/");
+              const isAudio = file.fileType?.startsWith("audio/");
+              const isPDF = file.fileType === "application/pdf";
+              
               const isLoadingUrl =
                 loading && file.storageKey && !signedUrls[file.storageKey];
 
@@ -181,7 +187,13 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                     />
                   ) : (
                     <div className="flex flex-col items-center justify-center h-full gap-2.5 text-white/20">
-                      <FileText className="h-8 w-8" />
+                      {isVideo ? (
+                        <Video className="h-8 w-8" />
+                      ) : isAudio ? (
+                        <Music className="h-8 w-8" />
+                      ) : (
+                        <FileText className="h-8 w-8" />
+                      )}
                       <span className="text-[9px] font-black uppercase tracking-[0.2em]">
                         {file.fileType?.split("/")[1]?.toUpperCase() || "FILE"}
                       </span>

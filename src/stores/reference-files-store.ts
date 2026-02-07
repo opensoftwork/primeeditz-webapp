@@ -210,11 +210,13 @@ export const useFileTypeCounts = () => {
         acc.image++;
       } else if (file.fileType.startsWith("video/")) {
         acc.video++;
+      } else if (file.fileType.startsWith("audio/")) {
+        acc.audio++;
       } else {
         acc.document++;
       }
       return acc;
     },
-    { image: 0, video: 0, document: 0 },
+    { image: 0, video: 0, audio: 0, document: 0 },
   );
 };

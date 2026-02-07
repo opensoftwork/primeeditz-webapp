@@ -152,6 +152,7 @@ export function AssetStage({
                 <audio
                   src={asset.url}
                   controls
+                  controlsList="nodownload"
                   autoPlay
                   className="w-full max-w-md"
                   onLoadedData={() => onSetIsLoading(false)}
@@ -168,6 +169,7 @@ export function AssetStage({
               <video
                 src={asset.url}
                 controls
+                controlsList="nodownload"
                 autoPlay
                 className="max-w-full max-h-full rounded-2xl shadow-2xl z-10"
                 onLoadedData={() => onSetIsLoading(false)}
@@ -178,7 +180,7 @@ export function AssetStage({
               />
             ) : isPDF ? (
               <div className="w-full h-full max-w-5xl bg-zinc-900/50 rounded-2xl overflow-hidden shadow-2xl border border-white/5">
-                <PDFViewer url={asset.url} fileName={asset.fileName} />
+                <PDFViewer url={asset.url} fileName={asset.fileName} hideDownload />
               </div>
             ) : (
               <Image

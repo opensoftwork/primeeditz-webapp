@@ -18,6 +18,7 @@ import {
   Upload,
   Vault,
   Video,
+  Music,
 } from "lucide-react";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -60,7 +61,7 @@ export function WizardStep3() {
 
   const [lastSynced, setLastSynced] = useState<Date | null>(null);
   const [vaultFilter, setVaultFilter] = useState<
-    "all" | "image" | "video" | "document"
+    "all" | "image" | "video" | "audio" | "document"
   >("all");
   const fileTypeCounts = useFileTypeCounts();
 
@@ -163,6 +164,15 @@ export function WizardStep3() {
               count={fileTypeCounts.video}
               onClick={() => {
                 setVaultFilter("video");
+                setVaultDrawerOpen(true);
+              }}
+            />
+
+            <FileStatsCard
+              type="audio"
+              count={fileTypeCounts.audio}
+              onClick={() => {
+                setVaultFilter("audio");
                 setVaultDrawerOpen(true);
               }}
             />
