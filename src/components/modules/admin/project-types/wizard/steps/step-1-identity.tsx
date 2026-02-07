@@ -35,6 +35,7 @@ import { useProjectTypeWizard } from "../wizard-context";
 
 const step1Schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string(),
   categoryId: z.string().min(1, "Category is required"),
   isActive: z.boolean(),
   icon: z.string(),
@@ -56,17 +57,18 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
   const form = useForm({
     defaultValues: {
       name: step1Data?.name ?? "",
+      description: step1Data?.description ?? "",
       categoryId: (step1Data?.categoryId as string) ?? "",
       isActive: step1Data?.isActive ?? true,
       icon: step1Data?.icon ?? "",
     },
-    validatorAdapter: zodValidator(),
     validators: {
       onChange: step1Schema,
     },
     onSubmit: async ({ value }) => {
       setStep1Data({
         name: value.name,
+        description: value.description,
         categoryId: (value.categoryId as Id<"projectCategories">) || undefined,
         icon: value.icon || undefined,
         isActive: value.isActive,
@@ -81,6 +83,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
   useEffect(() => {
     if (step1Data && !formValues.name && !formValues.categoryId) {
       form.setFieldValue("name", step1Data.name);
+      form.setFieldValue("description", step1Data.description ?? "");
       form.setFieldValue("categoryId", (step1Data.categoryId as string) ?? "");
       form.setFieldValue("isActive", step1Data.isActive);
       form.setFieldValue("icon", step1Data.icon ?? "");
@@ -98,6 +101,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
     // Only update if something actually changed to avoid render cycles
     const hasChanged =
       formValues.name !== (step1Data?.name ?? "") ||
+      formValues.description !== (step1Data?.description ?? "") ||
       formValues.categoryId !== (step1Data?.categoryId ?? "") ||
       formValues.icon !== (step1Data?.icon ?? "") ||
       formValues.isActive !== (step1Data?.isActive ?? true);
@@ -105,6 +109,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
     if (hasChanged) {
       setStep1Data({
         name: formValues.name,
+        description: formValues.description,
         categoryId:
           (formValues.categoryId as Id<"projectCategories">) || undefined,
         icon: formValues.icon || undefined,
@@ -213,6 +218,24 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
             )}
           </form.Field>
         </div>
+
+        {/* Description Field */}
+        <form.Field name="description">
+          {(field) => (
+            <div className="space-y-1.5">
+              <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                Description (Optional)
+              </Label>
+              <Textarea
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
+                className="bg-white/5 border-white/10 text-white h-20 rounded-xl focus:ring-primary/20 font-bold resize-none"
+                placeholder="Briefly describe this project type..."
+              />
+            </div>
+          )}
+        </form.Field>
 
         {/* Second Row - Category and Availability */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

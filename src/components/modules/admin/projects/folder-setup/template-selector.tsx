@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
   name: string;
-  folders: string[];
+  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
   projectTypeName?: string;
   isDefault?: boolean;
 }
@@ -101,7 +101,7 @@ export function TemplateSelector({
                     key={idx}
                     className="px-2 py-0.5 text-[10px] font-bold text-white/50 bg-white/5 rounded-full"
                   >
-                    {folder}
+                    {folder.name}
                   </span>
                 ))}
                 {template.folders.length > 4 && (

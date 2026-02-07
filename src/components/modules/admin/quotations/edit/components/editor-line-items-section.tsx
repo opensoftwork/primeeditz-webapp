@@ -93,9 +93,10 @@ export function EditorLineItemsSection() {
   );
 
   const handleSelectFromLibrary = useCallback(
-    (item: LibraryItem) => {
+    (item: any, projectId?: string) => {
       const defaultProjectId =
-        filteredProjects.length === 1 ? filteredProjects[0]._id : undefined;
+        projectId ||
+        (filteredProjects.length === 1 ? filteredProjects[0]._id : undefined);
 
       addLineItem({
         description: item.name,
@@ -244,7 +245,7 @@ export function EditorLineItemsSection() {
         </div>
       )}
 
-      <div className="p-1 rounded-[2rem] bg-white/2 border border-white/5">
+      <div className="p-1 rounded-4xl bg-white/2 border border-white/5">
         <div className="p-6">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
             <div className="flex items-center gap-4">

@@ -163,7 +163,8 @@ export function FolderTemplatesList() {
           <FolderTemplateCard
             key={template._id}
             template={template as any}
-            onEdit={(t) => handleEdit(t._id)}
+            onView={(t) => handleEdit(t._id)}
+            onConfigure={(t) => handleEdit(t._id)}
             onDelete={(id, name) => {
               setTemplateToDelete({
                 id: id as Id<"folderTemplates">,

@@ -641,4 +641,29 @@ export default defineSchema({
     createdBy: v.id("profiles"), // Profile ID
     updatedAt: v.number(),
   }).index("by_createdBy", ["createdBy"]),
+  // --------------------------------------------------------------------------
+  // Company Profile (Billing & Information)
+  // --------------------------------------------------------------------------
+  company: defineTable({
+    name: v.string(),
+    tagline: v.optional(v.string()),
+    address: v.string(),
+    phone: v.optional(v.string()),
+    email: v.optional(v.string()),
+    website: v.optional(v.string()),
+    gstNumber: v.optional(v.string()),
+    panNumber: v.optional(v.string()),
+    bankDetails: v.optional(
+      v.object({
+        bankName: v.string(),
+        accountHolder: v.string(),
+        accountNumber: v.string(),
+        ifscCode: v.string(),
+        branch: v.optional(v.string()),
+      }),
+    ),
+    logoUrl: v.optional(v.string()),
+    updatedAt: v.number(),
+    updatedBy: v.id("profiles"),
+  }),
 });

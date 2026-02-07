@@ -51,7 +51,8 @@ export function ListContent({
               <ProjectTypeCard
                 key={type._id}
                 type={type as any}
-                onEdit={onEdit}
+                onView={onEdit}
+                onConfigure={onEdit}
                 onDelete={onDeleteRequest}
               />
             ))}

@@ -26,6 +26,7 @@ export const WIZARD_STEPS = [
 
 export interface Step1Data {
   name: string;
+  description?: string;
   categoryId?: Id<"projectCategories">;
   icon?: string;
   isActive: boolean;

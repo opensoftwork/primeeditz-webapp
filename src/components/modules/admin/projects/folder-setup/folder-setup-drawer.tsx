@@ -29,7 +29,7 @@ import { TemplateSelector } from "./template-selector";
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
   name: string;
-  folders: string[];
+  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
 }
 
 interface StorageTier {

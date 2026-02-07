@@ -23,6 +23,8 @@ import type * as functions_admin_squads from "../functions/admin/squads.js";
 import type * as functions_admin_studios from "../functions/admin/studios.js";
 import type * as functions_admin_wipeData from "../functions/admin/wipeData.js";
 import type * as functions_assets_mutations from "../functions/assets/mutations.js";
+import type * as functions_company_mutations from "../functions/company/mutations.js";
+import type * as functions_company_queries from "../functions/company/queries.js";
 import type * as functions_deliverables_index from "../functions/deliverables/index.js";
 import type * as functions_deliverables_mutations from "../functions/deliverables/mutations.js";
 import type * as functions_deliverables_queries from "../functions/deliverables/queries.js";
@@ -96,6 +98,8 @@ declare const fullApi: ApiFromModules<{
   "functions/admin/studios": typeof functions_admin_studios;
   "functions/admin/wipeData": typeof functions_admin_wipeData;
   "functions/assets/mutations": typeof functions_assets_mutations;
+  "functions/company/mutations": typeof functions_company_mutations;
+  "functions/company/queries": typeof functions_company_queries;
   "functions/deliverables/index": typeof functions_deliverables_index;
   "functions/deliverables/mutations": typeof functions_deliverables_mutations;
   "functions/deliverables/queries": typeof functions_deliverables_queries;

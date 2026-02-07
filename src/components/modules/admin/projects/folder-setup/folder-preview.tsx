@@ -3,7 +3,7 @@
 import { Folder, FolderOpen } from "lucide-react";
 
 interface FolderPreviewProps {
-  folders: string[];
+  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
   projectCode: string;
 }
 
@@ -33,9 +33,11 @@ export function FolderPreview({ folders, projectCode }: FolderPreviewProps) {
             className="flex items-center gap-2 py-2 px-3 rounded-lg bg-white/3 hover:bg-white/5 transition-colors"
           >
             <Folder className="h-4 w-4 text-amber-500/70" />
-            <span className="text-white/80 font-medium text-sm">{folder}</span>
+            <span className="text-white/80 font-medium text-sm">
+              {folder.name}
+            </span>
             <span className="text-white/20 text-xs ml-auto">
-              pending_upload
+              {folder.path || "root"}
             </span>
           </div>
         ))}
