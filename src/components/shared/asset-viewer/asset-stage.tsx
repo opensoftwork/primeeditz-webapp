@@ -1,12 +1,13 @@
 "use client";
 
 import { ChevronLeft, ChevronRight, Loader2, X } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import type { ViewerAsset } from "./asset-slider";
 import dynamic from "next/dynamic";
+import { AudioVisualizer } from "./audio-visualizer";
 
 // Dynamically import PDF viewer for performance
 const PDFViewer = dynamic(() => import("../file-preview/pdf-viewer"), {
@@ -50,8 +51,10 @@ export function AssetStage({
   onPrevious,
   onNext,
 }: AssetStageProps) {
-  const isVideo = asset?.mimeType?.startsWith("video/") || asset?.type === "video";
-  const isAudio = asset?.mimeType?.startsWith("audio/") || asset?.type === "audio";
+  const isVideo =
+    asset?.mimeType?.startsWith("video/") || asset?.type === "video";
+  const isAudio =
+    asset?.mimeType?.startsWith("audio/") || asset?.type === "audio";
   const isPDF = asset?.mimeType === "application/pdf" || asset?.type === "pdf";
 
   return (
@@ -137,34 +140,27 @@ export function AssetStage({
           <div
             className={cn(
               "relative w-full h-full transition-all duration-700 select-none flex items-center justify-center",
-              !isPDF && (isLoading ? "opacity-0 translate-y-8" : "opacity-100 translate-y-0"),
-              !isPDF && !isVideo && (isZoomed ? "cursor-zoom-out scale-150" : "cursor-zoom-in"),
+              !isPDF &&
+                (isLoading
+                  ? "opacity-0 translate-y-8"
+                  : "opacity-100 translate-y-0"),
+              !isPDF &&
+                !isVideo &&
+                (isZoomed ? "cursor-default scale-150" : "cursor-default"),
             )}
-            onClick={() => !isVideo && !isAudio && !isPDF && onSetIsZoomed(!isZoomed)}
+            onClick={() =>
+              !isVideo && !isAudio && !isPDF && onSetIsZoomed(!isZoomed)
+            }
           >
             {isAudio ? (
-              <div className="flex flex-col items-center justify-center gap-8 p-12 bg-white/5 backdrop-blur-3xl rounded-[3rem] border border-white/10 shadow-2xl">
-                <div className="w-24 h-24 rounded-full bg-primary/20 flex items-center justify-center animate-pulse">
-                   <div className="w-16 h-16 rounded-full bg-primary/40 flex items-center justify-center">
-                     <Loader2 className="w-8 h-8 text-primary animate-spin" style={{ animationDuration: '3s' }} />
-                   </div>
-                </div>
-                <audio
-                  src={asset.url}
-                  controls
-                  controlsList="nodownload"
-                  autoPlay
-                  className="w-full max-w-md"
-                  onLoadedData={() => onSetIsLoading(false)}
-                  onError={() => {
-                    onSetHasError(true);
-                    onSetIsLoading(false);
-                  }}
-                />
-                <p className="text-xs font-black uppercase tracking-[0.3em] text-white/40">
-                  Audio Frequency Active
-                </p>
-              </div>
+              <AudioVisualizer
+                src={asset.url}
+                onLoadedData={() => onSetIsLoading(false)}
+                onError={() => {
+                  onSetHasError(true);
+                  onSetIsLoading(false);
+                }}
+              />
             ) : isVideo ? (
               <video
                 src={asset.url}
@@ -180,7 +176,11 @@ export function AssetStage({
               />
             ) : isPDF ? (
               <div className="w-full h-full max-w-5xl bg-zinc-900/50 rounded-2xl overflow-hidden shadow-2xl border border-white/5">
-                <PDFViewer url={asset.url} fileName={asset.fileName} hideDownload />
+                <PDFViewer
+                  url={asset.url}
+                  fileName={asset.fileName}
+                  hideDownload
+                />
               </div>
             ) : (
               <Image

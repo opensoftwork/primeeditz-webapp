@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import { Download, FileText, Music, Video } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AudioVisualizer } from "../asset-viewer/audio-visualizer";
 
 // Dynamically import heavy components to reduce initial bundle size
 const PDFViewer = dynamic(() => import("./pdf-viewer"), {
@@ -131,20 +132,22 @@ function VideoPlayer({ url, fileName }: { url: string; fileName: string }) {
 }
 
 /**
- * Audio player component
+ * Audio player component with visualizer
  */
 function AudioPlayer({ url, fileName }: { url: string; fileName: string }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-6 h-full min-h-[300px]">
-      <div className="h-24 w-24 rounded-3xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-[0_0_30px_rgba(99,102,241,0.1)]">
-        <Music className="h-10 w-10 text-indigo-400" />
+    <div className="flex flex-col items-center justify-center gap-10 h-full p-12">
+      <div className="w-full max-w-2xl aspect-video md:aspect-21/9 shrink-0">
+        <AudioVisualizer src={url} />
       </div>
-      <p className="text-sm font-bold text-white truncate max-w-[300px]">
-        {fileName}
-      </p>
-      <audio src={url} controls className="w-full max-w-md" preload="metadata">
-        Your browser does not support the audio tag.
-      </audio>
+      <div className="text-center space-y-2">
+        <p className="text-sm font-black text-white uppercase tracking-widest truncate max-w-[400px]">
+          {fileName}
+        </p>
+        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">
+          Audio Artifact Preview
+        </p>
+      </div>
     </div>
   );
 }
@@ -175,7 +178,9 @@ export function FilePreview({
 
   switch (previewType) {
     case "pdf":
-      return <PDFViewer url={url} fileName={fileName} hideDownload={hideDownload} />;
+      return (
+        <PDFViewer url={url} fileName={fileName} hideDownload={hideDownload} />
+      );
 
     case "image":
       return <ImageViewer url={url} fileName={fileName} />;

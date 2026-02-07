@@ -22,6 +22,7 @@ import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FinalizeWorkDrawer } from "./finalize-work-drawer";
 import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { SquadMemberCard } from "./squad-member-card";
+import { MusicVisualizer } from "./music-visualizer";
 
 interface EmployeeProjectDetailProps {
   projectId: string;
@@ -119,27 +120,25 @@ export default function EmployeeProjectDetail({
         />
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* Main Production Feed */}
-          <div className="lg:col-span-8 space-y-12">
-            <div className="p-8 rounded-[2.5rem] bg-zinc-900/50 border border-white/5 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-6 opacity-10 group-hover:opacity-20 transition-opacity">
-                <Shield className="h-24 w-24" />
-              </div>
-              <div className="relative z-10 space-y-2">
-                <div className="flex items-center gap-2">
-                  <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
-                  <h4 className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400">
-                    Production Live
-                  </h4>
+          {/* Main Production Feed with Visualizer */}
+          <div className="lg:col-span-8 flex flex-col items-center justify-center space-y-12">
+            <div className="relative w-full flex justify-center py-10">
+              <MusicVisualizer
+                isPlaying={true}
+                className="w-[300px] h-[300px] md:w-[500px] md:h-[500px]"
+              >
+                <div className="flex flex-col items-center gap-2 z-50">
+                  <h3 className="text-xs font-black uppercase tracking-[0.3em] text-indigo-400 animate-pulse">
+                    Current Status
+                  </h3>
+                  <h1 className="text-3xl font-black uppercase text-white tracking-tighter drop-shadow-2xl">
+                    {project.actionState?.replace(/_/g, " ")}
+                  </h1>
+                  <p className="text-[10px] text-white/50 uppercase tracking-[0.2em] font-bold">
+                    Project {project.code}
+                  </p>
                 </div>
-                <h2 className="text-2xl font-black uppercase tracking-tight text-white">
-                  Active Stage: {project.actionState.replace(/_/g, " ")}
-                </h2>
-                <p className="text-xs font-bold text-white/30 uppercase tracking-widest leading-relaxed max-w-md">
-                  You are currently in the product feed. Use the control center
-                  in the header to manage transitions or finalize your work.
-                </p>
-              </div>
+              </MusicVisualizer>
             </div>
           </div>
 

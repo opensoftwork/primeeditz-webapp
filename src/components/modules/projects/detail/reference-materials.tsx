@@ -80,7 +80,12 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   // Filter images for the slider
   const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => f.fileType.startsWith("image/") || f.fileType.startsWith("video/") || f.fileType === "application/pdf")
+      .filter(
+        (f) =>
+          f.fileType.startsWith("image/") ||
+          f.fileType.startsWith("video/") ||
+          f.fileType === "application/pdf",
+      )
       .map((file) => ({
         url:
           (file.storageKey ? signedUrls[file.storageKey] : file.previewUrl) ||
@@ -99,12 +104,15 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
       return;
     }
 
-    const isSliderType = file.type.startsWith("image/") || 
-                        file.type.startsWith("video/") || 
-                        file.type === "application/pdf";
+    const isSliderType =
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/") ||
+      file.type === "application/pdf";
 
     if (isSliderType) {
-      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
+      const index = assetsForSlider.findIndex(
+        (asset) => asset.fileId === fileId,
+      );
       if (index !== -1) {
         setSelectedAssetIndex(index);
       }
@@ -147,7 +155,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
               className="rounded-xl border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 font-black uppercase tracking-widest text-[10px] h-10 px-5 gap-2"
               onClick={() => setIsDrawerOpen(true)}
             >
-              OPEN VAULT <ExternalLink className="h-3.5 w-3.5" />
+              OPEN VAULT
             </Button>
           </div>
 
@@ -160,7 +168,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
               const isVideo = file.fileType?.startsWith("video/");
               const isAudio = file.fileType?.startsWith("audio/");
               const isPDF = file.fileType === "application/pdf";
-              
+
               const isLoadingUrl =
                 loading && file.storageKey && !signedUrls[file.storageKey];
 
@@ -190,7 +198,23 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                       {isVideo ? (
                         <Video className="h-8 w-8" />
                       ) : isAudio ? (
-                        <Music className="h-8 w-8" />
+                        <div className="flex flex-col items-center justify-center h-full w-full bg-black relative">
+                          <div className="flex items-center gap-1">
+                            {[0, 1, 2, 3, 4].map((i) => (
+                              <div
+                                key={i}
+                                className="w-1 bg-white/40 rounded-full animate-pulse"
+                                style={{
+                                  height: `${15 + Math.random() * 25}px`,
+                                  animationDelay: `${i * 0.1}s`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <span className="absolute bottom-3 text-[7px] font-black uppercase tracking-[0.2em] text-white/20">
+                            AUDIO
+                          </span>
+                        </div>
                       ) : (
                         <FileText className="h-8 w-8" />
                       )}
@@ -201,7 +225,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   )}
 
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <ExternalLink className="h-4 w-4 text-white" />
+                    {/* Icon removed per user request */}
                   </div>
                 </motion.div>
               );
@@ -216,10 +240,10 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                 className="group relative aspect-square rounded-xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-1 transition-all duration-500 hover:bg-white/10"
               >
                 <span className="text-sm font-black text-white">
-                  +{remainingCount}
+                  {remainingCount}
                 </span>
                 <span className="text-[7px] font-black uppercase tracking-widest text-white/30">
-                  More
+                  More Files
                 </span>
               </motion.button>
             )}
