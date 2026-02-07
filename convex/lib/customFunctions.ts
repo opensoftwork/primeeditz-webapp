@@ -41,6 +41,7 @@ export type Profile = {
   userId: string; // Better Auth user ID
   role: "studio" | "employee" | "admin";
   name: string;
+  email: string;
   phone?: string;
   company?: string;
   onboardingComplete: boolean;

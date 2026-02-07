@@ -666,4 +666,23 @@ export default defineSchema({
     updatedAt: v.number(),
     updatedBy: v.id("profiles"),
   }),
+
+  // --------------------------------------------------------------------------
+  // Global App Settings
+  // --------------------------------------------------------------------------
+  appSettings: defineTable({
+    quotation: v.object({
+      defaultTaxRate: v.number(),
+      defaultValidityDays: v.number(),
+      defaultTerms: v.optional(v.string()),
+      nextQuotationNumber: v.optional(v.number()),
+      codePrefix: v.optional(v.string()),
+    }),
+    notifications: v.object({
+      adminEmails: v.array(v.string()),
+      enableEmailNotifications: v.boolean(),
+    }),
+    updatedAt: v.number(),
+    updatedBy: v.id("profiles"),
+  }),
 });

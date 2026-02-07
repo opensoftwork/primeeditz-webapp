@@ -90,6 +90,15 @@ export interface CompanyInfo {
   phone?: string;
   email?: string;
   logoUrl?: string;
+  gstNumber?: string;
+  panNumber?: string;
+  bankDetails?: {
+    bankName: string;
+    accountHolder: string;
+    accountNumber: string;
+    ifscCode: string;
+    branch?: string;
+  };
 }
 
 // ============================================================================

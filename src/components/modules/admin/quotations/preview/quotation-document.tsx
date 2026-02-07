@@ -7,6 +7,8 @@
 
 "use client";
 
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
 import React, { useMemo } from "react";
 import type {
   CompanyInfo,
@@ -23,6 +25,7 @@ import { FinancialSummary } from "./components/financial-summary";
 import { LineItemsList } from "./components/line-items-list";
 import { SignatureSection } from "./components/signature-section";
 import { TermsAndConditions } from "./components/terms-and-conditions";
+import { BankDetails } from "./components/bank-details";
 
 // ============================================================================
 // Component Props
@@ -73,6 +76,8 @@ export const QuotationDocument = React.forwardRef<
     // -------------------------------------------------------------------------
     // 1. Data Processing & Calculations
     // -------------------------------------------------------------------------
+
+    const dbCompany = useQuery(api.functions.company.queries.get);
 
     const {
       filteredLineItems,
@@ -192,7 +197,7 @@ export const QuotationDocument = React.forwardRef<
         });
       }
 
-      const comp = companyInfo || {
+      const comp = companyInfo || dbCompany || {
         name: "PRIMEEDITZ",
         tagline: "Post-Production Excellence",
         address: "Creative Hub, Film City, Mumbai 400065",
@@ -211,9 +216,9 @@ export const QuotationDocument = React.forwardRef<
         hasProjects: hp,
         groupedByProject: gbp,
         groupedBySection: gbs,
-        company: comp,
+        company: comp as unknown as CompanyInfo,
       };
-    }, [quotation, sections, projects, activeSection, companyInfo]);
+    }, [quotation, sections, projects, activeSection, companyInfo, dbCompany]);
 
     // -------------------------------------------------------------------------
     // 2. Render
@@ -253,6 +258,9 @@ export const QuotationDocument = React.forwardRef<
           />
 
           <TermsAndConditions terms={quotation.terms} />
+
+          {/* Bank Details */}
+          <BankDetails company={company} />
 
           <SignatureSection companyName={company.name} />
 

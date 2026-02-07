@@ -60,6 +60,8 @@ import type * as functions_servicePackages_drafts_mutations from "../functions/s
 import type * as functions_servicePackages_drafts_queries from "../functions/servicePackages/drafts/queries.js";
 import type * as functions_servicePackages_mutations from "../functions/servicePackages/mutations.js";
 import type * as functions_servicePackages_queries from "../functions/servicePackages/queries.js";
+import type * as functions_settings_mutations from "../functions/settings/mutations.js";
+import type * as functions_settings_queries from "../functions/settings/queries.js";
 import type * as functions_storage_actions from "../functions/storage/actions.js";
 import type * as functions_storage_cleanup from "../functions/storage/cleanup.js";
 import type * as functions_storage_queries from "../functions/storage/queries.js";
@@ -135,6 +137,8 @@ declare const fullApi: ApiFromModules<{
   "functions/servicePackages/drafts/queries": typeof functions_servicePackages_drafts_queries;
   "functions/servicePackages/mutations": typeof functions_servicePackages_mutations;
   "functions/servicePackages/queries": typeof functions_servicePackages_queries;
+  "functions/settings/mutations": typeof functions_settings_mutations;
+  "functions/settings/queries": typeof functions_settings_queries;
   "functions/storage/actions": typeof functions_storage_actions;
   "functions/storage/cleanup": typeof functions_storage_cleanup;
   "functions/storage/queries": typeof functions_storage_queries;

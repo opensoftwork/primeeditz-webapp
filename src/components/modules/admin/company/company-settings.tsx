@@ -39,24 +39,14 @@ export function CompanySettings() {
   }
 
   return (
-    <div className="w-full px-6 pt-6 pb-20">
+    <div className="space-y-16">
       {/* Header */}
-      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
-        >
-          <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
-            ADMINISTRATIVE CONTROL
-          </span>
-          <h1 className="text-4xl font-black uppercase tracking-tighter text-white xl:text-5xl">
-            Company Profile
-          </h1>
-        </motion.div>
+      <div>
+        <h1 className="text-4xl font-black uppercase tracking-tight text-white mb-2 italic">Company Profile</h1>
+        <p className="text-sm text-white/40 font-bold tracking-tight">Manage your studio's identity and billing information.</p>
       </div>
 
-      <div className="max-w-5xl">
+      <div className="max-w-4xl">
         <CompanyForm initialData={company} onSubmit={handleSubmit} />
       </div>
     </div>
