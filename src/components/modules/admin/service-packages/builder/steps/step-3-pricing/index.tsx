@@ -28,8 +28,8 @@ const lineItemSchema = z.object({
   projectConfigId: z.string(),
   description: z.string().min(1, "Description is required"),
   unit: z.string().min(1, "Unit is required"),
-  rate: z.number().min(0, "Rate must be 0 or more"),
-  quantity: z.number().min(1, "Quantity must be at least 1"),
+  rate: z.coerce.number().min(0, "Rate must be 0 or more"),
+  quantity: z.coerce.number().min(1, "Quantity must be at least 1"),
 });
 
 const step3Schema = z.object({
@@ -37,7 +37,7 @@ const step3Schema = z.object({
     .array(lineItemSchema)
     .min(1, "At least one line item is required"),
   applyGST: z.boolean(),
-  gstPercentage: z.number().min(0).max(100),
+  gstPercentage: z.coerce.number().min(0).max(100),
 });
 
 export function Step3Pricing() {
@@ -74,8 +74,9 @@ export function Step3Pricing() {
       gstPercentage: step3Data?.gstPercentage ?? 18,
     },
     validators: {
-      onSubmit: step3Schema,
+      onSubmit: step3Schema as any,
     },
+
     onSubmit: async ({ value }) => {
       setStep3Data({
         lineItems: value.lineItems.map((item: any) => ({

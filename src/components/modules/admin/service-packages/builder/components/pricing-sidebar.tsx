@@ -13,7 +13,6 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { LineItem, ProjectConfig } from "../builder-context";
-
 interface PricingSidebarProps {
   lineItems: LineItem[];
   projectConfigs: ProjectConfig[];
@@ -145,11 +144,16 @@ export function PricingSidebar({
                     <input
                       type="number"
                       value={gstPercentage}
-                      onChange={(e) =>
-                        onUpdateGSTPercentage(Number(e.target.value))
-                      }
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        onUpdateGSTPercentage(
+                          val === "" ? ("" as any) : Number(val),
+                        );
+                      }}
+                      onFocus={(e) => (e.target as HTMLInputElement).select()}
                       className="bg-transparent border-none p-0 w-6 text-[10px] font-black text-primary focus:ring-0 outline-none text-right [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                     />
+
                     <span className="text-[10px] font-black text-white/20 uppercase tracking-widest">
                       %
                     </span>

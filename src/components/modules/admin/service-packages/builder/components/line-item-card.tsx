@@ -196,10 +196,15 @@ export function LineItemCard({
                     min={0}
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.handleChange(val === "" ? "" : Number(val));
+                    }}
+                    onFocus={(e) => e.target.select()}
                     aria-invalid={hasError}
                     className="h-10 bg-black/20 border-white/5 rounded-xl text-xs font-black tabular-nums focus:bg-black/40 transition-colors"
                   />
+
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
               );
@@ -234,10 +239,15 @@ export function LineItemCard({
                     min={1}
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(Number(e.target.value))}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      field.handleChange(val === "" ? "" : Number(val));
+                    }}
+                    onFocus={(e) => e.target.select()}
                     aria-invalid={hasError}
                     className="h-10 bg-black/20 border-white/5 rounded-xl text-xs font-black tabular-nums focus:bg-black/40 transition-colors"
                   />
+
                   <FieldError errors={field.state.meta.errors} />
                 </Field>
               );

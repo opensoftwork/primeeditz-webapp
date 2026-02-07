@@ -4,6 +4,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
+  ArrowLeft,
   ArrowRight,
   CheckCheck,
   ChevronLeft,
@@ -58,15 +59,15 @@ export default function EmployeeProjectDetail({
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
         <div className="space-y-4">
           <Button
-            variant="ghost"
             onClick={() => router.back()}
-            className="p-0 hover:bg-transparent text-white/40 hover:text-white flex items-center gap-2 group mb-2"
+            className="bg-blue-500 hover:bg-blue-600 text-white rounded-2xl h-9 px-5 flex items-center gap-2 mb-6 group transition-all active:scale-95 shadow-lg shadow-blue-500/20"
           >
-            <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
+            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
             <span className="text-[10px] font-black uppercase tracking-widest">
-              Back to Dashboard
+              Back
             </span>
           </Button>
+
           <div className="flex items-center gap-5">
             <div className="p-4 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
               <Shield className="h-8 w-8 text-indigo-400" />

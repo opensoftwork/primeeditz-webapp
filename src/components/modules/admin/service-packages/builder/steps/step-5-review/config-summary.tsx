@@ -1,6 +1,13 @@
 "use client";
 
-import { HardDrive, Pencil, Layers, Rocket, Database, FolderTree } from "lucide-react";
+import {
+  HardDrive,
+  Pencil,
+  Layers,
+  Rocket,
+  Database,
+  FolderTree,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +21,7 @@ import {
 } from "@/components/ui/sheet";
 import { useBuilder } from "../../builder-context";
 import { FolderPreview } from "../../components/folder-preview";
+import { cn } from "@/lib/utils";
 
 interface ConfigSummaryProps {
   projectTypes: any[];
@@ -27,6 +35,8 @@ export function ConfigSummary({
   storageTiers,
 }: ConfigSummaryProps) {
   const { step2Data, setCurrentStep } = useBuilder();
+  const configs = step2Data?.projectConfigs || [];
+  const isSingle = configs.length === 1;
 
   return (
     <div className="group space-y-4">
@@ -49,7 +59,7 @@ export function ConfigSummary({
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {step2Data?.projectConfigs.map((config, index) => {
+        {configs.map((config, index) => {
           const type = projectTypes.find((t) => t._id === config.projectTypeId);
           const tier = storageTiers.find(
             (t) => t._id === config.defaultStorageTierId,
@@ -58,7 +68,10 @@ export function ConfigSummary({
           return (
             <Card
               key={config.id}
-              className="group bg-zinc-900/40 border-white/5 rounded-[24px] overflow-hidden glass-subtle hover:border-primary/20 transition-all duration-300 shadow-xl p-0 lg:col-span-2"
+              className={cn(
+                "group bg-zinc-900/40 border-white/5 rounded-[24px] overflow-hidden glass-subtle hover:border-primary/20 transition-all duration-300 shadow-xl p-0",
+                isSingle ? "lg:col-span-2" : "lg:col-span-1",
+              )}
             >
               <CardContent className="p-0">
                 {/* Compact Header */}
@@ -89,8 +102,9 @@ export function ConfigSummary({
                           {config.categoryId && (
                             <Badge className="bg-white/5 text-white/60 border-white/10 font-bold text-[8px] uppercase tracking-widest px-2 py-1 rounded-md">
                               {
-                                categories.find((c) => c._id === config.categoryId)
-                                  ?.name
+                                categories.find(
+                                  (c) => c._id === config.categoryId,
+                                )?.name
                               }
                             </Badge>
                           )}
@@ -158,7 +172,9 @@ export function ConfigSummary({
                             </div>
                           </SheetHeader>
                           <div className="h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar p-6">
-                            <FolderPreview templateId={config.folderTemplateId} />
+                            <FolderPreview
+                              templateId={config.folderTemplateId}
+                            />
                           </div>
                         </SheetContent>
                       </Sheet>

@@ -330,7 +330,7 @@ export function FolderDetailView({
               <h1 className="text-3xl font-black uppercase tracking-tight text-white mb-1">
                 {folder.name}
               </h1>
-              {isLocked && (
+              {isLocked && !isEmployee && (
                 <span
                   className={cn(
                     "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
@@ -373,7 +373,7 @@ export function FolderDetailView({
       </motion.div>
 
       {/* Upload Status Banner - Consistent with AssetsSection */}
-      {isLocked && (
+      {isLocked && !isEmployee && (
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
