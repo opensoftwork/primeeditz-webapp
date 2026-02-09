@@ -12,6 +12,7 @@ import { columns } from "./columns";
 import { NewEmployeeDrawer } from "./new-employee-drawer";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminEmployee } from "./types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ============================================================================
 // Employee Card Component (for card view)
@@ -105,6 +106,7 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
   const [showNewEmployeeDrawer, setShowNewEmployeeDrawer] = useState(false);
 
   // Fetch employees
+  //@ts-ignore
   const rawEmployees = useQuery(api.admin.getEmployees, {});
 
   // Transform the data to match AdminEmployee type
@@ -142,21 +144,20 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
 
   if (rawEmployees === undefined) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
+      <div
+        className={
+          showHeader
+            ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
+            : "w-full"
+        }
+      >
         {showHeader && (
-          <div className="mb-10">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
-            >
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/40">
-                TEAM MANAGEMENT
-              </span>
-              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-                Employee Directory
-              </h1>
-            </motion.div>
+          <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32 bg-white/5" />
+              <Skeleton className="h-12 w-64 bg-white/5" />
+            </div>
+            <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
           </div>
         )}
         <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
@@ -165,9 +166,15 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
   }
 
   return (
-    <div className={showHeader ? "flex-1 p-8 md:p-12 w-full" : "w-full"}>
+    <div
+      className={
+        showHeader
+          ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
+          : "w-full"
+      }
+    >
       {showHeader && (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -195,7 +202,8 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
         </div>
       )}
 
-      <DataTable
+       <DataTable
+        className="flex-1"
         columns={columns}
         data={employees}
         emptyTitle="No Employees Found"

@@ -14,6 +14,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { DataTableFacetedFilter } from "./data-table-faceted-filter";
+import { DataTableViewOptions } from "./data-table-view-options";
 
 
 interface DataTableToolbarProps<TData> {
@@ -53,6 +54,7 @@ export function DataTableToolbar<TData>({
   filters = [],
   actions = [],
   customActions,
+  isLoading,
 }: DataTableToolbarProps<TData>) {
   const columnFilters = table.getState().columnFilters;
   const isFiltered = columnFilters.length > 0;
@@ -91,6 +93,7 @@ export function DataTableToolbar<TData>({
                     setLocalSearchValue(newValue);
                     column.setFilterValue(newValue || undefined);
                   }}
+                  disabled={isLoading}
                   className="pl-11 h-11 bg-white/5 border-white/10 text-xs font-bold uppercase tracking-widest placeholder:text-white/20 focus-visible:ring-1 focus-visible:ring-primary/50 focus:bg-white/10 transition-all rounded-xl"
                 />
               </div>
@@ -115,6 +118,7 @@ export function DataTableToolbar<TData>({
             <Button
               variant="ghost"
               onClick={() => table.resetColumnFilters()}
+              disabled={isLoading}
               className="h-10 px-3 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/10 rounded-xl gap-2"
             >
               Reset
@@ -127,6 +131,7 @@ export function DataTableToolbar<TData>({
       {/* Right Side: View Options & Actions */}
       <div className="flex flex-wrap items-center gap-2">
         {customActions}
+        <DataTableViewOptions table={table} />
         {actions.map((action, index) => {
           const Icon = action.icon;
           return (

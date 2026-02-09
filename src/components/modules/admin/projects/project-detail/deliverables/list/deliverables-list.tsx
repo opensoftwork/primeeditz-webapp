@@ -21,7 +21,7 @@ import { useEffect, useMemo, useState } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DataTable } from "@/components/shared/data-table";
+import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { cn } from "@/lib/utils";
 import { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
@@ -50,7 +50,7 @@ export function DeliverablesList() {
   );
 
   const sendToStudioMutation = useMutation(api.functions.deliverables.mutations.sendToStudio);
-
+// @ts-ignore
   const project = useQuery(api.admin.getAdminProject, { projectId });
 
   useEffect(() => {
@@ -180,23 +180,23 @@ export function DeliverablesList() {
 
   if (deliverables === undefined || project === undefined) {
     return (
-      <div className="p-8 md:p-12 space-y-8">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <Skeleton className="h-8 w-64 bg-white/5" />
             <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
           </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
-        <Skeleton className="h-[400px] w-full rounded-2xl bg-white/5" />
+        <DataTableSkeleton rows={6} columns={6} viewMode="table" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="space-y-4">
           <Button
             variant="ghost"
@@ -245,7 +245,7 @@ export function DeliverablesList() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
         <div className="p-6 rounded-3xl bg-indigo-500/5 border border-indigo-500/10 flex items-start gap-4">
           <div className="h-10 w-10 rounded-2xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20">
             <ShieldCheck className="h-5 w-5 text-indigo-400" />
@@ -284,8 +284,9 @@ export function DeliverablesList() {
       </div>
 
       {/* Main Table */}
-      <div className="space-y-6">
+      <div className="flex-1">
         <DataTable
+          className="flex-1"
           columns={columns}
           data={deliverables}
           isLoading={deliverables === undefined}

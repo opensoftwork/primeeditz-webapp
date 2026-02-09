@@ -1,6 +1,6 @@
 "use client";
 
-import { CircleDot } from "lucide-react";
+import { CheckCircle2, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StatusBadgeProps {
@@ -10,15 +10,19 @@ interface StatusBadgeProps {
 export function OnboardingBadge({ isComplete }: StatusBadgeProps) {
   const config = isComplete
     ? {
-        label: "Complete",
+        label: "Onboarded",
         color: "text-emerald-400",
         bgColor: "bg-emerald-500/10 border-emerald-500/20",
+        icon: CheckCircle2,
       }
     : {
         label: "Pending",
         color: "text-amber-400",
         bgColor: "bg-amber-500/10 border-amber-500/20",
+        icon: Clock,
       };
+
+  const Icon = config.icon;
 
   return (
     <span
@@ -28,7 +32,7 @@ export function OnboardingBadge({ isComplete }: StatusBadgeProps) {
         config.color,
       )}
     >
-      <CircleDot className="h-2.5 w-2.5" />
+      <Icon className="h-2.5 w-2.5" />
       {config.label}
     </span>
   );

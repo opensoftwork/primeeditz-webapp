@@ -118,7 +118,7 @@ export function StudioDataTable({
                 : "border-amber-500/20 text-amber-500 bg-amber-500/5",
             )}
           >
-            {row.original.onboardingComplete ? "Complete" : "Pending"}
+            {row.original.onboardingComplete ? "Onboarded" : "Pending"}
           </Badge>
         ),
       },

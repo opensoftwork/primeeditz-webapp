@@ -91,12 +91,26 @@ export const publishDraft = adminMutation({
     if (!draft.projectConfigs || draft.projectConfigs.length === 0) {
       throw new Error("At least one project configuration is required to publish");
     }
+    // Validate all configs have required fields
+    const validatedConfigs = draft.projectConfigs.map((config) => {
+      if (!config.projectTypeId || !config.folderTemplateId) {
+        throw new Error(
+          "All project configurations must have a Project Type and Folder Template",
+        );
+      }
+      return {
+        ...config,
+        projectTypeId: config.projectTypeId,
+        folderTemplateId: config.folderTemplateId,
+      };
+    });
+
     if (!draft.lineItems || draft.lineItems.length === 0) {
       throw new Error("At least one line item is required to publish");
     }
 
     // Extract top-level fields from the first config for backward compatibility and filtering
-    const firstConfig = draft.projectConfigs[0];
+    const firstConfig = validatedConfigs[0];
     const categoryId = firstConfig.categoryId || draft.categoryId;
     const projectTypeId = firstConfig.projectTypeId;
     const folderTemplateId = firstConfig.folderTemplateId;
@@ -107,7 +121,7 @@ export const publishDraft = adminMutation({
       name: draft.name,
       description: draft.description,
       categoryId,
-      projectConfigs: draft.projectConfigs,
+      projectConfigs: validatedConfigs,
       // Legacy fields for backward compatibility
       projectTypeId,
       folderTemplateId,

@@ -95,22 +95,14 @@ export function FolderListingView({
 
   if (!project || folders === undefined) {
     return (
-      <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in">
-        {/* Header Skeleton */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4">
-            <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />
-            <div className="flex items-center gap-3">
-              <Skeleton className="h-12 w-12 rounded-2xl bg-white/5" />
-              <div className="space-y-2">
-                <Skeleton className="h-6 w-48 bg-white/5 rounded-lg" />
-                <Skeleton className="h-3 w-32 bg-white/5 rounded-lg" />
-              </div>
-            </div>
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
           </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
-
-        {/* Grid Skeleton */}
         <FolderGridSkeleton />
       </div>
     );
@@ -120,9 +112,8 @@ export function FolderListingView({
     project.actionState === "awaiting_uploads" && folders.length > 0;
 
   return (
-    <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-5">
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="outline"

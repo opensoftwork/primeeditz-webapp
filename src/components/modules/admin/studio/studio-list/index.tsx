@@ -14,6 +14,7 @@ import { columns } from "./columns";
 import { NewStudioDrawer } from "./new-studio-drawer";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminStudio } from "./types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ============================================================================
 // Studio Card Component (for card view)
@@ -116,6 +117,7 @@ export default function StudioList({
   }, [setOverride, removeOverride]);
 
   // Fetch studios based on the filter prop
+  //@ts-ignore
   const allStudios = useQuery(api.admin.getStudios, {});
   const studiosWithProjects = useQuery(api.admin.getStudiosWithProjects);
 
@@ -149,27 +151,26 @@ export default function StudioList({
   }, [studios]);
 
   const onboardingOptions = [
-    { label: "Complete", value: "complete" },
+    { label: "Onboarded", value: "onboarded" },
     { label: "Pending", value: "pending" },
   ];
 
   if (rawStudios === undefined) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
+      <div
+        className={
+          showHeader
+            ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
+            : "w-full"
+        }
+      >
         {showHeader && (
-          <div className="mb-10">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
-            >
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
-                STUDIO MANAGEMENT
-              </span>
-              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-                Studio Directory
-              </h1>
-            </motion.div>
+          <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32 bg-white/5" />
+              <Skeleton className="h-12 w-64 bg-white/5" />
+            </div>
+            <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
           </div>
         )}
         <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
@@ -178,9 +179,15 @@ export default function StudioList({
   }
 
   return (
-    <div className={showHeader ? "flex-1 p-8 md:p-12 w-full" : "w-full"}>
+      <div
+        className={
+          showHeader
+            ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
+            : "w-full"
+        }
+      >
       {showHeader && (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -209,6 +216,7 @@ export default function StudioList({
       )}
 
       <DataTable
+        className="flex-1"
         columns={columns}
         data={studios}
         emptyTitle="No Studios Found"

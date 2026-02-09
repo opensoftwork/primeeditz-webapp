@@ -82,13 +82,13 @@ export function ServicePackageList() {
 
   if (rawPackages === undefined) {
     return (
-      <div className="w-full">
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
             <Skeleton className="h-12 w-64 bg-white/5" />
           </div>
-          <Skeleton className="h-12 w-48 bg-white/5 rounded-xl" />
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
         <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
@@ -106,8 +106,8 @@ export function ServicePackageList() {
   }));
 
   return (
-    <div className="w-full">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -136,6 +136,7 @@ export function ServicePackageList() {
       </div>
 
       <DataTable
+        className="flex-1"
         columns={columns}
         data={packages}
         emptyTitle="No packages found"

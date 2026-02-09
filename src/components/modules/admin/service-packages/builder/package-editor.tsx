@@ -71,7 +71,8 @@ export function PackageEditor() {
 
   const handleUpdate = async () => {
     if (syncCurrentStep) {
-      syncCurrentStep();
+      const success = syncCurrentStep();
+      if (success === false) return;
     }
     await savePackageUpdate();
   };

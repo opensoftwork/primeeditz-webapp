@@ -74,11 +74,11 @@ interface BuilderContextValue {
   prevStep: () => void;
   goToStep: (step: number) => void;
   submitTrigger: (() => void) | null;
-  setSubmitTrigger: (fn: (() => void) | null) => void;
+  setSubmitTrigger: (fn: any) => void;
 
   // Step data sync - called before navigation to save current form data to context
-  syncCurrentStep: (() => void) | null;
-  setSyncCurrentStep: (fn: (() => void) | null) => void;
+  syncCurrentStep: (() => boolean | void) | null;
+  setSyncCurrentStep: (fn: any) => void;
 
   // Lifecycle
   isSubmitting: boolean;
@@ -332,12 +332,12 @@ export function BuilderProvider({
   }, [activeDraft, isInitialized, packageId, draftId, isSubmitting, router]);
 
   const [submitTrigger, setSubmitTrigger] = useState<(() => void) | null>(null);
-  const [syncCurrentStep, setSyncCurrentStep] = useState<(() => void) | null>(
-    null,
-  );
+  const [syncCurrentStep, setSyncCurrentStep] = useState<
+    (() => boolean | void) | null
+  >(null);
 
   // Reference to hold the latest sync function (avoids stale closure issues)
-  const syncCurrentStepRef = useRef<(() => void) | null>(null);
+  const syncCurrentStepRef = useRef<(() => boolean | void) | null>(null);
   useEffect(() => {
     syncCurrentStepRef.current = syncCurrentStep;
   }, [syncCurrentStep]);
@@ -347,7 +347,8 @@ export function BuilderProvider({
       if (step >= 1 && step <= 5) {
         // First, sync the current step's form data to context
         if (syncCurrentStepRef.current) {
-          syncCurrentStepRef.current();
+          const result = syncCurrentStepRef.current();
+          if (result === false) return; // Block navigation if sync/validation failed
         }
         // Then save to backend (draft persistence)
         await saveDraft(step);

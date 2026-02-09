@@ -7,9 +7,11 @@
 "use client";
 
 import { Check, Copy, FileText, Sparkles, AlertCircle } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
+import { useForm } from "@tanstack/react-form";
+import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { FieldLabel } from "@/components/ui/field";
+import { Field, FieldLabel, FieldError } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 import { useBuilder } from "../../builder-context";
@@ -89,6 +91,13 @@ This quotation is valid for 30 days from the date of issue.`,
   },
 ];
 
+const step4Schema = z.object({
+  terms: z
+    .string()
+    .min(1, "Terms & Conditions are required")
+    .max(2000, "Maximum characters exceeded (2000)"),
+});
+
 export function Step4Terms() {
   const {
     step3Data,
@@ -99,69 +108,73 @@ export function Step4Terms() {
     isEditor,
   } = useBuilder();
 
-  // Terms state
-  const [terms, setTerms] = useState(step3Data?.terms ?? "");
+  // Toast state for copy action only
   const [copied, setCopied] = useState(false);
 
-  // Sync terms from context on mount
-  useEffect(() => {
-    if (step3Data?.terms !== undefined && step3Data.terms !== terms) {
-      setTerms(step3Data.terms);
-    }
-  }, [step3Data?.terms]);
-
-  // Update context when terms change
-  const handleTermsChange = (value: string) => {
-    setTerms(value);
-  };
+  const form = useForm({
+    defaultValues: {
+      terms: step3Data?.terms ?? "",
+    },
+    validators: {
+      onChange: step4Schema,
+    },
+    onSubmit: async ({ value }) => {
+      // Update step3Data with terms
+      if (step3Data) {
+        setStep3Data({
+          ...step3Data,
+          terms: value.terms.trim(),
+        });
+      }
+      if (!isEditor) {
+        goToStep(5);
+      }
+    },
+  });
 
   // Apply template
   const applyTemplate = (templateId: string) => {
     const template = TERMS_TEMPLATES.find((t) => t.id === templateId);
     if (template) {
-      handleTermsChange(template.content);
+      form.setFieldValue("terms", template.content);
     }
   };
 
   // Copy to clipboard
   const copyToClipboard = async () => {
-    await navigator.clipboard.writeText(terms);
+    await navigator.clipboard.writeText(form.getFieldValue("terms"));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
 
-  // Handle next step
-  const handleNext = () => {
-    // Update step3Data with terms
-    if (step3Data) {
-      setStep3Data({
-        ...step3Data,
-        terms: terms || undefined,
-      });
-    }
-    if (!isEditor) {
-      goToStep(5);
-    }
-  };
-
   // Register submit trigger
   useEffect(() => {
-    setSubmitTrigger(() => handleNext);
+    setSubmitTrigger(() => () => form.handleSubmit());
     return () => setSubmitTrigger(null);
-  }, [setSubmitTrigger, terms, step3Data]);
+  }, [form, setSubmitTrigger]);
 
   // Register sync callback
   useEffect(() => {
     setSyncCurrentStep(() => () => {
+      const { terms } = form.state.values;
+
+      // Validate locally for the sync step
+      if (!terms || terms.trim() === "") {
+        // Trigger validation UI by marking as touched
+        form.setFieldMeta("terms", (meta) => ({ ...meta, isTouched: true }));
+        return false;
+      }
+
       if (step3Data) {
         setStep3Data({
           ...step3Data,
-          terms: terms || undefined,
+          terms: terms.trim(),
         });
       }
+      return true;
     });
     return () => setSyncCurrentStep(null);
-  }, [terms, step3Data, setStep3Data, setSyncCurrentStep]);
+  }, [form, step3Data, setStep3Data, setSyncCurrentStep]);
 
   return (
     <div className="w-full space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
@@ -207,59 +220,85 @@ export function Step4Terms() {
           </div>
         </div>
 
-        {/* Terms Editor Header */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <FileText className="h-5 w-5 text-primary" />
-            <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/60">
-              Terms of Service
-            </FieldLabel>
-            {terms && (
-              <span
-                className={cn(
-                  "text-[9px] font-black uppercase tracking-widest",
-                  terms.length > 1800 ? "text-red-500" : "text-white/20",
-                )}
-              >
-                {terms.length} / 2000
-              </span>
-            )}
-          </div>
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={copyToClipboard}
-            disabled={!terms}
-            className="h-8 px-3 rounded-lg text-[9px] font-bold uppercase tracking-wider text-white/30 hover:text-white disabled:opacity-30"
-          >
-            {copied ? (
-              <>
-                <Check className="h-3 w-3 mr-1 text-green-400" />
-                Copied
-              </>
-            ) : (
-              <>
-                <Copy className="h-3 w-3 mr-1" />
-                Copy
-              </>
-            )}
-          </Button>
-        </div>
+        <form.Field name="terms">
+          {(field) => {
+            const hasError = field.state.meta.errors.length > 0;
+            return (
+              <Field data-invalid={hasError} className="space-y-6">
+                {/* Terms Editor Header */}
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <FileText className="h-5 w-5 text-primary" />
+                    <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/60">
+                      Terms of Service
+                      <span className="text-primary ml-1">*</span>
+                    </FieldLabel>
+                    {field.state.value && (
+                      <span
+                        className={cn(
+                          "text-[9px] font-black uppercase tracking-widest",
+                          field.state.value.length > 1800
+                            ? "text-red-500"
+                            : "text-white/20",
+                        )}
+                      >
+                        {field.state.value.length} / 2000
+                      </span>
+                    )}
+                  </div>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    onClick={copyToClipboard}
+                    disabled={!field.state.value}
+                    className="h-8 px-3 rounded-lg text-[9px] font-bold uppercase tracking-wider text-white/30 hover:text-white disabled:opacity-30"
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-3 w-3 mr-1 text-green-400" />
+                        Copied
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-3 w-3 mr-1" />
+                        Copy
+                      </>
+                    )}
+                  </Button>
+                </div>
 
-        {/* Terms Textarea */}
-        <div className="relative group">
-          <Textarea
-            value={terms}
-            onChange={(e) => handleTermsChange(e.target.value)}
-            placeholder="Define payment milestones, cancellation policies, delivery timelines..."
-            className="bg-zinc-900/30 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none min-h-[500px] rounded-[12px] text-sm transition-all p-8 shadow-inner placeholder:text-white/10 backdrop-blur-sm font-mono leading-relaxed"
-          />
-          {/* Decorative Corner */}
-          <div className="absolute bottom-6 right-6 pointer-events-none opacity-20">
-            <FileText className="h-10 w-10 text-white" />
-          </div>
-        </div>
+                <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                  {field.state.meta.errors
+                    .map((err) =>
+                      typeof err === "string" ? err : (err as any)?.message,
+                    )
+                    .filter(Boolean)
+                    .join(", ")}
+                </FieldError>
+
+                {/* Terms Textarea */}
+                <div className="relative group">
+                  <Textarea
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder="Define payment milestones, cancellation policies, delivery timelines..."
+                    className={cn(
+                      "bg-zinc-900/30 border-white/5 focus:border-primary/50 focus:ring-primary/20 resize-none min-h-[500px] rounded-[12px] text-sm transition-all p-8 shadow-inner placeholder:text-white/10 backdrop-blur-sm font-mono leading-relaxed",
+                      hasError && "border-red-500/50 bg-red-500/5",
+                    )}
+                  />
+                  {/* Decorative Corner */}
+                  <div className="absolute bottom-6 right-6 pointer-events-none opacity-20">
+                    <FileText className="h-10 w-10 text-white" />
+                  </div>
+                </div>
+              </Field>
+            );
+          }}
+        </form.Field>
 
         {/* Info Note */}
         <div className="flex items-center gap-2 px-4">

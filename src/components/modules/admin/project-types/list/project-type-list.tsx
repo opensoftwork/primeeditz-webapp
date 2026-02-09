@@ -96,8 +96,8 @@ export function ProjectTypeList() {
   // Loading State
   if (projectTypes === undefined) {
     return (
-      <div className="w-full px-6 pt-6">
-        <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
             <Skeleton className="h-12 w-64 bg-white/5" />
@@ -110,8 +110,8 @@ export function ProjectTypeList() {
   }
 
   return (
-    <div className="w-full px-6 pt-6">
-      <div className="mb-10 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -140,6 +140,7 @@ export function ProjectTypeList() {
       </div>
 
       <DataTable
+        className="flex-1"
         columns={columns}
         data={data}
         emptyTitle="No project types defined"

@@ -103,6 +103,7 @@ function StatCard({ label, value, icon, color, delay = 0 }: StatCardProps) {
 // ============================================================================
 
 import { getStatusConfig } from "@/lib/status-display";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // StatusBadge is no longer used locally, using StudioStatusBadge from projects module.
 
@@ -181,12 +182,18 @@ function ProjectCard({
 
 function LoadingSkeleton() {
   return (
-    <div className="flex-1 p-8 md:p-12 w-full animate-pulse">
+    <div className="flex-1 p-6 w-full animate-pulse">
       {/* Header Skeleton */}
-      <div className="mb-8">
-        <div className="h-4 w-24 bg-white/5 rounded mb-4" />
-        <div className="h-12 w-64 bg-white/5 rounded mb-2" />
-        <div className="h-4 w-48 bg-white/5 rounded" />
+      <div className="flex items-center gap-5 mb-10">
+        <Skeleton className="h-10 w-10 rounded-xl bg-white/5 shrink-0" />
+        <div className="flex items-center gap-4 flex-1">
+          <Skeleton className="h-14 w-14 rounded-xl bg-white/5 shrink-0" />
+          <div className="space-y-2">
+            <Skeleton className="h-3 w-24 bg-white/5" />
+            <Skeleton className="h-8 w-48 bg-white/5 rounded-lg" />
+            <Skeleton className="h-3 w-32 bg-white/5" />
+          </div>
+        </div>
       </div>
 
       {/* Stats Skeleton */}
@@ -225,6 +232,7 @@ export default function IndividualStudio() {
   const clientId = params.clientId as Id<"profiles">;
 
   const data = useQuery(
+    //@ts-ignore
     api.admin.getStudioWithProjects,
     clientId ? { studioId: clientId } : ("skip" as any),
   );
@@ -232,15 +240,10 @@ export default function IndividualStudio() {
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   useEffect(() => {
-    setOverride("clients", "Studios");
     if (data?.client?.name) {
       setOverride(clientId, data.client.name);
     }
-
-    return () => {
-      removeOverride("clients");
-      removeOverride(clientId);
-    };
+    return () => removeOverride(clientId);
   }, [clientId, data?.client?.name, setOverride, removeOverride]);
 
   if (data === undefined) {
@@ -249,7 +252,7 @@ export default function IndividualStudio() {
 
   if (data === null) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
+      <div className="flex-1 p-6 w-full">
         <div className="flex flex-col items-center justify-center h-[60vh] text-center">
           <div className="w-20 h-20 rounded-full bg-red-500/10 border border-red-500/20 flex items-center justify-center mb-6">
             <User className="h-10 w-10 text-red-400" />
@@ -277,65 +280,61 @@ export default function IndividualStudio() {
   const { client: studio, projects, stats } = data;
 
   return (
-    <div className="flex-1 p-8 md:p-12 w-full">
-      {/* Header Section */}
+    <div className="flex-1 p-6 w-full animate-in fade-in slide-in-from-bottom-5">
+      {/* Page Header Section */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         className="mb-10"
       >
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-5 mb-6">
           <Button
             variant="outline"
             size="icon"
+            className="rounded-xl shrink-0"
             onClick={() => router.back()}
-            className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
 
-          <div className="flex-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-4">
-              STUDIO PROFILE
-            </span>
-
-            <div className="flex items-start gap-4">
-              {/* Left side - Avatar */}
-              <div className="shrink-0">
-                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-                  <User className="h-8 w-8 text-primary" />
-                </div>
+          <div className="flex items-center gap-4 flex-1 min-w-0">
+            {/* Avatar - Compact */}
+            <div className="shrink-0">
+              <div className="w-14 h-14 rounded-xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                <User className="h-7 w-7 text-primary" />
               </div>
+            </div>
 
-              {/* Right side - Studio Info */}
-              <div className="flex-1">
-                <div className="flex flex-wrap items-center gap-4">
-                  <h1 className="text-3xl font-black uppercase tracking-tighter text-white">
-                    {studio.name}
-                  </h1>
-                  {/* Status Badge */}
-                  {studio.onboardingComplete ? (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                      <CheckCircle2 className="h-3 w-3" />
-                      Onboarded
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                      <Clock className="h-3 w-3" />
-                      Pending
-                    </span>
-                  )}
-                </div>
-                <p className="text-white/30 text-xs font-bold uppercase tracking-widest mt-0.5">
-                  Studio ID: {studio._id.slice(-8).toUpperCase()}
-                </p>
+            {/* Studio Info */}
+            <div className="min-w-0">
+              <span className="text-[9px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-1">
+                STUDIO PROFILE
+              </span>
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-black uppercase tracking-tighter text-white truncate">
+                  {studio.name}
+                </h1>
+                {studio.onboardingComplete ? (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                    <CheckCircle2 className="h-2.5 w-2.5" />
+                    Onboarded
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[8px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                    <Clock className="h-2.5 w-2.5" />
+                    Pending
+                  </span>
+                )}
               </div>
+              <p className="text-white/40 text-[9px] font-black uppercase tracking-widest mt-0.5">
+                STUDIO ID: {studio._id.slice(-8).toUpperCase()}
+              </p>
             </div>
           </div>
         </div>
 
-        {/* Studio Details - Aligned to left side */}
-        <div className="flex flex-wrap items-center gap-x-6 gap-y-3 mt-6">
+        {/* Studio Details Row */}
+        <div className="flex flex-wrap items-center gap-x-8 gap-y-4 px-1">
           {/* Email */}
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
@@ -345,7 +344,7 @@ export default function IndividualStudio() {
               <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
                 Email
               </span>
-              <span className="text-sm font-medium text-white/70">
+              <span className="text-xs font-medium text-white/70">
                 {studio.email}
               </span>
             </div>
@@ -361,7 +360,7 @@ export default function IndividualStudio() {
                 <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
                   Phone
                 </span>
-                <span className="text-sm font-mono text-white/70">
+                <span className="text-xs font-mono text-white/70">
                   {studio.phone}
                 </span>
               </div>
@@ -378,7 +377,7 @@ export default function IndividualStudio() {
                 <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
                   Company
                 </span>
-                <span className="text-sm font-bold text-white/70 uppercase">
+                <span className="text-xs font-bold text-white/70 uppercase">
                   {studio.company}
                 </span>
               </div>
@@ -394,7 +393,7 @@ export default function IndividualStudio() {
               <span className="text-[8px] font-black text-white/30 uppercase tracking-widest block">
                 Member Since
               </span>
-              <span className="text-sm font-medium text-white/70">
+              <span className="text-xs font-medium text-white/70">
                 {new Date(studio._creationTime).toLocaleDateString("en-GB", {
                   day: "numeric",
                   month: "long",

@@ -113,6 +113,14 @@ export function Step1Identity() {
                     >
                       Package Name <span className="text-primary">*</span>
                     </FieldLabel>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                      {field.state.meta.errors
+                        .map((err) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </FieldError>
                     <Input
                       id={field.name}
                       placeholder="e.g. Premium Wedding Photography"
@@ -122,14 +130,6 @@ export function Step1Identity() {
                       aria-invalid={hasError}
                       className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none placeholder:text-white/10"
                     />
-                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
-                      {field.state.meta.errors
-                        .map((err) =>
-                          typeof err === "string" ? err : err?.message,
-                        )
-                        .filter(Boolean)
-                        .join(", ")}
-                    </FieldError>
                   </Field>
                 );
               }}
@@ -149,6 +149,14 @@ export function Step1Identity() {
                     >
                       Public Description
                     </FieldLabel>
+                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
+                      {field.state.meta.errors
+                        .map((err) =>
+                          typeof err === "string" ? err : err?.message,
+                        )
+                        .filter(Boolean)
+                        .join(", ")}
+                    </FieldError>
                     <div className="relative">
                       <Textarea
                         id={field.name}
@@ -163,14 +171,6 @@ export function Step1Identity() {
                         {field.state.value?.length ?? 0}/500
                       </div>
                     </div>
-                    <FieldError className="text-[10px] uppercase tracking-wider font-bold pl-2">
-                      {field.state.meta.errors
-                        .map((err) =>
-                          typeof err === "string" ? err : err?.message,
-                        )
-                        .filter(Boolean)
-                        .join(", ")}
-                    </FieldError>
                   </Field>
                 );
               }}

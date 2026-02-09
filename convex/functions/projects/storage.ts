@@ -49,6 +49,7 @@ export const generateUploadUrl = action({
     args,
   ): Promise<{ uploadUrl: string; storageKey: string }> => {
     // 1. Get current user's profile
+    //@ts-ignore
     const profile = await ctx.runQuery(api.profiles.getMyProfile);
 
     if (!profile) {

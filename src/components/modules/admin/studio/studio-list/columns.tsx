@@ -96,7 +96,7 @@ export const columns: ColumnDef<AdminStudio>[] = [
     ),
     filterFn: (row, id, value) => {
       const isComplete = row.getValue(id) as boolean;
-      const status = isComplete ? "complete" : "pending";
+      const status = isComplete ? "onboarded" : "pending";
       return (value as string[]).includes(status);
     },
   },

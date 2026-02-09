@@ -96,6 +96,7 @@ interface DataTableProps<TData, TValue> {
     setPageSize?: (size: number) => void;
     pageSize?: number;
   };
+  onRowClick?: (row: TData) => void;
   className?: string;
 }
 
@@ -111,6 +112,7 @@ export function DataTable<TData, TValue>({
   showViewToggle = false,
   toolbar,
   serverPagination,
+  onRowClick,
   className,
 }: DataTableProps<TData, TValue>) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(
@@ -293,7 +295,11 @@ export function DataTable<TData, TValue>({
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
                         data-state={row.getIsSelected() && "selected"}
-                        className="transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group"
+                        onClick={() => onRowClick?.(row.original)}
+                        className={cn(
+                          "transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group",
+                          onRowClick && "cursor-pointer",
+                        )}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="py-4 px-6">
