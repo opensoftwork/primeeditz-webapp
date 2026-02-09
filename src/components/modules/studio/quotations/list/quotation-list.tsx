@@ -15,6 +15,7 @@ export function StudioQuotationList() {
   const [statusFilter, setStatusFilter] = useState<any>(undefined);
 
   const query = useSimplePaginatedQuery(
+    // @ts-ignore
     api.functions.quotations.queries.getMyQuotationsPaginated,
     {
       status: statusFilter,
@@ -44,7 +45,7 @@ export function StudioQuotationList() {
 
   if (query.status === "loading" && !quotations.length) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
+      <div className="flex-1 w-full px-8 pt-10 pb-12">
         <div className="mb-10">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
@@ -65,7 +66,7 @@ export function StudioQuotationList() {
   }
 
   return (
-    <div className="flex-1 p-8 md:p-12 w-full">
+    <div className="flex-1 w-full px-8 pt-10 pb-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
         <motion.div
           initial={{ opacity: 0, y: -10 }}

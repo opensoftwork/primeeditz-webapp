@@ -2,21 +2,10 @@
 
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
-import {
-  Copy,
-  Eye,
-  EyeOff,
-  Pencil,
-  Trash2,
-  MoreHorizontal,
-} from "lucide-react";
+import { Copy, Pencil, Power, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import {
-  DataTableRowActions,
-  type RowAction,
-} from "@/components/shared/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -87,35 +76,46 @@ export function PackageActions({ pkg }: PackageActionsProps) {
     }
   };
 
-  const actions: RowAction<AdminServicePackage>[] = [
-    {
-      label: "Edit Package",
-      icon: Pencil,
-      onClick: () => router.push(`/settings/service-packages/${pkg._id}`),
-    },
-    {
-      label: "Duplicate",
-      icon: Copy,
-      onClick: handleDuplicate,
-    },
-    {
-      label: pkg.isActive ? "Deactivate" : "Activate",
-      icon: pkg.isActive ? EyeOff : Eye,
-      onClick: handleToggleActive,
-      variant: pkg.isActive ? "destructive" : "default",
-    },
-    {
-      label: "Delete",
-      icon: Trash2,
-      variant: "destructive",
-      separator: true,
-      onClick: () => setShowDeleteDialog(true),
-    },
-  ];
-
   return (
     <>
-      <DataTableRowActions row={pkg} actions={actions} />
+      <div className="flex items-center justify-end gap-2">
+        <button
+          onClick={() => router.push(`/settings/service-packages/${pkg._id}`)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="Edit Package"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleDuplicate}
+          disabled={isLoading}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors disabled:opacity-50"
+          title="Duplicate Package"
+        >
+          <Copy className="h-4 w-4" />
+        </button>
+        <button
+          onClick={handleToggleActive}
+          disabled={isLoading}
+          className={cn(
+            "p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50",
+            pkg.isActive
+              ? "text-green-500/40 hover:text-red-400"
+              : "text-white/20 hover:text-green-400",
+          )}
+          title={pkg.isActive ? "Deactivate Package" : "Activate Package"}
+        >
+          <Power className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() => setShowDeleteDialog(true)}
+          disabled={isLoading}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-red-400 transition-colors disabled:opacity-50"
+          title="Delete Package"
+        >
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-3xl">
