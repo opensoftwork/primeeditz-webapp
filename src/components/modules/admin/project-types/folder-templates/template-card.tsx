@@ -90,14 +90,25 @@ export function TemplateCard({
         <CardContent className="relative z-10 p-6 pt-0 space-y-4">
           {/* Stats Row */}
           <div className="flex items-center gap-4">
-            <div className="text-center">
-              <p className="text-2xl font-black text-white">{folderCount}</p>
+            <div className="text-center px-1">
+              <p className="text-2xl font-black text-white">
+                {template.folders?.length || 0}
+              </p>
               <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold">
-                Folders
+                Main Folders
               </p>
             </div>
             <div className="h-8 w-px bg-white/5" />
-            <div className="flex-1 flex items-center gap-2 flex-wrap">
+            <div className="text-center px-1">
+              <p className="text-2xl font-black text-white">
+                {folderCount - (template.folders?.length || 0)}
+              </p>
+              <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold">
+                Sub Folders
+              </p>
+            </div>
+            <div className="h-8 w-px bg-white/5" />
+            <div className="flex-1 flex items-center justify-end gap-2 flex-wrap">
               {isDefault && (
                 <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] font-black uppercase tracking-widest">
                   Default

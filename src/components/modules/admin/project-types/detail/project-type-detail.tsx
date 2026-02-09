@@ -7,7 +7,7 @@ import {
   Loader2,
   Layout,
   Settings,
-  ChevronLeft,
+  ArrowLeft,
   Tag,
   Calendar,
   ChevronRight,
@@ -40,7 +40,7 @@ export default function ProjectTypeDetail({
 
   if (projectType === undefined) {
     return (
-      <div className="p-6 lg:p-10 space-y-8 animate-in fade-in duration-500">
+      <div className="p-8 md:p-12 space-y-8 animate-in fade-in duration-500">
         <div className="flex items-center gap-4">
           <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />
           <div className="space-y-2">
@@ -84,42 +84,45 @@ export default function ProjectTypeDetail({
   return (
     <div className="flex flex-col min-h-full bg-transparent text-white selection:bg-primary/20">
       {/* 1. Integrated Hero Area - Clean & Borderless */}
-      <section className="px-6 lg:px-10 py-12 flex flex-col gap-10">
-        <Button
-          variant="ghost"
-          size="icon"
-          asChild
-          className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border border-white/10"
-        >
-          <Link href="/settings/project-types">
-            <ChevronLeft className="h-5 w-5" />
-          </Link>
-        </Button>
+      <section className="px-8 md:px-12 pt-8 md:pt-12 pb-0 flex flex-col gap-10">
         {/* Navigation & Core Identification Row */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-6">
-            <div className="relative group">
-              <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full scale-150 group-hover:bg-primary/30 transition-all opacity-50" />
-              <div className="relative w-24 h-24 rounded-4xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all shadow-2xl shadow-primary/20">
-                <DynamicIcon
-                  name={projectType.icon || "Package"}
-                  className="h-10 w-10 text-primary"
-                />
-              </div>
-            </div>
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
+            >
+              <Link href="/settings/project-types">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
 
-            <div className="space-y-1">
-              <div className="flex items-center gap-3">
-                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/60">
-                  Engine View • ID: {projectTypeId.slice(0, 8)}...
-                </span>
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-125 group-hover:bg-primary/30 transition-all opacity-50" />
+                <div className="relative w-16 h-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all shadow-xl shadow-primary/10">
+                  <DynamicIcon
+                    name={projectType.icon || "Package"}
+                    className="h-7 w-7 text-primary"
+                  />
+                </div>
               </div>
-              <h1 className="text-4xl font-black uppercase tracking-tighter text-white xl:text-5xl leading-none">
-                {projectType.name}
-              </h1>
-                <h4 className="text-xl font-black text-white uppercase ">
-            {category?.name || "General Engine"}
-          </h4>
+
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60">
+                    Engine View • ID: {projectTypeId.slice(0, 8)}...
+                  </span>
+                </div>
+                <h1 className="text-3xl font-black uppercase tracking-tighter text-white leading-none">
+                  {projectType.name}
+                </h1>
+                <h4 className="text-sm font-black text-white/30 uppercase tracking-tight">
+                  {category?.name || "General Engine"}
+                </h4>
+              </div>
             </div>
           </div>
 
@@ -149,9 +152,6 @@ export default function ProjectTypeDetail({
             </div>
           </div>
         </div>
-
-        {/* Classification Details */}
-       
       </section>
 
       {/* 2. Folder Templates Section */}

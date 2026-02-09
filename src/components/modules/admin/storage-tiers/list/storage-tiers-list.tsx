@@ -58,12 +58,35 @@ export function StorageTiersList() {
     }));
   }, [storageTiers]);
 
+  const handleToggleActive = async (tier: StorageTier) => {
+    try {
+      await updateStorageTier({
+        id: tier._id as Id<"storageTiers">,
+        isActive: !tier.isActive,
+      });
+      toast.success(
+        `Storage tier ${tier.isActive ? "deactivated" : "activated"}`,
+      );
+    } catch (error) {
+      toast.error("Failed to update status");
+    }
+  };
+
   const columns = useMemo(
     () =>
-      getColumns((tier) => {
-        setEditingTier(tier);
-        setIsDrawerOpen(true);
-      }),
+      getColumns(
+        (tier) => {
+          setEditingTier(tier);
+          setIsDrawerOpen(true);
+        },
+        handleToggleActive,
+        (tier) => {
+          setTierToDelete({
+            id: tier._id as Id<"storageTiers">,
+            name: tier.name,
+          });
+        },
+      ),
     [],
   );
 

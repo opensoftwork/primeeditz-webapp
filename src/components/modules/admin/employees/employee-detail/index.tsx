@@ -5,6 +5,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
   AlertCircle,
+  ArrowLeft,
   Briefcase,
   Building,
   Calendar,
@@ -67,7 +68,7 @@ function StatCard({
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.1, duration: 0.4 }}
       className={cn(
-        "p-6 rounded-[1.5rem] bg-white/3 border border-white/5 relative group hover:bg-white/5 hover:border-white/10 transition-all duration-500 overflow-hidden shadow-2xl",
+        "p-6 rounded-3xl bg-white/3 border border-white/5 relative group hover:bg-white/5 hover:border-white/10 transition-all duration-500 overflow-hidden shadow-2xl",
         "before:absolute before:inset-0 before:bg-linear-to-b before:from-white/2 before:to-transparent",
       )}
     >
@@ -110,6 +111,7 @@ function StatCard({
 }
 
 export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
+  //@ts-ignore
   const data = useQuery(api.admin.getEmployeeWithProjects, { employeeId });
   const [isCopying, setIsCopying] = useState(false);
   const [isEditDrawerOpen, setIsEditDrawerOpen] = useState(false);
@@ -188,26 +190,39 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
       />
 
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="space-y-2"
-        >
-          <div className="flex items-center gap-3 mb-1">
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
-              TEAM MEMBER
-            </span>
-            <OnboardingBadge isComplete={employee.onboardingComplete} />
-          </div>
-          <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-            {employee.name}
-          </h1>
-          <div className="flex items-center gap-2 text-[10px] font-black text-white/30 tracking-widest uppercase">
-            Joined {new Date(employee._creationTime).toLocaleDateString()} • ID:{" "}
-            {employee._id.slice(-6).toUpperCase()}
-          </div>
-        </motion.div>
+      <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
+        <div className="flex items-center gap-6">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
+          >
+            <Link href="/employees">
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
+
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="space-y-2"
+          >
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400/60">
+                TEAM MEMBER
+              </span>
+              <OnboardingBadge isComplete={employee.onboardingComplete} />
+            </div>
+            <h1 className="text-3xl font-black uppercase tracking-tighter text-white">
+              {employee.name}
+            </h1>
+            <div className="flex items-center gap-2 text-[9px] font-black text-white/30 tracking-widest uppercase">
+              Joined {new Date(employee._creationTime).toLocaleDateString()} •
+              ID: {employee._id.slice(-6).toUpperCase()}
+            </div>
+          </motion.div>
+        </div>
 
         <div className="flex items-center gap-3">
           <Button
@@ -276,7 +291,7 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
           </div>
 
           {projects.length === 0 ? (
-            <Card className="rounded-[2.5rem] bg-white/2 border-white/5 p-12 flex flex-col items-center justify-center text-center space-y-4">
+            <Card className="rounded-4xl bg-white/2 border-white/5 p-12 flex flex-col items-center justify-center text-center space-y-4">
               <div className="w-16 h-16 rounded-full bg-white/5 flex items-center justify-center text-white/10">
                 <LayoutGrid className="h-8 w-8" />
               </div>
@@ -296,7 +311,7 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
                 <Link key={project._id} href={`/projects/${project._id}`}>
                   <motion.div
                     whileHover={{ x: 4 }}
-                    className="p-6 rounded-[2rem] bg-white/2 border border-white/5 hover:bg-white/5 hover:border-indigo-500/20 transition-all group flex items-center justify-between"
+                    className="p-6 rounded-4xl bg-white/2 border border-white/5 hover:bg-white/5 hover:border-indigo-500/20 transition-all group flex items-center justify-between"
                   >
                     <div className="flex items-center gap-6">
                       <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
@@ -351,7 +366,7 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
         {/* Right Column: Profile Info & Onboarding */}
         <div className="space-y-8 lg:col-span-1">
           {/* Detailed Info Card */}
-          <Card className="rounded-[2.5rem] bg-indigo-500/5 border-white/5 p-8 space-y-8">
+          <Card className="rounded-4xl bg-indigo-500/5 border-white/5 p-8 space-y-8">
             <div className="space-y-6">
               <div className="space-y-1.5">
                 <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20">
@@ -393,7 +408,7 @@ export default function EmployeeDetail({ employeeId }: EmployeeDetailProps) {
 
           {/* Onboarding Link Card (Only if not complete) */}
           {!employee.onboardingComplete && (
-            <Card className="rounded-[2.5rem] bg-amber-500/5 border-amber-500/10 p-8 space-y-6 relative overflow-hidden">
+            <Card className="rounded-4xl bg-amber-500/5 border-amber-500/10 p-8 space-y-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/10 blur-[60px] rounded-full translate-x-16 -translate-y-16" />
 
               <div className="relative space-y-4">

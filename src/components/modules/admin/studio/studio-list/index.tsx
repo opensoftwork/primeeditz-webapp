@@ -8,6 +8,8 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
+import { useEffect } from "react";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { columns } from "./columns";
 import { NewStudioDrawer } from "./new-studio-drawer";
 import { OnboardingBadge } from "./status-badge";
@@ -106,6 +108,13 @@ export default function StudioList({
   showHeader = true,
 }: StudioListProps) {
   const [showNewStudioDrawer, setShowNewStudioDrawer] = useState(false);
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    setOverride("clients", "Studios");
+    return () => removeOverride("clients");
+  }, [setOverride, removeOverride]);
+
   // Fetch studios based on the filter prop
   const allStudios = useQuery(api.admin.getStudios, {});
   const studiosWithProjects = useQuery(api.admin.getStudiosWithProjects);

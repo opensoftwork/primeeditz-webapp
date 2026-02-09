@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { HardDrive, IndianRupee } from "lucide-react";
+import { HardDrive, IndianRupee, Pencil, Power, Trash2 } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -23,6 +23,8 @@ function formatPrice(priceINR: number): string {
 
 export function getColumns(
   onEdit: (tier: StorageTier) => void,
+  onToggleActive: (tier: StorageTier) => void,
+  onDelete: (tier: StorageTier) => void,
 ): ColumnDef<StorageTier>[] {
   return [
     {
@@ -99,13 +101,32 @@ export function getColumns(
       cell: ({ row }) => {
         const tier = row.original;
         return (
-          <div className="flex justify-end">
+          <div className="flex justify-end items-center gap-2">
             <button
-              type="button"
               onClick={() => onEdit(tier)}
-              className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary transition-colors"
+              className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+              title="Edit Tier"
             >
-              Edit
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onToggleActive(tier)}
+              className={cn(
+                "p-2 rounded-lg hover:bg-white/5 transition-colors",
+                tier.isActive
+                  ? "text-green-500/40 hover:text-red-400"
+                  : "text-white/20 hover:text-green-400",
+              )}
+              title={tier.isActive ? "Deactivate Tier" : "Activate Tier"}
+            >
+              <Power className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => onDelete(tier)}
+              className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-red-400 transition-colors"
+              title="Delete Tier"
+            >
+              <Trash2 className="h-4 w-4" />
             </button>
           </div>
         );

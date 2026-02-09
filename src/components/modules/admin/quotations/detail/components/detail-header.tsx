@@ -69,15 +69,14 @@ export function DetailHeader({
 
   return (
     <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-      <div className="space-y-3">
+      <div className="flex items-center gap-6">
         <Button
-          variant="ghost"
-          size="sm"
+          variant="outline"
+          size="icon"
           onClick={() => router.push("/quotations")}
-          className="h-9 px-3 -ml-3 text-white/40 hover:text-white font-bold text-xs rounded-lg transition-colors"
+          className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
         >
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Back to Quotations
+          <ArrowLeft className="h-5 w-5" />
         </Button>
 
         <div className="flex items-center gap-4">

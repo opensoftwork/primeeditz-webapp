@@ -21,6 +21,8 @@ import {
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { Button } from "@/components/ui/button";
 import { PhaseProgress } from "@/components/modules/projects/phase-progress";
 import { StudioStatusBadge } from "@/components/modules/projects/studio-status-badge";
@@ -227,6 +229,20 @@ export default function IndividualStudio() {
     clientId ? { studioId: clientId } : ("skip" as any),
   );
 
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    setOverride("clients", "Studios");
+    if (data?.client?.name) {
+      setOverride(clientId, data.client.name);
+    }
+
+    return () => {
+      removeOverride("clients");
+      removeOverride(clientId);
+    };
+  }, [clientId, data?.client?.name, setOverride, removeOverride]);
+
   if (data === undefined) {
     return <LoadingSkeleton />;
   }
@@ -262,63 +278,59 @@ export default function IndividualStudio() {
 
   return (
     <div className="flex-1 p-8 md:p-12 w-full">
-      {/* Back Button */}
+      {/* Header Section */}
       <motion.div
-        initial={{ opacity: 0, x: -10 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mb-6"
+        className="mb-10"
       >
-        <Button
-          onClick={() => router.back()}
-          variant="ghost"
-          size="sm"
-          className="text-white/40 hover:text-white hover:bg-white/5 rounded-xl gap-2 px-3 h-9 text-[10px] font-black uppercase tracking-widest"
-        >
-          <ArrowLeft className="h-3.5 w-3.5" />
-          Back to Studios
-        </Button>
-      </motion.div>
+        <div className="flex items-center gap-6">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => router.back()}
+            className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Button>
 
-      {/* Page Header with Avatar on Left */}
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="mb-8"
-      >
-        <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-4">
-          STUDIO PROFILE
-        </span>
-
-        <div className="flex items-start gap-4">
-          {/* Left side - Avatar */}
-          <div className="shrink-0">
-            <div className="w-20 h-20 xl:w-20 xl:h-20 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
-              <User className="h-10 w-10 xl:h-12 xl:w-12 text-primary" />
-            </div>
-          </div>
-
-          {/* Right side - Studio Info */}
           <div className="flex-1">
-            <div className="flex items-center gap-4">
-              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-                {studio.name}
-              </h1>
-              {/* Status Badge */}
-              {studio.onboardingComplete ? (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle2 className="h-3 w-3" />
-                  Onboarded
-                </span>
-              ) : (
-                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
-                  <Clock className="h-3 w-3" />
-                  Pending
-                </span>
-              )}
+            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40 block mb-4">
+              STUDIO PROFILE
+            </span>
+
+            <div className="flex items-start gap-4">
+              {/* Left side - Avatar */}
+              <div className="shrink-0">
+                <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center">
+                  <User className="h-8 w-8 text-primary" />
+                </div>
+              </div>
+
+              {/* Right side - Studio Info */}
+              <div className="flex-1">
+                <div className="flex flex-wrap items-center gap-4">
+                  <h1 className="text-3xl font-black uppercase tracking-tighter text-white">
+                    {studio.name}
+                  </h1>
+                  {/* Status Badge */}
+                  {studio.onboardingComplete ? (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                      <CheckCircle2 className="h-3 w-3" />
+                      Onboarded
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest bg-amber-500/10 text-amber-400 border border-amber-500/20">
+                      <Clock className="h-3 w-3" />
+                      Pending
+                    </span>
+                  )}
+                </div>
+                <p className="text-white/30 text-xs font-bold uppercase tracking-widest mt-0.5">
+                  Studio ID: {studio._id.slice(-8).toUpperCase()}
+                </p>
+              </div>
             </div>
-            <p className="text-white/40 text-sm mt-1">
-              Studio ID: {studio._id.slice(-8).toUpperCase()}
-            </p>
           </div>
         </div>
 

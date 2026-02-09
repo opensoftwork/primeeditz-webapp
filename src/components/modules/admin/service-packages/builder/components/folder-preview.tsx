@@ -3,7 +3,13 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import { CheckCircle2, ChevronDown, ChevronRight, Folder } from "lucide-react";
+import {
+  CheckCircle2,
+  ChevronDown,
+  ChevronRight,
+  Folder,
+  FolderOpen,
+} from "lucide-react";
 import { useState } from "react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
@@ -49,12 +55,14 @@ export function FolderPreview({ templateId }: FolderPreviewProps) {
     );
   }
 
+  const rootFolderCount = template.folders.length;
+
   return (
     <div className="p-6 space-y-2 animate-in fade-in duration-500">
       <div className="flex items-center gap-2 mb-6 ml-1">
         <div className="h-1.5 w-1.5 rounded-full bg-primary" />
         <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-          {template.folders.length} Root Folders
+          {rootFolderCount} Root Folder{rootFolderCount !== 1 ? "s" : ""}
         </h4>
       </div>
 
@@ -70,6 +78,7 @@ export function FolderPreview({ templateId }: FolderPreviewProps) {
 function FolderNode({ folder, level }: { folder: any; level: number }) {
   const [isOpen, setIsOpen] = useState(true);
   const hasChildren = folder.children && folder.children.length > 0;
+  const IndentSize = 20;
 
   return (
     <div className="select-none">
@@ -78,13 +87,13 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
           "flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all group",
           level === 0 ? "hover:bg-white/5" : "hover:bg-white/3",
         )}
-        style={{ marginLeft: `${level * 12}px` }}
+        style={{ paddingLeft: `${level * IndentSize + 8}px` }}
       >
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
           className={cn(
-            "p-0.5 rounded cursor-pointer transition-colors",
+            "p-0.5 rounded cursor-pointer transition-colors shrink-0",
             hasChildren ? "hover:bg-white/10" : "opacity-0 pointer-events-none",
           )}
           aria-label={isOpen ? "Collapse folder" : "Expand folder"}
@@ -97,18 +106,29 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
           )}
         </button>
 
-        <Folder
-          className={cn(
-            "h-4 w-4 shrink-0 transition-colors",
-            level === 0
-              ? "text-primary/60 group-hover:text-primary"
-              : "text-white/20 group-hover:text-white/40",
-          )}
-        />
+        {isOpen && hasChildren ? (
+          <FolderOpen
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              level === 0
+                ? "text-primary/60 group-hover:text-primary"
+                : "text-white/20 group-hover:text-white/40",
+            )}
+          />
+        ) : (
+          <Folder
+            className={cn(
+              "h-4 w-4 shrink-0 transition-colors",
+              level === 0
+                ? "text-primary/60 group-hover:text-primary"
+                : "text-white/20 group-hover:text-white/40",
+            )}
+          />
+        )}
 
         <span
           className={cn(
-            "text-xs font-medium transition-colors whitespace-nowrap",
+            "text-xs font-medium transition-colors whitespace-nowrap truncate",
             level === 0 ? "text-white/90" : "text-white/60",
           )}
         >
@@ -124,8 +144,8 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
         <div className="relative">
           {/* Visual line connector */}
           <div
-            className="absolute left-3 top-0 bottom-2 w-px bg-white/5 z-0"
-            style={{ marginLeft: `${level * 12 + 6}px` }}
+            className="absolute top-0 bottom-2 w-px bg-white/5 z-0"
+            style={{ left: `${level * IndentSize + 15}px` }}
           />
           <div className="relative z-10">
             {folder.children.map((child: any, idx: number) => (

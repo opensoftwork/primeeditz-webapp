@@ -100,7 +100,12 @@ export function FolderTemplatesList({
   }
 
   return (
-    <div className="w-full px-10 pt-8 pb-20 font-geist">
+    <div
+      className={cn(
+        "w-full pb-20 font-geist",
+        minimal ? "px-8 md:px-12 pt-0" : "px-10 pt-8",
+      )}
+    >
       {/* Header - Compact in minimal mode */}
       <div className={cn("flex flex-col mb-12", minimal ? "gap-4" : "gap-8")}>
         {!minimal && (

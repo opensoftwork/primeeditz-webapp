@@ -52,6 +52,12 @@ import type * as functions_projects_spawning from "../functions/projects/spawnin
 import type * as functions_projects_storage from "../functions/projects/storage.js";
 import type * as functions_quotations_mutations from "../functions/quotations/mutations.js";
 import type * as functions_quotations_queries from "../functions/quotations/queries.js";
+import type * as functions_quotations_queries_admin from "../functions/quotations/queries/admin.js";
+import type * as functions_quotations_queries_dashboard from "../functions/quotations/queries/dashboard.js";
+import type * as functions_quotations_queries_library from "../functions/quotations/queries/library.js";
+import type * as functions_quotations_queries_public from "../functions/quotations/queries/public.js";
+import type * as functions_quotations_queries_storage from "../functions/quotations/queries/storage.js";
+import type * as functions_quotations_queries_studio from "../functions/quotations/queries/studio.js";
 import type * as functions_quotations_sections_mutations from "../functions/quotations/sections/mutations.js";
 import type * as functions_quotations_sections_queries from "../functions/quotations/sections/queries.js";
 import type * as functions_quotations_templates_mutations from "../functions/quotations/templates/mutations.js";
@@ -129,6 +135,12 @@ declare const fullApi: ApiFromModules<{
   "functions/projects/storage": typeof functions_projects_storage;
   "functions/quotations/mutations": typeof functions_quotations_mutations;
   "functions/quotations/queries": typeof functions_quotations_queries;
+  "functions/quotations/queries/admin": typeof functions_quotations_queries_admin;
+  "functions/quotations/queries/dashboard": typeof functions_quotations_queries_dashboard;
+  "functions/quotations/queries/library": typeof functions_quotations_queries_library;
+  "functions/quotations/queries/public": typeof functions_quotations_queries_public;
+  "functions/quotations/queries/storage": typeof functions_quotations_queries_storage;
+  "functions/quotations/queries/studio": typeof functions_quotations_queries_studio;
   "functions/quotations/sections/mutations": typeof functions_quotations_sections_mutations;
   "functions/quotations/sections/queries": typeof functions_quotations_sections_queries;
   "functions/quotations/templates/mutations": typeof functions_quotations_templates_mutations;
