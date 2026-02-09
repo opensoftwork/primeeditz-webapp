@@ -157,14 +157,20 @@ export function AdminActionBanner({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10">
+            <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 flex items-center gap-2">
               Cancel
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                ESC
+              </kbd>
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDialog?.action}
-              className="bg-primary text-black hover:bg-primary/90 font-black uppercase"
+              className="bg-primary text-black hover:bg-primary/90 font-black uppercase flex items-center gap-2"
             >
               Confirm
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                ⏎
+              </kbd>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

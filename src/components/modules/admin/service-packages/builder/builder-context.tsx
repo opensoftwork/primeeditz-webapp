@@ -166,11 +166,36 @@ export function BuilderProvider({
           lastStep: stepOverride ?? currentStep,
           name: step1DataRef.current?.name,
           description: step1DataRef.current?.description,
-          projectConfigs: step2DataRef.current?.projectConfigs,
+          projectConfigs: step2DataRef.current?.projectConfigs?.map(
+            (config) => ({
+              ...config,
+              categoryId: (config.categoryId &&
+              (config.categoryId as string) !== ""
+                ? config.categoryId
+                : undefined) as Id<"projectCategories">,
+              projectTypeId: (config.projectTypeId &&
+              (config.projectTypeId as string) !== ""
+                ? config.projectTypeId
+                : undefined) as Id<"projectTypes">,
+              folderTemplateId: (config.folderTemplateId &&
+              (config.folderTemplateId as string) !== ""
+                ? config.folderTemplateId
+                : undefined) as Id<"folderTemplates">,
+              defaultStorageTierId: (config.defaultStorageTierId &&
+              (config.defaultStorageTierId as string) !== ""
+                ? config.defaultStorageTierId
+                : undefined) as Id<"storageTiers">,
+            }),
+          ),
           lineItems: step3DataRef.current?.lineItems?.map((item) => ({
             ...item,
-            sectionId: item.sectionId as Id<"quotationSections">,
+            sectionId:
+              item.sectionId && (item.sectionId as string) !== ""
+                ? (item.sectionId as Id<"quotationSections">)
+                : undefined,
             projectConfigId: item.projectConfigId || undefined,
+            rate: Number(item.rate) || 0,
+            quantity: Number(item.quantity) || 1,
           })),
           terms: step3DataRef.current?.terms,
           applyGST: step3DataRef.current?.applyGST,
@@ -294,11 +319,12 @@ export function BuilderProvider({
       if (activeDraft === null && draftWasSeen.current && !isSubmitting) {
         // Prevent multiple redirects
         setIsSubmitting(true);
-        
+
         toast.error("Draft session ended", {
-          description: "This package has already been published or the draft was removed in another session.",
+          description:
+            "This package has already been published or the draft was removed in another session.",
         });
-        
+
         // Redirect back to the package list
         router.replace("/settings/service-packages");
       }
@@ -384,11 +410,33 @@ export function BuilderProvider({
         id: packageId,
         name: step1DataRef.current?.name,
         description: step1DataRef.current?.description,
-        projectConfigs: step2DataRef.current?.projectConfigs as any,
+        projectConfigs: step2DataRef.current?.projectConfigs?.map((config) => ({
+          ...config,
+          categoryId: (config.categoryId && (config.categoryId as string) !== ""
+            ? config.categoryId
+            : undefined) as Id<"projectCategories">,
+          projectTypeId: (config.projectTypeId &&
+          (config.projectTypeId as string) !== ""
+            ? config.projectTypeId
+            : undefined) as Id<"projectTypes">,
+          folderTemplateId: (config.folderTemplateId &&
+          (config.folderTemplateId as string) !== ""
+            ? config.folderTemplateId
+            : undefined) as Id<"folderTemplates">,
+          defaultStorageTierId: (config.defaultStorageTierId &&
+          (config.defaultStorageTierId as string) !== ""
+            ? config.defaultStorageTierId
+            : undefined) as Id<"storageTiers">,
+        })) as any,
         lineItems: step3DataRef.current?.lineItems?.map((item) => ({
           ...item,
-          sectionId: item.sectionId as Id<"quotationSections">,
+          sectionId:
+            item.sectionId && (item.sectionId as string) !== ""
+              ? (item.sectionId as Id<"quotationSections">)
+              : undefined,
           projectConfigId: item.projectConfigId || undefined,
+          rate: Number(item.rate) || 0,
+          quantity: Number(item.quantity) || 1,
         })),
         terms: step3DataRef.current?.terms,
         applyGST: step3DataRef.current?.applyGST,

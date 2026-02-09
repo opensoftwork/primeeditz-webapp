@@ -1,10 +1,22 @@
 "use client";
 
+import { useState } from "react";
 import { ArrowLeft, ArrowRight, ChevronRight, Loader2, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { authClient } from "@/lib/auth-client";
 import { cn } from "@/lib/utils";
 import { RequestStepNavigation } from "./request-step-navigation";
@@ -26,6 +38,7 @@ export default function QuoteRequestWizard() {
 }
 
 function QuoteRequestWizardContent() {
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
   const {
     step,
     setStep,
@@ -87,15 +100,49 @@ function QuoteRequestWizardContent() {
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => {
-              if (confirm("Are you sure you want to cancel? This will delete your draft progress.")) {
-                cancelWizard();
-              }
-            }}
+            onClick={() => setShowCancelDialog(true)}
             className="h-10 px-4 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
             Cancel
           </Button>
+
+          <AlertDialog
+            open={showCancelDialog}
+            onOpenChange={setShowCancelDialog}
+          >
+            <AlertDialogContent className="bg-zinc-950 border-white/10">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-white font-black uppercase tracking-tight">
+                  Cancel Quote Request?
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-white/60">
+                  Are you sure you want to cancel? This will delete your draft
+                  progress.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 flex items-center gap-2">
+                  Go Back
+                  <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                    ESC
+                  </kbd>
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={async () => {
+                    await cancelWizard();
+                    setShowCancelDialog(false);
+                  }}
+                  className="bg-primary text-black hover:bg-primary/90 font-black uppercase flex items-center gap-2"
+                >
+                  Confirm Cancel
+                  <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                    ⏎
+                  </kbd>
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+
           <Link href="/dashboard">
             <Button
               variant="outline"
@@ -107,7 +154,6 @@ function QuoteRequestWizardContent() {
           </Link>
         </div>
       </header>
-
 
       {/* 2. Main Content Layout */}
       <div className="flex flex-1 overflow-hidden">

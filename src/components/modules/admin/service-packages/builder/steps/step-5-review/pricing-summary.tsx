@@ -10,7 +10,7 @@ interface PricingSummaryProps {
 }
 
 export function PricingSummary({ lineItems }: PricingSummaryProps) {
-  const { setCurrentStep } = useBuilder();
+  const { goToStep } = useBuilder();
 
   return (
     <div className="group space-y-4">
@@ -24,7 +24,7 @@ export function PricingSummary({ lineItems }: PricingSummaryProps) {
           </h3>
         </div>
         <button
-          onClick={() => setCurrentStep(3)}
+          onClick={() => goToStep(3)}
           className="h-8 px-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all"
         >
           <Pencil className="h-3 w-3" />

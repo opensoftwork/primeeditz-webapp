@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useBuilder } from "../../builder-context";
 
 export function IdentitySummary() {
-  const { step1Data, step2Data, setCurrentStep } = useBuilder();
+  const { step1Data, step2Data, goToStep } = useBuilder();
 
   return (
     <div className="group space-y-4">
@@ -20,7 +20,7 @@ export function IdentitySummary() {
           </h3>
         </div>
         <button
-          onClick={() => setCurrentStep(1)}
+          onClick={() => goToStep(1)}
           className="h-8 px-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all"
         >
           <Pencil className="h-3 w-3" />

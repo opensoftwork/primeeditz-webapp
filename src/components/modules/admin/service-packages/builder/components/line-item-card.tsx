@@ -198,7 +198,11 @@ export function LineItemCard({
                     onBlur={field.handleBlur}
                     onChange={(e) => {
                       const val = e.target.value;
-                      field.handleChange(val === "" ? "" : Number(val));
+                      // Strip leading zeros
+                      const cleanValue = val.replace(/^0+(?=\d)/, "");
+                      field.handleChange(
+                        cleanValue === "" ? "" : Number(cleanValue),
+                      );
                     }}
                     onFocus={(e) => e.target.select()}
                     aria-invalid={hasError}
@@ -241,7 +245,11 @@ export function LineItemCard({
                     onBlur={field.handleBlur}
                     onChange={(e) => {
                       const val = e.target.value;
-                      field.handleChange(val === "" ? "" : Number(val));
+                      // Strip leading zeros
+                      const cleanValue = val.replace(/^0+(?=\d)/, "");
+                      field.handleChange(
+                        cleanValue === "" ? "" : Number(cleanValue),
+                      );
                     }}
                     onFocus={(e) => e.target.select()}
                     aria-invalid={hasError}

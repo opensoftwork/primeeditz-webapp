@@ -85,6 +85,8 @@ export function Step3Pricing() {
             ? (item.sectionId as Id<"quotationSections">)
             : undefined,
           projectConfigId: item.projectConfigId || undefined,
+          rate: Number(item.rate) || 0,
+          quantity: Number(item.quantity) || 1,
         })),
         terms: step3Data?.terms, // Preserve existing terms from step 4
         applyGST: value.applyGST,
@@ -113,6 +115,8 @@ export function Step3Pricing() {
             ? (item.sectionId as Id<"quotationSections">)
             : undefined,
           projectConfigId: item.projectConfigId || undefined,
+          rate: Number(item.rate) || 0,
+          quantity: Number(item.quantity) || 1,
         })),
         terms: step3Data?.terms, // Preserve terms from step 4
         applyGST: values.applyGST,

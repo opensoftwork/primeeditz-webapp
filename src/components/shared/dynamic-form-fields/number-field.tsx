@@ -42,9 +42,11 @@ export function NumberField({
             type="number"
             value={(value as number) ?? ""}
             onBlur={onBlur}
+            onFocus={(e) => e.target.select()}
             onChange={(e) => {
               const val = e.target.value;
-              onChange(val === "" ? null : Number(val));
+              const cleanValue = val.replace(/^0+(?=\d)/, "");
+              onChange(cleanValue === "" ? null : Number(cleanValue));
             }}
             aria-invalid={isInvalid}
             min={fieldDef.min}

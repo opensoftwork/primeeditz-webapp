@@ -13,6 +13,17 @@ import {
   SheetClose,
 } from "@/components/ui/sheet";
 import { Field, FieldLabel, FieldError } from "@/components/ui/field";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { cn } from "@/lib/utils";
 import { sectionSchema, SectionFormData } from "./schema";
 import { colorOptions } from "./constants";
@@ -127,21 +138,48 @@ export function SectionSheet({
 
           <div className="p-6 border-t border-white/5 bg-zinc-900/50 flex items-center justify-between gap-4">
             {initialData && onDelete && (
-              <Button
-                type="button"
-                variant="ghost"
-                onClick={() => {
-                  if (
-                    confirm("Are you sure you want to delete this section?")
-                  ) {
-                    onDelete();
-                    onOpenChange(false);
-                  }
-                }}
-                className="h-12 w-12 rounded-xl text-red-500 hover:bg-red-500/10"
-              >
-                <Trash2 className="h-5 w-5" />
-              </Button>
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-12 w-12 rounded-xl text-red-500 hover:bg-red-500/10"
+                  >
+                    <Trash2 className="h-5 w-5" />
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="bg-zinc-950 border-white/10">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-white font-black uppercase tracking-tight">
+                      Delete Section?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-white/60">
+                      Are you sure you want to delete this section? This action
+                      cannot be undone.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="bg-white/5 border-white/10 text-white hover:bg-white/10 flex items-center gap-2">
+                      Cancel
+                      <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                        ESC
+                      </kbd>
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={() => {
+                        onDelete();
+                        onOpenChange(false);
+                      }}
+                      className="bg-red-500 text-white hover:bg-red-600 font-black uppercase flex items-center gap-2"
+                    >
+                      Delete
+                      <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                        ⏎
+                      </kbd>
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
             )}
 
             <div className="flex gap-3 ml-auto w-full justify-end">

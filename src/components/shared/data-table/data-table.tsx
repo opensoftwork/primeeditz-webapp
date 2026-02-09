@@ -20,6 +20,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -95,6 +96,7 @@ interface DataTableProps<TData, TValue> {
     setPageSize?: (size: number) => void;
     pageSize?: number;
   };
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -109,6 +111,7 @@ export function DataTable<TData, TValue>({
   showViewToggle = false,
   toolbar,
   serverPagination,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(
     renderCard ? (defaultView ?? "cards") : "table",
@@ -120,6 +123,10 @@ export function DataTable<TData, TValue>({
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: serverPagination?.pageSize ?? 10,
+  });
 
   const table = useReactTable({
     data,
@@ -129,24 +136,27 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination,
     },
     enableRowSelection: true,
+    manualPagination: !!serverPagination,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
+    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    // Note: No getPaginationRowModel - server handles pagination
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const showCards = renderCard && viewMode === "cards";
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className={cn("flex flex-col gap-8", className)}>
       {/* Toolbar with optional view toggle */}
       <div className="flex items-start gap-4">
         <div className="flex-1">
@@ -314,7 +324,12 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <DataTablePagination table={table} serverPagination={serverPagination} />
+      <div className="mt-auto pt-6">
+        <DataTablePagination
+          table={table}
+          serverPagination={serverPagination}
+        />
+      </div>
     </div>
   );
 }

@@ -94,8 +94,8 @@ export function LineItemDrawer({
   const [sectionId, setSectionId] = useState<string>("");
   const [projectId, setProjectId] = useState<string | undefined>(undefined);
   const [unit, setUnit] = useState(DEFAULT_UNIT);
-  const [rate, setRate] = useState<number>(0);
-  const [quantity, setQuantity] = useState<number>(1);
+  const [rate, setRate] = useState<number | "">(0);
+  const [quantity, setQuantity] = useState<number | "">(1);
 
   // Project Spawning state
   const [spawnsProject, setSpawnsProject] = useState(false);
@@ -154,7 +154,7 @@ export function LineItemDrawer({
 
   // Calculate total
   const calculatedTotal = useMemo(() => {
-    return rate * quantity;
+    return (Number(rate) || 0) * (Number(quantity) || 0);
   }, [rate, quantity]);
 
   // Handle save
@@ -166,8 +166,8 @@ export function LineItemDrawer({
       projectId,
       description: description.trim(),
       unit,
-      rate,
-      quantity,
+      rate: Number(rate) || 0,
+      quantity: Number(quantity) || 0,
       spawnsProject,
       projectTypeId,
       selectedFolderTemplateId,
@@ -405,8 +405,13 @@ export function LineItemDrawer({
                   </span>
                   <Input
                     type="number"
-                    value={rate || ""}
-                    onChange={(e) => setRate(Number(e.target.value) || 0)}
+                    value={rate}
+                    onFocus={(e) => e.target.select()}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      const cleanValue = val.replace(/^0+(?=\d)/, "");
+                      setRate(cleanValue === "" ? "" : Number(cleanValue));
+                    }}
                     placeholder="0"
                     className="h-11 pl-7 bg-white/5 border-white/10 rounded-xl text-sm font-mono font-bold text-white text-right pr-3"
                   />
@@ -424,8 +429,13 @@ export function LineItemDrawer({
             <FieldContent>
               <Input
                 type="number"
-                value={quantity || ""}
-                onChange={(e) => setQuantity(Number(e.target.value) || 1)}
+                value={quantity}
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const cleanValue = val.replace(/^0+(?=\d)/, "");
+                  setQuantity(cleanValue === "" ? "" : Number(cleanValue));
+                }}
                 placeholder="1"
                 min="1"
                 className="h-11 bg-white/5 border-white/10 rounded-xl text-sm font-bold text-white text-center"
@@ -456,7 +466,7 @@ export function LineItemDrawer({
               </span>
             </div>
             <p className="text-[10px] text-white/30 mt-1">
-              {quantity} {unit} × ₹{rate.toLocaleString()}
+              {quantity} {unit} × ₹{(Number(rate) || 0).toLocaleString()}
             </p>
           </div>
         </div>

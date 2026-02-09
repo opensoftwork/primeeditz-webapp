@@ -50,7 +50,12 @@ export function StorageTierDrawer({
       isActive: initialData?.isActive ?? true,
     },
     onSubmit: async ({ value }) => {
-      await onSave(value as StorageTierFormValues);
+      const submissionValue = {
+        ...value,
+        sizeGB: Number(value.sizeGB) || 0,
+        priceINR: Number(value.priceINR) || 0,
+      };
+      await onSave(submissionValue as StorageTierFormValues);
     },
   });
 
@@ -94,6 +99,7 @@ export function StorageTierDrawer({
                     <Database className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
                     <Input
                       value={field.state.value}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => field.handleChange(e.target.value)}
                       className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                       placeholder="e.g. Pro Suite"
@@ -116,9 +122,16 @@ export function StorageTierDrawer({
                       <Input
                         type="number"
                         value={field.state.value}
-                        onChange={(e) =>
-                          field.handleChange(Number(e.target.value))
-                        }
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const cleanValue = val.replace(/^0+(?=\d)/, "");
+                          field.handleChange(
+                            (cleanValue === ""
+                              ? ""
+                              : Number(cleanValue)) as any,
+                          );
+                        }}
                         className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                         placeholder="100"
                       />
@@ -139,9 +152,16 @@ export function StorageTierDrawer({
                       <Input
                         type="number"
                         value={field.state.value}
-                        onChange={(e) =>
-                          field.handleChange(Number(e.target.value))
-                        }
+                        onFocus={(e) => e.target.select()}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          const cleanValue = val.replace(/^0+(?=\d)/, "");
+                          field.handleChange(
+                            (cleanValue === ""
+                              ? ""
+                              : Number(cleanValue)) as any,
+                          );
+                        }}
                         className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                         placeholder="999"
                       />

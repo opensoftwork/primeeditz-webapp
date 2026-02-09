@@ -53,7 +53,7 @@ export function DataTablePagination<TData>({
     } = serverPagination;
 
     return (
-      <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/5 gap-4">
+      <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
         {/* Left: Info & Page Size */}
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-4">
@@ -131,7 +131,7 @@ export function DataTablePagination<TData>({
   const totalPages = table.getPageCount();
 
   return (
-    <div className="flex flex-col sm:flex-row items-center justify-between pt-6 border-t border-white/5 gap-4">
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
       {/* Left: Info & Page Size */}
       <div className="flex items-center gap-6">
         <div className="flex items-center gap-4">
@@ -147,7 +147,7 @@ export function DataTablePagination<TData>({
         </div>
 
         {/* Page Size */}
-        <div className="hidden md:flex items-center gap-3 border-l border-white/5 pl-6">
+        <div className="hidden md:flex items-center gap-3 pl-6">
           <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
             Rows
           </span>

@@ -35,7 +35,7 @@ export function Step2ProjectConfig() {
   const {
     step2Data,
     setStep2Data,
-    setCurrentStep,
+    nextStep,
     setSubmitTrigger,
     setSyncCurrentStep,
     isEditor,
@@ -70,7 +70,7 @@ export function Step2ProjectConfig() {
         projectConfigs: value.projectConfigs as any,
       });
       if (!isEditor) {
-        setCurrentStep(3);
+        nextStep();
       }
     },
   });

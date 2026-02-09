@@ -44,8 +44,8 @@ export const updateDraft = adminMutation({
       id: v.string(),
       label: v.optional(v.string()),
       categoryId: v.optional(v.id("projectCategories")),
-      projectTypeId: v.id("projectTypes"),
-      folderTemplateId: v.id("folderTemplates"),
+      projectTypeId: v.optional(v.id("projectTypes")),
+      folderTemplateId: v.optional(v.id("folderTemplates")),
       defaultStorageTierId: v.optional(v.id("storageTiers")),
     }))),
     // Step 3

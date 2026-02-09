@@ -146,8 +146,9 @@ export function PricingSidebar({
                       value={gstPercentage}
                       onChange={(e) => {
                         const val = e.target.value;
+                        const cleanValue = val.replace(/^0+(?=\d)/, "");
                         onUpdateGSTPercentage(
-                          val === "" ? ("" as any) : Number(val),
+                          cleanValue === "" ? ("" as any) : Number(cleanValue),
                         );
                       }}
                       onFocus={(e) => (e.target as HTMLInputElement).select()}

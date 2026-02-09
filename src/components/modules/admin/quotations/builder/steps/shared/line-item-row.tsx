@@ -153,9 +153,16 @@ export function LineItemRow({
               <Input
                 type="number"
                 value={item.rate}
-                onChange={(e) =>
-                  handleUpdateItem(idx, "rate", Number(e.target.value))
-                }
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const cleanValue = val.replace(/^0+(?=\d)/, "");
+                  handleUpdateItem(
+                    idx,
+                    "rate",
+                    cleanValue === "" ? "" : Number(cleanValue),
+                  );
+                }}
                 className="h-11 bg-white/5 border-none rounded-xl text-sm font-mono font-bold text-white text-right pr-4"
               />
             </FieldContent>
@@ -170,9 +177,16 @@ export function LineItemRow({
               <Input
                 type="number"
                 value={item.quantity}
-                onChange={(e) =>
-                  handleUpdateItem(idx, "quantity", Number(e.target.value))
-                }
+                onFocus={(e) => e.target.select()}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  const cleanValue = val.replace(/^0+(?=\d)/, "");
+                  handleUpdateItem(
+                    idx,
+                    "quantity",
+                    cleanValue === "" ? "" : Number(cleanValue),
+                  );
+                }}
                 className="h-11 bg-white/5 border-none rounded-xl text-sm font-bold text-white text-center"
               />
             </FieldContent>

@@ -657,14 +657,20 @@ export function FolderTemplateBuilder({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3 relative z-10 flex flex-row items-center">
-            <AlertDialogCancel className="h-11 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-wider text-[10px] flex-1 mt-0">
+            <AlertDialogCancel className="h-11 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-wider text-[10px] flex-1 mt-0 flex items-center justify-center gap-2">
               Cancel
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                ESC
+              </kbd>
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteFolder}
-              className="h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider text-[10px] flex-1 shadow-lg shadow-red-500/20"
+              className="h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider text-[10px] flex-1 shadow-lg shadow-red-500/20 flex items-center justify-center gap-2"
             >
               Delete Folder
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                ⏎
+              </kbd>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -690,14 +696,20 @@ export function FolderTemplateBuilder({
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter className="mt-8 gap-3 relative z-10 flex flex-row items-center">
-            <AlertDialogCancel className="h-11 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-wider text-[10px] flex-1 mt-0">
+            <AlertDialogCancel className="h-11 rounded-xl border border-white/10 bg-white/5 hover:bg-white/10 text-white font-bold uppercase tracking-wider text-[10px] flex-1 mt-0 flex items-center justify-center gap-2">
               Cancel
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                ESC
+              </kbd>
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmDeleteBulk}
-              className="h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider text-[10px] flex-1 shadow-lg shadow-red-500/20"
+              className="h-11 rounded-xl bg-red-500 hover:bg-red-600 text-white font-bold uppercase tracking-wider text-[10px] flex-1 shadow-lg shadow-red-500/20 flex items-center justify-center gap-2"
             >
               Delete Selected
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                ⏎
+              </kbd>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -723,18 +735,24 @@ export function FolderTemplateBuilder({
                 form.setFieldValue("name", initialName);
                 setIsEditingName(false);
               }}
-              className="rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-6 transition-all"
+              className="rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-6 transition-all flex items-center gap-2"
             >
               Cancel
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-white/20 bg-white/5 px-1.5 font-mono text-[8px] font-medium text-white/40">
+                ESC
+              </kbd>
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={() => {
                 setIsEditingName(false);
                 setShowNameConfirm(false);
               }}
-              className="rounded-xl bg-primary hover:bg-primary/90 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-8 transition-all shadow-lg shadow-primary/20"
+              className="rounded-xl bg-primary hover:bg-primary/90 text-white uppercase tracking-widest text-[10px] font-bold h-10 px-8 transition-all shadow-lg shadow-primary/20 flex items-center gap-2"
             >
               Confirm Change
+              <kbd className="hidden sm:inline-flex h-4 items-center gap-1 rounded border border-black/20 bg-black/5 px-1.5 font-mono text-[8px] font-medium text-black/40">
+                ⏎
+              </kbd>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

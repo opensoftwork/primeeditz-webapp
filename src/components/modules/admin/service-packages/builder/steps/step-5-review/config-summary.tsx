@@ -34,7 +34,7 @@ export function ConfigSummary({
   categories,
   storageTiers,
 }: ConfigSummaryProps) {
-  const { step2Data, setCurrentStep } = useBuilder();
+  const { step2Data, goToStep } = useBuilder();
   const configs = step2Data?.projectConfigs || [];
   const isSingle = configs.length === 1;
 
@@ -50,7 +50,7 @@ export function ConfigSummary({
           </h3>
         </div>
         <button
-          onClick={() => setCurrentStep(2)}
+          onClick={() => goToStep(2)}
           className="h-8 px-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all"
         >
           <Pencil className="h-3 w-3" />

@@ -98,7 +98,7 @@ export const columns: ColumnDef<EmployeeWithWorkload>[] = [
       />
     ),
   },
-  {
+  /*  {
     id: "availability",
     header: () => (
       <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
@@ -106,7 +106,7 @@ export const columns: ColumnDef<EmployeeWithWorkload>[] = [
       </span>
     ),
     cell: () => <AvailabilityRibbon />,
-  },
+  }, */
   {
     accessorKey: "email",
     header: () => (

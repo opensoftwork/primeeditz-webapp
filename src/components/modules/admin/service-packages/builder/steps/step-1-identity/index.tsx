@@ -29,7 +29,7 @@ export function Step1Identity() {
   const {
     step1Data,
     setStep1Data,
-    setCurrentStep,
+    nextStep,
     setSubmitTrigger,
     setSyncCurrentStep,
     isEditor,
@@ -49,7 +49,7 @@ export function Step1Identity() {
         description: value.description || undefined,
       });
       if (!isEditor) {
-        setCurrentStep(2);
+        nextStep();
       }
     },
   });

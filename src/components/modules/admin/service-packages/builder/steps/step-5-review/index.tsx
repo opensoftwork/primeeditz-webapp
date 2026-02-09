@@ -81,10 +81,16 @@ export function Step5Review() {
           projectConfigs: step2Data.projectConfigs.map((config) => ({
             id: config.id,
             label: config.label,
-            categoryId: config.categoryId as Id<"projectCategories">,
-            projectTypeId: config.projectTypeId,
-            folderTemplateId: config.folderTemplateId,
-            defaultStorageTierId: config.defaultStorageTierId,
+            categoryId: (config.categoryId &&
+            (config.categoryId as string) !== ""
+              ? config.categoryId
+              : undefined) as Id<"projectCategories">,
+            projectTypeId: config.projectTypeId as Id<"projectTypes">,
+            folderTemplateId: config.folderTemplateId as Id<"folderTemplates">,
+            defaultStorageTierId: (config.defaultStorageTierId &&
+            (config.defaultStorageTierId as string) !== ""
+              ? config.defaultStorageTierId
+              : undefined) as Id<"storageTiers">,
           })),
           // Legacy fields
           projectTypeId: step2Data.projectConfigs[0]?.projectTypeId,
@@ -94,12 +100,14 @@ export function Step5Review() {
 
           lineItems: step3Data.lineItems.map((item) => ({
             id: item.id,
-            sectionId: item.sectionId as Id<"quotationSections">,
+            sectionId: (item.sectionId && (item.sectionId as string) !== ""
+              ? (item.sectionId as Id<"quotationSections">)
+              : undefined) as Id<"quotationSections">,
             projectConfigId: item.projectConfigId,
             description: item.description,
             unit: item.unit,
-            rate: item.rate,
-            quantity: item.quantity,
+            rate: Number(item.rate) || 0,
+            quantity: Number(item.quantity) || 1,
           })),
           terms: step3Data.terms,
           applyGST: step3Data.applyGST,

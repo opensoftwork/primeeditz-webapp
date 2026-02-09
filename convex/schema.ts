@@ -116,6 +116,16 @@ export const projectConfigValidator = v.object({
   defaultStorageTierId: v.optional(v.id("storageTiers")),
 });
 
+// Draft Project Config Validator - Allows optional fields for wizard persistence
+export const draftProjectConfigValidator = v.object({
+  id: v.string(),
+  label: v.optional(v.string()),
+  categoryId: v.optional(v.id("projectCategories")),
+  projectTypeId: v.optional(v.id("projectTypes")),
+  folderTemplateId: v.optional(v.id("folderTemplates")),
+  defaultStorageTierId: v.optional(v.id("storageTiers")),
+});
+
 // Service Package Line Item Validator - PRICING ONLY, no spawning config
 export const servicePackageLineItemValidator = v.object({
   id: v.string(),
@@ -606,7 +616,7 @@ export default defineSchema({
     categoryId: v.optional(v.id("projectCategories")),
 
     // Step 2: Project Configuration
-    projectConfigs: v.optional(v.array(projectConfigValidator)),
+    projectConfigs: v.optional(v.array(draftProjectConfigValidator)),
 
     // Step 3: Pricing & Terms
     lineItems: v.optional(v.array(servicePackageLineItemValidator)),

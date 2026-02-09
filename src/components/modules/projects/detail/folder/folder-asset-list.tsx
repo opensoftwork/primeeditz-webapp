@@ -64,7 +64,9 @@ export function FolderAssetList({
   folderId,
   folderName = "Folder",
 }: FolderAssetListProps) {
-  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(null);
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
+    null,
+  );
   const [sliderOpen, setSliderOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
@@ -131,6 +133,24 @@ export function FolderAssetList({
     }
   };
 
+  const sliderAssets = useMemo(() => {
+    if (!assets) return [];
+    return assets
+      .filter(
+        (a) =>
+          a.mimeType.startsWith("image/") ||
+          a.mimeType.startsWith("video/") ||
+          a.mimeType === "application/pdf",
+      )
+      .map((asset) => ({
+        url: signedUrls[asset.minioKey] || "",
+        fileName: asset.filename,
+        fileId: asset._id,
+        mimeType: asset.mimeType,
+      }))
+      .filter((a) => a.url);
+  }, [assets, signedUrls]);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -149,19 +169,6 @@ export function FolderAssetList({
   if (!assets || assets.length === 0) {
     return null;
   }
-
-  const sliderAssets = useMemo(() => {
-    if (!assets) return [];
-    return assets
-      .filter((a) => a.mimeType.startsWith("image/") || a.mimeType.startsWith("video/") || a.mimeType === "application/pdf")
-      .map((asset) => ({
-        url: signedUrls[asset.minioKey] || "",
-        fileName: asset.filename,
-        fileId: asset._id,
-        mimeType: asset.mimeType,
-      }))
-      .filter((a) => a.url);
-  }, [assets, signedUrls]);
 
   const openAssetViewer = (assetId: string) => {
     const index = sliderAssets.findIndex((a) => a.fileId === assetId);
@@ -208,7 +215,8 @@ export function FolderAssetList({
                   : "opacity-80",
               )}
               onClick={
-                (isImage || isVideo || asset.mimeType === "application/pdf") && hasSignedUrl
+                (isImage || isVideo || asset.mimeType === "application/pdf") &&
+                hasSignedUrl
                   ? () => openAssetViewer(asset._id)
                   : isAudio && hasSignedUrl
                     ? () => handleAudioPlayPause(asset, hasSignedUrl)
@@ -287,23 +295,28 @@ export function FolderAssetList({
                       <Download className="h-4 w-4" />
                     </Button>
                   )}
-                  {(isImage || isVideo || asset.mimeType === "application/pdf") && hasSignedUrl && (
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className={cn(
-                        "h-8 w-8 transition-all rounded-xl",
-                        isVideo ? "text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10" : "text-primary/20 hover:text-primary hover:bg-primary/10"
-                      )}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openAssetViewer(asset._id);
-                      }}
-                      title="View file"
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                  )}
+                  {(isImage ||
+                    isVideo ||
+                    asset.mimeType === "application/pdf") &&
+                    hasSignedUrl && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className={cn(
+                          "h-8 w-8 transition-all rounded-xl",
+                          isVideo
+                            ? "text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10"
+                            : "text-primary/20 hover:text-primary hover:bg-primary/10",
+                        )}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openAssetViewer(asset._id);
+                        }}
+                        title="View file"
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                    )}
                   {isAudio && hasSignedUrl && (
                     <Button
                       variant="ghost"

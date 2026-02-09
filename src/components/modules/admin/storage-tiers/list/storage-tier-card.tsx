@@ -144,7 +144,7 @@ export function StorageTierCard({
           </div>
 
           {/* Footer Area - Aligned with ProjectTypeCard & PackageCard */}
-          <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-2">
+          <div className="flex items-center justify-between mt-2 pt-2">
             <div className="flex flex-col">
               <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
                 Current Status
