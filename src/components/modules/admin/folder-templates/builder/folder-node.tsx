@@ -103,7 +103,7 @@ export function FolderNode({
         "group relative flex flex-col items-center justify-center p-4 rounded-2xl transition-all border cursor-pointer aspect-square text-center",
         isSelected
           ? "bg-primary/10 border-primary/50 ring-1 ring-primary/20"
-          : "bg-white/2 border-white/5 hover:border-primary/30 hover:bg-primary/5",
+          : "bg-white/2 border-white/20 hover:border-primary/40 hover:bg-white/5",
         isEditing && "ring-2 ring-primary/50",
       )}
     >

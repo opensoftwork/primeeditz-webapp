@@ -196,8 +196,8 @@ export function Step2Folders({ compact = false }: { compact?: boolean }) {
               Folder Hierarchy
             </h2>
           </div>
-          <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/5">
-            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/30">
+          <div className="px-3 py-1.5 rounded-full bg-white/10 border border-white/10">
+            <span className="text-[9px] font-black uppercase tracking-[0.2em] text-white/70">
               Max 3 levels • 10 per level
             </span>
           </div>
@@ -216,7 +216,7 @@ export function Step2Folders({ compact = false }: { compact?: boolean }) {
 
       {/* Folder Stats - Inline with header style */}
       {folders.length > 0 && !compact && (
-        <div className="shrink-0 flex items-center gap-3 mb-4 px-4 py-3 rounded-xl bg-white/3 border border-white/5">
+        <div className="shrink-0 flex items-center gap-3 mb-4 px-4 py-3 rounded-xl bg-white/3 border border-white/15 ">
           <div className="p-2 rounded-lg bg-primary/10 border border-primary/20">
             <FolderOpen className="h-4 w-4 text-primary" />
           </div>
@@ -232,7 +232,7 @@ export function Step2Folders({ compact = false }: { compact?: boolean }) {
       )}
 
       {/* Folder Tree - Takes remaining space */}
-      <div className="flex-1 min-h-0 bg-zinc-950/30 rounded-2xl border border-white/5 p-4 overflow-y-auto custom-scrollbar">
+      <div className="flex-1 min-h-0 bg-zinc-950/30 rounded-2xl border border-white/15 p-8 overflow-y-auto custom-scrollbar">
         <FolderTreeComponent
           folders={folders}
           onAddRoot={addRootFolder}

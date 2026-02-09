@@ -114,11 +114,11 @@ export function FolderTree({
   return (
     <div className="space-y-4">
       {/* Navigation Header */}
-      <div className="flex flex-col gap-4 border-b border-white/5 pb-4">
+      <div className="flex flex-col gap-4 border-b border-white/10 pb-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-6">
             <div className="flex items-center gap-3 shrink-0">
-              <div className="p-2 rounded-xl bg-primary/10 border border-primary/20">
+              <div className="p-2 rounded-xl bg-primary/10 border border-white/20">
                 <LayoutTemplate className="h-4 w-4 text-primary" />
               </div>
               <div className="hidden sm:block">
@@ -199,12 +199,12 @@ export function FolderTree({
             <span
               className={cn(
                 "text-[10px] font-black uppercase tracking-widest transition-colors",
-                currentFolders.length >= 10 ? "text-red-500" : "text-white/20",
+                currentFolders.length >= 10 ? "text-red-500" : "text-white",
               )}
             >
               {currentFolders.length} / 10
             </span>
-            <span className="text-[8px] font-bold text-white/10 uppercase tracking-[0.2em]">
+            <span className="text-[8px] font-bold text-white/50 uppercase tracking-[0.2em]">
               Directory Limit
             </span>
           </div>

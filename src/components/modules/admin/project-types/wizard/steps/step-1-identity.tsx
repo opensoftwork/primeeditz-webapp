@@ -230,7 +230,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                className="bg-white/5 border-white/10 text-white h-20 rounded-xl focus:ring-primary/20 font-bold resize-none"
+                className="bg-white/5 border-white/10 text-white h-30 rounded-xl focus:ring-primary/20 font-bold resize-none"
                 placeholder="Briefly describe this project type..."
               />
             </div>
@@ -321,7 +321,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
                 <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
                   Status
                 </Label>
-                <div className="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/5 h-10">
+                <div className="flex items-center justify-between p-3 rounded-xl bg-white/3 border border-white/20 h-10">
                   <div className="flex items-center gap-3">
                     <div
                       className={`h-2 w-2 rounded-full ${field.state.value ? "bg-emerald-500 animate-pulse" : "bg-zinc-500"}`}

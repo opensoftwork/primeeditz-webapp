@@ -50,7 +50,7 @@ export function Step3Review() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
         {/* Project Type Summary Card */}
-        <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/50">
+        <Card className="bg-zinc-900/40 border-white/15 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/50 p-0">
           <CardHeader className="flex flex-row items-center justify-between p-8 border-b border-white/5 bg-white/3">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
@@ -76,7 +76,7 @@ export function Step3Review() {
               Edit
             </Button>
           </CardHeader>
-          <CardContent className="p-8 space-y-8">
+          <CardContent className="px-10 pb-5 space-y-8">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
               <SummaryField label="Type Name" value={step1Data?.name || "—"} />
               <SummaryField label="Category" value={categoryName} />
@@ -129,7 +129,7 @@ export function Step3Review() {
         </Card>
 
         {/* Folder Structure Summary Card */}
-        <Card className="bg-zinc-900/40 border-white/5 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/50">
+        <Card className="bg-zinc-900/40 border-white/15 rounded-[32px] overflow-hidden glass-subtle shadow-2xl shadow-black/50 p-0">
           <CardHeader className="flex flex-row items-center justify-between p-8 border-b border-white/5 bg-white/3">
             <div className="flex items-center gap-4">
               <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
@@ -161,7 +161,7 @@ export function Step3Review() {
               Edit
             </Button>
           </CardHeader>
-          <CardContent className="p-8">
+          <CardContent className=" px-10 pb-5">
             <div className="space-y-1 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">
               {folders.length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-12 border border-dashed border-white/5 rounded-2xl bg-white/2">

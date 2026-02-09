@@ -220,11 +220,12 @@ function LoadingSkeleton() {
 export default function IndividualStudio() {
   const params = useParams();
   const router = useRouter();
-  const studioId = params.studioId as Id<"profiles">;
+  const clientId = params.clientId as Id<"profiles">;
 
-  const data = useQuery(api.admin.getStudioWithProjects, {
-    studioId: studioId,
-  });
+  const data = useQuery(
+    api.admin.getStudioWithProjects,
+    clientId ? { studioId: clientId } : ("skip" as any),
+  );
 
   if (data === undefined) {
     return <LoadingSkeleton />;
