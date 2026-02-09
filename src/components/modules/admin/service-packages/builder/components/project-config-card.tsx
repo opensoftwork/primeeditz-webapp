@@ -6,11 +6,7 @@ import { useQuery } from "convex/react";
 import { FolderTree, Layout, X, Database, Layers } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-} from "@/components/ui/field";
+import { Field, FieldError, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -55,7 +51,7 @@ export function ProjectConfigCard({
 
   // Filter project types based on selected category
   const filteredProjectTypes = projectTypes.filter(
-    (type) => !selectedCategoryId || type.categoryId === selectedCategoryId
+    (type) => !selectedCategoryId || type.categoryId === selectedCategoryId,
   );
 
   const folderTemplates =
@@ -78,8 +74,12 @@ export function ProjectConfigCard({
           type="button"
           variant="ghost"
           size="icon"
-          className="absolute top-4 right-4 h-8 w-8 rounded-full opacity-0 group-hover:opacity-100 hover:bg-red-500/20 hover:text-red-500 transition-all z-10"
-          onClick={onRemove}
+          className="absolute top-5 right-5 h-9 w-9 rounded-xl bg-zinc-950/50 backdrop-blur-md border border-white/10 opacity-40 group-hover:opacity-100 hover:bg-red-500 hover:text-white hover:border-red-500 transition-all z-50 shadow-xl"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onRemove();
+          }}
         >
           <X className="h-4 w-4" />
         </Button>
@@ -138,8 +138,14 @@ export function ProjectConfigCard({
                       onValueChange={(value) => {
                         field.handleChange(value);
                         // Reset dependent fields
-                        form.setFieldValue(`projectConfigs[${index}].projectTypeId`, "");
-                        form.setFieldValue(`projectConfigs[${index}].folderTemplateId`, "");
+                        form.setFieldValue(
+                          `projectConfigs[${index}].projectTypeId`,
+                          "",
+                        );
+                        form.setFieldValue(
+                          `projectConfigs[${index}].folderTemplateId`,
+                          "",
+                        );
                       }}
                     >
                       <SelectTrigger
@@ -203,7 +209,13 @@ export function ProjectConfigCard({
                         aria-invalid={hasError}
                         className="h-12 bg-black/20 border-white/5 rounded-2xl font-bold text-white text-base focus:border-primary/50 focus:bg-black/40 focus:ring-4 focus:ring-primary/5 transition-all outline-none disabled:opacity-50"
                       >
-                        <SelectValue placeholder={selectedCategoryId ? "Select type..." : "Select category first"} />
+                        <SelectValue
+                          placeholder={
+                            selectedCategoryId
+                              ? "Select type..."
+                              : "Select category first"
+                          }
+                        />
                       </SelectTrigger>
                       <SelectContent className="bg-zinc-950 border-white/10 rounded-2xl p-2">
                         {filteredProjectTypes.map((type) => (
