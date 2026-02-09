@@ -10,7 +10,7 @@ import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { companySchema } from "../schema";
+import { identitySchema, IdentityFormData } from "../schema";
 
 export function IdentitySection({ initialData }: { initialData: any }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,9 +20,9 @@ export function IdentitySection({ initialData }: { initialData: any }) {
     defaultValues: {
       name: initialData?.name ?? "",
       tagline: initialData?.tagline ?? "",
-    },
+    } as IdentityFormData,
     validators: {
-      onSubmit: companySchema.pick({ name: true, tagline: true }) as any,
+      onSubmit: identitySchema,
     },
     onSubmit: async ({ value }) => {
       try {

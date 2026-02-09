@@ -10,7 +10,7 @@ import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { companySchema } from "../schema";
+import { bankSchema, BankFormData } from "../schema";
 
 export function BankSection({ initialData }: { initialData: any }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -25,9 +25,9 @@ export function BankSection({ initialData }: { initialData: any }) {
         ifscCode: initialData?.bankDetails?.ifscCode ?? "",
         branch: initialData?.bankDetails?.branch ?? "",
       },
-    },
+    } as BankFormData,
     validators: {
-      onSubmit: companySchema.pick({ bankDetails: true }) as any,
+      onSubmit: bankSchema,
     },
     onSubmit: async ({ value }) => {
       try {

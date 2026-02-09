@@ -62,15 +62,19 @@ export function AssetStage({
       {/* Background Texture/Ambient Light (mainly for images/videos) */}
       {!isPDF && (
         <div className="absolute inset-x-0 inset-y-0 z-0 overflow-hidden pointer-events-none">
-          <div
-            className="absolute inset-0 opacity-15 blur-[60px] scale-150 transition-all duration-1000"
-            style={{
-              backgroundImage: `url(${asset?.url})`,
-              backgroundPosition: "center",
-              backgroundSize: "cover",
-              willChange: "background-image",
-            }}
-          />
+          {!isAudio && asset?.url ? (
+            <div
+              className="absolute inset-0 opacity-15 blur-[60px] scale-150 transition-all duration-1000"
+              style={{
+                backgroundImage: `url(${asset?.url})`,
+                backgroundPosition: "center",
+                backgroundSize: "cover",
+                willChange: "background-image",
+              }}
+            />
+          ) : (
+            <div className="absolute inset-0 bg-linear-to-b from-indigo-500/10 via-purple-500/5 to-transparent opacity-30" />
+          )}
           <div className="absolute inset-0 bg-black/80" />
         </div>
       )}
@@ -155,6 +159,7 @@ export function AssetStage({
             {isAudio ? (
               <AudioVisualizer
                 src={asset.url}
+                fileName={asset.fileName}
                 onLoadedData={() => onSetIsLoading(false)}
                 onError={() => {
                   onSetHasError(true);

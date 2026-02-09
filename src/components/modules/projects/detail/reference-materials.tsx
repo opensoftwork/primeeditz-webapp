@@ -84,6 +84,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
         (f) =>
           f.fileType.startsWith("image/") ||
           f.fileType.startsWith("video/") ||
+          f.fileType.startsWith("audio/") ||
           f.fileType === "application/pdf",
       )
       .map((file) => ({
@@ -107,6 +108,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
     const isSliderType =
       file.type.startsWith("image/") ||
       file.type.startsWith("video/") ||
+      file.type.startsWith("audio/") ||
       file.type === "application/pdf";
 
     if (isSliderType) {

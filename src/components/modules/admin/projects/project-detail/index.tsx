@@ -104,7 +104,14 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
 
   const assetsForSlider = useMemo(() => {
     return vaultFiles
-      .filter((f) => (f.type.startsWith("image/") || f.type.startsWith("video/") || f.type === "application/pdf") && f.url)
+      .filter(
+        (f) =>
+          (f.type.startsWith("image/") ||
+            f.type.startsWith("video/") ||
+            f.type.startsWith("audio/") ||
+            f.type === "application/pdf") &&
+          f.url,
+      )
       .map((f) => ({
         url: f.url!,
         fileName: f.name,
@@ -120,12 +127,16 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
       return;
     }
 
-    const isSliderType = file.type.startsWith("image/") || 
-                        file.type.startsWith("video/") || 
-                        file.type === "application/pdf";
+    const isSliderType =
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/") ||
+      file.type.startsWith("audio/") ||
+      file.type === "application/pdf";
 
     if (isSliderType) {
-      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
+      const index = assetsForSlider.findIndex(
+        (asset) => asset.fileId === fileId,
+      );
       if (index !== -1) {
         setSelectedAssetIndex(index);
       }

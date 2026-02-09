@@ -10,7 +10,7 @@ import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { companySchema } from "../schema";
+import { billingSchema, BillingFormData } from "../schema";
 
 export function BillingSection({ initialData }: { initialData: any }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -20,9 +20,9 @@ export function BillingSection({ initialData }: { initialData: any }) {
     defaultValues: {
       gstNumber: initialData?.gstNumber ?? "",
       panNumber: initialData?.panNumber ?? "",
-    },
+    } as BillingFormData,
     validators: {
-      onSubmit: companySchema.pick({ gstNumber: true, panNumber: true }) as any,
+      onSubmit: billingSchema,
     },
     onSubmit: async ({ value }) => {
       try {

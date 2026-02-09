@@ -137,17 +137,7 @@ function VideoPlayer({ url, fileName }: { url: string; fileName: string }) {
 function AudioPlayer({ url, fileName }: { url: string; fileName: string }) {
   return (
     <div className="flex flex-col items-center justify-center gap-10 h-full p-12">
-      <div className="w-full max-w-2xl aspect-video md:aspect-21/9 shrink-0">
-        <AudioVisualizer src={url} />
-      </div>
-      <div className="text-center space-y-2">
-        <p className="text-sm font-black text-white uppercase tracking-widest truncate max-w-[400px]">
-          {fileName}
-        </p>
-        <p className="text-[10px] font-bold text-white/20 uppercase tracking-[0.3em]">
-          Audio Artifact Preview
-        </p>
-      </div>
+      <AudioVisualizer src={url} fileName={fileName} />
     </div>
   );
 }

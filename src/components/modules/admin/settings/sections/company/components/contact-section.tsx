@@ -11,7 +11,7 @@ import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { companySchema } from "../schema";
+import { contactSchema, ContactFormData } from "../schema";
 
 export function ContactSection({ initialData }: { initialData: any }) {
   const [isEditing, setIsEditing] = useState(false);
@@ -23,14 +23,9 @@ export function ContactSection({ initialData }: { initialData: any }) {
       phone: initialData?.phone ?? "",
       email: initialData?.email ?? "",
       website: initialData?.website ?? "",
-    },
+    } as ContactFormData,
     validators: {
-      onSubmit: companySchema.pick({
-        address: true,
-        phone: true,
-        email: true,
-        website: true,
-      }) as any,
+      onSubmit: contactSchema,
     },
     onSubmit: async ({ value }) => {
       try {
