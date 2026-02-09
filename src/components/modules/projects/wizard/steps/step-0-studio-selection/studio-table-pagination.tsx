@@ -238,7 +238,7 @@ export function StudioTablePagination({
 /**
  * Hook to manage pagination state
  */
-export function usePagination(totalItems: number, initialPageSize = 10) {
+export function usePagination(totalItems: number, initialPageSize = 15) {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(initialPageSize);
 

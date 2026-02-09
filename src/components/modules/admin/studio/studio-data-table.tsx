@@ -29,7 +29,7 @@ interface StudioDataTableProps {
 export function StudioDataTable({
   onSelect,
   selectedId,
-  pageSize: initialPageSize = 10,
+  pageSize: initialPageSize = 15,
   onlyWithProjects = false,
 }: StudioDataTableProps) {
   const [search, setSearch] = useState("");

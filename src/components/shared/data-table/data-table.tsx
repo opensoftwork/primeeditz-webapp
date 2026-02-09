@@ -138,13 +138,13 @@ export function DataTable<TData, TValue>({
       columnFilters,
       pagination,
     },
+    onPaginationChange: setPagination,
     enableRowSelection: true,
     manualPagination: !!serverPagination,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange: setColumnVisibility,
-    onPaginationChange: setPagination,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     getSortedRowModel: getSortedRowModel(),
@@ -307,7 +307,7 @@ export function DataTable<TData, TValue>({
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
+                      <TableCell colSpan={table.getVisibleFlatColumns().length} className="p-0">
                         <EmptyState
                           icon={EmptyIcon}
                           title={emptyTitle}
