@@ -12,7 +12,7 @@ export type EnrichedQuotation = Doc<"quotations"> & {
 /**
  * Get enriched quotations for admin listing.
  */
-export const getAdminQuotations = query({
+/* export const getAdminQuotations = query({
   args: {
     status: v.optional(quotationStatusValidator),
     studioId: v.optional(v.id("profiles")),
@@ -63,7 +63,7 @@ export const getAdminQuotations = query({
       projectName: q.projectId ? projectMap.get(q.projectId) : undefined,
     }));
   },
-});
+}); */
 
 /**
  * DEV ONLY: Delete all quotations for testing.

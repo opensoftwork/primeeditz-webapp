@@ -27,7 +27,7 @@ export default function Settings() {
   const menuItems = [
     { id: "general", label: "General", icon: SettingsIcon },
     { id: "company", label: "Company", icon: Building2 },
-    { id: "quotation", label: "Quotations", icon: FileText },
+    // { id: "quotation", label: "Quotations", icon: FileText },
     { id: "notifications", label: "Notifications", icon: Bell },
     { id: "security", label: "Security", icon: ShieldCheck },
   ];
@@ -106,7 +106,7 @@ export default function Settings() {
         <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
           {activeSection === "general" && <AppSettings />}
           {activeSection === "company" && <CompanySettings />}
-          {activeSection === "quotation" && <QuotationConfig />}
+          {/* {activeSection === "quotation" && <QuotationConfig />} */}
 
           {["notifications", "security"].includes(activeSection) && (
             <div className="flex flex-col items-center justify-center min-h-[400px] border border-dashed border-white/10 rounded-3xl bg-white/5">

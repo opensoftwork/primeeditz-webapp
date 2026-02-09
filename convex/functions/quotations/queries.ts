@@ -5,6 +5,7 @@ import { type QueryCtx, query } from "../../_generated/server";
 import { adminQuery, studioQuery } from "../../lib/customFunctions";
 import { quotationStatusValidator } from "../../schema";
 
+/*
 /**
  * Get all quotations with optional filters
  */
@@ -889,3 +890,4 @@ export const getMyDraft = studioQuery({
       .first();
   },
 });
+*/

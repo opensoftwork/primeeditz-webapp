@@ -15,6 +15,7 @@ import { getActorForState, getPhaseForState } from "../../lib/statusMachine";
 import type { ActionState } from "../../schema";
 import { spawnProjectsFromQuotation } from "../projects/spawning";
 
+/*
 /**
  * Line item input validator
  */
@@ -983,3 +984,4 @@ export const deleteDraft = studioMutation({
     await ctx.db.delete(draftId);
   },
 });
+
