@@ -39,7 +39,7 @@ export function StudioTablePagination({
   pagination,
   onPageChange,
   onPageSizeChange,
-  pageSizeOptions = [5, 10, 20, 50],
+  pageSizeOptions = [5, 10, 15, 20, 50],
   className,
   itemName = "studios",
 }: StudioTablePaginationProps) {

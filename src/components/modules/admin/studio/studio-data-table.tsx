@@ -210,7 +210,7 @@ export function StudioDataTable({
         pagination={paginationInfo}
         onPageChange={handlePageChange}
         onPageSizeChange={handlePageSizeChange}
-        pageSizeOptions={[5, 10, 20]}
+        pageSizeOptions={[5, 10, 15, 20]}
         itemName="studios"
       />
     </div>

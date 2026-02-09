@@ -84,7 +84,7 @@ export function DataTablePagination<TData>({
                   side="top"
                   className="bg-zinc-950 border-white/10"
                 >
-                  {[10, 15, 20, 25, 50].map((size) => (
+                  {[5, 10, 15, 20, 25, 50].map((size) => (
                     <SelectItem
                       key={size}
                       value={`${size}`}
@@ -159,7 +159,7 @@ export function DataTablePagination<TData>({
               <SelectValue />
             </SelectTrigger>
             <SelectContent side="top" className="bg-zinc-950 border-white/10">
-              {[10, 15, 20, 25, 50].map((size) => (
+              {[5, 10, 15, 20, 25, 50].map((size) => (
                 <SelectItem
                   key={size}
                   value={`${size}`}
