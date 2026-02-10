@@ -12,7 +12,7 @@ import {
   useReactTable,
 } from "@tanstack/react-table";
 import { useMutation, useQuery } from "convex/react";
-import { Briefcase, ChevronLeft, Filter, Search, Users } from "lucide-react";
+import { ArrowLeft, Briefcase, Filter, Search, Users } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
@@ -112,26 +112,25 @@ export default function AssignTeamContainer({
     <div className="flex-1 p-8 md:p-12 space-y-10 min-h-screen pb-32">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-2">
+        <div className="flex items-center gap-5">
           <Button
-            variant="ghost"
+            variant="outline"
+            size="icon"
+            className="rounded-xl shrink-0"
             onClick={() => router.back()}
-            className="p-0 hover:bg-transparent text-white/40 hover:text-white flex items-center gap-2 group mb-2"
           >
-            <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Back to Project
-            </span>
+            <ArrowLeft className="h-4 w-4" />
           </Button>
+
           <div className="flex items-center gap-4">
             <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
               <Users className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-3xl font-black uppercase tracking-tight text-white">
+              <h1 className="text-3xl font-black uppercase tracking-tight text-white leading-none">
                 Assign Command Squad
               </h1>
-              <p className="text-xs font-bold text-white/40 uppercase tracking-[0.2em] mt-1">
+              <p className="text-[10px] font-black text-white/40 uppercase tracking-[0.2em] mt-2">
                 Project: {project.code} — {project.eventName}
               </p>
             </div>

@@ -32,7 +32,8 @@ export function FolderListingView({
   // Queries
   const project = useQuery(
     isStaff
-      ? api.admin.getAdminProject
+      ? // @ts-ignore
+        api.admin.getAdminProject
       : api.functions.projects.queries.getProject,
     {
       projectId: projectId as Id<"projects">,

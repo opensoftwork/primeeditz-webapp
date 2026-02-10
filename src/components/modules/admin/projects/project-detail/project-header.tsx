@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -30,12 +30,12 @@ export function ProjectHeader({
         animate={{ opacity: 1, x: 0 }}
       >
         <Button
-          variant="ghost"
+          variant="outline"
+          size="icon"
+          className="mb-4 rounded-xl border-white/10 hover:bg-white/5"
           onClick={() => router.back()}
-          className="mb-4 -ml-4 hover:bg-white/5 gap-2 group"
         >
-          <ChevronLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-          BACK TO PROJECTS
+          <ArrowLeft className="h-4 w-4" />
         </Button>
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">

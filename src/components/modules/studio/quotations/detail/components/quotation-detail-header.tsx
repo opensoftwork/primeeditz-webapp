@@ -27,11 +27,11 @@ export function QuotationDetailHeader({
         <Button
           variant="ghost"
           size="sm"
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.back()}
           className="h-9 px-3 -ml-3 text-white/40 hover:text-white font-bold text-xs rounded-lg transition-colors group"
         >
           <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-          Back to Dashboard
+          Back
         </Button>
 
         <div className="flex items-center gap-4">

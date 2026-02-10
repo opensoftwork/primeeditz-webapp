@@ -35,9 +35,9 @@ export function DeliverableHeader({
     <div className="flex items-center justify-between">
       <div className="flex items-center gap-4">
         <Button
-          variant="ghost"
+          variant="outline"
           size="icon"
-          className="rounded-xl h-10 w-10 border border-white/5 hover:bg-white/5"
+          className="rounded-xl h-10 w-10 border-white/10 hover:bg-white/5"
           onClick={onBack}
         >
           <ArrowLeft className="h-5 w-5 text-white/60" />

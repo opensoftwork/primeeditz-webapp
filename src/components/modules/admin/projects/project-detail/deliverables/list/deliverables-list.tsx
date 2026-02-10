@@ -3,17 +3,17 @@
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { 
-  FileIcon, 
-  Search, 
-  Filter, 
-  ArrowLeft, 
-  CheckCircle, 
-  Clock, 
+import {
+  FileIcon,
+  Search,
+  Filter,
+  ArrowLeft,
+  CheckCircle,
+  Clock,
   XCircle,
   ShieldCheck,
   Eye,
-  Send
+  Send,
 } from "lucide-react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -46,15 +46,18 @@ export function DeliverablesList() {
 
   const deliverables = useQuery(
     api.functions.deliverables.queries.getProjectDeliverables,
-    { projectId }
+    { projectId },
   );
 
-  const sendToStudioMutation = useMutation(api.functions.deliverables.mutations.sendToStudio);
-// @ts-ignore
+  const sendToStudioMutation = useMutation(
+    api.functions.deliverables.mutations.sendToStudio,
+  );
+  // @ts-ignore
   const project = useQuery(api.admin.getAdminProject, { projectId });
 
   useEffect(() => {
-    const label = project?.eventName || project?.projectTypeName || project?.code;
+    const label =
+      project?.eventName || project?.projectTypeName || project?.code;
     if (label) {
       setOverride(projectId, label);
     }
@@ -93,7 +96,8 @@ export function DeliverablesList() {
                 {item.name}
               </div>
               <div className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                v{item.version} • {(item.sizeBytes / (1024 * 1024)).toFixed(2)} MB
+                v{item.version} • {(item.sizeBytes / (1024 * 1024)).toFixed(2)}{" "}
+                MB
               </div>
             </div>
           </div>
@@ -111,14 +115,16 @@ export function DeliverablesList() {
               "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
               status === "approved"
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : status === "revision_requested" || status === "revision_needed"
-                ? "bg-red-500/10 border-red-500/20 text-red-400"
-                : "bg-amber-500/10 border-amber-500/20 text-amber-400"
+                : status === "revision_requested" ||
+                    status === "revision_needed"
+                  ? "bg-red-500/10 border-red-500/20 text-red-400"
+                  : "bg-amber-500/10 border-amber-500/20 text-amber-400",
             )}
           >
             {status === "approved" ? (
               <CheckCircle className="h-3 w-3" />
-            ) : status === "revision_requested" || status === "revision_needed" ? (
+            ) : status === "revision_requested" ||
+              status === "revision_needed" ? (
               <XCircle className="h-3 w-3" />
             ) : (
               <Clock className="h-3 w-3" />
@@ -156,23 +162,25 @@ export function DeliverablesList() {
             className="h-9 w-9 rounded-xl border border-white/5 hover:bg-white/5 hover:text-indigo-400 hover:border-indigo-500/30"
             asChild
           >
-            <Link href={`/projects/${projectId}/deliverables/${row.original._id}`}>
+            <Link
+              href={`/projects/${projectId}/deliverables/${row.original._id}`}
+            >
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
-          {row.original.status === "approved" && 
-           project?.actionState !== "awaiting_review" && 
-           project?.actionState !== "review_approved" && 
-           project?.phase !== "delivery" && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-9 w-9 rounded-xl border border-white/5 hover:bg-white/5 hover:text-emerald-400 hover:border-emerald-500/30"
-              onClick={() => handleSendToStudio(row.original._id)}
-            >
-              <Send className="h-4 w-4" />
-            </Button>
-          )}
+          {row.original.status === "approved" &&
+            project?.actionState !== "awaiting_review" &&
+            project?.actionState !== "review_approved" &&
+            project?.phase !== "delivery" && (
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-9 w-9 rounded-xl border border-white/5 hover:bg-white/5 hover:text-emerald-400 hover:border-emerald-500/30"
+                onClick={() => handleSendToStudio(row.original._id)}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            )}
         </div>
       ),
     },
@@ -199,20 +207,22 @@ export function DeliverablesList() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="space-y-4">
           <Button
-            variant="ghost"
-            size="sm"
-            className="rounded-xl h-8 px-2 -ml-2 text-white/40 hover:text-white hover:bg-white/5 gap-2"
-            onClick={() => router.push(`/projects/${projectId}`)}
+            variant="outline"
+            size="icon"
+            className="rounded-xl h-10 w-10 border-white/10 hover:bg-white/5 shadow-lg"
+            onClick={() => router.back()}
           >
             <ArrowLeft className="h-4 w-4" />
-            BACK TO PROJECT
           </Button>
           <div>
             <div className="flex items-center gap-3 mb-1">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
                 QUALITY CONTROL PIPELINE
               </span>
-              <Badge variant="outline" className="rounded-md border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase px-2 py-0">
+              <Badge
+                variant="outline"
+                className="rounded-md border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase px-2 py-0"
+              >
                 {project?.code}
               </Badge>
             </div>
@@ -220,7 +230,8 @@ export function DeliverablesList() {
               Deliverables <span className="text-white/20">Vault</span>
             </h1>
             <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
-              Reviewing {deliverables.length} finalized assets for {project?.eventName}
+              Reviewing {deliverables.length} finalized assets for{" "}
+              {project?.eventName}
             </p>
           </div>
         </div>
@@ -228,16 +239,24 @@ export function DeliverablesList() {
         <div className="flex items-center gap-3">
           <div className="h-12 px-6 rounded-2xl bg-white/5 border border-white/5 flex items-center gap-4">
             <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Storage Used</span>
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+                Storage Used
+              </span>
               <span className="text-xs font-bold text-white">
-                {(deliverables.reduce((acc, d) => acc + d.sizeBytes, 0) / (1024 * 1024)).toFixed(1)} MB
+                {(
+                  deliverables.reduce((acc, d) => acc + d.sizeBytes, 0) /
+                  (1024 * 1024)
+                ).toFixed(1)}{" "}
+                MB
               </span>
             </div>
             <div className="h-6 w-px bg-white/10" />
             <div className="flex flex-col items-end">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">Approved</span>
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest">
+                Approved
+              </span>
               <span className="text-xs font-bold text-emerald-400">
-                {deliverables.filter(d => d.status === "approved").length}
+                {deliverables.filter((d) => d.status === "approved").length}
               </span>
             </div>
           </div>
@@ -251,21 +270,31 @@ export function DeliverablesList() {
             <ShieldCheck className="h-5 w-5 text-indigo-400" />
           </div>
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-1">Pending QC</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-300 mb-1">
+              Pending QC
+            </h3>
             <p className="text-2xl font-black text-white">
-              {deliverables.filter(d => d.status === "pending_qc").length}
+              {deliverables.filter((d) => d.status === "pending_qc").length}
             </p>
           </div>
         </div>
-        
+
         <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
           <div className="h-10 w-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
             <Clock className="h-5 w-5 text-amber-500" />
           </div>
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-1">Revisions</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-1">
+              Revisions
+            </h3>
             <p className="text-2xl font-black text-white">
-              {deliverables.filter(d => d.status === "revision_requested" || d.status === "revision_needed").length}
+              {
+                deliverables.filter(
+                  (d) =>
+                    d.status === "revision_requested" ||
+                    d.status === "revision_needed",
+                ).length
+              }
             </p>
           </div>
         </div>
@@ -275,9 +304,11 @@ export function DeliverablesList() {
             <CheckCircle className="h-5 w-5 text-emerald-400" />
           </div>
           <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-1">Ready for Delivery</h3>
+            <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-1">
+              Ready for Delivery
+            </h3>
             <p className="text-2xl font-black text-white">
-              {deliverables.filter(d => d.status === "approved").length}
+              {deliverables.filter((d) => d.status === "approved").length}
             </p>
           </div>
         </div>

@@ -73,7 +73,7 @@ export function DetailHeader({
         <Button
           variant="outline"
           size="icon"
-          onClick={() => router.push("/quotations")}
+          onClick={() => router.back()}
           className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
         >
           <ArrowLeft className="h-5 w-5" />

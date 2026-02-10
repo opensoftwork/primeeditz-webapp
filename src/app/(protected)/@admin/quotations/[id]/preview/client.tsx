@@ -25,6 +25,7 @@ export function QuotationPreviewClient({
 
   // Fetch quotation with sections
   const data = useQuery(
+    // @ts-ignore
     api.functions.quotations.queries.getQuotationWithSections,
     { quotationId: quotationId as Id<"quotations"> },
   );
@@ -91,6 +92,8 @@ export function QuotationPreviewClient({
       sections={sections}
       projects={projects}
       companyInfo={companyInfo || undefined}
+      studioName={quotation.studioName}
+      projectName={quotation.projectName}
       onBack={() => router.back()}
     />
   );
