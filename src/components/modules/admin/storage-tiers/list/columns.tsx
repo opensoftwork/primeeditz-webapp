@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { HardDrive, IndianRupee, Pencil, Power, Trash2 } from "lucide-react";
+import { HardDrive, Pencil, Power, Trash2 } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -12,13 +12,6 @@ function formatStorage(sizeGB: number): string {
     return `${(sizeGB / 1000).toFixed(sizeGB % 1000 === 0 ? 0 : 1)} TB`;
   }
   return `${sizeGB} GB`;
-}
-
-function formatPrice(priceINR: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(priceINR);
 }
 
 export function getColumns(
@@ -54,18 +47,7 @@ export function getColumns(
         </span>
       ),
     },
-    {
-      accessorKey: "priceINR",
-      header: ({ column }) => (
-        <DataTableColumnHeader column={column} title="Price" />
-      ),
-      cell: ({ row }) => (
-        <div className="flex items-center gap-1 text-primary font-black">
-          <IndianRupee className="h-3.5 w-3.5 opacity-60" />
-          <span>{formatPrice(row.getValue("priceINR"))}</span>
-        </div>
-      ),
-    },
+
     {
       accessorKey: "isActive",
       header: ({ column }) => (

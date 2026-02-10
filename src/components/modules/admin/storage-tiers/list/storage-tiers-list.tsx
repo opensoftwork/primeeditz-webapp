@@ -103,7 +103,6 @@ export function StorageTiersList() {
           id: editingTier._id as Id<"storageTiers">,
           name: values.name,
           sizeGB: values.sizeGB,
-          priceINR: values.priceINR,
           isActive: values.isActive,
         });
         toast.success("Storage tier updated successfully");
@@ -111,7 +110,6 @@ export function StorageTiersList() {
         await createStorageTier({
           name: values.name,
           sizeGB: values.sizeGB,
-          priceINR: values.priceINR,
           isActive: values.isActive,
         });
         toast.success("New storage tier created");
@@ -192,7 +190,7 @@ export function StorageTiersList() {
         columns={columns}
         data={data}
         emptyTitle="No storage tiers defined"
-        emptyDescription="Set up your storage tiers with capacity and pricing to get started."
+        emptyDescription="Set up your storage tiers with capacity to get started."
         renderCard={(tier) => (
           <StorageTierCard
             key={tier._id}

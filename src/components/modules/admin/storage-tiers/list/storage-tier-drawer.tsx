@@ -1,13 +1,7 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import {
-  ArrowRight,
-  Database,
-  HardDrive,
-  IndianRupee,
-  Info,
-} from "lucide-react";
+import { ArrowRight, Database, HardDrive, Info } from "lucide-react";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,7 +19,6 @@ import type { StorageTier } from "./types";
 export interface StorageTierFormValues {
   name: string;
   sizeGB: number;
-  priceINR: number;
   isActive: boolean;
 }
 
@@ -46,14 +39,12 @@ export function StorageTierDrawer({
     defaultValues: {
       name: initialData?.name ?? "",
       sizeGB: initialData?.sizeGB ?? 0,
-      priceINR: initialData?.priceINR ?? 0,
       isActive: initialData?.isActive ?? true,
     },
     onSubmit: async ({ value }) => {
       const submissionValue = {
         ...value,
         sizeGB: Number(value.sizeGB) || 0,
-        priceINR: Number(value.priceINR) || 0,
       };
       await onSave(submissionValue as StorageTierFormValues);
     },
@@ -109,67 +100,33 @@ export function StorageTierDrawer({
               )}
             </form.Field>
 
-            <div className="grid grid-cols-2 gap-6">
-              {/* Size in GB */}
-              <form.Field name="sizeGB">
-                {(field) => (
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      Capacity (GB)
-                    </Label>
-                    <div className="relative">
-                      <HardDrive className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
-                      <Input
-                        type="number"
-                        value={field.state.value}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const cleanValue = val.replace(/^0+(?=\d)/, "");
-                          field.handleChange(
-                            (cleanValue === ""
-                              ? ""
-                              : Number(cleanValue)) as any,
-                          );
-                        }}
-                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
-                        placeholder="100"
-                      />
-                    </div>
+            {/* Size in GB */}
+            <form.Field name="sizeGB">
+              {(field) => (
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                    Capacity (GB)
+                  </Label>
+                  <div className="relative">
+                    <HardDrive className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
+                    <Input
+                      type="number"
+                      value={field.state.value}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const cleanValue = val.replace(/^0+(?=\d)/, "");
+                        field.handleChange(
+                          (cleanValue === "" ? "" : Number(cleanValue)) as any,
+                        );
+                      }}
+                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
+                      placeholder="100"
+                    />
                   </div>
-                )}
-              </form.Field>
-
-              {/* Price in INR */}
-              <form.Field name="priceINR">
-                {(field) => (
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      Price (INR)
-                    </Label>
-                    <div className="relative">
-                      <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
-                      <Input
-                        type="number"
-                        value={field.state.value}
-                        onFocus={(e) => e.target.select()}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          const cleanValue = val.replace(/^0+(?=\d)/, "");
-                          field.handleChange(
-                            (cleanValue === ""
-                              ? ""
-                              : Number(cleanValue)) as any,
-                          );
-                        }}
-                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
-                        placeholder="999"
-                      />
-                    </div>
-                  </div>
-                )}
-              </form.Field>
-            </div>
+                </div>
+              )}
+            </form.Field>
 
             {/* Active Status */}
             <form.Field name="isActive">

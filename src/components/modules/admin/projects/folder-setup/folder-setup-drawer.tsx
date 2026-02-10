@@ -29,14 +29,18 @@ import { TemplateSelector } from "./template-selector";
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
   name: string;
-  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
+  folders: {
+    name: string;
+    path: string;
+    description?: string;
+    isRequired?: boolean;
+  }[];
 }
 
 interface StorageTier {
   _id: Id<"storageTiers">;
   name: string;
   sizeGB: number;
-  priceINR: number;
 }
 
 interface QuotationOption {

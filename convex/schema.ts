@@ -364,7 +364,6 @@ export default defineSchema({
   storageTiers: defineTable({
     name: v.string(),
     sizeGB: v.number(),
-    priceINR: v.number(),
     isActive: v.boolean(),
     isDefault: v.optional(v.boolean()),
   }),

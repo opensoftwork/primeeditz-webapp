@@ -48,7 +48,7 @@ export function StorageSelector({
                 <p
                   className={cn(
                     "text-xs font-black uppercase tracking-tight",
-                    currentValue === "" ? "text-white" : "text-white/40"
+                    currentValue === "" ? "text-white" : "text-white/40",
                   )}
                 >
                   No Default Tier
@@ -97,7 +97,7 @@ export function StorageSelector({
                     <p
                       className={cn(
                         "text-xs font-black uppercase tracking-tight",
-                        isSelected ? "text-white" : "text-white/60"
+                        isSelected ? "text-white" : "text-white/60",
                       )}
                     >
                       {tier.name}
@@ -107,19 +107,11 @@ export function StorageSelector({
                     </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className={cn(
-                    "text-sm font-black",
-                    isSelected ? "text-white" : "text-white/80"
-                  )}>
-                    ₹{tier.priceINR}
-                  </p>
-                  {isSelected && (
-                    <div className="mt-1 h-6 w-6 rounded-full bg-primary flex items-center justify-center ml-auto shadow-lg shadow-primary/20">
-                      <Check className="h-3.5 w-3.5 text-primary-foreground font-black" />
-                    </div>
-                  )}
-                </div>
+                {isSelected && (
+                  <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center ml-auto shadow-lg shadow-primary/20">
+                    <Check className="h-3.5 w-3.5 text-primary-foreground font-black" />
+                  </div>
+                )}
               </div>
             </button>
           );

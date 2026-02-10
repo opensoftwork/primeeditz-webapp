@@ -8,7 +8,6 @@ export const createStorageTier = adminMutation({
   args: {
     name: v.string(),
     sizeGB: v.number(),
-    priceINR: v.number(),
     isActive: v.boolean(),
     isDefault: v.optional(v.boolean()),
   },
@@ -17,14 +16,10 @@ export const createStorageTier = adminMutation({
     if (args.sizeGB <= 0) {
       throw new Error("Storage capacity must be greater than 0");
     }
-    if (args.priceINR < 0) {
-      throw new Error("Price cannot be negative");
-    }
 
     const tierId = await ctx.db.insert("storageTiers", {
       name: args.name,
       sizeGB: args.sizeGB,
-      priceINR: args.priceINR,
       isActive: args.isActive,
       isDefault: args.isDefault,
     });
@@ -41,7 +36,6 @@ export const updateStorageTier = adminMutation({
     id: v.id("storageTiers"),
     name: v.optional(v.string()),
     sizeGB: v.optional(v.number()),
-    priceINR: v.optional(v.number()),
     isActive: v.optional(v.boolean()),
     isDefault: v.optional(v.boolean()),
   },
@@ -51,9 +45,6 @@ export const updateStorageTier = adminMutation({
     // Validate if sizeGB is being updated
     if (updates.sizeGB !== undefined && updates.sizeGB <= 0) {
       throw new Error("Storage capacity must be greater than 0");
-    }
-    if (updates.priceINR !== undefined && updates.priceINR < 0) {
-      throw new Error("Price cannot be negative");
     }
 
     // If changing capacity, check if tier is in use

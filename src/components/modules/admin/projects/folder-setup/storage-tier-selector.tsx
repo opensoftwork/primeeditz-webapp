@@ -3,20 +3,13 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
-import {
-  AlertTriangle,
-  Check,
-  HardDrive,
-  IndianRupee,
-  Loader2,
-} from "lucide-react";
+import { AlertTriangle, Check, HardDrive, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface StorageTier {
   _id: Id<"storageTiers">;
   name: string;
   sizeGB: number;
-  priceINR: number;
 }
 
 interface StorageTierSelectorProps {
@@ -54,14 +47,6 @@ export function StorageTierSelector({
       </div>
     );
   }
-
-  const formatPrice = (price: number) => {
-    return new Intl.NumberFormat("en-IN", {
-      style: "currency",
-      currency: "INR",
-      maximumFractionDigits: 0,
-    }).format(price);
-  };
 
   return (
     <div className="space-y-2">
@@ -134,15 +119,6 @@ export function StorageTierSelector({
                       )}
                     </div>
                   </div>
-                </div>
-                <div
-                  className={cn(
-                    "flex items-center gap-1 font-bold",
-                    exceedsQuota ? "text-white/40" : "text-white/80",
-                  )}
-                >
-                  <IndianRupee className="h-3.5 w-3.5" />
-                  <span>{tier.priceINR.toLocaleString("en-IN")}</span>
                 </div>
               </div>
             </button>

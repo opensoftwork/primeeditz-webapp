@@ -12,6 +12,7 @@ import type * as admin from "../admin.js";
 import type * as auth from "../auth.js";
 import type * as crons from "../crons.js";
 import type * as employees from "../employees.js";
+import type * as functions_admin_clearAllData from "../functions/admin/clearAllData.js";
 import type * as functions_admin_dashboard from "../functions/admin/dashboard.js";
 import type * as functions_admin_employees from "../functions/admin/employees.js";
 import type * as functions_admin_maintenance from "../functions/admin/maintenance.js";
@@ -94,6 +95,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   crons: typeof crons;
   employees: typeof employees;
+  "functions/admin/clearAllData": typeof functions_admin_clearAllData;
   "functions/admin/dashboard": typeof functions_admin_dashboard;
   "functions/admin/employees": typeof functions_admin_employees;
   "functions/admin/maintenance": typeof functions_admin_maintenance;

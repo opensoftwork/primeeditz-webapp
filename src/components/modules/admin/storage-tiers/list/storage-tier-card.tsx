@@ -26,15 +26,6 @@ function formatStorage(sizeGB: number): string {
   return `${sizeGB} GB`;
 }
 
-function formatPrice(priceINR: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(priceINR);
-}
-
 export function StorageTierCard({
   tier,
   onEdit,
@@ -139,7 +130,7 @@ export function StorageTierCard({
               </div>
             </div>
             <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
-              Professional Capacity • {formatPrice(tier.priceINR)}
+              Professional Capacity
             </div>
           </div>
 

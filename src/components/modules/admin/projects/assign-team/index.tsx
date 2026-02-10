@@ -45,6 +45,7 @@ export default function AssignTeamContainer({
   const [isConfirming, setIsConfirming] = useState(false);
 
   // Queries
+  //@ts-ignore
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   });

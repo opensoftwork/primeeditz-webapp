@@ -55,8 +55,11 @@ export const getClientApprovedQuotations = adminQuery({
             desc.includes("cloud")
           ) {
             // Try to match with a storage tier by rate
+            // Since price is removed, we just rely on description matching or defaults
+            // In a future update, we should match by projectConfigId -> defaultStorageTierId
+            // For now, we'll keep it simple as the price field is being deleted.
             const matchingTier = storageTiers.find(
-              (t) => t.priceINR === li.rate,
+              (t) => desc.includes(t.name.toLowerCase()) || desc.includes(`${t.sizeGB}gb`),
             );
             if (matchingTier) {
               totalStorageGB = matchingTier.sizeGB;
@@ -136,7 +139,9 @@ export const getQuotationStorageSummary = adminQuery({
         desc.includes("gb") ||
         desc.includes("cloud")
       ) {
-        const matchingTier = storageTiers.find((t) => t.priceINR === li.rate);
+        const matchingTier = storageTiers.find(
+          (t) => desc.includes(t.name.toLowerCase()) || desc.includes(`${t.sizeGB}gb`),
+        );
         if (matchingTier) {
           totalStorageGB = matchingTier.sizeGB;
           break;
