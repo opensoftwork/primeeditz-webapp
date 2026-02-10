@@ -23,5 +23,7 @@ export function ProjectFoldersList({ projectId }: ProjectFoldersListProps) {
     router.push(`/projects/${projectId}/folders/${folder._id}`);
   };
 
-  return <FolderGrid folders={folders} onFolderClick={handleFolderClick} />;
+  return (
+    <FolderGrid isAdmin folders={folders} onFolderClick={handleFolderClick} />
+  );
 }

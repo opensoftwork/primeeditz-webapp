@@ -138,19 +138,17 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
       whileHover={{ y: -2 }}
       className={cn(
         "group relative h-full rounded-xl p-4 transition-all duration-300 overflow-hidden flex flex-col cursor-pointer",
-        needsOnboarding || needsUploads
-          ? "bg-primary/5 border border-primary/20 hover:bg-primary/10 hover:border-primary/40"
-          : "bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/30",
+        "bg-white/3 border border-white/5 hover:bg-white/5 hover:border-white/15",
       )}
     >
       {/* Hover Highlight Effect */}
-      <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-primary/10 transition-colors" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-white/2 blur-2xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-white/5 transition-colors" />
 
       <div className="relative z-10 space-y-3 flex-1 flex flex-col">
         {/* Header */}
         <div className="flex items-start justify-between gap-2">
           <div className="space-y-0.5 min-w-0 flex-1">
-            <h3 className="text-[14px] font-black uppercase tracking-tight text-white group-hover:text-primary transition-colors truncate">
+            <h3 className="text-[14px] font-black uppercase tracking-tight text-white group-hover:text-white/90 transition-colors truncate">
               {project.eventName || project.projectTypeName}
             </h3>
             <div className="flex items-center gap-1.5">
@@ -158,7 +156,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
                 {project.code}
               </span>
               <div className="h-0.5 w-0.5 rounded-full bg-white/10" />
-              <span className="text-[8px] font-black text-primary/60 uppercase tracking-[0.15em] truncate">
+              <span className="text-[8px] font-black text-white/20 uppercase tracking-[0.15em] truncate">
                 {project.projectTypeName}
               </span>
             </div>
@@ -191,7 +189,7 @@ function ProjectCard({ project, index }: { project: any; index: number }) {
             {project.phase === "setup" ? "Approved" : "Started"}{" "}
             {new Date(project.createdAt).toLocaleDateString()}
           </span>
-          <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-primary/40 group-hover:text-primary transition-all">
+          <div className="flex items-center gap-1 text-[8px] font-black uppercase tracking-widest text-white/40 group-hover:text-white transition-all">
             View{" "}
             <ArrowRight className="h-2.5 w-2.5 transition-transform group-hover:translate-x-1" />
           </div>

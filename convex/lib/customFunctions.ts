@@ -326,3 +326,42 @@ export const studioAction = customAction(action, {
     return { ctx: { ...ctx, profile }, args: {} };
   },
 });
+
+/**
+ * Action wrapper that requires admin role.
+ * Adds `ctx.profile`.
+ */
+export const adminAction = customAction(action, {
+  args: {},
+  input: async (
+    ctx: ActionCtx,
+  ): Promise<{
+    ctx: { profile: Profile } & ActionCtx;
+    args: Record<string, unknown>;
+  }> => {
+    let authUser;
+    try {
+      authUser = await authComponent.getAuthUser(ctx);
+    } catch (e) {
+      throw new Error("Not authenticated");
+    }
+
+    if (!authUser) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = (await ctx.runQuery(
+      api.profiles.getMyProfile,
+    )) as Profile | null;
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    if (profile.role !== "admin") {
+      throw new Error("Access denied");
+    }
+
+    return { ctx: { ...ctx, profile }, args: {} };
+  },
+});

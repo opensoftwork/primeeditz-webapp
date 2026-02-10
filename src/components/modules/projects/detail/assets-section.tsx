@@ -3,7 +3,15 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { AlertCircle, CheckCircle2, Eye, Loader2, Lock, Send, Upload } from "lucide-react";
+import {
+  AlertCircle,
+  CheckCircle2,
+  Eye,
+  Loader2,
+  Lock,
+  Send,
+  Upload,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -38,12 +46,14 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isLocked = project?.uploadEligibility?.isAllowed === false;
-  const isUploadComplete = project?.uploadEligibility?.reason?.toLowerCase().includes("complete");
+  const isUploadComplete = project?.uploadEligibility?.reason
+    ?.toLowerCase()
+    .includes("complete");
 
-  const canSubmit = 
-    project?.actionState === "awaiting_uploads" && 
-    folders && 
-    folders.length > 0 && 
+  const canSubmit =
+    project?.actionState === "awaiting_uploads" &&
+    folders &&
+    folders.length > 0 &&
     folders.every((f: any) => f.status === "completed");
 
   const handleProjectSubmit = async () => {
@@ -68,7 +78,9 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
 
   const handleFolderComplete = async (folder: any) => {
     if (isLocked) {
-      toast.error("Upload phase is complete. Contact admin to re-enable uploads.");
+      toast.error(
+        "Upload phase is complete. Contact admin to re-enable uploads.",
+      );
       return;
     }
     try {
@@ -96,12 +108,14 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
           <h2 className="text-2xl font-black uppercase tracking-tight text-white flex items-center gap-3">
             Project Assets
             {isLocked && (
-              <span className={cn(
-                "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
-                isUploadComplete
-                  ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-500"
-              )}>
+              <span
+                className={cn(
+                  "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
+                  isUploadComplete
+                    ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                    : "bg-amber-500/10 border-amber-500/20 text-amber-500",
+                )}
+              >
                 {isUploadComplete ? "UPLOAD COMPLETE" : "LOCKED"}
               </span>
             )}
@@ -138,15 +152,17 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
             "flex items-center gap-4 p-4 rounded-2xl border backdrop-blur-sm",
             isUploadComplete
               ? "bg-emerald-500/5 border-emerald-500/20"
-              : "bg-amber-500/5 border-amber-500/20"
+              : "bg-amber-500/5 border-amber-500/20",
           )}
         >
-          <div className={cn(
-            "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
-            isUploadComplete
-              ? "bg-emerald-500/10 text-emerald-500"
-              : "bg-amber-500/10 text-amber-500"
-          )}>
+          <div
+            className={cn(
+              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+              isUploadComplete
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "bg-amber-500/10 text-amber-500",
+            )}
+          >
             {isUploadComplete ? (
               <CheckCircle2 className="h-5 w-5" />
             ) : (
@@ -154,25 +170,32 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h4 className={cn(
-              "text-sm font-black uppercase tracking-tight",
-              isUploadComplete ? "text-emerald-500" : "text-amber-500"
-            )}>
-              {isUploadComplete ? "Upload Phase Complete" : "Uploads Temporarily Locked"}
+            <h4
+              className={cn(
+                "text-sm font-black uppercase tracking-tight",
+                isUploadComplete ? "text-emerald-500" : "text-amber-500",
+              )}
+            >
+              {isUploadComplete
+                ? "Upload Phase Complete"
+                : "Uploads Temporarily Locked"}
             </h4>
             <p className="text-xs text-white/50 mt-0.5">
               {isUploadComplete
                 ? "Your files have been received. You can still view your uploaded assets below. Contact admin if you need to upload additional files."
-                : project?.uploadEligibility?.reason || "Awaiting quotation approval to unlock project storage."}
+                : project?.uploadEligibility?.reason ||
+                  "Awaiting quotation approval to unlock project storage."}
             </p>
           </div>
           <div className="flex items-center gap-2 shrink-0">
-            <div className={cn(
-              "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
-              isUploadComplete
-                ? "bg-emerald-500/10 text-emerald-400"
-                : "bg-amber-500/10 text-amber-400"
-            )}>
+            <div
+              className={cn(
+                "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
+                isUploadComplete
+                  ? "bg-emerald-500/10 text-emerald-400"
+                  : "bg-amber-500/10 text-amber-400",
+              )}
+            >
               <Eye className="h-3.5 w-3.5" />
               View Only
             </div>
@@ -184,6 +207,7 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
       <FolderGrid
         folders={folders}
         isLocked={isLocked}
+        isAdmin={false}
         onFolderClick={handleFolderClick}
         onFolderComplete={handleFolderComplete}
         showViewModeHint={isLocked}
@@ -191,4 +215,3 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
     </motion.div>
   );
 }
-

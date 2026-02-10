@@ -163,7 +163,7 @@ export function FolderListingView({
       </motion.div>
 
       {/* Instructions */}
-      {project.actionState === "awaiting_uploads" && (
+      {/* {project.actionState === "awaiting_uploads" && (
         <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 max-w-2xl">
           <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">
             Upload Instructions
@@ -177,7 +177,7 @@ export function FolderListingView({
             button to notify our team.
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

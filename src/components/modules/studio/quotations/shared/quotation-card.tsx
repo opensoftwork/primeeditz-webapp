@@ -40,20 +40,20 @@ export function QuotationCard({
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
         onClick={handleCardClick}
-        className="group p-4 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        className="group p-4 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-white/15 transition-all duration-300 cursor-pointer relative overflow-hidden"
       >
-        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-primary/10 transition-colors" />
+        <div className="absolute top-0 right-0 w-24 h-24 bg-white/2 blur-2xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-white/5 transition-colors" />
 
         <div className="relative space-y-3">
           <div className="flex items-start justify-between gap-3">
             <div>
               <div className="flex items-center gap-2">
-                <Hash className="h-3 w-3 text-primary/40" />
-                <span className="text-sm font-black tracking-tight text-white group-hover:text-primary transition-colors uppercase">
+                <Hash className="h-3 w-3 text-white/20" />
+                <span className="text-sm font-black tracking-tight text-white group-hover:text-white/90 transition-colors uppercase">
                   {quotation.code}
                 </span>
               </div>
-              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
+              <span className="text-[9px] font-black text-white/20 uppercase tracking-widest">
                 Quotation Review
               </span>
             </div>
@@ -64,8 +64,8 @@ export function QuotationCard({
           </div>
 
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors shrink-0">
-              <User className="h-3 w-3 text-white/40 group-hover:text-primary transition-colors" />
+            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-white/20 transition-colors shrink-0">
+              <User className="h-3 w-3 text-white/40 group-hover:text-white/60 transition-colors" />
             </div>
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-white/80 uppercase tracking-tight text-xs truncate">
@@ -86,7 +86,7 @@ export function QuotationCard({
 
           <div className="flex items-center justify-between">
             <div className="flex items-baseline gap-0.5">
-              <span className="text-[10px] font-bold text-primary/60">₹</span>
+              <span className="text-[10px] font-bold text-white/20">₹</span>
               <span className="text-base font-black text-white tracking-tight">
                 {quotation.total.toLocaleString("en-IN")}
               </span>
@@ -100,7 +100,7 @@ export function QuotationCard({
               <Button
                 variant="ghost"
                 size="sm"
-                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-md gap-1"
+                className="h-6 px-2 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white hover:bg-white/5 rounded-md gap-1"
               >
                 Review <Eye className="h-2.5 w-2.5" />
               </Button>
@@ -175,7 +175,7 @@ export function QuotationCard({
             Valuation
           </span>
           <div className="flex items-baseline gap-0.5">
-            <span className="text-xs font-bold text-blue-500/80 tracking-tighter">
+            <span className="text-xs font-bold text-white/20 tracking-tighter">
               ₹
             </span>
             <span className="text-xl font-black text-white tracking-tighter">

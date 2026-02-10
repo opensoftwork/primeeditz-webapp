@@ -60,16 +60,11 @@ export async function setupFoldersInternal(
 
   async function createFoldersRecursively(
     items: FolderItem[],
-    parentPath = "",
   ) {
     for (const item of items) {
-      // Clean up the item's own path by stripping leading/trailing slashes
-      const itemPathPart = item.path.replace(/^\/+|\/+$/g, "");
-      
-      // Build the hierarchical path
-      const fullPath = parentPath 
-        ? `${parentPath}/${itemPathPart}` 
-        : itemPathPart;
+      // Clean up the path by stripping leading/trailing slashes.
+      // Template paths are already absolute from project root.
+      const fullPath = item.path.replace(/^\/+|\/+$/g, "");
 
       const folderId = await ctx.db.insert("folders", {
         projectId: args.projectId,
@@ -82,7 +77,7 @@ export async function setupFoldersInternal(
       folderIds.push(folderId);
 
       if ("children" in item && item.children && item.children.length > 0) {
-        await createFoldersRecursively(item.children, fullPath);
+        await createFoldersRecursively(item.children);
       }
     }
   }
@@ -485,7 +480,7 @@ export const repairProjectFolders = internalMutation({
     /**
      * Recursively matches template nodes to project folders and updates their paths.
      */
-    async function matchNodes(items: FolderItem[], parentPath = "") {
+    async function matchNodes(items: FolderItem[]) {
       for (const item of items) {
         // Find a matching folder that hasn't been assigned yet
         // Match by name (case-insensitive)
@@ -494,8 +489,7 @@ export const repairProjectFolders = internalMutation({
           f.name.toLowerCase() === item.name.toLowerCase()
         );
 
-        const itemPathPart = item.path.replace(/^\/+|\/+$/g, "");
-        const fullPath = parentPath ? `${parentPath}/${itemPathPart}` : itemPathPart;
+        const fullPath = item.path.replace(/^\/+|\/+$/g, "");
 
         if (match) {
           assignedIds.add(match._id);
@@ -504,9 +498,9 @@ export const repairProjectFolders = internalMutation({
             repairedCount++;
           }
           
-          // Recursively match children using the current fullPath as parentPath
+          // Recursively match children
           if ("children" in item && item.children && item.children.length > 0) {
-            await matchNodes(item.children, fullPath);
+            await matchNodes(item.children);
           }
         }
       }

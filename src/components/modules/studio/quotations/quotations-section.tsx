@@ -43,7 +43,7 @@ export function QuotationsSection() {
     <section className="space-y-6">
       <div className="flex items-center justify-between px-2">
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-primary/10 border border-primary/30 text-primary shadow-[0_0_15px_rgba(var(--primary),0.2)]">
+          <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 shadow-[0_0_15px_rgba(255,255,255,0.05)]">
             <Receipt className="h-4 w-4" />
           </div>
           <div className="flex flex-col">

@@ -7,9 +7,9 @@ import { adminMutation } from "../../lib/customFunctions";
  */
 export const update = adminMutation({
   args: {
-    name: v.string(),
+    name: v.optional(v.string()),
     tagline: v.optional(v.string()),
-    address: v.string(),
+    address: v.optional(v.string()),
     phone: v.optional(v.string()),
     email: v.optional(v.string()),
     website: v.optional(v.string()),
@@ -37,10 +37,30 @@ export const update = adminMutation({
     };
 
     if (existing) {
-      await ctx.db.patch(existing._id, updateData);
+      // Filter out undefined values to satisfy patch
+      const cleanUpdateData = Object.fromEntries(
+        Object.entries(updateData).filter(([_, v]) => v !== undefined)
+      );
+      await ctx.db.patch(existing._id, cleanUpdateData);
       return existing._id;
     } else {
-      return await ctx.db.insert("company", updateData);
+      // For first time insert, ensure required fields have at least default values
+      const insertData = {
+        name: args.name ?? "New Studio",
+        address: args.address ?? "Set your address",
+        tagline: args.tagline,
+        phone: args.phone,
+        email: args.email,
+        website: args.website,
+        gstNumber: args.gstNumber,
+        panNumber: args.panNumber,
+        bankDetails: args.bankDetails,
+        logoUrl: args.logoUrl,
+        updatedAt: now,
+        updatedBy: ctx.profile._id,
+      };
+      
+      return await ctx.db.insert("company", insertData);
     }
   },
 });

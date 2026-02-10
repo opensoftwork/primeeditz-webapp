@@ -53,68 +53,74 @@ export const getProjectFolders = staffQuery({
     const enrichedFolders = folderAssetData.map((data) => {
       const { folder, directAssetCount, directTotalSize } = data;
 
-      // Find all descendant folders (folders whose path starts with this folder's path + "/")
-      const childPrefix = folder.path + "/";
-      const descendants = folderAssetData.filter(
-        (d) => d.folder.path.startsWith(childPrefix),
-      );
-
-      // Aggregate totals from descendants
-      const totalAssetCount =
-        directAssetCount +
-        descendants.reduce((sum, d) => sum + d.directAssetCount, 0);
-      const totalSize =
-        directTotalSize +
-        descendants.reduce((sum, d) => sum + d.directTotalSize, 0);
-
-      // Determine display status based on hierarchy
-      let displayStatus = folder.status;
-
-      // Check if this folder has children (is a parent folder)
-      const hasChildren = descendants.length > 0;
-
-      if (hasChildren) {
-        // For parent folders, compute status from direct children
-        const directChildren = folderAssetData.filter((d) => {
-          if (!d.folder.path.startsWith(childPrefix)) return false;
-          const remainder = d.folder.path.slice(childPrefix.length);
-          return !remainder.includes("/");
-        });
-
-        if (directChildren.length > 0) {
-          // Get the computed status for each direct child
-          const childStatuses = directChildren.map((child) => {
-            // Recursively compute child's display status
-            const childHasOwnFiles = child.directAssetCount > 0;
-            const childStoredStatus = child.folder.status;
-
-            if (child.directAssetCount === 0) {
-              // Check if this child has its own descendants with files
-              const childDescPrefix = child.folder.path + "/";
-              const childDescendants = folderAssetData.filter((d) =>
-                d.folder.path.startsWith(childDescPrefix),
-              );
-              const childTotalFiles = childDescendants.reduce(
-                (sum, d) => sum + d.directAssetCount,
-                0,
-              );
-
-              if (childTotalFiles === 0) {
-                return "pending_upload";
-              }
-              // Has descendant files, check if all descendants are completed
-              const allDescCompleted = childDescendants.every(
-                (d) => d.folder.status === "completed",
-              );
-              return allDescCompleted ? "completed" : "in_progress";
-            }
-
-            // Child has direct files
-            if (childStoredStatus === "pending_upload") {
-              return "in_progress";
-            }
-            return childStoredStatus;
-          });
+      // Normalize paths for comparison
+      const folderPath = folder.path.replace(/^\/+|\/+$/g, "");
+      const childPrefix = folderPath + "/";
+      
+      const descendants = folderAssetData.filter((d) => {
+        const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+        return dPath.startsWith(childPrefix);
+      });
+ 
+       // Aggregate totals from descendants
+       const totalAssetCount =
+         directAssetCount +
+         descendants.reduce((sum, d) => sum + d.directAssetCount, 0);
+       const totalSize =
+         directTotalSize +
+         descendants.reduce((sum, d) => sum + d.directTotalSize, 0);
+ 
+       // Determine display status based on hierarchy
+       let displayStatus = folder.status;
+ 
+       // Check if this folder has children (is a parent folder)
+       const hasChildren = descendants.length > 0;
+ 
+       if (hasChildren) {
+         // For parent folders, compute status from direct children
+         const directChildren = folderAssetData.filter((d) => {
+           const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+           if (!dPath.startsWith(childPrefix)) return false;
+           const remainder = dPath.slice(childPrefix.length);
+           return !remainder.includes("/");
+         });
+ 
+         if (directChildren.length > 0) {
+           // Get the computed status for each direct child
+           const childStatuses = directChildren.map((child) => {
+             // Recursively compute child's display status
+             const childHasOwnFiles = child.directAssetCount > 0;
+             const childStoredStatus = child.folder.status;
+ 
+             if (child.directAssetCount === 0) {
+               // Check if this child has its own descendants with files
+               const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
+               const childDescPrefix = childPath + "/";
+               const childDescendants = folderAssetData.filter((d) => {
+                 const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+                 return dPath.startsWith(childDescPrefix);
+               });
+               const childTotalFiles = childDescendants.reduce(
+                 (sum, d) => sum + d.directAssetCount,
+                 0,
+               );
+ 
+               if (childTotalFiles === 0) {
+                 return "pending_upload";
+               }
+               // Has descendant files, check if all descendants are completed
+               const allDescCompleted = childDescendants.every(
+                 (d) => d.folder.status === "completed",
+               );
+               return allDescCompleted ? "completed" : "in_progress";
+             }
+ 
+             // Child has direct files
+             if (childStoredStatus === "pending_upload") {
+               return "in_progress";
+             }
+             return childStoredStatus;
+           });
 
           const allCompleted = childStatuses.every((s) => s === "completed");
           const anyInProgress = childStatuses.some(
@@ -198,11 +204,14 @@ export const getMyProjectFolders = studioQuery({
     const enrichedFolders = folderAssetData.map((data) => {
       const { folder, directAssetCount, directTotalSize } = data;
 
-      // Find all descendant folders (folders whose path starts with this folder's path + "/")
-      const childPrefix = folder.path + "/";
-      const descendants = folderAssetData.filter(
-        (d) => d.folder.path.startsWith(childPrefix),
-      );
+      // Normalize paths for comparison
+      const folderPath = folder.path.replace(/^\/+|\/+$/g, "");
+      const childPrefix = folderPath + "/";
+      
+      const descendants = folderAssetData.filter((d) => {
+        const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+        return dPath.startsWith(childPrefix);
+      });
 
       // Aggregate totals from descendants
       const totalAssetCount =
@@ -221,8 +230,9 @@ export const getMyProjectFolders = studioQuery({
       if (hasChildren) {
         // For parent folders, compute status from direct children
         const directChildren = folderAssetData.filter((d) => {
-          if (!d.folder.path.startsWith(childPrefix)) return false;
-          const remainder = d.folder.path.slice(childPrefix.length);
+          const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+          if (!dPath.startsWith(childPrefix)) return false;
+          const remainder = dPath.slice(childPrefix.length);
           return !remainder.includes("/");
         });
 
@@ -233,10 +243,12 @@ export const getMyProjectFolders = studioQuery({
 
             if (child.directAssetCount === 0) {
               // Check if this child has its own descendants with files
-              const childDescPrefix = child.folder.path + "/";
-              const childDescendants = folderAssetData.filter((d) =>
-                d.folder.path.startsWith(childDescPrefix),
-              );
+              const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
+              const childDescPrefix = childPath + "/";
+              const childDescendants = folderAssetData.filter((d) => {
+                const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+                return dPath.startsWith(childDescPrefix);
+              });
               const childTotalFiles = childDescendants.reduce(
                 (sum, d) => sum + d.directAssetCount,
                 0,

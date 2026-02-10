@@ -17,6 +17,7 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import { v } from "convex/values";
 import { api } from "../../_generated/api";
 import { action, internalAction } from "../../_generated/server";
+import { adminAction } from "../../lib/customFunctions";
 
 // Initialize S3 client for MinIO
 function getS3Client(): S3Client {
@@ -243,5 +244,32 @@ export const deleteFile = action({
       console.error(`Error deleting file ${args.storageKey}:`, error);
       return false;
     }
+  },
+});
+/**
+ * Generate a pre-signed PUT URL for system-wide uploads (e.g. company logo).
+ */
+export const generateSystemUploadUrl = adminAction({
+  args: {
+    fileName: v.string(),
+    contentType: v.string(),
+  },
+  handler: async (_ctx, args): Promise<{ url: string; storageKey: string }> => {
+    const timestamp = Date.now();
+    const cleanName = args.fileName.replace(/\s+/g, "_");
+    const storageKey = `system/uploads/${timestamp}_${cleanName}`;
+
+    const s3Client = getS3Client();
+    const command = new PutObjectCommand({
+      Bucket: getBucket(),
+      Key: storageKey,
+      ContentType: args.contentType,
+    });
+
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    return { url, storageKey };
   },
 });

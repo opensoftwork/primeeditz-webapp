@@ -18,7 +18,6 @@ import type * as functions_admin_maintenance from "../functions/admin/maintenanc
 import type * as functions_admin_projectTypes from "../functions/admin/projectTypes.js";
 import type * as functions_admin_projects from "../functions/admin/projects.js";
 import type * as functions_admin_quotations from "../functions/admin/quotations.js";
-import type * as functions_admin_seed from "../functions/admin/seed.js";
 import type * as functions_admin_squads from "../functions/admin/squads.js";
 import type * as functions_admin_studios from "../functions/admin/studios.js";
 import type * as functions_admin_wipeData from "../functions/admin/wipeData.js";
@@ -101,7 +100,6 @@ declare const fullApi: ApiFromModules<{
   "functions/admin/projectTypes": typeof functions_admin_projectTypes;
   "functions/admin/projects": typeof functions_admin_projects;
   "functions/admin/quotations": typeof functions_admin_quotations;
-  "functions/admin/seed": typeof functions_admin_seed;
   "functions/admin/squads": typeof functions_admin_squads;
   "functions/admin/studios": typeof functions_admin_studios;
   "functions/admin/wipeData": typeof functions_admin_wipeData;

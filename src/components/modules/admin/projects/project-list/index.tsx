@@ -36,6 +36,7 @@ import { columns } from "./columns";
 import { PhaseProgress } from "@/components/modules/projects/phase-progress";
 import { StudioStatusBadge } from "@/components/modules/projects/studio-status-badge";
 import type { AdminProject } from "./types";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ============================================================================
 // Project Card Component (for card view)
@@ -201,6 +202,7 @@ export default function ProjectList() {
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [isDiscarding, setIsDiscarding] = useState(false);
 
+  // @ts-ignore
   const projectTypes = useQuery(api.admin.getProjectTypes);
 
   // Query for existing admin draft

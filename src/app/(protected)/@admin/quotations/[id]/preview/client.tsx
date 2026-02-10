@@ -29,8 +29,11 @@ export function QuotationPreviewClient({
     { quotationId: quotationId as Id<"quotations"> },
   );
 
+  // Fetch company info
+  const companyInfo = useQuery(api.functions.company.queries.get);
+
   // Loading state
-  if (data === undefined) {
+  if (data === undefined || companyInfo === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-100">
         <div className="flex flex-col items-center gap-4">
@@ -87,7 +90,8 @@ export function QuotationPreviewClient({
       }}
       sections={sections}
       projects={projects}
-      onBack={() => router.push(`/quotations/${quotationId}/builder?step=4`)}
+      companyInfo={companyInfo || undefined}
+      onBack={() => router.back()}
     />
   );
 }

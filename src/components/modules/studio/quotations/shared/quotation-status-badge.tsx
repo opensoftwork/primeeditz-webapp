@@ -107,18 +107,18 @@ const statusConfig: Record<
   requested: {
     label: "Proposal Requested",
     icon: Clock,
-    color: "text-blue-400",
-    bgColor: "bg-blue-400/10",
-    borderColor: "border-blue-400/20",
-    glowColor: "bg-blue-400/10",
+    color: "text-white/40",
+    bgColor: "bg-white/5",
+    borderColor: "border-white/10",
+    glowColor: "bg-white/5",
   },
   initiated: {
     label: "Pending Review",
     icon: Rocket,
-    color: "text-primary",
-    bgColor: "bg-primary/10",
-    borderColor: "border-primary/20",
-    glowColor: "bg-primary/10",
+    color: "text-white/60",
+    bgColor: "bg-white/10",
+    borderColor: "border-white/20",
+    glowColor: "bg-white/10",
   },
 };
 

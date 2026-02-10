@@ -43,6 +43,7 @@ interface FolderCardProps {
   totalSize: number;
   onComplete?: () => void;
   onClick?: () => void;
+  onOpen?: () => void;
   className?: string;
   isLocked?: boolean;
   isViewOnly?: boolean;
@@ -55,6 +56,7 @@ export function FolderCard({
   assetCount,
   totalSize,
   onClick,
+  onOpen,
   className,
   isLocked,
   isViewOnly,
@@ -172,7 +174,7 @@ export function FolderCard({
           </button>
         )}
 
-        {status !== "in_progress" && !isViewOnly && (
+        {status !== "in_progress" && !isViewOnly && !onOpen && (
           <div
             className={cn(
               "h-1.5 w-1.5 rounded-full transition-colors",
@@ -181,6 +183,18 @@ export function FolderCard({
                 : "bg-white/5",
             )}
           />
+        )}
+
+        {onOpen && !isLocked && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onOpen();
+            }}
+            className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-white/40 text-[9px] font-black uppercase tracking-widest hover:bg-primary hover:text-white transition-all scale-90 group-hover:scale-100"
+          >
+            Open & Upload
+          </button>
         )}
       </div>
     </div>

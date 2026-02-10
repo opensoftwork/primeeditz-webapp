@@ -1,13 +1,20 @@
 import * as z from "zod";
+import { isValidPhoneNumber } from "@/components/ui/phone-input";
 
 export const identitySchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   tagline: z.string().optional(),
+  logoUrl: z.string().optional().or(z.literal("")),
 });
 
 export const contactSchema = z.object({
   address: z.string().min(5, "Address must be at least 5 characters"),
-  phone: z.string().optional(),
+  phone: z
+    .string()
+    .optional()
+    .refine((val) => !val || isValidPhoneNumber(val), {
+      message: "Invalid phone number format",
+    }),
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   website: z.string().url("Invalid URL").optional().or(z.literal("")),
 });
