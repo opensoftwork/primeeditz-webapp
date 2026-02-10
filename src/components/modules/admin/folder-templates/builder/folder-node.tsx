@@ -59,17 +59,9 @@ export function FolderNode({
 
   const handleNameSave = () => {
     if (editName.trim() && editName !== folder.name) {
-      const slug = editName
-        .toLowerCase()
-        .trim()
-        .replace(/[^\w\s-]/g, "")
-        .replace(/[\s_-]+/g, "-")
-        .replace(/^-+|-+$/g, "");
-
       onEdit(path, {
         ...folder,
         name: editName.trim(),
-        path: `/${slug}`,
       });
     } else {
       setEditName(folder.name);

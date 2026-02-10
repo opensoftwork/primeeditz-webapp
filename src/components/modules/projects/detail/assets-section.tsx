@@ -19,6 +19,17 @@ import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface AssetsSectionProps {
   projectId: string;
@@ -39,8 +50,8 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
     projectId: projectId as Id<"projects">,
   });
 
-  const completeOnboarding = useMutation(
-    api.functions.projects.mutations.completeOnboarding,
+  const markAllComplete = useMutation(
+    api.functions.folders.mutations.markAllUploadsComplete,
   );
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -53,19 +64,18 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
   const canSubmit =
     project?.actionState === "awaiting_uploads" &&
     folders &&
-    folders.length > 0 &&
-    folders.every((f: any) => f.status === "completed");
+    folders.length > 0;
 
   const handleProjectSubmit = async () => {
     if (!canSubmit) return;
     setIsSubmitting(true);
     try {
-      await completeOnboarding({
+      await markAllComplete({
         projectId: projectId as Id<"projects">,
       });
-      toast.success("Assets submitted successfully. Uploads are now disabled.");
+      toast.success("Project submitted successfully!");
     } catch (error) {
-      toast.error("Failed to submit assets");
+      toast.error("Failed to submit project");
     } finally {
       setIsSubmitting(false);
     }
@@ -128,18 +138,44 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
         </div>
 
         {canSubmit && (
-          <Button
-            onClick={handleProjectSubmit}
-            disabled={isSubmitting}
-            className="rounded-2xl h-11 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
-          >
-            {isSubmitting ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Send className="h-4 w-4" />
-            )}
-            {isSubmitting ? "Submitting..." : "Mark as Submit"}
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                disabled={isSubmitting}
+                className="rounded-2xl h-11 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+              >
+                {isSubmitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Send className="h-4 w-4" />
+                )}
+                {isSubmitting ? "Submitting..." : "Mark as Submit"}
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-zinc-950 border border-white/10 rounded-3xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white">
+                  Confirm Project Submission
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-white/60 font-medium">
+                  Are you sure you want to submit this project? Once submitted,
+                  you won't be able to upload more files to these folders. Any
+                  pending folders will be marked as complete.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-6">
+                <AlertDialogCancel className="rounded-xl border-white/10 hover:bg-white/5 text-white/50 uppercase tracking-widest text-[10px] font-black h-12 px-6">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleProjectSubmit}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white uppercase tracking-widest text-[10px] font-black h-12 px-6"
+                >
+                  Yes, Submit Project
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 

@@ -60,16 +60,38 @@ export async function setupFoldersInternal(
 
   async function createFoldersRecursively(
     items: FolderItem[],
+    parentId?: Id<"folders">,
+    parentPath: string = "",
   ) {
     for (const item of items) {
-      // Clean up the path by stripping leading/trailing slashes.
-      // Template paths are already absolute from project root.
-      const fullPath = item.path.replace(/^\/+|\/+$/g, "");
+      // 1. Determine the correct name-based slug for this folder.
+      const slug = item.name
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, "")
+        .replace(/[\s_-]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      // 2. Construct the absolute path.
+      // We prioritize any multi-segment path already in the template if it looks absolute,
+      // but otherwise we build it properly using parentPath + slug.
+      const itemPath = item.path.replace(/^\/+|\/+$/g, "");
+      let fullPath: string;
+
+      if (parentPath) {
+        // If we have a parent, ensure this folder is nested under it.
+        // Even if itemPath is "family", if parent is "reception", fullPath becomes "reception/family"
+        fullPath = `${parentPath}/${itemPath.includes("/") ? itemPath.split("/").pop() : itemPath}`;
+      } else {
+        // Root level
+        fullPath = itemPath;
+      }
 
       const folderId = await ctx.db.insert("folders", {
         projectId: args.projectId,
         name: item.name,
         path: fullPath,
+        parentId: parentId, // Set the parent link!
         description: item.description,
         isRequired: item.isRequired,
         status: "pending_upload",
@@ -77,7 +99,7 @@ export async function setupFoldersInternal(
       folderIds.push(folderId);
 
       if ("children" in item && item.children && item.children.length > 0) {
-        await createFoldersRecursively(item.children);
+        await createFoldersRecursively(item.children, folderId, fullPath);
       }
     }
   }
@@ -222,10 +244,6 @@ export const adminUpdateFolderStatus = adminMutation({
       status: args.status,
     });
 
-    if (args.status === "completed") {
-      await checkAndTransitionUploadsComplete(ctx, folder.projectId);
-    }
-
     return { success: true };
   },
 });
@@ -252,10 +270,6 @@ export const updateFolderStatus = studioMutation({
     await ctx.db.patch(args.folderId, {
       status: args.status,
     });
-
-    if (args.status === "completed") {
-      await checkAndTransitionUploadsComplete(ctx, folder.projectId);
-    }
 
     return { success: true };
   },
@@ -422,12 +436,10 @@ export const openProjectForUpload = adminMutation({
 });
 
 
-import { internalMutation } from "../../_generated/server";
-
 /**
  * Maintenance: Fixes folder hierarchy for a project generically using templates.
  */
-export const repairProjectFolders = internalMutation({
+export const repairProjectFolders = adminMutation({
   args: {
     projectId: v.id("projects"),
   },
@@ -480,27 +492,43 @@ export const repairProjectFolders = internalMutation({
     /**
      * Recursively matches template nodes to project folders and updates their paths.
      */
-    async function matchNodes(items: FolderItem[]) {
+    async function matchNodes(
+      items: FolderItem[],
+      parentId?: Id<"folders">,
+      parentPath: string = "",
+    ) {
       for (const item of items) {
         // Find a matching folder that hasn't been assigned yet
         // Match by name (case-insensitive)
-        const match = allFolders.find(f => 
-          !assignedIds.has(f._id) && 
-          f.name.toLowerCase() === item.name.toLowerCase()
+        const match = allFolders.find(
+          (f) =>
+            !assignedIds.has(f._id) &&
+            f.name.toLowerCase() === item.name.toLowerCase(),
         );
 
-        const fullPath = item.path.replace(/^\/+|\/+$/g, "");
+        const itemPath = item.path.replace(/^\/+|\/+$/g, "");
+        let fullPath: string;
+
+        if (parentPath) {
+          // Construct proper absolute path based on parent
+          fullPath = `${parentPath}/${itemPath.includes("/") ? itemPath.split("/").pop() : itemPath}`;
+        } else {
+          fullPath = itemPath;
+        }
 
         if (match) {
           assignedIds.add(match._id);
-          if (match.path !== fullPath) {
-            await ctx.db.patch(match._id, { path: fullPath });
+          if (match.path !== fullPath || match.parentId !== parentId) {
+            await ctx.db.patch(match._id, {
+              path: fullPath,
+              parentId: parentId,
+            });
             repairedCount++;
           }
-          
+
           // Recursively match children
           if ("children" in item && item.children && item.children.length > 0) {
-            await matchNodes(item.children);
+            await matchNodes(item.children, match._id, fullPath);
           }
         }
       }
@@ -511,11 +539,17 @@ export const repairProjectFolders = internalMutation({
     // 3. Final pass: ensure any remaining unassigned folders have clean paths (no leading slashes)
     for (const folder of allFolders) {
       if (!assignedIds.has(folder._id) && folder.path.startsWith("/")) {
-        await ctx.db.patch(folder._id, { path: folder.path.replace(/^\/+/, "") });
+        await ctx.db.patch(folder._id, {
+          path: folder.path.replace(/^\/+/, ""),
+        });
         repairedCount++;
       }
     }
 
-    return `Repaired ${repairedCount} folder paths for project ${project.code} using structural template matching.`;
+    return {
+      success: true,
+      repairedCount,
+      message: `Repaired ${repairedCount} folders for project ${project.code}.`,
+    };
   },
 });

@@ -107,6 +107,7 @@ export function FolderTemplateBuilder({
   const isProjectTypeContext = !!propProjectTypeId;
 
   // Convex Hooks
+  // ts-
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const existingTemplate = useQuery(
     api.functions.folderTemplates.queries.get,
@@ -203,15 +204,42 @@ export function FolderTemplateBuilder({
     },
   });
 
+  // Helper to generate a URL-friendly slug from a name
+  const generateSlug = (name: string) =>
+    name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+
+  // Helper to recursively update paths for a folder and all its descendants
+  const updatePathsRecursively = (item: any, parentPath: string = "") => {
+    const slug = generateSlug(item.name);
+    // Ensure the path starts with a leading slash and properly joins segments
+    const currentPath = parentPath
+      ? `${parentPath.endsWith("/") ? parentPath : parentPath + "/"}${slug}`
+      : `/${slug}`;
+
+    item.path = currentPath;
+
+    if (item.children && item.children.length > 0) {
+      item.children.forEach((child: any) =>
+        updatePathsRecursively(child, currentPath),
+      );
+    }
+  };
+
   // Folder Operations
   const addRootFolder = () => {
     if (folders.length >= 10) {
       toast.error("Maximum 10 root folders allowed");
       return;
     }
+    const name = "New Root Folder";
     const newRoot: FolderLevel1 = {
-      name: "New Root Folder",
-      path: "new-folder",
+      name,
+      path: `/${generateSlug(name)}`,
       description: "",
       isRequired: false,
       children: [],
@@ -234,11 +262,14 @@ export function FolderTemplateBuilder({
         return;
       }
 
-      l1.children.push({
-        name: "New Child Folder",
-        path: `${l1.path}/new-child`,
+      const name = "New Child Folder";
+      const child: FolderLevel2 = {
+        name,
+        path: `${l1.path}/${generateSlug(name)}`,
         isRequired: false,
-      });
+        children: [],
+      };
+      l1.children.push(child);
     } else if (parts.length === 3) {
       // Adding to Level 2
       const l1Idx = parseInt(parts[0]);
@@ -251,11 +282,13 @@ export function FolderTemplateBuilder({
         return;
       }
 
-      l2.children.push({
-        name: "New Sub-child Folder",
-        path: `${l2.path}/new-subchild`,
+      const name = "New Sub-child Folder";
+      const child: FolderLevel3 = {
+        name,
+        path: `${l2.path}/${generateSlug(name)}`,
         isRequired: false,
-      });
+      };
+      l2.children.push(child);
     }
     setFolders(newFolders);
   };
@@ -325,25 +358,22 @@ export function FolderTemplateBuilder({
     const parts = path.split(".");
 
     if (parts.length === 1) {
-      newFolders[parseInt(parts[0])] = {
-        ...newFolders[parseInt(parts[0])],
-        ...updated,
-      } as FolderLevel1;
+      const target = newFolders[parseInt(parts[0])];
+      Object.assign(target, updated);
+      updatePathsRecursively(target, "");
     } else if (parts.length === 3) {
       const l1Idx = parseInt(parts[0]);
       const l2Idx = parseInt(parts[2]);
-      newFolders[l1Idx].children![l2Idx] = {
-        ...newFolders[l1Idx].children![l2Idx],
-        ...updated,
-      } as FolderLevel2;
+      const target = newFolders[l1Idx].children![l2Idx];
+      Object.assign(target, updated);
+      updatePathsRecursively(target, newFolders[l1Idx].path);
     } else if (parts.length === 5) {
       const l1Idx = parseInt(parts[0]);
       const l2Idx = parseInt(parts[2]);
       const l3Idx = parseInt(parts[4]);
-      newFolders[l1Idx].children![l2Idx].children![l3Idx] = {
-        ...newFolders[l1Idx].children![l2Idx].children![l3Idx],
-        ...updated,
-      } as FolderLevel3;
+      const target = newFolders[l1Idx].children![l2Idx].children![l3Idx];
+      Object.assign(target, updated);
+      updatePathsRecursively(target, newFolders[l1Idx].children![l2Idx].path);
     }
 
     setFolders(newFolders);

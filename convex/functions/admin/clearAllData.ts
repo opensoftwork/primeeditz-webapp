@@ -28,7 +28,6 @@ export const clearAllData = internalMutation({
       "servicePackages",
       "statusHistory",
       "storageTiers",
-      // Tables from wipeData that may also exist
       "quotationSections",
       "quotationLibraryItems",
       "projectSquads",

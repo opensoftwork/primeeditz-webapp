@@ -13,6 +13,17 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { FolderGridSkeleton } from "@/components/shared/project-folders";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface FolderListingViewProps {
   projectId: string;
@@ -88,9 +99,9 @@ export function FolderListingView({
   const handleUploadsComplete = async () => {
     try {
       await markAllComplete({ projectId: projectId as Id<"projects"> });
-      toast.success("Project transitioned to uploads complete!");
+      toast.success("Project submitted successfully!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to complete uploads");
+      toast.error(error.message || "Failed to submit project");
     }
   };
 
@@ -109,7 +120,7 @@ export function FolderListingView({
     );
   }
 
-  const showCompleteButton =
+  const showSubmitButton =
     project.actionState === "awaiting_uploads" && folders.length > 0;
 
   return (
@@ -139,14 +150,38 @@ export function FolderListingView({
           </div>
         </div>
 
-        {showCompleteButton && (
-          <Button
-            onClick={handleUploadsComplete}
-            className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 group"
-          >
-            <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-            Finalize My Uploads
-          </Button>
+        {showSubmitButton && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 group">
+                <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                Mark as Submit
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-zinc-950 border border-white/10 rounded-3xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white">
+                  Confirm Project Submission
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-white/60 font-medium">
+                  Are you sure you want to submit this project? Once submitted,
+                  you won't be able to upload more files to these folders. Any
+                  pending folders will be marked as complete.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-6">
+                <AlertDialogCancel className="rounded-xl border-white/10 hover:bg-white/5 text-white/50 uppercase tracking-widest text-[10px] font-black h-12 px-6">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleUploadsComplete}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black uppercase tracking-widest text-[10px] font-black h-12 px-6"
+                >
+                  Yes, Submit Project
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 
@@ -158,6 +193,7 @@ export function FolderListingView({
       >
         <FolderGrid
           folders={folders}
+          isAdmin={isAdmin}
           onFolderClick={handleFolderClick}
           title="Project Folders"
         />

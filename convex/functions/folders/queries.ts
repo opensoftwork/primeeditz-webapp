@@ -73,75 +73,83 @@ export const getProjectFolders = staffQuery({
        // Determine display status based on hierarchy
        let displayStatus = folder.status;
  
-       // Check if this folder has children (is a parent folder)
-       const hasChildren = descendants.length > 0;
+      // COMPUTED STATUS LOGIC:
+      // Only compute display status if the folder is NOT already marked as completed.
+      // Explicitly completed folders (via submission or manual action) should stay completed.
+      if (folder.status !== "completed") {
+        // Check if this folder has children (is a parent folder)
+        const hasChildren = descendants.length > 0;
  
-       if (hasChildren) {
-         // For parent folders, compute status from direct children
-         const directChildren = folderAssetData.filter((d) => {
-           const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
-           if (!dPath.startsWith(childPrefix)) return false;
-           const remainder = dPath.slice(childPrefix.length);
-           return !remainder.includes("/");
-         });
+        if (hasChildren) {
+          // For parent folders, compute status from direct children
+          const directChildren = folderAssetData.filter((d) => {
+            const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+            if (!dPath.startsWith(childPrefix)) return false;
+            const remainder = dPath.slice(childPrefix.length);
+            return !remainder.includes("/");
+          });
  
-         if (directChildren.length > 0) {
-           // Get the computed status for each direct child
-           const childStatuses = directChildren.map((child) => {
-             // Recursively compute child's display status
-             const childHasOwnFiles = child.directAssetCount > 0;
-             const childStoredStatus = child.folder.status;
+          if (directChildren.length > 0) {
+            // Get the computed status for each direct child
+            const childStatuses = directChildren.map((child) => {
+              // Recursively compute child's display status
+              const childHasOwnFiles = child.directAssetCount > 0;
+              const childStoredStatus = child.folder.status;
  
-             if (child.directAssetCount === 0) {
-               // Check if this child has its own descendants with files
-               const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
-               const childDescPrefix = childPath + "/";
-               const childDescendants = folderAssetData.filter((d) => {
-                 const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
-                 return dPath.startsWith(childDescPrefix);
-               });
-               const childTotalFiles = childDescendants.reduce(
-                 (sum, d) => sum + d.directAssetCount,
-                 0,
-               );
+              if (child.directAssetCount === 0) {
+                // Check if this child has its own descendants with files
+                const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
+                const childDescPrefix = childPath + "/";
+                const childDescendants = folderAssetData.filter((d) => {
+                  const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+                  return dPath.startsWith(childDescPrefix);
+                });
+                const childTotalFiles = childDescendants.reduce(
+                  (sum, d) => sum + d.directAssetCount,
+                  0,
+                );
  
-               if (childTotalFiles === 0) {
-                 return "pending_upload";
-               }
-               // Has descendant files, check if all descendants are completed
-               const allDescCompleted = childDescendants.every(
-                 (d) => d.folder.status === "completed",
-               );
-               return allDescCompleted ? "completed" : "in_progress";
-             }
+                if (childTotalFiles === 0) {
+                  // Even if no files, follow the stored status if it's completed
+                  return childStoredStatus === "completed"
+                    ? "completed"
+                    : "pending_upload";
+                }
+                // Has descendant files, check if all descendants are completed
+                const allDescCompleted = childDescendants.every(
+                  (d) => d.folder.status === "completed",
+                );
+                return allDescCompleted ? "completed" : "in_progress";
+              }
  
-             // Child has direct files
-             if (childStoredStatus === "pending_upload") {
-               return "in_progress";
-             }
-             return childStoredStatus;
-           });
+              // Child has direct files
+              if (childStoredStatus === "pending_upload") {
+                return "in_progress";
+              }
+              return childStoredStatus;
+            });
 
-          const allCompleted = childStatuses.every((s) => s === "completed");
-          const anyInProgress = childStatuses.some(
-            (s) => s === "in_progress" || s === "completed",
-          );
-          const allPending = childStatuses.every((s) => s === "pending_upload");
+            const allCompleted = childStatuses.every((s) => s === "completed");
+            const anyInProgress = childStatuses.some(
+              (s) => s === "in_progress" || s === "completed",
+            );
+            const allPending = childStatuses.every((s) => s === "pending_upload");
 
-          if (allCompleted) {
-            displayStatus = "completed";
-          } else if (allPending) {
+            if (allCompleted) {
+              displayStatus = "completed";
+            } else if (allPending) {
+              displayStatus = "pending_upload";
+            } else {
+              displayStatus = "in_progress";
+            }
+          }
+        } else {
+          // Leaf folder - compute status based on its own file count
+          if (directAssetCount === 0) {
             displayStatus = "pending_upload";
-          } else {
+          } else if (folder.status === "pending_upload" && directAssetCount > 0) {
             displayStatus = "in_progress";
           }
-        }
-      } else {
-        // Leaf folder - compute status based on its own file count
-        if (directAssetCount === 0) {
-          displayStatus = "pending_upload";
-        } else if (folder.status === "pending_upload" && directAssetCount > 0) {
-          displayStatus = "in_progress";
         }
       }
 
@@ -224,75 +232,90 @@ export const getMyProjectFolders = studioQuery({
       // Determine display status based on hierarchy
       let displayStatus = folder.status;
 
-      // Check if this folder has children (is a parent folder)
-      const hasChildren = descendants.length > 0;
+      // COMPUTED STATUS LOGIC:
+      // Only compute display status if the folder is NOT already marked as completed.
+      // Explicitly completed folders (via submission or manual action) should stay completed.
+      if (folder.status !== "completed") {
+        // Check if this folder has children (is a parent folder)
+        const hasChildren = descendants.length > 0;
 
-      if (hasChildren) {
-        // For parent folders, compute status from direct children
-        const directChildren = folderAssetData.filter((d) => {
-          const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
-          if (!dPath.startsWith(childPrefix)) return false;
-          const remainder = dPath.slice(childPrefix.length);
-          return !remainder.includes("/");
-        });
-
-        if (directChildren.length > 0) {
-          // Get the computed status for each direct child
-          const childStatuses = directChildren.map((child) => {
-            const childStoredStatus = child.folder.status;
-
-            if (child.directAssetCount === 0) {
-              // Check if this child has its own descendants with files
-              const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
-              const childDescPrefix = childPath + "/";
-              const childDescendants = folderAssetData.filter((d) => {
-                const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
-                return dPath.startsWith(childDescPrefix);
-              });
-              const childTotalFiles = childDescendants.reduce(
-                (sum, d) => sum + d.directAssetCount,
-                0,
-              );
-
-              if (childTotalFiles === 0) {
-                return "pending_upload";
-              }
-              // Has descendant files, check if all descendants are completed
-              const allDescCompleted = childDescendants.every(
-                (d) => d.folder.status === "completed",
-              );
-              return allDescCompleted ? "completed" : "in_progress";
-            }
-
-            // Child has direct files
-            if (childStoredStatus === "pending_upload") {
-              return "in_progress";
-            }
-            return childStoredStatus;
+        if (hasChildren) {
+          // For parent folders, compute status from direct children
+          const directChildren = folderAssetData.filter((d) => {
+            const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+            if (!dPath.startsWith(childPrefix)) return false;
+            const remainder = dPath.slice(childPrefix.length);
+            return !remainder.includes("/");
           });
 
-          const allCompleted = childStatuses.every((s) => s === "completed");
-          const allPending = childStatuses.every((s) => s === "pending_upload");
+          if (directChildren.length > 0) {
+            // Get the computed status for each direct child
+            const childStatuses = directChildren.map((child) => {
+              const childStoredStatus = child.folder.status;
 
-          if (allCompleted) {
-            displayStatus = "completed";
-          } else if (allPending) {
+              // Recursive status computation logic for children
+              if (child.directAssetCount === 0) {
+                // Check if this child has its own descendants with files
+                const childPath = child.folder.path.replace(/^\/+|\/+$/g, "");
+                const childDescPrefix = childPath + "/";
+                const childDescendants = folderAssetData.filter((d) => {
+                  const dPath = d.folder.path.replace(/^\/+|\/+$/g, "");
+                  return dPath.startsWith(childDescPrefix);
+                });
+                const childTotalFiles = childDescendants.reduce(
+                  (sum, d) => sum + d.directAssetCount,
+                  0,
+                );
+
+                if (childTotalFiles === 0) {
+                  // Even if no files, follow the stored status if it's completed
+                  return childStoredStatus === "completed"
+                    ? "completed"
+                    : "pending_upload";
+                }
+                // Has descendant files, check if all descendants are completed
+                const allDescCompleted = childDescendants.every(
+                  (d) => d.folder.status === "completed",
+                );
+                return allDescCompleted ? "completed" : "in_progress";
+              }
+
+              // Child has direct files
+              if (childStoredStatus === "pending_upload") {
+                return "in_progress";
+              }
+              return childStoredStatus;
+            });
+
+            const allCompleted = childStatuses.every((s) => s === "completed");
+            const allPending = childStatuses.every(
+              (s) => s === "pending_upload",
+            );
+
+            if (allCompleted) {
+              displayStatus = "completed";
+            } else if (allPending) {
+              displayStatus = "pending_upload";
+            } else {
+              displayStatus = "in_progress";
+            }
+          }
+        } else {
+          // Leaf folder - compute status based on its own file count
+          if (directAssetCount === 0) {
             displayStatus = "pending_upload";
-          } else {
+          } else if (
+            folder.status === "pending_upload" &&
+            directAssetCount > 0
+          ) {
             displayStatus = "in_progress";
           }
-        }
-      } else {
-        // Leaf folder - compute status based on its own file count
-        if (directAssetCount === 0) {
-          displayStatus = "pending_upload";
-        } else if (folder.status === "pending_upload" && directAssetCount > 0) {
-          displayStatus = "in_progress";
         }
       }
 
       return {
         _id: folder._id,
+        projectId: folder.projectId,
         name: folder.name,
         path: folder.path,
         status: displayStatus,

@@ -386,6 +386,7 @@ export default defineSchema({
 
   folders: defineTable({
     projectId: v.id("projects"),
+    parentId: v.optional(v.id("folders")), // Support for hierarchical folders
     name: v.string(),
     path: v.string(),
     description: v.optional(v.string()),
