@@ -36,7 +36,9 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
   - [Epic 13B: Folder Template Enhancement](./13b-folder-template-enhancement.md)
   - [Epic 13C: Service Package Builder UI](./13c-service-package-builder-ui.md)
   - [Epic 13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration.md)
-- **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)** ⬅️ NEW
+- **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)**
+- [Epic 15: Quotation Review Notification System](./15-quotation-review-notifications.md)
+- **[Epic 16: Deliverable Revision Workflow](./16-deliverable-revision-workflow.md)** ⬅️ NEW
 
 ---
 

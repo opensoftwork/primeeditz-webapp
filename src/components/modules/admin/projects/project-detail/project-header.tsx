@@ -28,14 +28,15 @@ export function ProjectHeader({
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
+        className="flex items-center gap-5"
       >
         <Button
           variant="outline"
           size="icon"
-          className="mb-4 rounded-xl border-white/10 hover:bg-white/5"
+          className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
           onClick={() => router.back()}
         >
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="h-5 w-5 text-white/60" />
         </Button>
         <div className="flex items-center gap-4">
           <h1 className="text-4xl font-black uppercase tracking-tighter text-white">
