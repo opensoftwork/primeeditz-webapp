@@ -22,6 +22,7 @@ import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FinalizeWorkDrawer } from "./finalize-work-drawer";
 import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { SquadMemberCard } from "./squad-member-card";
+import { AssignedWorkDeliverables } from "./deliverables";
 
 interface EmployeeProjectDetailProps {
   projectId: string;
@@ -126,6 +127,9 @@ export default function EmployeeProjectDetail({
 
             {/* Reference Materials */}
             <ReferenceMaterials files={project.referenceFiles as any} />
+
+            {/* Sent Deliverables */}
+            <AssignedWorkDeliverables projectId={projectId} />
           </div>
 
           {/* Squad Sidebar */}

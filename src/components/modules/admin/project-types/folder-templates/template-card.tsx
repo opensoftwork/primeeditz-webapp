@@ -43,7 +43,7 @@ export function TemplateCard({
       <Card
         onClick={onView}
         className={cn(
-          "relative overflow-hidden bg-white/2 border-white/5 rounded-3xl transition-all hover:bg-white/4 hover:border-white/10 group cursor-pointer",
+          "relative overflow-hidden bg-white/2 border-white/5 rounded-2xl transition-all hover:bg-white/4 hover:border-white/10 group cursor-pointer",
           isDefault && "border-primary/30 bg-primary/5",
         )}
       >
@@ -57,11 +57,11 @@ export function TemplateCard({
           )}
         />
 
-        <CardHeader className="relative z-10 flex flex-row items-start justify-between p-6">
-          <div className="flex items-center gap-3">
+        <CardHeader className="relative z-10 flex flex-row items-start justify-between p-4">
+          <div className="flex items-center gap-2.5">
             <div
               className={cn(
-                "p-2.5 rounded-xl border transition-colors",
+                "p-2 rounded-lg border transition-colors",
                 isDefault
                   ? "bg-primary/20 border-primary/30"
                   : "bg-white/5 border-white/10",
@@ -69,17 +69,17 @@ export function TemplateCard({
             >
               <FolderTree
                 className={cn(
-                  "h-5 w-5",
+                  "h-4 w-4",
                   isDefault ? "text-primary" : "text-white/40",
                 )}
               />
             </div>
             <div>
-              <CardTitle className="text-base font-black uppercase tracking-widest text-white">
+              <CardTitle className="text-sm font-black uppercase tracking-widest text-white">
                 {template.name}
               </CardTitle>
               {template.variant && (
-                <p className="text-[10px] text-white/40 font-bold uppercase tracking-widest mt-0.5">
+                <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-0.5">
                   {template.variant}
                 </p>
               )}
@@ -101,39 +101,39 @@ export function TemplateCard({
           )}
         </CardHeader>
 
-        <CardContent className="relative z-10 p-6 pt-0 space-y-4">
+        <CardContent className="relative z-10 p-4 pt-0 space-y-3">
           {/* Stats Row */}
-          <div className="flex items-center gap-4">
-            <div className="text-center px-1">
-              <p className="text-2xl font-black text-white">
+          <div className="flex items-center gap-3">
+            <div className="text-left">
+              <p className="text-lg font-black text-white leading-none">
                 {template.folders?.length || 0}
               </p>
-              <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold">
+              <p className="text-[8px] uppercase tracking-widest text-white/40 font-bold mt-1">
                 Main Folders
               </p>
             </div>
-            <div className="h-8 w-px bg-white/5" />
-            <div className="text-center px-1">
-              <p className="text-2xl font-black text-white">
+            <div className="h-6 w-px bg-white/5" />
+            <div className="text-left">
+              <p className="text-lg font-black text-white leading-none">
                 {folderCount - (template.folders?.length || 0)}
               </p>
-              <p className="text-[9px] uppercase tracking-widest text-white/40 font-bold">
+              <p className="text-[8px] uppercase tracking-widest text-white/40 font-bold mt-1">
                 Sub Folders
               </p>
             </div>
-            <div className="h-8 w-px bg-white/5" />
-            <div className="flex-1 flex items-center justify-end gap-2 flex-wrap">
+            <div className="h-6 w-px bg-white/5 ml-auto" />
+            <div className="flex items-center gap-1.5 flex-wrap">
               {isDefault && (
-                <Badge className="bg-primary/20 text-primary border-primary/30 text-[9px] font-black uppercase tracking-widest">
+                <Badge className="bg-primary/20 text-primary border-primary/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
                   Default
                 </Badge>
               )}
               {template.isActive ? (
-                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[9px] font-black uppercase tracking-widest">
+                <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
                   Active
                 </Badge>
               ) : (
-                <Badge className="bg-zinc-500/20 text-zinc-400 border-zinc-500/30 text-[9px] font-black uppercase tracking-widest">
+                <Badge className="bg-zinc-500/20 text-zinc-400 border-zinc-500/30 text-[8px] font-black uppercase tracking-widest px-1.5 py-0">
                   Inactive
                 </Badge>
               )}

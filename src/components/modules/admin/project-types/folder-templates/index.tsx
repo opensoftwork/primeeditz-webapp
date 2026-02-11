@@ -107,7 +107,7 @@ export function FolderTemplatesList({
       )}
     >
       {/* Header - Compact in minimal mode */}
-      <div className={cn("flex flex-col mb-12", minimal ? "gap-4" : "gap-8")}>
+      <div className={cn("flex flex-col mb-8", minimal ? "gap-4" : "gap-8")}>
         {!minimal && (
           <div className="flex items-center gap-4">
             <Button
@@ -134,7 +134,7 @@ export function FolderTemplatesList({
 
         <div
           className={cn(
-            "flex flex-col md:flex-row md:items-center justify-between gap-6 py-8",
+            "flex flex-col md:flex-row md:items-center justify-between gap-6 py-6",
             minimal ? "border-b border-white/5" : "border-y border-white/5",
           )}
         >
@@ -159,7 +159,7 @@ export function FolderTemplatesList({
 
           <Button
             onClick={handleCreate}
-            className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 gap-2"
+            className="h-10 px-6 rounded-lg font-black uppercase tracking-widest text-[10px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20 gap-2"
           >
             <Plus className="h-4 w-4" />
             ADD TEMPLATE

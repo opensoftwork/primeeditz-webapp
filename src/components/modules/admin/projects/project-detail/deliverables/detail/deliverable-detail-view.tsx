@@ -22,11 +22,13 @@ import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 interface DeliverableDetailViewProps {
   projectId?: string;
   deliverableId?: string;
+  hrefPrefix?: string;
 }
 
 export function DeliverableDetailView({
   projectId: propProjectId,
   deliverableId: propDeliverableId,
+  hrefPrefix,
 }: DeliverableDetailViewProps = {}) {
   const params = useParams();
   const router = useRouter();
@@ -38,6 +40,7 @@ export function DeliverableDetailView({
   const deliverableId = deliverableIdString as Id<"deliverables">;
 
   // Role check
+  // @ts-ignore
   const myProfile = useQuery(api.functions.profiles.queries.getMyProfile);
   const isAdmin = myProfile?.role === "admin";
 
@@ -204,9 +207,10 @@ export function DeliverableDetailView({
 
       {showVersionHistory && versions && versions.length > 1 && (
         <VersionHistory
-          versions={versions}
-          currentId={deliverableId}
-          projectId={projectId}
+          versions={versions!}
+          currentId={deliverableId as string}
+          projectId={deliverable.projectId as string}
+          hrefPrefix={hrefPrefix}
         />
       )}
 

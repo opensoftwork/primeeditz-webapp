@@ -18,6 +18,8 @@ interface DeliverableCardProps {
   uploadedByName: string;
   onSend?: () => void;
   variant?: "card" | "flat";
+  href?: string;
+  disableLink?: boolean;
 }
 
 export function DeliverableCard({
@@ -31,10 +33,15 @@ export function DeliverableCard({
   uploadedByName,
   onSend,
   variant = "card",
+  href,
+  disableLink,
 }: DeliverableCardProps) {
+  const CardWrapper = (disableLink ? "div" : Link) as any;
+  const cardHref = href || `/projects/${projectId}/deliverables/${id}`;
+
   return (
-    <Link
-      href={`/projects/${projectId}/deliverables/${id}`}
+    <CardWrapper
+      {...(disableLink ? {} : { href: cardHref })}
       className={cn(
         "group flex flex-col sm:flex-row sm:items-center justify-between transition-all gap-4 cursor-pointer",
         variant === "card"
@@ -98,6 +105,6 @@ export function DeliverableCard({
           </Button>
         )}
       </div>
-    </Link>
+    </CardWrapper>
   );
 }

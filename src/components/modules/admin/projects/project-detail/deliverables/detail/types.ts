@@ -21,5 +21,7 @@ export interface DeliverableData {
 export interface DeliverableVersion {
   _id: Id<"deliverables">;
   version: number;
+  status: string;
+  sizeBytes: number;
   _creationTime: number;
 }
