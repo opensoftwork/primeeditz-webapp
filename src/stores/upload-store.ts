@@ -1,6 +1,11 @@
 import { create } from "zustand";
 
-export type UploadStatus = "pending" | "uploading" | "processing" | "completed" | "error";
+export type UploadStatus =
+  | "pending"
+  | "uploading"
+  | "processing"
+  | "completed"
+  | "error";
 
 export interface UploadItem {
   id: string;
@@ -18,13 +23,17 @@ interface UploadState {
   items: Record<string, UploadItem>;
   addUpload: (projectId: string, folderId: string, file: File) => string;
   updateProgress: (id: string, progress: number) => void;
-  updateStatus: (id: string, status: UploadStatus, extra?: Partial<UploadItem>) => void;
+  updateStatus: (
+    id: string,
+    status: UploadStatus,
+    extra?: Partial<UploadItem>,
+  ) => void;
   removeUpload: (id: string) => void;
 }
 
 export const useUploadStore = create<UploadState>((set) => ({
   items: {},
-  
+
   addUpload: (projectId, folderId, file) => {
     const id = Math.random().toString(36).substring(7);
     set((state) => ({

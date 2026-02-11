@@ -7,17 +7,17 @@
 
 "use client";
 
+import { ArrowLeft, FileText } from "lucide-react";
 import React, { useRef } from "react";
-import { FileText, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { QuotationDocument } from "./quotation-document";
-import { DownloadQuotation } from "./download-quotation";
 import type {
-  QuotationData,
-  QuotationSection,
   CompanyInfo,
   Project,
+  QuotationData,
+  QuotationSection,
 } from "../types";
+import { DownloadQuotation } from "./download-quotation";
+import { QuotationDocument } from "./quotation-document";
 
 // ============================================================================
 // Component Props
@@ -29,7 +29,7 @@ interface QuotationPreviewProps {
   projects?: Project[];
   onBack?: () => void;
   companyInfo?: CompanyInfo;
-  clientName?: string;
+  studioName?: string;
   projectName?: string;
 }
 
@@ -43,7 +43,7 @@ export function QuotationPreview({
   projects = [],
   onBack,
   companyInfo,
-  clientName,
+  studioName,
   projectName,
 }: QuotationPreviewProps) {
   const documentRef = useRef<HTMLDivElement>(null);
@@ -52,7 +52,7 @@ export function QuotationPreview({
     <div className="min-h-screen bg-zinc-100 print:bg-white">
       {/* Control Panel - Hidden on Print */}
       <div className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-white/5 print:hidden">
-        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row justify-between items-center p-4 gap-4">
+        <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row justify-between items-center p-6 gap-4">
           <div className="flex items-center gap-4">
             {onBack && (
               <Button
@@ -91,7 +91,7 @@ export function QuotationPreview({
               sections={sections}
               projects={projects}
               companyInfo={companyInfo}
-              clientName={clientName}
+              studioName={studioName}
               projectName={projectName}
               variant="outline"
               size="sm"
@@ -109,7 +109,7 @@ export function QuotationPreview({
           sections={sections}
           projects={projects}
           companyInfo={companyInfo}
-          clientName={clientName}
+          studioName={studioName}
           projectName={projectName}
         />
       </div>

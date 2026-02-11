@@ -16,11 +16,12 @@ export const createSection = adminMutation({
     let displayOrder = args.displayOrder;
     if (displayOrder === undefined) {
       const sections = await ctx.db.query("quotationSections").collect();
-      displayOrder = sections.length > 0 
-        ? Math.max(...sections.map((s) => s.displayOrder ?? 0)) + 1 
-        : 0;
+      displayOrder =
+        sections.length > 0
+          ? Math.max(...sections.map((s) => s.displayOrder ?? 0)) + 1
+          : 0;
     }
-    
+
     return await ctx.db.insert("quotationSections", {
       name: args.name,
       displayOrder,
@@ -45,16 +46,16 @@ export const updateSection = adminMutation({
   },
   handler: async (ctx, args) => {
     const { sectionId, ...updates } = args;
-    
+
     // Remove undefined values
     const cleanUpdates = Object.fromEntries(
-      Object.entries(updates).filter(([_, v]) => v !== undefined)
+      Object.entries(updates).filter(([_, v]) => v !== undefined),
     );
-    
+
     if (Object.keys(cleanUpdates).length > 0) {
       await ctx.db.patch(sectionId, cleanUpdates);
     }
-    
+
     return null;
   },
 });
@@ -71,7 +72,7 @@ export const toggleSectionActive = adminMutation({
     if (!section) {
       throw new Error("Section not found");
     }
-    
+
     const newStatus = !section.isActive;
     await ctx.db.patch(args.sectionId, { isActive: newStatus });
     return newStatus;
@@ -88,8 +89,8 @@ export const reorderSections = adminMutation({
   handler: async (ctx, args) => {
     await Promise.all(
       args.orderedIds.map((id, index) =>
-        ctx.db.patch(id, { displayOrder: index })
-      )
+        ctx.db.patch(id, { displayOrder: index }),
+      ),
     );
     return null;
   },

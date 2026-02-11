@@ -9,13 +9,14 @@
 
 import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import type { Table } from "@tanstack/react-table";
-import { SlidersHorizontal } from "lucide-react";
+import { Check, SlidersHorizontal } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
@@ -49,22 +50,39 @@ export function DataTableViewOptions<TData>({
         <DropdownMenuSeparator className="bg-white/5" />
         {table
           .getAllColumns()
-          .filter(
-            (column) =>
-              typeof column.accessorFn !== "undefined" && column.getCanHide(),
-          )
+          .filter((column) => column.getCanHide())
           .map((column) => {
+            // Map known column IDs to friendly titles
+            const friendlyTitles: Record<string, string> = {
+              name: "Package Name",
+              categoryName: "Category",
+              projectTypeName: "Project Type",
+              isActive: "Status",
+              totalValue: "Value",
+              items: "Items",
+              actions: "Actions",
+            };
+
+            const title =
+              friendlyTitles[column.id] ||
+              (typeof column.columnDef.header === "string"
+                ? column.columnDef.header
+                : column.id.replace(/([A-Z])/g, " $1").trim());
+
             return (
-              <DropdownMenuCheckboxItem
+              <DropdownMenuItem
                 key={column.id}
-                className="text-[10px] font-bold uppercase tracking-widest text-white/60 focus:bg-white/10 focus:text-white"
-                checked={column.getIsVisible()}
-                onCheckedChange={(value: boolean) =>
-                  column.toggleVisibility(value)
-                }
+                className="text-[10px] font-bold uppercase tracking-widest text-white/60 focus:bg-white/10 focus:text-white relative pl-8 cursor-pointer"
+                onSelect={(e) => {
+                  e.preventDefault();
+                  column.toggleVisibility(!column.getIsVisible());
+                }}
               >
-                {column.id.replace(/([A-Z])/g, " $1").trim()}
-              </DropdownMenuCheckboxItem>
+                <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
+                  {column.getIsVisible() && <Check className="h-4 w-4" />}
+                </span>
+                {title}
+              </DropdownMenuItem>
             );
           })}
       </DropdownMenuContent>

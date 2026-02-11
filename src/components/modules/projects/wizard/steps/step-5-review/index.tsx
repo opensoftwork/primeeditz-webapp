@@ -1,23 +1,21 @@
 "use client";
 
-import { useEffect, useCallback } from "react";
+import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import { api } from "@convex/_generated/api";
+import { useCallback, useEffect } from "react";
 
 import { toast } from "sonner";
 import { useReferenceFilesStore } from "@/stores/reference-files-store";
+import { useWizardForm } from "../../wizard-form-context";
 import { UploadedFilesDrawer } from "../step-3-files/uploaded-files-drawer";
-
 // Components
 import { Step5Header } from "./header";
-import { ClientInfoReview } from "./sections/client-info";
 import { BasicInfoReview } from "./sections/basic-info";
-import { SpecificationsReview } from "./sections/specifications";
 import { DescriptionReview } from "./sections/description";
 import { FilesReview } from "./sections/files-review";
-
-import { useWizardForm } from "../../wizard-form-context";
+import { SpecificationsReview } from "./sections/specifications";
+import { StudioInfoReview } from "./sections/studio-info";
 import { SubmissionCard } from "./submission-card";
 
 export function WizardStep5() {
@@ -26,6 +24,7 @@ export function WizardStep5() {
     mode,
     formData,
     projectCode,
+    projectId,
     goToStep,
     submitProject,
     setReviewing,
@@ -40,7 +39,7 @@ export function WizardStep5() {
     api.functions.projectTypes.queries.getProjectType,
     formData.step1.projectTypeId
       ? { projectTypeId: formData.step1.projectTypeId }
-      : "skip"
+      : "skip",
   ) as any;
 
   const handleEdit = (step: 0 | 1 | 2 | 3 | 4) => {
@@ -51,10 +50,16 @@ export function WizardStep5() {
   const handleSubmit = useCallback(async () => {
     const success = await submitProject();
     if (success) {
-      toast.success("Project successfully submitted!");
-      router.push("/dashboard");
+      toast.success(
+        mode === "onboarding"
+          ? "Onboarding completed!"
+          : "Project successfully submitted!",
+      );
+      router.push(
+        mode === "onboarding" ? `/projects/${projectId}` : "/dashboard",
+      );
     }
-  }, [submitProject, router]);
+  }, [submitProject, router, mode, projectId]);
 
   useEffect(() => {
     setSubmitTrigger(() => handleSubmit());
@@ -72,7 +77,7 @@ export function WizardStep5() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-8 space-y-10">
           {mode === "admin" && (
-            <ClientInfoReview
+            <StudioInfoReview
               formData={formData}
               onEdit={() => handleEdit(0)}
             />

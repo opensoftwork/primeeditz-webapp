@@ -1,16 +1,27 @@
 import { v } from "convex/values";
-import { QueryCtx, MutationCtx, mutation } from "../../_generated/server";
-import { Doc, Id } from "../../_generated/dataModel";
-import { adminMutation, clientMutation, Profile } from "../../lib/customFunctions";
-import { getPhaseForState, getActorForState } from "../../lib/statusMachine";
-import { ActionState } from "../../schema";
+import type { Doc, Id } from "../../_generated/dataModel";
+import {
+  type MutationCtx,
+  mutation,
+  type QueryCtx,
+} from "../../_generated/server";
+import {
+  adminMutation,
+  authenticatedWithProfileMutation,
+  type Profile,
+  studioMutation,
+} from "../../lib/customFunctions";
+import { getActorForState, getPhaseForState } from "../../lib/statusMachine";
+import type { ActionState } from "../../schema";
+import { spawnProjectsFromQuotation } from "../projects/spawning";
 
+/*
 /**
  * Line item input validator
  */
 const lineItemInput = v.object({
   id: v.string(),
-  sectionId: v.id("quotationSections"),
+  sectionId: v.optional(v.id("quotationSections")),
   projectId: v.optional(v.string()),
   description: v.string(),
   unit: v.string(),
@@ -19,6 +30,11 @@ const lineItemInput = v.object({
   length: v.optional(v.string()),
   width: v.optional(v.string()),
   image: v.optional(v.string()),
+  spawnsProject: v.optional(v.boolean()),
+  projectTypeId: v.optional(v.id("projectTypes")),
+  selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
+  sourcePackageId: v.optional(v.id("servicePackages")),
+  projectConfigId: v.optional(v.string()),
   subItems: v.optional(
     v.array(
       v.object({
@@ -27,15 +43,17 @@ const lineItemInput = v.object({
         unit: v.string(),
         rate: v.number(),
         quantity: v.number(),
-      })
-    )
+      }),
+    ),
   ),
 });
 
 /**
  * Generate unique quotation code
  */
-async function generateQuotationCode(ctx: QueryCtx | MutationCtx): Promise<string> {
+async function generateQuotationCode(
+  ctx: QueryCtx | MutationCtx,
+): Promise<string> {
   const quotations = await ctx.db.query("quotations").collect();
   const maxNumber = quotations.reduce((max: number, q: Doc<"quotations">) => {
     const match = q.code.match(/QT-(\d+)/);
@@ -45,7 +63,7 @@ async function generateQuotationCode(ctx: QueryCtx | MutationCtx): Promise<strin
     }
     return max;
   }, 0);
-  
+
   const nextNumber = maxNumber + 1;
   return `QT-${nextNumber.toString().padStart(6, "0")}`;
 }
@@ -60,10 +78,10 @@ function calculateTotals(
     subItems?: Array<{ rate: number; quantity: number }>;
   }>,
   taxRate: number,
-  discountAmount?: number
+  discountAmount?: number,
 ) {
   let subtotal = 0;
-  
+
   for (const item of lineItems) {
     subtotal += item.rate * item.quantity;
     if (item.subItems) {
@@ -72,13 +90,64 @@ function calculateTotals(
       }
     }
   }
-  
+
   const discount = discountAmount || 0;
   const taxableAmount = subtotal - discount;
   const taxAmount = taxableAmount * taxRate;
   const total = taxableAmount + taxAmount;
-  
+
   return { subtotal, taxAmount, total };
+}
+
+/**
+ * Aggregates line items from multiple service packages.
+ * Adds sourcePackageId and spawning config to each item.
+ */
+async function aggregateLineItemsFromPackages(
+  ctx: MutationCtx,
+  packageIds: Id<"servicePackages">[],
+) {
+  const allLineItems: any[] = [];
+
+  for (const packageId of packageIds) {
+    const pkg = await ctx.db.get(packageId);
+    if (!pkg) {
+      throw new Error(`Package not found: ${packageId}`);
+    }
+
+    // Add each line item with source tracking and spawning config
+    for (const item of pkg.lineItems) {
+      // Lookup the specific project config if it exists
+      let projectTypeId = pkg.projectTypeId;
+      let selectedFolderTemplateId = pkg.folderTemplateId;
+
+      if (item.projectConfigId && pkg.projectConfigs) {
+        const config = pkg.projectConfigs.find(c => c.id === item.projectConfigId);
+        if (config) {
+          projectTypeId = config.projectTypeId;
+          selectedFolderTemplateId = config.folderTemplateId;
+        }
+      }
+
+      allLineItems.push({
+        ...item,
+        id: crypto.randomUUID(), // New ID for quotation line item
+        sourcePackageId: packageId,
+        spawnsProject: true, // Packages always spawn projects now
+        projectTypeId,
+        selectedFolderTemplateId,
+        subItems: item.subItems?.map((si) => ({
+          id: crypto.randomUUID(),
+          description: si.description,
+          unit: "Unit",
+          rate: si.amount ?? 0,
+          quantity: 1,
+        })),
+      });
+    }
+  }
+
+  return allLineItems;
 }
 
 /**
@@ -87,13 +156,13 @@ function calculateTotals(
 async function transitionProjectsForQuotation(
   ctx: MutationCtx & { profile: Profile },
   args: {
-    clientId?: string;
-    projectId?: string;
-    projectIds?: string[];
+    studioId?: Id<"profiles">;
+    projectId?: Id<"projects">;
+    projectIds?: Id<"projects">[];
     targetState: ActionState;
     notes: string;
     onlyFromDraft?: boolean;
-  }
+  },
 ) {
   const targetProjectIds = [
     ...(args.projectId ? [args.projectId] : []),
@@ -104,23 +173,22 @@ async function transitionProjectsForQuotation(
 
   // Optimized fetch: Query all projects for this client
   let projectsToUpdate: Doc<"projects">[] = [];
-  
-  if (args.clientId) {
+
+  if (args.studioId) {
     const allClientProjects = await ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", args.clientId as Id<"profiles">))
+      .withIndex("by_studioId", (q) =>
+        q.eq("studioId", args.studioId as Id<"profiles">),
+      )
       .collect();
-    
-    projectsToUpdate = allClientProjects.filter(p => 
-      targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code)
+
+    projectsToUpdate = allClientProjects.filter((p) =>
+      targetProjectIds.includes(p._id),
     );
   } else {
-    // Fallback if no clientId: fetch individually
+    // Fallback if no studioId: fetch individually
     for (const pId of targetProjectIds) {
-      let p = await ctx.db.get(pId as Id<"projects">);
-      if (!p) {
-        p = await ctx.db.query("projects").withIndex("by_code", q => q.eq("code", pId)).unique();
-      }
+      const p = await ctx.db.get(pId);
       if (p) projectsToUpdate.push(p);
     }
   }
@@ -154,39 +222,118 @@ async function transitionProjectsForQuotation(
 }
 
 /**
+ * Request a quotation (Studio-side)
+ */
+export const requestQuotation = authenticatedWithProfileMutation({
+  args: {
+    selectedPackageIds: v.array(v.id("servicePackages")),
+    endClientName: v.string(),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    // Validation
+    if (args.selectedPackageIds.length === 0) {
+      throw new Error("At least one package must be selected");
+    }
+
+    const code = await generateQuotationCode(ctx);
+    const taxRate = 0.18; // Default GST
+
+    // Aggregate line items from all selected packages
+    const lineItems = await aggregateLineItemsFromPackages(
+      ctx,
+      args.selectedPackageIds,
+    );
+
+    const { subtotal, taxAmount, total } = calculateTotals(
+      lineItems,
+      taxRate,
+      0,
+    );
+
+    // Generate share token for public sharing
+    const shareToken = crypto.randomUUID();
+
+    const quotationId = await ctx.db.insert("quotations", {
+      code,
+      version: 1,
+      studioId: ctx.profile._id,
+      selectedPackageIds: args.selectedPackageIds,
+      status: "initiated",
+      lineItems,
+      subtotal,
+      taxRate,
+      taxAmount,
+      total,
+      endClientName: args.endClientName,
+      eventName: args.eventName,
+      eventDate: args.eventDate,
+      studioNotes: args.notes,
+      shareToken,
+      createdBy: "STUDIO",
+      updatedAt: Date.now(),
+    });
+
+    return quotationId;
+  },
+});
+
+/**
  * Create a new quotation
  */
 export const createQuotation = adminMutation({
   args: {
-    clientId: v.optional(v.string()),
-    projectId: v.optional(v.string()),
-    projectIds: v.optional(v.array(v.string())),
-    templateId: v.optional(v.id("quotationTemplates")),
+    studioId: v.optional(v.id("profiles")),
+    projectId: v.optional(v.id("projects")),
+    projectIds: v.optional(v.array(v.id("projects"))),
+    selectedPackageIds: v.array(v.id("servicePackages")),
     lineItems: v.array(lineItemInput),
     terms: v.optional(v.string()),
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
+    endClientName: v.string(),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
     createdBy: v.string(),
+    lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
+    // Validation
+    if (args.selectedPackageIds.length === 0 && (!args.lineItems || args.lineItems.length === 0)) {
+      throw new Error("At least one package or one line item must be provided");
+    }
+
     const code = await generateQuotationCode(ctx);
     const taxRate = args.taxRate ?? 0.18;
+
+    // Aggregate line items from packages if provided AND no line items were explicitly passed
+    let combinedLineItems = [...(args.lineItems || [])];
+    if (args.selectedPackageIds.length > 0 && combinedLineItems.length === 0) {
+      const packageLineItems = await aggregateLineItemsFromPackages(
+        ctx,
+        args.selectedPackageIds,
+      );
+      combinedLineItems = [...combinedLineItems, ...packageLineItems];
+    }
+
     const { subtotal, taxAmount, total } = calculateTotals(
-      args.lineItems,
+      combinedLineItems,
       taxRate,
-      args.discountAmount
+      args.discountAmount,
     );
-    
+
     const quotationId = await ctx.db.insert("quotations", {
       code,
       version: 1,
-      clientId: args.clientId,
+      studioId: args.studioId,
       projectId: args.projectId,
       projectIds: args.projectIds,
-      templateId: args.templateId,
+      selectedPackageIds: args.selectedPackageIds,
       status: "draft",
-      lineItems: args.lineItems,
+      lineItems: combinedLineItems,
       subtotal,
       taxRate,
       taxAmount,
@@ -194,17 +341,22 @@ export const createQuotation = adminMutation({
       total,
       terms: args.terms,
       validUntil: args.validUntil,
+      endClientName: args.endClientName,
+      eventName: args.eventName,
+      eventDate: args.eventDate,
       createdBy: args.createdBy,
+      lastStep: args.lastStep,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: args.clientId,
+      studioId: args.studioId,
       projectId: args.projectId,
       projectIds: args.projectIds,
       targetState: "awaiting_quotation",
-      notes: "System moved project to awaiting_quotation because a quotation was created",
+      notes:
+        "System moved project to awaiting_quotation because a quotation was created",
       onlyFromDraft: true,
     });
 
@@ -223,31 +375,36 @@ export const updateQuotation = adminMutation({
     validUntil: v.optional(v.number()),
     taxRate: v.optional(v.number()),
     discountAmount: v.optional(v.number()),
-    clientId: v.optional(v.string()),
-    projectId: v.optional(v.string()),
-    projectIds: v.optional(v.array(v.string())),
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.number()),
+    studioId: v.optional(v.id("profiles")),
+    projectId: v.optional(v.id("projects")),
+    projectIds: v.optional(v.array(v.id("projects"))),
+    selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
+    lastStep: v.optional(v.number()),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) {
       throw new Error("Quotation not found");
     }
-    
+
     if (quotation.status !== "draft") {
       throw new Error("Can only edit draft quotations");
     }
-    
+
     const { quotationId, ...updates } = args;
-    
+
     if (updates.lineItems) {
       const taxRate = updates.taxRate ?? quotation.taxRate;
       const discountAmount = updates.discountAmount ?? quotation.discountAmount;
       const { subtotal, taxAmount, total } = calculateTotals(
         updates.lineItems,
         taxRate,
-        discountAmount
+        discountAmount,
       );
-      
+
       await ctx.db.patch(quotationId, {
         ...updates,
         lineItems: updates.lineItems,
@@ -258,9 +415,9 @@ export const updateQuotation = adminMutation({
       });
     } else {
       const cleanUpdates = Object.fromEntries(
-        Object.entries(updates).filter(([_, v]) => v !== undefined)
+        Object.entries(updates).filter(([_, v]) => v !== undefined),
       );
-      
+
       if (Object.keys(cleanUpdates).length > 0) {
         await ctx.db.patch(quotationId, {
           ...cleanUpdates,
@@ -268,7 +425,7 @@ export const updateQuotation = adminMutation({
         });
       }
     }
-    
+
     return null;
   },
 });
@@ -285,22 +442,28 @@ export const sendQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
     // Status can be draft (first time) or sent/viewed (resending)
-    const canSend = ["draft", "sent", "viewed", "changes_requested"].includes(quotation.status);
-    if (!canSend) throw new Error(`Cannot send quotation in ${quotation.status} status`);
-    
+    const canSend = ["draft", "sent", "viewed", "changes_requested"].includes(
+      quotation.status,
+    );
+    if (!canSend)
+      throw new Error(`Cannot send quotation in ${quotation.status} status`);
+
     // Generate share token
-    const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    const characters =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     let shareToken = "";
     for (let i = 0; i < 16; i++) {
-      shareToken += characters.charAt(Math.floor(Math.random() * characters.length));
+      shareToken += characters.charAt(
+        Math.floor(Math.random() * characters.length),
+      );
     }
-    
+
     // Calculate expiry
     const validityDays = args.validityDays ?? 30;
-    const shareTokenExpiresAt = Date.now() + (validityDays * 24 * 60 * 60 * 1000);
-    
+    const shareTokenExpiresAt = Date.now() + validityDays * 24 * 60 * 60 * 1000;
+
     await ctx.db.patch(args.quotationId, {
       status: "sent",
       sentAt: Date.now(),
@@ -312,7 +475,7 @@ export const sendQuotation = adminMutation({
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_sent",
@@ -333,7 +496,7 @@ export const markQuotationViewed = mutation({
   handler: async (ctx: MutationCtx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) return null;
-    
+
     // Only update viewedAt if it hasn't been set or if status is 'sent'
     if (quotation.status === "sent") {
       await ctx.db.patch(args.quotationId, {
@@ -347,35 +510,121 @@ export const markQuotationViewed = mutation({
         updatedAt: Date.now(),
       });
     }
-    
+
     return null;
   },
 });
 
 /**
- * Approve quotation
+ * Approve quotation and spawn projects
  */
 export const approveQuotation = adminMutation({
   args: {
     quotationId: v.id("quotations"),
+    assignedEmployeeId: v.optional(v.id("profiles")),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
+    // Status check
+    const allowed = [
+      "initiated",
+      "draft",
+      "sent",
+      "viewed",
+      "changes_requested",
+    ];
+    if (!allowed.includes(quotation.status)) {
+      throw new Error(
+        `Cannot approve quotation from status: ${quotation.status}`,
+      );
+    }
+
     await ctx.db.patch(args.quotationId, {
       status: "approved",
       approvedAt: Date.now(),
+      assignedEmployeeId:
+        args.assignedEmployeeId ?? quotation.assignedEmployeeId,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_approved",
       notes: "Admin approved the quotation",
+    });
+
+    // Story 11B.3 / 13F.4: Spawn projects based on line items/packages
+    const spawnedProjectIds = await spawnProjectsFromQuotation(ctx, {
+      quotationId: args.quotationId,
+      profileId: ctx.profile._id,
+    });
+
+    // Update quotation with spawned project IDs
+    if (spawnedProjectIds.length > 0) {
+      const existingProjectIds = quotation.projectIds || [];
+      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      await ctx.db.patch(args.quotationId, {
+        projectIds: allProjectIds,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { projectIds: spawnedProjectIds };
+  },
+});
+
+/**
+ * Reject quotation (Admin-side)
+ */
+export const rejectQuotationByAdmin = adminMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    reason: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    await ctx.db.patch(args.quotationId, {
+      status: "rejected",
+      rejectedAt: Date.now(),
+      rejectionReason: args.reason,
+      updatedAt: Date.now(),
+    });
+
+    // Optimized transition using helper
+    await transitionProjectsForQuotation(ctx, {
+      studioId: quotation.studioId,
+      projectId: quotation.projectId,
+      projectIds: quotation.projectIds,
+      targetState: "quotation_rejected",
+      notes: `Admin rejected requested quotation. Reason: ${args.reason}`,
+    });
+
+    return null;
+  },
+});
+
+/**
+ * Assign an employee to a quotation
+ */
+export const assignEmployeeToQuotation = adminMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    assignedEmployeeId: v.optional(v.id("profiles")),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    await ctx.db.patch(args.quotationId, {
+      assignedEmployeeId: args.assignedEmployeeId,
+      updatedAt: Date.now(),
     });
 
     return null;
@@ -392,11 +641,9 @@ export const deleteQuotation = adminMutation({
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
-    
+
     await ctx.db.patch(args.quotationId, {
-      status: "rejected",
-      clientNotes: "Deleted by admin",
-      rejectedAt: Date.now(),
+      isDeleted: true,
       updatedAt: Date.now(),
     });
 
@@ -406,14 +653,14 @@ export const deleteQuotation = adminMutation({
       ...(quotation.projectIds || []),
     ];
 
-    if (targetProjectIds.length > 0 && quotation.clientId) {
+    if (targetProjectIds.length > 0 && quotation.studioId) {
       const allClientProjects = await ctx.db
         .query("projects")
-        .withIndex("by_clientId", (q) => q.eq("clientId", quotation.clientId as Id<"profiles">))
+        .withIndex("by_studioId", (q) => q.eq("studioId", quotation.studioId!))
         .collect();
-      
-      const projectsToLog = allClientProjects.filter(p => 
-        targetProjectIds.includes(p._id) || targetProjectIds.includes(p.code)
+
+      const projectsToLog = allClientProjects.filter((p) =>
+        targetProjectIds.includes(p._id),
       );
 
       for (const project of projectsToLog) {
@@ -437,50 +684,68 @@ export const deleteQuotation = adminMutation({
 /**
  * Accept quotation (client-side)
  */
-export const acceptQuotation = clientMutation({
+export const acceptQuotation = studioMutation({
   args: {
     quotationId: v.id("quotations"),
-    clientSignature: v.optional(v.string()),
+    studioSignature: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const quotation = await ctx.db.get(args.quotationId);
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Quotation cannot be accepted from status: ${quotation.status}`);
+      throw new Error(
+        `Quotation cannot be accepted from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
       status: "approved",
       approvedAt: Date.now(),
-      clientSignature: args.clientSignature,
+      studioSignature: args.studioSignature,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_approved",
       notes: "Client approved the quotation",
     });
 
-    return { success: true };
+    // Story 11B.3 / 13F.4: Spawn projects based on line items/packages
+    const spawnedProjectIds = await spawnProjectsFromQuotation(ctx, {
+      quotationId: args.quotationId,
+      profileId: ctx.profile._id,
+    });
+
+    // Update quotation with spawned project IDs
+    if (spawnedProjectIds.length > 0) {
+      const existingProjectIds = quotation.projectIds || [];
+      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      await ctx.db.patch(args.quotationId, {
+        projectIds: allProjectIds,
+        updatedAt: Date.now(),
+      });
+    }
+
+    return { success: true, projectIds: spawnedProjectIds };
   },
 });
 
 /**
  * Request quotation changes (client-side)
  */
-export const requestQuotationChanges = clientMutation({
+export const requestQuotationChanges = studioMutation({
   args: {
     quotationId: v.id("quotations"),
     reasons: v.array(v.string()),
@@ -491,27 +756,29 @@ export const requestQuotationChanges = clientMutation({
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Changes cannot be requested from status: ${quotation.status}`);
+      throw new Error(
+        `Changes cannot be requested from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
       status: "changes_requested",
       changeRequestedAt: Date.now(),
       changeReasons: args.reasons,
-      clientNotes: args.notes,
+      studioNotes: args.notes,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "awaiting_quotation",
@@ -525,7 +792,7 @@ export const requestQuotationChanges = clientMutation({
 /**
  * Reject quotation (client-side)
  */
-export const rejectQuotation = clientMutation({
+export const rejectQuotation = studioMutation({
   args: {
     quotationId: v.id("quotations"),
     reason: v.string(),
@@ -536,27 +803,29 @@ export const rejectQuotation = clientMutation({
     if (!quotation) throw new Error("Quotation not found");
 
     // Verify ownership
-    if (quotation.clientId !== ctx.profile._id) {
+    if (quotation.studioId !== ctx.profile._id) {
       throw new Error("Access denied: Not your quotation");
     }
 
     // Status check
     const allowedStatuses = ["sent", "viewed", "changes_requested"];
     if (!allowedStatuses.includes(quotation.status)) {
-      throw new Error(`Quotation cannot be rejected from status: ${quotation.status}`);
+      throw new Error(
+        `Quotation cannot be rejected from status: ${quotation.status}`,
+      );
     }
 
     await ctx.db.patch(args.quotationId, {
       status: "rejected",
       rejectedAt: Date.now(),
       rejectionReason: args.reason,
-      clientNotes: args.notes,
+      studioNotes: args.notes,
       updatedAt: Date.now(),
     });
 
     // Optimized transition using helper
     await transitionProjectsForQuotation(ctx, {
-      clientId: quotation.clientId,
+      studioId: quotation.studioId,
       projectId: quotation.projectId,
       projectIds: quotation.projectIds,
       targetState: "quotation_rejected",
@@ -580,7 +849,7 @@ export const duplicateQuotation = adminMutation({
     if (!original) throw new Error("Original quotation not found");
 
     const code = await generateQuotationCode(ctx);
-    
+
     // Create new quotation as a copy of the original
     const newQuotationId = await ctx.db.insert("quotations", {
       ...original,
@@ -589,6 +858,7 @@ export const duplicateQuotation = adminMutation({
       code,
       version: 1,
       status: "draft",
+      selectedPackageIds: original.selectedPackageIds,
       createdBy: args.createdBy,
       updatedAt: Date.now(),
       sentAt: undefined,
@@ -598,12 +868,120 @@ export const duplicateQuotation = adminMutation({
       changeRequestedAt: undefined,
       shareToken: undefined,
       shareTokenExpiresAt: undefined,
-      clientSignature: undefined,
+      studioSignature: undefined,
       changeReasons: undefined,
-      clientNotes: undefined,
+      studioNotes: undefined,
       rejectionReason: undefined,
     } as any);
 
     return newQuotationId;
   },
 });
+
+/**
+ * Re-initiate a rejected quotation (Studio-side)
+ */
+export const reinitiateQuotation = studioMutation({
+  args: {
+    quotationId: v.id("quotations"),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) throw new Error("Quotation not found");
+
+    if (quotation.studioId !== ctx.profile._id) {
+      throw new Error("Access denied");
+    }
+
+    if (quotation.status !== "rejected") {
+      throw new Error("Only rejected quotations can be re-initiated");
+    }
+
+    await ctx.db.patch(args.quotationId, {
+      status: "initiated",
+      studioNotes: args.notes ?? quotation.studioNotes,
+      rejectionReason: undefined,
+      rejectedAt: undefined,
+      updatedAt: Date.now(),
+    });
+
+    return { success: true };
+  },
+});
+
+/**
+ * Create or get an existing quotation request draft for the current studio.
+ */
+export const getOrCreateDraft = studioMutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db
+      .query("quotationRequestDrafts")
+      .withIndex("by_createdBy", (q) => q.eq("createdBy", ctx.profile._id))
+      .first();
+
+    if (existing) {
+      return { draftId: existing._id, isNew: false, draft: existing };
+    }
+
+    const draftId = await ctx.db.insert("quotationRequestDrafts", {
+      lastStep: 1,
+      createdBy: ctx.profile._id,
+      updatedAt: Date.now(),
+    });
+
+    const draft = await ctx.db.get(draftId);
+    return { draftId, isNew: true, draft };
+  },
+});
+
+/**
+ * Update a quotation request draft.
+ */
+export const updateDraft = studioMutation({
+  args: {
+    draftId: v.id("quotationRequestDrafts"),
+    lastStep: v.optional(v.number()),
+    // Step 1
+    selectedPackageIds: v.optional(v.array(v.id("servicePackages"))),
+    selectedCategory: v.optional(v.string()),
+    // Step 2
+    endClientName: v.optional(v.string()),
+    eventName: v.optional(v.string()),
+    eventDate: v.optional(v.string()),
+    venue: v.optional(v.string()),
+    notes: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { draftId, ...updates } = args;
+
+    const draft = await ctx.db.get(draftId);
+    if (!draft || draft.createdBy !== ctx.profile._id) {
+      throw new Error("Draft not found or unauthorized");
+    }
+
+    await ctx.db.patch(draftId, {
+      ...updates,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+/**
+ * Delete a quotation request draft.
+ */
+export const deleteDraft = studioMutation({
+  args: {
+    draftId: v.id("quotationRequestDrafts"),
+  },
+  handler: async (ctx, { draftId }) => {
+    const draft = await ctx.db.get(draftId);
+    if (!draft || draft.createdBy !== ctx.profile._id) {
+      throw new Error("Draft not found or unauthorized");
+    }
+
+    await ctx.db.delete(draftId);
+  },
+});
+

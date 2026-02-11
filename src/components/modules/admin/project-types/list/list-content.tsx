@@ -10,25 +10,28 @@ interface ProjectType {
   fieldCount?: number;
 }
 
+import type { Id } from "@convex/_generated/dataModel";
+
 interface ListContentProps {
   projectTypes: ProjectType[];
   onEdit: (type: any) => void;
-  onToggleStatus: (id: string, current: boolean) => void;
-  onDeleteRequest: (id: string, name: string) => void;
+  onDeleteRequest: (id: Id<"projectTypes">, name: string) => void;
 }
 
 export function ListContent({
   projectTypes,
   onEdit,
-  onToggleStatus,
   onDeleteRequest,
 }: ListContentProps) {
-  const categorizedTypes = projectTypes.reduce((acc, type) => {
-    const cat = type.categoryName || "Uncategorized";
-    if (!acc[cat]) acc[cat] = [];
-    acc[cat].push(type);
-    return acc;
-  }, {} as Record<string, ProjectType[]>);
+  const categorizedTypes = projectTypes.reduce(
+    (acc, type) => {
+      const cat = type.categoryName || "Uncategorized";
+      if (!acc[cat]) acc[cat] = [];
+      acc[cat].push(type);
+      return acc;
+    },
+    {} as Record<string, ProjectType[]>,
+  );
 
   return (
     <div className="space-y-12">
@@ -47,9 +50,9 @@ export function ListContent({
             {types.map((type) => (
               <ProjectTypeCard
                 key={type._id}
-                type={type}
-                onEdit={onEdit}
-                onToggleStatus={onToggleStatus}
+                type={type as any}
+                onView={onEdit}
+                onConfigure={onEdit}
                 onDelete={onDeleteRequest}
               />
             ))}

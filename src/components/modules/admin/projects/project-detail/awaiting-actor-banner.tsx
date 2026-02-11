@@ -1,8 +1,8 @@
 "use client";
 
-import { motion } from "motion/react";
 import { Clock, User, UserCog } from "lucide-react";
-import { AdminProjectDetail } from "./types";
+import { motion } from "motion/react";
+import type { AdminProjectDetail } from "./types";
 
 interface AwaitingActorBannerProps {
   project: AdminProjectDetail;
@@ -52,12 +52,17 @@ export function AwaitingActorBanner({ project }: AwaitingActorBannerProps) {
 }
 
 function getAwaitingConfig(role: string, state: string, employeeName?: string) {
-  if (role === "client") {
+  if (role === "studio" || role === "studio") {
     const messages: Record<string, { title: string; message: string }> = {
       quotation_sent: {
         title: "Waiting for Client",
         message:
           "Client is reviewing the quotation. They will be notified to approve or request changes.",
+      },
+      awaiting_onboarding: {
+        title: "Client Onboarding",
+        message:
+          "Client needs to complete project onboarding before uploading files.",
       },
       awaiting_uploads: {
         title: "Client Uploading",

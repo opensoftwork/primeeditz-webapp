@@ -1,8 +1,8 @@
 "use client";
 
+import { ShieldCheck, User } from "lucide-react";
+import { getPhaseConfig, getStatusConfig } from "@/lib/status-display";
 import { cn } from "@/lib/utils";
-import { getStatusConfig, getPhaseConfig } from "@/lib/status-display";
-import { User, ShieldCheck } from "lucide-react";
 
 interface AdminStatusBadgeProps {
   status: string;

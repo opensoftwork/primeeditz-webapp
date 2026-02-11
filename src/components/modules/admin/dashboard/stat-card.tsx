@@ -29,13 +29,13 @@ export function StatCard({
       transition={{ delay: index * 0.1, duration: 0.4 }}
       className={cn(
         "p-6 rounded-[1.5rem] bg-white/3 border border-white/5 relative group hover:bg-white/5 hover:border-white/10 transition-all duration-500 overflow-hidden shadow-2xl",
-        "before:absolute before:inset-0 before:bg-linear-to-b before:from-white/2 before:to-transparent"
+        "before:absolute before:inset-0 before:bg-linear-to-b before:from-white/2 before:to-transparent",
       )}
     >
       <div
         className={cn(
           "absolute -top-4 -right-4 p-6 opacity-[0.03] group-hover:opacity-[0.07] group-hover:rotate-12 transition-all duration-700",
-          color
+          color,
         )}
       >
         <div className="scale-[3]">{icon}</div>
@@ -47,7 +47,7 @@ export function StatCard({
             className={cn(
               "p-1.5 rounded-lg bg-white/5 border border-white/10 shadow-lg transition-transform duration-500 group-hover:scale-110",
               color,
-              glowColor
+              glowColor,
             )}
           >
             {icon}

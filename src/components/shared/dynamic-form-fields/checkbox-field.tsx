@@ -1,16 +1,16 @@
 "use client";
 
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Field,
+  FieldContent,
   FieldDescription,
   FieldError,
   FieldLabel,
-  FieldContent,
   FieldTitle,
 } from "@/components/ui/field";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
-import { type FieldRenderProps } from "./types";
+import type { FieldRenderProps } from "./types";
 
 export function CheckboxField({
   fieldDef,
@@ -28,7 +28,7 @@ export function CheckboxField({
         "group/card flex flex-col p-0 transition-all duration-300 rounded-2xl border cursor-pointer overflow-hidden relative shadow-lg shadow-black/20",
         (value as boolean)
           ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20"
-          : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-white/20"
+          : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-white/20",
       )}
     >
       <Field
@@ -54,7 +54,7 @@ export function CheckboxField({
           <FieldTitle
             className={cn(
               "text-[14px] font-black uppercase tracking-wider transition-colors",
-              (value as boolean) ? "text-primary" : "text-foreground/80"
+              (value as boolean) ? "text-primary" : "text-foreground/80",
             )}
           >
             {fieldDef.label}

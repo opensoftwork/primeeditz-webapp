@@ -1,14 +1,14 @@
 {
   "folders": [
-	{
-		"path": "."
-	},
-	{
-		"path": "../primeeditz-tanstack-webapp"
-	},
-	{
-		"path": "../../../Life-Design/prime-editz/primeeditz-app"
-	}
-],
+    {
+      "path": "."
+    },
+    {
+      "path": "../primeeditz-tanstack-webapp"
+    },
+    {
+      "path": "../../../Life-Design/prime-editz/primeeditz-app"
+    }
+  ],
   "settings": {}
 }

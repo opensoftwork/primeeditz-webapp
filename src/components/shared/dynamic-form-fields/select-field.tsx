@@ -13,9 +13,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { parseSelectOptions, type FieldRenderProps } from "./types";
-import { FieldLabelWithRequired } from "./shared-components";
 import { cn } from "@/lib/utils";
+import { FieldLabelWithRequired } from "./shared-components";
+import { type FieldRenderProps, parseSelectOptions } from "./types";
 
 export function SelectField({
   fieldDef,
@@ -47,7 +47,7 @@ export function SelectField({
               "h-14 text-[15px] font-black uppercase tracking-wider transition-all duration-300 rounded-2xl px-6 shadow-lg shadow-black/20",
               isInvalid
                 ? "bg-primary/10 border-primary/30 ring-1 ring-primary/20 shadow-lg shadow-primary/5"
-                : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-primary/40 focus:ring-2 focus:ring-primary/20"
+                : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-primary/40 focus:ring-2 focus:ring-primary/20",
             )}
           >
             <SelectValue

@@ -17,9 +17,9 @@ export interface AdminProjectDetail {
   actionState: string;
   status: string; // compatibility
   projectTypeId: Id<"projectTypes">;
-  clientId?: Id<"profiles">;
-  clientName: string;
-  clientEmail?: string;
+  studioId?: Id<"profiles">;
+  studioName: string;
+  studioEmail?: string;
   awaitingActorRole?: string;
   awaitingActorId?: Id<"profiles">;
   assignedEmployeeId?: Id<"profiles">;
@@ -56,7 +56,5 @@ export interface AdminProjectDetail {
     digitalDeliveryLabel?: string;
     requiresSignoff: boolean;
   };
+  hasEmployeeUploads?: boolean;
 }
-
-
-

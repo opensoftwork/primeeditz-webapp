@@ -1,15 +1,19 @@
 import {
-  PaginatedQueryArgs,
-  PaginatedQueryReference,
+  type PaginatedQueryArgs,
+  type PaginatedQueryReference,
   useQuery,
 } from "convex/react";
-import { Cursor, FunctionReturnType, PaginationOptions } from "convex/server";
+import type {
+  Cursor,
+  FunctionReturnType,
+  PaginationOptions,
+} from "convex/server";
 import { useEffect, useReducer } from "react";
 
 export const useSimplePaginatedQuery = <Query extends PaginatedQueryReference>(
   query: Query,
   args: PaginatedQueryArgs<Query> | "skip",
-  options: { initialNumItems: number }
+  options: { initialNumItems: number },
 ) => {
   if (options.initialNumItems <= 0) {
     throw new Error("Initial number of items must be greater than zero");
@@ -36,9 +40,10 @@ export const useSimplePaginatedQuery = <Query extends PaginatedQueryReference>(
     }
   }, [queryResults]);
 
-  const currentPageNum = state.status === "loaded"
-    ? state.prevCursors.length + 1 + (state.currentCursor ? 1 : 0)
-    : 1;
+  const currentPageNum =
+    state.status === "loaded"
+      ? state.prevCursors.length + 1 + (state.currentCursor ? 1 : 0)
+      : 1;
 
   const setPageSize = (newSize: number) => {
     dispatch({ type: "setPageSize", pageSize: newSize });
@@ -46,50 +51,85 @@ export const useSimplePaginatedQuery = <Query extends PaginatedQueryReference>(
 
   return {
     ...state,
-    loadNext: state.status === "loaded" && state.nextCursor
-      ? () => dispatch({ type: "loadNext" })
-      : null,
-    loadPrev: state.status === "loaded" && (state.prevCursors.length > 0 || state.currentCursor)
-      ? () => dispatch({ type: "loadPrev" })
-      : null,
+    loadNext:
+      state.status === "loaded" && state.nextCursor
+        ? () => dispatch({ type: "loadNext" })
+        : null,
+    loadPrev:
+      state.status === "loaded" &&
+      (state.prevCursors.length > 0 || state.currentCursor)
+        ? () => dispatch({ type: "loadPrev" })
+        : null,
     currentPageNum,
     setPageSize,
   };
 };
 
 type State<Query extends PaginatedQueryReference> =
-  | { status: "loading"; args: PaginatedQueryArgs<Query> | "skip"; initialNumItems: number; pageSize: number }
-  | { status: "loadingNext" | "loadingPrev"; args: PaginatedQueryArgs<Query> | "skip"; initialNumItems: number; pageSize: number; loadingCursor: Cursor | null; prevCursors: Cursor[] }
-  | { status: "loaded"; args: PaginatedQueryArgs<Query> | "skip"; initialNumItems: number; pageSize: number; currentResults: FunctionReturnType<Query>; currentCursor: Cursor | null; prevCursors: Cursor[]; nextCursor: Cursor | null };
+  | {
+      status: "loading";
+      args: PaginatedQueryArgs<Query> | "skip";
+      initialNumItems: number;
+      pageSize: number;
+    }
+  | {
+      status: "loadingNext" | "loadingPrev";
+      args: PaginatedQueryArgs<Query> | "skip";
+      initialNumItems: number;
+      pageSize: number;
+      loadingCursor: Cursor | null;
+      prevCursors: Cursor[];
+    }
+  | {
+      status: "loaded";
+      args: PaginatedQueryArgs<Query> | "skip";
+      initialNumItems: number;
+      pageSize: number;
+      currentResults: FunctionReturnType<Query>;
+      currentCursor: Cursor | null;
+      prevCursors: Cursor[];
+      nextCursor: Cursor | null;
+    };
 
 type Action<Query extends PaginatedQueryReference> =
-  | { type: "resultsLoaded"; results: FunctionReturnType<Query>; nextCursor: Cursor | null }
+  | {
+      type: "resultsLoaded";
+      results: FunctionReturnType<Query>;
+      nextCursor: Cursor | null;
+    }
   | { type: "loadNext" }
   | { type: "loadPrev" }
   | { type: "setPageSize"; pageSize: number };
 
 const reducer = <Query extends PaginatedQueryReference>(
   state: State<Query>,
-  action: Action<Query>
+  action: Action<Query>,
 ): State<Query> => {
   switch (action.type) {
-    case "loadPrev":
+    case "loadPrev": {
       if (state.status !== "loaded") {
-        throw new Error("Cannot load previous page unless the current page is loaded");
+        throw new Error(
+          "Cannot load previous page unless the current page is loaded",
+        );
       }
       const prevCursors = [...state.prevCursors];
       const loadingCursor = prevCursors.pop() ?? null;
       return { ...state, status: "loadingPrev", loadingCursor, prevCursors };
+    }
 
     case "loadNext":
       if (state.status !== "loaded") {
-        throw new Error("Cannot load next page unless the current page is loaded");
+        throw new Error(
+          "Cannot load next page unless the current page is loaded",
+        );
       }
       return {
         ...state,
         status: "loadingNext",
         loadingCursor: state.nextCursor,
-        prevCursors: [...state.prevCursors, state.currentCursor].filter(Boolean) as Cursor[],
+        prevCursors: [...state.prevCursors, state.currentCursor].filter(
+          Boolean,
+        ) as Cursor[],
       };
 
     case "resultsLoaded":
@@ -97,10 +137,14 @@ const reducer = <Query extends PaginatedQueryReference>(
         ...state,
         status: "loaded",
         currentResults: action.results,
-        currentCursor: state.status === "loadingNext" || state.status === "loadingPrev"
-          ? state.loadingCursor ?? null
-          : null,
-        prevCursors: state.status === "loadingNext" || state.status === "loadingPrev" ? state.prevCursors : [],
+        currentCursor:
+          state.status === "loadingNext" || state.status === "loadingPrev"
+            ? (state.loadingCursor ?? null)
+            : null,
+        prevCursors:
+          state.status === "loadingNext" || state.status === "loadingPrev"
+            ? state.prevCursors
+            : [],
         nextCursor: action.nextCursor,
       };
 
@@ -117,17 +161,18 @@ const reducer = <Query extends PaginatedQueryReference>(
 };
 
 const argsToPaginationOpts = <Query extends PaginatedQueryReference>(
-  state: State<Query>
+  state: State<Query>,
 ): PaginatedQueryArgs<Query> | "skip" => {
   if (state.args === "skip") return "skip";
 
   const paginationOpts: PaginationOptions = {
     numItems: state.pageSize,
-    cursor: state.status === "loaded"
-      ? state.currentCursor
-      : state.status === "loadingNext" || state.status === "loadingPrev"
-        ? state.loadingCursor ?? null
-        : null,
+    cursor:
+      state.status === "loaded"
+        ? state.currentCursor
+        : state.status === "loadingNext" || state.status === "loadingPrev"
+          ? (state.loadingCursor ?? null)
+          : null,
   };
 
   return { ...state.args, paginationOpts };

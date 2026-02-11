@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
-import Image from "next/image";
-import { Eye, Trash2, Loader2 } from "lucide-react";
+import { Eye, Loader2, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
+import Image from "next/image";
+import React from "react";
 import { Button } from "@/components/ui/button";
-import { formatFileSize, getFileTypeIcon } from "../utils";
 import type { VaultFile } from "../types";
+import { formatFileSize, getFileTypeIcon } from "../utils";
 
 interface VaultFileItemProps {
   file: VaultFile;

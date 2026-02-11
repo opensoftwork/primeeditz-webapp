@@ -1,18 +1,18 @@
 "use client";
 
-import { LayoutDashboard, CheckCircle2, RefreshCw } from "lucide-react";
+import { CheckCircle2, LayoutDashboard, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 interface DashboardSectionProps {
-  clientId?: string;
+  studioId?: string;
   isSent: boolean;
   isSending: boolean;
   onSend: () => void;
 }
 
 export function DashboardSection({
-  clientId,
+  studioId,
   isSent,
   isSending,
   onSend,
@@ -38,7 +38,7 @@ export function DashboardSection({
       <div className="pt-2">
         <div className="rounded-2xl bg-blue-500/5 border border-blue-500/10 p-4 mb-4">
           <p className="text-xs font-bold text-blue-400/80 leading-relaxed">
-            {clientId
+            {studioId
               ? "This quotation will automatically appear in the client's dashboard for review and approval."
               : "Warning: No client linked to this quotation. It will not appear in any dashboard."}
           </p>
@@ -46,11 +46,11 @@ export function DashboardSection({
 
         <Button
           onClick={onSend}
-          disabled={isSending || !clientId}
+          disabled={isSending || !studioId || isSent}
           className={cn(
             "w-full h-12 rounded-2xl font-black uppercase tracking-widest transition-all",
             isSent
-              ? "bg-green-500/10 border border-green-500/20 text-green-400 hover:bg-green-500/20"
+              ? "bg-green-500/10 border border-green-500/20 text-green-400 cursor-not-allowed opacity-70"
               : "bg-blue-600 hover:bg-blue-700 text-white",
           )}
         >
@@ -59,7 +59,7 @@ export function DashboardSection({
           ) : isSent ? (
             <CheckCircle2 className="h-4 w-4 mr-2" />
           ) : null}
-          {isSent ? "Resend to Dashboard" : "Mark as Sent to Dashboard"}
+          {isSent ? "Sent to Dashboard" : "Mark as Sent to Dashboard"}
         </Button>
       </div>
     </div>

@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import { Geist_Mono } from "next/font/google";
 import "@/styles/transition.css";
 import { Header } from "@/components/modules/landing/header";
-import { PageTransition } from "@/components/modules/landing/page-transition";
 import { MenuOverlay } from "@/components/modules/landing/menu-overlay";
+import { PageTransition } from "@/components/modules/landing/page-transition";
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",

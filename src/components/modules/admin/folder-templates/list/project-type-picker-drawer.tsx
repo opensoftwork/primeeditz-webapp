@@ -1,6 +1,10 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
+import { Check, Globe, Search, Tag } from "lucide-react";
 import { useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -8,11 +12,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { Search, Check, Tag, Globe } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface ProjectTypePickerDrawerProps {
@@ -28,11 +28,13 @@ export function ProjectTypePickerDrawer({
   selectedTypeId,
   onSelect,
 }: ProjectTypePickerDrawerProps) {
-  const projectTypes = useQuery(api.functions.projectTypes.queries.getProjectTypes);
+  const projectTypes = useQuery(
+    api.functions.projectTypes.queries.getProjectTypes,
+  );
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredTypes = projectTypes?.filter((type) =>
-    type.name.toLowerCase().includes(searchQuery.toLowerCase())
+    type.name.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const handleSelect = (typeId: string | undefined) => {
@@ -72,7 +74,7 @@ export function ProjectTypePickerDrawer({
               "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group",
               selectedTypeId === undefined
                 ? "bg-primary/10 border-primary/30"
-                : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10"
+                : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10",
             )}
           >
             <div
@@ -80,13 +82,15 @@ export function ProjectTypePickerDrawer({
                 "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
                 selectedTypeId === undefined
                   ? "bg-primary/20 border border-primary/30"
-                  : "bg-white/5 border border-white/5"
+                  : "bg-white/5 border border-white/5",
               )}
             >
               <Globe
                 className={cn(
                   "h-5 w-5",
-                  selectedTypeId === undefined ? "text-primary" : "text-white/40"
+                  selectedTypeId === undefined
+                    ? "text-primary"
+                    : "text-white/40",
                 )}
               />
             </div>
@@ -94,7 +98,7 @@ export function ProjectTypePickerDrawer({
               <p
                 className={cn(
                   "font-black uppercase tracking-tight text-sm",
-                  selectedTypeId === undefined ? "text-primary" : "text-white"
+                  selectedTypeId === undefined ? "text-primary" : "text-white",
                 )}
               >
                 General (All Projects)
@@ -119,7 +123,7 @@ export function ProjectTypePickerDrawer({
                 "w-full flex items-center gap-4 p-4 rounded-xl border transition-all text-left group",
                 selectedTypeId === type._id
                   ? "bg-primary/10 border-primary/30"
-                  : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10"
+                  : "bg-white/3 border-white/5 hover:bg-white/5 hover:border-white/10",
               )}
             >
               <div
@@ -127,13 +131,15 @@ export function ProjectTypePickerDrawer({
                   "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
                   selectedTypeId === type._id
                     ? "bg-primary/20 border border-primary/30"
-                    : "bg-white/5 border border-white/5"
+                    : "bg-white/5 border border-white/5",
                 )}
               >
                 <Tag
                   className={cn(
                     "h-5 w-5",
-                    selectedTypeId === type._id ? "text-primary" : "text-white/40"
+                    selectedTypeId === type._id
+                      ? "text-primary"
+                      : "text-white/40",
                   )}
                 />
               </div>
@@ -141,7 +147,7 @@ export function ProjectTypePickerDrawer({
                 <p
                   className={cn(
                     "font-black uppercase tracking-tight text-sm",
-                    selectedTypeId === type._id ? "text-primary" : "text-white"
+                    selectedTypeId === type._id ? "text-primary" : "text-white",
                   )}
                 >
                   {type.name}

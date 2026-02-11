@@ -1,21 +1,21 @@
 import "./App.css";
-import { api } from "../convex/_generated/api";
-import { useSimplePaginatedQuery } from "./useSimplePaginatedQuery";
 import {
   flexRender,
   getCoreRowModel,
   useReactTable,
 } from "@tanstack/react-table";
 import { useMemo, useState } from "react";
-import { Header } from "./header";
+import { api } from "../convex/_generated/api";
 import Footer from "./footer";
+import { Header } from "./header";
+import { useSimplePaginatedQuery } from "./useSimplePaginatedQuery";
 
 function App() {
   const [pageSize, setPageSize] = useState(10);
   const query = useSimplePaginatedQuery(
     api.users.getUsers,
     {},
-    { initialNumItems: pageSize }
+    { initialNumItems: pageSize },
   );
 
   const fallbackData = useMemo(
@@ -28,7 +28,7 @@ function App() {
         _id: "j57cvkhfqz7kxzjden4f3khpcn6y41jn",
       },
     ],
-    []
+    [],
   );
 
   const columns = useMemo(
@@ -36,7 +36,7 @@ function App() {
       { accessorKey: "company", header: "Company" },
       { accessorKey: "name", header: "Name" },
     ],
-    []
+    [],
   );
 
   const data =
@@ -51,7 +51,7 @@ function App() {
   });
 
   const handlePageSizeChange = (
-    event: React.ChangeEvent<HTMLSelectElement>
+    event: React.ChangeEvent<HTMLSelectElement>,
   ) => {
     const newSize = parseInt(event.target.value, 10);
     setPageSize(newSize);
@@ -59,7 +59,7 @@ function App() {
   };
 
   const isLoading = ["loading", "loadingNext", "loadingPrev"].includes(
-    query.status
+    query.status,
   );
   const isLastPage =
     query.status === "loaded" &&
@@ -96,7 +96,7 @@ function App() {
                         {!header.isPlaceholder &&
                           flexRender(
                             header.column.columnDef.header,
-                            header.getContext()
+                            header.getContext(),
                           )}
                       </th>
                     ))}
@@ -111,7 +111,7 @@ function App() {
                         <td key={cell.id}>
                           {flexRender(
                             cell.column.columnDef.cell,
-                            cell.getContext()
+                            cell.getContext(),
                           )}
                         </td>
                       ))}
@@ -131,7 +131,7 @@ function App() {
                         {!header.isPlaceholder &&
                           flexRender(
                             header.column.columnDef.footer,
-                            header.getContext()
+                            header.getContext(),
                           )}
                       </th>
                     ))}

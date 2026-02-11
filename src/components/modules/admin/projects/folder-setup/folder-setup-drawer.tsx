@@ -1,42 +1,46 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  FolderTree,
+  HardDrive,
+  Link as LinkIcon,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
-import {
-  FolderTree,
-  HardDrive,
-  ArrowRight,
-  CheckCircle2,
-  AlertCircle,
-  Link as LinkIcon,
-} from "lucide-react";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
-import { TemplateSelector } from "./template-selector";
-import { StorageTierSelector } from "./storage-tier-selector";
 import { FolderPreview } from "./folder-preview";
 import { QuotationSelector } from "./quotation-selector";
+import { StorageTierSelector } from "./storage-tier-selector";
+import { TemplateSelector } from "./template-selector";
 
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
   name: string;
-  folders: string[];
+  folders: {
+    name: string;
+    path: string;
+    description?: string;
+    isRequired?: boolean;
+  }[];
 }
 
 interface StorageTier {
   _id: Id<"storageTiers">;
   name: string;
   sizeGB: number;
-  priceINR: number;
 }
 
 interface QuotationOption {
@@ -60,7 +64,7 @@ interface FolderSetupDrawerProps {
   projectCode: string;
   projectName?: string;
   projectTypeId: Id<"projectTypes">;
-  clientId?: Id<"profiles">;
+  studioId?: Id<"profiles">;
   linkedQuotationId?: Id<"quotations">;
   onSuccess?: () => void;
 }
@@ -72,21 +76,27 @@ export function FolderSetupDrawer({
   projectCode,
   projectName,
   projectTypeId,
-  clientId,
+  studioId,
   linkedQuotationId,
   onSuccess,
 }: FolderSetupDrawerProps) {
-  const [selectedQuotation, setSelectedQuotation] = useState<QuotationOption | null>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<FolderTemplate | null>(null);
+  const [selectedQuotation, setSelectedQuotation] =
+    useState<QuotationOption | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<FolderTemplate | null>(null);
   const [selectedTier, setSelectedTier] = useState<StorageTier | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const setupFolders = useMutation(api.functions.folders.mutations.setupProjectFolders);
-  const linkProject = useMutation(api.functions.projects.mutations.linkProjectToQuotation);
+  const setupFolders = useMutation(
+    api.functions.folders.mutations.setupProjectFolders,
+  );
+  const linkProject = useMutation(
+    api.functions.projects.mutations.linkProjectToQuotation,
+  );
 
   // Check if project already has a linked approved quotation
   const hasLinkedQuotation = !!linkedQuotationId;
-  const needsQuotationStep = !hasLinkedQuotation && !!clientId;
+  const needsQuotationStep = !hasLinkedQuotation && !!studioId;
 
   // Calculate step numbers based on whether quotation selection is needed
   const getStepNumber = (baseStep: number) => {
@@ -109,8 +119,13 @@ export function FolderSetupDrawer({
     }
 
     // Validate storage allocation against quotation pool
-    if (selectedQuotation && selectedTier.sizeGB > selectedQuotation.storageInfo.remainingGB) {
-      toast.error(`Cannot allocate ${selectedTier.sizeGB} GB. Only ${selectedQuotation.storageInfo.remainingGB} GB remaining in quotation.`);
+    if (
+      selectedQuotation &&
+      selectedTier.sizeGB > selectedQuotation.storageInfo.remainingGB
+    ) {
+      toast.error(
+        `Cannot allocate ${selectedTier.sizeGB} GB. Only ${selectedQuotation.storageInfo.remainingGB} GB remaining in quotation.`,
+      );
       return;
     }
 
@@ -132,7 +147,7 @@ export function FolderSetupDrawer({
       });
 
       toast.success(
-        `Created ${result.foldersCreated} folders with ${selectedTier.sizeGB} GB storage`
+        `Created ${result.foldersCreated} folders with ${selectedTier.sizeGB} GB storage`,
       );
       onOpenChange(false);
       onSuccess?.();
@@ -153,10 +168,10 @@ export function FolderSetupDrawer({
   };
 
   // Determine if can submit
-  const canSubmit = 
+  const canSubmit =
     (!needsQuotationStep || selectedQuotation) &&
-    selectedTemplate && 
-    selectedTier && 
+    selectedTemplate &&
+    selectedTier &&
     !isSubmitting;
 
   return (
@@ -167,10 +182,9 @@ export function FolderSetupDrawer({
             Setup Project Folders
           </DrawerTitle>
           <DrawerDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-2">
-            {needsQuotationStep 
+            {needsQuotationStep
               ? "Link quotation, configure folder structure and storage"
-              : "Configure folder structure and storage allocation"
-            }
+              : "Configure folder structure and storage allocation"}
           </DrawerDescription>
         </DrawerHeader>
 
@@ -182,7 +196,9 @@ export function FolderSetupDrawer({
                 <FolderTree className="h-5 w-5 text-primary" />
               </div>
               <div>
-                <p className="text-white font-bold">{projectName || projectCode}</p>
+                <p className="text-white font-bold">
+                  {projectName || projectCode}
+                </p>
                 <p className="text-white/40 text-xs font-medium uppercase tracking-wider">
                   {projectCode}
                 </p>
@@ -205,7 +221,7 @@ export function FolderSetupDrawer({
                 )}
               </div>
               <QuotationSelector
-                clientId={clientId}
+                studioId={studioId}
                 selectedQuotationId={selectedQuotation?._id ?? null}
                 onSelect={setSelectedQuotation}
               />
@@ -220,7 +236,9 @@ export function FolderSetupDrawer({
                   <LinkIcon className="h-4 w-4 text-emerald-500" />
                 </div>
                 <div>
-                  <p className="text-emerald-400 font-bold text-sm">Quotation Linked</p>
+                  <p className="text-emerald-400 font-bold text-sm">
+                    Quotation Linked
+                  </p>
                   <p className="text-white/40 text-xs">
                     This project is linked to an approved quotation
                   </p>
@@ -272,17 +290,20 @@ export function FolderSetupDrawer({
               onSelect={setSelectedTier}
               maxGB={selectedQuotation?.storageInfo.remainingGB}
             />
-            
+
             {/* Storage warning if quotation selected */}
-            {selectedQuotation && selectedTier && 
-             selectedTier.sizeGB > selectedQuotation.storageInfo.remainingGB && (
-              <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
-                <AlertCircle className="h-4 w-4 text-red-500" />
-                <span className="text-red-400 text-xs">
-                  Selected tier exceeds quotation's remaining storage ({selectedQuotation.storageInfo.remainingGB} GB)
-                </span>
-              </div>
-            )}
+            {selectedQuotation &&
+              selectedTier &&
+              selectedTier.sizeGB >
+                selectedQuotation.storageInfo.remainingGB && (
+                <div className="p-3 rounded-lg bg-red-500/10 border border-red-500/20 flex items-center gap-2">
+                  <AlertCircle className="h-4 w-4 text-red-500" />
+                  <span className="text-red-400 text-xs">
+                    Selected tier exceeds quotation's remaining storage (
+                    {selectedQuotation.storageInfo.remainingGB} GB)
+                  </span>
+                </div>
+              )}
           </div>
 
           {/* Step 3/4: Preview */}
@@ -311,13 +332,15 @@ export function FolderSetupDrawer({
               <div className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 text-emerald-500 mt-0.5" />
                 <div className="space-y-1">
-                  <p className="text-white font-bold text-sm">Ready to Create</p>
+                  <p className="text-white font-bold text-sm">
+                    Ready to Create
+                  </p>
                   <p className="text-white/60 text-xs">
                     {needsQuotationStep && selectedQuotation && (
                       <>Link to {selectedQuotation.code}, then </>
                     )}
-                    {selectedTemplate?.folders.length} folders will be created with{" "}
-                    {selectedTier?.sizeGB} GB storage allocation.
+                    {selectedTemplate?.folders.length} folders will be created
+                    with {selectedTier?.sizeGB} GB storage allocation.
                   </p>
                 </div>
               </div>
@@ -337,7 +360,9 @@ export function FolderSetupDrawer({
                 "Creating Folders..."
               ) : (
                 <>
-                  {needsQuotationStep ? "Link & Create Folders" : "Create Folders"}
+                  {needsQuotationStep
+                    ? "Link & Create Folders"
+                    : "Create Folders"}
                   <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
                 </>
               )}
@@ -357,4 +382,3 @@ export function FolderSetupDrawer({
     </Drawer>
   );
 }
-

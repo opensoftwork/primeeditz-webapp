@@ -1,14 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { type ColumnDef, type CellContext } from "@tanstack/react-table";
-import {
-  Database,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
+import { ArrowRight, Database, Sparkles } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 export const columns: ColumnDef<any>[] = [
   {
@@ -44,12 +40,12 @@ export const columns: ColumnDef<any>[] = [
     ),
   },
   {
-    accessorKey: "clientName",
+    accessorKey: "studioName",
     header: "Client",
     cell: ({ row }: CellContext<any, any>) => (
       <div className="flex items-center gap-2">
         <span className="text-sm font-bold text-white/80">
-          {row.getValue("clientName")}
+          {row.getValue("studioName")}
         </span>
       </div>
     ),

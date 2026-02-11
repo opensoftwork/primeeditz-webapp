@@ -1,6 +1,6 @@
-import { QueryCtx, MutationCtx } from "../_generated/server";
-import { Id } from "../_generated/dataModel";
-import { Role, ActionState } from "../schema";
+import type { Id } from "../_generated/dataModel";
+import type { MutationCtx, QueryCtx } from "../_generated/server";
+import { ActionState, type Role } from "../schema";
 
 export interface UploadPermission {
   allowed: boolean;
@@ -16,7 +16,7 @@ export async function canUpload(
   ctx: QueryCtx | MutationCtx,
   projectId: Id<"projects">,
   userRole: Role,
-  userId?: Id<"profiles">
+  userId?: Id<"profiles">,
 ): Promise<UploadPermission> {
   const project = await ctx.db.get(projectId);
   if (!project) {
@@ -29,13 +29,14 @@ export async function canUpload(
   if (source === "admin_init" && userRole === "admin") {
     const allowedAdminStates = [
       "storage_allocated",
+      "awaiting_onboarding",
       "awaiting_uploads",
       "uploads_complete",
       "assigned",
       "work_in_progress",
       "deliverables_ready",
       "awaiting_review",
-      "revisions_requested"
+      "revisions_requested",
     ];
     if (allowedAdminStates.includes(actionState)) {
       return {
@@ -46,11 +47,14 @@ export async function canUpload(
   }
 
   // 2. Client Permissions
-  if (userRole === "client") {
+  if (userRole === "studio") {
     switch (actionState) {
+      case "awaiting_onboarding":
+        return { allowed: false, reason: "Complete onboarding first" };
       case "awaiting_uploads":
-      case "uploads_complete":
         return { allowed: true, reason: "Ready to upload" };
+      case "uploads_complete":
+        return { allowed: false, reason: "Upload phase is complete" };
       case "draft":
         return { allowed: false, reason: "Project request not submitted" };
       case "awaiting_quotation":
@@ -69,6 +73,7 @@ export async function canUpload(
   if (userRole === "admin") {
     switch (actionState) {
       case "storage_allocated":
+      case "awaiting_onboarding":
       case "uploads_complete":
       case "awaiting_assignment":
       case "assigned":
@@ -113,14 +118,14 @@ export async function canUpload(
  */
 export async function checkUploadEligibility(
   ctx: QueryCtx | MutationCtx,
-  projectId: Id<"projects">
+  projectId: Id<"projects">,
 ): Promise<{ isAllowed: boolean; reason: string; canOverride: boolean }> {
   const profile = (ctx as any).profile;
   const permission = await canUpload(
     ctx,
     projectId,
-    profile?.role ?? "client",
-    profile?._id
+    profile?.role ?? "studio",
+    profile?._id,
   );
 
   return {

@@ -7,16 +7,19 @@ function getMinioHostname(): string | null {
   if (process.env.NEXT_PUBLIC_MINIO_HOSTNAME) {
     return process.env.NEXT_PUBLIC_MINIO_HOSTNAME;
   }
-  
+
   // Try parsing from URL
   if (process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL) {
     try {
       return new URL(process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL).hostname;
     } catch {
-      console.warn("Failed to parse NEXT_PUBLIC_MINIO_PUBLIC_URL:", process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL);
+      console.warn(
+        "Failed to parse NEXT_PUBLIC_MINIO_PUBLIC_URL:",
+        process.env.NEXT_PUBLIC_MINIO_PUBLIC_URL,
+      );
     }
   }
-  
+
   return null;
 }
 

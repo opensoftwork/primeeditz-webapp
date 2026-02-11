@@ -1,9 +1,12 @@
 "use client";
 
+import { Copy, Download, Send, Trash2 } from "lucide-react";
 import { motion } from "motion/react";
-import { Send, Copy, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { DownloadQuotation } from "../../preview";
+import { DeleteQuotationAction } from "../../delete-quotation-action";
+import { Project } from "../../types";
+import type { Id } from "@convex/_generated/dataModel";
 
 interface QuotationLineItem {
   id: string;
@@ -11,7 +14,7 @@ interface QuotationLineItem {
   rate: number;
   quantity: number;
   unit: string;
-  sectionId: string;
+  sectionId?: string;
   projectId?: string;
   subItems?: {
     description: string;
@@ -31,10 +34,14 @@ interface QuickActionsProps {
     discountAmount?: number;
     terms?: string;
     validUntil?: number;
+    _id: Id<"quotations"> | string;
     _creationTime: number;
+    studioName?: string;
+    projectId?: string;
+    projectIds?: string[];
   };
   sections: { _id: string; name: string; color?: string }[];
-  projects?: { _id: string; code: string; eventName?: string; projectTypeName?: string }[];
+  projects?: Project[];
   onSend: () => void;
   onDuplicate: () => void;
 }
@@ -61,12 +68,16 @@ export function QuickActions({
           variant="outline"
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
           onClick={onSend}
-          disabled={!["draft", "sent", "viewed", "changes_requested"].includes(quotation.status)}
+          disabled={
+            !["draft", "sent", "viewed", "changes_requested"].includes(
+              quotation.status,
+            )
+          }
         >
           <Send className="h-4 w-4 mr-2 text-primary" />
-          Send to Client
+          Send to Studio
         </Button>
-        
+
         <DownloadQuotation
           quotation={quotation}
           sections={sections}
@@ -76,7 +87,7 @@ export function QuickActions({
           icon={<Download className="h-4 w-4 mr-2 text-white/40" />}
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
         />
-        
+
         <Button
           variant="outline"
           className="w-full justify-start h-10 rounded-xl bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
@@ -85,6 +96,21 @@ export function QuickActions({
           <Copy className="h-4 w-4 mr-2 text-white/40" />
           Duplicate as New
         </Button>
+
+        {quotation.status === "draft" && (
+          <DeleteQuotationAction
+            quotationId={quotation._id as Id<"quotations">}
+            quotationCode={quotation.code}
+          >
+            <Button
+              variant="outline"
+              className="w-full justify-start h-10 rounded-xl bg-red-500/5 border-red-500/20 text-red-400 font-bold text-xs hover:bg-red-500/10 hover:text-red-300"
+            >
+              <Trash2 className="h-4 w-4 mr-2" />
+              Delete Quotation
+            </Button>
+          </DeleteQuotationAction>
+        )}
       </div>
     </motion.div>
   );

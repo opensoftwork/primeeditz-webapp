@@ -1,25 +1,24 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
+import { ArrowRight, Database, HardDrive, Info } from "lucide-react";
+import { useEffect } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
-  DrawerFooter,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { HardDrive, IndianRupee, Database, Info, ArrowRight } from "lucide-react";
-import { useEffect } from "react";
+import type { StorageTier } from "./types";
 
 export interface StorageTierFormValues {
   name: string;
   sizeGB: number;
-  priceINR: number;
   isActive: boolean;
 }
 
@@ -27,7 +26,7 @@ interface StorageTierDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSave: (values: StorageTierFormValues) => Promise<void>;
-  initialData?: any | null;
+  initialData?: StorageTier | null;
 }
 
 export function StorageTierDrawer({
@@ -40,20 +39,24 @@ export function StorageTierDrawer({
     defaultValues: {
       name: initialData?.name ?? "",
       sizeGB: initialData?.sizeGB ?? 0,
-      priceINR: initialData?.priceINR ?? 0,
       isActive: initialData?.isActive ?? true,
     },
     onSubmit: async ({ value }) => {
-      await onSave(value as StorageTierFormValues);
+      const submissionValue = {
+        ...value,
+        sizeGB: Number(value.sizeGB) || 0,
+      };
+      await onSave(submissionValue as StorageTierFormValues);
     },
   });
 
   // Reset form when initialData or open changes
+  // biome-ignore lint/correctness/useExhaustiveDependencies: form.reset() needs to happen when open state or initialData changes
   useEffect(() => {
     if (open) {
       form.reset();
     }
-  }, [initialData, open, form]);
+  }, [initialData, open]);
 
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
@@ -87,6 +90,7 @@ export function StorageTierDrawer({
                     <Database className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
                     <Input
                       value={field.state.value}
+                      onFocus={(e) => e.target.select()}
                       onChange={(e) => field.handleChange(e.target.value)}
                       className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
                       placeholder="e.g. Pro Suite"
@@ -96,49 +100,33 @@ export function StorageTierDrawer({
               )}
             </form.Field>
 
-            <div className="grid grid-cols-2 gap-6">
-              {/* Size in GB */}
-              <form.Field name="sizeGB">
-                {(field) => (
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      Capacity (GB)
-                    </Label>
-                    <div className="relative">
-                      <HardDrive className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
-                      <Input
-                        type="number"
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
-                        placeholder="100"
-                      />
-                    </div>
+            {/* Size in GB */}
+            <form.Field name="sizeGB">
+              {(field) => (
+                <div className="space-y-3">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                    Capacity (GB)
+                  </Label>
+                  <div className="relative">
+                    <HardDrive className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
+                    <Input
+                      type="number"
+                      value={field.state.value}
+                      onFocus={(e) => e.target.select()}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        const cleanValue = val.replace(/^0+(?=\d)/, "");
+                        field.handleChange(
+                          (cleanValue === "" ? "" : Number(cleanValue)) as any,
+                        );
+                      }}
+                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
+                      placeholder="100"
+                    />
                   </div>
-                )}
-              </form.Field>
-
-              {/* Price in INR */}
-              <form.Field name="priceINR">
-                {(field) => (
-                  <div className="space-y-3">
-                    <Label className="text-[10px] font-black uppercase tracking-widest text-white/40">
-                      Price (INR)
-                    </Label>
-                    <div className="relative">
-                      <IndianRupee className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
-                      <Input
-                        type="number"
-                        value={field.state.value}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
-                        placeholder="999"
-                      />
-                    </div>
-                  </div>
-                )}
-              </form.Field>
-            </div>
+                </div>
+              )}
+            </form.Field>
 
             {/* Active Status */}
             <form.Field name="isActive">

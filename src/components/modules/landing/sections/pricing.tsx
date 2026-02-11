@@ -1,11 +1,18 @@
 "use client";
 
-import * as React from "react";
-import { motion, AnimatePresence } from "motion/react";
-import { Check, Star, Zap, Crown, Diamond as DiamondIcon, ShieldCheck } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Button } from "@/components/ui/button";
+import {
+  Check,
+  Crown,
+  Diamond as DiamondIcon,
+  ShieldCheck,
+  Star,
+  Zap,
+} from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import type * as React from "react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 
@@ -38,7 +45,7 @@ const tiers: PricingTier[] = [
       "Traditional Album (15 Sheets)",
       "Traditional Video Edit (60 min)",
       "Turnaround: 15-20 Days",
-      "Digital Delivery"
+      "Digital Delivery",
     ],
     cta: "Choose Silver",
     ctaLink: "/contact?package=silver",
@@ -55,7 +62,7 @@ const tiers: PricingTier[] = [
       "Candid Grading (50 Images)",
       "Trad (20) + Candid (10) Album Sheets",
       "Traditional Video (90 min) + Teaser",
-      "Turnaround: 12-15 Days"
+      "Turnaround: 12-15 Days",
     ],
     cta: "Choose Gold",
     ctaLink: "/contact?package=gold",
@@ -73,7 +80,7 @@ const tiers: PricingTier[] = [
       "Trad (25) + Candid (20) Album Sheets",
       "2hr Video + Teaser + Highlight",
       "Drone Clips Integration",
-      "Turnaround: 10-12 Days"
+      "Turnaround: 10-12 Days",
     ],
     cta: "Choose Platinum",
     ctaLink: "/contact?package=platinum",
@@ -93,7 +100,7 @@ const tiers: PricingTier[] = [
       "Parent Albums (2)",
       "Pre-Wedding Video + VFX",
       "Turnaround: 8-10 Days",
-      "Priority Support"
+      "Priority Support",
     ],
     cta: "Choose Diamond",
     ctaLink: "/contact?package=diamond",
@@ -113,7 +120,7 @@ const tiers: PricingTier[] = [
       "Cinematic Film (15-20 min)",
       "Heavy VFX Work",
       "Video Edit (5 Hours)",
-      "Turnaround: 7-10 Days (Priority)"
+      "Turnaround: 7-10 Days (Priority)",
     ],
     cta: "Contact for Elite",
     ctaLink: "/contact?package=royal",
@@ -132,7 +139,7 @@ const getThemeStyles = (theme: PricingTier["colorTheme"]) => {
         text: "text-slate-100",
         badge: "bg-slate-500/20 text-slate-300",
         button: "bg-slate-100 text-slate-900 hover:bg-white",
-        icon: "text-slate-300"
+        icon: "text-slate-300",
       };
     case "gold":
       return {
@@ -142,7 +149,7 @@ const getThemeStyles = (theme: PricingTier["colorTheme"]) => {
         text: "text-amber-100",
         badge: "bg-amber-500/20 text-amber-300",
         button: "bg-amber-400 text-amber-950 hover:bg-amber-300",
-        icon: "text-amber-400"
+        icon: "text-amber-400",
       };
     case "platinum":
       return {
@@ -152,7 +159,7 @@ const getThemeStyles = (theme: PricingTier["colorTheme"]) => {
         text: "text-cyan-50",
         badge: "bg-cyan-500/20 text-cyan-300",
         button: "bg-cyan-400 text-cyan-950 hover:bg-cyan-300",
-        icon: "text-cyan-400"
+        icon: "text-cyan-400",
       };
     case "diamond":
       return {
@@ -162,7 +169,7 @@ const getThemeStyles = (theme: PricingTier["colorTheme"]) => {
         text: "text-blue-50",
         badge: "bg-blue-500/20 text-blue-300",
         button: "bg-blue-500 text-white hover:bg-blue-400",
-        icon: "text-blue-400"
+        icon: "text-blue-400",
       };
     case "royal":
       return {
@@ -171,8 +178,9 @@ const getThemeStyles = (theme: PricingTier["colorTheme"]) => {
         glow: "shadow-fuchsia-500/20",
         text: "text-fuchsia-50",
         badge: "bg-fuchsia-500/20 text-fuchsia-300",
-        button: "bg-linear-to-r from-fuchsia-600 to-purple-600 text-white hover:from-fuchsia-500 hover:to-purple-500",
-        icon: "text-fuchsia-400"
+        button:
+          "bg-linear-to-r from-fuchsia-600 to-purple-600 text-white hover:from-fuchsia-500 hover:to-purple-500",
+        icon: "text-fuchsia-400",
       };
   }
 };
@@ -192,9 +200,9 @@ function PricingCard({ tier, index }: { tier: PricingTier; index: number }) {
         "group relative flex flex-col h-full p-6 rounded-2xl border transition-all duration-300 backdrop-blur-md",
         styles.border,
         styles.hoverBorder,
-        tier.popular 
-          ? `bg-black/40 shadow-2xl ${styles.glow} z-10 scale-[1.02] md:scale-105` 
-          : "bg-black/20 hover:bg-black/30"
+        tier.popular
+          ? `bg-black/40 shadow-2xl ${styles.glow} z-10 scale-[1.02] md:scale-105`
+          : "bg-black/20 hover:bg-black/30",
       )}
     >
       {tier.popular && (
@@ -208,36 +216,53 @@ function PricingCard({ tier, index }: { tier: PricingTier; index: number }) {
       {/* Header Section - Fixed Height for alignment */}
       <div className="flex flex-col gap-4 mb-6">
         <div className="flex items-center justify-between">
-            <h3 className={cn("text-lg font-bold flex items-center gap-2", styles.text)}>
-                {tier.icon}
-                {tier.name}
-            </h3>
-            {tier.id === 'royal' && (
-                 <Badge variant="outline" className="text-[10px] border-fuchsia-500/50 text-fuchsia-300 h-5 px-1.5">
-                    Elite
-                 </Badge>
+          <h3
+            className={cn(
+              "text-lg font-bold flex items-center gap-2",
+              styles.text,
             )}
+          >
+            {tier.icon}
+            {tier.name}
+          </h3>
+          {tier.id === "royal" && (
+            <Badge
+              variant="outline"
+              className="text-[10px] border-fuchsia-500/50 text-fuchsia-300 h-5 px-1.5"
+            >
+              Elite
+            </Badge>
+          )}
         </div>
-        
+
         <div className="space-y-1">
-            <div className="text-3xl font-bold text-white tracking-tight">
+          <div className="text-3xl font-bold text-white tracking-tight">
             {tier.price}
-            </div>
-            <p className="text-xs text-muted-foreground min-h-10 leading-relaxed">
+          </div>
+          <p className="text-xs text-muted-foreground min-h-10 leading-relaxed">
             {tier.description}
-            </p>
+          </p>
         </div>
       </div>
 
-      <div className={cn("h-px w-full mb-6 bg-linear-to-r from-transparent via-white/10 to-transparent")} />
+      <div
+        className={cn(
+          "h-px w-full mb-6 bg-linear-to-r from-transparent via-white/10 to-transparent",
+        )}
+      />
 
       {/* Features - Flex Grow to push button down */}
       <ul className="flex flex-col gap-3 mb-8 grow">
         {tier.features.map((feature, idx) => (
           <li key={idx} className="flex items-start gap-2.5 group/item">
-            <Check className={cn("w-4 h-4 mt-0.5 shrink-0 transition-colors", styles.icon)} />
+            <Check
+              className={cn(
+                "w-4 h-4 mt-0.5 shrink-0 transition-colors",
+                styles.icon,
+              )}
+            />
             <span className="text-sm text-muted-foreground/90 group-hover/item:text-white/90 transition-colors duration-200">
-                {feature}
+              {feature}
             </span>
           </li>
         ))}
@@ -245,12 +270,12 @@ function PricingCard({ tier, index }: { tier: PricingTier; index: number }) {
 
       {/* CTA - Always at bottom */}
       <div className="mt-auto pt-2">
-        <Button 
+        <Button
           asChild
           className={cn(
-            "w-full rounded-xl font-semibold transition-all duration-300 shadow-lg", 
+            "w-full rounded-xl font-semibold transition-all duration-300 shadow-lg",
             styles.button,
-            tier.popular ? "shadow-cyan-500/10" : ""
+            tier.popular ? "shadow-cyan-500/10" : "",
           )}
         >
           <a href={tier.ctaLink}>{tier.cta}</a>
@@ -269,7 +294,6 @@ export function PricingSection() {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[400px] bg-primary/5 blur-[120px] rounded-full pointer-events-none" />
 
       <div className="relative max-w-[1400px] mx-auto flex flex-col gap-12">
-        
         {/* Header */}
         <div className="flex flex-col items-center gap-4 text-center max-w-2xl mx-auto">
           <motion.span
@@ -280,7 +304,7 @@ export function PricingSection() {
           >
             Pricing Strategy
           </motion.span>
-          <motion.h2 
+          <motion.h2
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -288,36 +312,32 @@ export function PricingSection() {
           >
             Choose Your Perfect Package
           </motion.h2>
-          <motion.p 
+          <motion.p
             initial={{ opacity: 0 }}
             whileInView={{ opacity: 1 }}
             viewport={{ once: true }}
             transition={{ delay: 0.1 }}
             className="text-muted-foreground text-base max-w-xl mx-auto"
           >
-            Professional post-production services tailored to your needs.
-            From essential editing to cinematic masterpieces.
+            Professional post-production services tailored to your needs. From
+            essential editing to cinematic masterpieces.
           </motion.p>
         </div>
 
         {/* Grid - 5 Columns for Desktop */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4 lg:gap-6 items-stretch pt-4">
           {tiers.map((tier, index) => (
-            <PricingCard 
-              key={index} 
-              tier={tier} 
-              index={index} 
-            />
+            <PricingCard key={index} tier={tier} index={index} />
           ))}
         </div>
 
         {/* Footer info */}
         <div className="text-center mt-8">
-            <p className="text-sm text-muted-foreground/60">
-                All prices are exclusive of GST (18%). Bulk discounts available for orders over ₹25,000.
-            </p>
+          <p className="text-sm text-muted-foreground/60">
+            All prices are exclusive of GST (18%). Bulk discounts available for
+            orders over ₹25,000.
+          </p>
         </div>
-
       </div>
     </section>
   );

@@ -1,12 +1,12 @@
 "use client";
 
-import { motion } from "motion/react";
 import { format } from "date-fns";
-import { Receipt, ArrowLeft, Download, Printer } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { ArrowLeft, Download, Printer, Receipt } from "lucide-react";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { QuotationStatusBadge } from "../../shared/quotation-status-badge";
 import { DownloadQuotation } from "@/components/modules/admin/quotations/preview/download-quotation";
+import { Button } from "@/components/ui/button";
+import { QuotationStatusBadge } from "../../shared/quotation-status-badge";
 
 interface QuotationDetailHeaderProps {
   quotation: any;

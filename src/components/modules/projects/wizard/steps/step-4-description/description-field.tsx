@@ -1,8 +1,8 @@
 "use client";
 
-import React from "react";
 import { FileText } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
+import React from "react";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -35,7 +35,7 @@ export function DescriptionField({ form }: DescriptionFieldProps) {
                     "transition-colors",
                     (field.state.value?.length ?? 0) > 0
                       ? "text-primary/40"
-                      : "text-white/10"
+                      : "text-white/10",
                   )}
                 >
                   {field.state.value?.length ?? 0}

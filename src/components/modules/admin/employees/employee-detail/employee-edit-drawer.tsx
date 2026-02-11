@@ -1,26 +1,26 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { User, Phone, Building2, Briefcase, X, Save } from "lucide-react";
-import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Doc, Id } from "@convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import { Briefcase, Building2, Phone, Save, User, X } from "lucide-react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
-import type { Id, Doc } from "@convex/_generated/dataModel";
+import { isValidPhoneNumber, PhoneInput } from "@/components/ui/phone-input";
 
 interface EmployeeEditDrawerProps {
   open: boolean;
@@ -28,10 +28,10 @@ interface EmployeeEditDrawerProps {
   employee: Doc<"profiles">;
 }
 
-export function EmployeeEditDrawer({ 
-  open, 
-  onOpenChange, 
-  employee 
+export function EmployeeEditDrawer({
+  open,
+  onOpenChange,
+  employee,
 }: EmployeeEditDrawerProps) {
   const [name, setName] = useState(employee.name);
   const [phone, setPhone] = useState(employee.phone || "");

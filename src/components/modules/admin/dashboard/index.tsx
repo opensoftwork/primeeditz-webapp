@@ -1,25 +1,26 @@
 "use client";
 
-import Link from "next/link";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Button } from "@/components/ui/button";
+import { useQuery } from "convex/react";
 import {
-  Users,
-  FolderKanban,
   AlertCircle,
+  CheckCircle2,
+  Database,
+  FolderKanban,
   Settings,
   UserCog,
-  Database,
+  Users,
   Zap,
-  CheckCircle2,
 } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/ui/data-table";
-import { DashboardHeader } from "./dashboard-header";
-import { StatCard } from "./stat-card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { ActionButton } from "./action-button";
 import { columns } from "./columns";
+import { DashboardHeader } from "./dashboard-header";
+import { PendingQuotationsSection } from "./pending-quotations-section";
+import { StatCard } from "./stat-card";
 
 export default function AdminDashboard() {
   const profile = useQuery(api.profiles.getMyProfile);
@@ -74,47 +75,8 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* Quick Operations Component */}
-      <div className="p-6 rounded-[1.5rem] bg-white/2 border border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.01] bg-size-[40px_40px]" />
-
-        <div className="relative z-10 space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-1.5 rounded-lg bg-white/5 border border-white/10 text-white/40">
-              <Zap className="h-3.5 w-3.5" />
-            </div>
-            <h3 className="text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
-              Quick Operations
-            </h3>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <ActionButton
-              href="/projects?actionState=awaiting_quotation"
-              icon={<AlertCircle className="h-4 w-4" />}
-              label="Review Pending"
-              sublabel="Process incoming requests"
-            />
-            <ActionButton
-              href="/settings/project-types"
-              icon={<Settings className="h-4 w-4" />}
-              label="Project Types"
-              sublabel="Configure system forms"
-              disabled
-            />
-            <ActionButton
-              href="/settings/employees"
-              icon={<UserCog className="h-4 w-4" />}
-              label="Team Access"
-              sublabel="Manage role permissions"
-              disabled
-            />
-          </div>
-          <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] italic">
-            Upcoming Administrative modules are currently in development
-          </p>
-        </div>
-      </div>
+      {/* Pending Quotations Section - Story 15.2 */}
+      <PendingQuotationsSection />
 
       {/* Pending Requests Section */}
       <div className="space-y-6">

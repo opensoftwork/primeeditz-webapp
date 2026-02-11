@@ -1,16 +1,16 @@
 "use client";
 
-import React from "react";
 import { format } from "date-fns";
-import { MessageSquare, CalendarIcon } from "lucide-react";
+import { CalendarIcon, MessageSquare } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
+import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
@@ -65,14 +65,16 @@ export function DeliveryNotesFields({ form }: DeliveryNotesFieldsProps) {
                       className={cn(
                         "w-full h-full min-h-[120px] flex flex-col items-center justify-center gap-4 rounded-2xl border-2 border-dashed border-white/5 bg-white/2 hover:bg-white/4 hover:border-primary/20 transition-all duration-500 group",
                         field.state.value &&
-                          "border-solid border-primary/20 bg-primary/5"
+                          "border-solid border-primary/20 bg-primary/5",
                       )}
                     >
                       <div className="p-4 rounded-2xl bg-white/5 border border-white/10 group-hover:scale-110 transition-transform duration-500">
                         <CalendarIcon
                           className={cn(
                             "h-6 w-6",
-                            field.state.value ? "text-primary" : "text-white/20"
+                            field.state.value
+                              ? "text-primary"
+                              : "text-white/20",
                           )}
                         />
                       </div>
@@ -80,7 +82,7 @@ export function DeliveryNotesFields({ form }: DeliveryNotesFieldsProps) {
                         <span
                           className={cn(
                             "block text-xs font-black uppercase tracking-widest transition-colors",
-                            field.state.value ? "text-white" : "text-white/20"
+                            field.state.value ? "text-white" : "text-white/20",
                           )}
                         >
                           {field.state.value

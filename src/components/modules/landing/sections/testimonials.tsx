@@ -1,9 +1,9 @@
 "use client";
 
-import { motion } from "motion/react";
-import { cn } from "@/lib/utils";
 import { Quote, Star } from "lucide-react";
+import { motion } from "motion/react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { cn } from "@/lib/utils";
 
 // --- Types ---
 
@@ -43,7 +43,13 @@ const testimonials: Testimonial[] = [
 
 // --- Sub-Components ---
 
-function TestimonialCard({ item, index }: { item: Testimonial; index: number }) {
+function TestimonialCard({
+  item,
+  index,
+}: {
+  item: Testimonial;
+  index: number;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -54,7 +60,7 @@ function TestimonialCard({ item, index }: { item: Testimonial; index: number }) 
         "group relative flex flex-col p-8 rounded-3xl",
         "bg-white/5 border border-white/5 backdrop-blur-md",
         "hover:bg-white/10 hover:border-white/10 hover:translate-y-[-4px]",
-        "transition-all duration-500 ease-out shadow-lg shadow-black/20"
+        "transition-all duration-500 ease-out shadow-lg shadow-black/20",
       )}
     >
       {/* Quote Icon */}
@@ -106,7 +112,8 @@ export function TestimonialsSection() {
     <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8 overflow-hidden">
       {/* Background Ambience - matches other premium sections */}
       <div className="absolute inset-0 bg-linear-to-b from-primary/5 via-transparent to-primary/5 pointer-events-none" />
-      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />      <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[300px] bg-purple-500/5 blur-[120px] rounded-full pointer-events-none" />{" "}
+      <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
         {/* Header */}
         <div className="flex flex-col items-center gap-4 text-center">
           <motion.span
@@ -148,9 +155,9 @@ export function TestimonialsSection() {
 
         {/* Placeholder Note */}
         <div className="text-center">
-             <p className="text-xs text-white/50 uppercase tracking-widest ">
-                * Beta Program Feedback
-             </p>
+          <p className="text-xs text-white/50 uppercase tracking-widest ">
+            * Beta Program Feedback
+          </p>
         </div>
       </div>
     </section>

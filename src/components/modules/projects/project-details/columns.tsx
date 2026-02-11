@@ -1,15 +1,15 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { Calendar, Hash, Eye } from "lucide-react";
-import { DataTableColumnHeader } from "@/components/shared/data-table";
-import { ClientStatusBadge } from "../client-status-badge";
-import { PhaseProgress } from "../phase-progress";
-import type { ClientProject } from "./types";
-import { Button } from "@/components/ui/button";
+import { Eye, Hash } from "lucide-react";
 import Link from "next/link";
+import { DataTableColumnHeader } from "@/components/shared/data-table";
+import { Button } from "@/components/ui/button";
+import { PhaseProgress } from "../phase-progress";
+import { StudioStatusBadge } from "../studio-status-badge";
+import type { StudioProject } from "./types";
 
-export const columns: ColumnDef<ClientProject>[] = [
+export const columns: ColumnDef<StudioProject>[] = [
   {
     accessorKey: "code",
     header: ({ column }) => (
@@ -25,9 +25,8 @@ export const columns: ColumnDef<ClientProject>[] = [
     ),
     filterFn: (row, id, value) => {
       const code = (row.getValue(id) as string).toLowerCase();
-      const eventName = (row.original.eventName || "").toLowerCase();
       const search = (value as string).toLowerCase();
-      return code.includes(search) || eventName.includes(search);
+      return code.includes(search);
     },
   },
   {
@@ -44,32 +43,14 @@ export const columns: ColumnDef<ClientProject>[] = [
       return (value as string[]).includes(row.getValue(id));
     },
   },
-  {
-    accessorKey: "eventName",
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title="Event" />
-    ),
-    cell: ({ row }) => (
-      <div className="space-y-1">
-        <div className="font-bold text-white/60 truncate max-w-[180px]">
-          {row.getValue("eventName") || "—"}
-        </div>
-        {row.original.eventDate && (
-          <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest flex items-center gap-1.5">
-            <Calendar className="h-3 w-3" />
-            {new Date(row.original.eventDate).toLocaleDateString()}
-          </div>
-        )}
-      </div>
-    ),
-  },
+
   {
     accessorKey: "actionState",
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title="Status" />
     ),
     cell: ({ row }) => (
-      <ClientStatusBadge status={row.getValue("actionState")} />
+      <StudioStatusBadge status={row.getValue("actionState")} />
     ),
     filterFn: (row, id, value) => {
       return (value as string[]).includes(row.getValue(id));

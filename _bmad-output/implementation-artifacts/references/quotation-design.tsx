@@ -1,32 +1,32 @@
-import React, { useState, useEffect } from "react";
 import {
-  Plus,
-  Library,
-  X,
-  Edit2,
-  Trash2,
-  ChevronRight,
-  ChevronDown,
-  ChevronUp,
-  FileText,
-  MoreHorizontal,
   ArrowLeft,
-  Folder,
-  Layers,
-  Hammer,
-  PenTool,
+  Check,
+  ChevronDown,
+  ChevronRight,
+  ChevronUp,
   CornerDownRight,
-  GripVertical,
-  Printer,
+  Edit2,
   Eye,
   EyeOff,
+  FileText,
   Filter,
-  Check,
+  Folder,
+  GripVertical,
+  Hammer,
   Image as ImageIcon,
+  Layers,
+  Library,
   Maximize2,
   Moon,
+  MoreHorizontal,
+  PenTool,
+  Plus,
+  Printer,
   Sun,
+  Trash2,
+  X,
 } from "lucide-react";
+import React, { useEffect, useState } from "react";
 
 // --- STYLES INJECTION ---
 const GlobalStyles = () => (
@@ -436,7 +436,7 @@ export default function QuotationApp() {
 
   const subtotal = filteredItems.reduce(
     (acc, item) => acc + calculateItemTotal(item),
-    0
+    0,
   );
   const tax = subtotal * 0.18;
   const total = subtotal + tax;
@@ -529,7 +529,7 @@ export default function QuotationApp() {
     } else {
       if (parentIdForSubItem) {
         setItems((prevItems) =>
-          addItemToTree(prevItems, parentIdForSubItem, newItemData)
+          addItemToTree(prevItems, parentIdForSubItem, newItemData),
         );
       } else {
         setItems((prevItems) => [...prevItems, newItemData]);
@@ -568,7 +568,7 @@ export default function QuotationApp() {
         rate: libItem.rate,
       };
       setItems((prevItems) =>
-        addItemToTree(prevItems, targetParentId, newSubItem)
+        addItemToTree(prevItems, targetParentId, newSubItem),
       );
       setTargetParentId(null);
       setIsLibraryOpen(false);
@@ -924,12 +924,12 @@ export default function QuotationApp() {
             <div className="divide-y divide-theme-border">
               {sectionsToRender.map((section) => {
                 const sectionItems = filteredItems.filter(
-                  (item) => item.section === section
+                  (item) => item.section === section,
                 );
                 if (sectionItems.length === 0) return null;
                 const sectionSubtotal = sectionItems.reduce(
                   (acc, item) => acc + calculateItemTotal(item),
-                  0
+                  0,
                 );
                 const sectionTax = sectionSubtotal * 0.18;
                 const sectionTotal = sectionSubtotal + sectionTax;
@@ -1165,8 +1165,8 @@ export default function QuotationApp() {
                 libraryView === "categories"
                   ? "translate-x-0"
                   : libraryView === "sections"
-                  ? "translate-x-full"
-                  : "-translate-x-full"
+                    ? "translate-x-full"
+                    : "-translate-x-full"
               }`}
             >
               <div className="flex items-center gap-3 mb-6 pb-4 border-b border-theme-border">
@@ -1258,7 +1258,7 @@ export default function QuotationApp() {
                           </div>
                         </div>
                       </div>
-                    )
+                    ),
                   )}
               </div>
             </div>
@@ -1279,8 +1279,8 @@ export default function QuotationApp() {
                 {isEditing
                   ? "Edit Item"
                   : parentIdForSubItem
-                  ? "Add Child Item"
-                  : "Add Main Item"}
+                    ? "Add Child Item"
+                    : "Add Main Item"}
               </h2>
               <button
                 onClick={() => setIsModalOpen(false)}

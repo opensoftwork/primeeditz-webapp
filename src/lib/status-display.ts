@@ -1,40 +1,41 @@
 /**
  * Status Display Utilities
- * 
+ *
  * Provides human-readable labels and colors for the new multi-dimensional
  * project status model (phase + actionState).
  */
 
-export type ProjectPhase = 
-  | 'setup' 
-  | 'onboarding' 
-  | 'production' 
-  | 'review' 
-  | 'delivery' 
-  | 'completed' 
-  | 'archived';
+export type ProjectPhase =
+  | "setup"
+  | "onboarding"
+  | "production"
+  | "review"
+  | "delivery"
+  | "completed"
+  | "archived";
 
-export type ActionState = 
-  | 'draft'
-  | 'awaiting_quotation'
-  | 'quotation_sent'
-  | 'quotation_approved'
-  | 'quotation_rejected'
-  | 'storage_allocated'
-  | 'awaiting_uploads'
-  | 'uploads_complete'
-  | 'awaiting_assignment'
-  | 'assigned'
-  | 'work_in_progress'
-  | 'deliverables_ready'
-  | 'awaiting_review'
-  | 'revisions_requested'
-  | 'review_approved'
-  | 'preparing_delivery'
-  | 'ready_for_delivery'
-  | 'delivered'
-  | 'completed'
-  | 'cancelled';
+export type ActionState =
+  | "draft"
+  | "awaiting_quotation"
+  | "quotation_sent"
+  | "quotation_approved"
+  | "quotation_rejected"
+  | "storage_allocated"
+  | "awaiting_onboarding"
+  | "awaiting_uploads"
+  | "uploads_complete"
+  | "awaiting_assignment"
+  | "assigned"
+  | "work_in_progress"
+  | "deliverables_ready"
+  | "awaiting_review"
+  | "revisions_requested"
+  | "review_approved"
+  | "preparing_delivery"
+  | "ready_for_delivery"
+  | "delivered"
+  | "completed"
+  | "cancelled";
 
 export interface StatusConfig {
   label: string;
@@ -74,8 +75,13 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-blue-400",
     bgColor: "bg-blue-500/10 border-blue-500/20",
   },
-  
+
   // Onboarding Phase
+  awaiting_onboarding: {
+    label: "Awaiting Onboarding",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10 border-amber-500/20",
+  },
   awaiting_uploads: {
     label: "Ready to Upload",
     color: "text-amber-400",
@@ -91,7 +97,7 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-zinc-400",
     bgColor: "bg-zinc-500/10 border-zinc-500/20",
   },
-  
+
   // Production Phase
   assigned: {
     label: "Assigned",
@@ -108,7 +114,7 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-purple-400",
     bgColor: "bg-purple-500/10 border-purple-500/20",
   },
-  
+
   // Review Phase
   awaiting_review: {
     label: "Needs Review",
@@ -125,7 +131,7 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-emerald-400",
     bgColor: "bg-emerald-500/10 border-emerald-500/20",
   },
-  
+
   // Delivery Phase
   preparing_delivery: {
     label: "Preparing Delivery",
@@ -137,7 +143,7 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-emerald-400",
     bgColor: "bg-emerald-500/10 border-emerald-500/20",
   },
-  
+
   // Terminal States
   delivered: {
     label: "Delivered",
@@ -157,23 +163,55 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
 };
 
 export const PHASE_CONFIG: Record<ProjectPhase, StatusConfig> = {
-  setup: { label: "Setup", color: "text-blue-400", bgColor: "bg-blue-500/10 border-blue-500/20" },
-  onboarding: { label: "Onboarding", color: "text-amber-400", bgColor: "bg-amber-500/10 border-amber-500/20" },
-  production: { label: "Production", color: "text-blue-400", bgColor: "bg-blue-500/10 border-blue-500/20" },
-  review: { label: "Review", color: "text-purple-400", bgColor: "bg-purple-500/10 border-purple-500/20" },
-  delivery: { label: "Delivery", color: "text-emerald-400", bgColor: "bg-emerald-500/10 border-emerald-500/20" },
-  completed: { label: "Completed", color: "text-primary", bgColor: "bg-primary/10 border-primary/20" },
-  archived: { label: "Archived", color: "text-zinc-500", bgColor: "bg-zinc-500/5 border-zinc-500/10" },
+  setup: {
+    label: "Setup",
+    color: "text-blue-400",
+    bgColor: "bg-blue-500/10 border-blue-500/20",
+  },
+  onboarding: {
+    label: "Onboarding",
+    color: "text-amber-400",
+    bgColor: "bg-amber-500/10 border-amber-500/20",
+  },
+  production: {
+    label: "Production",
+    color: "text-blue-400",
+    bgColor: "bg-blue-500/10 border-blue-500/20",
+  },
+  review: {
+    label: "Review",
+    color: "text-purple-400",
+    bgColor: "bg-purple-500/10 border-purple-500/20",
+  },
+  delivery: {
+    label: "Delivery",
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-500/10 border-emerald-500/20",
+  },
+  completed: {
+    label: "Completed",
+    color: "text-primary",
+    bgColor: "bg-primary/10 border-primary/20",
+  },
+  archived: {
+    label: "Archived",
+    color: "text-zinc-500",
+    bgColor: "bg-zinc-500/5 border-zinc-500/10",
+  },
 };
 
-export function getStatusConfig(state: string, deliveryLabel?: string): StatusConfig {
-  const config = ACTION_STATE_CONFIG[state as ActionState] || ACTION_STATE_CONFIG.draft;
-  
+export function getStatusConfig(
+  state: string,
+  deliveryLabel?: string,
+): StatusConfig {
+  const config =
+    ACTION_STATE_CONFIG[state as ActionState] || ACTION_STATE_CONFIG.draft;
+
   // Override label for preparing_delivery if project-specific label exists
-  if (state === 'preparing_delivery' && deliveryLabel) {
+  if (state === "preparing_delivery" && deliveryLabel) {
     return {
       ...config,
-      label: deliveryLabel
+      label: deliveryLabel,
     };
   }
 
@@ -197,7 +235,10 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "Complete your project request",
     color: "text-zinc-400",
     isActionNeeded: true,
-    cta: { label: "Continue Request", href: (id) => `/projects/wizard?projectId=${id}` },
+    cta: {
+      label: "Continue Request",
+      href: (id) => `/projects/wizard?projectId=${id}`,
+    },
   },
   awaiting_quotation: {
     label: "Preparing Quote",
@@ -229,6 +270,13 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "Almost ready for your files",
     color: "text-blue-400",
     isActionNeeded: false,
+  },
+  awaiting_onboarding: {
+    label: "Complete Onboarding",
+    description: "Complete project setup to begin uploading",
+    color: "text-amber-400",
+    isActionNeeded: true,
+    cta: { label: "Complete Onboarding", href: (id) => `/projects/${id}/onboarding` },
   },
   awaiting_uploads: {
     label: "Upload Files",
@@ -272,7 +320,10 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "Your deliverables are ready for review",
     color: "text-amber-400",
     isActionNeeded: true,
-    cta: { label: "Review Deliverables", href: (id) => `/projects/${id}/review` }, // Hypothetical review page
+    cta: {
+      label: "Review Deliverables",
+      href: (id) => `/projects/${id}/review`,
+    }, // Hypothetical review page
   },
   revisions_requested: {
     label: "Making Changes",
@@ -319,12 +370,14 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
 };
 
 export function getClientStatusDisplay(state: string): ClientStatusDisplay {
-  return CLIENT_STATUS_MAP[state as ActionState] || {
-    label: state.replace("_", " "),
-    description: "",
-    color: "text-zinc-400",
-    isActionNeeded: false,
-  };
+  return (
+    CLIENT_STATUS_MAP[state as ActionState] || {
+      label: state.replace("_", " "),
+      description: "",
+      color: "text-zinc-400",
+      isActionNeeded: false,
+    }
+  );
 }
 
 export function getPhaseConfig(phase: string): StatusConfig {

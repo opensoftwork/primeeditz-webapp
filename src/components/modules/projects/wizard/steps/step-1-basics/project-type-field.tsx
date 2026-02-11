@@ -1,13 +1,13 @@
 "use client";
 
-import React from "react";
 import { Tag } from "lucide-react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   Field,
   FieldContent,
-  FieldLabel,
   FieldError,
+  FieldLabel,
 } from "@/components/ui/field";
 import { cn } from "@/lib/utils";
 import type { ProjectType } from "../../types";
@@ -26,7 +26,7 @@ export function ProjectTypeField({
   const isInvalid =
     field.state.meta.isTouched && field.state.meta.errors.length > 0;
   const currentProjectType = projectTypes?.find(
-    (pt) => pt._id === field.state.value
+    (pt) => pt._id === field.state.value,
   );
 
   return (
@@ -40,7 +40,7 @@ export function ProjectTypeField({
           onClick={onOpenDrawer}
           className={cn(
             "w-full h-12 justify-start gap-4 rounded-xl border border-white/10 bg-white/3 hover:bg-white/5 hover:border-white/20 transition-all duration-300 font-black uppercase tracking-wider px-4",
-            currentProjectType ? "text-white" : "text-white/20"
+            currentProjectType ? "text-white" : "text-white/20",
           )}
         >
           <Tag className="h-4 w-4 text-primary" />

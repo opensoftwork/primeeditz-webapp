@@ -1,10 +1,10 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import { useQuery } from "convex/react";
+import { format } from "date-fns";
 import { motion } from "motion/react";
 import { Badge } from "@/components/ui/badge";
-import { format } from "date-fns";
 
 export function DashboardHeader() {
   const profile = useQuery(api.profiles.getMyProfile);

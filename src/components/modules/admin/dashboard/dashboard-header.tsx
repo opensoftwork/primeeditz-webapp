@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
+import { Badge } from "@/components/ui/badge";
 
 interface DashboardHeaderProps {
   userName: string;

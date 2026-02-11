@@ -5,8 +5,11 @@
  * Uses authenticatedMutation wrapper from customFunctions.
  */
 
-import { ConvexError, v } from 'convex/values'
-import { authenticatedMutation, adminMutation } from '../../lib/customFunctions'
+import { ConvexError, v } from "convex/values";
+import {
+  adminMutation,
+  authenticatedMutation,
+} from "../../lib/customFunctions";
 
 /**
  * Create a new profile for the authenticated user.
@@ -14,30 +17,30 @@ import { authenticatedMutation, adminMutation } from '../../lib/customFunctions'
  *
  * @param name - User's full name (required)
  * @param phone - User's phone number (optional)
- * @param role - User's role: 'client' or 'admin' (for first user bootstrap)
+ * @param role - User's role: 'studio' or 'admin' (for first user bootstrap)
  */
 export const createProfile = authenticatedMutation({
   args: {
     name: v.string(),
     phone: v.optional(v.string()),
-    role: v.union(v.literal('client'), v.literal('admin')),
+    role: v.union(v.literal("studio"), v.literal("admin")),
   },
   handler: async (ctx, args) => {
     // ctx.authUser is available from the authenticatedMutation wrapper
-    const userId = ctx.authUser._id
+    const userId = ctx.authUser._id;
 
     // Check if profile already exists
     const existingProfile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
-      .first()
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
 
     if (existingProfile) {
-      throw new Error('Profile already exists')
+      throw new Error("Profile already exists");
     }
 
     // Create the profile
-    const profileId = await ctx.db.insert('profiles', {
+    const profileId = await ctx.db.insert("profiles", {
       userId: userId, // Store Better Auth user ID as string
       email: ctx.authUser.email, // Store email for easier admin access
       name: args.name,
@@ -45,11 +48,11 @@ export const createProfile = authenticatedMutation({
       role: args.role,
       onboardingComplete: true,
       updatedAt: Date.now(),
-    })
+    });
 
-    return profileId
+    return profileId;
   },
-})
+});
 
 /**
  * Update an existing profile.
@@ -62,44 +65,44 @@ export const updateProfile = authenticatedMutation({
     company: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const userId = ctx.authUser._id
+    const userId = ctx.authUser._id;
 
     // Get existing profile
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
-      .first()
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
 
     if (!profile) {
-      throw new Error('Profile not found')
+      throw new Error("Profile not found");
     }
 
     // Update profile with provided fields
     const updates: Record<string, unknown> = {
       updatedAt: Date.now(),
-    }
+    };
 
-    if (args.name !== undefined) updates.name = args.name
-    if (args.phone !== undefined) updates.phone = args.phone
-    if (args.company !== undefined) updates.company = args.company
+    if (args.name !== undefined) updates.name = args.name;
+    if (args.phone !== undefined) updates.phone = args.phone;
+    if (args.company !== undefined) updates.company = args.company;
 
-    await ctx.db.patch(profile._id, updates)
+    await ctx.db.patch(profile._id, updates);
 
-    return profile._id
+    return profile._id;
   },
-})
+});
 
 /**
- * Create a draft client profile (admin-initiated).
- * Used when admin creates a project for a new client who hasn't registered.
- * The client will receive an invitation to complete their profile later.
+ * Create a draft studio profile (admin-initiated).
+ * Used when admin creates a project for a new studio who hasn't registered.
+ * The studio will receive an invitation to complete their profile later.
  *
- * @param name - Client's full name (required)
- * @param email - Client's email address (required)
- * @param phone - Client's phone number (optional)
- * @param company - Client's company name (optional)
+ * @param name - Studio's full name (required)
+ * @param email - Studio's email address (required)
+ * @param phone - Studio's phone number (optional)
+ * @param company - Studio's company name (optional)
  */
-export const createDraftClientProfile = authenticatedMutation({
+export const createDraftStudioProfile = authenticatedMutation({
   args: {
     name: v.string(),
     email: v.string(),
@@ -107,45 +110,45 @@ export const createDraftClientProfile = authenticatedMutation({
     company: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    // Verify the caller is an admin or employee (has permission to create clients)
-    const callerUserId = ctx.authUser._id
+    // Verify the caller is an admin or employee (has permission to create studios)
+    const callerUserId = ctx.authUser._id;
 
     const callerProfile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', callerUserId))
-      .first()
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", callerUserId))
+      .first();
 
     if (!callerProfile) {
-      throw new Error('Caller profile not found')
+      throw new Error("Caller profile not found");
     }
 
-    if (callerProfile.role !== 'admin' && callerProfile.role !== 'employee') {
-      throw new Error('Only admins and employees can create client profiles')
+    if (callerProfile.role !== "admin" && callerProfile.role !== "employee") {
+      throw new Error("Only admins and employees can create studio profiles");
     }
 
     // Check if a profile with this email already exists
-    const allProfiles = await ctx.db.query('profiles').collect()
+    const allProfiles = await ctx.db.query("profiles").collect();
     const existingProfile = allProfiles.find(
-      (p) => p.email.toLowerCase() === args.email.toLowerCase()
-    )
+      (p) => p.email.toLowerCase() === args.email.toLowerCase(),
+    );
 
     if (existingProfile) {
-      throw new Error('A profile with this email already exists')
+      throw new Error("A profile with this email already exists");
     }
 
-    // Create the draft client profile
-    // Note: userId will be set when the client actually registers/logs in
+    // Create the draft studio profile
+    // Note: userId will be set when the studio actually registers/logs in
     // For now, we use a placeholder that can be linked later
-    const profileId = await ctx.db.insert('profiles', {
+    const profileId = await ctx.db.insert("profiles", {
       userId: `draft_${Date.now()}_${Math.random().toString(36).substring(7)}`, // Placeholder
       email: args.email,
       name: args.name,
       phone: args.phone,
       company: args.company,
-      role: 'client',
-      onboardingComplete: false, // Client hasn't completed onboarding
+      role: "studio",
+      onboardingComplete: false, // Studio hasn't completed onboarding
       updatedAt: Date.now(),
-    })
+    });
 
     return {
       profileId,
@@ -153,82 +156,84 @@ export const createDraftClientProfile = authenticatedMutation({
       email: args.email,
       phone: args.phone,
       company: args.company,
-    }
+    };
   },
-})
+});
 
 /**
- * Update a client profile (admin only).
+ * Update a studio profile (admin only).
  */
-export const updateClientProfile = adminMutation({
+export const updateStudioProfile = adminMutation({
   args: {
-    profileId: v.id('profiles'),
+    profileId: v.id("profiles"),
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
     company: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { profileId, ...updates } = args
+    const { profileId, ...updates } = args;
 
-    const targetProfile = await ctx.db.get(profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
-    if (targetProfile.role !== 'client') throw new Error('Target profile is not a client')
+    const targetProfile = await ctx.db.get(profileId);
+    if (!targetProfile) throw new Error("Studio profile not found");
+    if (targetProfile.role !== "studio")
+      throw new Error("Target profile is not a studio");
 
     const filteredUpdates: Record<string, any> = {
       updatedAt: Date.now(),
-    }
+    };
 
-    if (updates.name !== undefined) filteredUpdates.name = updates.name
-    if (updates.phone !== undefined) filteredUpdates.phone = updates.phone
-    if (updates.company !== undefined) filteredUpdates.company = updates.company
+    if (updates.name !== undefined) filteredUpdates.name = updates.name;
+    if (updates.phone !== undefined) filteredUpdates.phone = updates.phone;
+    if (updates.company !== undefined)
+      filteredUpdates.company = updates.company;
 
-    await ctx.db.patch(profileId, filteredUpdates)
+    await ctx.db.patch(profileId, filteredUpdates);
 
-    return profileId
+    return profileId;
   },
-})
+});
 
 /**
- * Deactivate a client profile (soft delete).
+ * Deactivate a studio profile (soft delete).
  */
-export const deactivateClient = adminMutation({
+export const deactivateStudio = adminMutation({
   args: {
-    profileId: v.id('profiles'),
+    profileId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
-    const targetProfile = await ctx.db.get(args.profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
+    const targetProfile = await ctx.db.get(args.profileId);
+    if (!targetProfile) throw new Error("Studio profile not found");
 
     await ctx.db.patch(args.profileId, {
       deactivatedAt: Date.now(),
       deactivatedBy: ctx.profile._id,
       updatedAt: Date.now(),
-    })
+    });
 
-    return args.profileId
+    return args.profileId;
   },
-})
+});
 
 /**
- * Reactivate a deactivated client profile.
+ * Reactivate a deactivated studio profile.
  */
-export const reactivateClient = adminMutation({
+export const reactivateStudio = adminMutation({
   args: {
-    profileId: v.id('profiles'),
+    profileId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
-    const targetProfile = await ctx.db.get(args.profileId)
-    if (!targetProfile) throw new Error('Client profile not found')
+    const targetProfile = await ctx.db.get(args.profileId);
+    if (!targetProfile) throw new Error("Studio profile not found");
 
     await ctx.db.patch(args.profileId, {
       deactivatedAt: undefined,
       deactivatedBy: undefined,
       updatedAt: Date.now(),
-    })
+    });
 
-    return args.profileId
+    return args.profileId;
   },
-})
+});
 
 /**
  * Claim a draft profile (onboarding).
@@ -236,36 +241,45 @@ export const reactivateClient = adminMutation({
  */
 export const claimDraftProfile = authenticatedMutation({
   args: {
-    profileId: v.id('profiles'),
+    profileId: v.id("profiles"),
   },
   handler: async (ctx, args) => {
-    const userId = ctx.authUser._id
-    const userEmail = ctx.authUser.email
+    const userId = ctx.authUser._id;
+    const userEmail = ctx.authUser.email;
 
     // Check if user already has a profile (other than the draft one they are claiming)
     const existingProfile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
-      .first()
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
 
-    if (existingProfile && existingProfile._id !== args.profileId) {
-      throw new ConvexError('User already has an active profile')
+    if (existingProfile) {
+      if (existingProfile._id === args.profileId) {
+        return args.profileId;
+      }
+      throw new ConvexError("User already has an active profile");
     }
 
     // Get the draft profile
-    const draftProfile = await ctx.db.get(args.profileId)
+    const draftProfile = await ctx.db.get(args.profileId);
     if (!draftProfile) {
-      throw new ConvexError('Profile not found')
+      throw new ConvexError("Profile not found");
     }
 
     // Verify it is a draft
-    if (!draftProfile.userId.startsWith('draft_')) {
-      throw new ConvexError('This profile has already been claimed')
+    if (!draftProfile.userId.startsWith("draft_")) {
+      throw new ConvexError("This profile has already been claimed");
     }
 
     // Security Check: Verify email if it's not a placeholder
-    const isPlaceholderEmail = draftProfile.email?.endsWith("@pending.primeeditz.com");
-    if (draftProfile.email && !isPlaceholderEmail && draftProfile.email !== userEmail) {
+    const isPlaceholderEmail = draftProfile.email?.endsWith(
+      "@pending.primeeditz.com",
+    );
+    if (
+      draftProfile.email &&
+      !isPlaceholderEmail &&
+      draftProfile.email !== userEmail
+    ) {
       throw new ConvexError("You are not authorized to claim this profile");
     }
 
@@ -275,9 +289,8 @@ export const claimDraftProfile = authenticatedMutation({
       email: userEmail,
       onboardingComplete: true,
       updatedAt: Date.now(),
-    })
+    });
 
-    return args.profileId
+    return args.profileId;
   },
-})
-
+});

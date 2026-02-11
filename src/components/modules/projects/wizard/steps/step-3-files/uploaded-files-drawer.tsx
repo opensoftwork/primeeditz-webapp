@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useMemo, useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
+import { toast } from "sonner";
 import {
   FilesVaultDrawer,
   type VaultFile,
 } from "@/components/shared/files-vault/drawer";
 import { useReferenceFilesStore } from "@/stores/reference-files-store";
-import { toast } from "sonner";
 
 interface UploadedFilesDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRemoveFile: (fileId: string) => void;
-  initialTab?: "all" | "image" | "video" | "document";
+  initialTab?: "all" | "image" | "video" | "audio" | "document";
 }
 
 /**
@@ -51,13 +51,13 @@ export function UploadedFilesDrawer({
           {
             description: "Stored in local cache for final transmission.",
             duration: 2500,
-          }
+          },
         );
       } else if (result.error) {
         toast.error(result.error, { duration: 4000 });
       }
     },
-    [addFiles]
+    [addFiles],
   );
 
   return (

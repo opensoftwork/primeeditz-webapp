@@ -7,6 +7,9 @@
 
 "use client";
 
+import { ArrowLeft, Loader2, Save } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
 import {
   QuotationBuilderProvider,
   useQuotationBuilder,
@@ -14,13 +17,10 @@ import {
 import { PricingSummary } from "../detail/components/pricing-summary";
 import {
   EditorClientCard,
-  EditorValiditySection,
   EditorLineItemsSection,
   EditorTermsSection,
+  EditorValiditySection,
 } from "./components";
-import { Button } from "@/components/ui/button";
-import { Save, ArrowLeft, Loader2 } from "lucide-react";
-import { useRouter } from "next/navigation";
 
 export function EditQuotation({ quotationId }: { quotationId: string }) {
   return (
@@ -39,7 +39,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
     grandTotal,
     formData,
     taxAmount,
-    selectedClient,
+    selectedStudio,
   } = useQuotationBuilder();
 
   return (
@@ -63,7 +63,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
           </div>
           <p className="text-white/50 text-xs font-medium ml-12">
             Modifying quotation details for{" "}
-            {selectedClient?.name || "selected client"}.
+            {selectedStudio?.name || "selected client"}.
           </p>
         </div>
 

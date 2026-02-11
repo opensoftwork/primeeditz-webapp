@@ -6,13 +6,13 @@
 
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { ArrowLeft, Loader2, Receipt } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { Loader2, Receipt, ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { QuotationPreview } from "@/components/modules/admin/quotations/preview";
+import { Button } from "@/components/ui/button";
 
 interface QuotationPreviewClientProps {
   quotationId: string;
@@ -25,12 +25,16 @@ export function QuotationPreviewClient({
 
   // Fetch quotation with sections
   const data = useQuery(
+    // @ts-ignore
     api.functions.quotations.queries.getQuotationWithSections,
-    { quotationId: quotationId as Id<"quotations"> }
+    { quotationId: quotationId as Id<"quotations"> },
   );
 
+  // Fetch company info
+  const companyInfo = useQuery(api.functions.company.queries.get);
+
   // Loading state
-  if (data === undefined) {
+  if (data === undefined || companyInfo === undefined) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-zinc-100">
         <div className="flex flex-col items-center gap-4">
@@ -76,7 +80,7 @@ export function QuotationPreviewClient({
         code: quotation.code,
         version: quotation.version,
         status: quotation.status,
-        clientId: quotation.clientId,
+        studioId: quotation.studioId,
         projectIds: quotation.projectIds,
         lineItems: quotation.lineItems,
         terms: quotation.terms,
@@ -87,7 +91,10 @@ export function QuotationPreviewClient({
       }}
       sections={sections}
       projects={projects}
-      onBack={() => router.push(`/quotations/${quotationId}`)}
+      companyInfo={companyInfo || undefined}
+      studioName={quotation.studioName}
+      projectName={quotation.projectName}
+      onBack={() => router.back()}
     />
   );
 }

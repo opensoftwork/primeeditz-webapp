@@ -2,129 +2,142 @@
  * Project Queries
  *
  * Read operations for projects with role-based access.
- * Uses clientQuery for client-owned project access.
+ * Uses studioQuery for studio-owned project access.
  */
 
-import { v, ConvexError } from 'convex/values'
-import { paginationOptsValidator } from 'convex/server'
-import { query } from '../../_generated/server'
+import { paginationOptsValidator } from "convex/server";
+import { ConvexError, v } from "convex/values";
+import type { Doc } from "../../_generated/dataModel";
+import { query } from "../../_generated/server";
 import {
-  clientQuery,
   adminQuery,
-  staffQuery,
   authenticatedWithProfileQuery,
-} from '../../lib/customFunctions'
-import { enrichReferenceFilesWithUrls } from '../../lib/storageUtils'
-import { checkUploadEligibility } from '../../lib/uploadGate'
-import type { Doc } from '../../_generated/dataModel'
-import { projectPhaseValidator, projectActionStateValidator } from '../../schema'
+  staffQuery,
+  studioQuery,
+} from "../../lib/customFunctions";
+import { enrichReferenceFilesWithUrls } from "../../lib/storageUtils";
+import { checkUploadEligibility } from "../../lib/uploadGate";
+import {
+  projectActionStateValidator,
+  projectPhaseValidator,
+} from "../../schema";
 
 // ============================================================================
-// Client Queries
+// Studio Queries
 // ============================================================================
 
 /**
- * Get all projects for the current client.
+ * Get all projects for the current studio.
  * Excludes drafts - only shows submitted projects.
  */
-export const getMyProjects = clientQuery({
+export const getMyProjects = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
-      .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.eq(q.field('deletedAt'), undefined))
-      .order('desc')
-      .collect()
+      .query("projects")
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .collect();
 
-    return projects
+    return projects;
   },
-})
+});
 
 /**
- * Get a draft project for the current client.
+ * Get a draft project for the current studio.
  * Used by the wizard to resume a draft.
  */
-export const getDraft = clientQuery({
+export const getDraft = studioQuery({
   args: {
-    projectId: v.id('projects'),
+    projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const project = await ctx.db.get(args.projectId)
+    const project = await ctx.db.get(args.projectId);
 
     if (!project) {
-      throw new ConvexError('Project not found')
+      throw new ConvexError("Project not found");
     }
 
     // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
-      throw new ConvexError('Access denied')
+    if (project.studioId !== ctx.profile._id) {
+      throw new ConvexError("Access denied");
     }
 
     // Only return if it's a draft
-    if (project.actionState !== 'draft') {
-      throw new ConvexError('Project is not a draft')
+    if (project.actionState !== "draft") {
+      throw new ConvexError("Project is not a draft");
     }
 
-    return project
+    return project;
   },
-})
+});
 
 /**
- * Get the current active draft project for the current client.
+ * Get the current active draft project for the current studio.
  * Used to resume a draft without knowing its ID.
  */
-export const getMyActiveDraft = clientQuery({
+export const getMyActiveDraft = studioQuery({
   args: {},
   handler: async (ctx) => {
     const draft = await ctx.db
-      .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => q.eq(q.field('actionState'), 'draft'))
-      .first()
+      .query("projects")
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
+      .filter((q) => q.eq(q.field("actionState"), "draft"))
+      .first();
 
-    return draft
+    return draft;
   },
-})
+});
 
 /**
  * Get a single project by ID.
- * Verifies ownership for clients.
+ * Verifies ownership for studios.
  * Enriches reference files with proper MinIO public URLs.
  */
-export const getProject = clientQuery({
+export const getProject = authenticatedWithProfileQuery({
   args: {
-    projectId: v.id('projects'),
+    projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const project = await ctx.db.get(args.projectId)
+    const project = await ctx.db.get(args.projectId);
 
     if (!project) {
-      throw new ConvexError('Project not found')
+      throw new ConvexError("Project not found");
     }
 
-    // Verify ownership
-    if (project.clientId !== ctx.profile._id) {
-      throw new ConvexError('Access denied')
+    // Verify access based on role
+    if (ctx.profile.role === "studio") {
+      // Studios can only see their own projects
+      if (project.studioId !== ctx.profile._id) {
+        throw new ConvexError("Access denied");
+      }
+    } else if (
+      ctx.profile.role !== "admin" &&
+      ctx.profile.role !== "employee"
+    ) {
+      // Unknown role
+      throw new ConvexError("Access denied");
     }
+    // Admins and Employees can view all projects
 
     // Enrich with project type
-    const projectType = await ctx.db.get(project.projectTypeId)
+    const projectType = await ctx.db.get(project.projectTypeId);
 
     // Enrich reference files with proper URLs
-    const enrichedFiles = enrichReferenceFilesWithUrls(project.referenceFiles)
+    const enrichedFiles = enrichReferenceFilesWithUrls(project.referenceFiles);
 
     // Enrich with upload eligibility
     const uploadEligibility = await checkUploadEligibility(ctx, args.projectId);
 
     return {
       ...project,
-      projectTypeName: projectType?.name ?? 'Unknown',
+      projectTypeName: projectType?.name ?? "Unknown",
       referenceFiles: enrichedFiles,
       uploadEligibility,
-    }
+    };
   },
-})
+});
 
 /**
  * Internal query for upload eligibility check.
@@ -132,63 +145,108 @@ export const getProject = clientQuery({
  */
 export const getProjectUploadEligibility = authenticatedWithProfileQuery({
   args: {
-    projectId: v.id('projects'),
+    projectId: v.id("projects"),
   },
   handler: async (ctx, args) => {
-    const project = await ctx.db.get(args.projectId)
+    const project = await ctx.db.get(args.projectId);
     if (!project) {
-      return { isAllowed: false, reason: "Project not found", canOverride: false };
+      return {
+        isAllowed: false,
+        reason: "Project not found",
+        canOverride: false,
+      };
     }
-    
+
     // Use the upload gate logic directly
     return await checkUploadEligibility(ctx, args.projectId);
   },
-})
+});
 
 /**
- * Get projects for the current client with their project type and category info.
- * Returns enriched project data for dashboard display.
+ * Get projects for the current studio grouped by end studio name.
+ * Used for the revamped studio dashboard (Story 11C.3).
  */
-export const getMyProjectsWithType = clientQuery({
+export const getMyProjectsGroupedByEndClient = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
-      .query('projects')
-      .withIndex('by_clientId', (q) => q.eq('clientId', ctx.profile._id))
-      .filter((q) => 
-          q.eq(q.field('deletedAt'), undefined)
-      )
-      .order('desc')
-      .collect()
+      .query("projects")
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .collect();
+
+    // Map to group projects
+    const groups: Record<string, any[]> = {};
+
+    for (const project of projects) {
+      const endClient = project.endClientName || "Direct Engagements";
+      if (!groups[endClient]) {
+        groups[endClient] = [];
+      }
+
+      const projectType = await ctx.db.get(project.projectTypeId);
+      groups[endClient].push({
+        ...project,
+        projectTypeName: projectType?.name ?? "Unknown",
+        createdAt: project._creationTime,
+      });
+    }
+
+    // Convert to sorted array of groups
+    return Object.entries(groups)
+      .map(([name, projects]) => ({
+        name,
+        projects,
+        count: projects.length,
+        lastUpdated: Math.max(...projects.map((p) => p.updatedAt)),
+      }))
+      .sort((a, b) => b.lastUpdated - a.lastUpdated);
+  },
+});
+
+/**
+ * Get projects for the current studio with their project type and category info.
+ * Returns enriched project data for dashboard display.
+ */
+export const getMyProjectsWithType = studioQuery({
+  args: {},
+  handler: async (ctx) => {
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .order("desc")
+      .collect();
 
     // Enrich with project type and category
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const projectType = await ctx.db.get(project.projectTypeId)
-        let categoryName = 'Other'
+        const projectType = await ctx.db.get(project.projectTypeId);
+        let categoryName = "Other";
         const pt = projectType as Doc<"projectTypes"> | null;
         if (pt && pt.categoryId) {
-          const category = await ctx.db.get(pt.categoryId)
-          categoryName = (category as any)?.name || 'Other'
+          const category = await ctx.db.get(pt.categoryId);
+          categoryName = (category as any)?.name || "Other";
         }
         return {
           ...project,
-          projectTypeName: projectType?.name ?? 'Unknown',
+          projectTypeName: projectType?.name ?? "Unknown",
           projectTypeCategory: categoryName,
           createdAt: project._creationTime,
-        }
-      })
-    )
+        };
+      }),
+    );
 
-    return enriched
+    return enriched;
   },
-})
+});
 
 /**
- * Get all projects for the current client with cursor-based pagination.
+ * Get all projects for the current studio with cursor-based pagination.
  * Compatible with useSimplePaginatedQuery for infinite scroll or page navigation.
  */
-export const getClientProjectsPaginated = clientQuery({
+export const getStudioProjectsPaginated = studioQuery({
   args: {
     paginationOpts: paginationOptsValidator,
     phase: v.optional(projectPhaseValidator),
@@ -197,27 +255,29 @@ export const getClientProjectsPaginated = clientQuery({
   },
   handler: async (ctx, args) => {
     // Execute pagination - conditionally use index for status filtering
-    // Clients only see their own projects and non-draft projects
+    // Studios only see their own projects and non-draft projects
     let query = ctx.db
       .query("projects")
-      .withIndex("by_clientId", (q) => q.eq("clientId", ctx.profile._id))
+      .withIndex("by_studioId", (q) => q.eq("studioId", ctx.profile._id))
       .filter((q) => q.eq(q.field("deletedAt"), undefined));
 
     if (args.phase) {
       query = query.filter((q) => q.eq(q.field("phase"), args.phase!));
     }
-    
+
     if (args.actionState) {
-      query = query.filter((q) => q.eq(q.field("actionState"), args.actionState!));
+      query = query.filter((q) =>
+        q.eq(q.field("actionState"), args.actionState!),
+      );
     }
 
     const results = await query.order("desc").paginate(args.paginationOpts);
 
     // Get all project types for enrichment
-    const projectTypes: Doc<"projectTypes">[] = await ctx.db.query("projectTypes").collect();
-    const projectTypeMap = new Map(
-      projectTypes.map((pt) => [pt._id, pt])
-    );
+    const projectTypes: Doc<"projectTypes">[] = await ctx.db
+      .query("projectTypes")
+      .collect();
+    const projectTypeMap = new Map(projectTypes.map((pt) => [pt._id, pt]));
 
     // Filter by projectTypeId in memory and enrich
     const enrichedPage = results.page
@@ -235,8 +295,8 @@ export const getClientProjectsPaginated = clientQuery({
           source: project.source,
           awaitingActorRole: project.awaitingActorRole,
           projectTypeName: projectType?.name ?? "Unknown",
-          eventName: project.eventName,
-          eventDate: project.eventDate,
+          eventName: project.endClientName,
+          eventDate: project.preferredDeliveryDate,
           createdAt: project._creationTime,
           updatedAt: project.updatedAt,
         };
@@ -250,9 +310,9 @@ export const getClientProjectsPaginated = clientQuery({
 });
 
 /**
- * Get all project types for filter dropdown (Client View).
+ * Get all project types for filter dropdown (Studio View).
  */
-export const getProjectTypes = clientQuery({
+export const getProjectTypes = studioQuery({
   args: {},
   handler: async (ctx) => {
     const projectTypes = await ctx.db.query("projectTypes").collect();
@@ -262,12 +322,12 @@ export const getProjectTypes = clientQuery({
         return {
           _id: pt._id,
           name: pt.name,
-          categoryName: (category as any)?.name || 'Uncategorized',
+          categoryName: (category as any)?.name || "Uncategorized",
           isActive: pt.isActive,
         };
-      })
-    )
-    return enriched.filter(pt => pt.isActive);
+      }),
+    );
+    return enriched.filter((pt) => pt.isActive);
   },
 });
 
@@ -284,32 +344,32 @@ export const getAdminActiveDraft = adminQuery({
   handler: async (ctx) => {
     // Find any draft project created by admin (source: admin_init)
     const draft = await ctx.db
-      .query('projects')
+      .query("projects")
       .filter((q) =>
         q.and(
-          q.eq(q.field('actionState'), 'draft'),
-          q.eq(q.field('source'), 'admin_init')
-        )
+          q.eq(q.field("actionState"), "draft"),
+          q.eq(q.field("source"), "admin_init"),
+        ),
       )
-      .first()
+      .first();
 
     if (!draft) {
-      return null
+      return null;
     }
 
     // Enrich with project type name
-    const projectType = await ctx.db.get(draft.projectTypeId)
+    const projectType = await ctx.db.get(draft.projectTypeId);
 
-    // Get client info if exists
-    const client = draft.clientId ? await ctx.db.get(draft.clientId) : null
+    // Get studio info if exists
+    const studio = draft.studioId ? await ctx.db.get(draft.studioId) : null;
 
     return {
       ...draft,
-      projectTypeName: projectType?.name ?? 'Unknown',
-      clientName: client?.name ?? null,
-    }
+      projectTypeName: projectType?.name ?? "Unknown",
+      studioName: studio?.name ?? null,
+    };
   },
-})
+});
 
 /**
  * Get all projects (admin view).
@@ -323,33 +383,39 @@ export const getAllProjects = adminQuery({
     let query;
 
     if (args.phase) {
-      query = ctx.db.query('projects').withIndex('by_phase', (q) => q.eq('phase', args.phase!));
+      query = ctx.db
+        .query("projects")
+        .withIndex("by_phase", (q) => q.eq("phase", args.phase!));
     } else if (args.actionState) {
-      query = ctx.db.query('projects').withIndex('by_actionState', (q) => q.eq('actionState', args.actionState!));
+      query = ctx.db
+        .query("projects")
+        .withIndex("by_actionState", (q) =>
+          q.eq("actionState", args.actionState!),
+        );
     } else {
-      query = ctx.db.query('projects');
+      query = ctx.db.query("projects");
     }
 
-    const projects = await query.order('desc').collect();
+    const projects = await query.order("desc").collect();
 
-    // Enrich with client and project type info
+    // Enrich with studio and project type info
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const [client, projectType] = await Promise.all([
-          project.clientId ? ctx.db.get(project.clientId) : null,
+        const [studio, projectType] = await Promise.all([
+          project.studioId ? ctx.db.get(project.studioId) : null,
           ctx.db.get(project.projectTypeId),
-        ])
+        ]);
         return {
           ...project,
-          clientName: client?.name ?? 'Unknown',
-          projectTypeName: projectType?.name ?? 'Unknown',
-        }
-      })
-    )
+          studioName: studio?.name ?? "Unknown",
+          projectTypeName: projectType?.name ?? "Unknown",
+        };
+      }),
+    );
 
-    return enriched
+    return enriched;
   },
-})
+});
 
 /**
  * Get pending review projects (admin dashboard).
@@ -358,27 +424,75 @@ export const getPendingProjects = adminQuery({
   args: {},
   handler: async (ctx) => {
     const projects = await ctx.db
-      .query('projects')
-      .withIndex('by_actionState', (q) => q.eq('actionState', 'awaiting_quotation'))
-      .order('desc')
-      .collect()
+      .query("projects")
+      .withIndex("by_actionState", (q) =>
+        q.eq("actionState", "awaiting_quotation"),
+      )
+      .order("desc")
+      .collect();
 
-    // Enrich with client info (clientId is optional for admin-initiated projects)
+    // Enrich with studio info (studioId is optional for admin-initiated projects)
     const enriched = await Promise.all(
       projects.map(async (project) => {
-        const client = project.clientId
-          ? await ctx.db.get(project.clientId)
-          : null
+        const studio = project.studioId
+          ? await ctx.db.get(project.studioId)
+          : null;
         return {
           ...project,
-          clientName: client?.name ?? 'Unknown',
-        }
-      })
-    )
+          studioName: studio?.name ?? "Unknown",
+        };
+      }),
+    );
 
-    return enriched
+    return enriched;
   },
-})
+});
+
+// ============================================================================
+// Shared Queries (Admin & Studio/Studio)
+// ============================================================================
+
+/**
+ * Get all projects spawned from a specific quotation.
+ * Returns enriched data with project type names.
+ */
+export const getByQuotationId = authenticatedWithProfileQuery({
+  args: { quotationId: v.id("quotations") },
+  handler: async (ctx, args) => {
+    // 1. Fetch the quotation to check permissions
+    const quotation = await ctx.db.get(args.quotationId);
+    if (!quotation) return [];
+
+    // 2. Permission check: Admin can see everything,
+    // Studios/Studios only see their own quotations
+    if (
+      ctx.profile.role !== "admin" &&
+      quotation.studioId !== ctx.profile._id
+    ) {
+      return [];
+    }
+
+    // 3. Fetch projects
+    const projects = await ctx.db
+      .query("projects")
+      .withIndex("by_quotationId", (q) => q.eq("quotationId", args.quotationId))
+      .filter((q) => q.eq(q.field("deletedAt"), undefined))
+      .collect();
+
+    // 4. Enrich with project type info
+    const enriched = await Promise.all(
+      projects.map(async (project) => {
+        const projectType = await ctx.db.get(project.projectTypeId);
+        return {
+          ...project,
+          projectTypeName: projectType?.name || "Unknown",
+        };
+      }),
+    );
+
+    return enriched;
+  },
+});
 
 // ============================================================================
 // Internal Queries
@@ -389,8 +503,8 @@ export const getPendingProjects = adminQuery({
  * FOR INTERNAL USE BY ACTIONS ONLY.
  */
 export const internalGetProject = query({
-  args: { projectId: v.id('projects') },
+  args: { projectId: v.id("projects") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.projectId)
+    return await ctx.db.get(args.projectId);
   },
-})
+});

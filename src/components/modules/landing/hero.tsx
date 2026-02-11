@@ -1,13 +1,13 @@
 "use client";
 
-import { TransitionLink } from "./transition-link";
-import { GL } from "./gl";
-import { Pill } from "./pill";
-
-import { DashboardPreview } from "./modules/dashboard-preview";
 // import { Maximize2 } from "lucide-react";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
+import { GL } from "./gl";
+
+import { DashboardPreview } from "./modules/dashboard-preview";
+import { Pill } from "./pill";
+import { TransitionLink } from "./transition-link";
 
 export function Hero() {
   const [hovering, setHovering] = useState(false);
@@ -29,7 +29,9 @@ export function Hero() {
                   Next efficiency hit
                 </h1>
                 <p className="font-mono text-sm sm:text-base md:text-lg lg:text-xl text-foreground/80 text-balance leading-relaxed max-w-xl">
-                  A comprehensive post-production system that enables teams and studios to manage their entire workflow—from client management to team collaboration.
+                  A comprehensive post-production system that enables teams and
+                  studios to manage their entire workflow—from client management
+                  to team collaboration.
                 </p>
 
                 <div className="relative z-30 mt-10 sm:mt-12 md:mt-14 lg:mt-16">

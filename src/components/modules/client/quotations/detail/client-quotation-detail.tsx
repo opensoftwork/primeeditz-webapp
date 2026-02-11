@@ -1,21 +1,22 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
-import { Skeleton } from "@/components/ui/skeleton";
+import { toast } from "sonner";
 import {
+  PricingSummary,
+  QuotationActionButtons,
   QuotationDetailHeader,
   QuotationLineItemsView,
   QuotationTermsView,
-  QuotationActionButtons,
-  PricingSummary,
 } from "@/components/modules/client/quotations";
-import { toast } from "sonner";
+import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 export function ClientQuotationDetail() {
@@ -86,36 +87,42 @@ export function ClientQuotationDetail() {
   };
 
   // Group line items by project, then by section (new project-based grouping)
-  const groupedByProject = projects.map((project: {
-    _id: string;
-    code: string;
-    eventName?: string;
-    projectTypeName?: string;
-  }) => {
-    const projectItems = quotation.lineItems.filter(
-      (item: { projectId?: string }) => item.projectId === project._id
-    );
-    const sectionGroups = sections
-      .map((section: { _id: string; name: string; color?: string }) => ({
-        section,
-        items: projectItems.filter(
-          (item: { sectionId?: string }) => item.sectionId === section._id
-        ),
-      }))
-      .filter((g) => g.items.length > 0);
-    return {
-      project,
-      sectionGroups,
-    };
-  }).filter((pg) => pg.sectionGroups.length > 0);
+  const groupedByProject = projects
+    .map(
+      (project: {
+        _id: string;
+        code: string;
+        eventName?: string;
+        projectTypeName?: string;
+      }) => {
+        const projectItems = quotation.lineItems.filter(
+          (item: { projectId?: string }) => item.projectId === project._id,
+        );
+        const sectionGroups = sections
+          .map((section: { _id: string; name: string; color?: string }) => ({
+            section,
+            items: projectItems.filter(
+              (item: { sectionId?: string }) => item.sectionId === section._id,
+            ),
+          }))
+          .filter((g) => g.items.length > 0);
+        return {
+          project,
+          sectionGroups,
+        };
+      },
+    )
+    .filter((pg) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
-  const groupedBySection = sections.map((section: { _id: string; name: string; color?: string }) => ({
-    section,
-    items: quotation.lineItems.filter(
-      (item: { sectionId?: string }) => item.sectionId === section._id,
-    ),
-  }));
+  const groupedBySection = sections.map(
+    (section: { _id: string; name: string; color?: string }) => ({
+      section,
+      items: quotation.lineItems.filter(
+        (item: { sectionId?: string }) => item.sectionId === section._id,
+      ),
+    }),
+  );
 
   return (
     <div className="min-h-screen p-6 md:p-12 space-y-12 w-full">
@@ -133,6 +140,9 @@ export function ClientQuotationDetail() {
             projects={projects}
             formatCurrency={formatCurrency}
           />
+          {quotation.status === "approved" && (
+            <SpawnedProjectsList quotationId={quotationId} isAdmin={false} />
+          )}
           <QuotationTermsView terms={quotation.terms} />
         </div>
 

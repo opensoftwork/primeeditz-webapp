@@ -1,62 +1,75 @@
-import type { LucideIcon } from "lucide-react"
-import { Hash, Type, ToggleLeft, FileText, ListFilter, Layers } from "lucide-react"
+import type { LucideIcon } from "lucide-react";
+import {
+  FileText,
+  Hash,
+  Layers,
+  ListFilter,
+  ToggleLeft,
+  Type,
+} from "lucide-react";
 
 export interface DbFieldDefinition {
-  _id: string
-  name: string
-  label: string
-  type: "text" | "number" | "select" | "checkbox" | "textarea"
-  required: boolean
-  placeholder?: string
-  description?: string
-  options?: string // JSON string of options array
-  min?: number
-  max?: number
-  displayOrder: number
-  isActive: boolean
+  _id: string;
+  name: string;
+  label: string;
+  type: "text" | "number" | "select" | "checkbox" | "textarea";
+  required: boolean;
+  placeholder?: string;
+  description?: string;
+  options?: string; // JSON string of options array
+  min?: number;
+  max?: number;
+  displayOrder: number;
+  isActive: boolean;
 }
 
 export interface SelectOption {
-  value: string
-  label: string
+  value: string;
+  label: string;
 }
 
-export type FieldValue = string | number | boolean | number[] | null | undefined
+export type FieldValue =
+  | string
+  | number
+  | boolean
+  | number[]
+  | null
+  | undefined;
 
 export interface FieldRenderProps {
-  fieldDef: DbFieldDefinition
-  value: FieldValue
-  onChange: (value: FieldValue) => void
-  onBlur: () => void
-  isInvalid: boolean
-  errors: string[]
-  isHighlighted?: boolean
+  fieldDef: DbFieldDefinition;
+  value: FieldValue;
+  onChange: (value: FieldValue) => void;
+  onBlur: () => void;
+  isInvalid: boolean;
+  errors: string[];
+  isHighlighted?: boolean;
 }
 
 export function getFieldIcon(type: string, name: string): LucideIcon {
-  if (name === "albumCount") return Layers
+  if (name === "albumCount") return Layers;
   switch (type) {
     case "number":
-      return Hash
+      return Hash;
     case "text":
-      return Type
+      return Type;
     case "checkbox":
-      return ToggleLeft
+      return ToggleLeft;
     case "textarea":
-      return FileText
+      return FileText;
     case "select":
-      return ListFilter
+      return ListFilter;
     default:
-      return Type
+      return Type;
   }
 }
 
 export function parseSelectOptions(optionsJson?: string): SelectOption[] {
-  if (!optionsJson) return []
+  if (!optionsJson) return [];
   try {
-    return JSON.parse(optionsJson)
+    return JSON.parse(optionsJson);
   } catch {
-    return []
+    return [];
   }
 }
 
@@ -64,12 +77,12 @@ export function hasAlbumConfig(fields: DbFieldDefinition[]): boolean {
   return (
     fields.some((f) => f.name === "albumCount") &&
     fields.some((f) => f.name === "sheetsPerAlbum")
-  )
+  );
 }
 
 export function filterAlbumFields(
-  fields: DbFieldDefinition[]
+  fields: DbFieldDefinition[],
 ): DbFieldDefinition[] {
-  if (!hasAlbumConfig(fields)) return fields
-  return fields.filter((f) => f.name !== "sheetsPerAlbum")
+  if (!hasAlbumConfig(fields)) return fields;
+  return fields.filter((f) => f.name !== "sheetsPerAlbum");
 }

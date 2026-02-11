@@ -8,13 +8,13 @@
  * @returns Formatted string (e.g., "1.5 MB")
  */
 export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 Bytes'
+  if (bytes === 0) return "0 Bytes";
 
-  const k = 1024
-  const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB']
-  const i = Math.floor(Math.log(bytes) / Math.log(k))
+  const k = 1024;
+  const sizes = ["Bytes", "KB", "MB", "GB", "TB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
 
-  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`
+  return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
 }
 
 /**
@@ -23,8 +23,8 @@ export function formatFileSize(bytes: number): string {
  * @returns File extension without dot (e.g., "pdf")
  */
 export function getFileExtension(filename: string): string {
-  const parts = filename.split('.')
-  return parts.length > 1 ? parts.pop()?.toLowerCase() ?? '' : ''
+  const parts = filename.split(".");
+  return parts.length > 1 ? (parts.pop()?.toLowerCase() ?? "") : "";
 }
 
 /**
@@ -33,7 +33,7 @@ export function getFileExtension(filename: string): string {
  * @returns True if the file is an image
  */
 export function isImageFile(mimeType: string): boolean {
-  return mimeType.startsWith('image/')
+  return mimeType.startsWith("image/");
 }
 
 /**
@@ -42,5 +42,5 @@ export function isImageFile(mimeType: string): boolean {
  * @returns True if the file is a video
  */
 export function isVideoFile(mimeType: string): boolean {
-  return mimeType.startsWith('video/')
+  return mimeType.startsWith("video/");
 }

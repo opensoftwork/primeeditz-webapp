@@ -1,12 +1,13 @@
 "use client";
 
-import { ColumnDef } from "@tanstack/react-table";
-import { AdminQuotation } from "./list-types";
-import { QuotationStatusBadge } from "@/components/modules/client/quotations/shared/quotation-status-badge";
+import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
 import { Eye, Receipt, User } from "lucide-react";
 import Link from "next/link";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { Button } from "@/components/ui/button";
+import type { AdminQuotation } from "./list-types";
+import { DeleteQuotationAction } from "./delete-quotation-action";
 
 export const columns: ColumnDef<AdminQuotation>[] = [
   {
@@ -15,7 +16,7 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     cell: ({ row }) => {
       const quotation = row.original;
       return (
-        <Link 
+        <Link
           href={`/quotations/${quotation._id}`}
           className="flex items-center gap-2 group/link"
         >
@@ -30,30 +31,33 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     },
   },
   {
-    accessorKey: "clientName",
-    header: "Client",
+    accessorKey: "studioName",
+    header: "Studio",
     cell: ({ row }) => {
-      const name = row.getValue("clientName") as string;
+      const name = row.getValue("studioName") as string;
       return (
         <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
-                <User className="h-3 w-3 text-white/40" />
-            </div>
-            <span className="font-bold text-white/50 truncate max-w-[150px] block">
-                {name || "Guest"}
-            </span>
+          <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center shrink-0">
+            <User className="h-3 w-3 text-white/40" />
+          </div>
+          <span className="font-bold text-white/50 truncate max-w-[150px] block">
+            {name || "Guest"}
+          </span>
         </div>
       );
     },
   },
   {
     accessorKey: "projectName",
-    header: "Project",
+    header: "Project / Identity",
     cell: ({ row }) => {
-      const name = row.getValue("projectName") as string;
+      const quotation = row.original;
+      const projectName = quotation.projectName;
+      const endClientName = quotation.endClientName;
+
       return (
         <span className="font-bold text-white/30 truncate max-w-[200px] block text-xs uppercase tracking-tight">
-          {name || "General"}
+          {projectName || endClientName || "General"}
         </span>
       );
     },
@@ -99,7 +103,13 @@ export const columns: ColumnDef<AdminQuotation>[] = [
     cell: ({ row }) => {
       const quotation = row.original;
       return (
-        <div className="flex justify-end">
+        <div className="flex justify-end items-center gap-1">
+          {quotation.status === "draft" && (
+            <DeleteQuotationAction
+              quotationId={quotation._id}
+              quotationCode={quotation.code}
+            />
+          )}
           <Link href={`/quotations/${quotation._id}`}>
             <Button
               variant="ghost"

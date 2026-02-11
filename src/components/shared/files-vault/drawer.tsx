@@ -1,26 +1,26 @@
 "use client";
 
-import React, { useMemo, useState, useRef } from "react";
+import React, { useMemo, useRef, useState } from "react";
+import { AssetSlider } from "@/components/shared/asset-viewer";
 import { Drawer, DrawerContent, DrawerTitle } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 
 // Types
-export type { VaultFile, VaultTabType, FileTypeCounts } from "./types";
-import type { VaultFile, VaultTabType } from "./types";
+export type { FileTypeCounts, VaultFile, VaultTabType } from "./types";
 
+import { VaultEmptyState } from "./components/vault-empty-state";
+import { VaultFileItem } from "./components/vault-file-item";
+import { VaultFooter } from "./components/vault-footer";
+// Components
+import { VaultHeader } from "./components/vault-header";
+import type { VaultFile, VaultTabType } from "./types";
 // Utils
 import {
   calculateFileTypeCounts,
   filterFilesByTab,
   getAcceptTypesForTab,
 } from "./utils";
-
-// Components
-import { VaultHeader } from "./components/vault-header";
-import { VaultEmptyState } from "./components/vault-empty-state";
-import { VaultFileItem } from "./components/vault-file-item";
-import { VaultFooter } from "./components/vault-footer";
 
 interface FilesVaultDrawerProps {
   open: boolean;
@@ -50,9 +50,10 @@ export function FilesVaultDrawer({
   initialTab = "all",
 }: FilesVaultDrawerProps) {
   const [activeTab, setActiveTab] = useState<VaultTabType>(initialTab);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
+    null,
   );
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Reset tab when drawer opens with a specific tab
@@ -66,20 +67,21 @@ export function FilesVaultDrawer({
   const fileTypeCounts = useMemo(() => calculateFileTypeCounts(files), [files]);
   const totalSize = useMemo(
     () => files.reduce((sum, f) => sum + (f.size || 0), 0),
-    [files]
+    [files],
   );
   const filteredFiles = useMemo(
     () => filterFilesByTab(files, activeTab),
-    [files, activeTab]
+    [files, activeTab],
   );
 
-  const imagesForSlider = useMemo(() => {
+  const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => f.type.startsWith("image/") && f.url)
+      .filter((f) => (f.type.startsWith("image/") || f.type.startsWith("video/") || f.type.startsWith("audio/") || f.type.includes("pdf")) && f.url)
       .map((f) => ({
         url: f.url!,
         fileName: f.name,
         fileId: f.id,
+        mimeType: f.type,
       }));
   }, [files]);
 
@@ -89,9 +91,22 @@ export function FilesVaultDrawer({
       onImageClick(fileId);
       return;
     }
-    const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
-    if (index !== -1) {
-      setSelectedImageIndex(index);
+
+    const file = files.find((f) => f.id === fileId);
+    if (!file || !file.url) return;
+
+    const isSliderType = file.type.startsWith("image/") || 
+                        file.type.startsWith("video/") || 
+                        file.type.startsWith("audio/") || 
+                        file.type.includes("pdf");
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
+      if (index !== -1) {
+        setSelectedAssetIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
     }
   };
 
@@ -174,13 +189,13 @@ export function FilesVaultDrawer({
         </DrawerContent>
       </Drawer>
 
-      {/* Internal Image Slider (Fallback if no parent handler) */}
+      {/* Internal Asset Slider (Fallback if no parent handler) */}
       {!onImageClick && (
-        <ImageSlider
-          images={imagesForSlider}
-          initialIndex={selectedImageIndex ?? 0}
-          open={selectedImageIndex !== null}
-          onOpenChange={(isOpen) => !isOpen && setSelectedImageIndex(null)}
+        <AssetSlider
+          assets={assetsForSlider}
+          initialIndex={selectedAssetIndex ?? 0}
+          open={selectedAssetIndex !== null}
+          onOpenChange={(isOpen) => !isOpen && setSelectedAssetIndex(null)}
           onDownload={(fileId, fileName, url) => {
             if (onDownload) {
               onDownload({
@@ -197,6 +212,17 @@ export function FilesVaultDrawer({
               link.click();
             }
           }}
+        />
+      )}
+
+      {/* Internal File Preview Overlay (Fallback if no parent handler) */}
+      {!onImageClick && (
+        <FilePreviewOverlay
+          open={!!previewFile}
+          onOpenChange={(isOpen) => !isOpen && setPreviewFile(null)}
+          url={previewFile?.url || null}
+          fileName={previewFile?.name || ""}
+          mimeType={previewFile?.type}
         />
       )}
     </>

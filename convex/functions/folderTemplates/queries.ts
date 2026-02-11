@@ -1,66 +1,104 @@
 import { v } from "convex/values";
-import { adminQuery } from "../../lib/customFunctions";
-import { query } from "../../_generated/server";
+import { adminQuery, authenticatedQuery, authenticatedWithProfileQuery } from "../../lib/customFunctions";
 
 /**
- * List all folder templates for admin.
+ * List all folder templates with project type names.
  */
-export const listFolderTemplates = adminQuery({
+export const list = adminQuery({
   args: {},
   handler: async (ctx) => {
     const templates = await ctx.db.query("folderTemplates").collect();
-
-    // Enrich with project type name
     return await Promise.all(
-      templates.map(async (t) => {
-        let projectTypeName = "General";
-        if (t.projectTypeId) {
-          const type = await ctx.db.get(t.projectTypeId);
-          if (type) projectTypeName = type.name;
-        }
+      templates.map(async (template) => {
+        const projectType = await ctx.db.get(template.projectTypeId);
         return {
-          ...t,
-          projectTypeName,
+          ...template,
+          projectTypeName: projectType?.name || "N/A",
         };
-      })
+      }),
     );
   },
 });
 
 /**
- * Get a single folder template by ID.
+ * Get a specific folder template by ID.
  */
-export const getFolderTemplate = adminQuery({
-  args: {
-    templateId: v.id("folderTemplates"),
-  },
+export const get = adminQuery({
+  args: { id: v.id("folderTemplates") },
   handler: async (ctx, args) => {
-    return await ctx.db.get(args.templateId);
+    return await ctx.db.get(args.id);
   },
 });
 
 /**
- * Get templates by project type.
- * Used when setting up folders for a project.
+ * List all folder templates for a specific project type.
+ * Used for selection in quotation/onboarding.
  */
-export const getTemplatesByProjectType = query({
-  args: {
-    projectTypeId: v.id("projectTypes"),
-  },
+export const listByProjectType = authenticatedQuery({
+  args: { projectTypeId: v.id("projectTypes") },
   handler: async (ctx, args) => {
-    // Get templates specifically for this project type
-    const specificTemplates = await ctx.db
+    return await ctx.db
       .query("folderTemplates")
-      .withIndex("by_projectTypeId", (q) => q.eq("projectTypeId", args.projectTypeId))
-      .filter((q) => q.eq(q.field("isActive"), true))
+      .withIndex("by_projectType_isActive", (q) =>
+        q.eq("projectTypeId", args.projectTypeId).eq("isActive", true)
+      )
+      .collect();
+  },
+});
+
+/**
+ * Get the default (or first) folder template for a project type.
+ */
+export const getByProjectTypeId = adminQuery({
+  args: { projectTypeId: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    return await ctx.db
+      .query("folderTemplates")
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId)
+      )
+      .first();
+  },
+});
+
+/**
+ * List all folder templates for a specific project type (Admin).
+ */
+export const listAllByProjectType = adminQuery({
+  args: { projectTypeId: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    const projectType = await ctx.db.get(args.projectTypeId);
+    const templates = await ctx.db
+      .query("folderTemplates")
+      .withIndex("by_projectTypeId", (q) =>
+        q.eq("projectTypeId", args.projectTypeId)
+      )
       .collect();
 
-    // Also get general templates (where projectTypeId is not set)
-    const allTemplates = await ctx.db.query("folderTemplates").collect();
-    const generalTemplates = allTemplates.filter(
-      (t) => !t.projectTypeId && t.isActive
-    );
+    return templates.map((template) => ({
+      ...template,
+      projectTypeName: projectType?.name || "N/A",
+    }));
+  },
+});
 
-    return [...specificTemplates, ...generalTemplates];
+/**
+ * Get all folder templates (for selection in Quotation Builder).
+ * Now accessible to authenticated users for the wizard flow.
+ */
+export const getFolderTemplates = authenticatedWithProfileQuery({
+  args: {
+    activeOnly: v.optional(v.boolean()),
+  },
+  handler: async (ctx, args) => {
+    let query = ctx.db.query("folderTemplates");
+
+    const templates = await query.collect();
+
+    if (args.activeOnly) {
+      return templates.filter((t) => t.isActive);
+    }
+
+    return templates;
   },
 });

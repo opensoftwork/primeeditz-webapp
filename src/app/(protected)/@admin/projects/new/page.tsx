@@ -10,5 +10,5 @@
 import { ProjectWizard } from "@/components/modules/projects";
 
 export default function AdminNewProjectPage() {
-    return <ProjectWizard mode="admin" />;
+  return <ProjectWizard mode="admin" />;
 }

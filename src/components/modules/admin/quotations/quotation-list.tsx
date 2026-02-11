@@ -2,16 +2,17 @@
 
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
+import { Plus } from "lucide-react";
 import { motion } from "motion/react";
-import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
+import { Button } from "@/components/ui/button";
 import { useSimplePaginatedQuery } from "@/hooks/use-simple-paginated-query";
 import { columns } from "./columns";
+import type { AdminQuotation } from "./list-types";
 import { QuotationCard } from "./quotation-card";
-import { AdminQuotation } from "./list-types";
-import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 /**
  * Admin-facing list of quotations.
@@ -20,14 +21,17 @@ import { Plus } from "lucide-react";
 export function QuotationList() {
   const router = useRouter();
   const [pageSize, setPageSize] = useState(15);
-  const [statusFilter, setStatusFilter] = useState<AdminQuotation["status"] | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<
+    AdminQuotation["status"] | undefined
+  >(undefined);
 
   const query = useSimplePaginatedQuery(
+    //@ts-ignore
     api.functions.quotations.queries.getAdminQuotationsPaginated,
     {
       status: statusFilter,
     },
-    { initialNumItems: pageSize }
+    { initialNumItems: pageSize },
   );
 
   const quotations: AdminQuotation[] = useMemo(() => {
@@ -42,10 +46,11 @@ export function QuotationList() {
   }, [query]);
 
   const statusOptions = [
+    { label: "Initiated", value: "initiated" },
     { label: "Draft", value: "draft" },
     { label: "Sent", value: "sent" },
     { label: "Viewed", value: "viewed" },
-    { label: "Approved", value: "approved" },
+    { label: "Accepted", value: "approved" },
     { label: "Changes Requested", value: "changes_requested" },
     { label: "Rejected", value: "rejected" },
     { label: "Expired", value: "expired" },
@@ -58,29 +63,22 @@ export function QuotationList() {
 
   if (query.status === "loading" && !quotations.length) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
-        <div className="mb-10">
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="space-y-2"
-          >
-            <span className="text-[10px] font-black uppercase tracking-[0.3em] text-primary/40">
-              ADMINISTRATIVE CONTROL
-            </span>
-            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-              Quotations
-            </h1>
-          </motion.div>
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
+          </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
         </div>
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
 
   return (
-    <div className="flex-1 p-8 md:p-12 w-full">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -109,15 +107,14 @@ export function QuotationList() {
       </div>
 
       <DataTable
+        className="flex-1"
         columns={columns}
         data={quotations}
         isLoading={query.isLoading}
         emptyTitle="No Quotations Found"
         emptyDescription="No quotations match your current filters. Try adjusting your search criteria."
-        renderCard={(quotation) => (
-          <QuotationCard quotation={quotation} />
-        )}
-        defaultView="table"
+        renderCard={(quotation) => <QuotationCard quotation={quotation} />}
+        defaultView="cards"
         showViewToggle={true}
         toolbar={{
           search: {

@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { BookOpen, Layers } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import {
   Field,
   FieldContent,
@@ -11,10 +12,9 @@ import {
 } from "@/components/ui/field";
 import {
   InputGroup,
-  InputGroupInput,
   InputGroupAddon,
+  InputGroupInput,
 } from "@/components/ui/input-group";
-import { BookOpen, Layers } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AlbumConfigFieldProps {
@@ -83,7 +83,7 @@ export function AlbumConfigField({
 
     if (allValid) {
       const numericSheets = localSheets.filter(
-        (s): s is number => typeof s === "number"
+        (s): s is number => typeof s === "number",
       );
 
       // Only update if different from current value
@@ -140,7 +140,7 @@ export function AlbumConfigField({
   // Calculate total sheets
   const totalSheets = localSheets.reduce<number>(
     (sum, s) => sum + (typeof s === "number" ? s : 0),
-    0
+    0,
   );
 
   if (albumCount === 0) {
@@ -198,7 +198,7 @@ export function AlbumConfigField({
                   "p-6 rounded-2xl border transition-all duration-300 group cursor-pointer relative overflow-hidden",
                   localSheets[index]
                     ? "bg-primary/5 border-primary/20 shadow-xl ring-1 ring-primary/10"
-                    : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-primary/40 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1"
+                    : "bg-white/3 border-white/10 hover:bg-white/5 hover:border-primary/40 hover:shadow-2xl hover:shadow-black/20 hover:-translate-y-1",
                 )}
                 onClick={() => {
                   document.getElementById(`album-sheets-${index}`)?.focus();
@@ -210,7 +210,7 @@ export function AlbumConfigField({
                       "text-[10px] font-black uppercase tracking-[0.2em]",
                       localSheets[index]
                         ? "text-primary"
-                        : "text-muted-foreground/30"
+                        : "text-muted-foreground/30",
                     )}
                   >
                     Volume {index + 1}
@@ -218,7 +218,7 @@ export function AlbumConfigField({
                   <div
                     className={cn(
                       "p-1.5 rounded-lg transition-colors",
-                      localSheets[index] ? "bg-primary/10" : "bg-white/5"
+                      localSheets[index] ? "bg-primary/10" : "bg-white/5",
                     )}
                   >
                     <Layers
@@ -226,7 +226,7 @@ export function AlbumConfigField({
                         "h-3 w-3",
                         localSheets[index]
                           ? "text-primary"
-                          : "text-muted-foreground/20"
+                          : "text-muted-foreground/20",
                       )}
                     />
                   </div>
@@ -250,7 +250,7 @@ export function AlbumConfigField({
                       "text-[10px] font-black uppercase tracking-widest transition-colors",
                       localSheets[index]
                         ? "text-primary/70"
-                        : "text-white/20 group-hover:text-white/50"
+                        : "text-white/20 group-hover:text-white/50",
                     )}
                   >
                     Sheets

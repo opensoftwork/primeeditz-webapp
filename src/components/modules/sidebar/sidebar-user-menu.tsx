@@ -1,17 +1,9 @@
 "use client";
 
-import { User2, ChevronUp, Settings, LogOut } from "lucide-react";
+import { ChevronUp, LogOut, Settings, User2 } from "lucide-react";
 import Link from "next/link";
-import { toast } from "sonner";
-import { authClient } from "@/lib/auth-client";
-import { Skeleton } from "@/components/ui/skeleton";
 import { useState } from "react";
-import {
-  SidebarFooter,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-} from "@/components/ui/sidebar";
+import { toast } from "sonner";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -19,6 +11,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  SidebarFooter,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
+import { Skeleton } from "@/components/ui/skeleton";
+import { authClient } from "@/lib/auth-client";
 
 interface SidebarUserMenuProps {
   userName: string;

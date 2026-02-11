@@ -1,15 +1,15 @@
 "use client";
 
+import type { CellContext, ColumnDef } from "@tanstack/react-table";
+import { Calendar, Database, Eye, Hash, Zap } from "lucide-react";
 import Link from "next/link";
-import { type ColumnDef, type CellContext } from "@tanstack/react-table";
-import { Calendar, Hash, Eye, Database, Zap } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { DataTable } from "@/components/shared/data-table";
 import { DataTableColumnHeader } from "@/components/shared/data-table/data-table-column-header";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ClientStatusBadge } from "../../projects/client-status-badge";
 import { PhaseProgress } from "../../projects/phase-progress";
-import { ProjectData } from "./types";
+import { StudioStatusBadge } from "../../projects/studio-status-badge";
+import type { ProjectData } from "./types";
 
 interface PipelineTableProps {
   projects: ProjectData[] | undefined;
@@ -67,7 +67,7 @@ export function PipelineTable({ projects }: PipelineTableProps) {
         <DataTableColumnHeader column={column} title="Status" />
       ),
       cell: ({ row }) => (
-        <ClientStatusBadge status={row.getValue("actionState")} />
+        <StudioStatusBadge status={row.getValue("actionState")} />
       ),
     },
     {

@@ -1,27 +1,27 @@
 "use client";
 
-import { motion } from "motion/react";
-import { CheckCircle2, Calendar as CalendarIcon, User } from "lucide-react";
 import { format } from "date-fns";
+import { Calendar as CalendarIcon, CheckCircle2, User } from "lucide-react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
-import { ClientDataTable } from "../../../clients/client-data-table";
+import type { Studio as Client } from "../../../studio/studio-data-table";
+import { StudioDataTable } from "../../../studio/studio-data-table";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
-import type { Client } from "../../builder/types";
 
 export function EditorClientSection() {
-  const { formData, setFormData, selectedClient } = useQuotationBuilder();
+  const { formData, setFormData, selectedStudio } = useQuotationBuilder();
   const step1Data = formData.step1;
 
   const handleClientSelect = (client: Client) => {
-    setFormData("step1", { clientId: client._id });
+    setFormData("step1", { studioId: client._id });
     toast.success(`Selected ${client.name}`);
   };
 
@@ -38,12 +38,12 @@ export function EditorClientSection() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Client Selection */}
-        <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5 space-y-4">
+        <div className="p-6 rounded-4xl bg-white/2 border border-white/5 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-black uppercase tracking-widest text-white/40">
               Recipient
             </h3>
-            {step1Data.clientId && (
+            {step1Data.studioId && (
               <motion.div
                 initial={{ opacity: 0, scale: 0.9 }}
                 animate={{ opacity: 1, scale: 1 }}
@@ -51,21 +51,21 @@ export function EditorClientSection() {
               >
                 <CheckCircle2 className="h-3 w-3 text-primary" />
                 <span className="text-[8px] font-black text-primary uppercase tracking-widest">
-                  {selectedClient?.name}
+                  {selectedStudio?.name}
                 </span>
               </motion.div>
             )}
           </div>
 
-          <ClientDataTable
+          <StudioDataTable
             onSelect={handleClientSelect}
-            selectedId={step1Data.clientId}
+            selectedId={step1Data.studioId}
             onlyWithProjects
           />
         </div>
 
         {/* Project & Validity Window */}
-        <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5 space-y-6">
+        <div className="p-6 rounded-4xl bg-white/2 border border-white/5 space-y-6">
           <div>
             <h3 className="text-xs font-black uppercase tracking-widest text-white/40 mb-3">
               Validity Window
@@ -77,7 +77,7 @@ export function EditorClientSection() {
                   variant="outline"
                   className={cn(
                     "w-full h-14 bg-white/5 border-white/5 rounded-2xl px-5 flex items-center justify-between text-white font-bold hover:bg-white/10 transition-colors text-left",
-                    !step1Data.validUntil && "text-white/40"
+                    !step1Data.validUntil && "text-white/40",
                   )}
                 >
                   <span>

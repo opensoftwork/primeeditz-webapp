@@ -7,91 +7,91 @@
 
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 import {
   createContext,
-  useContext,
-  useState,
   useCallback,
-  useMemo,
+  useContext,
   useEffect,
+  useMemo,
+  useRef,
+  useState,
 } from "react";
-import { useMutation, useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
 import { toast } from "sonner";
-import { useRouter } from "next/navigation";
-import type { Id } from "@convex/_generated/dataModel";
 import type {
-  QuotationLineItem,
-  QuotationSubItem,
   Client,
   Project,
+  QuotationLineItem,
+  QuotationSubItem,
+  Section,
   Template,
   TemplateLineItem,
-  Section,
 } from "./types";
 
 // ============================================================================
 // Types
 // ============================================================================
 
-export type QuotationStepId = 1 | 2 | 3 | 4 | 5;
+export type QuotationStepId = 1 | 2 | 3 | 4;
 
 export interface QuotationFormData {
   step1: {
-    clientId: string;
-    projectId: string; // Left for compatibility
-    projectIds: string[]; // Master list, but we sync with step2
+    studioId: string;
     validUntil: Date | undefined;
   };
   step2: {
-    // Project Selection
-    projectIds: string[];
+    // Package Selection
+    packageIds: string[];
   };
   step3: {
-    // Template Selection (Per Project)
+    // Project & Template Selection (Legacy Step 3 data moved here or implicitly handled)
+    projectIds: string[];
     projectTemplates: Record<string, string>; // projectId -> templateId
   };
   step4: {
-    // Calculate Worth
+    // Items & Terms
     lineItems: QuotationLineItem[];
+    terms: string;
   };
   step5: {
-    // Terms
-    terms: string;
+    // Review & Send
     taxRate: number;
     discountAmount: number;
+    shareLinkEnabled: boolean;
   };
 }
 
 export const INITIAL_FORM_DATA: QuotationFormData = {
   step1: {
-    clientId: "",
-    projectId: "",
-    projectIds: [],
+    studioId: "",
     validUntil: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
   },
   step2: {
-    projectIds: [],
+    packageIds: [],
   },
   step3: {
+    projectIds: [],
     projectTemplates: {},
   },
   step4: {
     lineItems: [],
+    terms: "",
   },
   step5: {
-    terms: "",
     taxRate: 18,
     discountAmount: 0,
+    shareLinkEnabled: true,
   },
 };
 
 export const QUOTATION_STEPS = [
-  { id: 1 as const, label: "Client & Context" },
-  { id: 2 as const, label: "Projects" },
-  { id: 3 as const, label: "Template Selection" },
-  { id: 4 as const, label: "Calculate Worth" },
-  { id: 5 as const, label: "Terms & Conditions" },
+  { id: 1 as const, label: "Studio & Context" },
+  { id: 2 as const, label: "Package Selection" },
+  { id: 3 as const, label: "Items & Terms" },
+  { id: 4 as const, label: "Review & Send" },
 ];
 
 // ============================================================================
@@ -105,15 +105,16 @@ interface QuotationBuilderContextValue {
   formData: QuotationFormData;
   isDirty: boolean;
   isLoading: boolean;
+  isDataReady: boolean;
   error: string | null;
   submitTrigger: (() => void) | null;
 
   // Data from queries
-  clients: Client[] | undefined;
+  studios: Client[] | undefined;
   projects: Project[] | undefined;
   templates: Template[] | undefined;
   sections: Section[] | undefined;
-  selectedClient: Client | undefined;
+  selectedStudio: Client | undefined;
 
   // Computed values
   subtotal: number;
@@ -123,16 +124,17 @@ interface QuotationBuilderContextValue {
   // Actions
   setFormData: <K extends keyof QuotationFormData>(
     step: K,
-    data: Partial<QuotationFormData[K]>
+    data: Partial<QuotationFormData[K]>,
   ) => void;
-  goToStep: (step: QuotationStepId) => void;
+  goToStep: (step: number) => void;
   nextStep: () => void;
   prevStep: () => void;
-  applyTemplate: (templateId: string, projectId: string) => void;
-  addLineItem: (initialData?: Partial<QuotationLineItem>) => void;
+  applyPackageItems: () => void;
+  addLineItem: (data?: Partial<QuotationLineItem>) => void;
   updateLineItem: (idx: number, updates: Partial<QuotationLineItem>) => void;
   removeLineItem: (idx: number) => void;
   saveQuotation: () => Promise<void>;
+  saveQuotationAndReturn: () => Promise<string | null>;
   setSubmitTrigger: (fn: (() => void) | null) => void;
 }
 
@@ -147,7 +149,7 @@ export function useQuotationBuilder() {
   const context = useContext(QuotationBuilderContext);
   if (!context) {
     throw new Error(
-      "useQuotationBuilder must be used within QuotationBuilderProvider"
+      "useQuotationBuilder must be used within QuotationBuilderProvider",
     );
   }
   return context;
@@ -160,85 +162,149 @@ export function useQuotationBuilder() {
 interface QuotationBuilderProviderProps {
   children: React.ReactNode;
   initialQuotationId?: string;
+  initialStep?: 1 | 2 | 3 | 4;
 }
 
 export function QuotationBuilderProvider({
   children,
   initialQuotationId,
+  initialStep = 1,
 }: QuotationBuilderProviderProps) {
   const router = useRouter();
 
   // State
   const [quotationId, setQuotationId] = useState<string | null>(
-    initialQuotationId ?? null
+    initialQuotationId ?? null,
   );
-  const [currentStep, setCurrentStep] = useState<QuotationStepId>(1);
+  const [currentStep, setCurrentStep] = useState<QuotationStepId>(initialStep);
   const [formData, setFormDataState] =
     useState<QuotationFormData>(INITIAL_FORM_DATA);
   const [isDirty, setIsDirty] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [submitTrigger, setSubmitTriggerState] = useState<(() => void) | null>(
-    null
+    null,
   );
+
+  // Refs for tracking draft state and preventing race conditions (merging pattern from studio wizard)
+  const lastUpdateTimestamp = useRef<number>(0);
+  const isLocalUpdate = useRef(false);
+  const draftWasSeen = useRef(false);
 
   // Query existing quotation if editing
   const existingQuotation = useQuery(
     api.functions.quotations.queries.getQuotation,
-    initialQuotationId
-      ? { quotationId: initialQuotationId as Id<"quotations"> }
-      : "skip"
+    quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
   );
+
+  // Auto-resume logic: If no specific ID provided, check for the latest un-finalized draft
+  const latestDraft = useQuery(
+    api.functions.quotations.queries.getMyLatestDraft,
+    !quotationId ? {} : "skip",
+  );
+
+  // Redirection effect for auto-resume
+  useEffect(() => {
+    if (!quotationId && latestDraft && !isLoading) {
+      // Small delay to let user see "Redirecting to your draft..." if we added a message
+      // But for now, let's just do it.
+      router.replace(`/quotations/${latestDraft._id}/builder`);
+    }
+  }, [latestDraft, quotationId, router, isLoading]);
+
+  // Data loading state - ready when:
+  // 1. Not editing AND no draft found (truly new), OR
+  // 2. Editing and existingQuotation has loaded
+  // 3. We are in the middle of a redirect (hide content)
+  const isDataReady =
+    (quotationId && existingQuotation !== undefined) ||
+    (!quotationId && latestDraft === null);
 
   // Populate form data if editing
   useEffect(() => {
-    if (existingQuotation && initialQuotationId) {
-      setFormDataState({
-        step1: {
-          clientId: existingQuotation.clientId || "",
-          projectId: existingQuotation.projectId || "",
-          projectIds: existingQuotation.projectIds || [],
-          validUntil: existingQuotation.validUntil
-            ? new Date(existingQuotation.validUntil)
-            : undefined,
-        },
-        step2: {
-          projectIds: existingQuotation.projectIds || [],
-        },
-        step3: {
-          projectTemplates: {}, // TODO: Can we infer this from existing items? For now start empty or rely on stored separate field if we add one
-        },
-        step4: {
-          lineItems: existingQuotation.lineItems.map((item: any) => ({
-            ...item,
-            id: item.id || crypto.randomUUID(),
-          })),
-        },
-        step5: {
-          terms: existingQuotation.terms || "",
-          taxRate: (existingQuotation.taxRate || 0.18) * 100, // API stores as decimal
-          discountAmount: existingQuotation.discountAmount || 0,
-        },
-      });
+    // Only overwrite local state if we have data from DB and either:
+    // 1. We are not dirty (no unsaved local changes)
+    // 2. This is the first time we're getting data for this quotation
+    // AND it's not a local update echo
+    if (existingQuotation && quotationId && !isLocalUpdate.current) {
+      const serverTimestamp = existingQuotation.updatedAt || 0;
+
+      if (!isDirty || serverTimestamp > lastUpdateTimestamp.current) {
+        setFormDataState({
+          step1: {
+            studioId: existingQuotation.studioId || "",
+            validUntil: existingQuotation.validUntil
+              ? new Date(existingQuotation.validUntil)
+              : undefined,
+          },
+          step2: {
+            packageIds:
+              (existingQuotation.selectedPackageIds as string[]) || [],
+          },
+          step3: {
+            projectIds: existingQuotation.projectIds || [],
+            projectTemplates: {},
+          },
+          step4: {
+            lineItems: existingQuotation.lineItems.map((item: any) => ({
+              ...item,
+              id: item.id || crypto.randomUUID(),
+            })),
+            terms: existingQuotation.terms || "",
+          },
+          step5: {
+            taxRate: (existingQuotation.taxRate || 0.18) * 100,
+            discountAmount: existingQuotation.discountAmount || 0,
+            shareLinkEnabled: true,
+          },
+        });
+
+        if (existingQuotation.lastStep) {
+          setCurrentStep(existingQuotation.lastStep as QuotationStepId);
+        }
+        
+        lastUpdateTimestamp.current = serverTimestamp;
+      }
     }
-  }, [existingQuotation, initialQuotationId]);
+    // Always reset local update flag after processing
+    isLocalUpdate.current = false;
+  }, [existingQuotation, quotationId, isDirty]);
+
+  // Update draftWasSeen when data is available
+  useEffect(() => {
+    if (existingQuotation) {
+      draftWasSeen.current = true;
+    }
+  }, [existingQuotation]);
+
+  // Reactive monitor for quotation existence
+  useEffect(() => {
+    if (isDataReady && quotationId && !isLoading) {
+      if (existingQuotation === null && draftWasSeen.current) {
+        toast.error("Quotation session ended", {
+          description: "This quotation has been removed or finalized in another session.",
+        });
+        router.push("/quotations");
+      }
+    }
+  }, [existingQuotation, isDataReady, quotationId, isLoading, router]);
 
   // Queries - cast to proper types
-  const clientsQuery = useQuery(api.admin.getClients, {});
-  const clients = clientsQuery as Client[] | undefined;
+  const studiosQuery = useQuery(api.admin.getStudios, {});
+  const studios = studiosQuery as Client[] | undefined;
 
   const projectsQuery = useQuery(
     api.admin.getAdminProjectsSimple,
-    formData.step1.clientId
-      ? { clientId: formData.step1.clientId as Id<"profiles"> }
-      : "skip"
+    formData.step1.studioId
+      ? { studioId: formData.step1.studioId as Id<"profiles"> }
+      : "skip",
   );
 
   const templatesQuery = useQuery(
-    api.functions.quotations.templates.queries.getTemplates,
+    api.functions.quotations.templates.queries.getPackages,
     {
       activeOnly: true,
-    }
+    },
   );
   const templates = templatesQuery as Template[] | undefined;
 
@@ -246,22 +312,22 @@ export function QuotationBuilderProvider({
     api.functions.quotations.sections.queries.getSections,
     {
       activeOnly: true,
-    }
+    },
   );
   const sections = sectionsQuery as Section[] | undefined;
 
   // Mutations
   const createQuotation = useMutation(
-    api.functions.quotations.mutations.createQuotation
+    api.functions.quotations.mutations.createQuotation,
   );
   const updateQuotation = useMutation(
-    api.functions.quotations.mutations.updateQuotation
+    api.functions.quotations.mutations.updateQuotation,
   );
 
   // Computed
-  const selectedClient = useMemo(
-    () => clients?.find((c) => c._id === formData.step1.clientId),
-    [clients, formData.step1.clientId]
+  const selectedStudio = useMemo(
+    () => studios?.find((c) => c._id === formData.step1.studioId),
+    [studios, formData.step1.studioId],
   );
 
   const projects = useMemo((): Project[] | undefined => {
@@ -275,7 +341,7 @@ export function QuotationBuilderProvider({
       const subItemsTotal =
         item.subItems?.reduce(
           (s: number, sub: QuotationSubItem) => s + sub.rate * sub.quantity,
-          0
+          0,
         ) ?? 0;
       return acc + itemTotal + subItemsTotal;
     }, 0);
@@ -285,11 +351,272 @@ export function QuotationBuilderProvider({
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
+
+  // Save quotation core logic (shared between Finalize and Auto-save)
+  const performSave = useCallback(
+    async (isAutoSave = false, overrides: any = {}) => {
+      const { step1, step2, step3, step4, step5 } = formData;
+
+      // For auto-save, we can be more lenient, but we at least need a studio
+      if (isAutoSave && !step1.studioId) return null;
+      if (!isAutoSave && !step1.studioId)
+        throw new Error("Please select a client");
+
+      // Skip auto-save if no packages or line items (backend would reject anyway)
+      if (isAutoSave && step4.lineItems.length === 0 && step2.packageIds.length === 0) {
+        return null;
+      }
+
+      // Validation for line items only on final submission, unless we have package IDs
+      if (
+        !isAutoSave &&
+        step4.lineItems.length === 0 &&
+        step2.packageIds.length === 0
+      ) {
+        throw new Error("Please add packages or line items");
+      }
+
+      const lineItemsPayload = step4.lineItems.map((item) => {
+        // Ensure sectionId is either a valid ID or undefined, never an empty string
+        const sectionId = item.sectionId || sections?.[0]?._id;
+
+        return {
+          id: item.id || crypto.randomUUID(),
+          sectionId: sectionId as Id<"quotationSections"> | undefined,
+          projectId: item.projectId,
+          description: item.description,
+          unit: item.unit,
+          rate: item.rate,
+          quantity: item.quantity,
+          spawnsProject: item.spawnsProject,
+          projectTypeId: item.projectTypeId as Id<"projectTypes"> | undefined,
+          selectedFolderTemplateId: item.selectedFolderTemplateId as
+            | Id<"folderTemplates">
+            | undefined,
+          subItems: item.subItems?.map((s) => ({
+            id: s.id || crypto.randomUUID(),
+            description: s.description,
+            unit: s.unit,
+            rate: s.rate,
+            quantity: s.quantity,
+          })),
+        };
+      });
+
+      const firstProjectId = step3.projectIds[0];
+      const associatedProject = (projects as Project[])?.find(
+        (p) => p._id === firstProjectId,
+      );
+      const endClientName =
+        associatedProject?.eventName ||
+        selectedStudio?.name ||
+        "Untitled Quotation";
+
+      const projectIds =
+        step3.projectIds.length > 0
+          ? (step3.projectIds as Id<"projects">[])
+          : undefined;
+
+      // Base payload shared between create and update
+      const basePayload = {
+        studioId: step1.studioId as Id<"profiles">,
+        projectIds: projectIds,
+        selectedPackageIds: step2.packageIds as Id<"servicePackages">[],
+        lineItems: lineItemsPayload,
+        terms: step4.terms,
+        taxRate: step5.taxRate / 100,
+        discountAmount: step5.discountAmount,
+        validUntil: step1.validUntil?.getTime(),
+        endClientName,
+        lastStep: currentStep,
+        ...overrides,
+      };
+
+      if (quotationId) {
+        // Update existing quotation (no createdBy field)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
+        await updateQuotation({
+          quotationId: quotationId as Id<"quotations">,
+          ...basePayload,
+        });
+        return quotationId;
+      } else {
+        // Create new quotation (includes createdBy)
+        isLocalUpdate.current = true;
+        lastUpdateTimestamp.current = Date.now();
+        const res = await createQuotation({
+          ...basePayload,
+          createdBy: "ADMIN",
+        });
+        setQuotationId(res);
+        // Silently update URL if we created a new quotation via auto-save
+        if (isAutoSave) {
+          window.history.replaceState(
+            null,
+            "",
+            `/quotations/${res}/builder?step=${currentStep}`,
+          );
+        }
+        return res;
+      }
+    },
+    [
+      formData,
+      sections,
+      projects,
+      selectedStudio,
+      currentStep,
+      quotationId,
+      updateQuotation,
+      createQuotation,
+    ],
+  );
+
+  // Navigation
+  const goToStep = useCallback(async (step: number) => {
+    if (step >= 1 && step <= 4) {
+      setCurrentStep(step as QuotationStepId);
+      toast.promise(performSave(true, { lastStep: step }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
+    }
+  }, [performSave]);
+
+  const nextStep = useCallback(async () => {
+    const next = Math.min(currentStep + 1, 4) as QuotationStepId;
+    if (next !== currentStep) {
+      setCurrentStep(next);
+      toast.promise(performSave(true, { lastStep: next }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
+    }
+  }, [currentStep, performSave]);
+
+  const prevStep = useCallback(async () => {
+    const prev = Math.max(currentStep - 1, 1) as QuotationStepId;
+    if (prev !== currentStep) {
+      setCurrentStep(prev);
+      toast.promise(performSave(true, { lastStep: prev }), {
+        loading: "Saving progress...",
+        success: "Progress saved",
+        error: "Failed to save progress",
+      });
+    }
+  }, [currentStep, performSave]);
+
+  // Item Management
+  const addLineItem = useCallback((data?: Partial<QuotationLineItem>) => {
+    const newItem: QuotationLineItem = {
+      id: crypto.randomUUID(),
+      description: "",
+      rate: 0,
+      quantity: 1,
+      unit: "ea",
+      ...data,
+    };
+    setFormDataState((prev) => ({
+      ...prev,
+      step4: {
+        ...prev.step4,
+        lineItems: [...prev.step4.lineItems, newItem],
+      },
+    }));
+    setIsDirty(true);
+  }, []);
+
+  const updateLineItem = useCallback(
+    (idx: number, updates: Partial<QuotationLineItem>) => {
+      setFormDataState((prev) => {
+        const newItems = [...prev.step4.lineItems];
+        newItems[idx] = { ...newItems[idx], ...updates };
+        return {
+          ...prev,
+          step4: { ...prev.step4, lineItems: newItems },
+        };
+      });
+      setIsDirty(true);
+    },
+    [],
+  );
+
+  const removeLineItem = useCallback((idx: number) => {
+    setFormDataState((prev) => {
+      const newItems = [...prev.step4.lineItems];
+      newItems.splice(idx, 1);
+      return {
+        ...prev,
+        step4: { ...prev.step4, lineItems: newItems },
+      };
+    });
+    setIsDirty(true);
+  }, []);
+
+  // Package Logic
+  const applyPackageItems = useCallback(() => {
+    // Only apply if we have packages and no items yet (or logic to merge)
+    // For now, let's simply append items from selected packages if they aren't already there?
+    // Or closer to original: Reset items based on packages?
+    // Let's implement a safe add: Add items from packages if the list is empty.
+
+    if (!templates) return;
+
+    const { step2, step4 } = formData;
+
+    // IF line items are already populated, we might not want to nuke them every time we nav.
+    // However, if the user fundamentally changed packages, we might expect updates.
+    // For this refactor, let's assume we populate if empty to avoid accidental data loss.
+    if (step4.lineItems.length > 0) return;
+
+    const selectedTemplates = templates.filter((t) =>
+      step2.packageIds.includes(t._id),
+    );
+
+    const newItems: QuotationLineItem[] = [];
+
+    selectedTemplates.forEach((template) => {
+      template.lineItems.forEach((item) => {
+        newItems.push({
+          id: crypto.randomUUID(),
+          description: item.description,
+          unit: item.unit,
+          rate: item.rate,
+          quantity: item.quantity,
+          sectionId: item.sectionId,
+          spawnsProject: item.spawnsProject,
+          projectTypeId: item.projectTypeId as string,
+          selectedFolderTemplateId: item.selectedFolderTemplateId as string,
+          subItems: item.subItems?.map((s) => ({
+            description: s.description,
+            unit: "unit",
+            rate: s.amount || 0,
+            quantity: 1,
+          })),
+        });
+      });
+    });
+
+    if (newItems.length > 0) {
+      setFormDataState((prev) => ({
+        ...prev,
+        step4: {
+          ...prev.step4,
+          lineItems: newItems,
+        },
+      }));
+      setIsDirty(true);
+    }
+  }, [formData, templates]);
+
   // Update form data for a specific step
   const setFormData = useCallback(
     <K extends keyof QuotationFormData>(
       step: K,
-      data: Partial<QuotationFormData[K]>
+      data: Partial<QuotationFormData[K]>,
     ) => {
       setFormDataState((prev) => ({
         ...prev,
@@ -297,300 +624,87 @@ export function QuotationBuilderProvider({
       }));
       setIsDirty(true);
     },
-    []
+    [],
   );
 
-  // Navigation
-  // Update step1.projectIds whenever step2 changes for syncing
-  useEffect(() => {
-    if (
-      JSON.stringify(formData.step2.projectIds) !==
-      JSON.stringify(formData.step1.projectIds)
-    ) {
-      setFormData("step1", { projectIds: formData.step2.projectIds });
-    }
-  }, [formData.step2.projectIds, formData.step1.projectIds, setFormData]);
 
-  const goToStep = useCallback((step: QuotationStepId) => {
-    setCurrentStep(step);
-  }, []);
 
-  const nextStep = useCallback(() => {
-    const nextStepId = Math.min(currentStep + 1, 5) as QuotationStepId;
-    setCurrentStep(nextStepId);
-  }, [currentStep]);
-
-  const prevStep = useCallback(() => {
-    const prevStepId = Math.max(currentStep - 1, 1) as QuotationStepId;
-    setCurrentStep(prevStepId);
-  }, [currentStep]);
-
-  // Template application
-  const applyTemplate = useCallback(
-    (templateId: string, projectId: string) => {
-      // Logic for "Start from Scratch" (empty templateId)
-      if (!templateId) {
-        setFormDataState((prev) => {
-          const currentItems = prev.step4.lineItems;
-          // Remove items for this project
-          const filteredItems = currentItems.filter(
-            (item) => item.projectId !== projectId
-          );
-          return {
-            ...prev,
-            step3: {
-              ...prev.step3,
-              projectTemplates: {
-                ...prev.step3.projectTemplates,
-                [projectId]: "",
-              },
-            },
-            step4: {
-              ...prev.step4,
-              lineItems: filteredItems,
-            },
-          };
-        });
-        return;
-      }
-
-      const template = templates?.find((t) => t._id === templateId);
-      if (!template) return;
-
-      // Update project template mapping
-      setFormDataState((prev) => ({
-        ...prev,
-        step3: {
-          ...prev.step3,
-          projectTemplates: {
-            ...prev.step3.projectTemplates,
-            [projectId]: templateId,
-          },
-        },
-      }));
-
-      // Append terms if they are not already there (simple logic for now)
-      setFormDataState((prev) => {
-        const currentTerms = prev.step5.terms;
-        const newTerms = template.terms || "";
-        // Only add if not present to avoid duplication on re-select
-        const combinedTerms = currentTerms.includes(newTerms.substring(0, 20))
-          ? currentTerms
-          : currentTerms
-          ? `${currentTerms}\n\n${newTerms}`
-          : newTerms;
-        return {
-          ...prev,
-          step5: { ...prev.step5, terms: combinedTerms },
-        };
-      });
-
-      const mappedItems: QuotationLineItem[] = template.lineItems.map(
-        (li: TemplateLineItem) => ({
-          id: crypto.randomUUID(),
-          sectionId: li.sectionId,
-          description: li.description,
-          unit: li.unit,
-          rate: li.unitPrice,
-          quantity: li.defaultQuantity,
-          projectId: projectId, // Assign to specific project
-          subItems: li.subItems?.map((si) => ({
-            id: crypto.randomUUID(),
-            description: si.description,
-            unit: si.unit,
-            rate: si.unitPrice,
-            quantity: si.defaultQuantity,
-          })),
-        })
-      );
-
-      // Merge items: Remove old items for this project, add new ones
-      setFormDataState((prev) => {
-        const otherItems = prev.step4.lineItems.filter(
-          (item) => item.projectId !== projectId
-        );
-        return {
-          ...prev,
-          step4: {
-            ...prev.step4,
-            lineItems: [...otherItems, ...mappedItems],
-          },
-        };
-      });
-    },
-    [templates]
-  );
-
-  // Line Item management
-  const addLineItem = useCallback(
-    (initialData?: Partial<QuotationLineItem>) => {
-      const newItem: QuotationLineItem = {
-        id: crypto.randomUUID(),
-        sectionId: (initialData?.sectionId ||
-          sections?.[0]?._id) as Id<"quotationSections">,
-        description: initialData?.description || "",
-        unit: initialData?.unit || "ls",
-        rate: initialData?.rate || 0,
-        quantity: initialData?.quantity || 1,
-        projectId: initialData?.projectId,
-      };
-      setFormData("step4", {
-        lineItems: [...formData.step4.lineItems, newItem],
-      });
-    },
-    [sections, formData.step4.lineItems, setFormData]
-  );
-
-  const updateLineItem = useCallback(
-    (idx: number, updates: Partial<QuotationLineItem>) => {
-      const newItems = [...formData.step4.lineItems];
-      newItems[idx] = { ...newItems[idx], ...updates };
-      setFormData("step4", { lineItems: newItems });
-    },
-    [formData.step4.lineItems, setFormData]
-  );
-
-  const removeLineItem = useCallback(
-    (idx: number) => {
-      const newItems = formData.step4.lineItems.filter((_, i) => i !== idx);
-      setFormData("step4", { lineItems: newItems });
-    },
-    [formData.step4.lineItems, setFormData]
-  );
-
-  // Save quotation
+  // Save quotation (Public Action)
   const saveQuotation = useCallback(async () => {
     setIsLoading(true);
     setError(null);
 
     try {
-      const { step1, step2, step3, step4, step5 } = formData;
-
-      if (!step1.clientId) throw new Error("Please select a client");
-      if (step4.lineItems.length === 0)
-        throw new Error("Please add at least one line item");
-
-      const lineItemsPayload = step4.lineItems.map((item) => ({
-        id: item.id || crypto.randomUUID(),
-        sectionId: (item.sectionId ||
-          sections?.[0]?._id ||
-          "") as Id<"quotationSections">,
-        projectId: item.projectId,
-        description: item.description,
-        unit: item.unit,
-        rate: item.rate,
-        quantity: item.quantity,
-        subItems: item.subItems?.map((s) => ({
-          id: s.id || crypto.randomUUID(),
-          description: s.description,
-          unit: s.unit,
-          rate: s.rate,
-          quantity: s.quantity,
-        })),
-      }));
-
-      // Prefer step2 projectIds, fallback to step1 if sync failed
-      const projectIds =
-        step2.projectIds.length > 0
-          ? step2.projectIds
-          : step1.projectIds.length > 0
-            ? step1.projectIds
-            : undefined;
-
-      const payload = {
-        clientId: step1.clientId,
-        projectId:
-          step1.projectId && step1.projectId !== "none"
-            ? step1.projectId
-            : undefined,
-        projectIds: projectIds,
-
-        // Template ID is ambiguous with multiple projects, passing undefined or we could pass a primary one.
-        // For now, let's omit it as the source of truth is the line items.
-        templateId: undefined,
-        lineItems: lineItemsPayload,
-        terms: step5.terms,
-        taxRate: step5.taxRate / 100, // API expects decimal
-        discountAmount: step5.discountAmount,
-        validUntil: step1.validUntil?.getTime(),
-        createdBy: "ADMIN",
-      };
-
-      if (quotationId) {
-        await updateQuotation({
-          quotationId: quotationId as Id<"quotations">,
-          lineItems: lineItemsPayload,
-          terms: step5.terms,
-          taxRate: step5.taxRate / 100,
-          discountAmount: step5.discountAmount,
-          clientId: step1.clientId,
-          projectId:
-            step1.projectId && step1.projectId !== "none"
-              ? step1.projectId
-              : undefined,
-          projectIds: projectIds,
-          validUntil: step1.validUntil?.getTime(),
-        });
-        toast.success("Quotation updated successfully");
-      } else {
-        const res = await createQuotation(payload);
-        setQuotationId(res);
-        toast.success("Quotation created successfully");
-        router.push(`/quotations/${res}`);
+      const resId = await performSave(false);
+      if (!quotationId && resId) {
+        router.push(`/quotations/${resId}/builder?step=${currentStep}`);
       }
-
+      toast.success(
+        quotationId
+          ? "Quotation updated successfully"
+          : "Quotation created successfully",
+      );
       setIsDirty(false);
     } catch (err: unknown) {
-      // Extract user-friendly error message from Convex errors
-      let message = "Failed to save quotation";
-
-      if (err instanceof Error) {
-        // Check for Convex error patterns
-        const errorMessage = err.message;
-
-        // Handle specific business logic errors with friendly messages
-        if (errorMessage.includes("Can only edit draft quotations")) {
-          message =
-            "This quotation can no longer be edited. Only draft quotations can be modified.";
-          toast.error(message, {
-            description: "Redirecting to quotation details...",
-            duration: 3000,
-          });
-          // Redirect back to detail page after a short delay
-          setTimeout(() => {
-            router.push(`/quotations/${quotationId}`);
-          }, 1500);
-          setIsLoading(false);
-          return;
-        }
-
-        // Handle other known error patterns
-        if (errorMessage.includes("Quotation not found")) {
-          message = "This quotation no longer exists.";
-        } else if (errorMessage.includes("Server Error")) {
-          // Generic Convex server error - extract the meaningful part
-          const match = errorMessage.match(/Uncaught Error: (.+?)(?:\n|$)/);
-          message =
-            match?.[1] || "An unexpected error occurred. Please try again.";
-        } else {
-          // Use original message if it's already user-friendly
-          message = errorMessage;
-        }
-      }
-
-      setError(message);
-      toast.error(message);
+      handleError(err, "Failed to save quotation");
     } finally {
       setIsLoading(false);
     }
-  }, [
-    formData,
-    quotationId,
-    sections,
-    createQuotation,
-    updateQuotation,
-    router,
-  ]);
+  }, [performSave, quotationId, router, currentStep]);
+
+  // Save quotation and return ID
+  const saveQuotationAndReturn = useCallback(async (): Promise<
+    string | null
+  > => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const resId = await performSave(false);
+      setIsDirty(false);
+      return resId;
+    } catch (err: unknown) {
+      handleError(err, "Failed to save quotation");
+      return null;
+    } finally {
+      setIsLoading(false);
+    }
+  }, [performSave]);
+
+  // Auto-save logic
+  useEffect(() => {
+    if (!isDirty || isLoading || !isDataReady) return;
+
+    const timer = setTimeout(async () => {
+      try {
+        await performSave(true);
+        setIsDirty(false);
+        // No toast for auto-save to keep it subtle
+      } catch (err) {
+        console.error("Auto-save failed:", err);
+      }
+    }, 2000); // 2 second debounce
+
+    return () => clearTimeout(timer);
+  }, [isDirty, performSave, isLoading, isDataReady]);
+
+  // Centralized error handler
+  const handleError = (err: unknown, defaultMessage: string) => {
+    let message = defaultMessage;
+    if (err instanceof Error) {
+      const errorMessage = err.message;
+      if (errorMessage.includes("Can only edit draft quotations")) {
+        message = "This quotation can no longer be edited. Redirecting...";
+        setTimeout(() => router.push(`/quotations/${quotationId}`), 1500);
+      } else if (errorMessage.includes("Quotation not found")) {
+        message = "This quotation no longer exists.";
+      } else {
+        const match = errorMessage.match(/Uncaught Error: (.+?)(?:\n|$)/);
+        message = match?.[1] || errorMessage;
+      }
+    }
+    setError(message);
+    toast.error(message);
+  };
 
   const setSubmitTrigger = useCallback((fn: (() => void) | null) => {
     setSubmitTriggerState(() => fn);
@@ -604,13 +718,14 @@ export function QuotationBuilderProvider({
         formData,
         isDirty,
         isLoading,
+        isDataReady,
         error,
         submitTrigger,
-        clients,
+        studios,
         projects,
         templates,
         sections,
-        selectedClient,
+        selectedStudio,
         subtotal,
         taxAmount,
         grandTotal,
@@ -618,11 +733,12 @@ export function QuotationBuilderProvider({
         goToStep,
         nextStep,
         prevStep,
-        applyTemplate,
+        applyPackageItems,
         addLineItem,
         updateLineItem,
         removeLineItem,
         saveQuotation,
+        saveQuotationAndReturn,
         setSubmitTrigger,
       }}
     >

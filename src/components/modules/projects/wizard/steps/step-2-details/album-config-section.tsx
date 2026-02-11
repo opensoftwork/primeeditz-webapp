@@ -1,9 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
+import type { FieldValue } from "@/components/shared/dynamic-form-fields";
 import { AlbumConfigField } from "../../album-config-field";
-
-import { type FieldValue } from "@/components/shared/dynamic-form-fields";
 
 interface AlbumConfigSectionProps {
   form: {

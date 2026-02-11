@@ -1,18 +1,12 @@
 "use client";
 
-import React, { useEffect } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useConvexAuth, useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
-import {
-  SidebarProvider,
-  SidebarInset,
-  SidebarTrigger,
-} from "@/components/ui/sidebar";
+import { useConvexAuth, useQuery } from "convex/react";
+import Link from "next/link";
+import { usePathname, useRouter } from "next/navigation";
+import React, { useEffect } from "react";
+import { UserNav } from "@/components/modules/header/user-nav";
 import { AppSidebar } from "@/components/modules/sidebar";
-import { usePathname } from "next/navigation";
-import { Separator } from "@/components/ui/separator";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -21,20 +15,25 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
+import {
+  SidebarInset,
+  SidebarProvider,
+  SidebarTrigger,
+} from "@/components/ui/sidebar";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import { UserNav } from "@/components/modules/header/user-nav";
 
 interface DashboardLayoutProps {
   children: React.ReactNode;
   admin: React.ReactNode;
-  client: React.ReactNode;
+  studio: React.ReactNode;
   employee: React.ReactNode;
 }
 
 export default function DashboardLayout({
   children,
   admin,
-  client,
+  studio,
   employee,
 }: DashboardLayoutProps) {
   const { isAuthenticated, isLoading: isAuthLoading } = useConvexAuth();
@@ -49,7 +48,16 @@ export default function DashboardLayout({
   const pathname = usePathname();
   const { overrides } = useBreadcrumbStore();
   const isWizardPage =
-    pathname?.includes("/projects/new") || pathname?.includes("/preview");
+    pathname?.includes("/projects/new") ||
+    pathname?.includes("/quotations/new") ||
+    pathname?.includes("/quotations/request") ||
+    pathname?.includes("/onboarding") ||
+    (pathname?.includes("/quotations/") && pathname?.includes("/builder")) ||
+    pathname?.includes("/settings/service-packages/new") ||
+    (pathname?.includes("/settings/service-packages/") &&
+      pathname?.includes("/edit")) ||
+    pathname?.includes("/settings/project-types/new") ||
+    pathname?.includes("/preview");
   const isOnboardingPage = pathname === "/onboarding";
 
   // Redirect to onboarding or sign-in based on auth state
@@ -124,8 +132,8 @@ export default function DashboardLayout({
     switch (userProfile.role) {
       case "admin":
         return admin;
-      case "client":
-        return client;
+      case "studio":
+        return studio;
       case "employee":
         return employee;
       default:
@@ -133,11 +141,31 @@ export default function DashboardLayout({
     }
   };
 
+  if (isWizardPage) {
+    return (
+      <div className="h-screen w-screen overflow-hidden">
+        {renderRoleContent()}
+      </div>
+    );
+  }
+
+  const showGlobalHeader =
+    (!isWizardPage && !pathname?.includes("/settings/service-packages/")) ||
+    (pathname?.includes("/settings/service-packages/") &&
+      !pathname?.includes("/new") &&
+      !pathname?.includes("/edit"));
+
+  // Simplification: We want the sidebar for everyone except wizard pages
+  // We want the global header for everyone except wizard pages and editors
+  const isEditorPage =
+    pathname?.includes("/settings/service-packages/") &&
+    pathname?.includes("/edit");
+
   return (
     <SidebarProvider>
       {!isWizardPage && <AppSidebar />}
       <SidebarInset>
-        {!isWizardPage && (
+        {!isWizardPage && !isEditorPage && (
           <header className="flex h-16 shrink-0 items-center gap-2 border-b px-4 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60">
             <SidebarTrigger className="-ml-1" />
             <Separator orientation="vertical" className="mr-2 h-4" />

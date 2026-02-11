@@ -8,7 +8,7 @@
  * - Client-facing quotation views
  */
 
-import { Doc, Id } from "@convex/_generated/dataModel";
+import type { Doc, Id } from "@convex/_generated/dataModel";
 
 // ============================================================================
 // Core Line Item Types
@@ -40,6 +40,9 @@ export interface QuotationLineItem {
   width?: string;
   image?: string;
   subItems?: QuotationSubItem[];
+  spawnsProject?: boolean;
+  projectTypeId?: string | Id<"projectTypes">;
+  selectedFolderTemplateId?: string | Id<"folderTemplates">;
 }
 
 // ============================================================================
@@ -67,7 +70,7 @@ export interface QuotationData {
   code: string;
   version: number;
   status: string;
-  clientId?: string;
+  studioId?: string;
   projectIds?: string[];
   lineItems: QuotationLineItem[];
   terms?: string;
@@ -87,6 +90,15 @@ export interface CompanyInfo {
   phone?: string;
   email?: string;
   logoUrl?: string;
+  gstNumber?: string;
+  panNumber?: string;
+  bankDetails?: {
+    bankName: string;
+    accountHolder: string;
+    accountNumber: string;
+    ifscCode: string;
+    branch?: string;
+  };
 }
 
 // ============================================================================
@@ -110,21 +122,23 @@ export interface GroupedLineItems {
  */
 export interface TemplateSubItem {
   description: string;
-  unit: string;
-  unitPrice: number;
-  defaultQuantity: number;
+  amount?: number;
 }
 
 /**
  * Line item in a template (uses different field names than QuotationLineItem)
  */
 export interface TemplateLineItem {
+  id: string;
   description: string;
   unit: string;
-  unitPrice: number;
-  defaultQuantity: number;
+  rate: number;
+  quantity: number;
   sectionId?: string;
   subItems?: TemplateSubItem[];
+  spawnsProject?: boolean;
+  projectTypeId?: string | Id<"projectTypes">;
+  selectedFolderTemplateId?: string | Id<"folderTemplates">;
 }
 
 // ============================================================================
@@ -140,7 +154,7 @@ export type LibraryItem = Doc<"quotationLibraryItems">;
 // ============================================================================
 
 export interface QuotationBuilderState {
-  clientId: string;
+  studioId: string;
   projectId: string;
   projectIds: string[];
   templateId: string;
@@ -160,8 +174,31 @@ export type Client = Doc<"profiles">;
 export interface Project {
   _id: Id<"projects"> | string;
   code: string;
+  projectTypeId?: Id<"projectTypes"> | string;
   eventName?: string;
+  endClientName?: string;
   projectTypeName?: string;
 }
 
-export type Template = Doc<"quotationTemplates">;
+/**
+ * Configuration for a project within a service package
+ */
+export interface ProjectConfig {
+  id: string;
+  label?: string;
+  categoryId?: Id<"projectCategories">;
+  projectTypeId: Id<"projectTypes">;
+  folderTemplateId: Id<"folderTemplates">;
+  defaultStorageTierId?: Id<"storageTiers">;
+}
+
+/**
+ * Service Package (formerly Template)
+ */
+export interface ServicePackage extends Omit<Doc<"servicePackages">, "projectConfigs" | "lineItems"> {
+  projectConfigs?: ProjectConfig[];
+  lineItems: TemplateLineItem[];
+  price?: number; // Calculated/overridden price for UI
+}
+
+export type Template = ServicePackage;

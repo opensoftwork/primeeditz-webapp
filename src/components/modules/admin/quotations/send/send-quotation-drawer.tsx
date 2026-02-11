@@ -1,22 +1,22 @@
 "use client";
 
-import { useState } from "react";
 import { useMutation } from "convex/react";
-import { api } from "../../../../../../convex/_generated/api";
-import { Id } from "../../../../../../convex/_generated/dataModel";
+import { Receipt, Send } from "lucide-react";
+import { useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Sheet,
   SheetContent,
+  SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetDescription,
 } from "@/components/ui/sheet";
+import { api } from "../../../../../../convex/_generated/api";
+import type { Id } from "../../../../../../convex/_generated/dataModel";
 import { DashboardSection } from "./dashboard-section";
 import { ShareLinkSection } from "./share-link-section";
 import { ValiditySelector } from "./validity-selector";
-import { toast } from "sonner";
-import { Receipt, X, Send } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
 interface SendQuotationDrawerProps {
   isOpen: boolean;
@@ -25,8 +25,8 @@ interface SendQuotationDrawerProps {
     _id: Id<"quotations">;
     code: string;
     total: number;
-    clientId?: string;
-    clientName?: string;
+    studioId?: string;
+    studioName?: string;
     status: string;
     shareToken?: string;
   };
@@ -66,18 +66,10 @@ export function SendQuotationDrawer({
       <SheetContent className="w-full sm:max-w-md bg-zinc-950 border-white/5 p-0 overflow-hidden flex flex-col">
         <div className="p-8 space-y-8 flex-1 overflow-y-auto custom-scrollbar">
           <SheetHeader className="space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
               <div className="h-12 w-12 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shadow-lg shadow-primary/5">
                 <Send className="h-6 w-6 text-primary" />
               </div>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={onClose}
-                className="rounded-xl bg-white/5 border border-white/5 text-white/40 hover:text-white"
-              >
-                <X className="h-5 w-5" />
-              </Button>
             </div>
             <div className="space-y-1">
               <SheetTitle className="text-2xl font-black text-white uppercase tracking-tighter">
@@ -90,7 +82,7 @@ export function SendQuotationDrawer({
           </SheetHeader>
 
           {/* Quotation Summary */}
-          <div className="rounded-[2rem] border border-white/5 bg-white/2 p-6 space-y-4">
+          <div className="rounded-4xl border border-white/5 bg-white/2 p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Receipt className="h-5 w-5 text-white/20" />
@@ -102,13 +94,13 @@ export function SendQuotationDrawer({
                 ₹{quotation.total.toLocaleString("en-IN")}
               </span>
             </div>
-            {quotation.clientName && (
+            {quotation.studioName && (
               <div className="flex items-center gap-2 px-1">
                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
                   Client:
                 </span>
                 <span className="text-[10px] font-black text-white/60 uppercase tracking-widest">
-                  {quotation.clientName}
+                  {quotation.studioName}
                 </span>
               </div>
             )}
@@ -119,7 +111,7 @@ export function SendQuotationDrawer({
 
             <div className="space-y-4">
               <DashboardSection
-                clientId={quotation.clientId}
+                studioId={quotation.studioId}
                 isSent={quotation.status !== "draft"}
                 isSending={isSending}
                 onSend={handleSend}

@@ -2,16 +2,17 @@
 
 import { api } from "@convex/_generated/api";
 import { useQuery } from "convex/react";
-import { Building, Eye, Phone, User, Briefcase } from "lucide-react";
+import { Briefcase, Building, Eye, Phone, User } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import { Button } from "@/components/ui/button";
 import { columns } from "./columns";
+import { NewEmployeeDrawer } from "./new-employee-drawer";
 import { OnboardingBadge } from "./status-badge";
 import type { AdminEmployee } from "./types";
-import { NewEmployeeDrawer } from "./new-employee-drawer";
+import { Skeleton } from "@/components/ui/skeleton";
 
 // ============================================================================
 // Employee Card Component (for card view)
@@ -23,7 +24,7 @@ function EmployeeCard({ employee }: { employee: AdminEmployee }) {
       <motion.div
         whileHover={{ scale: 1.01 }}
         whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-indigo-500/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
+        className="group p-6 rounded-3xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-indigo-500/20 transition-all duration-300 cursor-pointer relative overflow-hidden"
       >
         <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-indigo-500/10 transition-colors" />
 
@@ -101,12 +102,11 @@ interface EmployeeListProps {
 // Main Component
 // ============================================================================
 
-export default function EmployeeList({
-  showHeader = true,
-}: EmployeeListProps) {
+export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
   const [showNewEmployeeDrawer, setShowNewEmployeeDrawer] = useState(false);
-  
+
   // Fetch employees
+  //@ts-ignore
   const rawEmployees = useQuery(api.admin.getEmployees, {});
 
   // Transform the data to match AdminEmployee type
@@ -144,32 +144,37 @@ export default function EmployeeList({
 
   if (rawEmployees === undefined) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full">
+      <div
+        className={
+          showHeader
+            ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
+            : "w-full"
+        }
+      >
         {showHeader && (
-          <div className="mb-10">
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="space-y-2"
-            >
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/40">
-                TEAM MANAGEMENT
-              </span>
-              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-                Employee Directory
-              </h1>
-            </motion.div>
+          <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+            <div className="space-y-2">
+              <Skeleton className="h-4 w-32 bg-white/5" />
+              <Skeleton className="h-12 w-64 bg-white/5" />
+            </div>
+            <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
           </div>
         )}
-        <DataTableSkeleton rows={6} columns={6} />
+        <DataTableSkeleton rows={6} columns={6} viewMode="cards" />
       </div>
     );
   }
 
   return (
-    <div className={showHeader ? "flex-1 p-8 md:p-12 w-full" : "w-full"}>
+    <div
+      className={
+        showHeader
+          ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
+          : "w-full"
+      }
+    >
       {showHeader && (
-        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-10">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
@@ -197,13 +202,14 @@ export default function EmployeeList({
         </div>
       )}
 
-      <DataTable
+       <DataTable
+        className="flex-1"
         columns={columns}
         data={employees}
         emptyTitle="No Employees Found"
         emptyDescription="No employees match your current filters. Click 'Add Employee' to add your first team member."
         renderCard={(employee) => <EmployeeCard employee={employee} />}
-        defaultView="table"
+        defaultView="cards"
         showViewToggle={showHeader}
         toolbar={{
           search: {

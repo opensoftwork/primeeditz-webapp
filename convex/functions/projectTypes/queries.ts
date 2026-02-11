@@ -1,6 +1,16 @@
-import { v } from 'convex/values'
-import { query } from '../../_generated/server'
-import { adminQuery } from '../../lib/customFunctions'
+import { v } from "convex/values";
+import { query } from "../../_generated/server";
+import { adminQuery } from "../../lib/customFunctions";
+
+/**
+ * List all project types.
+ */
+export const list = adminQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("projectTypes").collect();
+  },
+});
 
 /**
  * Get all active project types.
@@ -10,30 +20,30 @@ export const getActiveProjectTypes = query({
   args: {},
   handler: async (ctx) => {
     const types = await ctx.db
-      .query('projectTypes')
-      .withIndex('by_isActive', (q) => q.eq('isActive', true))
-      .collect()
+      .query("projectTypes")
+      .withIndex("by_isActive", (q) => q.eq("isActive", true))
+      .collect();
 
     return await Promise.all(
       types.map(async (t) => {
         const [category, fields] = await Promise.all([
           ctx.db.get(t.categoryId),
           ctx.db
-            .query('projectTypeFields')
-            .withIndex('by_projectTypeId_active', (q) =>
-              q.eq('projectTypeId', t._id).eq('isActive', true)
+            .query("projectTypeFields")
+            .withIndex("by_projectTypeId_active", (q) =>
+              q.eq("projectTypeId", t._id).eq("isActive", true),
             )
             .collect(),
-        ])
+        ]);
         return {
           ...t,
-          categoryName: category?.name || 'Uncategorized',
+          categoryName: category?.name || "Uncategorized",
           hasCustomFields: fields.length > 0,
-        }
-      })
-    )
+        };
+      }),
+    );
   },
-})
+});
 
 /**
  * Get all project types for admin, with field counts.
@@ -41,81 +51,101 @@ export const getActiveProjectTypes = query({
 export const getProjectTypes = adminQuery({
   args: {},
   handler: async (ctx) => {
-    const projectTypes = await ctx.db.query('projectTypes').collect()
+    const projectTypes = await ctx.db.query("projectTypes").collect();
 
     // Enrich with field counts and category names
     const enriched = await Promise.all(
       projectTypes.map(async (type) => {
         const [fields, category] = await Promise.all([
           ctx.db
-            .query('projectTypeFields')
-            .withIndex('by_projectTypeId', (q) => q.eq('projectTypeId', type._id))
+            .query("projectTypeFields")
+            .withIndex("by_projectTypeId", (q) =>
+              q.eq("projectTypeId", type._id),
+            )
             .collect(),
           ctx.db.get(type.categoryId),
-        ])
+        ]);
         return {
           ...type,
           fieldCount: fields.length,
-          categoryName: category?.name || 'Uncategorized',
-        }
-      })
-    )
+          categoryName: category?.name || "Uncategorized",
+        };
+      }),
+    );
 
-    return enriched
+    // Sort: Drafts first, then by creation date (desc)
+    return enriched.sort((a, b) => {
+      const aDraft = a.isDraft ? 1 : 0;
+      const bDraft = b.isDraft ? 1 : 0;
+      if (aDraft !== bDraft) return bDraft - aDraft;
+      return b._creationTime - a._creationTime;
+    });
   },
-})
+});
 
 /**
  * Get a single project type by ID (public query for wizard).
  */
 export const getProjectType = query({
   args: {
-    projectTypeId: v.id('projectTypes'),
+    projectTypeId: v.id("projectTypes"),
   },
   handler: async (ctx, args) => {
-    const type = await ctx.db.get(args.projectTypeId)
-    if (!type) return null
+    const type = await ctx.db.get(args.projectTypeId);
+    if (!type) return null;
 
     const fields = await ctx.db
-      .query('projectTypeFields')
-      .withIndex('by_projectTypeId_active', (q) =>
-        q.eq('projectTypeId', args.projectTypeId).eq('isActive', true)
+      .query("projectTypeFields")
+      .withIndex("by_projectTypeId_active", (q) =>
+        q.eq("projectTypeId", args.projectTypeId).eq("isActive", true),
       )
-      .collect()
+      .collect();
 
     return {
       ...type,
       hasCustomFields: fields.length > 0,
-    }
+    };
   },
-})
+});
 
 /**
  * Get a single project type by ID with its fields.
  */
 export const getProjectTypeWithFields = adminQuery({
   args: {
-    projectTypeId: v.id('projectTypes'),
+    projectTypeId: v.id("projectTypes"),
   },
   handler: async (ctx, args) => {
-    const projectType = await ctx.db.get(args.projectTypeId)
-    if (!projectType) return null
+    const projectType = await ctx.db.get(args.projectTypeId);
+    if (!projectType) return null;
 
     const [fields, category] = await Promise.all([
       ctx.db
-        .query('projectTypeFields')
-        .withIndex('by_projectTypeId', (q) => q.eq('projectTypeId', args.projectTypeId))
+        .query("projectTypeFields")
+        .withIndex("by_projectTypeId", (q) =>
+          q.eq("projectTypeId", args.projectTypeId),
+        )
         .collect(),
       ctx.db.get(projectType.categoryId),
-    ])
+    ]);
 
     // Sort fields by displayOrder
-    fields.sort((a, b) => a.displayOrder - b.displayOrder)
+    fields.sort((a, b) => a.displayOrder - b.displayOrder);
 
     return {
       ...projectType,
-      categoryName: category?.name || 'Uncategorized',
+      categoryName: category?.name || "Uncategorized",
       fields,
-    }
+    };
   },
-})
+});
+
+/**
+ * Get a single project type by ID (Admin).
+ */
+export const getById = adminQuery({
+  args: { id: v.id("projectTypes") },
+  handler: async (ctx, args) => {
+    return await ctx.db.get(args.id);
+  },
+});

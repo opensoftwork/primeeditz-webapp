@@ -6,29 +6,26 @@
  */
 
 // Re-export all types from the centralized types file
-export {
-  // Core types
-  type QuotationSubItem,
-  type QuotationLineItem,
-  type QuotationSection,
-  type QuotationData,
-  type CompanyInfo,
-  type GroupedLineItems,
-  type TemplateLineItem,
-  type TemplateSubItem,
-
-  // Convex document types
-  type Section,
-  type Quotation,
-  type LibraryItem,
-
-  // Builder state
-  type QuotationBuilderState,
-
+export type {
   // Component props
-  type Client,
-  type Project,
-  type Template,
+  Client,
+  CompanyInfo,
+  GroupedLineItems,
+  LibraryItem,
+  Project,
+  Quotation,
+  // Builder state
+  QuotationBuilderState,
+  QuotationData,
+  QuotationLineItem,
+  QuotationSection,
+  // Core types
+  QuotationSubItem,
+  // Convex document types
+  Section,
+  Template,
+  TemplateLineItem,
+  TemplateSubItem,
 } from "../types";
 
 // For backward compatibility with existing imports that use TemplateLineItem differently

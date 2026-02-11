@@ -1,9 +1,9 @@
 "use client";
 
-import { useQuery } from "convex/react";
-import { useRouter } from "next/navigation";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import { useRouter } from "next/navigation";
 
 import { FolderGrid } from "@/components/shared/project-folders";
 
@@ -23,5 +23,7 @@ export function ProjectFoldersList({ projectId }: ProjectFoldersListProps) {
     router.push(`/projects/${projectId}/folders/${folder._id}`);
   };
 
-  return <FolderGrid folders={folders} onFolderClick={handleFolderClick} />;
+  return (
+    <FolderGrid isAdmin folders={folders} onFolderClick={handleFolderClick} />
+  );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { Skeleton } from "@/components/ui/skeleton";
+import { ChevronUp, LayoutDashboard } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -11,7 +11,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { LayoutDashboard, ChevronUp } from "lucide-react";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export function SidebarLoading() {
   return (

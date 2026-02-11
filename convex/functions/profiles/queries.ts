@@ -5,8 +5,8 @@
  * Uses authenticatedQuery wrapper from customFunctions.
  */
 
-import { query } from '../../_generated/server'
-import { authenticatedQuery } from '../../lib/customFunctions'
+import { query } from "../../_generated/server";
+import { authenticatedQuery } from "../../lib/customFunctions";
 
 /**
  * Get the current user's profile.
@@ -16,17 +16,17 @@ export const getMyProfile = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
     // ctx.authUser is available from the authenticatedQuery wrapper
-    const userId = ctx.authUser._id
+    const userId = ctx.authUser._id;
 
     // Get profile by Better Auth user ID
     const profile = await ctx.db
-      .query('profiles')
-      .withIndex('by_userId', (q) => q.eq('userId', userId))
-      .first()
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", userId))
+      .first();
 
-    return profile
+    return profile;
   },
-})
+});
 
 /**
  * Check if profiles table is empty (for first admin bootstrap).
@@ -36,10 +36,10 @@ export const isFirstUser = authenticatedQuery({
   args: {},
   handler: async (ctx) => {
     // Count existing profiles
-    const existingProfile = await ctx.db.query('profiles').first()
-    return existingProfile === null
+    const existingProfile = await ctx.db.query("profiles").first();
+    return existingProfile === null;
   },
-})
+});
 
 /**
  * Get profile by user ID (public query for route guards).
@@ -50,6 +50,6 @@ export const getProfileByUserId = query({
   handler: async (_ctx) => {
     // This is a placeholder - actual implementation would need
     // the user ID passed from the auth context
-    return null
+    return null;
   },
-})
+});

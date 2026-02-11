@@ -1,22 +1,24 @@
 "use client";
 
+import { ExternalLink, FileText } from "lucide-react";
 import { motion } from "motion/react";
-import { FileText, ExternalLink } from "lucide-react";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
 import { DetailSection } from "@/components/modules/projects/detail/shared";
 import type { VaultFile } from "@/components/shared/files-vault/drawer";
+import { Button } from "@/components/ui/button";
 
 interface ProjectReferenceFilesProps {
   referenceFilesCount: number;
   vaultFiles: VaultFile[];
   onOpenVault: () => void;
+  onFileClick?: (fileId: string) => void;
 }
 
 export function ProjectReferenceFiles({
   referenceFilesCount,
   vaultFiles,
   onOpenVault,
+  onFileClick,
 }: ProjectReferenceFilesProps) {
   return (
     <DetailSection
@@ -46,7 +48,9 @@ export function ProjectReferenceFiles({
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: idx * 0.1 }}
               className="aspect-square rounded-2xl bg-white/5 border border-white/5 overflow-hidden group cursor-pointer relative"
-              onClick={onOpenVault}
+              onClick={() =>
+                onFileClick ? onFileClick(file.id) : onOpenVault()
+              }
             >
               {file.type.startsWith("image/") && file.url ? (
                 <Image

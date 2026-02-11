@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -27,7 +27,7 @@ export function ActionButton({
         "h-auto flex-col items-start gap-4 p-6 rounded-2xl border border-white/5 bg-white/2 transition-all duration-300 w-full group/act overflow-hidden relative",
         disabled
           ? "opacity-50 cursor-not-allowed"
-          : "hover:bg-white/5 hover:border-white/10 hover:-translate-y-1 shadow-lg"
+          : "hover:bg-white/5 hover:border-white/10 hover:-translate-y-1 shadow-lg",
       )}
       asChild={!disabled}
       disabled={disabled}

@@ -1,195 +1,80 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useParams } from "next/navigation";
-import { useState, useEffect, useRef } from "react";
-import { Boxes } from "lucide-react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
+import {
+  Loader2,
+  Layout,
+  Settings,
+  ArrowLeft,
+  Tag,
+  Calendar,
+  ChevronRight,
+} from "lucide-react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { toast } from "sonner";
-import { motion } from "motion/react";
+import { cn } from "@/lib/utils";
 import Link from "next/link";
-import { FieldList, FieldDrawer } from "./index";
-import { type FieldFormValues } from "./field-drawer";
-import { DetailHeader, DetailStats, DetailAlerts } from "./index";
-import { DeliveryConfigForm } from "./delivery-config-form";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import type { Doc, Id } from "@convex/_generated/dataModel";
+import { FolderTemplatesList } from "../folder-templates";
+import { format } from "date-fns";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
+import { Badge } from "@/components/ui/badge";
 
-export function ProjectTypeDetail() {
-  const params = useParams();
-  const id = params.id as Id<"projectTypes">;
+interface ProjectTypeDetailProps {
+  projectTypeId: Id<"projectTypes">;
+}
 
-  // Queries & Mutations
-  const projectType = useQuery(
-    api.functions.projectTypes.queries.getProjectTypeWithFields,
-    { projectTypeId: id },
+export default function ProjectTypeDetail({
+  projectTypeId,
+}: ProjectTypeDetailProps) {
+  const projectType = useQuery(api.functions.projectTypes.queries.getById, {
+    id: projectTypeId,
+  });
+
+  const categories = useQuery(
+    api.functions.projectCategories.queries.getActiveCategories,
   );
-  const createField = useMutation(
-    api.functions.projectTypeFields.mutations.createField,
-  );
-  const updateField = useMutation(
-    api.functions.projectTypeFields.mutations.updateField,
-  );
-  const reorderFields = useMutation(
-    api.functions.projectTypeFields.mutations.reorderFields,
-  );
-  const toggleFieldStatus = useMutation(
-    api.functions.projectTypeFields.mutations.toggleFieldActive,
-  );
-  const hardDeleteField = useMutation(
-    api.functions.projectTypeFields.mutations.hardDeleteField,
-  );
+  const category = categories?.find((c) => c._id === projectType?.categoryId);
 
-  // State
-  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [editingField, setEditingField] =
-    useState<Doc<"projectTypeFields"> | null>(null);
-  const [localFields, setLocalFields] = useState<Doc<"projectTypeFields">[]>(
-    [],
-  );
-  const [fieldToDeactivate, setFieldToDeactivate] = useState<string | null>(
-    null,
-  );
-  const [fieldToReactivate, setFieldToReactivate] = useState<string | null>(
-    null,
-  );
-  const [fieldToHardDelete, setFieldToHardDelete] = useState<string | null>(
-    null,
-  );
-  const isSyncingOrder = useRef(false);
-  const syncTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  const { setOverride } = useBreadcrumbStore();
-
-  // Sync breadcrumbs and local fields
-  useEffect(() => {
-    if (projectType?.fields) {
-      if (isSyncingOrder.current) {
-        // Check if server state matches local order
-        const isMatch =
-          projectType.fields.length === localFields.length &&
-          projectType.fields.every((f, i) => f._id === localFields[i]?._id);
-        if (isMatch) {
-          isSyncingOrder.current = false;
-        }
-      } else {
-        setLocalFields(projectType.fields);
-      }
-    }
-    if (projectType?.name) setOverride(id, projectType.name);
-  }, [id, projectType, localFields, setOverride]);
-
-  // Handlers
-  const handleAddField = () => {
-    setEditingField(null);
-    setIsDrawerOpen(true);
-  };
-
-  const handleEditField = (field: Doc<"projectTypeFields">) => {
-    setEditingField(field);
-    setIsDrawerOpen(true);
-  };
-
-  const handleSaveField = async (values: FieldFormValues) => {
-    try {
-      if (editingField) {
-        await updateField({ id: editingField._id, ...values });
-        toast.success("Field updated");
-      } else {
-        await createField({
-          projectTypeId: id,
-          ...values,
-          displayOrder: localFields.length,
-        });
-        toast.success("Field added");
-      }
-      setIsDrawerOpen(false);
-    } catch (error) {
-      toast.error("An error occurred while saving the field");
-    }
-  };
-
-  const handleReorder = (fields: Doc<"projectTypeFields">[]) => {
-    // 1. Update UI immediately
-    setLocalFields(fields);
-    isSyncingOrder.current = true;
-
-    // 2. Debounce server sync
-    if (syncTimeoutRef.current) clearTimeout(syncTimeoutRef.current);
-
-    syncTimeoutRef.current = setTimeout(async () => {
-      try {
-        await reorderFields({
-          fields: fields.map((f, i) => ({ id: f._id, displayOrder: i })),
-        });
-      } catch (error) {
-        toast.error("Failed to save field order");
-        // Revert to server state on error
-        if (projectType?.fields) setLocalFields(projectType.fields);
-        isSyncingOrder.current = false;
-      }
-    }, 500);
-  };
-
-  const handleToggleStatusRequest = async (id: string, current: boolean) => {
-    if (current) setFieldToDeactivate(id);
-    else setFieldToReactivate(id);
-  };
-
-  const confirmToggleStatus = async () => {
-    const fieldId = fieldToDeactivate || fieldToReactivate;
-    const isActivating = !!fieldToReactivate;
-    if (!fieldId) return;
-
-    try {
-      await toggleFieldStatus({
-        id: fieldId as Id<"projectTypeFields">,
-        isActive: isActivating,
-      });
-      toast.success(isActivating ? "Field reactivated" : "Field deactivated");
-      setFieldToDeactivate(null);
-      setFieldToReactivate(null);
-    } catch (error) {
-      toast.error("Failed to update field status");
-    }
-  };
-
-  const confirmHardDelete = async () => {
-    if (!fieldToHardDelete) return;
-    try {
-      await hardDeleteField({
-        id: fieldToHardDelete as Id<"projectTypeFields">,
-      });
-      toast.success("Field permanently removed");
-      setFieldToHardDelete(null);
-    } catch (error) {
-      toast.error("Failed to delete field");
-    }
-  };
-
-  // Loading & Error States
   if (projectType === undefined) {
     return (
-      <div className="space-y-8 animate-pulse p-8 md:p-12">
-        <Skeleton className="h-10 w-1/3 bg-white/5" />
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <Skeleton className="h-64 bg-white/5 rounded-3xl" />
-          <Skeleton className="lg:col-span-2 h-[600px] bg-white/5 rounded-3xl" />
+      <div className="p-8 md:p-12 space-y-8 animate-in fade-in duration-500">
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-10 w-10 rounded-xl bg-white/5" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-10 w-64 bg-white/5" />
+          </div>
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Skeleton className="h-32 rounded-3xl bg-white/5 md:col-span-2" />
+          <Skeleton className="h-32 rounded-3xl bg-white/5" />
+        </div>
+        <Skeleton className="h-[400px] rounded-[32px] bg-white/5" />
       </div>
     );
   }
 
-  if (!projectType) {
+  if (projectType === null) {
     return (
-      <div className="h-[60vh] flex flex-col items-center justify-center space-y-4 p-6">
-        <Boxes className="h-12 w-12 text-white/10" />
-        <p className="text-white/40 font-medium text-lg">
-          Project Type not found
+      <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+        <div className="p-4 rounded-full bg-red-500/10 mb-4">
+          <Layout className="h-8 w-8 text-red-500" />
+        </div>
+        <h2 className="text-xl font-black text-white uppercase tracking-tight">
+          Project Type Not Found
+        </h2>
+        <p className="text-white/40 mt-2">
+          The project type you are looking for does not exist or has been
+          removed.
         </p>
-        <Button variant="link" asChild className="text-primary">
+        <Button
+          asChild
+          variant="outline"
+          className="mt-6 rounded-xl border-white/10"
+        >
           <Link href="/settings/project-types">Back to Project Types</Link>
         </Button>
       </div>
@@ -197,64 +82,82 @@ export function ProjectTypeDetail() {
   }
 
   return (
-    <div className="space-y-8 pb-20 p-8 md:p-12">
-      <DetailHeader
-        id={id}
-        projectType={projectType}
-        onAddField={handleAddField}
-      />
+    <div className="flex flex-col min-h-full bg-transparent text-white selection:bg-primary/20">
+      {/* 1. Integrated Hero Area - Clean & Borderless */}
+      <section className="px-8 md:px-12 pt-8 md:pt-12 pb-0 flex flex-col gap-10">
+        {/* Navigation & Core Identification Row */}
+        <div className="flex items-start justify-between">
+          <div className="flex items-center gap-6">
+            <Button
+              variant="outline"
+              size="icon"
+              asChild
+              className="h-10 w-10 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
+            >
+              <Link href="/settings/project-types">
+                <ArrowLeft className="h-5 w-5" />
+              </Link>
+            </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="space-y-6">
-          <DetailStats
-            projectType={projectType}
-            fieldCount={localFields.length}
-          />
-          <DeliveryConfigForm
-            projectTypeId={id}
-            initialConfig={projectType.deliveryConfig}
-          />
-        </div>
+            <div className="flex items-center gap-5">
+              <div className="relative group">
+                <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-125 group-hover:bg-primary/30 transition-all opacity-50" />
+                <div className="relative w-16 h-16 rounded-2xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all shadow-xl shadow-primary/10">
+                  <DynamicIcon
+                    name={projectType.icon || "Package"}
+                    className="h-7 w-7 text-primary"
+                  />
+                </div>
+              </div>
 
-        <div className="lg:col-span-2 space-y-4">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-xs font-black text-white/40 uppercase tracking-[0.2em]">
-              Form Structure
-            </h3>
-            <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
-              Drag cards to reorder
-            </span>
+              <div className="space-y-0.5">
+                <div className="flex items-center gap-3">
+                  <span className="text-[9px] font-black uppercase tracking-[0.2em] text-primary/60">
+                    Engine View • ID: {projectTypeId.slice(0, 8)}...
+                  </span>
+                </div>
+                <h1 className="text-3xl font-black uppercase tracking-tighter text-white leading-none">
+                  {projectType.name}
+                </h1>
+                <h4 className="text-sm font-black text-white/30 uppercase tracking-tight">
+                  {category?.name || "General Engine"}
+                </h4>
+              </div>
+            </div>
           </div>
 
-          <FieldList
-            fields={localFields}
-            onEdit={handleEditField}
-            onDelete={setFieldToHardDelete}
-            onToggleStatus={handleToggleStatusRequest}
-            onReorder={handleReorder}
-          />
+          <Link href={`/settings/project-types/${projectTypeId}/edit`}>
+            <Button className="h-11 px-6 rounded-xl bg-zinc-950/40 border border-white/10 text-white font-black uppercase tracking-widest text-[10px] transition-all hover:bg-white/5 active:scale-95 flex items-center gap-2">
+              <Settings className="h-4 w-4 text-primary" />
+              <span>Modify Configuration</span>
+            </Button>
+          </Link>
         </div>
-      </div>
 
-      <FieldDrawer
-        open={isDrawerOpen}
-        onOpenChange={setIsDrawerOpen}
-        onSave={handleSaveField}
-        initialData={editingField}
-        projectTypeId={id}
-        nextDisplayOrder={localFields.length}
-      />
+        {/* Visual Identity & Status Row */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Badge
+              className={cn(
+                "font-black text-[10px] uppercase tracking-widest px-4 py-1.5 rounded-lg",
+                projectType.isActive
+                  ? "bg-green-500/10 text-green-500 border-green-500/20"
+                  : "bg-white/5 text-white/40 border-white/5",
+              )}
+            >
+              {projectType.isActive ? "System Active" : "System Offline"}
+            </Badge>
+            <div className="px-3 py-1.5 rounded-lg bg-white/5 border border-white/10 text-[10px] font-black text-white/30 uppercase tracking-widest">
+              v1.0.0 Stable
+            </div>
+          </div>
+        </div>
+      </section>
 
-      <DetailAlerts
-        fieldToDeactivate={fieldToDeactivate}
-        setFieldToDeactivate={setFieldToDeactivate}
-        fieldToReactivate={fieldToReactivate}
-        setFieldToReactivate={setFieldToReactivate}
-        fieldToHardDelete={fieldToHardDelete}
-        setFieldToHardDelete={setFieldToHardDelete}
-        onConfirmToggleStatus={confirmToggleStatus}
-        onConfirmHardDelete={confirmHardDelete}
-      />
+      {/* 2. Folder Templates Section */}
+      <main className="flex-1 pb-24 overflow-y-auto">
+        <FolderTemplatesList projectTypeId={projectTypeId} minimal={true} />
+      </main>
     </div>
   );
 }

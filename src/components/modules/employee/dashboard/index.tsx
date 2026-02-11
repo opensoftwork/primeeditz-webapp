@@ -1,15 +1,10 @@
 "use client";
 
-import { DashboardHeader } from "./dashboard-header";
-import { StatsGrid } from "./stats-grid";
-import { RecentProjects } from "./recent-projects";
+import { Briefcase, Settings, UserCircle, Zap } from "lucide-react";
 import { ActionButton } from "./action-button";
-import { 
-  Zap, 
-  Briefcase, 
-  UserCircle, 
-  Settings 
-} from "lucide-react";
+import { DashboardHeader } from "./dashboard-header";
+import { RecentProjects } from "./recent-projects";
+import { StatsGrid } from "./stats-grid";
 
 export default function EmployeeDashboard() {
   return (
@@ -56,7 +51,8 @@ export default function EmployeeDashboard() {
               />
             </div>
             <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] italic">
-              New production tools and asset management modules are in development
+              New production tools and asset management modules are in
+              development
             </p>
           </div>
         </div>

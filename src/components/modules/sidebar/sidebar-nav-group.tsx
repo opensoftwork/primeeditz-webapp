@@ -1,15 +1,15 @@
-import { useState, useMemo } from "react";
+import { ChevronRight } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { motion, AnimatePresence } from "motion/react";
-import { ChevronRight } from "lucide-react";
+import { useMemo, useState } from "react";
 import {
   SidebarGroup,
   SidebarGroupContent,
   SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 import { cn } from "@/lib/utils";
 import type { NavItem } from "./navigation-config";
@@ -113,6 +113,24 @@ export function SidebarNavGroup({ label, items }: SidebarNavGroupProps) {
                               {item.title}
                             </span>
                           </div>
+
+                          {/* Badge - Premium Neon Style */}
+                          {item.badgeCount !== undefined &&
+                            item.badgeCount > 0 && (
+                              <motion.div
+                                initial={{ scale: 0.8, opacity: 0 }}
+                                animate={{ scale: 1, opacity: 1 }}
+                                className={cn(
+                                  "flex items-center justify-center shrink-0 ml-auto z-10",
+                                  "min-w-[18px] h-[18px] px-1 rounded-full",
+                                  "bg-primary text-black text-[9px] font-black tracking-tight",
+                                  "shadow-[0_0_12px_rgba(var(--primary-rgb),0.5)]",
+                                  "group-data-[collapsible=icon]:absolute group-data-[collapsible=icon]:top-2 group-data-[collapsible=icon]:right-2 group-data-[collapsible=icon]:size-4 group-data-[collapsible=icon]:p-0",
+                                )}
+                              >
+                                {item.badgeCount}
+                              </motion.div>
+                            )}
 
                           {/* Futuristic Glow Effect on Hover */}
                           <div className="absolute inset-0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-500">

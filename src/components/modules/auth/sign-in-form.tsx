@@ -1,14 +1,14 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "convex/react";
+import { ArrowRight, Loader2, Sparkles } from "lucide-react";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import * as z from "zod";
-import { Loader2, ArrowRight, Sparkles } from "lucide-react";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { motion } from "motion/react";
 import { Label } from "@/components/ui/label";
 
 // Google Icon Component
@@ -39,17 +39,16 @@ const GoogleIcon = ({ className }: { className?: string }) => (
 );
 
 import Link from "next/link";
-
-import { authClient } from "@/lib/auth-client";
 import { Button } from "@/components/ui/button";
-import { PasswordInput } from "@/components/ui/password-input";
-import { Input } from "@/components/ui/input";
 import {
   Field,
   FieldError,
   FieldGroup,
   FieldLabel,
 } from "@/components/ui/field";
+import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
+import { authClient } from "@/lib/auth-client";
 
 // Zod validation schema
 const signInSchema = z.object({
@@ -148,7 +147,8 @@ export default function SignInForm() {
               SIGN IN
             </h1>
             <p className="text-sm font-medium text-white/40 leading-relaxed max-w-[360px] mx-auto lg:mx-0">
-              Access your studio dashboard and manage your creative production pipeline.
+              Access your studio dashboard and manage your creative production
+              pipeline.
             </p>
           </div>
 
@@ -163,7 +163,9 @@ export default function SignInForm() {
               ) : (
                 <div className="flex items-center justify-center w-full">
                   <GoogleIcon className="mr-3 h-4 w-4" />
-                  <span className="flex-1 text-center">Continue with Google</span>
+                  <span className="flex-1 text-center">
+                    Continue with Google
+                  </span>
                 </div>
               )}
             </Button>
@@ -207,7 +209,10 @@ export default function SignInForm() {
                         className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs placeholder:text-white/10"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                      <FieldError
+                        errors={field.state.meta.errors}
+                        className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]"
+                      />
                     </div>
                   )}
                 />
@@ -239,7 +244,10 @@ export default function SignInForm() {
                         className="bg-[#0A0A0C] border-white/5 text-white h-12 rounded-xl focus:ring-1 focus:ring-indigo-500/50 font-medium text-xs"
                         disabled={isLoading}
                       />
-                      <FieldError errors={field.state.meta.errors} className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]" />
+                      <FieldError
+                        errors={field.state.meta.errors}
+                        className="text-red-500/80 text-[10px] ml-1 mt-1 font-bold uppercase tracking-[0.05em]"
+                      />
                     </div>
                   )}
                 />

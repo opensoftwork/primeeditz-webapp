@@ -19,14 +19,14 @@ export const createAsset = mutation({
   handler: async (ctx, args) => {
     // 1. Verify authentication
     const { profile } = await getAuthUserWithProfile(ctx);
-    
+
     // 2. Verify access - client must own project, or user must be admin
     const project = await ctx.db.get(args.projectId);
     if (!project) {
       throw new Error("Project not found");
     }
-    
-    if (profile.role === "client" && project.clientId !== profile._id) {
+
+    if (profile.role === "studio" && project.studioId !== profile._id) {
       throw new Error("Access denied");
     }
 
@@ -50,5 +50,46 @@ export const createAsset = mutation({
     }
 
     return assetId;
+  },
+});
+
+/**
+ * Delete an asset record.
+ * Only the uploader, project owner, or admin can delete.
+ */
+export const deleteAsset = mutation({
+  args: {
+    assetId: v.id("assets"),
+  },
+  handler: async (ctx, args) => {
+    // 1. Verify authentication
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    // 2. Get the asset
+    const asset = await ctx.db.get(args.assetId);
+    if (!asset) {
+      throw new Error("Asset not found");
+    }
+
+    // 3. Verify access
+    const project = await ctx.db.get(asset.projectId);
+    if (!project) {
+      throw new Error("Project not found");
+    }
+
+    // Allow if:
+    // - User is admin
+    // - User is the studio that owns the project
+    const isOwner = profile.role === "studio" && project.studioId === profile._id;
+    const isAdmin = profile.role === "admin";
+
+    if (!isOwner && !isAdmin) {
+      throw new Error("Access denied: You don't have permission to delete this asset");
+    }
+
+    // 4. Delete the record
+    await ctx.db.delete(args.assetId);
+
+    return { success: true };
   },
 });

@@ -1,7 +1,7 @@
 "use client";
 
-import { motion } from "motion/react";
 import { FolderTree, Plus } from "lucide-react";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 
 interface ListHeaderProps {
@@ -30,7 +30,8 @@ export function ListHeader({ onCreate, templateCount }: ListHeaderProps) {
           )}
         </div>
         <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-          Define standard folder structures for automated project setup and consistent asset upload.
+          Define standard folder structures for automated project setup and
+          consistent asset upload.
         </p>
       </motion.div>
 

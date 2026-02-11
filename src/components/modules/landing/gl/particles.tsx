@@ -1,12 +1,11 @@
-import * as THREE from "three";
-import { useMemo, useState, useRef } from "react";
-import { createPortal, useFrame } from "@react-three/fiber";
 import { useFBO } from "@react-three/drei";
 import type { RootState } from "@react-three/fiber";
-
+import { createPortal, useFrame } from "@react-three/fiber";
+import * as easing from "maath/easing";
+import { useMemo, useRef, useState } from "react";
+import * as THREE from "three";
 import { DofPointsMaterial } from "./shaders/pointMaterial";
 import { SimulationMaterial } from "./shaders/simulationMaterial";
-import * as easing from "maath/easing";
 
 export function Particles({
   speed,
@@ -65,16 +64,16 @@ export function Particles({
 
   const [scene] = useState(() => new THREE.Scene());
   const [camera] = useState(
-    () => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / Math.pow(2, 53), 1)
+    () => new THREE.OrthographicCamera(-1, 1, 1, -1, 1 / 2 ** 53, 1),
   );
   const [positions] = useState(
     () =>
       new Float32Array([
         -1, -1, 0, 1, -1, 0, 1, 1, 0, -1, -1, 0, 1, 1, 0, -1, 1, 0,
-      ])
+      ]),
   );
   const [uvs] = useState(
-    () => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0])
+    () => new Float32Array([0, 1, 1, 1, 1, 0, 0, 1, 1, 0, 0, 0]),
   );
 
   const particles = useMemo(() => {
@@ -105,11 +104,12 @@ export function Particles({
     }
 
     // Calculate reveal progress
-    const revealElapsed = currentTime - (revealStartTime.current ?? currentTime);
+    const revealElapsed =
+      currentTime - (revealStartTime.current ?? currentTime);
     const revealProgress = Math.min(revealElapsed / revealDuration, 1.0);
 
     // Ease out the reveal animation
-    const easedProgress = 1 - Math.pow(1 - revealProgress, 3);
+    const easedProgress = 1 - (1 - revealProgress) ** 3;
 
     // Map progress to reveal factor (0 = fully hidden, higher values = more revealed)
     // We want to start from center (0) and expand outward (higher values)
@@ -129,7 +129,7 @@ export function Particles({
       "value",
       introspect ? 1.0 : 0.0,
       introspect ? 0.35 : 0.2,
-      delta
+      delta,
     );
 
     simulationMaterial.uniforms.uTime.value = currentTime;
@@ -156,7 +156,7 @@ export function Particles({
             <bufferAttribute attach="attributes-uv" args={[uvs, 2]} />
           </bufferGeometry>
         </mesh>,
-        scene
+        scene,
       )}
       <points material={dofPointsMaterial} {...props}>
         <bufferGeometry>

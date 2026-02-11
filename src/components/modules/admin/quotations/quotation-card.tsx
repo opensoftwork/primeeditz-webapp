@@ -1,101 +1,102 @@
 "use client";
 
-import { motion } from "motion/react";
-import {
-  Receipt,
-  Calendar,
-  User,
-  Eye,
-  Hash,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
-import { QuotationStatusBadge } from "@/components/modules/client/quotations/shared/quotation-status-badge";
+import { Calendar, User } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AdminQuotation } from "./list-types";
+import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
+import type { AdminQuotation } from "./list-types";
+import { DeleteQuotationAction } from "./delete-quotation-action";
 
 interface QuotationCardProps {
   quotation: AdminQuotation;
 }
 
 export function QuotationCard({ quotation }: QuotationCardProps) {
+  const router = useRouter();
+
+  const handleCardClick = () => {
+    router.push(`/quotations/${quotation._id}`);
+  };
+
   return (
-    <Link href={`/quotations/${quotation._id}`}>
-      <motion.div
-        whileHover={{ scale: 1.01 }}
-        whileTap={{ scale: 0.99 }}
-        className="group p-6 rounded-[1.5rem] bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
-      >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
+    <motion.div
+      onClick={handleCardClick}
+      whileHover={{ y: -4 }}
+      whileTap={{ scale: 0.98 }}
+      className="group relative flex flex-col justify-between h-full p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.07] hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/20"
+    >
+      {/* Glow Effect */}
+      <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] rounded-full translate-x-12 -translate-y-12 group-hover:bg-primary/20 transition-colors duration-500" />
 
-        <div className="relative space-y-4 h-full flex flex-col">
-          {/* Header */}
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Hash className="h-3.5 w-3.5 text-primary/40" />
-                <span className="text-lg font-black tracking-tight text-white group-hover:text-primary transition-colors uppercase">
-                  {quotation.code}
-                </span>
-              </div>
-              <span className="text-[9px] font-black text-primary/40 uppercase tracking-widest">
-                v{quotation.version} • Quotation
+      <div className="relative z-10 space-y-4">
+        {/* Top Row: Code & Status */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex flex-col gap-1">
+            <div className="flex items-center gap-2">
+              <span className="text-sm font-black tracking-tight text-white group-hover:text-primary transition-colors uppercase">
+                {quotation.code}
+              </span>
+              <span className="px-1.5 py-0.5 rounded-sm bg-white/5 border border-white/10 text-[9px] font-bold text-white/50">
+                v{quotation.version}
               </span>
             </div>
-            <QuotationStatusBadge status={quotation.status as AdminQuotation["status"]} />
-          </div>
-
-          {/* Client Info */}
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors shrink-0">
-              <User className="h-3.5 w-3.5 text-white/40 group-hover:text-primary transition-colors" />
-            </div>
-            <span className="font-black text-white/80 uppercase tracking-tight text-sm truncate">
-              {quotation.clientName || "Direct Inquiry"}
-            </span>
-          </div>
-
-          {/* Project Name (if any) */}
-          {quotation.projectName && (
-            <div className="pt-3 border-t border-white/5">
-              <div className="font-bold text-white/50 truncate text-xs uppercase tracking-tight">
-                {quotation.projectName}
-              </div>
-            </div>
-          )}
-
-          <div className="flex-1 min-h-4" />
-
-          {/* Amount Section */}
-          <div className="pt-3 border-t border-white/5">
-            <div className="text-[9px] font-bold text-white/20 uppercase tracking-widest mb-1">
-              Total Valuation
-            </div>
-            <div className="flex items-baseline gap-1">
-              <span className="text-sm font-bold text-white/40 tracking-tighter">₹</span>
-              <span className="text-2xl font-black text-white tracking-tighter">
-                {quotation.total.toLocaleString("en-IN")}
-              </span>
-            </div>
-          </div>
-
-          {/* Footer Info */}
-          <div className="pt-3 border-t border-white/5 flex items-center justify-between">
-            <div className="flex items-center gap-1.5 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-              <Calendar className="h-3 w-3" />
+            <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/40">
+              <Calendar className="w-3 h-3" />
               {format(quotation._creationTime, "MMM dd, yyyy")}
             </div>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 px-3 text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-primary hover:bg-primary/10 rounded-lg gap-1"
-            >
-              View <Eye className="h-3 w-3" />
-            </Button>
           </div>
+          <QuotationStatusBadge
+            status={quotation.status as AdminQuotation["status"]}
+            className="scale-[0.85] origin-top-right transform-gpu"
+          />
         </div>
-      </motion.div>
-    </Link>
+
+        {/* Divider */}
+        <div className="h-px w-full bg-linear-to-r from-transparent via-white/10 to-transparent" />
+
+        {/* Middle: Client Info */}
+        <div className="space-y-2">
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-full bg-linear-to-br from-white/10 to-white/5 border border-white/10 flex items-center justify-center shadow-inner group-hover:border-primary/30 transition-colors">
+              <User className="w-3.5 h-3.5 text-white/60 group-hover:text-primary transition-colors" />
+            </div>
+            <span className="text-xs font-bold text-white/90 uppercase tracking-wide truncate">
+              {quotation.studioName || "Direct Inquiry"}
+            </span>
+          </div>
+          {(quotation.projectName || quotation.endClientName) && (
+            <div className="pl-[2.35rem] text-[10px] font-semibold text-white/50 uppercase tracking-wider truncate">
+              {quotation.projectName || quotation.endClientName}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Footer: Price */}
+      <div className="relative z-10 mt-5 pt-3 border-t border-white/5 flex items-end justify-between">
+        <div className="flex items-center gap-3 pb-1">
+          <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
+            Valuation
+          </div>
+          {quotation.status === "draft" && (
+            <div onClick={(e) => e.stopPropagation()}>
+              <DeleteQuotationAction
+                quotationId={quotation._id}
+                quotationCode={quotation.code}
+                className="h-7 w-7 text-white/20 hover:text-red-400 transition-colors"
+              />
+            </div>
+          )}
+        </div>
+        <div className="flex items-baseline gap-0.5">
+          <span className="text-xs font-bold text-primary/60">₹</span>
+          <span className="text-xl font-black text-white tracking-tight group-hover:text-primary/90 transition-colors">
+            {quotation.total.toLocaleString("en-IN")}
+          </span>
+        </div>
+      </div>
+    </motion.div>
   );
 }

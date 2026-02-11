@@ -2,6 +2,7 @@
 
 import { use } from "react";
 import ProjectDetail from "@/components/modules/admin/projects/project-detail";
+import { ConvexErrorBoundary } from "@/components/shared/convex-error-boundary";
 
 interface AdminProjectDetailPageProps {
   params: Promise<{
@@ -20,5 +21,9 @@ export default function AdminProjectDetailPage({
 }: AdminProjectDetailPageProps) {
   const { projectId } = use(params);
 
-  return <ProjectDetail projectId={projectId} />;
+  return (
+    <ConvexErrorBoundary>
+      <ProjectDetail projectId={projectId} />
+    </ConvexErrorBoundary>
+  );
 }

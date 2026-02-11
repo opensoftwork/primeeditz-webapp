@@ -1,34 +1,47 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
-import { useRouter } from "next/navigation";
-import { useQuery, useMutation, useAction } from "convex/react";
-import { ArrowLeft, CheckCircle2, Loader2, HardDrive, Eye } from "lucide-react";
-import { motion } from "motion/react";
-import { toast } from "sonner";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { useAction, useMutation, useQuery } from "convex/react";
+import {
+  ArrowLeft,
+  CheckCircle2,
+  Eye,
+  HardDrive,
+  Loader2,
+  Lock,
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
+import { formatBytes } from "@/components/shared/project-folders/folder-card";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { formatBytes } from "@/components/shared/project-folders/folder-card";
-
-import { FolderDropZone } from "./folder-drop-zone";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FolderAssetList } from "./folder-asset-list";
-import { StagedUploadQueue, type StagedFile } from "./staged-upload-queue";
+import { FolderDropZone } from "./folder-drop-zone";
+import { type StagedFile, StagedUploadQueue } from "./staged-upload-queue";
+import { DownloadFolderZip } from "@/components/shared/project-folders";
 
 interface FolderDetailViewProps {
   projectId: string;
   folderId: string;
   isAdmin?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderDetailView({
   projectId,
   folderId,
   isAdmin = false,
+  isEmployee = false,
 }: FolderDetailViewProps) {
   const router = useRouter();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+  const isStaff = isAdmin || isEmployee;
 
   // State
   const [stagedFiles, setStagedFiles] = useState<StagedFile[]>([]);
@@ -38,26 +51,15 @@ export function FolderDetailView({
   );
 
   // Queries & Mutations
-  const folder = isAdmin
-    ? useQuery(api.functions.folders.queries.getProjectFolders, {
-        projectId: projectId as Id<"projects">,
-      })?.find((f) => f._id === folderId)
-    : useQuery(api.functions.folders.queries.getFolderDetails, {
-        folderId: folderId as Id<"folders">,
-      });
+  const folder = useQuery(api.functions.folders.queries.getFolderDetails, {
+    folderId: folderId as Id<"folders">,
+  });
 
-  const assets = isAdmin
-    ? useQuery(api.functions.folders.queries.getAdminFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      })
-    : useQuery(api.functions.folders.queries.getFolderAssets, {
-        folderId: folderId as Id<"folders">,
-      });
-
-  const updateFolderStatus = useMutation(
+  const project = useQuery(
     isAdmin
-      ? api.functions.folders.mutations.adminUpdateFolderStatus
-      : api.functions.folders.mutations.updateFolderStatus,
+      ? api.admin.getAdminProject
+      : api.functions.projects.queries.getProject,
+    { projectId: projectId as Id<"projects"> },
   );
 
   const uploadEligibility = useQuery(
@@ -65,6 +67,32 @@ export function FolderDetailView({
     {
       projectId: projectId as Id<"projects">,
     },
+  );
+
+  const isLocked = uploadEligibility?.isAllowed === false;
+  const isUploadComplete = uploadEligibility?.reason
+    ?.toLowerCase()
+    .includes("complete");
+
+  // Handle Breadcrumb Overrides
+  useEffect(() => {
+    if (folder?.name) {
+      setOverride(folderId, folder.name);
+    }
+
+    return () => {
+      removeOverride(folderId);
+    };
+  }, [folderId, folder?.name, setOverride, removeOverride]);
+
+  const assets = useQuery(api.functions.folders.queries.getFolderAssets, {
+    folderId: folderId as Id<"folders">,
+  });
+
+  const updateFolderStatus = useMutation(
+    isAdmin
+      ? api.functions.folders.mutations.adminUpdateFolderStatus
+      : api.functions.folders.mutations.updateFolderStatus,
   );
 
   const generateUploadUrl = useAction(
@@ -75,13 +103,19 @@ export function FolderDetailView({
     api.functions.storage.actions.getSignedFileUrls,
   );
 
-  // Fetch signed URLs for viewing images
+  // Fetch signed URLs for viewing images, playing audio, and viewing videos
   useEffect(() => {
     async function fetchUrls() {
       if (!assets || assets.length === 0) return;
 
-      const imageAssets = assets.filter((a) => a.mimeType.startsWith("image/"));
-      const keys = imageAssets.map((a) => a.minioKey);
+      // Include image, audio, and video assets for signed URL fetching
+      const mediaAssets = assets.filter(
+        (a: any) =>
+          a.mimeType.startsWith("image/") ||
+          a.mimeType.startsWith("audio/") ||
+          a.mimeType.startsWith("video/"),
+      );
+      const keys = mediaAssets.map((a: any) => a.minioKey);
 
       if (keys.length > 0) {
         try {
@@ -241,16 +275,41 @@ export function FolderDetailView({
 
   if (!folder) {
     return (
-      <div className="flex items-center justify-center h-[60vh]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex-1 space-y-8 p-8 md:p-12 w-full animate-pulse">
+        {/* Header Skeleton */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-12 w-12 rounded-xl bg-white/5" />
+            <div className="space-y-2">
+              <Skeleton className="h-8 w-48 bg-white/5" />
+              <Skeleton className="h-4 w-32 bg-white/5" />
+            </div>
+          </div>
+        </div>
+
+        {/* Dropzone Skeleton */}
+        <Skeleton className="h-40 w-full rounded-2xl bg-white/5" />
+
+        {/* Asset List Skeleton */}
+        <div className="space-y-4">
+          <Skeleton className="h-6 w-32 bg-white/5" />
+          <div className="grid gap-3">
+            {[1, 2, 3].map((i) => (
+              <Skeleton
+                key={i}
+                className="h-20 w-full rounded-2xl bg-white/5"
+              />
+            ))}
+          </div>
+        </div>
       </div>
     );
   }
 
-  const totalSize = assets?.reduce((sum, a) => sum + a.sizeBytes, 0) || 0;
+  const totalSize = assets?.reduce((sum, a: any) => sum + a.sizeBytes, 0) || 0;
 
   return (
-    <div className="space-y-8">
+    <div className="flex-1 space-y-4 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
@@ -267,18 +326,40 @@ export function FolderDetailView({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-tight text-white">
-              {folder.name}
-            </h1>
-            <p className="text-sm font-bold text-white/40 uppercase tracking-widest mt-1">
+            <div className="flex items-center gap-3">
+              <h1 className="text-3xl font-black uppercase tracking-tight text-white mb-1">
+                {folder.name}
+              </h1>
+              {isLocked && !isEmployee && (
+                <span
+                  className={cn(
+                    "px-3 py-1 rounded-full text-[10px] tracking-[0.2em] font-black border",
+                    isUploadComplete
+                      ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-500"
+                      : "bg-amber-500/10 border-amber-500/20 text-amber-500",
+                  )}
+                >
+                  {isUploadComplete ? "UPLOAD COMPLETE" : "LOCKED"}
+                </span>
+              )}
+            </div>
+            <p className="text-sm font-bold text-white/40 uppercase tracking-widest">
               {assets?.length || 0} files • {formatBytes(totalSize)}
-              {isAdmin && " • Admin"}
+              {isAdmin && " • Admin View"}
             </p>
           </div>
         </div>
 
         <div className="flex items-center gap-3">
-          {folder.status === "in_progress" && (
+          {assets && assets.length > 0 && (
+            <DownloadFolderZip
+              folderId={folderId}
+              folderName={folder.name}
+              variant="default"
+              className="rounded-xl bg-blue-600 hover:bg-blue-700 text-white border-none px-6 h-10 shadow-lg shadow-blue-500/20"
+            />
+          )}
+          {folder.status === "in_progress" && !isLocked && !isEmployee && (
             <Button
               variant="outline"
               className="rounded-full border-emerald-500/20 text-emerald-500 hover:bg-emerald-500/10"
@@ -291,8 +372,68 @@ export function FolderDetailView({
         </div>
       </motion.div>
 
-      {/* Drop Zone - Only show if allowed */}
-      {uploadEligibility?.isAllowed && (
+      {/* Upload Status Banner - Consistent with AssetsSection */}
+      {isLocked && !isEmployee && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className={cn(
+            "flex items-center gap-4 p-4 rounded-2xl border backdrop-blur-sm",
+            isUploadComplete
+              ? "bg-emerald-500/5 border-emerald-500/20"
+              : "bg-amber-500/5 border-amber-500/20",
+          )}
+        >
+          <div
+            className={cn(
+              "h-10 w-10 rounded-xl flex items-center justify-center shrink-0",
+              isUploadComplete
+                ? "bg-emerald-500/10 text-emerald-500"
+                : "bg-amber-500/10 text-amber-500",
+            )}
+          >
+            {isUploadComplete ? (
+              <CheckCircle2 className="h-5 w-5" />
+            ) : (
+              <Lock className="h-5 w-5" />
+            )}
+          </div>
+          <div className="flex-1 min-w-0">
+            <h4
+              className={cn(
+                "text-sm font-black uppercase tracking-tight",
+                isUploadComplete ? "text-emerald-500" : "text-amber-500",
+              )}
+            >
+              {isUploadComplete
+                ? "Upload Phase Complete"
+                : "Uploads Temporarily Locked"}
+            </h4>
+            <p className="text-xs text-white/50 mt-0.5">
+              {isUploadComplete
+                ? "Your files have been received. You can still view your uploaded assets below. Contact admin if you need to upload additional files."
+                : uploadEligibility?.reason ||
+                  "Awaiting quotation approval to unlock project storage."}
+            </p>
+          </div>
+          <div className="flex items-center gap-2 shrink-0">
+            <div
+              className={cn(
+                "px-3 py-1.5 rounded-lg flex items-center gap-2 text-[10px] font-black uppercase tracking-widest",
+                isUploadComplete
+                  ? "bg-emerald-500/10 text-emerald-400"
+                  : "bg-amber-500/10 text-amber-400",
+              )}
+            >
+              <Eye className="h-3.5 w-3.5" />
+              View Only
+            </div>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Drop Zone - Locked out if isLocked is true or user is an employee */}
+      {!isLocked && !isEmployee ? (
         <>
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -319,42 +460,7 @@ export function FolderDetailView({
             />
           </motion.div>
         </>
-      )}
-
-      {/* View Only Badge for Admin */}
-      {!uploadEligibility?.isAllowed && isAdmin && (
-        <div className="bg-amber-500/10 border border-amber-500/20 rounded-2xl p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-xl bg-amber-500/20 flex items-center justify-center">
-              <Eye className="h-4 w-4 text-amber-500" />
-            </div>
-            <div>
-              <p className="text-[10px] font-black uppercase tracking-widest text-white">
-                View Only Mode
-              </p>
-              <p className="text-[9px] font-bold text-amber-500/60 uppercase tracking-widest">
-                {uploadEligibility?.reason || "Client Upload Phase"}
-              </p>
-            </div>
-          </div>
-          {uploadEligibility?.canOverride && (
-            <Button
-              variant="ghost"
-              size="sm"
-              className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white"
-              onClick={() => {
-                // We could add a local state to override this if needed,
-                // but for now let's just show it.
-                toast.info(
-                  "Admin override available if required. Use System Controls to manage project state.",
-                );
-              }}
-            >
-              Admin Override Enabled
-            </Button>
-          )}
-        </div>
-      )}
+      ) : null}
 
       {/* Asset List */}
       <motion.div
@@ -362,7 +468,14 @@ export function FolderDetailView({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <FolderAssetList assets={assets} signedUrls={signedUrls} />
+        <FolderAssetList
+          assets={assets}
+          signedUrls={signedUrls}
+          isEmployee={isEmployee}
+          isReadOnly={isLocked || folder?.status === "completed"}
+          folderId={folderId}
+          folderName={folder.name}
+        />
       </motion.div>
 
       {/* Empty State */}
@@ -372,10 +485,10 @@ export function FolderDetailView({
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <Card className="border-dashed">
-            <CardContent className="py-16 text-center">
+          <Card className="border-dashed bg-white/2 border-white/5">
+            <CardContent className="py-20 text-center">
               <HardDrive className="h-16 w-16 text-white/10 mx-auto mb-4" />
-              <p className="text-sm font-bold text-white/30 uppercase tracking-widest">
+              <p className="text-sm font-bold text-white/30 uppercase tracking-[0.2em]">
                 No files uploaded yet
               </p>
             </CardContent>

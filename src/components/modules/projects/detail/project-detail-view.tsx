@@ -7,23 +7,24 @@
  * Refactored into modular sub-components for better maintainability.
  */
 
-import { useEffect } from "react";
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import { Database } from "lucide-react";
+import { motion } from "motion/react";
+import Link from "next/link";
+import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import Link from "next/link";
-import { type Id } from "@convex/_generated/dataModel";
-import { motion } from "motion/react";
-
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { AssetsSection } from "./assets-section";
 // Modular Components
 import { ProjectHeader } from "./header";
-import { ProjectSpecifications } from "./specifications";
 import { ReferenceMaterials } from "./reference-materials";
-import { AssetsSection } from "./assets-section";
 import { DetailSidebar } from "./sidebar";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { ProjectSpecifications } from "./specifications";
+import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
+import { DeliverablesSection } from "./deliverables-section";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -36,11 +37,19 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   });
 
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    const label = project?.endClientName || project?.eventName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
     }
     return () => removeOverride(projectId);
-  }, [projectId, project?.eventName, setOverride, removeOverride]);
+  }, [
+    projectId,
+    project?.endClientName,
+    project?.eventName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   const fields = useQuery(
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
@@ -81,6 +90,10 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
       animate={{ opacity: 1 }}
       className="w-full space-y-12 p-6 md:p-12 relative"
     >
+      <DeliverableStatusBanner
+        projectId={projectId as Id<"projects">}
+        role="studio"
+      />
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -88,7 +101,6 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
       >
         <ProjectHeader
           code={project.code}
-          eventName={project.eventName}
           endClientName={project.endClientName}
           status={project.actionState}
         />
@@ -105,6 +117,14 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
         >
           <ProjectSpecifications project={project} fields={fields} />
           <ReferenceMaterials files={project.referenceFiles} />
+
+          {project.phase !== "setup" && (
+            <DeliverablesSection 
+              projectId={projectId} 
+              actionState={project.actionState}
+              revisionCount={project.revisionCount}
+            />
+          )}
 
           {project.phase !== "setup" && <AssetsSection projectId={projectId} />}
         </motion.div>

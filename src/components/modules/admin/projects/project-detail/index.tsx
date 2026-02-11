@@ -1,38 +1,41 @@
 "use client";
 
-import { useAction, useQuery } from "convex/react";
-import { useEffect, useMemo, useState, useCallback } from "react";
-import { Package } from "lucide-react";
-import Link from "next/link";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { useAction, useQuery } from "convex/react";
+import { Package } from "lucide-react";
+import Link from "next/link";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { PhaseProgress } from "@/components/modules/projects/phase-progress";
 import { FilesVaultDrawer } from "@/components/shared/files-vault/drawer";
-
-import { ProjectHeader } from "./project-header";
-import { ProjectSpecs } from "./project-specs";
-import { ProjectReferenceFiles } from "./project-reference-files";
-import { ProjectHistory } from "./project-history";
-import { ClientCard } from "./client-card";
-import { SystemControls } from "./system-controls";
-import { ProjectDetailSkeleton } from "./skeleton";
+import { Button } from "@/components/ui/button";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { FolderSetupDrawer, ProjectFoldersList } from "../folder-setup";
+import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
+import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
 import { AdminActionBanner } from "./admin-action-banner";
 import { AwaitingActorBanner } from "./awaiting-actor-banner";
-import { PhaseProgress } from "@/components/modules/projects/phase-progress";
-import { StatusUpdateDrawer } from "../status-update/status-update-drawer";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { ProjectHeader } from "./project-header";
+import { ProjectHistory } from "./project-history";
+import { ProjectDeliverables } from "./project-deliverables";
+import { ProjectReferenceFiles } from "./project-reference-files";
+import { ProjectSpecs } from "./project-specs";
+import { ProjectDetailSkeleton } from "./skeleton";
+import { StudioCard } from "./studio-card";
+import { SystemControls } from "./system-controls";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
+import { AssetSlider } from "@/components/shared/asset-viewer";
+import type { VaultFile } from "@/components/shared/files-vault/types";
 
 interface ProjectDetailProps {
   projectId: string;
 }
 
-import { AdminProjectDetail } from "./types";
-import { getDeliveryPhaseLabel } from "@/lib/status-display";
-import { toast } from "sonner";
-import { QuotationCard } from "./quotation-card";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { getDeliveryPhaseLabel } from "@/lib/status-display";
+import { QuotationCard } from "./quotation-card";
+import type { AdminProjectDetail } from "./types";
 
 export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const router = useRouter();
@@ -40,6 +43,10 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
+    null,
+  );
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
@@ -47,13 +54,6 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
-
-  useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
-    }
-    return () => removeOverride(projectId);
-  }, [projectId, project?.eventName, setOverride, removeOverride]);
 
   const deliveryLabel = useMemo(() => {
     return getDeliveryPhaseLabel(project?.deliveryConfig);
@@ -101,6 +101,49 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         : undefined,
     }));
   }, [project?.referenceFiles, signedUrls]);
+
+  const assetsForSlider = useMemo(() => {
+    return vaultFiles
+      .filter(
+        (f) =>
+          (f.type.startsWith("image/") ||
+            f.type.startsWith("video/") ||
+            f.type.startsWith("audio/") ||
+            f.type === "application/pdf") &&
+          f.url,
+      )
+      .map((f) => ({
+        url: f.url!,
+        fileName: f.name,
+        fileId: f.id,
+        mimeType: f.type,
+      }));
+  }, [vaultFiles]);
+
+  const handleFileClick = (fileId: string) => {
+    const file = vaultFiles.find((f) => f.id === fileId);
+    if (!file || !file.url) {
+      setIsVaultOpen(true);
+      return;
+    }
+
+    const isSliderType =
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/") ||
+      file.type.startsWith("audio/") ||
+      file.type === "application/pdf";
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex(
+        (asset) => asset.fileId === fileId,
+      );
+      if (index !== -1) {
+        setSelectedAssetIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
+    }
+  };
 
   const handleFolderSetupSuccess = useCallback(() => {
     toast.success("Project folders configured successfully!");
@@ -152,11 +195,19 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         <PhaseProgress currentPhase={project.phase} />
       </div>
 
-      <div className="max-w-[1600px] mx-auto">
+      <div className="max-w-[1600px] mx-auto space-y-6">
+        <DeliverableStatusBanner
+          projectId={projectId as Id<"projects">}
+          role="admin"
+        />
+
         <AdminActionBanner
           project={project}
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}
           onViewFolders={handleViewFolders}
+          onOpenAssignEmployee={() =>
+            router.push(`/projects/${projectId}/assign`)
+          }
         />
         <AwaitingActorBanner project={project} />
 
@@ -167,6 +218,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               referenceFilesCount={project.referenceFiles?.length || 0}
               vaultFiles={vaultFiles}
               onOpenVault={() => setIsVaultOpen(true)}
+              onFileClick={handleFileClick}
             />
 
             {/* Project Folders Section */}
@@ -176,13 +228,18 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
               </div>
             )}
 
+            <ProjectDeliverables
+              projectId={projectId as Id<"projects">}
+              isVisible={project.hasEmployeeUploads}
+            />
+
             <ProjectHistory history={project.statusHistory} />
           </div>
 
           <div className="lg:col-span-4 space-y-10">
-            <ClientCard
-              clientName={project.clientName}
-              clientEmail={project.clientEmail}
+            <StudioCard
+              studioName={project.studioName}
+              studioEmail={project.studioEmail}
               submittedAt={project._creationTime}
             />
             <QuotationCard
@@ -199,6 +256,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 folderSetupReason={folderSetupStatus?.reason}
                 onSetupFolders={() => setIsFolderSetupOpen(true)}
                 onViewFolders={handleViewFolders}
+                onAssignTeam={() =>
+                  router.push(`/projects/${projectId}/assign`)
+                }
               />
             </div>
           </div>
@@ -212,6 +272,30 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         subtitle={`Viewing secure reference materials for ${project.code}`}
         files={vaultFiles}
         primaryColor="amber-500"
+        onImageClick={handleFileClick}
+      />
+
+      {/* Asset Slider for Admin (Images, Videos, PDFs) */}
+      <AssetSlider
+        assets={assetsForSlider}
+        initialIndex={selectedAssetIndex ?? 0}
+        open={selectedAssetIndex !== null}
+        onOpenChange={(open) => !open && setSelectedAssetIndex(null)}
+        onDownload={(fileId, fileName, url) => {
+          const link = document.createElement("a");
+          link.href = url;
+          link.download = fileName;
+          link.click();
+        }}
+      />
+
+      {/* Universal File Projection Slider for Admin */}
+      <FilePreviewOverlay
+        open={!!previewFile}
+        onOpenChange={(open) => !open && setPreviewFile(null)}
+        url={previewFile?.url || null}
+        fileName={previewFile?.name || ""}
+        mimeType={previewFile?.type}
       />
 
       {/* Folder Setup Drawer */}
@@ -222,7 +306,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         projectCode={project.code}
         projectName={project.eventName}
         projectTypeId={project.projectTypeId}
-        clientId={project.clientId}
+        studioId={project.studioId}
         onSuccess={handleFolderSetupSuccess}
       />
 

@@ -1,6 +1,6 @@
 import { v } from "convex/values";
-import { adminQuery, adminMutation } from "../../lib/customFunctions";
-import { Doc, Id } from "../../_generated/dataModel";
+import { type Doc, Id } from "../../_generated/dataModel";
+import { adminMutation, adminQuery } from "../../lib/customFunctions";
 
 /**
  * Get all project types for filter dropdown.
@@ -15,11 +15,13 @@ export const getProjectTypes = adminQuery({
         return {
           _id: pt._id,
           name: pt.name,
-          categoryName: (category as Doc<"projectCategories"> | null)?.name || 'Uncategorized',
+          categoryName:
+            (category as Doc<"projectCategories"> | null)?.name ||
+            "Uncategorized",
           isActive: pt.isActive,
         };
-      })
-    )
+      }),
+    );
     return enriched;
   },
 });
@@ -56,7 +58,7 @@ export const createProjectType = adminMutation({
         hasDigitalDelivery: v.boolean(),
         digitalDeliveryLabel: v.optional(v.string()),
         requiresSignoff: v.boolean(),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {
@@ -81,7 +83,7 @@ export const updateProjectType = adminMutation({
         hasDigitalDelivery: v.boolean(),
         digitalDeliveryLabel: v.optional(v.string()),
         requiresSignoff: v.boolean(),
-      })
+      }),
     ),
   },
   handler: async (ctx, args) => {

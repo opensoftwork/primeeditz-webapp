@@ -1,31 +1,36 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { Id } from "@convex/_generated/dataModel";
-import { useParams, useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
-import { toast } from "sonner";
-import { SendQuotationDrawer } from "../send";
-import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation, useQuery } from "convex/react";
 import {
+  AlertCircle,
   ArrowLeft,
-  FileText,
   ArrowRight,
-  ShieldCheck,
   CheckCircle2,
   Clock,
-  AlertCircle,
+  FileText,
+  ShieldCheck,
 } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Project } from "../types";
+import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DetailHeader } from "./components/detail-header";
-import { ClientProjectInfo } from "./components/client-project-info";
-import { LineItemsSection } from "./components/line-items-section";
-import { PricingSummary } from "./components/pricing-summary";
-import { TermsConditions } from "./components/terms-conditions";
-import { QuickActions } from "./components/quick-actions";
-import { ClientFeedbackSection } from "./components/client-feedback-section";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { SendQuotationDrawer } from "../send";
+import {
+  DetailHeader,
+  LineItemsSection,
+  PricingSummary,
+  QuickActions,
+  ReviewActions,
+  StudioFeedbackSection,
+  StudioProjectInfo,
+  TermsConditions,
+} from "./components";
 
 const statusConfig: Record<
   string,
@@ -65,6 +70,13 @@ const statusConfig: Record<
     bgColor: "bg-emerald-400/10",
     borderColor: "border-emerald-400/20",
   },
+  quotation_approved: {
+    label: "Approved",
+    icon: CheckCircle2,
+    color: "text-emerald-400",
+    bgColor: "bg-emerald-400/10",
+    borderColor: "border-emerald-400/20",
+  },
   changes_requested: {
     label: "Revisions",
     icon: Clock,
@@ -93,6 +105,13 @@ const statusConfig: Record<
     bgColor: "bg-zinc-500/10",
     borderColor: "border-zinc-500/20",
   },
+  initiated: {
+    label: "Pending Review",
+    icon: Clock,
+    color: "text-amber-400",
+    bgColor: "bg-amber-400/10",
+    borderColor: "border-amber-400/20",
+  },
 };
 
 export function QuotationDetail({
@@ -100,7 +119,7 @@ export function QuotationDetail({
 }: {
   quotationId?: string;
 }) {
-   const params = useParams();
+  const params = useParams();
   const router = useRouter();
   const quotationId = propQuotationId || (params.id as string);
   const { setOverride, removeOverride } = useBreadcrumbStore();
@@ -120,8 +139,12 @@ export function QuotationDetail({
   }, [quotationId, data?.quotation?.code, setOverride, removeOverride]);
 
   const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
   const duplicateMutation = useMutation(
-    api.functions.quotations.mutations.duplicateQuotation
+    api.functions.quotations.mutations.duplicateQuotation,
+  );
+  const approveQuotation = useMutation(
+    api.functions.quotations.mutations.approveQuotation,
   );
 
   if (data === undefined) {
@@ -155,15 +178,20 @@ export function QuotationDetail({
     );
   }
 
-  const { quotation, sections, projects = [] } = data;
+  const { quotation, sections, projects: rawProjects = [] } = data;
+  const projects: Project[] = rawProjects.map((p) => ({
+    ...p,
+    eventName: p.endClientName || p.code,
+    projectTypeId: p.projectTypeId,
+  }));
   const status = statusConfig[quotation.status] || statusConfig.draft;
 
   // Calculate totals
-  const subtotal = quotation.lineItems.reduce((acc: number, item: any) => {
+  const subtotal = quotation.lineItems.reduce((acc: number, item) => {
     const itemTotal = item.rate * item.quantity;
     const subItemsTotal =
       item.subItems?.reduce(
-        (s: number, sub: any) => s + sub.rate * sub.quantity,
+        (s: number, sub) => s + sub.rate * sub.quantity,
         0,
       ) ?? 0;
     return acc + itemTotal + subItemsTotal;
@@ -175,32 +203,74 @@ export function QuotationDetail({
   const grandTotal = subtotal - discountAmount + taxAmount;
 
   // Group line items by project, then by section (new project-based grouping)
-  const groupedByProject = projects.map((project: any) => {
-    const projectItems = quotation.lineItems.filter(
-      (item: any) => item.projectId === project._id
-    );
-    const sectionGroups = sections
-      .map((section: any) => ({
-        section,
-        items: projectItems.filter(
-          (item: any) => item.sectionId === section._id
-        ),
-      }))
-      .filter((g: any) => g.items.length > 0);
-    return {
-      project,
-      sectionGroups,
-    };
-  }).filter((pg: any) => pg.sectionGroups.length > 0);
+  const groupedByProject = projects
+    .map((project) => {
+      const projectItems = quotation.lineItems.filter(
+        (item) => item.projectId === project._id,
+      );
+
+      // 1. Group by existing sections
+      const sectionGroups = sections
+        .map((section) => ({
+          section,
+          items: projectItems.filter((item) => item.sectionId === section._id),
+        }))
+        .filter((g) => g.items.length > 0);
+
+      // 2. Catch items without sections (or invalid sections)
+      const unsectionedItems = projectItems.filter(
+        (item) =>
+          !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+      );
+
+      if (unsectionedItems.length > 0) {
+        sectionGroups.push({
+          section: {
+            _id: "unsectioned" as Id<"quotationSections">,
+            _creationTime: 0,
+            name: "Standard Services",
+            color: "zinc",
+            isActive: true,
+          },
+          items: unsectionedItems,
+        });
+      }
+
+      return {
+        project,
+        sectionGroups,
+      };
+    })
+    .filter((pg) => pg.sectionGroups.length > 0);
 
   // Fallback: group by section only (for backward compatibility)
-  const groupedBySection = sections.map((section: any) => ({
-    section,
-    items: quotation.lineItems.filter(
-      (item: any) => item.sectionId === section._id,
-    ),
-  }));
+  const groupedBySection = sections
+    .map((section) => ({
+      section,
+      items: quotation.lineItems.filter(
+        (item) => item.sectionId === section._id,
+      ),
+    }))
+    .filter((g) => g.items.length > 0);
 
+  // Add global unsectioned items
+  const globalUnsectioned = quotation.lineItems.filter(
+    (item) =>
+      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+  );
+
+  if (globalUnsectioned.length > 0) {
+    groupedBySection.push({
+      section: {
+        _id: "unsectioned" as Id<"quotationSections">,
+        _creationTime: 0,
+        name: "Standard Services",
+        color: "zinc",
+        isActive: true,
+      },
+      items: globalUnsectioned,
+    });
+  }
 
   const handleDuplicate = async () => {
     try {
@@ -218,6 +288,26 @@ export function QuotationDetail({
     }
   };
 
+  const handleApprove = async () => {
+    try {
+      setIsApproving(true);
+      const toastId = toast.loading(
+        "Approving quotation and creating projects...",
+      );
+      await approveQuotation({
+        quotationId: quotationId as Id<"quotations">,
+      });
+      toast.success("Quotation approved and projects created!", {
+        id: toastId,
+      });
+    } catch (error) {
+      toast.error("Failed to approve quotation");
+      console.error(error);
+    } finally {
+      setIsApproving(false);
+    }
+  };
+
   return (
     <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
       <DetailHeader
@@ -227,22 +317,27 @@ export function QuotationDetail({
         status={status}
         quotationId={quotationId}
         onSend={() => setIsSendDrawerOpen(true)}
+        onApprove={handleApprove}
       />
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <ClientProjectInfo quotation={quotation} />
+          <StudioProjectInfo quotation={quotation} />
           <LineItemsSection
             groupedByProject={groupedByProject}
             groupedBySection={groupedBySection}
             projects={projects}
             formatCurrency={formatCurrency}
           />
+          {quotation.status === "approved" && (
+            <SpawnedProjectsList quotationId={quotationId} isAdmin={true} />
+          )}
           <TermsConditions terms={quotation.terms} />
         </div>
 
         <div className="space-y-6">
-          <ClientFeedbackSection quotation={quotation} />
+          <ReviewActions quotation={quotation} />
+          <StudioFeedbackSection quotation={quotation} />
           <PricingSummary
             subtotal={subtotal}
             discountAmount={discountAmount}
@@ -251,7 +346,7 @@ export function QuotationDetail({
             grandTotal={grandTotal}
             formatCurrency={formatCurrency}
           />
-          <QuickActions 
+          <QuickActions
             quotation={quotation}
             sections={sections}
             projects={projects}
@@ -268,8 +363,8 @@ export function QuotationDetail({
           _id: quotationId as Id<"quotations">,
           code: quotation.code,
           total: quotation.total,
-          clientId: quotation.clientId,
-          clientName: quotation.clientName,
+          studioId: quotation.studioId,
+          studioName: quotation.studioName,
           status: quotation.status,
           shareToken: quotation.shareToken,
         }}

@@ -2,9 +2,9 @@
 
 import { History } from "lucide-react";
 import { DetailSection } from "@/components/modules/projects/detail/shared";
-import type { StatusHistoryEntry } from "./types";
-import { cn } from "@/lib/utils";
 import { getStatusConfig } from "@/lib/status-display";
+import { cn } from "@/lib/utils";
+import type { StatusHistoryEntry } from "./types";
 
 interface ProjectHistoryProps {
   history?: StatusHistoryEntry[];

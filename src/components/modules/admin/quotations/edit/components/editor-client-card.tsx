@@ -1,13 +1,13 @@
 "use client";
 
+import { Building2, FileText, Mail, User } from "lucide-react";
 import { motion } from "motion/react";
-import { User, Mail, Building2, FileText } from "lucide-react";
 import { useQuotationBuilder } from "../../builder/quotation-builder-context";
 
 export function EditorClientCard() {
-  const { selectedClient } = useQuotationBuilder();
+  const { selectedStudio } = useQuotationBuilder();
 
-  if (!selectedClient) {
+  if (!selectedStudio) {
     return (
       <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5">
         <div className="flex items-center gap-3 text-white/30">
@@ -32,31 +32,31 @@ export function EditorClientCard() {
         {/* Avatar */}
         <div className="h-14 w-14 rounded-2xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
           <span className="text-xl font-black text-primary">
-            {selectedClient.name?.charAt(0)?.toUpperCase() || "?"}
+            {selectedStudio.name?.charAt(0)?.toUpperCase() || "?"}
           </span>
         </div>
 
         {/* Client Info */}
         <div className="flex-1 min-w-0 space-y-2">
           <h4 className="text-lg font-black text-white tracking-tight truncate">
-            {selectedClient.name}
+            {selectedStudio.name}
           </h4>
 
           <div className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {selectedClient.email && (
+            {selectedStudio.email && (
               <div className="flex items-center gap-1.5 text-white/50">
                 <Mail className="h-3.5 w-3.5" />
                 <span className="text-xs font-medium">
-                  {selectedClient.email}
+                  {selectedStudio.email}
                 </span>
               </div>
             )}
 
-            {selectedClient.company && (
+            {selectedStudio.company && (
               <div className="flex items-center gap-1.5 text-white/50">
                 <Building2 className="h-3.5 w-3.5" />
                 <span className="text-xs font-medium">
-                  {selectedClient.company}
+                  {selectedStudio.company}
                 </span>
               </div>
             )}
@@ -66,7 +66,7 @@ export function EditorClientCard() {
         {/* Type Badge */}
         <div className="px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
           <span className="text-[9px] font-black uppercase tracking-widest text-white/40">
-            {selectedClient.company ? "Business" : "Individual"}
+            {selectedStudio.company ? "Business" : "Individual"}
           </span>
         </div>
       </div>

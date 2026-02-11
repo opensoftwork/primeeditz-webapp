@@ -4,4 +4,4 @@
  * Feature modules for all application components.
  */
 
-export * from './projects'
+export * from "./projects";

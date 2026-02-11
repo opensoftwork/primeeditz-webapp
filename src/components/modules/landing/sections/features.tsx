@@ -1,15 +1,15 @@
 "use client";
 
-import { motion } from "motion/react";
-import { 
-  User, 
-  Palette, 
-  BarChart3, 
-  Settings, 
-  Check, 
+import {
   ArrowRight,
-  LucideIcon 
+  BarChart3,
+  Check,
+  type LucideIcon,
+  Palette,
+  Settings,
+  User,
 } from "lucide-react";
+import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
 // --- Types ---
@@ -34,8 +34,8 @@ const portalData: PortalFeature[] = [
       "Request new projects",
       "Upload raw assets",
       "Track real-time progress",
-      "One-click approvals"
-    ]
+      "One-click approvals",
+    ],
   },
   {
     name: "Employee",
@@ -46,8 +46,8 @@ const portalData: PortalFeature[] = [
       "Personalized task board",
       "Edit & update status",
       "Submit deliverables",
-      "Internal project notes"
-    ]
+      "Internal project notes",
+    ],
   },
   {
     name: "Admin",
@@ -58,8 +58,8 @@ const portalData: PortalFeature[] = [
       "Global project oversight",
       "Assign tasks to team",
       "Review deliverables",
-      "Performance reports"
-    ]
+      "Performance reports",
+    ],
   },
   {
     name: "SuperAdmin",
@@ -70,14 +70,20 @@ const portalData: PortalFeature[] = [
       "System configurations",
       "Manage templates",
       "Setup pricing tiers",
-      "User role management"
-    ]
-  }
+      "User role management",
+    ],
+  },
 ];
 
 // --- Sub-Components ---
 
-function PortalCard({ feature, index }: { feature: PortalFeature; index: number }) {
+function PortalCard({
+  feature,
+  index,
+}: {
+  feature: PortalFeature;
+  index: number;
+}) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
@@ -89,19 +95,21 @@ function PortalCard({ feature, index }: { feature: PortalFeature; index: number 
         "bg-white/2 border border-white/5 backdrop-blur-sm",
         "hover:translate-y-[-4px] transition-all duration-300 ease-out",
         "hover:bg-white/4 hover:border-white/10",
-        "hover:shadow-2xl hover:shadow-black/50"
+        "hover:shadow-2xl hover:shadow-black/50",
       )}
     >
       {/* Icon Header */}
       <div className="flex items-center gap-4 mb-6">
-        <div className={cn(
-          "w-12 h-12 rounded-2xl flex items-center justify-center",
-          "bg-white/5 border border-white/5",
-          "group-hover:scale-110 transition-transform duration-300",
-          feature.color,
-          "shadow-lg", 
-          feature.glowColor
-        )}>
+        <div
+          className={cn(
+            "w-12 h-12 rounded-2xl flex items-center justify-center",
+            "bg-white/5 border border-white/5",
+            "group-hover:scale-110 transition-transform duration-300",
+            feature.color,
+            "shadow-lg",
+            feature.glowColor,
+          )}
+        >
           <feature.icon className="w-6 h-6" />
         </div>
         <h3 className="text-xl font-bold bg-clip-text text-transparent bg-linear-to-r from-white to-white/70">
@@ -112,7 +120,10 @@ function PortalCard({ feature, index }: { feature: PortalFeature; index: number 
       {/* Feature List */}
       <ul className="flex flex-col gap-3 mb-8 grow">
         {feature.features.map((item, idx) => (
-          <li key={idx} className="flex items-start gap-3 text-sm text-muted-foreground/80 group-hover:text-muted-foreground transition-colors">
+          <li
+            key={idx}
+            className="flex items-start gap-3 text-sm text-muted-foreground/80 group-hover:text-muted-foreground transition-colors"
+          >
             <Check className={cn("w-4 h-4 mt-0.5", feature.color)} />
             <span>{item}</span>
           </li>
@@ -122,14 +133,21 @@ function PortalCard({ feature, index }: { feature: PortalFeature; index: number 
       {/* Learn More Link */}
       <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider opacity-60 group-hover:opacity-100 transition-opacity">
         <span className={cn(feature.color)}>Learn more</span>
-        <ArrowRight className={cn("w-3 h-3 transition-transform group-hover:translate-x-1", feature.color)} />
+        <ArrowRight
+          className={cn(
+            "w-3 h-3 transition-transform group-hover:translate-x-1",
+            feature.color,
+          )}
+        />
       </div>
 
       {/* Subtle Gradient Overlay */}
-      <div className={cn(
-        "absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none",
-        "bg-linear-to-b from-white/5 to-transparent"
-      )} />
+      <div
+        className={cn(
+          "absolute inset-0 rounded-3xl opacity-0 group-hover:opacity-10 transition-opacity duration-500 pointer-events-none",
+          "bg-linear-to-b from-white/5 to-transparent",
+        )}
+      />
     </motion.div>
   );
 }
@@ -140,10 +158,9 @@ export function FeaturesShowcaseSection() {
   return (
     <section className="relative w-full py-24 px-4 sm:px-6 lg:px-8">
       <div className="relative max-w-7xl mx-auto flex flex-col gap-16">
-        
         {/* Section Heading */}
         <div className="flex flex-col items-center gap-4 text-center">
-          <motion.span 
+          <motion.span
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -151,8 +168,8 @@ export function FeaturesShowcaseSection() {
           >
             One Platform, Four Experiences
           </motion.span>
-          
-          <motion.h2 
+
+          <motion.h2
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -161,7 +178,7 @@ export function FeaturesShowcaseSection() {
           >
             Built for Every Role
           </motion.h2>
-          
+
           <motion.p
             initial={{ opacity: 0, y: 10 }}
             whileInView={{ opacity: 1, y: 0 }}
@@ -169,21 +186,17 @@ export function FeaturesShowcaseSection() {
             transition={{ delay: 0.2 }}
             className="text-muted-foreground max-w-2xl text-base leading-relaxed"
           >
-            A cohesive ecosystem that connects clients, editors, and admins in one seamless workflow.
+            A cohesive ecosystem that connects clients, editors, and admins in
+            one seamless workflow.
           </motion.p>
         </div>
 
         {/* Portal Cards Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {portalData.map((feature, index) => (
-            <PortalCard 
-              key={index} 
-              feature={feature} 
-              index={index} 
-            />
+            <PortalCard key={index} feature={feature} index={index} />
           ))}
         </div>
-
       </div>
     </section>
   );

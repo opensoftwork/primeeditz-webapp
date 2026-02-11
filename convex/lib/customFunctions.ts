@@ -4,22 +4,22 @@
  * Provides role-based access control at the API level:
  * - authenticatedQuery/Mutation: Requires valid session
  * - adminQuery/Mutation: Requires admin role
- * - clientQuery/Mutation: Requires client role
+ * - studioQuery/Mutation: Requires studio role
  *
  * Uses Better Auth component for authentication.
  * @see https://github.com/get-convex/convex-helpers
  */
 
 import {
-  customQuery,
-  customMutation,
   customAction,
-} from 'convex-helpers/server/customFunctions'
-import { query, mutation, action } from '../_generated/server'
-import type { QueryCtx, MutationCtx, ActionCtx } from '../_generated/server'
-import type { Id } from '../_generated/dataModel'
-import { authComponent } from '../auth'
-import { api } from '../_generated/api'
+  customMutation,
+  customQuery,
+} from "convex-helpers/server/customFunctions";
+import { api } from "../_generated/api";
+import type { Id } from "../_generated/dataModel";
+import type { ActionCtx, MutationCtx, QueryCtx } from "../_generated/server";
+import { action, mutation, query } from "../_generated/server";
+import { authComponent } from "../auth";
 
 // ============================================================================
 // Types
@@ -27,33 +27,34 @@ import { api } from '../_generated/api'
 
 // Better Auth user type (from component)
 export type AuthUser = {
-  _id: string // Better Auth uses _id (Convex style)
-  email: string
-  name: string
-  image?: string | null
-  emailVerified: boolean
-  createdAt: Date
-  updatedAt: Date
-}
+  _id: string; // Better Auth uses _id (Convex style)
+  email: string;
+  name: string;
+  image?: string | null;
+  emailVerified: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+};
 
 export type Profile = {
-  _id: Id<'profiles'>
-  userId: string // Better Auth user ID
-  role: 'client' | 'employee' | 'admin'
-  name: string
-  phone?: string
-  company?: string
-  onboardingComplete: boolean
-  updatedAt: number
-}
+  _id: Id<"profiles">;
+  userId: string; // Better Auth user ID
+  role: "studio" | "employee" | "admin";
+  name: string;
+  email: string;
+  phone?: string;
+  company?: string;
+  onboardingComplete: boolean;
+  updatedAt: number;
+};
 
 export type AuthContext = {
-  authUser: AuthUser
-}
+  authUser: AuthUser;
+};
 
 export type AuthContextWithProfile = AuthContext & {
-  profile: Profile
-}
+  profile: Profile;
+};
 
 // ============================================================================
 // Auth Helpers
@@ -63,17 +64,15 @@ export type AuthContextWithProfile = AuthContext & {
  * Get authenticated user from Better Auth component.
  * Uses authComponent.getAuthUser(ctx) to get the current user.
  */
-async function getAuthUser(
-  ctx: QueryCtx | MutationCtx
-): Promise<AuthUser> {
+async function getAuthUser(ctx: QueryCtx | MutationCtx): Promise<AuthUser> {
   try {
-    const user = await authComponent.getAuthUser(ctx)
+    const user = await authComponent.getAuthUser(ctx);
     if (!user) {
-      throw new Error('Not authenticated')
+      throw new Error("Not authenticated");
     }
-    return user as unknown as AuthUser
+    return user as unknown as AuthUser;
   } catch (e) {
-    throw new Error('Not authenticated')
+    throw new Error("Not authenticated");
   }
 }
 
@@ -83,21 +82,21 @@ async function getAuthUser(
  * Throws "Profile not found" if profile doesn't exist.
  */
 export async function getAuthUserWithProfile(
-  ctx: QueryCtx | MutationCtx
+  ctx: QueryCtx | MutationCtx,
 ): Promise<{ authUser: AuthUser; profile: Profile }> {
-  const authUser = await getAuthUser(ctx)
+  const authUser = await getAuthUser(ctx);
 
   // Get profile by Better Auth user ID (stored as string)
   const profile = await ctx.db
-    .query('profiles')
-    .withIndex('by_userId', (q) => q.eq('userId', authUser._id))
-    .first()
+    .query("profiles")
+    .withIndex("by_userId", (q) => q.eq("userId", authUser._id))
+    .first();
 
   if (!profile) {
-    throw new Error('Profile not found. Please complete onboarding.')
+    throw new Error("Profile not found. Please complete onboarding.");
   }
 
-  return { authUser, profile: profile as unknown as Profile }
+  return { authUser, profile: profile as unknown as Profile };
 }
 
 /**
@@ -106,10 +105,10 @@ export async function getAuthUserWithProfile(
  */
 function requireRole(
   profile: Profile,
-  allowedRoles: Array<'client' | 'employee' | 'admin'>
+  allowedRoles: Array<"studio" | "employee" | "admin">,
 ): void {
   if (!allowedRoles.includes(profile.role)) {
-    throw new Error('Access denied')
+    throw new Error("Access denied");
   }
 }
 
@@ -124,10 +123,10 @@ function requireRole(
 export const authenticatedQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const authUser = await getAuthUser(ctx)
-    return { ctx: { ...ctx, authUser }, args: {} }
+    const authUser = await getAuthUser(ctx);
+    return { ctx: { ...ctx, authUser }, args: {} };
   },
-})
+});
 
 /**
  * Mutation wrapper that requires authentication.
@@ -136,10 +135,10 @@ export const authenticatedQuery = customQuery(query, {
 export const authenticatedMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const authUser = await getAuthUser(ctx)
-    return { ctx: { ...ctx, authUser }, args: {} }
+    const authUser = await getAuthUser(ctx);
+    return { ctx: { ...ctx, authUser }, args: {} };
   },
-})
+});
 
 /**
  * Mutation wrapper that requires authentication AND profile.
@@ -148,10 +147,10 @@ export const authenticatedMutation = customMutation(mutation, {
 export const authenticatedWithProfileMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 /**
  * Query wrapper that requires authentication AND profile.
@@ -160,10 +159,10 @@ export const authenticatedWithProfileMutation = customMutation(mutation, {
 export const authenticatedWithProfileQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 // ============================================================================
 // Admin Wrappers
@@ -176,11 +175,11 @@ export const authenticatedWithProfileQuery = customQuery(query, {
 export const adminQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['admin'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["admin"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 /**
  * Mutation wrapper that requires admin role.
@@ -189,41 +188,41 @@ export const adminQuery = customQuery(query, {
 export const adminMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['admin'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["admin"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 // ============================================================================
-// Client Wrappers
+// Studio Wrappers
 // ============================================================================
 
 /**
- * Query wrapper that requires client role.
+ * Query wrapper that requires studio role.
  * Adds `ctx.authUser` and `ctx.profile`.
  */
-export const clientQuery = customQuery(query, {
+export const studioQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["studio"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 /**
- * Mutation wrapper that requires client role.
+ * Mutation wrapper that requires studio role.
  * Adds `ctx.authUser` and `ctx.profile`.
  */
-export const clientMutation = customMutation(mutation, {
+export const studioMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['client'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["studio"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 // ============================================================================
 // Employee Wrappers
@@ -236,11 +235,11 @@ export const clientMutation = customMutation(mutation, {
 export const employeeQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['employee'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["employee"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 /**
  * Mutation wrapper that requires employee role.
@@ -249,11 +248,11 @@ export const employeeQuery = customQuery(query, {
 export const employeeMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['employee'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["employee"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 // ============================================================================
 // Staff Wrappers (Admin or Employee)
@@ -266,11 +265,11 @@ export const employeeMutation = customMutation(mutation, {
 export const staffQuery = customQuery(query, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['admin', 'employee'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["admin", "employee"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 /**
  * Mutation wrapper that requires admin or employee role.
@@ -279,44 +278,90 @@ export const staffQuery = customQuery(query, {
 export const staffMutation = customMutation(mutation, {
   args: {},
   input: async (ctx) => {
-    const { authUser, profile } = await getAuthUserWithProfile(ctx)
-    requireRole(profile, ['admin', 'employee'])
-    return { ctx: { ...ctx, authUser, profile }, args: {} }
+    const { authUser, profile } = await getAuthUserWithProfile(ctx);
+    requireRole(profile, ["admin", "employee"]);
+    return { ctx: { ...ctx, authUser, profile }, args: {} };
   },
-})
+});
 
 // ============================================================================
 // Action Wrappers
 // ============================================================================
 
 /**
- * Action wrapper that requires client role.
+ * Action wrapper that requires studio role.
  * Adds `ctx.profile`.
  */
-export const clientAction = customAction(action, {
+export const studioAction = customAction(action, {
   args: {},
-  input: async (ctx: ActionCtx): Promise<{ ctx: { profile: Profile } & ActionCtx; args: Record<string, unknown> }> => {
+  input: async (
+    ctx: ActionCtx,
+  ): Promise<{
+    ctx: { profile: Profile } & ActionCtx;
+    args: Record<string, unknown>;
+  }> => {
     let authUser;
     try {
-      authUser = await authComponent.getAuthUser(ctx)
+      authUser = await authComponent.getAuthUser(ctx);
     } catch (e) {
-      throw new Error('Not authenticated')
+      throw new Error("Not authenticated");
     }
-    
+
     if (!authUser) {
-      throw new Error('Not authenticated')
+      throw new Error("Not authenticated");
     }
 
-    const profile = (await ctx.runQuery(api.profiles.getMyProfile)) as Profile | null
-    
+    const profile = (await ctx.runQuery(
+      api.profiles.getMyProfile,
+    )) as Profile | null;
+
     if (!profile) {
-      throw new Error('Profile not found')
+      throw new Error("Profile not found");
     }
 
-    if (profile.role !== 'client') {
-      throw new Error('Access denied')
+    if (profile.role !== "studio") {
+      throw new Error("Access denied");
     }
 
-    return { ctx: { ...ctx, profile }, args: {} }
+    return { ctx: { ...ctx, profile }, args: {} };
   },
-})
+});
+
+/**
+ * Action wrapper that requires admin role.
+ * Adds `ctx.profile`.
+ */
+export const adminAction = customAction(action, {
+  args: {},
+  input: async (
+    ctx: ActionCtx,
+  ): Promise<{
+    ctx: { profile: Profile } & ActionCtx;
+    args: Record<string, unknown>;
+  }> => {
+    let authUser;
+    try {
+      authUser = await authComponent.getAuthUser(ctx);
+    } catch (e) {
+      throw new Error("Not authenticated");
+    }
+
+    if (!authUser) {
+      throw new Error("Not authenticated");
+    }
+
+    const profile = (await ctx.runQuery(
+      api.profiles.getMyProfile,
+    )) as Profile | null;
+
+    if (!profile) {
+      throw new Error("Profile not found");
+    }
+
+    if (profile.role !== "admin") {
+      throw new Error("Access denied");
+    }
+
+    return { ctx: { ...ctx, profile }, args: {} };
+  },
+});

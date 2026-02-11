@@ -1,5 +1,5 @@
 import { ConvexError, v } from "convex/values";
-import { mutation, query, internalQuery } from "./_generated/server";
+import { internalQuery, mutation, query } from "./_generated/server";
 import { authComponent } from "./auth";
 
 // Check if this is the first user (for admin bootstrap)
@@ -38,7 +38,7 @@ export const createProfile = mutation({
     // Check if this is the first user
     const firstProfile = await ctx.db.query("profiles").first();
     const isFirst = firstProfile === null;
-    const role = isFirst ? ("admin" as const) : ("client" as const);
+    const role = isFirst ? ("admin" as const) : ("studio" as const);
 
     // Create the profile
     const profileId = await ctx.db.insert("profiles", {
@@ -124,7 +124,10 @@ export const claimDraftProfile = mutation({
       .withIndex("by_userId", (q) => q.eq("userId", userId))
       .first();
 
-    if (existingProfile && existingProfile._id !== args.profileId) {
+    if (existingProfile) {
+      if (existingProfile._id === args.profileId) {
+        return args.profileId;
+      }
       throw new ConvexError("User already has an active profile");
     }
 
@@ -136,12 +139,20 @@ export const claimDraftProfile = mutation({
 
     // Verify it is a draft
     if (!draftProfile.userId || !draftProfile.userId.startsWith("draft_")) {
-      throw new ConvexError("This profile has already been claimed or is invalid");
+      throw new ConvexError(
+        "This profile has already been claimed or is invalid",
+      );
     }
 
     // Security Check: Verify email if it's not a placeholder
-    const isPlaceholderEmail = draftProfile.email?.endsWith("@pending.primeeditz.com");
-    if (draftProfile.email && !isPlaceholderEmail && draftProfile.email !== userEmail) {
+    const isPlaceholderEmail = draftProfile.email?.endsWith(
+      "@pending.primeeditz.com",
+    );
+    if (
+      draftProfile.email &&
+      !isPlaceholderEmail &&
+      draftProfile.email !== userEmail
+    ) {
       throw new ConvexError("You are not authorized to claim this profile");
     }
 
@@ -157,4 +168,3 @@ export const claimDraftProfile = mutation({
     return args.profileId;
   },
 });
-

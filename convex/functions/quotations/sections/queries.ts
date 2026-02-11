@@ -11,7 +11,7 @@ export const getSections = adminQuery({
   },
   handler: async (ctx, args) => {
     let sections;
-    
+
     if (args.activeOnly) {
       sections = await ctx.db
         .query("quotationSections")
@@ -20,9 +20,11 @@ export const getSections = adminQuery({
     } else {
       sections = await ctx.db.query("quotationSections").collect();
     }
-    
+
     // Sort by displayOrder if it exists, otherwise use 0
-    return sections.sort((a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0));
+    return sections.sort(
+      (a, b) => (a.displayOrder ?? 0) - (b.displayOrder ?? 0),
+    );
   },
 });
 

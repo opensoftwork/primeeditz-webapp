@@ -10,7 +10,8 @@ const crons = cronJobs();
 crons.daily(
   "purge-expired-trash",
   { hourUTC: 2, minuteUTC: 0 },
-  internal.functions.storage.cleanup.purgeExpiredTrash
+  //@ts-ignore
+  internal.functions.storage.cleanup.purgeExpiredTrash,
 );
 
 export default crons;

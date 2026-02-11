@@ -1,38 +1,38 @@
 "use client";
 
-import { useState } from "react";
-import {
-  User,
-  Phone,
-  Building2,
-  Briefcase,
-  X,
-  Plus,
-  Link as LinkIcon,
-  Copy,
-  Check,
-  Mail,
-} from "lucide-react";
-import { useMutation } from "convex/react";
 import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { useMutation } from "convex/react";
+import {
+  Briefcase,
+  Building2,
+  Check,
+  Copy,
+  Link as LinkIcon,
+  Mail,
+  Phone,
+  Plus,
+  User,
+  X,
+} from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
+  DrawerDescription,
   DrawerHeader,
   DrawerTitle,
-  DrawerDescription,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Field, FieldContent, FieldLabel } from "@/components/ui/field";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { PhoneInput, isValidPhoneNumber } from "@/components/ui/phone-input";
+import { isValidPhoneNumber, PhoneInput } from "@/components/ui/phone-input";
 import { cn } from "@/lib/utils";
-import type { Id } from "@convex/_generated/dataModel";
 
 interface NewEmployeeDrawerProps {
   open: boolean;

@@ -4,4 +4,4 @@
  * Shared components for multi-step wizard flows.
  */
 
-export { StepIndicator, type WizardStep } from './step-indicator'
+export { StepIndicator, type WizardStep } from "./step-indicator";

@@ -20,6 +20,7 @@ import {
   getFacetedRowModel,
   getFacetedUniqueValues,
   getFilteredRowModel,
+  getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
   useReactTable,
@@ -95,6 +96,8 @@ interface DataTableProps<TData, TValue> {
     setPageSize?: (size: number) => void;
     pageSize?: number;
   };
+  onRowClick?: (row: TData) => void;
+  className?: string;
 }
 
 export function DataTable<TData, TValue>({
@@ -109,9 +112,11 @@ export function DataTable<TData, TValue>({
   showViewToggle = false,
   toolbar,
   serverPagination,
+  onRowClick,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(
-    renderCard ? defaultView : "table",
+    renderCard ? (defaultView ?? "cards") : "table",
   );
   const [rowSelection, setRowSelection] = React.useState({});
   const [columnVisibility, setColumnVisibility] =
@@ -120,6 +125,10 @@ export function DataTable<TData, TValue>({
     [],
   );
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const [pagination, setPagination] = React.useState({
+    pageIndex: 0,
+    pageSize: serverPagination?.pageSize ?? 10,
+  });
 
   const table = useReactTable({
     data,
@@ -129,8 +138,11 @@ export function DataTable<TData, TValue>({
       columnVisibility,
       rowSelection,
       columnFilters,
+      pagination,
     },
+    onPaginationChange: setPagination,
     enableRowSelection: true,
+    manualPagination: !!serverPagination,
     onRowSelectionChange: setRowSelection,
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
@@ -140,27 +152,13 @@ export function DataTable<TData, TValue>({
     getSortedRowModel: getSortedRowModel(),
     getFacetedRowModel: getFacetedRowModel(),
     getFacetedUniqueValues: getFacetedUniqueValues(),
-    // Note: No getPaginationRowModel - server handles pagination
+    getPaginationRowModel: getPaginationRowModel(),
   });
 
   const showCards = renderCard && viewMode === "cards";
 
-  // Animation variants
-  const containerVariants = {
-    hidden: { opacity: 0 },
-    show: {
-      opacity: 1,
-      transition: { staggerChildren: 0.03 },
-    },
-  };
-
-  const rowVariants = {
-    hidden: { opacity: 0, y: 8 },
-    show: { opacity: 1, y: 0 },
-  };
-
   return (
-    <div className="flex flex-col gap-6">
+    <div className={cn("flex flex-col gap-8", className)}>
       {/* Toolbar with optional view toggle */}
       <div className="flex items-start gap-4">
         <div className="flex-1">
@@ -226,33 +224,42 @@ export function DataTable<TData, TValue>({
       >
         {/* Card View */}
         {showCards && (
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            animate="show"
-            className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4"
-          >
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <motion.div key={row.id} variants={rowVariants}>
-                  {renderCard(row.original)}
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+            <AnimatePresence mode="popLayout">
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <motion.div
+                    key={row.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.95 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {renderCard(row.original)}
+                  </motion.div>
+                ))
+              ) : (
+                <motion.div
+                  key="empty-state"
+                  className="col-span-full"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                >
+                  <EmptyState
+                    icon={EmptyIcon}
+                    title={emptyTitle}
+                    description={emptyDescription}
+                  />
                 </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full">
-                <EmptyState
-                  icon={EmptyIcon}
-                  title={emptyTitle}
-                  description={emptyDescription}
-                />
-              </div>
-            )}
-          </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )}
 
         {/* Table View */}
         {!showCards && (
-          <div className="overflow-hidden rounded-[1.5rem] border border-white/5 bg-white/2 overflow-x-auto">
+          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto">
             <Table className="min-w-full">
               <TableHeader className="bg-white/3">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -288,7 +295,11 @@ export function DataTable<TData, TValue>({
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
                         data-state={row.getIsSelected() && "selected"}
-                        className="transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group"
+                        onClick={() => onRowClick?.(row.original)}
+                        className={cn(
+                          "transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group",
+                          onRowClick && "cursor-pointer",
+                        )}
                       >
                         {row.getVisibleCells().map((cell) => (
                           <TableCell key={cell.id} className="py-4 px-6">
@@ -302,7 +313,7 @@ export function DataTable<TData, TValue>({
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={columns.length} className="p-0">
+                      <TableCell colSpan={table.getVisibleFlatColumns().length} className="p-0">
                         <EmptyState
                           icon={EmptyIcon}
                           title={emptyTitle}
@@ -319,7 +330,12 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <DataTablePagination table={table} serverPagination={serverPagination} />
+      <div className="mt-auto pt-6">
+        <DataTablePagination
+          table={table}
+          serverPagination={serverPagination}
+        />
+      </div>
     </div>
   );
 }
@@ -358,50 +374,98 @@ function EmptyState({
 export function DataTableSkeleton({
   rows = 5,
   columns = 4,
+  viewMode = "table",
+  renderCardSkeleton,
 }: {
   rows?: number;
   columns?: number;
+  viewMode?: "table" | "cards";
+  renderCardSkeleton?: () => React.ReactNode;
 }) {
   return (
     <div className="space-y-6">
       {/* Toolbar Skeleton */}
-      <div className="flex items-center justify-between">
-        <Skeleton className="h-11 w-80 bg-white/5 rounded-xl" />
-        <div className="flex gap-2">
-          <Skeleton className="h-10 w-32 bg-white/5 rounded-xl" />
-          <Skeleton className="h-10 w-24 bg-white/5 rounded-xl" />
+      <div className="flex items-start gap-4">
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <Skeleton className="h-11 w-80 bg-white/5 rounded-xl" />
+            <Skeleton className="h-11 w-32 bg-white/5 rounded-xl" />
+            <Skeleton className="h-11 w-32 bg-white/5 rounded-xl" />
+          </div>
+        </div>
+        <div className="hidden lg:flex items-center border border-white/10 rounded-xl p-1 bg-white/5">
+          <Skeleton className="h-9 w-9 bg-white/10 rounded-lg" />
+          <Skeleton className="h-9 w-9 bg-transparent rounded-lg" />
         </div>
       </div>
 
-      {/* Table Skeleton */}
-      <div className="rounded-[1.5rem] border border-white/5 bg-white/2 overflow-hidden">
-        <div className="bg-white/3 p-4">
-          <div className="flex gap-8">
-            {Array.from({ length: columns }).map((_, i) => (
-              <Skeleton
-                key={`skeleton-header-${i}`}
-                className="h-4 w-24 bg-white/5"
-              />
-            ))}
-          </div>
-        </div>
-        <div className="divide-y divide-white/5">
+      {viewMode === "cards" ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
           {Array.from({ length: rows }).map((_, i) => (
-            <div key={`skeleton-row-${i}`} className="flex gap-8 p-6">
-              {Array.from({ length: columns }).map((_, j) => (
-                <Skeleton
-                  key={`skeleton-cell-${i}-${j}`}
-                  className="h-5 w-32 bg-white/5"
-                />
-              ))}
+            <div key={`skeleton-card-${i}`}>
+              {renderCardSkeleton ? (
+                renderCardSkeleton()
+              ) : (
+                <div className="bg-white/2 border border-white/5 p-6 rounded-3xl space-y-5">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="w-10 h-10 rounded-xl bg-white/5" />
+                      <div className="space-y-2">
+                        <Skeleton className="h-3 w-20 bg-white/5" />
+                        <Skeleton className="h-3 w-12 bg-white/5" />
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Skeleton className="h-8 w-8 rounded-lg bg-white/5" />
+                      <Skeleton className="h-8 w-8 rounded-lg bg-white/5" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Skeleton className="h-6 w-3/4 bg-white/5" />
+                    <Skeleton className="h-3 w-1/2 bg-white/5" />
+                  </div>
+                  <div className="pt-4 border-t border-white/5 flex items-center justify-between">
+                    <Skeleton className="h-4 w-24 bg-white/5" />
+                    <Skeleton className="h-8 w-20 rounded-lg bg-white/5" />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </div>
+      ) : (
+        <div className="rounded-3xl border border-white/5 bg-white/2 overflow-hidden">
+          <div className="bg-white/3 p-4">
+            <div className="flex gap-8">
+              {Array.from({ length: columns }).map((_, i) => (
+                <Skeleton
+                  key={`skeleton-header-${i}`}
+                  className="h-4 w-24 bg-white/5"
+                />
+              ))}
+            </div>
+          </div>
+          <div className="divide-y divide-white/5">
+            {Array.from({ length: rows }).map((_, i) => (
+              <div key={`skeleton-row-${i}`} className="flex gap-8 p-6">
+                {Array.from({ length: columns }).map((_, j) => (
+                  <Skeleton
+                    key={`skeleton-cell-${i}-${j}`}
+                    className="h-5 w-32 bg-white/5"
+                  />
+                ))}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Pagination Skeleton */}
       <div className="flex items-center justify-between pt-6 border-t border-white/5">
-        <Skeleton className="h-10 w-24 bg-white/5 rounded-xl" />
+        <div className="flex items-center gap-6">
+          <Skeleton className="h-10 w-24 bg-white/5 rounded-xl" />
+          <Skeleton className="h-10 w-20 bg-white/5 rounded-xl" />
+        </div>
         <div className="flex gap-2">
           <Skeleton className="h-11 w-28 bg-white/5 rounded-xl" />
           <Skeleton className="h-11 w-20 bg-white/5 rounded-xl" />

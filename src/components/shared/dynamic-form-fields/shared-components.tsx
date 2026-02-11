@@ -1,7 +1,7 @@
 "use client";
 
-import { cn } from "@/lib/utils";
 import { FieldLabel } from "@/components/ui/field";
+import { cn } from "@/lib/utils";
 
 interface FieldLabelWithRequiredProps {
   htmlFor: string;
@@ -21,7 +21,7 @@ export function FieldLabelWithRequired({
       htmlFor={htmlFor}
       className={cn(
         "text-sm font-black uppercase tracking-widest mb-3 text-white/60 flex items-center",
-        className
+        className,
       )}
     >
       {label}

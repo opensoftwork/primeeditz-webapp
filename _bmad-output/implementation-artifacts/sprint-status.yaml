@@ -134,6 +134,8 @@ development_status:
   4-14-project-type-hints-for-templates: deferred
   # Phase D: Enhancements
   4-16-enhanced-quotation-pdf-download: done # MEDIUM: Section-specific PDF downloads
+  # Phase E: UX Improvements
+  4-17-quotation-builder-step-restructure: done # HIGH: Restructure builder steps for better UX
   epic-4-retrospective: done # Completed 2026-01-18
 
   # ============================================================================
@@ -157,11 +159,14 @@ development_status:
   # ============================================================================
   # EPIC 6: Deliverables & QC Workflow
   # ============================================================================
-  epic-6: backlog
-  6-1-upload-deliverables-admin-employee: backlog
-  6-2-qc-review-approval: backlog
-  6-3-client-view-approved-deliverables: backlog
-  6-4-client-approve-request-revision: backlog
+  # Updated: 2026-02-04 - Split into technical actions and UI reactions
+  epic-6: done
+  6-1-upload-deliverables: done
+  6-2-qc-review-approval: done
+  6-3-client-view-deliverables: done
+  6-4-client-approve-revise: done
+  6-5-ui-reactions: done
+  6-6-component-architecture-refactor: done
   epic-6-retrospective: optional
 
   # ============================================================================
@@ -201,3 +206,157 @@ development_status:
   10-12-seo-meta-tags: deferred # P1 - SEO optimization
   10-13-responsive-testing-polish: deferred # P0 - Final QA
   epic-10-retrospective: optional
+
+  # ============================================================================
+  # EPIC 11: System Architecture Revamp (Master)
+  # ============================================================================
+  epic-11: in-progress
+
+  # Epic 11A: Schema & Data Foundation
+  11a-1-add-quotationid-to-projects: done
+  11a-2-enhance-quotation-templates: done
+  11a-3-add-folder-template-variants: done
+  11a-4-seed-folder-templates: done
+  11a-5-introduce-studio-role: done
+  11a-6-create-migration: done
+  epic-11a-retrospective: optional
+
+  # Epic 11B: Quotation Engine Enhancements
+  11b-1-link-line-items-to-types: done # Integrated into line item schema
+  11b-2-select-folder-template: done # Integrated into line item schema
+  11b-3-project-spawning-backend: done # IMPLEMENTED: Spawn logic bridges to Onboarding
+  11b-4-display-spawned-projects: review
+  epic-11b-retrospective: optional
+
+  # Epic 11C: Studio Portal Revamp
+  11c-1-quote-request-flow: ready-for-dev # NEW: Studio initiates 'initiated' quotes
+  11c-2-my-quote-requests-list: ready-for-dev
+  11c-3-my-projects-grouped-by-end-client: ready-for-dev
+  11c-4-project-onboarding-card: ready-for-dev
+  11c-5-repurpose-wizard-for-onboarding-only: ready-for-dev
+  11c-6-studio-project-detail-view: backlog
+  11c-7-deprecate-old-wizard: backlog
+  epic-11c-retrospective: optional
+
+  # ============================================================================
+  # EPIC 13: Unified Service Package Configuration (Master)
+  # ============================================================================
+  # Context: Party Mode Review 2026-01-28
+  # Goal: Consolidate config into unified Service Package model
+  # Key Change: N Service Packages → N Projects (multi-package selection)
+  # Breaking Change: quotationTemplates → servicePackages (table rename)
+  epic-13: backlog
+
+  # Epic 13A: Schema Consolidation (FOUNDATION - MUST GO FIRST)
+  # Goal: Rename table, multi-package model, simplified spawning
+  epic-13a: done
+  13a-1-create-service-packages-table: done # 3 points
+  13a-2-update-quotations-multi-package: done # 2 points
+  13a-3-update-spawning-logic: done # 3 points
+  13a-4-create-service-package-seeds: done # 2 points
+  13a-5-update-quotation-mutations: done # 2 points
+  13a-6-deprecate-project-type-fields: done # 1 point
+
+  epic-13a-retrospective: optional
+
+  # Epic 13B: Folder Template Enhancement (parallel with 13C after 13A)
+  # Goal: Depth-limited hierarchical folders, variants (NO RECURSION!)
+  13b-1-enhance-folder-templates-schema: done # 3 points
+  13b-2-create-wedding-folder-seeds: done # 3 points
+  13b-3-create-content-creator-folder-seeds: done # 2 points
+  13b-4-update-folder-setup-mutation: done # 2 points
+  13b-5-folder-template-builder-ui: done # 3 points
+  epic-13b-retrospective: optional
+
+  # Epic 13C: Service Package Builder UI (parallel with 13B after 13A)
+  # Goal: Unified admin wizard with TanStack Form + Zod
+  13c-1-service-package-list-page: done # 3 points
+  13c-2-builder-step-1-identity: done # 3 points
+  13c-3-builder-step-2-project-config: done # 5 points
+  13c-4-builder-step-3-pricing: done # 5 points
+  13c-5-builder-step-4-review-publish: done # 3 points
+  13c-6-package-detail-view: backlog # 2 points
+  epic-13c-retrospective: optional
+
+  # Epic 13D: Legacy Cleanup & Migration (LAST - after 13A, 13B, 13C complete)
+  # Goal: Remove deprecated UIs, multi-package studio flow, clear dev data
+  13d-1-remove-old-quotation-templates-ui: done # 2 points
+  13d-2-simplify-project-types-ui: done # 2 points
+  13d-3-remove-quotation-sections-ui: done # 2 points
+  13d-4-update-studio-quotation-request: done # 3 points
+  13d-5-update-quotation-request-mutation: done # 2 points
+  13d-6-clear-development-data: done # 2 points
+  epic-13d-retrospective: optional
+
+  # Epic 13E: Service Package Bundles (planned - after 13F)
+  # Goal: Bundle discounts for multi-package combo pricing
+  epic-13e: planned
+  # Deferred until 13F is complete - bundles build on multi-project packages
+
+  # Epic 13F: Multi-Project Package Support (NEW - 2026-01-30)
+  # Goal: Single package can spawn MULTIPLE projects (combo packages)
+  # Use Case: "Complete Wedding Package" creates Photo + Video + Album projects
+  # Created via Party Mode discussion with Architect + PM + SM
+  epic-13f: in-progress
+  13f-1-schema-update-project-configs-array: done # 3 points
+  13f-2-builder-step-2-multi-project-config-ui: done # 5 points
+  13f-3-link-line-items-to-project-configs: done # 3 points
+  13f-4-update-spawning-logic-create-n-projects: done # 3 points
+  13f-5-update-view-detail-show-multiple-configs: done # 2 points
+  epic-13f-retrospective: optional
+
+  # ============================================================================
+  # EPIC 14: Project Type + Folder Template Integration
+  # ============================================================================
+  # Context: Created 2026-01-31
+  # Goal: Restructure Project Types as parent containers for Folder Templates
+  # Key Change: Stepper-based wizard with mandatory folder structure
+  # Breaking Change: Deprecates standalone /settings/folder-templates route
+  epic-14: backlog
+
+  # Story 14.11: Schema & Backend Updates (Foundation - parallel with 14.1)
+  # Goal: Add isDraft, draftData, defaultFolderTemplateId to schema
+  14-11-schema-backend-updates: done # 2 points - FOUNDATION
+
+  # Story 14.1: Wizard Context & Infrastructure (Foundation)
+  # Goal: Create ProjectTypeWizardProvider with all state management
+  14-1-wizard-context-infrastructure: done # 3 points - FOUNDATION
+
+  # Story 14.2: Step 1 — Project Type Identity Form
+  # Goal: Form for name, category, description, icon, isActive
+  14-2-step-1-identity-form: done # 2 points
+
+  # Story 14.3: Step 2 — Folder Hierarchy Builder
+  # Goal: Integrate FolderTree, enforce min 1 folder
+  14-3-step-2-folder-hierarchy: done # 3 points
+
+  # Story 14.4: Step 3 — Review & Submit
+  # Goal: Summary view, draft save, atomic create/update
+  14-4-step-3-review-submit: done # 3 points
+
+  # Story 14.5: Project Type Wizard — Stepper Layout
+  # Goal: Full-screen layout matching Request Engagement flow
+  14-5-wizard-stepper-layout: in-progress # 3 points
+
+  # Story 14.6: Route Structure & Navigation
+  # Goal: Set up /new, /[id], /[id]/folder-templates routes
+  14-6-route-structure-navigation: done # 2 points
+
+  # Story 14.7: Draft Save & Resume Functionality
+  # Goal: Draft persistence, resume from last step
+  14-7-draft-save-resume: done # 3 points
+
+  # Story 14.8: Folder Templates List (Project Type Scoped)
+  # Goal: List templates under project type with add/edit/delete
+  14-8-folder-templates-list: done # 2 points
+
+  # Story 14.9: Folder Template Builder (Project Type Context)
+  # Goal: Pre-selected project type, variant field, contextual nav
+  14-9-folder-template-builder-context: done # 2 points
+
+  # Story 14.10: Deprecate Standalone Folder Templates Route
+  # Goal: Remove /settings/folder-templates, update sidebar
+  # ⚠️ LAST - Only after 14.1-14.9 complete and tested
+  14-10-deprecate-folder-templates-route: done # 2 points - FINAL
+
+  epic-14-retrospective: optional

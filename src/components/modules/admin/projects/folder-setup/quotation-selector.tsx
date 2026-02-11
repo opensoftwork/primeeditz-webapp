@@ -1,15 +1,15 @@
 "use client";
 
-import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
+import { useQuery } from "convex/react";
 import {
+  AlertCircle,
+  CheckCircle2,
   FileText,
   HardDrive,
-  CheckCircle2,
-  Loader2,
-  AlertCircle,
   Link as LinkIcon,
+  Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -28,7 +28,7 @@ interface QuotationOption {
 }
 
 interface QuotationSelectorProps {
-  clientId: Id<"profiles"> | undefined;
+  studioId: Id<"profiles"> | undefined;
   selectedQuotationId: Id<"quotations"> | null;
   onSelect: (quotation: QuotationOption | null) => void;
   linkedQuotation?: QuotationOption | null;
@@ -52,23 +52,25 @@ function formatDate(timestamp: number): string {
 }
 
 export function QuotationSelector({
-  clientId,
+  studioId,
   selectedQuotationId,
   onSelect,
   linkedQuotation,
 }: QuotationSelectorProps) {
   const quotations = useQuery(
     api.functions.quotations.queries.getClientApprovedQuotations,
-    clientId ? { clientId } : "skip"
+    studioId ? { studioId } : "skip",
   );
 
-  if (!clientId) {
+  if (!studioId) {
     return (
       <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20">
         <div className="flex items-center gap-3">
           <AlertCircle className="h-5 w-5 text-amber-500" />
           <div>
-            <p className="text-white/80 text-sm font-medium">No Client Assigned</p>
+            <p className="text-white/80 text-sm font-medium">
+              No Client Assigned
+            </p>
             <p className="text-white/40 text-xs">
               This project has no client. Cannot link to quotations.
             </p>
@@ -82,7 +84,9 @@ export function QuotationSelector({
     return (
       <div className="flex items-center justify-center py-8">
         <Loader2 className="h-5 w-5 animate-spin text-white/20" />
-        <span className="ml-2 text-white/40 text-sm">Loading quotations...</span>
+        <span className="ml-2 text-white/40 text-sm">
+          Loading quotations...
+        </span>
       </div>
     );
   }
@@ -93,9 +97,12 @@ export function QuotationSelector({
         <div className="flex items-center gap-3">
           <FileText className="h-5 w-5 text-white/30" />
           <div>
-            <p className="text-white/60 text-sm font-medium">No Approved Quotations</p>
+            <p className="text-white/60 text-sm font-medium">
+              No Approved Quotations
+            </p>
             <p className="text-white/40 text-xs">
-              This client has no approved quotations. Create and approve a quotation first.
+              This client has no approved quotations. Create and approve a
+              quotation first.
             </p>
           </div>
         </div>
@@ -179,7 +186,11 @@ interface QuotationCardProps {
   onSelect: () => void;
 }
 
-function QuotationCard({ quotation, isSelected, onSelect }: QuotationCardProps) {
+function QuotationCard({
+  quotation,
+  isSelected,
+  onSelect,
+}: QuotationCardProps) {
   const hasStorage = quotation.storageInfo.remainingGB > 0;
 
   return (
@@ -191,8 +202,8 @@ function QuotationCard({ quotation, isSelected, onSelect }: QuotationCardProps) 
         isSelected
           ? "bg-primary/10 border-primary/30"
           : hasStorage
-          ? "bg-white/3 border-white/10 hover:bg-white/5 hover:border-white/20"
-          : "bg-white/2 border-white/5 opacity-50 cursor-not-allowed"
+            ? "bg-white/3 border-white/10 hover:bg-white/5 hover:border-white/20"
+            : "bg-white/2 border-white/5 opacity-50 cursor-not-allowed",
       )}
     >
       <div className="flex items-start justify-between gap-3">
@@ -201,14 +212,15 @@ function QuotationCard({ quotation, isSelected, onSelect }: QuotationCardProps) 
             <p
               className={cn(
                 "font-bold text-sm",
-                isSelected ? "text-primary" : "text-white"
+                isSelected ? "text-primary" : "text-white",
               )}
             >
               {quotation.code}
             </p>
             {quotation.linkedProjectCount > 0 && (
               <span className="text-white/30 text-[10px] font-medium uppercase">
-                {quotation.linkedProjectCount} project{quotation.linkedProjectCount > 1 ? "s" : ""}
+                {quotation.linkedProjectCount} project
+                {quotation.linkedProjectCount > 1 ? "s" : ""}
               </span>
             )}
           </div>
@@ -230,13 +242,13 @@ function QuotationCard({ quotation, isSelected, onSelect }: QuotationCardProps) 
               <HardDrive
                 className={cn(
                   "h-3.5 w-3.5",
-                  hasStorage ? "text-emerald-500" : "text-red-500"
+                  hasStorage ? "text-emerald-500" : "text-red-500",
                 )}
               />
               <span
                 className={cn(
                   "text-xs font-medium",
-                  hasStorage ? "text-emerald-500" : "text-red-500"
+                  hasStorage ? "text-emerald-500" : "text-red-500",
                 )}
               >
                 {quotation.storageInfo.remainingGB} GB remaining
@@ -251,14 +263,14 @@ function QuotationCard({ quotation, isSelected, onSelect }: QuotationCardProps) 
               <div
                 className={cn(
                   "h-full rounded-full transition-all",
-                  hasStorage ? "bg-emerald-500" : "bg-red-500"
+                  hasStorage ? "bg-emerald-500" : "bg-red-500",
                 )}
                 style={{
                   width: `${Math.min(
                     (quotation.storageInfo.allocatedGB /
                       quotation.storageInfo.totalGB) *
                       100,
-                    100
+                    100,
                   )}%`,
                 }}
               />

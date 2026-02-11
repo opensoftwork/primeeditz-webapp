@@ -18,13 +18,25 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 
 - [Epic 0: Project Foundation](./00-foundation.md)
 - [Epic 1: Authentication & Onboarding](./01-auth-onboarding.md)
-- [Epic 2: Client Portal — Project Request](./02-client-portal-request.md)
+- [Epic 2: Client Portal — Project Request](./02-client-portal-request.md) _(Superseded by 11C)_
 - [Epic 3: Admin Portal — Project & System Management](./03-admin-portal-management.md)
 - [Epic 4: Quotation System](./04-quotation-system.md)
 - [Epic 5: Asset Upload & Folder Management](./05-asset-upload.md)
 - [Epic 6: Deliverables & QC Workflow](./06-deliverables-qc.md)
 - [Epic 7: Status Tracking & Dashboards](./07-status-tracking.md)
 - [Epic 10: Landing Page — Marketing & Conversion](./10-landing-page.md)
+- **[Epic 11: System Architecture Revamp (Master)](./11-system-restructuring-revamp.md)**
+  - [Epic 11A: Schema & Data Foundation](./11a-schema-foundation.md)
+  - [Epic 11B: Quotation Engine Enhancements](./11b-quotation-engine.md)
+  - [Epic 11C: Studio Portal Revamp](./11c-studio-portal.md)
+  - [Epic 11D: Terminology & Routing Cleanup](./11d-terminology-cleanup.md)
+- [Epic 12: Employee Assignment & Team Management](./12-employee-assignment-team-management.md)
+- **[Epic 13: Unified Service Package Configuration (Master)](./13-unified-service-package-configuration.md)**
+  - [Epic 13A: Schema Consolidation](./13a-schema-consolidation.md)
+  - [Epic 13B: Folder Template Enhancement](./13b-folder-template-enhancement.md)
+  - [Epic 13C: Service Package Builder UI](./13c-service-package-builder-ui.md)
+  - [Epic 13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration.md)
+- **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)** ⬅️ NEW
 
 ---
 

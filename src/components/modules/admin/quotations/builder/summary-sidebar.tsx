@@ -6,7 +6,7 @@
 
 "use client";
 
-import { User, Briefcase } from "lucide-react";
+import { Briefcase, User } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import {
   Select,
@@ -21,16 +21,16 @@ import { useQuotationBuilder } from "./quotation-builder-context";
 export function SummarySidebar({
   subtotal,
   grandTotal,
-  selectedClient,
+  selectedStudio,
 }: {
   subtotal: number;
   grandTotal: number;
-  selectedClient: { _id: string; name: string; company?: string } | undefined;
+  selectedStudio: { _id: string; name: string; company?: string } | undefined;
 }) {
   const { formData, setFormData, taxAmount, projects } = useQuotationBuilder();
   const { taxRate, discountAmount } = formData.step5;
   const selectedProjects = projects?.filter((p) =>
-    formData.step2.projectIds.includes(p._id)
+    formData.step3.projectIds?.includes(p._id),
   );
 
   return (
@@ -134,7 +134,7 @@ export function SummarySidebar({
         </div>
 
         {/* Recipient Details (If selected) */}
-        {selectedClient && (
+        {selectedStudio && (
           <div className="p-6 rounded-3xl bg-white/2 border border-white/5 space-y-4">
             <div className="flex items-center gap-3">
               <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center">
@@ -145,13 +145,13 @@ export function SummarySidebar({
                   Quoting for
                 </span>
                 <span className="text-xs font-black text-white uppercase tracking-wider">
-                  {selectedClient.name}
+                  {selectedStudio.name}
                 </span>
               </div>
             </div>
-            {selectedClient.company && (
+            {selectedStudio.company && (
               <p className="text-[10px] font-bold text-white/30 uppercase tracking-widest pl-1">
-                {selectedClient.company}
+                {selectedStudio.company}
               </p>
             )}
           </div>

@@ -1,24 +1,21 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
+import { Edit2, Eye, EyeOff, HardDrive, Loader2, Trash2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { HardDrive, Edit2, Trash2 } from "lucide-react";
-import { motion } from "motion/react";
+import { Card } from "@/components/ui/card";
+import { useMutationWithStatus } from "@/lib/convex-hooks";
 import { cn } from "@/lib/utils";
-
-interface StorageTier {
-  _id: string;
-  name: string;
-  sizeGB: number;
-  priceINR: number;
-  isActive: boolean;
-}
+import type { StorageTier } from "./types";
 
 interface StorageTierCardProps {
   tier: StorageTier;
   onEdit: (tier: StorageTier) => void;
-  onToggleStatus: (id: string, current: boolean, name: string) => void;
   onDelete: (id: string, name: string) => void;
 }
 
@@ -29,81 +26,80 @@ function formatStorage(sizeGB: number): string {
   return `${sizeGB} GB`;
 }
 
-function formatPrice(priceINR: number): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(priceINR);
-}
-
 export function StorageTierCard({
   tier,
   onEdit,
-  onToggleStatus,
   onDelete,
 }: StorageTierCardProps) {
+  const toggleStatusMutation = useMutationWithStatus(
+    api.functions.storageTiers.mutations.toggleStorageTierActive,
+  );
+
+  useEffect(() => {
+    if (toggleStatusMutation.isSuccess) {
+      toast.success(
+        `Storage tier ${tier.isActive ? "deactivated" : "activated"}`,
+      );
+    }
+    if (toggleStatusMutation.isError) {
+      toast.error("Failed to update status");
+    }
+  }, [
+    toggleStatusMutation.isSuccess,
+    toggleStatusMutation.isError,
+    tier.isActive,
+  ]);
+
+  const handleToggleStatus = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    toggleStatusMutation.mutate({
+      id: tier._id as Id<"storageTiers">,
+      isActive: !tier.isActive,
+    });
+  };
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      whileHover={{ y: -5 }}
-    >
-      <Card className="group relative overflow-hidden border-white/5 bg-white/5 backdrop-blur-xl transition-all hover:bg-white/10 rounded-xl p-0">
+    <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
+      <Card
+        onClick={() => onEdit(tier)}
+        className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer"
+      >
         {/* Glow Effect */}
-        <div className="absolute -right-20 -top-20 h-30 w-40 rounded-full bg-primary/10 blur-3xl transition-opacity group-hover:opacity-100 opacity-0" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/5 blur-[60px] rounded-full translate-x-16 -translate-y-16 group-hover:bg-primary/10 transition-colors" />
 
-        <CardContent className="p-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center border border-primary/20">
-              <HardDrive className="h-5 w-5 text-primary" />
-            </div>
-            <Badge
-              variant={tier.isActive ? "default" : "secondary"}
-              className={cn(
-                "cursor-pointer text-[9px] h-5 px-2 font-black uppercase tracking-widest",
-                tier.isActive
-                  ? "bg-primary/20 text-primary hover:bg-primary/30"
-                  : "bg-white/5 text-white/40 border-white/5"
-              )}
-              onClick={(e) => {
-                e.preventDefault();
-                onToggleStatus(tier._id, tier.isActive, tier.name);
-              }}
-            >
-              {tier.isActive ? "Active" : "Inactive"}
-            </Badge>
-          </div>
-
-          <div className="mb-4">
-            <h3 className="text-lg font-black tracking-tight text-white line-clamp-1">
-              {tier.name}
-            </h3>
-            <div className="flex items-baseline gap-2 mt-1">
-              <span className="text-3xl font-black text-white tracking-tight">
-                {formatStorage(tier.sizeGB)}
-              </span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-4 border-t border-white/5">
-            <div className="flex flex-col">
-              <span className="text-[9px] text-white/30 font-black uppercase tracking-widest">
-                Price
-              </span>
-              <span className="text-xl font-black text-primary">
-                {formatPrice(tier.priceINR)}
-              </span>
+        <div className="relative z-10 space-y-5">
+          {/* Header */}
+          <div className="flex items-start justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/30 transition-colors">
+                <HardDrive className="h-5 w-5 text-primary" />
+              </div>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">
+                  STORAGE PLAN
+                </span>
+                <Badge
+                  className={cn(
+                    "w-fit font-black text-[7px] uppercase tracking-widest px-1.5 py-0 rounded-md mt-0.5 shadow-none",
+                    tier.isActive
+                      ? "bg-green-500/10 text-green-500 border-green-500/20"
+                      : "bg-white/5 text-white/40 border-white/5",
+                  )}
+                >
+                  {tier.isActive ? "ACTIVE" : "INACTIVE"}
+                </Badge>
+              </div>
             </div>
 
-            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200">
+            <div className="flex items-center gap-1.5 transition-all duration-200">
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10"
-                onClick={() => onEdit(tier)}
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-white hover:bg-white/10 transition-all active:scale-90"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(tier);
+                }}
                 title="Edit Tier"
               >
                 <Edit2 className="h-3.5 w-3.5" />
@@ -111,15 +107,75 @@ export function StorageTierCard({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10"
-                onClick={() => onDelete(tier._id, tier.name)}
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-90"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onDelete(tier._id, tier.name);
+                }}
                 title="Delete Tier"
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </Button>
             </div>
           </div>
-        </CardContent>
+
+          {/* Title Area */}
+          <div className="space-y-1">
+            <div className="flex items-baseline justify-between gap-4">
+              <h3 className="text-xl font-black text-white uppercase tracking-tight line-clamp-1 group-hover:text-primary transition-colors">
+                {tier.name}
+              </h3>
+              <div className="text-lg font-black text-white tracking-tight shrink-0">
+                {formatStorage(tier.sizeGB)}
+              </div>
+            </div>
+            <div className="flex items-center gap-1.5 text-[9px] font-black uppercase tracking-widest text-primary/60">
+              Professional Capacity
+            </div>
+          </div>
+
+          {/* Footer Area - Aligned with ProjectTypeCard & PackageCard */}
+          <div className="flex items-center justify-between mt-2 pt-2">
+            <div className="flex flex-col">
+              <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest">
+                Current Status
+              </span>
+              <span
+                className={cn(
+                  "text-xs font-black uppercase tracking-wider",
+                  tier.isActive ? "text-primary" : "text-white/40",
+                )}
+              >
+                {tier.isActive ? "System Live" : "Inactive"}
+              </span>
+            </div>
+
+            <Button
+              onClick={handleToggleStatus}
+              disabled={toggleStatusMutation.isPending}
+              variant="ghost"
+              size="sm"
+              className={cn(
+                "h-8 px-3 text-[9px] font-black uppercase tracking-widest rounded-lg gap-2 shrink-0 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed",
+                tier.isActive
+                  ? "text-red-400/60 bg-red-400/5 hover:text-red-400 hover:bg-red-400/10"
+                  : "text-green-400/60 bg-green-400/5 hover:text-green-400 hover:bg-green-400/10",
+              )}
+            >
+              {toggleStatusMutation.isPending ? (
+                <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              ) : tier.isActive ? (
+                <>
+                  DEACTIVATE <EyeOff className="h-3.5 w-3.5" />
+                </>
+              ) : (
+                <>
+                  ACTIVATE <Eye className="h-3.5 w-3.5" />
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
       </Card>
     </motion.div>
   );

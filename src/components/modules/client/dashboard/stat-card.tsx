@@ -2,7 +2,7 @@
 
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
-import { StatCardProps } from "./types";
+import type { StatCardProps } from "./types";
 
 export function StatCard({
   icon,

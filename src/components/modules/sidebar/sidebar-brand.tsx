@@ -1,12 +1,12 @@
 "use client";
 
-import Link from "next/link";
 import { LayoutDashboard } from "lucide-react";
+import Link from "next/link";
 import {
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
 export function SidebarBrand() {

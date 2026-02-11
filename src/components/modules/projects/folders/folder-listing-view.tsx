@@ -1,31 +1,50 @@
 "use client";
 
-import { useQuery, useMutation } from "convex/react";
-import { useRouter } from "next/navigation";
-import { CheckCircle2, Loader2, FolderTree, ArrowLeft } from "lucide-react";
-import { motion } from "motion/react";
-import { toast } from "sonner";
-
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { Button } from "@/components/ui/button";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowLeft, CheckCircle2, FolderTree, Loader2 } from "lucide-react";
+import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
 import { FolderGrid } from "@/components/shared/project-folders";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { FolderGridSkeleton } from "@/components/shared/project-folders";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 interface FolderListingViewProps {
   projectId: string;
   isAdmin?: boolean;
+  isEmployee?: boolean;
 }
 
 export function FolderListingView({
   projectId,
   isAdmin = false,
+  isEmployee = false,
 }: FolderListingViewProps) {
   const router = useRouter();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+  const isStaff = isAdmin || isEmployee;
 
   // Queries
   const project = useQuery(
-    isAdmin
-      ? api.admin.getAdminProject
+    isStaff
+      ? // @ts-ignore
+        api.admin.getAdminProject
       : api.functions.projects.queries.getProject,
     {
       projectId: projectId as Id<"projects">,
@@ -33,13 +52,33 @@ export function FolderListingView({
   );
 
   const folders = useQuery(
-    isAdmin
+    isStaff
       ? api.functions.folders.queries.getProjectFolders
       : api.functions.folders.queries.getMyProjectFolders,
     {
       projectId: projectId as Id<"projects">,
     },
   );
+
+  // Set breadcrumb override for project name
+  useEffect(() => {
+    const label =
+      project?.eventName || project?.projectTypeName || project?.code;
+    if (label) {
+      setOverride(projectId, label);
+    }
+
+    return () => {
+      removeOverride(projectId);
+    };
+  }, [
+    projectId,
+    project?.eventName,
+    project?.projectTypeName,
+    project?.code,
+    setOverride,
+    removeOverride,
+  ]);
 
   // Mutations
   const markAllComplete = useMutation(
@@ -48,40 +87,45 @@ export function FolderListingView({
 
   const handleFolderClick = (folder: any) => {
     // Navigate to dedicated folder upload page
-    const baseRoute = isAdmin
-      ? `/projects/${projectId}/folders`
-      : `/projects/${projectId}/folders`;
-    // Wait, let's make sure the path is correct
+    let baseRoute = `/projects/${projectId}/folders`;
+
+    if (isEmployee) {
+      baseRoute = `/assigned-work/${projectId}/folders`;
+    }
+
     router.push(`${baseRoute}/${folder._id}`);
   };
 
   const handleUploadsComplete = async () => {
     try {
       await markAllComplete({ projectId: projectId as Id<"projects"> });
-      toast.success("Project transitioned to uploads complete!");
+      toast.success("Project submitted successfully!");
     } catch (error: any) {
-      toast.error(error.message || "Failed to complete uploads");
+      toast.error(error.message || "Failed to submit project");
     }
   };
 
   if (!project || folders === undefined) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
-        <p className="text-white/40 font-bold uppercase tracking-widest text-[10px]">
-          Loading Folders...
-        </p>
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in">
+        <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-12 w-64 bg-white/5" />
+          </div>
+          <Skeleton className="h-12 w-48 rounded-xl bg-white/5" />
+        </div>
+        <FolderGridSkeleton />
       </div>
     );
   }
 
-  const showCompleteButton =
+  const showSubmitButton =
     project.actionState === "awaiting_uploads" && folders.length > 0;
 
   return (
-    <div className="space-y-10">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-5">
+      <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center justify-between">
         <div className="flex items-center gap-4">
           <Button
             variant="outline"
@@ -92,28 +136,52 @@ export function FolderListingView({
             <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex items-center gap-3">
-            <div className="p-3 rounded-2xl bg-primary/10 border border-primary/20">
+            <div className="p-3 rounded-2xl bg-primary/10 border border-white/5 shadow-inner">
               <FolderTree className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-black uppercase tracking-tight text-white">
+              <h1 className="text-2xl font-black uppercase tracking-tight text-white leading-none">
                 Project Folders
               </h1>
-              <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
+              <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1">
                 {project.code} • {folders.length} Folders Configured
               </p>
             </div>
           </div>
         </div>
 
-        {showCompleteButton && (
-          <Button
-            onClick={handleUploadsComplete}
-            className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 group"
-          >
-            <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
-            Finalize My Uploads
-          </Button>
+        {showSubmitButton && (
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button className="h-14 px-8 rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-500/20 group">
+                <CheckCircle2 className="h-4 w-4 mr-2 group-hover:scale-110 transition-transform" />
+                Mark as Submit
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="bg-zinc-950 border border-white/10 rounded-3xl">
+              <AlertDialogHeader>
+                <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white">
+                  Confirm Project Submission
+                </AlertDialogTitle>
+                <AlertDialogDescription className="text-white/60 font-medium">
+                  Are you sure you want to submit this project? Once submitted,
+                  you won't be able to upload more files to these folders. Any
+                  pending folders will be marked as complete.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="mt-6">
+                <AlertDialogCancel className="rounded-xl border-white/10 hover:bg-white/5 text-white/50 uppercase tracking-widest text-[10px] font-black h-12 px-6">
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleUploadsComplete}
+                  className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black uppercase tracking-widest text-[10px] font-black h-12 px-6"
+                >
+                  Yes, Submit Project
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </div>
 
@@ -125,13 +193,14 @@ export function FolderListingView({
       >
         <FolderGrid
           folders={folders}
+          isAdmin={isAdmin}
           onFolderClick={handleFolderClick}
-          title=""
+          title="Project Folders"
         />
       </motion.div>
 
       {/* Instructions */}
-      {project.actionState === "awaiting_uploads" && (
+      {/* {project.actionState === "awaiting_uploads" && (
         <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 max-w-2xl">
           <h4 className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-2">
             Upload Instructions
@@ -145,7 +214,7 @@ export function FolderListingView({
             button to notify our team.
           </p>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

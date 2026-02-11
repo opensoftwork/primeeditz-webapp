@@ -1,8 +1,7 @@
-import React from "react"
-import { Button } from "@/components/ui/button"
-
-import Link from "next/link"
-import { Header } from "../header"
+import Link from "next/link";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Header } from "../header";
 
 export function HeroSection() {
   return (
@@ -30,7 +29,13 @@ export function HeroSection() {
               width="1200"
               height="812"
             >
-              <rect x="10" y="-0.84668" width="1200" height="811.693" fill="url(#paint0_linear_186_1134)" />
+              <rect
+                x="10"
+                y="-0.84668"
+                width="1200"
+                height="811.693"
+                fill="url(#paint0_linear_186_1134)"
+              />
             </mask>
             <g mask="url(#mask0_186_1134)">
               {/* Grid Rectangles */}
@@ -259,18 +264,102 @@ export function HeroSection() {
                 </React.Fragment>
               ))}
               {/* Specific Rectangles with fill */}
-              <rect x="699.711" y="81" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.08" />
-              <rect x="195.711" y="153" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="1023.71" y="153" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="123.711" y="225" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="1095.71" y="225" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="951.711" y="297" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="231.711" y="333" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
-              <rect x="303.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
-              <rect x="87.7109" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="519.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.08" />
-              <rect x="771.711" y="405" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.09" />
-              <rect x="591.711" y="477" width="36" height="36" fill="hsl(var(--foreground))" fillOpacity="0.07" />
+              <rect
+                x="699.711"
+                y="81"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.08"
+              />
+              <rect
+                x="195.711"
+                y="153"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="1023.71"
+                y="153"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="123.711"
+                y="225"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="1095.71"
+                y="225"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="951.711"
+                y="297"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="231.711"
+                y="333"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.07"
+              />
+              <rect
+                x="303.711"
+                y="405"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.07"
+              />
+              <rect
+                x="87.7109"
+                y="405"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="519.711"
+                y="405"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.08"
+              />
+              <rect
+                x="771.711"
+                y="405"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.09"
+              />
+              <rect
+                x="591.711"
+                y="477"
+                width="36"
+                height="36"
+                fill="hsl(var(--foreground))"
+                fillOpacity="0.07"
+              />
             </g>
 
             <g filter="url(#filter0_f_186_1134)">
@@ -288,14 +377,20 @@ export function HeroSection() {
               />
             </g>
 
-            <g style={{ mixBlendMode: "lighten" }} filter="url(#filter2_f_186_1134)">
+            <g
+              style={{ mixBlendMode: "lighten" }}
+              filter="url(#filter2_f_186_1134)"
+            >
               <path
                 d="M1567.45 -231.02V-293.03H1890V1104.85H586.158V750.269C1128.11 750.269 1567.45 310.931 1567.45 -231.02Z"
                 fill="url(#paint3_linear_186_1134)"
               />
             </g>
 
-            <g style={{ mixBlendMode: "overlay" }} filter="url(#filter3_f_186_1134)">
+            <g
+              style={{ mixBlendMode: "overlay" }}
+              filter="url(#filter3_f_186_1134)"
+            >
               <path
                 d="M65.625 750.269H284.007C860.205 750.269 1327.31 283.168 1327.31 -293.03H1650V1104.85H65.625V750.269Z"
                 fill="url(#paint4_radial_186_1134)"
@@ -325,8 +420,16 @@ export function HeroSection() {
               colorInterpolationFilters="sRGB"
             >
               <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="159.394" result="effect1_foregroundBlur_186_1134" />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="BackgroundImageFix"
+                result="shape"
+              />
+              <feGaussianBlur
+                stdDeviation="159.394"
+                result="effect1_foregroundBlur_186_1134"
+              />
             </filter>
             <filter
               id="filter1_f_186_1134"
@@ -338,8 +441,16 @@ export function HeroSection() {
               colorInterpolationFilters="sRGB"
             >
               <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="478.182" result="effect1_foregroundBlur_186_1134" />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="BackgroundImageFix"
+                result="shape"
+              />
+              <feGaussianBlur
+                stdDeviation="478.182"
+                result="effect1_foregroundBlur_186_1134"
+              />
             </filter>
             <filter
               id="filter2_f_186_1134"
@@ -351,8 +462,16 @@ export function HeroSection() {
               colorInterpolationFilters="sRGB"
             >
               <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="79.6969" result="effect1_foregroundBlur_186_1134" />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="BackgroundImageFix"
+                result="shape"
+              />
+              <feGaussianBlur
+                stdDeviation="79.6969"
+                result="effect1_foregroundBlur_186_1134"
+              />
             </filter>
             <filter
               id="filter3_f_186_1134"
@@ -364,8 +483,16 @@ export function HeroSection() {
               colorInterpolationFilters="sRGB"
             >
               <feFlood floodOpacity="0" result="BackgroundImageFix" />
-              <feBlend mode="normal" in="SourceGraphic" in2="BackgroundImageFix" result="shape" />
-              <feGaussianBlur stdDeviation="159.394" result="effect1_foregroundBlur_186_1134" />
+              <feBlend
+                mode="normal"
+                in="SourceGraphic"
+                in2="BackgroundImageFix"
+                result="shape"
+              />
+              <feGaussianBlur
+                stdDeviation="159.394"
+                result="effect1_foregroundBlur_186_1134"
+              />
             </filter>
             <linearGradient
               id="paint0_linear_186_1134"
@@ -427,7 +554,12 @@ export function HeroSection() {
               <stop offset="1" stopColor="hsl(var(--primary))" />
             </radialGradient>
             <clipPath id="clip0_186_1134">
-              <rect width="1220" height="810" rx="16" fill="hsl(var(--foreground))" />
+              <rect
+                width="1220"
+                height="810"
+                rx="16"
+                fill="hsl(var(--foreground))"
+              />
             </clipPath>
           </defs>
         </svg>
@@ -443,15 +575,20 @@ export function HeroSection() {
           Unleash the Power of AI Agents
         </h1>
         <p className="text-muted-foreground text-base md:text-base lg:text-lg font-medium leading-relaxed max-w-lg mx-auto">
-          Accelerate your development workflow with intelligent AI agents that write, review, and optimize your code.
+          Accelerate your development workflow with intelligent AI agents that
+          write, review, and optimize your code.
         </p>
       </div>
 
-      <Link href="https://vercel.com/home" target="_blank" rel="noopener noreferrer">
+      <Link
+        href="https://vercel.com/home"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
         <Button className="relative z-10 bg-secondary text-secondary-foreground hover:bg-secondary/90 px-8 py-3 rounded-full font-medium text-base shadow-lg ring-1 ring-white/10">
           Signup for free
         </Button>
       </Link>
     </section>
-  )
+  );
 }

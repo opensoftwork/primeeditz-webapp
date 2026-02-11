@@ -1,18 +1,28 @@
 "use client";
 
-import React, { useEffect, useState, useMemo } from "react";
-import Image from "next/image";
-import { LayoutGrid, FileText, Eye, Loader2, ArrowRight, ExternalLink } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { motion } from "motion/react";
-import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { DetailSection } from "./shared";
+import { useAction } from "convex/react";
+import {
+  ArrowRight,
+  ExternalLink,
+  Eye,
+  FileText,
+  LayoutGrid,
+  Loader2,
+  Video,
+  Music,
+} from "lucide-react";
+import { motion } from "motion/react";
+import Image from "next/image";
+import React, { useEffect, useMemo, useState } from "react";
 import {
   FilesVaultDrawer,
-  VaultFile,
+  type VaultFile,
 } from "@/components/shared/files-vault/drawer";
-import { ImageSlider } from "@/components/shared/image-viewer/image-slider";
+import { AssetSlider } from "@/components/shared/asset-viewer";
+import { Button } from "@/components/ui/button";
+import { DetailSection } from "./shared";
+import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 
 interface ReferenceFile {
   fileId: string;
@@ -29,17 +39,18 @@ interface ReferenceMaterialsProps {
 
 export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
-    {}
+    {},
   );
   const [loading, setLoading] = useState(false);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
-  const [selectedImageIndex, setSelectedImageIndex] = useState<number | null>(
-    null
+  const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
+    null,
   );
+  const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
 
   // Action to get signed URLs
   const getSignedUrls = useAction(
-    api.functions.storage.actions.getSignedFileUrls
+    api.functions.storage.actions.getSignedFileUrls,
   );
 
   // Extract storage keys
@@ -67,23 +78,48 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   }, [storageKeys, getSignedUrls]);
 
   // Filter images for the slider
-  const imagesForSlider = useMemo(() => {
+  const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => f.fileType.startsWith("image/"))
+      .filter(
+        (f) =>
+          f.fileType.startsWith("image/") ||
+          f.fileType.startsWith("video/") ||
+          f.fileType.startsWith("audio/") ||
+          f.fileType === "application/pdf",
+      )
       .map((file) => ({
         url:
           (file.storageKey ? signedUrls[file.storageKey] : file.previewUrl) ||
           "",
         fileName: file.fileName,
         fileId: file.fileId,
+        mimeType: file.fileType,
       }))
-      .filter((img) => img.url !== "");
+      .filter((asset) => asset.url !== "");
   }, [files, signedUrls]);
 
-  const handleImageClick = (fileId: string) => {
-    const index = imagesForSlider.findIndex((img) => img.fileId === fileId);
-    if (index !== -1) {
-      setSelectedImageIndex(index);
+  const handleFileClick = (fileId: string) => {
+    const file = vaultFiles.find((f) => f.id === fileId);
+    if (!file || !file.url) {
+      setIsDrawerOpen(true);
+      return;
+    }
+
+    const isSliderType =
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/") ||
+      file.type.startsWith("audio/") ||
+      file.type === "application/pdf";
+
+    if (isSliderType) {
+      const index = assetsForSlider.findIndex(
+        (asset) => asset.fileId === fileId,
+      );
+      if (index !== -1) {
+        setSelectedAssetIndex(index);
+      }
+    } else {
+      setPreviewFile(file);
     }
   };
 
@@ -121,16 +157,20 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
               className="rounded-xl border-white/10 hover:bg-primary/10 hover:text-primary hover:border-primary/20 font-black uppercase tracking-widest text-[10px] h-10 px-5 gap-2"
               onClick={() => setIsDrawerOpen(true)}
             >
-              OPEN VAULT <ExternalLink className="h-3.5 w-3.5" />
+              OPEN VAULT
             </Button>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {displayFiles.map((file, idx) => {
               const imageUrl = file.storageKey
                 ? signedUrls[file.storageKey]
                 : file.previewUrl;
               const isImage = file.fileType?.startsWith("image/");
+              const isVideo = file.fileType?.startsWith("video/");
+              const isAudio = file.fileType?.startsWith("audio/");
+              const isPDF = file.fileType === "application/pdf";
+
               const isLoadingUrl =
                 loading && file.storageKey && !signedUrls[file.storageKey];
 
@@ -140,16 +180,12 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                   initial={{ opacity: 0, scale: 0.95 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ delay: idx * 0.05, duration: 0.3 }}
-                  className="group relative aspect-square rounded-2xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer"
-                  onClick={() =>
-                    isImage
-                      ? handleImageClick(file.fileId)
-                      : setIsDrawerOpen(true)
-                  }
+                  className="group relative aspect-square rounded-xl bg-white/5 border border-white/5 overflow-hidden transition-all duration-500 cursor-pointer shadow-sm hover:shadow-indigo-500/10"
+                  onClick={() => handleFileClick(file.fileId)}
                 >
                   {isLoadingUrl ? (
                     <div className="flex items-center justify-center h-full">
-                      <Loader2 className="h-6 w-6 animate-spin text-white/20" />
+                      <Loader2 className="h-4 w-4 animate-spin text-white/20" />
                     </div>
                   ) : imageUrl && isImage ? (
                     <Image
@@ -160,16 +196,38 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                       unoptimized
                     />
                   ) : (
-                    <div className="flex flex-col items-center justify-center h-full gap-2 text-white/20">
-                      <FileText className="h-8 w-8" />
-                      <span className="text-[8px] font-black uppercase tracking-[0.2em]">
+                    <div className="flex flex-col items-center justify-center h-full gap-2.5 text-white/20">
+                      {isVideo ? (
+                        <Video className="h-8 w-8" />
+                      ) : isAudio ? (
+                        <div className="flex flex-col items-center justify-center h-full w-full bg-black relative">
+                          <div className="flex items-center gap-1">
+                            {[0, 1, 2, 3, 4].map((i) => (
+                              <div
+                                key={i}
+                                className="w-1 bg-white/40 rounded-full animate-pulse"
+                                style={{
+                                  height: `${15 + Math.random() * 25}px`,
+                                  animationDelay: `${i * 0.1}s`,
+                                }}
+                              />
+                            ))}
+                          </div>
+                          <span className="absolute bottom-3 text-[7px] font-black uppercase tracking-[0.2em] text-white/20">
+                            AUDIO
+                          </span>
+                        </div>
+                      ) : (
+                        <FileText className="h-8 w-8" />
+                      )}
+                      <span className="text-[9px] font-black uppercase tracking-[0.2em]">
                         {file.fileType?.split("/")[1]?.toUpperCase() || "FILE"}
                       </span>
                     </div>
                   )}
 
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-                    <ExternalLink className="h-5 w-5 text-white" />
+                    {/* Icon removed per user request */}
                   </div>
                 </motion.div>
               );
@@ -181,12 +239,12 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.2, duration: 0.3 }}
                 onClick={() => setIsDrawerOpen(true)}
-                className="group relative aspect-square rounded-2xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-2 transition-all duration-500 hover:bg-white/10"
+                className="group relative aspect-square rounded-xl bg-white/5 border border-dashed border-white/10 flex flex-col items-center justify-center gap-1 transition-all duration-500 hover:bg-white/10"
               >
-                <span className="text-lg font-black text-white">
-                  +{remainingCount}
+                <span className="text-sm font-black text-white">
+                  {remainingCount}
                 </span>
-                <span className="text-[8px] font-black uppercase tracking-widest text-white/30">
+                <span className="text-[7px] font-black uppercase tracking-widest text-white/30">
                   More Files
                 </span>
               </motion.button>
@@ -194,7 +252,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
           </div>
         </div>
       ) : (
-        <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-[2rem] bg-white/1">
+        <div className="py-12 text-center border-2 border-dashed border-white/5 rounded-4xl bg-white/1">
           <p className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20">
             No assets tagged in this production
           </p>
@@ -208,7 +266,7 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
         title="Production Vault"
         subtitle={`Reference Materials • ${files.length} items`}
         files={vaultFiles}
-        onImageClick={handleImageClick}
+        onImageClick={handleFileClick}
         onDownload={(file) => {
           if (file.url) {
             const link = document.createElement("a");
@@ -219,13 +277,13 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
         }}
       />
 
-      {/* Unified Image Projection Slider */}
-      <ImageSlider
-        images={imagesForSlider}
-        initialIndex={selectedImageIndex ?? 0}
-        open={selectedImageIndex !== null}
+      {/* Unified Asset Projection Slider */}
+      <AssetSlider
+        assets={assetsForSlider}
+        initialIndex={selectedAssetIndex ?? 0}
+        open={selectedAssetIndex !== null}
         onOpenChange={(open) => {
-          if (!open) setSelectedImageIndex(null);
+          if (!open) setSelectedAssetIndex(null);
         }}
         onDownload={(fileId, fileName, url) => {
           const link = document.createElement("a");
@@ -233,6 +291,15 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
           link.download = fileName;
           link.click();
         }}
+      />
+
+      {/* Universal File Projection Slider */}
+      <FilePreviewOverlay
+        open={!!previewFile}
+        onOpenChange={(open) => !open && setPreviewFile(null)}
+        url={previewFile?.url || null}
+        fileName={previewFile?.name || ""}
+        mimeType={previewFile?.type}
       />
     </DetailSection>
   );

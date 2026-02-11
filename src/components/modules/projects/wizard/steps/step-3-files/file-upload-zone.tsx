@@ -1,7 +1,7 @@
 "use client";
 
+import { AlertCircle, Plus, Upload } from "lucide-react";
 import { motion } from "motion/react";
-import { Upload, Plus, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface FileUploadZoneProps {
@@ -57,7 +57,7 @@ export function FileUploadZone({
           "relative flex flex-col items-center justify-center min-h-[280px] rounded-[2.5rem] border-2 border-dashed transition-all duration-700 cursor-pointer overflow-hidden",
           isUploading
             ? "border-primary/20 bg-primary/5 cursor-wait"
-            : "border-white/5 bg-white/2 hover:bg-white/4 hover:border-primary/30 group-hover:border-primary/20"
+            : "border-white/5 bg-white/2 hover:bg-white/4 hover:border-primary/30 group-hover:border-primary/20",
         )}
       >
         {/* Decorative Grid Background */}
@@ -72,7 +72,7 @@ export function FileUploadZone({
               "p-6 rounded-3xl transition-all duration-700",
               isUploading
                 ? "bg-primary/20 scale-110 shadow-[0_0_30px_rgba(var(--primary),0.3)]"
-                : "bg-white/5 border border-white/10 group-hover:bg-primary/10 group-hover:border-primary/20 group-hover:scale-110"
+                : "bg-white/5 border border-white/10 group-hover:bg-primary/10 group-hover:border-primary/20 group-hover:scale-110",
             )}
           >
             {isUploading ? (

@@ -1,9 +1,9 @@
 "use client";
 
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { ArrowLeft, ArrowRight } from "lucide-react";
 
 interface NoFieldsStateProps {
   projectTypeName: string;

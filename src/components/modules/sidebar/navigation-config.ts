@@ -1,22 +1,22 @@
 import {
-  LayoutDashboard,
-  FolderKanban,
-  Users,
   Briefcase,
-  FileText,
-  Settings,
-  ClipboardList,
-  LayoutGrid,
   ClipboardCheck,
+  ClipboardList,
+  FileText,
+  FolderKanban,
   HardDrive,
-  FolderTree,
+  LayoutDashboard,
+  LayoutGrid,
   type LucideIcon,
+  Settings,
+  Users,
 } from "lucide-react";
 
 export interface NavItem {
   title: string;
   url: string;
   icon: LucideIcon;
+  badgeCount?: number;
 }
 
 export interface NavGroup {
@@ -24,8 +24,8 @@ export interface NavGroup {
   items: NavItem[];
 }
 
-// Client Navigation - Simple, focused on their projects
-export const clientNavItems: NavItem[] = [
+// Studio Navigation - Simple, focused on their projects
+export const studioNavItems: NavItem[] = [
   {
     title: "Dashboard",
     url: "/dashboard",
@@ -83,7 +83,7 @@ export const adminNavGroups: NavGroup[] = [
     label: "Relationships",
     items: [
       {
-        title: "Clients",
+        title: "Studios",
         url: "/clients",
         icon: Users,
       },
@@ -108,24 +108,14 @@ export const adminNavGroups: NavGroup[] = [
         icon: LayoutGrid,
       },
       {
-        title: "Quotation Sections",
-        url: "/settings/quotation-sections",
-        icon: LayoutGrid,
-      },
-      {
-        title: "Quotation Templates",
-        url: "/settings/quotation-templates",
-        icon: ClipboardCheck,
-      },
-      {
         title: "Storage Tiers",
         url: "/settings/storage-tiers",
         icon: HardDrive,
       },
       {
-        title: "Folder Templates",
-        url: "/settings/folder-templates",
-        icon: FolderTree,
+        title: "Service Packages",
+        url: "/settings/service-packages",
+        icon: ClipboardCheck,
       },
     ],
   },
@@ -145,15 +135,15 @@ export const commonNavGroup: NavGroup = {
 
 // Get navigation items based on role
 export function getNavItemsForRole(
-  role: "admin" | "employee" | "client" | null
+  role: "admin" | "employee" | "studio" | null,
 ): NavItem[] | NavGroup[] {
   switch (role) {
     case "admin":
       return adminNavGroups;
     case "employee":
       return employeeNavItems;
-    case "client":
-      return clientNavItems;
+    case "studio":
+      return studioNavItems;
     default:
       return [];
   }

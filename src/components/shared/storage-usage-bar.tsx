@@ -1,6 +1,6 @@
 "use client";
 
-import { HardDrive, AlertTriangle } from "lucide-react";
+import { AlertTriangle, HardDrive } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { cn } from "@/lib/utils";
 import { formatBytes } from "./project-folders/folder-card";

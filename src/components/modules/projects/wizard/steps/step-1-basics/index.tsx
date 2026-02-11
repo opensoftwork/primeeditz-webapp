@@ -1,16 +1,16 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useForm } from "@tanstack/react-form";
 import type { Id } from "@convex/_generated/dataModel";
+import { useForm } from "@tanstack/react-form";
+import { useEffect, useState } from "react";
 import { FieldGroup, FieldSet } from "@/components/ui/field";
-import { WizardLoadingState } from "../../wizard-loading-state";
-import { useWizardForm } from "../../wizard-form-context";
 import { ProjectTypeSelectionDrawer } from "../../project-type-drawer";
+import { useWizardForm } from "../../wizard-form-context";
+import { WizardLoadingState } from "../../wizard-loading-state";
+import { DateVenueFields } from "./date-venue-fields";
 import { Step1Header } from "./header";
 import { ProjectTypeField } from "./project-type-field";
-import { ClientEventFields } from "./client-event-fields";
-import { DateVenueFields } from "./date-venue-fields";
+import { StudioEventFields } from "./studio-event-fields";
 
 export function WizardStep1() {
   const {
@@ -29,30 +29,27 @@ export function WizardStep1() {
   const step0Data = formData.step0;
   const [projectTypeDrawerOpen, setProjectTypeDrawerOpen] = useState(false);
 
-  // Pre-fill endClientName if client is selected in Step 0 (Admin Mode)
-  const isClientSelectedOrNew =
+  // Pre-fill endClientName if studio is selected in Step 0 (Admin Mode)
+  const isStudioSelectedOrNew =
     mode === "admin" &&
-    (step0Data.selectionMode === "existing" || step0Data.selectionMode === "new") &&
-    !!step0Data.clientData;
+    (step0Data.selectionMode === "existing" ||
+      step0Data.selectionMode === "new") &&
+    !!step0Data.studioData;
 
-  const preFilledEndClientName = isClientSelectedOrNew
-    ? step0Data.clientData?.name
+  const preFilledEndStudioName = isStudioSelectedOrNew
+    ? step0Data.studioData?.name
     : step1Data.endClientName;
 
   const form = useForm({
     defaultValues: {
       projectTypeId: (step1Data.projectTypeId as string) ?? "",
-      endClientName: preFilledEndClientName ?? "",
-      eventName: step1Data.eventName,
-      eventDate: step1Data.eventDate,
+      endClientName: preFilledEndStudioName ?? "",
       venue: step1Data.venue,
     },
     onSubmit: async ({ value }) => {
       setFormData("step1", {
         projectTypeId: value.projectTypeId as Id<"projectTypes">,
         endClientName: value.endClientName,
-        eventName: value.eventName,
-        eventDate: value.eventDate ?? null,
         venue: value.venue ?? "",
       });
       if (isReviewing) {
@@ -66,12 +63,12 @@ export function WizardStep1() {
 
   // Sync endClientName if it changes in step0 (though step0 usually happens before step1)
   useEffect(() => {
-    if (isClientSelectedOrNew && step0Data.clientData?.name) {
-      if (form.getFieldValue("endClientName") !== step0Data.clientData.name) {
-        form.setFieldValue("endClientName", step0Data.clientData.name);
+    if (isStudioSelectedOrNew && step0Data.studioData?.name) {
+      if (form.getFieldValue("endClientName") !== step0Data.studioData.name) {
+        form.setFieldValue("endClientName", step0Data.studioData.name);
       }
     }
-  }, [isClientSelectedOrNew, step0Data.clientData?.name, form]);
+  }, [isStudioSelectedOrNew, step0Data.studioData?.name, form]);
 
   const handleProjectTypeSelect = (projectTypeId: string) => {
     form.setFieldValue("projectTypeId", projectTypeId);
@@ -113,10 +110,10 @@ export function WizardStep1() {
                     )}
                   />
 
-                  <ClientEventFields
+                  <StudioEventFields
                     form={form}
                     mode={mode}
-                    isClientSelectedOrNew={isClientSelectedOrNew}
+                    isStudioSelectedOrNew={isStudioSelectedOrNew}
                     selectionMode={step0Data.selectionMode}
                   />
                   <DateVenueFields form={form} />

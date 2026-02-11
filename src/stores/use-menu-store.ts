@@ -1,6 +1,6 @@
 /**
  * Menu Store
- * 
+ *
  * Zustand store for managing the mobile menu state across the landing page.
  */
 

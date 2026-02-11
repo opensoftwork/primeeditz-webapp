@@ -1,6 +1,6 @@
 import type { Doc, Id } from "@convex/_generated/dataModel";
 
-export type ClientProject = {
+export type StudioProject = {
   _id: Id<"projects">;
   code: string;
   phase: Doc<"projects">["phase"];

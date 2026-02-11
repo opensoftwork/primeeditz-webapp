@@ -1,25 +1,14 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
 import { useForm } from "@tanstack/react-form";
+import { useMutation, useQuery } from "convex/react";
+import { ArrowRight, Plus, Tag } from "lucide-react";
+import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
 import { z } from "zod";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from "@/components/ui/drawer";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -28,17 +17,33 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useEffect, useState } from "react";
-import { useQuery, useMutation } from "convex/react";
-import { api } from "@convex/_generated/api";
-import { Plus, Tag, ArrowRight } from "lucide-react";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "motion/react";
+import {
+  Drawer,
+  DrawerContent,
+  DrawerDescription,
+  DrawerHeader,
+  DrawerTitle,
+} from "@/components/ui/drawer";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
+import { IconPicker } from "@/components/ui/icon-picker";
+import { Textarea } from "@/components/ui/textarea";
+import { DynamicIcon } from "@/components/ui/dynamic-icon";
 
 const projectTypeSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
+  description: z.string().max(500).optional().or(z.literal("")),
   categoryId: z.string().min(1, "Category is required"),
   isActive: z.boolean().default(true),
+  icon: z.string().optional().or(z.literal("")),
 });
 
 export type ProjectTypeFormValues = z.infer<typeof projectTypeSchema>;
@@ -60,17 +65,19 @@ export function ProjectTypeDrawer({
   const [newCategoryName, setNewCategoryName] = useState("");
 
   const categories = useQuery(
-    api.functions.projectCategories.queries.getActiveCategories
+    api.functions.projectCategories.queries.getActiveCategories,
   );
   const createCategory = useMutation(
-    api.functions.projectCategories.mutations.createCategoryOnFly
+    api.functions.projectCategories.mutations.createCategoryOnFly,
   );
 
   const form = useForm({
     defaultValues: {
       name: initialData?.name ?? "",
+      description: initialData?.description ?? "",
       categoryId: initialData?.categoryId ?? "",
       isActive: initialData?.isActive ?? true,
+      icon: initialData?.icon ?? "",
     },
     onSubmit: async ({ value }) => {
       await onSave(value as ProjectTypeFormValues);
@@ -187,20 +194,78 @@ export function ProjectTypeDrawer({
                       >
                         Step 02 / Define Type Name
                       </Label>
-                      <Input
+                      <div className="flex items-center gap-3">
+                        <div className="shrink-0 w-14 h-14 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center">
+                          <form.Subscribe
+                            selector={(state) => state.values.icon}
+                          >
+                            {(icon) => (
+                              <DynamicIcon
+                                name={icon || "Package"}
+                                className="h-6 w-6 text-primary"
+                              />
+                            )}
+                          </form.Subscribe>
+                        </div>
+                        <Input
+                          id={field.name}
+                          name={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20 font-bold flex-1"
+                          placeholder="e.g. Cinematic Wedding Edit"
+                        />
+                      </div>
+                      {field.state.meta.errors.length > 0 && (
+                        <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
+                          {field.state.meta.errors
+                            .map((err: any) =>
+                              typeof err === "string" ? err : err?.message,
+                            )
+                            .filter(Boolean)
+                            .join(", ")}
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="description">
+                  {(field) => (
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/40"
+                      >
+                        Description (Optional)
+                      </Label>
+                      <Textarea
                         id={field.name}
                         name={field.name}
                         value={field.state.value}
                         onBlur={field.handleBlur}
                         onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-white/5 border-white/10 text-white h-14 rounded-2xl focus:ring-primary/20 font-bold"
-                        placeholder="e.g. Cinematic Wedding Edit"
+                        className="bg-white/5 border-white/10 text-white h-24 rounded-2xl focus:ring-primary/20 resize-none"
+                        placeholder="Briefly describe what this project type covers..."
                       />
-                      {field.state.meta.errors.length > 0 && (
-                        <p className="text-[10px] font-bold text-red-500 uppercase tracking-widest">
-                          {field.state.meta.errors.join(", ")}
-                        </p>
-                      )}
+                    </div>
+                  )}
+                </form.Field>
+
+                <form.Field name="icon">
+                  {(field) => (
+                    <div className="space-y-3">
+                      <Label
+                        htmlFor={field.name}
+                        className="text-[10px] font-black uppercase tracking-widest text-white/40"
+                      >
+                        Icon Identifier (Optional)
+                      </Label>
+                      <IconPicker
+                        value={field.state.value}
+                        onChange={(val) => field.handleChange(val)}
+                      />
                     </div>
                   )}
                 </form.Field>
@@ -259,7 +324,7 @@ export function ProjectTypeDrawer({
       </Drawer>
 
       <Dialog open={isAddingCategory} onOpenChange={setIsAddingCategory}>
-        <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px] rounded-[2rem]">
+        <DialogContent className="bg-zinc-950 border-white/10 sm:max-w-[425px] rounded-4xl">
           <DialogHeader>
             <DialogTitle className="text-xl font-black text-white uppercase tracking-tighter">
               New Master Category

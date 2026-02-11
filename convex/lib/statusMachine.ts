@@ -1,29 +1,40 @@
 /**
  * Status Machine Utilities
- * 
+ *
  * Provides centralized logic for valid project status transitions,
  * phase mappings, and actor assignments.
  */
 
-import { ActionState, ProjectPhase, Role } from "../schema";
+import type { ActionState, ProjectPhase, Role } from "../schema";
 
 // Transition map defining allowed target states for each current state
 const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   // Setup Phase
-  draft: ["awaiting_quotation", "quotation_sent", "quotation_approved", "cancelled"],
+  draft: [
+    "awaiting_quotation",
+    "quotation_sent",
+    "quotation_approved",
+    "cancelled",
+  ],
   awaiting_quotation: ["quotation_sent", "cancelled"],
-  quotation_sent: ["quotation_approved", "quotation_rejected", "awaiting_quotation", "cancelled"],
+  quotation_sent: [
+    "quotation_approved",
+    "quotation_rejected",
+    "awaiting_quotation",
+    "cancelled",
+  ],
   quotation_approved: ["storage_allocated", "cancelled"],
   quotation_rejected: ["awaiting_quotation", "cancelled"],
-  storage_allocated: ["awaiting_uploads"],
+  storage_allocated: ["awaiting_onboarding"],
 
   // Onboarding Phase
+  awaiting_onboarding: ["awaiting_uploads"], // Studio completes onboarding first
   awaiting_uploads: ["uploads_complete"],
   uploads_complete: ["awaiting_assignment", "assigned"],
   awaiting_assignment: ["assigned"],
 
   // Production Phase
-  assigned: ["work_in_progress"],
+  assigned: ["work_in_progress", "deliverables_ready"],
   work_in_progress: ["deliverables_ready"],
   deliverables_ready: ["awaiting_review", "work_in_progress"], // QC approve/reject
 
@@ -51,22 +62,23 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   quotation_approved: "setup",
   quotation_rejected: "setup",
   storage_allocated: "setup",
-  
+
+  awaiting_onboarding: "onboarding",
   awaiting_uploads: "onboarding",
   uploads_complete: "onboarding",
   awaiting_assignment: "onboarding",
-  
+
   assigned: "production",
   work_in_progress: "production",
   deliverables_ready: "production",
-  
+
   awaiting_review: "review",
   revisions_requested: "review",
   review_approved: "review",
-  
+
   preparing_delivery: "delivery",
   ready_for_delivery: "delivery",
-  
+
   delivered: "completed",
   completed: "completed",
   cancelled: "archived",
@@ -75,24 +87,25 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
 
 // Role mapping: who is responsible for the project in this state
 const STATE_TO_ACTOR: Record<ActionState, Role> = {
-  draft: "client",
+  draft: "studio",
   awaiting_quotation: "admin",
-  quotation_sent: "client",
+  quotation_sent: "studio",
   quotation_approved: "admin",
   quotation_rejected: "admin",
   storage_allocated: "admin",
-  awaiting_uploads: "client",
+  awaiting_onboarding: "studio",
+  awaiting_uploads: "studio",
   uploads_complete: "admin",
   awaiting_assignment: "admin",
   assigned: "employee",
   work_in_progress: "employee",
   deliverables_ready: "admin",
-  awaiting_review: "client",
+  awaiting_review: "studio",
   revisions_requested: "employee",
   review_approved: "admin",
   preparing_delivery: "admin",
   ready_for_delivery: "admin",
-  delivered: "client",
+  delivered: "studio",
   completed: "admin",
   cancelled: "admin",
   archived: "admin",

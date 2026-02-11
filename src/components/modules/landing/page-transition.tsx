@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
 import gsap from "gsap";
+import { usePathname } from "next/navigation";
+import { useEffect, useRef } from "react";
 
 // Animation function for revealing the page
 function revealTransition() {

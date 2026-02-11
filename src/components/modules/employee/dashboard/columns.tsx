@@ -1,15 +1,10 @@
 "use client";
 
-import Link from "next/link";
-import { type ColumnDef, type CellContext } from "@tanstack/react-table";
-import {
-  LayoutGrid,
-  Clock,
-  ArrowRight,
-  Calendar,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
+import type { CellContext, ColumnDef } from "@tanstack/react-table";
 import { formatDistanceToNow } from "date-fns";
+import { ArrowRight, Calendar, Clock, LayoutGrid } from "lucide-react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 export const columns: ColumnDef<any>[] = [
@@ -52,18 +47,22 @@ export const columns: ColumnDef<any>[] = [
     header: "Status",
     cell: ({ row }: CellContext<any, any>) => {
       const state = row.getValue("actionState") as string;
-      const isWip = state === 'work_in_progress';
+      const isWip = state === "work_in_progress";
       return (
         <div className="flex items-center gap-2">
-          <div className={cn(
-            "h-1.5 w-1.5 rounded-full animate-pulse",
-            isWip ? "bg-indigo-400" : "bg-amber-400"
-          )} />
-          <span className={cn(
-            "text-[10px] font-black uppercase tracking-widest",
-            isWip ? "text-indigo-400" : "text-amber-400"
-          )}>
-            {state.replace(/_/g, ' ')}
+          <div
+            className={cn(
+              "h-1.5 w-1.5 rounded-full animate-pulse",
+              isWip ? "bg-indigo-400" : "bg-amber-400",
+            )}
+          />
+          <span
+            className={cn(
+              "text-[10px] font-black uppercase tracking-widest",
+              isWip ? "text-indigo-400" : "text-amber-400",
+            )}
+          >
+            {state.replace(/_/g, " ")}
           </span>
         </div>
       );

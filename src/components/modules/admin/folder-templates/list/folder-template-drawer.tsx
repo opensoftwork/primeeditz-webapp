@@ -1,7 +1,21 @@
 "use client";
 
+import { api } from "@convex/_generated/api";
+import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
+import { useQuery } from "convex/react";
+import {
+  ArrowRight,
+  ChevronRight,
+  FolderTree,
+  Globe,
+  Info,
+  Star,
+  Tag,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Drawer,
   DrawerContent,
@@ -9,17 +23,11 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { useEffect, useState } from "react";
-import { FolderTree, Tag, Info, ArrowRight, Star, ChevronRight, Globe } from "lucide-react";
 import { FolderListEditor } from "./folder-list-editor";
 import { ProjectTypePickerDrawer } from "./project-type-picker-drawer";
-import { useQuery } from "convex/react";
-import { api } from "@convex/_generated/api";
-import type { Id } from "@convex/_generated/dataModel";
 
 const folderTemplateSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -53,7 +61,9 @@ export function FolderTemplateDrawer({
   onSave,
   initialData,
 }: FolderTemplateDrawerProps) {
-  const projectTypes = useQuery(api.functions.projectTypes.queries.getProjectTypes);
+  const projectTypes = useQuery(
+    api.functions.projectTypes.queries.getProjectTypes,
+  );
   const [isProjectTypePickerOpen, setIsProjectTypePickerOpen] = useState(false);
 
   const form = useForm({
@@ -149,9 +159,10 @@ export function FolderTemplateDrawer({
                       <ChevronRight className="h-4 w-4 text-white/30 group-hover:text-white/50 transition-colors" />
                     </button>
                     <p className="text-[9px] text-white/20 font-medium px-1 leading-relaxed">
-                      General templates appear for all projects. Specific templates only show for projects of that type.
+                      General templates appear for all projects. Specific
+                      templates only show for projects of that type.
                     </p>
-                    
+
                     {/* Project Type Picker Drawer */}
                     <ProjectTypePickerDrawer
                       open={isProjectTypePickerOpen}
@@ -167,9 +178,9 @@ export function FolderTemplateDrawer({
             {/* Step 02: Folder Structure */}
             <form.Field name="folders">
               {(field) => (
-                <FolderListEditor 
-                  folders={field.state.value} 
-                  onChange={field.handleChange} 
+                <FolderListEditor
+                  folders={field.state.value}
+                  onChange={field.handleChange}
                 />
               )}
             </form.Field>
@@ -238,7 +249,9 @@ export function FolderTemplateDrawer({
               {({ canSubmit, isSubmitting, name, folders }) => (
                 <Button
                   type="submit"
-                  disabled={!canSubmit || isSubmitting || !name || folders.length === 0}
+                  disabled={
+                    !canSubmit || isSubmitting || !name || folders.length === 0
+                  }
                   className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
                 >
                   <div className="flex items-center gap-3">
