@@ -35,7 +35,7 @@ import type {
 // Types
 // ============================================================================
 
-export type QuotationStepId = 1 | 2 | 3 | 4;
+export type QuotationStepId = 1 | 2 | 3;
 
 export interface QuotationFormData {
   step1: {
@@ -90,8 +90,7 @@ export const INITIAL_FORM_DATA: QuotationFormData = {
 export const QUOTATION_STEPS = [
   { id: 1 as const, label: "Studio & Context" },
   { id: 2 as const, label: "Package Selection" },
-  { id: 3 as const, label: "Items & Terms" },
-  { id: 4 as const, label: "Review & Send" },
+  { id: 3 as const, label: "Review & Send" },
 ];
 
 // ============================================================================
@@ -162,7 +161,7 @@ export function useQuotationBuilder() {
 interface QuotationBuilderProviderProps {
   children: React.ReactNode;
   initialQuotationId?: string;
-  initialStep?: 1 | 2 | 3 | 4;
+  initialStep?: 1 | 2 | 3;
 }
 
 export function QuotationBuilderProvider({
@@ -193,6 +192,7 @@ export function QuotationBuilderProvider({
 
   // Query existing quotation if editing
   const existingQuotation = useQuery(
+    // @ts-ignore
     api.functions.quotations.queries.getQuotation,
     quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
   );
@@ -262,7 +262,7 @@ export function QuotationBuilderProvider({
         if (existingQuotation.lastStep) {
           setCurrentStep(existingQuotation.lastStep as QuotationStepId);
         }
-        
+
         lastUpdateTimestamp.current = serverTimestamp;
       }
     }
@@ -282,7 +282,8 @@ export function QuotationBuilderProvider({
     if (isDataReady && quotationId && !isLoading) {
       if (existingQuotation === null && draftWasSeen.current) {
         toast.error("Quotation session ended", {
-          description: "This quotation has been removed or finalized in another session.",
+          description:
+            "This quotation has been removed or finalized in another session.",
         });
         router.push("/quotations");
       }
@@ -351,7 +352,6 @@ export function QuotationBuilderProvider({
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
   const grandTotal = subtotal - formData.step5.discountAmount + taxAmount;
 
-
   // Save quotation core logic (shared between Finalize and Auto-save)
   const performSave = useCallback(
     async (isAutoSave = false, overrides: any = {}) => {
@@ -363,7 +363,11 @@ export function QuotationBuilderProvider({
         throw new Error("Please select a client");
 
       // Skip auto-save if no packages or line items (backend would reject anyway)
-      if (isAutoSave && step4.lineItems.length === 0 && step2.packageIds.length === 0) {
+      if (
+        isAutoSave &&
+        step4.lineItems.length === 0 &&
+        step2.packageIds.length === 0
+      ) {
         return null;
       }
 
@@ -474,19 +478,22 @@ export function QuotationBuilderProvider({
   );
 
   // Navigation
-  const goToStep = useCallback(async (step: number) => {
-    if (step >= 1 && step <= 4) {
-      setCurrentStep(step as QuotationStepId);
-      toast.promise(performSave(true, { lastStep: step }), {
-        loading: "Saving progress...",
-        success: "Progress saved",
-        error: "Failed to save progress",
-      });
-    }
-  }, [performSave]);
+  const goToStep = useCallback(
+    async (step: number) => {
+      if (step >= 1 && step <= 3) {
+        setCurrentStep(step as QuotationStepId);
+        toast.promise(performSave(true, { lastStep: step }), {
+          loading: "Saving progress...",
+          success: "Progress saved",
+          error: "Failed to save progress",
+        });
+      }
+    },
+    [performSave],
+  );
 
   const nextStep = useCallback(async () => {
-    const next = Math.min(currentStep + 1, 4) as QuotationStepId;
+    const next = Math.min(currentStep + 1, 3) as QuotationStepId;
     if (next !== currentStep) {
       setCurrentStep(next);
       toast.promise(performSave(true, { lastStep: next }), {
@@ -600,12 +607,18 @@ export function QuotationBuilderProvider({
       });
     });
 
+    const newTerms = selectedTemplates
+      .map((t) => t.terms)
+      .filter(Boolean)
+      .join("\n\n");
+
     if (newItems.length > 0) {
       setFormDataState((prev) => ({
         ...prev,
         step4: {
           ...prev.step4,
           lineItems: newItems,
+          terms: newTerms || prev.step4.terms,
         },
       }));
       setIsDirty(true);
@@ -626,8 +639,6 @@ export function QuotationBuilderProvider({
     },
     [],
   );
-
-
 
   // Save quotation (Public Action)
   const saveQuotation = useCallback(async () => {

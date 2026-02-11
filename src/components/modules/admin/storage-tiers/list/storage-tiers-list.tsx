@@ -45,6 +45,7 @@ export function StorageTiersList() {
   // State
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [editingTier, setEditingTier] = useState<StorageTier | null>(null);
+  const [isViewOnly, setIsViewOnly] = useState(false);
   const [tierToDelete, setTierToDelete] = useState<{
     id: Id<"storageTiers">;
     name: string;
@@ -77,6 +78,12 @@ export function StorageTiersList() {
       getColumns(
         (tier) => {
           setEditingTier(tier);
+          setIsViewOnly(true);
+          setIsDrawerOpen(true);
+        },
+        (tier) => {
+          setEditingTier(tier);
+          setIsViewOnly(false);
           setIsDrawerOpen(true);
         },
         handleToggleActive,
@@ -93,6 +100,7 @@ export function StorageTiersList() {
   // Handlers
   const handleCreate = () => {
     setEditingTier(null);
+    setIsViewOnly(false);
     setIsDrawerOpen(true);
   };
 
@@ -195,8 +203,14 @@ export function StorageTiersList() {
           <StorageTierCard
             key={tier._id}
             tier={tier}
+            onView={(tier) => {
+              setEditingTier(tier);
+              setIsViewOnly(true);
+              setIsDrawerOpen(true);
+            }}
             onEdit={(tier) => {
               setEditingTier(tier);
+              setIsViewOnly(false);
               setIsDrawerOpen(true);
             }}
             onDelete={(id, name) => {
@@ -232,6 +246,7 @@ export function StorageTiersList() {
         onOpenChange={setIsDrawerOpen}
         onSave={handleSave}
         initialData={editingTier}
+        isReadOnly={isViewOnly}
       />
 
       <AlertDialog

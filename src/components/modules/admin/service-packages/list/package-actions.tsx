@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Copy, Pencil, Power, Trash2 } from "lucide-react";
+import { Copy, Eye, Pencil, Power, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -81,6 +81,15 @@ export function PackageActions({ pkg }: PackageActionsProps) {
       <div className="flex items-center justify-end gap-2">
         <button
           onClick={() => router.push(`/settings/service-packages/${pkg._id}`)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-primary transition-colors"
+          title="View Package"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+        <button
+          onClick={() =>
+            router.push(`/settings/service-packages/${pkg._id}/edit`)
+          }
           className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
           title="Edit Package"
         >

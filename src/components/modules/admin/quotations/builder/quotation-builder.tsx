@@ -33,7 +33,6 @@ import { QuotationStepNavigation } from "./quotation-step-navigation";
 import {
   Step1StudioContext,
   Step2PackageSelection,
-  Step3ItemsTerms,
   Step5ReviewSend,
 } from "./steps";
 
@@ -46,7 +45,7 @@ export function QuotationBuilder({
   initialStep = 1,
 }: {
   quotationId?: string;
-  initialStep?: 1 | 2 | 3 | 4;
+  initialStep?: 1 | 2 | 3;
 }) {
   return (
     <QuotationBuilderProvider
@@ -80,7 +79,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
   } = useQuotationBuilder();
 
   const handlePrimaryAction = () => {
-    if (currentStep < 4) {
+    if (currentStep < 3) {
       if (submitTrigger) {
         submitTrigger();
       } else {
@@ -102,11 +101,6 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
       case 2:
         return formData.step2.packageIds.length > 0;
       case 3:
-        return (
-          formData.step4.lineItems.length > 0 &&
-          formData.step4.terms.trim().length > 0
-        );
-      case 4:
         return true;
       default:
         return false;
@@ -146,7 +140,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
           <div className="flex items-center gap-5">
             <div className="flex flex-col items-start gap-1">
               <span className="text-[9px] font-black uppercase tracking-widest text-primary">
-                Step {currentStep} of 4
+                Step {currentStep} of 3
               </span>
               <div className="flex gap-1">
                 {QUOTATION_STEPS.map((s) => (
@@ -274,8 +268,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   <div className="w-full mx-auto space-y-8">
                     {currentStep === 1 && <Step1StudioContext />}
                     {currentStep === 2 && <Step2PackageSelection />}
-                    {currentStep === 3 && <Step3ItemsTerms />}
-                    {currentStep === 4 && <Step5ReviewSend />}
+                    {currentStep === 3 && <Step5ReviewSend />}
                   </div>
                 </motion.div>
               </AnimatePresence>
@@ -296,14 +289,14 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
 
             <div className="flex items-center gap-4">
               <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/20 mr-2">
-                Step 0{currentStep} / 04
+                Step 0{currentStep} / 03
               </span>
               <Button
                 onClick={handlePrimaryAction}
                 disabled={!canSubmit || isLoading}
                 className={cn(
                   "h-12 px-10 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all min-w-[180px] group",
-                  currentStep === 4
+                  currentStep === 3
                     ? "bg-primary text-black hover:bg-primary/90 shadow-[0_10px_40px_rgba(var(--primary),0.2)]"
                     : "bg-white text-black hover:bg-white/90 shadow-[0_10px_40px_rgba(255,255,255,0.1)]",
                 )}
@@ -315,11 +308,11 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   </>
                 ) : (
                   <>
-                    {currentStep === 4 ? "Finalize" : "Next"}
-                    {currentStep < 4 && (
+                    {currentStep === 3 ? "Finalize" : "Next"}
+                    {currentStep < 3 && (
                       <ArrowRight className="ml-2 h-4 w-4 group-hover:translate-x-1 transition-transform" />
                     )}
-                    {currentStep === 4 && (
+                    {currentStep === 3 && (
                       <CheckCircle2 className="ml-2 h-4 w-4" />
                     )}
                   </>

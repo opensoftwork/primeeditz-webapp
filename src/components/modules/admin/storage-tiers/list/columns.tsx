@@ -1,7 +1,7 @@
 "use client";
 
 import type { ColumnDef } from "@tanstack/react-table";
-import { HardDrive, Pencil, Power, Trash2 } from "lucide-react";
+import { Eye, HardDrive, Pencil, Power, Trash2 } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/shared/data-table";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -15,6 +15,7 @@ function formatStorage(sizeGB: number): string {
 }
 
 export function getColumns(
+  onView: (tier: StorageTier) => void,
   onEdit: (tier: StorageTier) => void,
   onToggleActive: (tier: StorageTier) => void,
   onDelete: (tier: StorageTier) => void,
@@ -84,6 +85,13 @@ export function getColumns(
         const tier = row.original;
         return (
           <div className="flex justify-end items-center gap-2">
+            <button
+              onClick={() => onView(tier)}
+              className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-primary transition-colors"
+              title="View Tier"
+            >
+              <Eye className="h-4 w-4" />
+            </button>
             <button
               onClick={() => onEdit(tier)}
               className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
