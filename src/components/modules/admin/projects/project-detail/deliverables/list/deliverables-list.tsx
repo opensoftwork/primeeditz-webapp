@@ -45,6 +45,7 @@ export function DeliverablesList() {
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const deliverables = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getProjectDeliverables,
     { projectId },
   );
@@ -205,15 +206,16 @@ export function DeliverablesList() {
     <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div className="space-y-4">
+        <div className="flex items-center gap-5">
           <Button
             variant="outline"
             size="icon"
-            className="rounded-xl h-10 w-10 border-white/10 hover:bg-white/5 shadow-lg"
+            className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
             onClick={() => router.back()}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5 text-white/60" />
           </Button>
+
           <div>
             <div className="flex items-center gap-3 mb-1">
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
@@ -227,7 +229,7 @@ export function DeliverablesList() {
               </Badge>
             </div>
             <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-              Deliverables <span className="text-white/20">Vault</span>
+              Deliverables 
             </h1>
             <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
               Reviewing {deliverables.length} finalized assets for{" "}

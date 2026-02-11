@@ -119,8 +119,8 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           <ReferenceMaterials files={project.referenceFiles} />
 
           {project.phase !== "setup" && (
-            <DeliverablesSection 
-              projectId={projectId} 
+            <DeliverablesSection
+              projectId={projectId}
               actionState={project.actionState}
               revisionCount={project.revisionCount}
             />

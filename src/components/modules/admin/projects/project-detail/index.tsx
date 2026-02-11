@@ -50,8 +50,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
-  
-//@ts-ignore
+
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
@@ -154,10 +153,6 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
     router.push(`/projects/${projectId}/folders`);
   }, [projectId, router]);
 
-  const handleViewDeliverables = useCallback(() => {
-    router.push(`/projects/${projectId}/deliverables`);
-  }, [projectId, router]);
-
   if (project === undefined) return <ProjectDetailSkeleton />;
 
   if (project === null) {
@@ -210,7 +205,6 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           project={project}
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}
           onViewFolders={handleViewFolders}
-          onViewDeliverables={handleViewDeliverables}
           onOpenAssignEmployee={() =>
             router.push(`/projects/${projectId}/assign`)
           }

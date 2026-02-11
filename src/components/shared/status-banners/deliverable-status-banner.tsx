@@ -13,18 +13,23 @@ interface DeliverableStatusBannerProps {
   role: "employee" | "studio" | "admin";
 }
 
-export function DeliverableStatusBanner({ projectId, role }: DeliverableStatusBannerProps) {
+export function DeliverableStatusBanner({
+  projectId,
+  role,
+}: DeliverableStatusBannerProps) {
   const [dismissed, setDismissed] = useState<string[]>([]);
 
   // Get recent deliverable status changes
   const recentChanges = useQuery(
     api.functions.deliverables.queries.getRecentStatusChanges,
-    { projectId }
+    { projectId },
   );
 
   if (!recentChanges?.length) return null;
 
-  const visibleChanges = recentChanges.filter((c) => !dismissed.includes(c._id));
+  const visibleChanges = recentChanges.filter(
+    (c) => !dismissed.includes(c._id),
+  );
 
   if (!visibleChanges.length) return null;
 
@@ -37,7 +42,7 @@ export function DeliverableStatusBanner({ projectId, role }: DeliverableStatusBa
             "p-4 rounded-2xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300",
             change.status === "approved"
               ? "bg-emerald-500/10 border-emerald-500/20"
-              : "bg-amber-500/10 border-amber-500/20"
+              : "bg-amber-500/10 border-amber-500/20",
           )}
         >
           {change.status === "approved" ? (
@@ -47,28 +52,34 @@ export function DeliverableStatusBanner({ projectId, role }: DeliverableStatusBa
           )}
 
           <div className="flex-1">
-            <p className={cn(
-              "text-sm font-bold uppercase tracking-tight",
-              change.status === "approved" ? "text-emerald-300" : "text-amber-300"
-            )}>
+            <p
+              className={cn(
+                "text-sm font-bold uppercase tracking-tight",
+                change.status === "approved"
+                  ? "text-emerald-300"
+                  : "text-amber-300",
+              )}
+            >
               {change.status === "approved"
                 ? `Deliverable "${change.name}" approved! 🎉`
-                : `Revision requested on "${change.name}"`
-              }
+                : `Revision requested on "${change.name}"`}
             </p>
 
-            {change.rejectionNotes && change.status === "revision_requested" && (
-              <div className="mt-2 text-xs text-white/60 bg-white/5 p-3 rounded-xl border border-white/5 italic">
-                "{change.rejectionNotes}"
-              </div>
-            )}
+            {change.rejectionNotes &&
+              change.status === "revision_requested" && (
+                <div className="mt-2 text-xs text-white/60 bg-white/5 p-3 rounded-xl border border-white/5 italic">
+                  "{change.rejectionNotes}"
+                </div>
+              )}
 
             <div className="mt-3 flex items-center gap-4">
               <Link
                 href={`/projects/${projectId}/deliverables/${change._id}`}
                 className={cn(
                   "text-[10px] font-black uppercase tracking-widest hover:underline",
-                  change.status === "approved" ? "text-emerald-400/80" : "text-amber-400/80"
+                  change.status === "approved"
+                    ? "text-emerald-400/80"
+                    : "text-amber-400/80",
                 )}
               >
                 View Details →

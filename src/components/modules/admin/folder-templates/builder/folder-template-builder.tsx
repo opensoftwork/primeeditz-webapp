@@ -106,14 +106,14 @@ export function FolderTemplateBuilder({
   const isProjectTypeContext = !!propProjectTypeId;
 
   // Convex Hooks
-  // ts-ignore
+  //@ts-ignore
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const existingTemplate = useQuery(
     api.functions.folderTemplates.queries.get,
     templateId ? { id: templateId } : "skip",
   );
   const parentProjectType = useQuery(
-    //ts-ignore
+    //@ts-ignore
     api.functions.projectTypes.queries.getById,
     propProjectTypeId ? { id: propProjectTypeId } : "skip",
   );

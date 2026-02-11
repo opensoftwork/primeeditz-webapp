@@ -36,7 +36,6 @@ interface AdminActionBannerProps {
   project: AdminProjectDetail;
   onSetIsFolderSetupOpen: (open: boolean) => void;
   onViewFolders: () => void;
-  onViewDeliverables?: () => void;
   onOpenAssignEmployee?: () => void;
 }
 
@@ -44,7 +43,6 @@ export function AdminActionBanner({
   project,
   onSetIsFolderSetupOpen,
   onViewFolders,
-  onViewDeliverables,
   onOpenAssignEmployee,
 }: AdminActionBannerProps) {
   const router = useRouter();
@@ -56,7 +54,6 @@ export function AdminActionBanner({
   } | null>(null);
 
   const transitionProject = useMutation(
-    // @ts-ignore
     api.functions.projects.mutations.transitionProject,
   );
   const { awaitingActorRole, actionState } = project;
@@ -103,7 +100,6 @@ export function AdminActionBanner({
     deliveryLabel,
     onSetIsFolderSetupOpen,
     onViewFolders,
-    onViewDeliverables,
     onOpenAssignEmployee,
     handleTransition,
     confirmTransition,
@@ -188,7 +184,6 @@ interface ActionHandlers {
   deliveryLabel: string;
   onSetIsFolderSetupOpen: (open: boolean) => void;
   onViewFolders: () => void;
-  onViewDeliverables?: () => void;
   onOpenAssignEmployee?: () => void;
   handleTransition: (newState: string, notes?: string) => Promise<void>;
   confirmTransition: (
@@ -281,13 +276,7 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
         "Deliverables are ready for QC. Review and approve to send to the client.",
       buttonLabel: "Review Deliverables",
       icon: CheckCircle,
-      onClick: () => {
-        if (handlers.onViewDeliverables) {
-          handlers.onViewDeliverables();
-        } else {
-          router.push(`/projects/${project._id}/deliverables`);
-        }
-      },
+      onClick: () => router.push(`/projects/${project._id}/deliverables`),
     },
 
     // Review Phase
