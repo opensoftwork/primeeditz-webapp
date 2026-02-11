@@ -9,6 +9,7 @@ import { ProjectActions } from "./project-actions";
 import type { AdminProjectType } from "./types";
 
 export function getColumns(
+  onView: (type: AdminProjectType) => void,
   onEdit: (type: AdminProjectType) => void,
 ): ColumnDef<AdminProjectType>[] {
   return [
@@ -86,7 +87,13 @@ export function getColumns(
     },
     {
       id: "actions",
-      cell: ({ row }) => <ProjectActions type={row.original} onEdit={onEdit} />,
+      cell: ({ row }) => (
+        <ProjectActions
+          type={row.original}
+          onView={onView}
+          onEdit={onEdit}
+        />
+      ),
     },
   ];
 }

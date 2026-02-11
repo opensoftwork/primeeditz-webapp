@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { FolderTree } from "lucide-react";
+import { FolderTree, Trash2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "motion/react";
 
@@ -85,6 +85,20 @@ export function TemplateCard({
               )}
             </div>
           </div>
+
+          {onDelete && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-red-500/40 hover:text-red-500 hover:bg-red-500/10 opacity-0 group-hover:opacity-100 transition-all duration-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete();
+              }}
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </Button>
+          )}
         </CardHeader>
 
         <CardContent className="relative z-10 p-6 pt-0 space-y-4">

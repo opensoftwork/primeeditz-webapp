@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
-import { Pencil, Power, Trash2 } from "lucide-react";
+import { Eye, Pencil, Power, Trash2 } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
@@ -21,10 +21,11 @@ import type { Id } from "@convex/_generated/dataModel";
 
 interface ProjectActionsProps {
   type: AdminProjectType;
+  onView: (type: AdminProjectType) => void;
   onEdit: (type: AdminProjectType) => void;
 }
 
-export function ProjectActions({ type, onEdit }: ProjectActionsProps) {
+export function ProjectActions({ type, onView, onEdit }: ProjectActionsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
 
@@ -69,9 +70,16 @@ export function ProjectActions({ type, onEdit }: ProjectActionsProps) {
     <>
       <div className="flex items-center justify-end gap-2">
         <button
+          onClick={() => onView(type)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="View Details"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+        <button
           onClick={() => onEdit(type)}
           className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
-          title="Edit Project Type"
+          title="Edit Configuration"
         >
           <Pencil className="h-4 w-4" />
         </button>

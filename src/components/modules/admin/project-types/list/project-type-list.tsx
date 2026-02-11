@@ -64,9 +64,10 @@ export function ProjectTypeList() {
 
   const columns = useMemo(
     () =>
-      getColumns((type) => {
-        handleView(type._id);
-      }),
+      getColumns(
+        (type) => handleView(type._id),
+        (type) => handleConfigure(type._id),
+      ),
     [router],
   );
 

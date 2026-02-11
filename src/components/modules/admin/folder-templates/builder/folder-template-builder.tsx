@@ -53,7 +53,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import Link from "next/link";
 import {
   Field,
   FieldContent,
@@ -107,7 +106,7 @@ export function FolderTemplateBuilder({
   const isProjectTypeContext = !!propProjectTypeId;
 
   // Convex Hooks
-  // ts-
+  // ts-ignore
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
   const existingTemplate = useQuery(
     api.functions.folderTemplates.queries.get,
@@ -132,13 +131,8 @@ export function FolderTemplateBuilder({
   const [isEditingName, setIsEditingName] = useState(false);
   const [initialName, setInitialName] = useState("");
   const [showNameConfirm, setShowNameConfirm] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  // Sync with existing template
-  useEffect(() => {
-    if (existingTemplate) {
-      setFolders(existingTemplate.folders);
-    }
-  }, [existingTemplate]);
 
   // Compute the back URL based on context
   // Note: Standalone folder templates route is deprecated, so fallback goes to project-types
@@ -149,7 +143,7 @@ export function FolderTemplateBuilder({
   // Form setup
   const form = useForm({
     defaultValues: {
-      name: (existingTemplate?.name || "") as string,
+      name: (existingTemplate?.name || (!templateId ? "New Template" : "")) as string,
       projectTypeId: ((propProjectTypeId as string) ||
         (existingTemplate?.projectTypeId as string) ||
         "") as string,
@@ -160,15 +154,19 @@ export function FolderTemplateBuilder({
       onChange: templateSchema,
     },
     onSubmit: async ({ value }) => {
+      console.log("Submitting form with value:", value);
+      console.log("Current folders:", folders);
+
+      const loadingToast = toast.loading("Saving template...");
       try {
         // Validation
         if (!value.name || value.name.trim() === "") {
-          toast.error("Template name is required");
+          toast.error("Template name is required", { id: loadingToast });
           return;
         }
 
         if (folders.length === 0) {
-          toast.error("At least one folder is required");
+          toast.error("At least one folder is required", { id: loadingToast });
           return;
         }
 
@@ -176,7 +174,7 @@ export function FolderTemplateBuilder({
           propProjectTypeId || (value.projectTypeId as Id<"projectTypes">);
 
         if (!effectiveProjectTypeId) {
-          toast.error("Project type is required");
+          toast.error("Project type is required", { id: loadingToast });
           return;
         }
 
@@ -189,20 +187,50 @@ export function FolderTemplateBuilder({
 
         if (templateId) {
           await updateTemplate({ id: templateId, ...data });
-          toast.success("Template updated successfully");
+          toast.success("Template updated successfully", { id: loadingToast });
         } else {
           await createTemplate(data);
-          toast.success("Template created successfully");
+          toast.success("Template created successfully", { id: loadingToast });
         }
 
         // Navigate back to appropriate location
         router.push(backUrl);
       } catch (error) {
         console.error("Save error:", error);
-        toast.error("Failed to save template");
+        toast.error("Failed to save template", {
+          id: loadingToast,
+          description: error instanceof Error ? error.message : String(error),
+        });
       }
     },
   });
+
+  // Sync with existing template
+  useEffect(() => {
+    if (existingTemplate) {
+      setFolders(existingTemplate.folders);
+      // Ensure form values are synced if they were initialized empty
+      if (!form.getFieldValue("name")) {
+        form.setFieldValue("name", existingTemplate.name);
+      }
+      if (!form.getFieldValue("projectTypeId")) {
+        form.setFieldValue("projectTypeId", existingTemplate.projectTypeId);
+      }
+      if (!form.getFieldValue("description")) {
+        form.setFieldValue("description", existingTemplate.description || "");
+      }
+      if (!form.getFieldValue("variant")) {
+        form.setFieldValue("variant", existingTemplate.variant || "");
+      }
+    }
+  }, [existingTemplate, form]);
+
+  // Handle propProjectTypeId changes for the form
+  useEffect(() => {
+    if (propProjectTypeId && !form.getFieldValue("projectTypeId")) {
+      form.setFieldValue("projectTypeId", propProjectTypeId);
+    }
+  }, [propProjectTypeId, form]);
 
   // Helper to generate a URL-friendly slug from a name
   const generateSlug = (name: string) =>
@@ -404,12 +432,21 @@ export function FolderTemplateBuilder({
           <Button
             variant="ghost"
             size="icon"
-            asChild
+            onClick={() => {
+              const initialFolders = existingTemplate?.folders || [];
+              const isFoldersDirty =
+                JSON.stringify(folders) !== JSON.stringify(initialFolders);
+              const isFormDirty = form.state.isPristine === false;
+
+              if (isFormDirty || isFoldersDirty) {
+                setShowUnsavedDialog(true);
+              } else {
+                router.push(backUrl);
+              }
+            }}
             className="shrink-0 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all h-11 w-11"
           >
-            <Link href={backUrl}>
-              <ArrowLeft className="h-5 w-5" />
-            </Link>
+            <ArrowLeft className="h-5 w-5" />
           </Button>
           <div className="flex-1 min-w-0 flex items-center">
             <form.Field
@@ -494,7 +531,22 @@ export function FolderTemplateBuilder({
             )}
           </Button>
           <Button
-            onClick={() => form.handleSubmit()}
+            onClick={async () => {
+              if (form.state.isPristine && !templateId) {
+                // If it's pristine, we still want to submit if folders are added
+                await form.handleSubmit();
+              } else {
+                await form.handleSubmit();
+              }
+
+              // After submission attempt, if there are STILL errors, show a toast
+              // because handleSubmit doesn't call onSubmit if invalid
+              const nameErrors = form.state.fieldMeta.name?.errors;
+              if (nameErrors && nameErrors.length > 0) {
+                const firstError = nameErrors[0];
+                toast.error(typeof firstError === 'string' ? firstError : (firstError as any)?.message || "Invalid template name");
+              }
+            }}
             className="gap-3 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"
           >
             <Save className="h-4 w-4" />
@@ -785,6 +837,45 @@ export function FolderTemplateBuilder({
               </kbd>
             </AlertDialogAction>
           </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Unsaved Changes Confirmation */}
+      <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+        <AlertDialogContent className="bg-zinc-950 border-white/10 rounded-2xl p-8 glass overflow-hidden max-w-md">
+          <AlertDialogHeader className="space-y-4 relative z-10 text-center">
+            <AlertDialogTitle className="text-2xl font-black uppercase tracking-tight text-white font-sentient">
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/50 text-xs font-medium leading-relaxed px-4">
+              You have unsaved changes. Do you want to save them before going
+              back?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-8 grid grid-cols-1 gap-3 relative z-10">
+            <Button
+              onClick={() => {
+                setShowUnsavedDialog(false);
+                form.handleSubmit();
+              }}
+              className="h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-wider text-[10px] w-full shadow-lg shadow-primary/20 transition-all"
+            >
+              Save & Exit
+            </Button>
+            <Button
+              variant="ghost"
+              onClick={() => {
+                setShowUnsavedDialog(false);
+                router.push(backUrl);
+              }}
+              className="h-11 rounded-xl border border-white/5 bg-white/2 hover:bg-white/5 text-white/60 hover:text-white font-bold uppercase tracking-wider text-[10px] w-full transition-all"
+            >
+              Discard Changes
+            </Button>
+            <AlertDialogCancel className="h-11 rounded-xl border border-white/10 bg-transparent hover:bg-white/5 text-white/40 hover:text-white/60 font-bold uppercase tracking-wider text-[10px] w-full mt-0 border-dashed">
+              Stay & Continue Editing
+            </AlertDialogCancel>
+          </div>
         </AlertDialogContent>
       </AlertDialog>
     </div>

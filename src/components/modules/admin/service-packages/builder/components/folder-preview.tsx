@@ -58,15 +58,15 @@ export function FolderPreview({ templateId }: FolderPreviewProps) {
   const rootFolderCount = template.folders.length;
 
   return (
-    <div className="p-6 space-y-2 animate-in fade-in duration-500">
-      <div className="flex items-center gap-2 mb-6 ml-1">
+    <div className="p-2 space-y-1 animate-in fade-in duration-500">
+      <div className="flex items-center gap-2 mb-4 ml-2">
         <div className="h-1.5 w-1.5 rounded-full bg-primary" />
         <h4 className="text-[10px] font-black text-white/40 uppercase tracking-widest">
           {rootFolderCount} Root Folder{rootFolderCount !== 1 ? "s" : ""}
         </h4>
       </div>
 
-      <div className="space-y-1">
+      <div className="space-y-0.5">
         {template.folders.map((folder: any, idx: number) => (
           <FolderNode key={`${idx}-${folder.name}`} folder={folder} level={0} />
         ))}
@@ -78,13 +78,13 @@ export function FolderPreview({ templateId }: FolderPreviewProps) {
 function FolderNode({ folder, level }: { folder: any; level: number }) {
   const [isOpen, setIsOpen] = useState(true);
   const hasChildren = folder.children && folder.children.length > 0;
-  const IndentSize = 20;
+  const IndentSize = 18;
 
   return (
     <div className="select-none">
       <div
         className={cn(
-          "flex items-center gap-2 py-1.5 px-2 rounded-lg transition-all group",
+          "flex items-center gap-2 py-1 px-2 rounded-lg transition-all group",
           level === 0 ? "hover:bg-white/5" : "hover:bg-white/3",
         )}
         style={{ paddingLeft: `${level * IndentSize + 8}px` }}
@@ -128,7 +128,7 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
 
         <span
           className={cn(
-            "text-xs font-medium transition-colors whitespace-nowrap truncate",
+            "text-sm font-bold transition-colors whitespace-nowrap truncate",
             level === 0 ? "text-white/90" : "text-white/60",
           )}
         >
@@ -136,7 +136,10 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
         </span>
 
         {folder.isRequired && (
-          <CheckCircle2 className="h-3 w-3 text-primary/40 ml-1 shrink-0" />
+          <div className="ml-auto flex items-center gap-1 bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-md shadow-sm shadow-primary/5">
+            <CheckCircle2 className="h-2.5 w-2.5 text-primary" />
+            <span className="text-[8px] font-black text-primary uppercase tracking-wider">Required</span>
+          </div>
         )}
       </div>
 

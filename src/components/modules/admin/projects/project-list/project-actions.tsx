@@ -1,14 +1,19 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
+
 import { api } from "@convex/_generated/api";
 import { useAction, useMutation } from "convex/react";
-import { Archive, ArchiveRestore, Eye, Pencil, Trash2 } from "lucide-react";
+import {
+  Archive,
+  ArchiveRestore,
+  Eye,
+  Pencil,
+  Trash2,
+} from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  DataTableRowActions,
-  type RowAction,
-} from "@/components/shared/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -26,6 +31,7 @@ interface ProjectActionsProps {
 }
 
 export function ProjectActions({ project }: ProjectActionsProps) {
+  const router = useRouter();
   const [showArchiveDialog, setShowArchiveDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -150,56 +156,87 @@ export function ProjectActions({ project }: ProjectActionsProps) {
 
   const isArchived = project.phase === "archived";
 
-  const actions: RowAction<AdminProject>[] = [
-    {
-      label: "View Details",
-      icon: Eye,
-      href: `/projects/${project._id}`,
-    },
-    {
-      label: "Edit Project",
-      icon: Pencil,
-      onClick: () => {
-        // TODO: Implement edit - navigate to edit page or open modal
-      },
-    },
-    {
-      label: isArchived ? "Restore" : "Archive",
-      icon: isArchived ? ArchiveRestore : Archive,
-      separator: true,
-      onClick: () => {
-        if (isArchived) {
-          handleUnarchive();
-        } else {
-          setShowArchiveDialog(true);
-        }
-      },
-    },
-    {
-      label: project.deletedAt ? "Restore" : "Delete",
-      icon: project.deletedAt ? ArchiveRestore : Trash2,
-      variant: project.deletedAt ? "default" : "destructive",
-      onClick: () => {
-        if (project.deletedAt) {
-          handleRestore();
-        } else {
-          setShowDeleteDialog(true);
-        }
-      },
-    },
-    project.deletedAt
-      ? {
-          label: "Delete Permanently",
-          icon: Trash2,
-          variant: "destructive",
-          onClick: () => setShowDeleteDialog(true),
-        }
-      : null,
-  ].filter(Boolean) as RowAction<AdminProject>[];
-
   return (
     <>
-      <DataTableRowActions row={project} actions={actions} />
+      <div className="flex items-center justify-end gap-1">
+        <button
+          onClick={() => router.push(`/projects/${project._id}`)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="View Details"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+
+        <button
+          onClick={() => {
+            // TODO: Implement edit or navigate
+            toast.info("Edit feature coming soon");
+          }}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="Edit Project"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+
+        <button
+          onClick={() => {
+            if (isArchived) {
+              handleUnarchive();
+            } else {
+              setShowArchiveDialog(true);
+            }
+          }}
+          disabled={isLoading}
+          className={cn(
+            "p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50",
+            isArchived
+              ? "text-amber-500/40 hover:text-amber-400"
+              : "text-white/40 hover:text-amber-400",
+          )}
+          title={isArchived ? "Restore from Archive" : "Archive Project"}
+        >
+          {isArchived ? (
+            <ArchiveRestore className="h-4 w-4" />
+          ) : (
+            <Archive className="h-4 w-4" />
+          )}
+        </button>
+
+        <button
+          onClick={() => {
+            if (project.deletedAt) {
+              handleRestore();
+            } else {
+              setShowDeleteDialog(true);
+            }
+          }}
+          disabled={isLoading}
+          className={cn(
+            "p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50",
+            project.deletedAt
+              ? "text-red-500/40 hover:text-green-400"
+              : "text-white/40 hover:text-red-400",
+          )}
+          title={project.deletedAt ? "Restore from Trash" : "Move to Trash"}
+        >
+          {project.deletedAt ? (
+            <ArchiveRestore className="h-4 w-4" />
+          ) : (
+            <Trash2 className="h-4 w-4" />
+          )}
+        </button>
+
+        {project.deletedAt && (
+          <button
+            onClick={() => setShowDeleteDialog(true)}
+            disabled={isLoading}
+            className="p-2 rounded-lg hover:bg-white/5 text-red-500/40 hover:text-red-500 transition-colors disabled:opacity-50"
+            title="Delete Permanently"
+          >
+            <Trash2 className="h-4 w-4" />
+          </button>
+        )}
+      </div>
 
       {/* Archive Confirmation Dialog */}
       <AlertDialog open={showArchiveDialog} onOpenChange={setShowArchiveDialog}>

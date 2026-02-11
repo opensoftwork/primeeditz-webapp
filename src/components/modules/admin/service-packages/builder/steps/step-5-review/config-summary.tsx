@@ -156,7 +156,7 @@ export function ConfigSummary({
                           </Button>
                         </SheetTrigger>
                         <SheetContent className="w-full sm:max-w-xl bg-zinc-950 border-l border-white/10 p-0 shadow-2xl">
-                          <SheetHeader className="p-8 border-b border-white/10 bg-zinc-900/20 backdrop-blur-xl">
+                          <SheetHeader className="p-6 border-b border-white/10 bg-zinc-900/20 backdrop-blur-xl">
                             <div className="flex items-center gap-3 mb-2">
                               <div className="h-10 w-10 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20">
                                 <FolderTree className="h-5 w-5 text-primary" />
@@ -171,7 +171,7 @@ export function ConfigSummary({
                               </div>
                             </div>
                           </SheetHeader>
-                          <div className="h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar p-6">
+                          <div className="h-[calc(100vh-130px)] overflow-y-auto custom-scrollbar p-4">
                             <FolderPreview
                               templateId={config.folderTemplateId}
                             />
