@@ -15,6 +15,7 @@ import type { StorageTier } from "./types";
 
 interface StorageTierCardProps {
   tier: StorageTier;
+  onView: (tier: StorageTier) => void;
   onEdit: (tier: StorageTier) => void;
   onDelete: (id: string, name: string) => void;
 }
@@ -28,6 +29,7 @@ function formatStorage(sizeGB: number): string {
 
 export function StorageTierCard({
   tier,
+  onView,
   onEdit,
   onDelete,
 }: StorageTierCardProps) {
@@ -61,7 +63,7 @@ export function StorageTierCard({
   return (
     <motion.div whileHover={{ y: -4 }} transition={{ duration: 0.2 }}>
       <Card
-        onClick={() => onEdit(tier)}
+        onClick={() => onView(tier)}
         className="group relative overflow-hidden bg-white/2 border-white/5 p-6 rounded-3xl transition-all hover:bg-white/4 hover:border-primary/20 hover:shadow-2xl hover:shadow-primary/5 cursor-pointer"
       >
         {/* Glow Effect */}
@@ -92,6 +94,18 @@ export function StorageTierCard({
             </div>
 
             <div className="flex items-center gap-1.5 transition-all duration-200">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 rounded-lg border border-white/5 bg-white/5 text-white/40 hover:text-primary hover:bg-white/10 transition-all active:scale-90"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onView(tier);
+                }}
+                title="View Tier"
+              >
+                <Eye className="h-3.5 w-3.5" />
+              </Button>
               <Button
                 variant="ghost"
                 size="icon"

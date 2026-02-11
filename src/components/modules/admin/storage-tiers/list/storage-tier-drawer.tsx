@@ -27,6 +27,7 @@ interface StorageTierDrawerProps {
   onOpenChange: (open: boolean) => void;
   onSave: (values: StorageTierFormValues) => Promise<void>;
   initialData?: StorageTier | null;
+  isReadOnly?: boolean;
 }
 
 export function StorageTierDrawer({
@@ -34,6 +35,7 @@ export function StorageTierDrawer({
   onOpenChange,
   onSave,
   initialData,
+  isReadOnly = false,
 }: StorageTierDrawerProps) {
   const form = useForm({
     defaultValues: {
@@ -58,12 +60,18 @@ export function StorageTierDrawer({
     }
   }, [initialData, open]);
 
+  const title = isReadOnly
+    ? "View Plan Detail"
+    : initialData
+      ? "Modify Tier"
+      : "Create Tier";
+
   return (
     <Drawer open={open} onOpenChange={onOpenChange} direction="right">
       <DrawerContent className="bg-zinc-950 border-white/10 h-full sm:max-w-xl ml-auto rounded-none flex flex-col">
         <DrawerHeader className="border-b border-white/5 py-8">
           <DrawerTitle className="text-3xl font-black text-white uppercase tracking-tighter">
-            {initialData ? "Modify Tier" : "Create Tier"}
+            {title}
           </DrawerTitle>
           <DrawerDescription className="text-white/40 font-bold uppercase tracking-widest text-[10px] mt-2">
             Pricing structure for client cloud storage allocation
@@ -90,9 +98,10 @@ export function StorageTierDrawer({
                     <Database className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
                     <Input
                       value={field.state.value}
+                      disabled={isReadOnly}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) => field.handleChange(e.target.value)}
-                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
+                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold disabled:opacity-100 disabled:bg-white/2"
                       placeholder="e.g. Pro Suite"
                     />
                   </div>
@@ -111,6 +120,7 @@ export function StorageTierDrawer({
                     <HardDrive className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-white/20" />
                     <Input
                       type="number"
+                      disabled={isReadOnly}
                       value={field.state.value}
                       onFocus={(e) => e.target.select()}
                       onChange={(e) => {
@@ -120,7 +130,7 @@ export function StorageTierDrawer({
                           (cleanValue === "" ? "" : Number(cleanValue)) as any,
                         );
                       }}
-                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold"
+                      className="bg-white/5 border-white/10 text-white h-12 rounded-xl pl-12 focus:ring-primary/20 font-bold disabled:opacity-100 disabled:bg-white/2"
                       placeholder="100"
                     />
                   </div>
@@ -150,6 +160,7 @@ export function StorageTierDrawer({
                   <Switch
                     checked={field.state.value}
                     onCheckedChange={field.handleChange}
+                    disabled={isReadOnly}
                   />
                 </div>
               )}
@@ -157,39 +168,51 @@ export function StorageTierDrawer({
           </div>
 
           <div className="pt-8">
-            <form.Subscribe
-              selector={(state) => ({
-                canSubmit: state.canSubmit,
-                isSubmitting: state.isSubmitting,
-              })}
-            >
-              {({ canSubmit, isSubmitting }) => (
-                <Button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
+            {!isReadOnly ? (
+              <>
+                <form.Subscribe
+                  selector={(state) => ({
+                    canSubmit: state.canSubmit,
+                    isSubmitting: state.isSubmitting,
+                  })}
                 >
-                  <div className="flex items-center gap-3">
-                    {isSubmitting ? (
-                      "Processing..."
-                    ) : (
-                      <>
-                        {initialData ? "Update Plan" : "Confirm Plan"}
-                        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
-                      </>
-                    )}
-                  </div>
+                  {({ canSubmit, isSubmitting }) => (
+                    <Button
+                      type="submit"
+                      disabled={!canSubmit || isSubmitting}
+                      className="w-full h-14 bg-primary text-primary-foreground font-black uppercase tracking-[0.3em] text-[10px] rounded-xl shadow-2xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 disabled:scale-100 group"
+                    >
+                      <div className="flex items-center gap-3">
+                        {isSubmitting ? (
+                          "Processing..."
+                        ) : (
+                          <>
+                            {initialData ? "Update Plan" : "Confirm Plan"}
+                            <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </>
+                        )}
+                      </div>
+                    </Button>
+                  )}
+                </form.Subscribe>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => onOpenChange(false)}
+                  className="w-full h-12 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px] mt-2"
+                >
+                  Discard Changes
                 </Button>
-              )}
-            </form.Subscribe>
-            <Button
-              type="button"
-              variant="ghost"
-              onClick={() => onOpenChange(false)}
-              className="w-full h-12 text-white/40 hover:text-white font-black uppercase tracking-widest text-[10px] mt-2"
-            >
-              Discard Changes
-            </Button>
+              </>
+            ) : (
+              <Button
+                type="button"
+                onClick={() => onOpenChange(false)}
+                className="w-full h-14 bg-white/5 border border-white/10 text-white font-black uppercase tracking-[0.3em] text-[10px] rounded-xl transition-all hover:bg-white/10"
+              >
+                Close Details
+              </Button>
+            )}
           </div>
         </form>
       </DrawerContent>
