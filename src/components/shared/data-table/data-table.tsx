@@ -23,6 +23,7 @@ import {
   getPaginationRowModel,
   getSortedRowModel,
   type SortingState,
+  type Table as TanStackTable,
   useReactTable,
   type VisibilityState,
 } from "@tanstack/react-table";
@@ -98,6 +99,12 @@ interface DataTableProps<TData, TValue> {
   };
   onRowClick?: (row: TData) => void;
   className?: string;
+  rowSelection?: Record<string, boolean>;
+  onRowSelectionChange?: React.Dispatch<
+    React.SetStateAction<Record<string, boolean>>
+  >;
+  table?: TanStackTable<TData>;
+  getRowId?: (row: TData) => string;
 }
 
 export function DataTable<TData, TValue>({
@@ -114,11 +121,19 @@ export function DataTable<TData, TValue>({
   serverPagination,
   onRowClick,
   className,
+  rowSelection: propsRowSelection,
+  onRowSelectionChange: propsOnRowSelectionChange,
+  table: externalTable,
+  getRowId,
 }: DataTableProps<TData, TValue>) {
   const [viewMode, setViewMode] = React.useState<ViewMode>(
     renderCard ? (defaultView ?? "cards") : "table",
   );
-  const [rowSelection, setRowSelection] = React.useState({});
+
+  const [internalRowSelection, setInternalRowSelection] = React.useState({});
+  const rowSelection = propsRowSelection ?? internalRowSelection;
+  const setRowSelection = propsOnRowSelectionChange ?? setInternalRowSelection;
+
   const [columnVisibility, setColumnVisibility] =
     React.useState<VisibilityState>({});
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
@@ -130,7 +145,7 @@ export function DataTable<TData, TValue>({
     pageSize: serverPagination?.pageSize ?? 10,
   });
 
-  const table = useReactTable({
+  const internalTable = useReactTable({
     data,
     columns,
     state: {
@@ -140,6 +155,7 @@ export function DataTable<TData, TValue>({
       columnFilters,
       pagination,
     },
+    getRowId,
     onPaginationChange: setPagination,
     enableRowSelection: true,
     manualPagination: !!serverPagination,
@@ -154,6 +170,8 @@ export function DataTable<TData, TValue>({
     getFacetedUniqueValues: getFacetedUniqueValues(),
     getPaginationRowModel: getPaginationRowModel(),
   });
+
+  const table = externalTable ?? internalTable;
 
   const showCards = renderCard && viewMode === "cards";
 
@@ -313,7 +331,10 @@ export function DataTable<TData, TValue>({
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={table.getVisibleFlatColumns().length} className="p-0">
+                      <TableCell
+                        colSpan={table.getVisibleFlatColumns().length}
+                        className="p-0"
+                      >
                         <EmptyState
                           icon={EmptyIcon}
                           title={emptyTitle}

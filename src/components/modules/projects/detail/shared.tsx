@@ -13,11 +13,13 @@ export function DetailSection({
   icon,
   children,
   action,
+  noContainer,
 }: {
   title: string;
   icon: React.ReactNode;
   children: React.ReactNode;
   action?: React.ReactNode;
+  noContainer?: boolean;
 }) {
   return (
     <div className="space-y-6">
@@ -32,10 +34,14 @@ export function DetailSection({
         </div>
         {action}
       </div>
-      <div className="p-10 md:p-14 rounded-[2.5rem] bg-white/3 border border-white/5 relative overflow-hidden">
-        <div className="absolute inset-0 bg-grid-white/[0.005] bg-size-[40px_40px]" />
+      {noContainer ? (
         <div className="relative z-10">{children}</div>
-      </div>
+      ) : (
+        <div className="p-6 md:p-8 rounded-3xl bg-white/3 border border-white/5 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-white/[0.005] bg-size-[40px_40px]" />
+          <div className="relative z-10">{children}</div>
+        </div>
+      )}
     </div>
   );
 }

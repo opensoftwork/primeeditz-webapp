@@ -72,6 +72,7 @@ export function ProjectDeliverables({
     <DetailSection
       title="Finalized Deliverables"
       icon={<ShieldCheck className="h-5 w-5" />}
+      noContainer
       action={
         <Button
           variant="ghost"

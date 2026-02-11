@@ -17,6 +17,7 @@ interface DeliverableCardProps {
   createdAt: number;
   uploadedByName: string;
   onSend?: () => void;
+  variant?: "card" | "flat";
 }
 
 export function DeliverableCard({
@@ -29,11 +30,17 @@ export function DeliverableCard({
   createdAt,
   uploadedByName,
   onSend,
+  variant = "card",
 }: DeliverableCardProps) {
   return (
     <Link
       href={`/projects/${projectId}/deliverables/${id}`}
-      className="group flex flex-col sm:flex-row sm:items-center justify-between p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/30 transition-all gap-4 cursor-pointer"
+      className={cn(
+        "group flex flex-col sm:flex-row sm:items-center justify-between transition-all gap-4 cursor-pointer",
+        variant === "card"
+          ? "p-4 rounded-2xl bg-white/5 border border-white/5 hover:border-indigo-500/30"
+          : "p-2 rounded-xl border border-transparent hover:bg-white/5",
+      )}
     >
       <div className="flex items-center gap-4">
         <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shrink-0">
@@ -44,7 +51,9 @@ export function DeliverableCard({
             {name}
           </h4>
           <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase font-bold tracking-wider text-white/40">
-            <span className="bg-white/5 px-2 py-0.5 rounded-md">v{version}</span>
+            <span className="bg-white/5 px-2 py-0.5 rounded-md">
+              v{version}
+            </span>
             <span>•</span>
             <span>{(sizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
             <span>•</span>
@@ -54,9 +63,10 @@ export function DeliverableCard({
               className={cn(
                 status === "approved"
                   ? "text-emerald-400"
-                  : status === "revision_requested" || status === "revision_needed"
+                  : status === "revision_requested" ||
+                      status === "revision_needed"
                     ? "text-red-400"
-                    : "text-amber-400"
+                    : "text-amber-400",
               )}
             >
               {status.replace("_", " ")}

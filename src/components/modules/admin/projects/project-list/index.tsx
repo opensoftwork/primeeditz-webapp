@@ -1,7 +1,7 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import type { ColumnDef } from "@tanstack/react-table";
+
 import { useMutation, useQuery } from "convex/react";
 import {
   AlertTriangle,
@@ -201,8 +201,7 @@ export default function ProjectList() {
   const [typeFilter, setTypeFilter] = useState<any>(undefined);
   const [showDiscardDialog, setShowDiscardDialog] = useState(false);
   const [isDiscarding, setIsDiscarding] = useState(false);
-
-  // @ts-ignore
+  //@ts-ignore
   const projectTypes = useQuery(api.admin.getProjectTypes);
 
   // Query for existing admin draft
@@ -250,7 +249,7 @@ export default function ProjectList() {
     if (!projectTypes) return [];
     return projectTypes.map((t) => ({
       label: t.name,
-      value: t.name,
+      value: t._id,
     }));
   }, [projectTypes]);
 
@@ -276,14 +275,7 @@ export default function ProjectList() {
     }
   };
 
-  const handleInitiateProject = () => {
-    if (existingDraft) {
-      // If there's a draft, resume it instead
-      router.push("/projects/new");
-    } else {
-      router.push("/projects/new");
-    }
-  };
+  // The handleInitiateProject function is currently unused as the button is commented out.
 
   if (query.status === "loading" && !projects.length) {
     return (
@@ -328,14 +320,7 @@ export default function ProjectList() {
               <FileEdit className="h-4 w-4" />
               RESUME DRAFT
             </Button>
-          ) : (
-            <Button
-              onClick={handleInitiateProject}
-              className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.02] active:scale-[0.98] transition-all shadow-xl shadow-primary/20"
-            >
-              INITIATE PROJECT
-            </Button>
-          )}
+          ) : null}
         </motion.div>
       </div>
 

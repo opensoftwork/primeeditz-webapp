@@ -33,7 +33,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import type { Id } from "@convex/_generated/dataModel";
-import { DownloadFolderZip } from "@/components/shared/project-folders";
 
 interface Asset {
   _id: string;
@@ -72,7 +71,7 @@ export function FolderAssetList({
   const [assetToDelete, setAssetToDelete] = useState<Asset | null>(null);
   const [playingAudioId, setPlayingAudioId] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-
+  //@ts-ignore
   const deleteAsset = useMutation(api.functions.assets.mutations.deleteAsset);
   const deleteFile = useAction(api.functions.storage.actions.deleteFile);
 
@@ -184,16 +183,6 @@ export function FolderAssetList({
         <h2 className="text-lg font-black uppercase tracking-tight text-white/60">
           Uploaded Files ({assets.length})
         </h2>
-        {assets.length > 0 && folderId && (
-          <DownloadFolderZip
-            folderId={folderId}
-            folderName={folderName}
-            size="sm"
-            variant="ghost"
-            label="DOWNLOAD ZIP"
-            className="h-8 px-3 text-[9px] font-black uppercase tracking-widest bg-blue-600/10 text-blue-400 hover:bg-blue-600 hover:text-white border-blue-600/20 rounded-xl transition-all"
-          />
-        )}
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -305,8 +294,8 @@ export function FolderAssetList({
                         className={cn(
                           "h-8 w-8 transition-all rounded-xl",
                           isVideo
-                            ? "text-purple-400/40 hover:text-purple-400 hover:bg-purple-500/10"
-                            : "text-primary/20 hover:text-primary hover:bg-primary/10",
+                            ? "text-purple-400/40 group-hover/asset:text-purple-400 hover:text-purple-400 hover:bg-purple-500/10"
+                            : "text-primary/20 group-hover/asset:text-primary hover:text-primary hover:bg-primary/10",
                         )}
                         onClick={(e) => {
                           e.stopPropagation();
@@ -325,7 +314,7 @@ export function FolderAssetList({
                         "h-8 w-8 rounded-xl transition-all",
                         isPlaying
                           ? "text-emerald-400 bg-emerald-500/10 hover:bg-emerald-500/20"
-                          : "text-amber-400/40 hover:text-amber-400 hover:bg-amber-500/10",
+                          : "text-amber-400/40 group-hover/asset:text-amber-400 hover:text-amber-400 hover:bg-amber-500/10",
                       )}
                       onClick={(e) => {
                         e.stopPropagation();
