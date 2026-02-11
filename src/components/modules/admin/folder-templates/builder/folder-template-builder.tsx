@@ -113,6 +113,7 @@ export function FolderTemplateBuilder({
     templateId ? { id: templateId } : "skip",
   );
   const parentProjectType = useQuery(
+    //ts-ignore
     api.functions.projectTypes.queries.getById,
     propProjectTypeId ? { id: propProjectTypeId } : "skip",
   );

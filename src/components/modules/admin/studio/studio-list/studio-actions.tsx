@@ -1,14 +1,12 @@
 "use client";
 
+import { useRouter } from "next/navigation";
+import { cn } from "@/lib/utils";
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
 import { Archive, ArchiveRestore, Eye, LinkIcon, Pencil } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
-import {
-  DataTableRowActions,
-  type RowAction,
-} from "@/components/shared/data-table";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +25,7 @@ interface StudioActionsProps {
 }
 
 export function StudioActions({ studio }: StudioActionsProps) {
+  const router = useRouter();
   const [showEditDrawer, setShowEditDrawer] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -90,47 +89,63 @@ export function StudioActions({ studio }: StudioActionsProps) {
 
   const isDeactivated = !!studio.deactivatedAt;
 
-  const actions: RowAction<AdminStudio>[] = [
-    {
-      label: "View Profile",
-      icon: Eye,
-      href: `/clients/${studio._id}`,
-    },
-    {
-      label: "Edit Studio",
-      icon: Pencil,
-      onClick: () => setShowEditDrawer(true),
-    },
-    ...(!studio.onboardingComplete
-      ? [
-          {
-            label: "Copy Invite Link",
-            icon: LinkIcon,
-            onClick: () => {
+  return (
+    <>
+      <div className="flex items-center justify-end gap-1">
+        <button
+          onClick={() => router.push(`/clients/${studio._id}`)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="View Profile"
+        >
+          <Eye className="h-4 w-4" />
+        </button>
+
+        <button
+          onClick={() => setShowEditDrawer(true)}
+          className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-white transition-colors"
+          title="Edit Studio"
+        >
+          <Pencil className="h-4 w-4" />
+        </button>
+
+        {!studio.onboardingComplete && (
+          <button
+            onClick={() => {
               const url = `${window.location.origin}/onboarding?profileId=${studio._id}`;
               navigator.clipboard.writeText(url);
               toast.success("Invite link copied to clipboard!");
-            },
-          },
-        ]
-      : []),
-    {
-      label: isDeactivated ? "Reactivate" : "Deactivate",
-      icon: isDeactivated ? ArchiveRestore : Archive,
-      separator: true,
-      onClick: () => {
-        if (isDeactivated) {
-          handleReactivate();
-        } else {
-          setShowDeleteDialog(true);
-        }
-      },
-    },
-  ];
+            }}
+            className="p-2 rounded-lg hover:bg-white/5 text-white/40 hover:text-primary transition-colors"
+            title="Copy Invite Link"
+          >
+            <LinkIcon className="h-4 w-4" />
+          </button>
+        )}
 
-  return (
-    <>
-      <DataTableRowActions row={studio} actions={actions} />
+        <button
+          onClick={() => {
+            if (isDeactivated) {
+              handleReactivate();
+            } else {
+              setShowDeleteDialog(true);
+            }
+          }}
+          disabled={isLoading}
+          className={cn(
+            "p-2 rounded-lg hover:bg-white/5 transition-colors disabled:opacity-50",
+            isDeactivated
+              ? "text-green-500/40 hover:text-green-400"
+              : "text-white/40 hover:text-red-400",
+          )}
+          title={isDeactivated ? "Reactivate Studio" : "Deactivate Studio"}
+        >
+          {isDeactivated ? (
+            <ArchiveRestore className="h-4 w-4" />
+          ) : (
+            <Archive className="h-4 w-4" />
+          )}
+        </button>
+      </div>
 
       <StudioEditDrawer
         open={showEditDrawer}
