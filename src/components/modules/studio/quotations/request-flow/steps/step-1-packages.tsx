@@ -7,14 +7,14 @@ import { PackageSelector } from "../../../quotation-request/package-selector";
 import { Step1Loader } from "./step-1-loader";
 
 export function Step1Packages() {
-  const { 
-    selectedPackageIds, 
-    setSelectedPackageIds, 
+  const {
+    selectedPackageIds,
+    setSelectedPackageIds,
     selectedCategory,
     setSelectedCategory,
-    isInitialized, 
-    packages, 
-    categories 
+    isInitialized,
+    packages,
+    categories,
   } = useRequestWizard();
 
   if (!isInitialized || packages === undefined || categories === undefined) {

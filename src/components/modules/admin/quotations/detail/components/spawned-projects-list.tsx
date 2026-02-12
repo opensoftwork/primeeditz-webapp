@@ -13,9 +13,7 @@ interface SpawnedProjectsListProps {
   quotationId: string;
 }
 
-export function SpawnedProjectsList({
-  quotationId,
-}: SpawnedProjectsListProps) {
+export function SpawnedProjectsList({ quotationId }: SpawnedProjectsListProps) {
   const projects = useQuery(api.functions.projects.queries.getByQuotationId, {
     quotationId: quotationId as Id<"quotations">,
   });
@@ -36,7 +34,8 @@ export function SpawnedProjectsList({
               Generated Projects
             </h3>
             <p className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] mt-1.5">
-              {projects.length} PIPELINE{projects.length !== 1 ? "S" : ""} INITIALIZED
+              {projects.length} PIPELINE{projects.length !== 1 ? "S" : ""}{" "}
+              INITIALIZED
             </p>
           </div>
         </div>
@@ -51,13 +50,10 @@ export function SpawnedProjectsList({
             transition={{ delay: index * 0.1 }}
             className="group relative"
           >
-            <Link 
-              href={`/projects/${project._id}`}
-              className="block relative"
-            >
+            <Link href={`/projects/${project._id}`} className="block relative">
               {/* Hover Glow */}
               <div className="absolute inset-0 bg-linear-to-br from-indigo-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
-              
+
               <div className="relative flex items-center justify-between p-5 rounded-2xl bg-white/2 border border-white/5 group-hover:border-indigo-500/30 backdrop-blur-xl transition-all duration-500 overflow-hidden">
                 {/* Decorative Accent */}
                 <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 blur-3xl rounded-full translate-x-12 -translate-y-12 group-hover:bg-indigo-500/10 transition-colors duration-500" />
@@ -77,16 +73,18 @@ export function SpawnedProjectsList({
                         {project.projectTypeName || "Project"}
                       </span>
                     </div>
-                    
+
                     <h4 className="text-base font-black text-white uppercase tracking-tight group-hover:text-white transition-colors truncate max-w-[180px]">
                       {project.eventName || "Untitled Project"}
                     </h4>
 
                     <div className="flex items-center gap-2.5">
-                      <div className={cn(
-                        "px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest",
-                        "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm"
-                      )}>
+                      <div
+                        className={cn(
+                          "px-2 py-0.5 rounded-md text-[8px] font-black uppercase tracking-widest",
+                          "bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 shadow-sm",
+                        )}
+                      >
                         {project.phase}
                       </div>
                       <div className="flex items-center gap-1.5 text-[8px] font-bold text-white/20 uppercase tracking-widest">

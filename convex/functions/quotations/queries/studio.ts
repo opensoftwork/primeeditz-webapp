@@ -108,7 +108,9 @@ export const getMyQuotationsPaginated = studioQuery({
     // Get project names for enrichment
     const projectIds = [
       ...new Set(
-        results.page.map((q) => q.projectId).filter((id): id is Id<"projects"> => !!id),
+        results.page
+          .map((q) => q.projectId)
+          .filter((id): id is Id<"projects"> => !!id),
       ),
     ];
     const projects = await Promise.all(

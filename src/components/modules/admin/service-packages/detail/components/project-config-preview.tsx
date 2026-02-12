@@ -59,10 +59,10 @@ export function ProjectConfigPreview({
                 </span>
               </div>
             </div>
-            
-            <FolderStructureViewer 
-              folderStructure={folderStructure} 
-              templateName={folderTemplateName || "Folder Template"} 
+
+            <FolderStructureViewer
+              folderStructure={folderStructure}
+              templateName={folderTemplateName || "Folder Template"}
             />
           </div>
 

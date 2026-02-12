@@ -23,7 +23,11 @@ interface PDFViewerProps {
   hideDownload?: boolean;
 }
 
-export default function PDFViewer({ url, fileName, hideDownload = false }: PDFViewerProps) {
+export default function PDFViewer({
+  url,
+  fileName,
+  hideDownload = false,
+}: PDFViewerProps) {
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1.0);

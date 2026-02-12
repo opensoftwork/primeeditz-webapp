@@ -17,7 +17,12 @@ export function PageHeader({
   children,
 }: PageHeaderProps) {
   return (
-    <div className={cn("flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8", className)}>
+    <div
+      className={cn(
+        "flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8",
+        className,
+      )}
+    >
       <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}

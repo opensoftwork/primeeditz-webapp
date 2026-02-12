@@ -21,7 +21,7 @@ function ProjectBreadcrumbContent({
   projectId: string;
 }) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
-// @ts-ignore
+  // @ts-ignore
   const project = useQuery(api.functions.projects.queries.getProject, {
     projectId: projectId as Id<"projects">,
   });

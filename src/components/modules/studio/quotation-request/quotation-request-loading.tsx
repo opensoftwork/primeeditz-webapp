@@ -19,7 +19,10 @@ export function QuotationRequestLoading() {
         {/* Grid Skeleton */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3, 4, 5, 6].map((i) => (
-            <Skeleton key={i} className="h-[280px] w-full bg-white/5 rounded-[1.8rem]" />
+            <Skeleton
+              key={i}
+              className="h-[280px] w-full bg-white/5 rounded-[1.8rem]"
+            />
           ))}
         </div>
       </div>

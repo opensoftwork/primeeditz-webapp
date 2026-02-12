@@ -8,15 +8,7 @@ export const UNITS = {
   // Post-production primary
   time: ["hours", "minutes", "days", "shifts", "weeks", "months"],
   work: ["lumpsum", "ls", "package", "project", "session"],
-  count: [
-    "nos",
-    "pcs",
-    "each",
-    "set",
-    "Item",
-    "deliverables",
-    "versions",
-  ],
+  count: ["nos", "pcs", "each", "set", "Item", "deliverables", "versions"],
 
   // Secondary
   media: ["clips", "tracks", "frames", "scenes", "shots", "reels"],

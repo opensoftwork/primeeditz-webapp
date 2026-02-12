@@ -197,13 +197,14 @@ export const QuotationDocument = React.forwardRef<
         });
       }
 
-      const comp = companyInfo || dbCompany || {
-        name: "PRIMEEDITZ",
-        tagline: "Post-Production Excellence",
-        address: "Creative Hub, Film City, Mumbai 400065",
-        phone: "+91 22 4455 6677",
-        email: "studio@primeeditz.com",
-      };
+      const comp = companyInfo ||
+        dbCompany || {
+          name: "PRIMEEDITZ",
+          tagline: "Post-Production Excellence",
+          address: "Creative Hub, Film City, Mumbai 400065",
+          phone: "+91 22 4455 6677",
+          email: "studio@primeeditz.com",
+        };
 
       return {
         filteredLineItems: fli,

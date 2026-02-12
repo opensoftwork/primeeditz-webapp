@@ -59,7 +59,9 @@ export const getClientApprovedQuotations = adminQuery({
             // In a future update, we should match by projectConfigId -> defaultStorageTierId
             // For now, we'll keep it simple as the price field is being deleted.
             const matchingTier = storageTiers.find(
-              (t) => desc.includes(t.name.toLowerCase()) || desc.includes(`${t.sizeGB}gb`),
+              (t) =>
+                desc.includes(t.name.toLowerCase()) ||
+                desc.includes(`${t.sizeGB}gb`),
             );
             if (matchingTier) {
               totalStorageGB = matchingTier.sizeGB;
@@ -114,8 +116,7 @@ export const getQuotationStorageSummary = adminQuery({
     const allProjects = await ctx.db.query("projects").collect();
     const linkedProjects = allProjects.filter((p) => {
       return (
-        quotation.projectId === p._id ||
-        quotation.projectIds?.includes(p._id)
+        quotation.projectId === p._id || quotation.projectIds?.includes(p._id)
       );
     });
 
@@ -140,7 +141,9 @@ export const getQuotationStorageSummary = adminQuery({
         desc.includes("cloud")
       ) {
         const matchingTier = storageTiers.find(
-          (t) => desc.includes(t.name.toLowerCase()) || desc.includes(`${t.sizeGB}gb`),
+          (t) =>
+            desc.includes(t.name.toLowerCase()) ||
+            desc.includes(`${t.sizeGB}gb`),
         );
         if (matchingTier) {
           totalStorageGB = matchingTier.sizeGB;

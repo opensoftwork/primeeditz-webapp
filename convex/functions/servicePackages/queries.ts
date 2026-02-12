@@ -1,4 +1,7 @@
-import { adminQuery, authenticatedWithProfileQuery } from "../../lib/customFunctions";
+import {
+  adminQuery,
+  authenticatedWithProfileQuery,
+} from "../../lib/customFunctions";
 import { v } from "convex/values";
 
 /**

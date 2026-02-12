@@ -66,9 +66,7 @@ export function PackageCard({
         <div
           className={cn(
             "p-2 rounded-full transition-all duration-500",
-            isSelected
-              ? "bg-black/10"
-              : "bg-white/5 group-hover:bg-primary/10",
+            isSelected ? "bg-black/10" : "bg-white/5 group-hover:bg-primary/10",
           )}
         >
           {isSelected ? (
@@ -84,7 +82,9 @@ export function PackageCard({
           <h3
             className={cn(
               "text-lg font-black uppercase tracking-tight leading-tight",
-              isSelected ? "text-black" : "text-white group-hover:text-primary transition-colors",
+              isSelected
+                ? "text-black"
+                : "text-white group-hover:text-primary transition-colors",
             )}
           >
             {pkg.name}
@@ -102,14 +102,17 @@ export function PackageCard({
         </div>
       </div>
 
-      <div className="mt-6 pt-6 relative z-10 w-full border-t border-dashed transition-colors duration-300 border-opacity-20 flex items-end justify-between"
-           style={{ borderColor: isSelected ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)" }}
+      <div
+        className="mt-6 pt-6 relative z-10 w-full border-t border-dashed transition-colors duration-300 border-opacity-20 flex items-end justify-between"
+        style={{
+          borderColor: isSelected ? "rgba(0,0,0,0.1)" : "rgba(255,255,255,0.1)",
+        }}
       >
         <div className="flex flex-col">
           <span
             className={cn(
               "text-[9px] font-black uppercase tracking-widest mb-1",
-               isSelected ? "text-black/40" : "text-white/20"
+              isSelected ? "text-black/40" : "text-white/20",
             )}
           >
             Starts From
@@ -117,7 +120,7 @@ export function PackageCard({
           <span
             className={cn(
               "text-2xl font-black tracking-tighter",
-               isSelected ? "text-black" : "text-white"
+              isSelected ? "text-black" : "text-white",
             )}
           >
             ₹{startingPrice.toLocaleString()}

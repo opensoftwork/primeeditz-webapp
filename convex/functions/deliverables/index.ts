@@ -1,6 +1,6 @@
 /**
  * Deliverables Module
- * 
+ *
  * Manages project deliverables/final assets.
  */
 

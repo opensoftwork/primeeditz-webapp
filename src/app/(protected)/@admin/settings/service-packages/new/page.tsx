@@ -1,6 +1,9 @@
 "use client";
 
-import { PackageBuilder, BuilderProvider } from "@/components/modules/admin/service-packages";
+import {
+  PackageBuilder,
+  BuilderProvider,
+} from "@/components/modules/admin/service-packages";
 
 export default function NewServicePackagePage() {
   return (

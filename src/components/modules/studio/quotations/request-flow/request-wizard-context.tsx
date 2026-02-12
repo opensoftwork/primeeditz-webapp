@@ -4,7 +4,14 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
 import { useRouter } from "next/navigation";
-import React, { createContext, useCallback, useContext, useRef, useState, useEffect } from "react";
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useRef,
+  useState,
+  useEffect,
+} from "react";
 import { toast } from "sonner";
 import {
   INITIAL_REQUEST_FORM_DATA,
@@ -91,7 +98,9 @@ export function RequestWizardProvider({
   );
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
-  const [draftId, setDraftId] = useState<Id<"quotationRequestDrafts"> | null>(null);
+  const [draftId, setDraftId] = useState<Id<"quotationRequestDrafts"> | null>(
+    null,
+  );
 
   // Refs for tracking latest state to avoid stale closures in mutations/timeouts
   const stepRef = useRef<RequestStepId>(1);
@@ -104,10 +113,18 @@ export function RequestWizardProvider({
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Keep refs in sync
-  useEffect(() => { stepRef.current = step; }, [step]);
-  useEffect(() => { selectedCategoryRef.current = selectedCategory; }, [selectedCategory]);
-  useEffect(() => { selectedPackageIdsRef.current = selectedPackageIds; }, [selectedPackageIds]);
-  useEffect(() => { formDataRef.current = formData; }, [formData]);
+  useEffect(() => {
+    stepRef.current = step;
+  }, [step]);
+  useEffect(() => {
+    selectedCategoryRef.current = selectedCategory;
+  }, [selectedCategory]);
+  useEffect(() => {
+    selectedPackageIdsRef.current = selectedPackageIds;
+  }, [selectedPackageIds]);
+  useEffect(() => {
+    formDataRef.current = formData;
+  }, [formData]);
 
   // Unified save function that persists everything
   const saveProgress = useCallback(
@@ -152,7 +169,7 @@ export function RequestWizardProvider({
 
         if (currentDraft) {
           setDraftId(currentDraft._id);
-          
+
           const initialStep = (currentDraft.lastStep as RequestStepId) || 1;
           const initialCategory = currentDraft.selectedCategory || null;
           const initialPackageIds = currentDraft.selectedPackageIds || [];
@@ -175,13 +192,14 @@ export function RequestWizardProvider({
           selectedCategoryRef.current = initialCategory;
           selectedPackageIdsRef.current = initialPackageIds;
           formDataRef.current = initialFormData;
-          
+
           lastUpdateTimestamp.current = currentDraft.updatedAt || Date.now();
 
           // Show toast only if resuming an existing draft with some progress
           if (!isNew && (initialStep > 1 || initialPackageIds.length > 0)) {
             toast.success("Resumed your previous draft", {
-              description: "We've loaded your progress from where you left off.",
+              description:
+                "We've loaded your progress from where you left off.",
             });
           }
         }
@@ -235,7 +253,8 @@ export function RequestWizardProvider({
       // If draft was seen before and is now null, it was submitted/deleted elsewhere
       if (draft === null && draftWasSeen.current) {
         toast.error("Draft session ended", {
-          description: "This request has already been submitted or removed in another session.",
+          description:
+            "This request has already been submitted or removed in another session.",
         });
         router.replace("/dashboard");
       }
@@ -317,7 +336,7 @@ export function RequestWizardProvider({
       });
       return;
     }
-    
+
     if (step < 3) {
       await setStep((step + 1) as RequestStepId);
     }
@@ -359,16 +378,18 @@ export function RequestWizardProvider({
       });
       router.push(`/quotations/${quotationId}`);
     } catch (err) {
-      const isNotFound = err instanceof Error && err.message?.includes("not found");
+      const isNotFound =
+        err instanceof Error && err.message?.includes("not found");
       toast.error(
         isNotFound
           ? "This draft has already been submitted or removed."
           : "Failed to submit request",
         {
-          description:
-            isNotFound
-              ? "Redirecting to dashboard..."
-              : (err instanceof Error ? err.message : "Something went wrong"),
+          description: isNotFound
+            ? "Redirecting to dashboard..."
+            : err instanceof Error
+              ? err.message
+              : "Something went wrong",
         },
       );
       if (isNotFound) {
@@ -438,4 +459,3 @@ export function useRequestWizard() {
   }
   return context;
 }
-

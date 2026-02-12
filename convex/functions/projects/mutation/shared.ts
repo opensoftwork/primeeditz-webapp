@@ -391,7 +391,10 @@ export const updateOnboarding = authenticatedMutation({
     }
 
     // Only allow in onboarding phase (awaiting_onboarding or awaiting_uploads)
-    if (project.actionState !== "awaiting_onboarding" && project.actionState !== "awaiting_uploads") {
+    if (
+      project.actionState !== "awaiting_onboarding" &&
+      project.actionState !== "awaiting_uploads"
+    ) {
       throw new ConvexError("Project is not in onboarding phase");
     }
 

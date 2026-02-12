@@ -22,9 +22,7 @@ export const getProjectDeliverables = query({
       .collect();
 
     // Filter out legacy child deliverables (from before version-in-place migration)
-    const rootDeliverables = deliverables.filter(
-      (d) => !d.parentDeliverableId,
-    );
+    const rootDeliverables = deliverables.filter((d) => !d.parentDeliverableId);
 
     const enrichedDeliverables = await Promise.all(
       rootDeliverables.map(async (d) => {
@@ -174,9 +172,7 @@ export const getClientDeliverables = query({
       .collect();
 
     // Filter out legacy child deliverables
-    const rootDeliverables = deliverables.filter(
-      (d) => !d.parentDeliverableId,
-    );
+    const rootDeliverables = deliverables.filter((d) => !d.parentDeliverableId);
 
     // Enrich with approval and version data
     const enriched = await Promise.all(
@@ -184,17 +180,13 @@ export const getClientDeliverables = query({
         // Check studio approval
         const approval = await ctx.db
           .query("studioApprovals")
-          .withIndex("by_deliverableId", (q) =>
-            q.eq("deliverableId", d._id),
-          )
+          .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
           .first();
 
         // Check latest version request
         const latestVersion = await ctx.db
           .query("versionRequests")
-          .withIndex("by_deliverableId", (q) =>
-            q.eq("deliverableId", d._id),
-          )
+          .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
           .order("desc")
           .first();
 
@@ -236,9 +228,7 @@ export const getDeliverableVersionRequests = query({
         const requester = await ctx.db.get(r.requestedBy);
         return {
           ...r,
-          requestedByName: requester
-            ? `${requester.name}`
-            : "Unknown",
+          requestedByName: requester ? `${requester.name}` : "Unknown",
         };
       }),
     );
@@ -271,9 +261,7 @@ export const getProjectVersionHistory = query({
         return {
           ...r,
           deliverableName: deliverable?.name || "Unknown",
-          requestedByName: requester
-            ? `${requester.name}`
-            : "Unknown",
+          requestedByName: requester ? `${requester.name}` : "Unknown",
         };
       }),
     );

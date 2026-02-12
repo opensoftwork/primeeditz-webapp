@@ -59,7 +59,9 @@ export const clearAllData = internalMutation({
       }
     }
 
-    console.log(`\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`);
+    console.log(
+      `\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`,
+    );
     return { success: true, totalDeleted, stats };
   },
 });

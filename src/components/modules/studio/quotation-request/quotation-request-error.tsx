@@ -15,18 +15,19 @@ export function QuotationRequestError({
       <div className="h-20 w-20 rounded-full bg-red-500/10 flex items-center justify-center border border-red-500/20 mb-2">
         <XCircle className="h-10 w-10 text-red-500/80" />
       </div>
-      
+
       <div className="space-y-2 max-w-md">
         <h2 className="text-xl font-black uppercase tracking-tight text-white">
           System Malfunction
         </h2>
         <p className="text-sm font-medium text-white/40 leading-relaxed">
-          {error.message || "An unexpected protocol error occurred while loading the request module."}
+          {error.message ||
+            "An unexpected protocol error occurred while loading the request module."}
         </p>
       </div>
 
-      <Button 
-        onClick={reset} 
+      <Button
+        onClick={reset}
         variant="outline"
         className="h-12 px-8 rounded-xl border-white/10 hover:bg-white/5 hover:text-white uppercase tracking-widest font-black text-[10px]"
       >

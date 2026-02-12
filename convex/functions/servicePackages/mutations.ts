@@ -10,14 +10,18 @@ export const create = adminMutation({
     name: v.string(),
     description: v.optional(v.string()),
     categoryId: v.optional(v.id("projectCategories")),
-    projectConfigs: v.optional(v.array(v.object({
-      id: v.string(),
-      label: v.optional(v.string()),
-      categoryId: v.optional(v.id("projectCategories")),
-      projectTypeId: v.id("projectTypes"),
-      folderTemplateId: v.id("folderTemplates"),
-      defaultStorageTierId: v.optional(v.id("storageTiers")),
-    }))),
+    projectConfigs: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          label: v.optional(v.string()),
+          categoryId: v.optional(v.id("projectCategories")),
+          projectTypeId: v.id("projectTypes"),
+          folderTemplateId: v.id("folderTemplates"),
+          defaultStorageTierId: v.optional(v.id("storageTiers")),
+        }),
+      ),
+    ),
     projectTypeId: v.optional(v.id("projectTypes")),
     folderTemplateId: v.optional(v.id("folderTemplates")),
     defaultStorageTierId: v.optional(v.id("storageTiers")),
@@ -44,14 +48,18 @@ export const update = adminMutation({
     name: v.optional(v.string()),
     description: v.optional(v.string()),
     categoryId: v.optional(v.id("projectCategories")),
-    projectConfigs: v.optional(v.array(v.object({
-      id: v.string(),
-      label: v.optional(v.string()),
-      categoryId: v.optional(v.id("projectCategories")),
-      projectTypeId: v.id("projectTypes"),
-      folderTemplateId: v.id("folderTemplates"),
-      defaultStorageTierId: v.optional(v.id("storageTiers")),
-    }))),
+    projectConfigs: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          label: v.optional(v.string()),
+          categoryId: v.optional(v.id("projectCategories")),
+          projectTypeId: v.id("projectTypes"),
+          folderTemplateId: v.id("folderTemplates"),
+          defaultStorageTierId: v.optional(v.id("storageTiers")),
+        }),
+      ),
+    ),
     projectTypeId: v.optional(v.id("projectTypes")),
     folderTemplateId: v.optional(v.id("folderTemplates")),
     defaultStorageTierId: v.optional(v.id("storageTiers")),
@@ -98,7 +106,7 @@ export const duplicate = adminMutation({
     if (!pkg) throw new Error("Package not found");
 
     const { _id, _creationTime, ...data } = pkg;
-    
+
     return await ctx.db.insert("servicePackages", {
       ...data,
       name: `Copy of ${data.name}`,

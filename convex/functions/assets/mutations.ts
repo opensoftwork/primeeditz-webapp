@@ -80,11 +80,14 @@ export const deleteAsset = mutation({
     // Allow if:
     // - User is admin
     // - User is the studio that owns the project
-    const isOwner = profile.role === "studio" && project.studioId === profile._id;
+    const isOwner =
+      profile.role === "studio" && project.studioId === profile._id;
     const isAdmin = profile.role === "admin";
 
     if (!isOwner && !isAdmin) {
-      throw new Error("Access denied: You don't have permission to delete this asset");
+      throw new Error(
+        "Access denied: You don't have permission to delete this asset",
+      );
     }
 
     // 4. Delete the record

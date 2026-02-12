@@ -31,12 +31,17 @@ export function DownloadFolderZip({
   showIconOnly = false,
 }: DownloadFolderZipProps) {
   const [isDownloading, setIsDownloading] = useState(false);
-  const getSignedUrls = useAction(api.functions.storage.actions.getSignedFileUrls);
-  
+  const getSignedUrls = useAction(
+    api.functions.storage.actions.getSignedFileUrls,
+  );
+
   // Use recursive query to get all files in this folder and its subfolders
-  const assets = useQuery(api.functions.folders.queries.getFolderAssetsRecursive, {
-    folderId: folderId as Id<"folders">,
-  });
+  const assets = useQuery(
+    api.functions.folders.queries.getFolderAssetsRecursive,
+    {
+      folderId: folderId as Id<"folders">,
+    },
+  );
 
   const handleDownload = async (e?: React.MouseEvent) => {
     if (e) {
@@ -55,25 +60,26 @@ export function DownloadFolderZip({
     try {
       const zip = new JSZip();
       const storageKeys = assets.map((a) => a.minioKey);
-      
+
       // Get signed URLs for all assets
       const urlsResult = await getSignedUrls({ storageKeys });
-      
+
       // Download all files and add to zip with correct path
       const downloadPromises = assets.map(async (asset) => {
         const url = urlsResult[asset.minioKey];
         if (!url) return;
 
         const response = await fetch(url);
-        if (!response.ok) throw new Error(`Failed to download ${asset.filename}`);
-        
+        if (!response.ok)
+          throw new Error(`Failed to download ${asset.filename}`);
+
         const blob = await response.blob();
-        
+
         // Use relativePath if available to put files in subfolders within the zip
-        const filePath = (asset as any).relativePath 
+        const filePath = (asset as any).relativePath
           ? `${(asset as any).relativePath}/${asset.filename}`
           : asset.filename;
-          
+
         zip.file(filePath, blob);
       });
 
@@ -86,7 +92,9 @@ export function DownloadFolderZip({
       toast.success("Download started", { id: toastId });
     } catch (error: any) {
       console.error("ZIP download failed:", error);
-      toast.error(error.message || "Failed to create ZIP folder", { id: toastId });
+      toast.error(error.message || "Failed to create ZIP folder", {
+        id: toastId,
+      });
     } finally {
       setIsDownloading(false);
     }
@@ -101,10 +109,14 @@ export function DownloadFolderZip({
       className={cn("", className)}
       onClick={handleDownload}
       disabled={isDisabled}
-      title={assets?.length === 0 ? "Folder is empty" : "Download folder as ZIP"}
+      title={
+        assets?.length === 0 ? "Folder is empty" : "Download folder as ZIP"
+      }
     >
       {isDownloading ? (
-        <Loader2 className={cn("h-4 w-4 animate-spin", !showIconOnly && "mr-2")} />
+        <Loader2
+          className={cn("h-4 w-4 animate-spin", !showIconOnly && "mr-2")}
+        />
       ) : (
         <Download className={cn("h-4 w-4", !showIconOnly && "mr-2")} />
       )}

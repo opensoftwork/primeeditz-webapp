@@ -3,7 +3,12 @@
 import { Folder, FolderOpen } from "lucide-react";
 
 interface FolderPreviewProps {
-  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
+  folders: {
+    name: string;
+    path: string;
+    description?: string;
+    isRequired?: boolean;
+  }[];
   projectCode: string;
 }
 

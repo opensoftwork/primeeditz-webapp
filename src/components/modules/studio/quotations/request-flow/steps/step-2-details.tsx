@@ -62,7 +62,10 @@ export function Step2Details() {
       <FieldGroup className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
         {/* End Client Name */}
         <Field className="space-y-3">
-          <FieldLabel htmlFor="endClientName" className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center">
+          <FieldLabel
+            htmlFor="endClientName"
+            className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center"
+          >
             End Client Identity <span className="text-primary ml-1.5">*</span>
           </FieldLabel>
           <FieldContent>
@@ -83,7 +86,10 @@ export function Step2Details() {
 
         {/* Event Name */}
         <Field className="space-y-3">
-          <FieldLabel htmlFor="eventName" className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center">
+          <FieldLabel
+            htmlFor="eventName"
+            className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center"
+          >
             Event Name
           </FieldLabel>
           <FieldContent>
@@ -114,7 +120,7 @@ export function Step2Details() {
                   variant="outline"
                   className={cn(
                     "w-full h-12 bg-white/3 border-white/10 rounded-xl justify-start text-left font-black uppercase tracking-wider text-[15px] hover:bg-white/5 hover:text-white hover:border-white/20",
-                    !formData.eventDate && "text-white/10"
+                    !formData.eventDate && "text-white/10",
                   )}
                 >
                   <Calendar className="mr-3 h-4 w-4 opacity-50" />
@@ -125,14 +131,28 @@ export function Step2Details() {
                   )}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0 bg-zinc-950 border-white/10 rounded-xl" align="start">
+              <PopoverContent
+                className="w-auto p-0 bg-zinc-950 border-white/10 rounded-xl"
+                align="start"
+              >
                 <div className="p-3 border-b border-white/5 bg-white/2">
-                  <h4 className="text-[10px] uppercase font-black tracking-widest text-white/40 text-center">Select Date</h4>
+                  <h4 className="text-[10px] uppercase font-black tracking-widest text-white/40 text-center">
+                    Select Date
+                  </h4>
                 </div>
                 <CalendarComponent
                   mode="single"
-                  selected={formData.eventDate ? new Date(formData.eventDate) : undefined}
-                  onSelect={(date) => updateField("eventDate", date ? date.toISOString().split("T")[0] : "")}
+                  selected={
+                    formData.eventDate
+                      ? new Date(formData.eventDate)
+                      : undefined
+                  }
+                  onSelect={(date) =>
+                    updateField(
+                      "eventDate",
+                      date ? date.toISOString().split("T")[0] : "",
+                    )
+                  }
                   initialFocus
                   className="bg-transparent"
                 />
@@ -143,7 +163,10 @@ export function Step2Details() {
 
         {/* Venue */}
         <Field className="space-y-3">
-          <FieldLabel htmlFor="venue" className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center">
+          <FieldLabel
+            htmlFor="venue"
+            className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center"
+          >
             Venue / Location
           </FieldLabel>
           <FieldContent>
@@ -165,7 +188,10 @@ export function Step2Details() {
         {/* Technical Requirements */}
         <Field className="space-y-3 md:col-span-2">
           <div className="flex items-center justify-between">
-            <FieldLabel htmlFor="notes" className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center">
+            <FieldLabel
+              htmlFor="notes"
+              className="text-sm font-black uppercase tracking-widest text-white/60 flex items-center"
+            >
               Technical Requirements & Notes
             </FieldLabel>
             <div className="flex items-center gap-1.5 text-[8px] font-bold text-primary/60 uppercase tracking-wider bg-primary/5 px-2 py-0.5 rounded-full border border-primary/10">

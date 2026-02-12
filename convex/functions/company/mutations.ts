@@ -29,7 +29,7 @@ export const update = adminMutation({
   handler: async (ctx, args) => {
     const existing = await ctx.db.query("company").first();
     const now = Date.now();
-    
+
     const updateData = {
       ...args,
       updatedAt: now,
@@ -39,7 +39,7 @@ export const update = adminMutation({
     if (existing) {
       // Filter out undefined values to satisfy patch
       const cleanUpdateData = Object.fromEntries(
-        Object.entries(updateData).filter(([_, v]) => v !== undefined)
+        Object.entries(updateData).filter(([_, v]) => v !== undefined),
       );
       await ctx.db.patch(existing._id, cleanUpdateData);
       return existing._id;
@@ -59,7 +59,7 @@ export const update = adminMutation({
         updatedAt: now,
         updatedBy: ctx.profile._id,
       };
-      
+
       return await ctx.db.insert("company", insertData);
     }
   },

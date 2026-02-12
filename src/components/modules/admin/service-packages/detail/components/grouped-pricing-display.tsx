@@ -27,7 +27,7 @@ export function GroupedPricingDisplay({
 
   const totalBeforeGST = lineItems.reduce(
     (sum, item) => sum + item.rate * item.quantity,
-    0
+    0,
   );
   const gstAmount = applyGST ? totalBeforeGST * 0.18 : 0;
   const totalWithGST = totalBeforeGST + gstAmount;
@@ -74,7 +74,10 @@ export function GroupedPricingDisplay({
                 </thead>
                 <tbody className="divide-y divide-white/5">
                   {items.map((item: any) => (
-                    <tr key={item.id} className="hover:bg-white/2 transition-colors">
+                    <tr
+                      key={item.id}
+                      className="hover:bg-white/2 transition-colors"
+                    >
                       <td className="px-6 py-4 text-xs font-medium text-white/60">
                         {item.description}
                       </td>

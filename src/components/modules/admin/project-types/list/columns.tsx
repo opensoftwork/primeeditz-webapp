@@ -88,11 +88,7 @@ export function getColumns(
     {
       id: "actions",
       cell: ({ row }) => (
-        <ProjectActions
-          type={row.original}
-          onView={onView}
-          onEdit={onEdit}
-        />
+        <ProjectActions type={row.original} onView={onView} onEdit={onEdit} />
       ),
     },
   ];

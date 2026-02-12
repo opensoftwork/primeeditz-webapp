@@ -4,7 +4,13 @@ import { Button } from "@/components/ui/button";
 import { AlertCircle, ArrowLeft, RefreshCcw } from "lucide-react";
 import Link from "next/link";
 
-export function FolderTemplateBuilderError({ error, onRetry }: { error: string, onRetry?: () => void }) {
+export function FolderTemplateBuilderError({
+  error,
+  onRetry,
+}: {
+  error: string;
+  onRetry?: () => void;
+}) {
   return (
     <div className="flex flex-col items-center justify-center min-h-[400px] text-center space-y-4 font-geist">
       <div className="p-4 rounded-full bg-destructive/10 text-destructive">
@@ -12,7 +18,8 @@ export function FolderTemplateBuilderError({ error, onRetry }: { error: string, 
       </div>
       <h2 className="text-xl font-bold">Something went wrong</h2>
       <p className="text-muted-foreground max-w-md">
-        {error || "Failed to load folder template. Please check your connection or permissions."}
+        {error ||
+          "Failed to load folder template. Please check your connection or permissions."}
       </p>
       <div className="flex gap-2 pt-4">
         <Button variant="outline" asChild>

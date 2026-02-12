@@ -10,13 +10,15 @@ interface DeliverablePageProps {
   }>;
 }
 
-export default function StudioDeliverablePage({ params }: DeliverablePageProps) {
+export default function StudioDeliverablePage({
+  params,
+}: DeliverablePageProps) {
   const { projectId, deliverableId } = use(params);
 
   return (
-    <DeliverableDetailView 
-      projectId={projectId} 
-      deliverableId={deliverableId} 
+    <DeliverableDetailView
+      projectId={projectId}
+      deliverableId={deliverableId}
     />
   );
 }

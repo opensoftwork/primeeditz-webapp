@@ -55,7 +55,7 @@ export default function EmployeeProjectDetail({
   }, [project?.eventName, projectId, setOverride, removeOverride]);
 
   if (project === undefined || deliverables === undefined)
-    return <EmployeeProjectDetailSkeleton />; 
+    return <EmployeeProjectDetailSkeleton />;
 
   if (project === null) {
     return (

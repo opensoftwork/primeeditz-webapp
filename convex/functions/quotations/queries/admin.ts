@@ -78,12 +78,16 @@ export const getAdminQuotationsPaginated = adminQuery({
 
     const activeQuery = query.filter((q) => q.neq(q.field("isDeleted"), true));
 
-    const results = await activeQuery.order("desc").paginate(args.paginationOpts);
+    const results = await activeQuery
+      .order("desc")
+      .paginate(args.paginationOpts);
 
     // Get all profiles for client name enrichment
     const studioIds = [
       ...new Set(
-        results.page.map((q) => q.studioId).filter((id): id is Id<"profiles"> => !!id),
+        results.page
+          .map((q) => q.studioId)
+          .filter((id): id is Id<"profiles"> => !!id),
       ),
     ];
     const clients = await Promise.all(

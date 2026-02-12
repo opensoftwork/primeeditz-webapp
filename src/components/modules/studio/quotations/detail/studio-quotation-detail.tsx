@@ -23,7 +23,7 @@ export function StudioQuotationDetail() {
   const params = useParams();
   const router = useRouter();
   const quotationId = params.id as string;
-//@ts-ignore
+  //@ts-ignore
   const data = useQuery(api.functions.quotations.queries.getMyQuotationDetail, {
     quotationId: quotationId as Id<"quotations">,
   });

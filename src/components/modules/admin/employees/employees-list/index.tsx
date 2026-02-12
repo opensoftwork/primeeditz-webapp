@@ -202,7 +202,7 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
         </div>
       )}
 
-       <DataTable
+      <DataTable
         className="flex-1"
         columns={columns}
         data={employees}

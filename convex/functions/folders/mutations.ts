@@ -11,7 +11,12 @@ import {
   getActorForState,
   getPhaseForState,
 } from "../../lib/statusMachine";
-import type { ActionState, FolderLevel1, FolderLevel2, FolderLevel3 } from "../../schema";
+import type {
+  ActionState,
+  FolderLevel1,
+  FolderLevel2,
+  FolderLevel3,
+} from "../../schema";
 
 type FolderItem = FolderLevel1 | FolderLevel2 | FolderLevel3;
 
@@ -435,7 +440,6 @@ export const openProjectForUpload = adminMutation({
   },
 });
 
-
 /**
  * Maintenance: Fixes folder hierarchy for a project generically using templates.
  */
@@ -453,14 +457,16 @@ export const repairProjectFolders = adminMutation({
     if (projectType?.defaultFolderTemplateId) {
       template = await ctx.db.get(projectType.defaultFolderTemplateId);
     }
-    
+
     if (!template && project.quotationId) {
       const quotation = await ctx.db.get(project.quotationId);
       if (quotation && quotation.selectedPackageIds?.length > 0) {
         for (const pkgId of quotation.selectedPackageIds) {
           const pkg = await ctx.db.get(pkgId);
           if (pkg?.projectConfigs) {
-            const config = pkg.projectConfigs.find(c => c.projectTypeId === project.projectTypeId);
+            const config = pkg.projectConfigs.find(
+              (c) => c.projectTypeId === project.projectTypeId,
+            );
             if (config?.folderTemplateId) {
               template = await ctx.db.get(config.folderTemplateId);
               break;
@@ -473,8 +479,10 @@ export const repairProjectFolders = adminMutation({
     if (!template) {
       template = await ctx.db
         .query("folderTemplates")
-        .withIndex("by_projectTypeId", q => q.eq("projectTypeId", project.projectTypeId))
-        .filter(q => q.eq(q.field("isActive"), true))
+        .withIndex("by_projectTypeId", (q) =>
+          q.eq("projectTypeId", project.projectTypeId),
+        )
+        .filter((q) => q.eq(q.field("isActive"), true))
         .first();
     }
 

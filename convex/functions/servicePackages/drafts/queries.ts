@@ -24,12 +24,12 @@ export const getDraftById = adminQuery({
   handler: async (ctx, { id }) => {
     const draft = await ctx.db.get(id);
     if (!draft) return null;
-    
+
     // Safety check: only the creator can access their draft
     if (draft.createdBy !== ctx.profile._id) {
-       throw new Error("Access denied: This draft belongs to another user.");
+      throw new Error("Access denied: This draft belongs to another user.");
     }
-    
+
     return draft;
   },
 });

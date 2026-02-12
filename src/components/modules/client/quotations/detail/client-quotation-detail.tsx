@@ -14,7 +14,8 @@ import {
   QuotationLineItemsView,
   QuotationTermsView,
 } from "@/components/modules/client/quotations";
-import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
+import { SpawnedProjectsList } from "@/components/modules/admin/quotations/detail/components";
+
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
@@ -23,7 +24,7 @@ export function ClientQuotationDetail() {
   const params = useParams();
   const router = useRouter();
   const quotationId = params.id as string;
-
+  //@ts-ignore
   const data = useQuery(api.functions.quotations.queries.getMyQuotationDetail, {
     quotationId: quotationId as Id<"quotations">,
   });
@@ -141,7 +142,7 @@ export function ClientQuotationDetail() {
             formatCurrency={formatCurrency}
           />
           {quotation.status === "approved" && (
-            <SpawnedProjectsList quotationId={quotationId} isAdmin={false} />
+            <SpawnedProjectsList quotationId={quotationId} />
           )}
           <QuotationTermsView terms={quotation.terms} />
         </div>
@@ -157,7 +158,7 @@ export function ClientQuotationDetail() {
 
           <QuotationActionButtons
             status={quotation.status}
-            quotation={quotation as any}
+            quotation={quotation}
             className="md:grid-cols-1"
           />
         </div>

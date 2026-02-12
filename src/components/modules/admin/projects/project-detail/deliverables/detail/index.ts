@@ -7,4 +7,3 @@ export { VersionDialog } from "./versions-dialog";
 export { VersionsPage } from "./versions-page";
 export { VersionRequestDetailView } from "./version-request-detail-view";
 export { VersionRequestsList } from "./version-requests-list";
-

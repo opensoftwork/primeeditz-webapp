@@ -151,7 +151,8 @@ export const updateWithTemplate = adminMutation({
     templateName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { projectTypeId, templateId, projectType, folders, templateName } = args;
+    const { projectTypeId, templateId, projectType, folders, templateName } =
+      args;
 
     // 1. Update project type
     await ctx.db.patch(projectTypeId, {

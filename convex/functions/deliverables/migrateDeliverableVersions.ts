@@ -13,18 +13,16 @@ import { internalMutation } from "../../_generated/server";
 export const migrateDeliverableVersions = internalMutation({
   args: {},
   handler: async (ctx) => {
-
     // Get ALL deliverables
     const allDeliverables = await ctx.db.query("deliverables").collect();
 
     // Check if migration already ran by looking for any existing deliverableVersions
-    const existingVersions = await ctx.db
-      .query("deliverableVersions")
-      .take(1);
+    const existingVersions = await ctx.db.query("deliverableVersions").take(1);
     if (existingVersions.length > 0) {
       return {
         success: true,
-        message: "Migration already completed — deliverableVersions table is not empty",
+        message:
+          "Migration already completed — deliverableVersions table is not empty",
         skipped: true,
       };
     }

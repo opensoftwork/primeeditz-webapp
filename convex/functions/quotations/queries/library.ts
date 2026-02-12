@@ -41,10 +41,7 @@ export const getLibraryItems = adminQuery({
     const packageLineItems: any[] = [];
     packages.forEach((pkg) => {
       // If projectTypeHint is provided, only include line items from matching packages
-      if (
-        args.projectTypeHint &&
-        pkg.projectTypeId !== args.projectTypeHint
-      ) {
+      if (args.projectTypeHint && pkg.projectTypeId !== args.projectTypeHint) {
         return;
       }
 

@@ -195,7 +195,8 @@ export interface ProjectConfig {
 /**
  * Service Package (formerly Template)
  */
-export interface ServicePackage extends Omit<Doc<"servicePackages">, "projectConfigs" | "lineItems"> {
+export interface ServicePackage
+  extends Omit<Doc<"servicePackages">, "projectConfigs" | "lineItems"> {
   projectConfigs?: ProjectConfig[];
   lineItems: TemplateLineItem[];
   price?: number; // Calculated/overridden price for UI

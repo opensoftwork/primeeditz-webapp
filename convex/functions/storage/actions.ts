@@ -139,7 +139,9 @@ export const generateUploadUrl = action({
     fileSize: v.number(),
   },
   handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
-    console.log(`[STORAGE_ACTION] generateUploadUrl started for projectId=${args.projectId}, deliverableId=${args.deliverableId}`);
+    console.log(
+      `[STORAGE_ACTION] generateUploadUrl started for projectId=${args.projectId}, deliverableId=${args.deliverableId}`,
+    );
     try {
       // 1. Unified Context Check (Eligibility + Storage)
       const context = await ctx.runQuery(
@@ -157,7 +159,7 @@ export const generateUploadUrl = action({
       // 2. Generate unique storage key
       const timestamp = Date.now();
       const cleanName = args.fileName.replace(/\s+/g, "_");
-      
+
       let subPath: string;
       if (args.deliverableId) {
         subPath = `versions/${args.deliverableId}`;
@@ -166,7 +168,7 @@ export const generateUploadUrl = action({
       } else {
         subPath = "deliverables";
       }
-      
+
       const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
 
       // 3. Generate pre-signed PUT URL
@@ -183,7 +185,10 @@ export const generateUploadUrl = action({
 
       return { url, storageKey };
     } catch (error: any) {
-      console.error("[STORAGE_ACTION_ERROR] Error in generateUploadUrl:", error);
+      console.error(
+        "[STORAGE_ACTION_ERROR] Error in generateUploadUrl:",
+        error,
+      );
       throw new Error(error.message || "Failed to generate upload URL");
     }
   },

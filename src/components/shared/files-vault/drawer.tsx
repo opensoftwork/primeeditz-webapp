@@ -76,7 +76,14 @@ export function FilesVaultDrawer({
 
   const assetsForSlider = useMemo(() => {
     return files
-      .filter((f) => (f.type.startsWith("image/") || f.type.startsWith("video/") || f.type.startsWith("audio/") || f.type.includes("pdf")) && f.url)
+      .filter(
+        (f) =>
+          (f.type.startsWith("image/") ||
+            f.type.startsWith("video/") ||
+            f.type.startsWith("audio/") ||
+            f.type.includes("pdf")) &&
+          f.url,
+      )
       .map((f) => ({
         url: f.url!,
         fileName: f.name,
@@ -95,13 +102,16 @@ export function FilesVaultDrawer({
     const file = files.find((f) => f.id === fileId);
     if (!file || !file.url) return;
 
-    const isSliderType = file.type.startsWith("image/") || 
-                        file.type.startsWith("video/") || 
-                        file.type.startsWith("audio/") || 
-                        file.type.includes("pdf");
+    const isSliderType =
+      file.type.startsWith("image/") ||
+      file.type.startsWith("video/") ||
+      file.type.startsWith("audio/") ||
+      file.type.includes("pdf");
 
     if (isSliderType) {
-      const index = assetsForSlider.findIndex((asset) => asset.fileId === fileId);
+      const index = assetsForSlider.findIndex(
+        (asset) => asset.fileId === fileId,
+      );
       if (index !== -1) {
         setSelectedAssetIndex(index);
       }

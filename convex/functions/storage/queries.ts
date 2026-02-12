@@ -1,8 +1,8 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
-import { 
-  getAuthUserWithProfile, 
-  authenticatedWithProfileQuery 
+import {
+  getAuthUserWithProfile,
+  authenticatedWithProfileQuery,
 } from "../../lib/customFunctions";
 import { checkUploadEligibility } from "../../lib/uploadGate";
 
@@ -117,20 +117,20 @@ export const getUploadContext = authenticatedWithProfileQuery({
     // Get allocation from project or quotation
     let allocated = project.storageAllocated || 0;
     if (!allocated) {
-       // ... simple fallback logic for the consolidated query
-       allocated = 100 * 1024 * 1024 * 1024; // Default 100GB
+      // ... simple fallback logic for the consolidated query
+      allocated = 100 * 1024 * 1024 * 1024; // Default 100GB
     }
 
     if (used + args.fileSize > allocated) {
-      return { 
-        isAllowed: false, 
-        reason: `Storage limit reached. Remaining: ${((allocated - used) / (1024 * 1024 * 1024)).toFixed(2)} GB` 
+      return {
+        isAllowed: false,
+        reason: `Storage limit reached. Remaining: ${((allocated - used) / (1024 * 1024 * 1024)).toFixed(2)} GB`,
       };
     }
 
-    return { 
-      isAllowed: true, 
-      storageKeyBase: `projects/${args.projectId}`
+    return {
+      isAllowed: true,
+      storageKeyBase: `projects/${args.projectId}`,
     };
   },
 });

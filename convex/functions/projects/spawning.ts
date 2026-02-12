@@ -74,8 +74,13 @@ export async function spawnProjectsFromQuotation(
   const createdProjectIds: Id<"projects">[] = [];
   const defaultStorageTierId = await getDefaultStorageTier(ctx.db);
 
-  if (!quotation.selectedPackageIds || quotation.selectedPackageIds.length === 0) {
-    console.warn(`Quotation ${quotation.code} has no selected packages. No projects spawned.`);
+  if (
+    !quotation.selectedPackageIds ||
+    quotation.selectedPackageIds.length === 0
+  ) {
+    console.warn(
+      `Quotation ${quotation.code} has no selected packages. No projects spawned.`,
+    );
     return [];
   }
 
@@ -94,13 +99,16 @@ export async function spawnProjectsFromQuotation(
           pkg,
           projectTypeId: config.projectTypeId,
           folderTemplateId: config.folderTemplateId,
-          storageTierId: config.defaultStorageTierId || pkg.defaultStorageTierId || defaultStorageTierId,
+          storageTierId:
+            config.defaultStorageTierId ||
+            pkg.defaultStorageTierId ||
+            defaultStorageTierId,
           label: config.label,
           profileId: args.profileId,
         });
         createdProjectIds.push(projectId);
       }
-    } 
+    }
     // BACKWARD COMPAT (Legacy single-project packages)
     else if (pkg.projectTypeId) {
       const projectId = await createProjectInternal(ctx, {
@@ -113,7 +121,9 @@ export async function spawnProjectsFromQuotation(
       });
       createdProjectIds.push(projectId);
     } else {
-      console.warn(`Package ${pkg.name} has no valid project configuration. Skipping.`);
+      console.warn(
+        `Package ${pkg.name} has no valid project configuration. Skipping.`,
+      );
     }
   }
 
@@ -133,9 +143,17 @@ async function createProjectInternal(
     storageTierId: Id<"storageTiers"> | null;
     label?: string;
     profileId: Id<"profiles">;
-  }
+  },
 ): Promise<Id<"projects">> {
-  const { quotation, pkg, projectTypeId, folderTemplateId, storageTierId, label, profileId } = args;
+  const {
+    quotation,
+    pkg,
+    projectTypeId,
+    folderTemplateId,
+    storageTierId,
+    label,
+    profileId,
+  } = args;
 
   // 1. Generate unique code
   const code = await generateProjectCode(ctx.db);

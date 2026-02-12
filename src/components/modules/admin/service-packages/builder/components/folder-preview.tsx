@@ -138,7 +138,9 @@ function FolderNode({ folder, level }: { folder: any; level: number }) {
         {folder.isRequired && (
           <div className="ml-auto flex items-center gap-1 bg-primary/10 border border-primary/20 px-1.5 py-0.5 rounded-md shadow-sm shadow-primary/5">
             <CheckCircle2 className="h-2.5 w-2.5 text-primary" />
-            <span className="text-[8px] font-black text-primary uppercase tracking-wider">Required</span>
+            <span className="text-[8px] font-black text-primary uppercase tracking-wider">
+              Required
+            </span>
           </div>
         )}
       </div>

@@ -34,11 +34,28 @@ import { VersionHistory } from "./version-history";
 import { VersionDialog } from "./versions-dialog";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
-export function DeliverableDetailView() {
+interface DeliverableDetailViewProps {
+  projectId?: string;
+  deliverableId?: string;
+  hrefPrefix?: string;
+}
+
+export function DeliverableDetailView({
+  projectId: propProjectId,
+  deliverableId: propDeliverableId,
+  hrefPrefix = "/projects/[projectId]/deliverables", // Default prefix
+}: DeliverableDetailViewProps) {
   const params = useParams();
   const router = useRouter();
-  const projectId = params.projectId as string;
-  const deliverableId = params.deliverableId as string;
+
+  const projectId = propProjectId || (params.projectId as string);
+  const deliverableId = propDeliverableId || (params.deliverableId as string);
+
+  // Base path for navigation within the deliverable views
+  const basePath = hrefPrefix.includes("[projectId]")
+    ? hrefPrefix.replace("[projectId]", projectId)
+    : hrefPrefix;
+
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const [fileUrl, setFileUrl] = useState<string | null>(null);
@@ -158,9 +175,7 @@ export function DeliverableDetailView() {
   };
 
   const handleRequestVersion = () => {
-    router.push(
-      `/projects/${projectId}/deliverables/${deliverableId}/versions/new`,
-    );
+    router.push(`${basePath}/${deliverableId}/versions/new`);
   };
 
   const handleSendToStudio = async () => {
@@ -338,11 +353,7 @@ export function DeliverableDetailView() {
         {/* Version History Button */}
         <Button
           variant="outline"
-          onClick={() =>
-            router.push(
-              `/projects/${projectId}/deliverables/${deliverableId}/versions`,
-            )
-          }
+          onClick={() => router.push(`${basePath}/${deliverableId}/versions`)}
           className="rounded-xl border-indigo-500/20 bg-indigo-500/5 hover:bg-indigo-500/10 hover:border-indigo-500/40 text-indigo-400 font-black uppercase tracking-widest text-[10px] h-11 px-5 gap-2 transition-all"
         >
           <History className="h-4 w-4" />
@@ -427,7 +438,7 @@ export function DeliverableDetailView() {
                     key={req._id}
                     onClick={() =>
                       router.push(
-                        `/projects/${projectId}/deliverables/${deliverableId}/versions/${req._id}`,
+                        `${basePath}/${deliverableId}/versions/${req._id}`,
                       )
                     }
                     className="w-full text-left p-3 rounded-2xl bg-white/3 border border-white/5 hover:border-indigo-500/30 transition-all group"

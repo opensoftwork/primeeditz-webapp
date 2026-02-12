@@ -5,7 +5,7 @@ import { motion } from "motion/react";
 
 export function Step1Loader() {
   return (
-    <motion.div 
+    <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       className="pb-20 space-y-8"
@@ -28,7 +28,10 @@ export function Step1Loader() {
           {/* List Skeleton */}
           <div className="space-y-3">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="p-4 rounded-xl border border-white/5 bg-white/2 space-y-2">
+              <div
+                key={i}
+                className="p-4 rounded-xl border border-white/5 bg-white/2 space-y-2"
+              >
                 <Skeleton className="h-4 w-3/4 bg-white/5 rounded-md" />
                 <Skeleton className="h-3 w-1/2 bg-white/10 rounded-md" />
               </div>

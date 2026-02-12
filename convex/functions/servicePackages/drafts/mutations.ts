@@ -40,14 +40,18 @@ export const updateDraft = adminMutation({
     description: v.optional(v.string()),
     categoryId: v.optional(v.id("projectCategories")),
     // Step 2
-    projectConfigs: v.optional(v.array(v.object({
-      id: v.string(),
-      label: v.optional(v.string()),
-      categoryId: v.optional(v.id("projectCategories")),
-      projectTypeId: v.optional(v.id("projectTypes")),
-      folderTemplateId: v.optional(v.id("folderTemplates")),
-      defaultStorageTierId: v.optional(v.id("storageTiers")),
-    }))),
+    projectConfigs: v.optional(
+      v.array(
+        v.object({
+          id: v.string(),
+          label: v.optional(v.string()),
+          categoryId: v.optional(v.id("projectCategories")),
+          projectTypeId: v.optional(v.id("projectTypes")),
+          folderTemplateId: v.optional(v.id("folderTemplates")),
+          defaultStorageTierId: v.optional(v.id("storageTiers")),
+        }),
+      ),
+    ),
     // Step 3
     lineItems: v.optional(v.array(servicePackageLineItemValidator)),
     terms: v.optional(v.string()),
@@ -89,7 +93,9 @@ export const publishDraft = adminMutation({
     // Validate minimum requirements for publishing
     if (!draft.name) throw new Error("Package name is required to publish");
     if (!draft.projectConfigs || draft.projectConfigs.length === 0) {
-      throw new Error("At least one project configuration is required to publish");
+      throw new Error(
+        "At least one project configuration is required to publish",
+      );
     }
     // Validate all configs have required fields
     const validatedConfigs = draft.projectConfigs.map((config) => {
@@ -126,7 +132,7 @@ export const publishDraft = adminMutation({
       projectTypeId,
       folderTemplateId,
       defaultStorageTierId,
-      
+
       lineItems: draft.lineItems,
       terms: draft.terms,
       applyGST: draft.applyGST ?? true,

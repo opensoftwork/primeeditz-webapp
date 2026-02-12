@@ -24,7 +24,7 @@ export const getPendingQuotationsForAdmin = adminQuery({
           q.eq(q.field("createdBy"), "STUDIO"), // Strictly Studio-initiated ONLY
           q.or(
             ...pendingStatuses.map((status) => q.eq(q.field("status"), status)),
-          )
+          ),
         ),
       )
       .order("desc")
@@ -40,7 +40,9 @@ export const getPendingQuotationsForAdmin = adminQuery({
     // Get all profiles for studio name enrichment
     const studioIds = [
       ...new Set(
-        limited.map((q) => q.studioId).filter((id): id is Id<"profiles"> => !!id),
+        limited
+          .map((q) => q.studioId)
+          .filter((id): id is Id<"profiles"> => !!id),
       ),
     ];
     const studios = await Promise.all(studioIds.map((id) => ctx.db.get(id)));

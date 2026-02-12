@@ -29,9 +29,12 @@ export function AssetThumbnails({
     >
       <div className="flex items-center gap-3 py-2 min-w-max mx-auto">
         {assets.map((asset, index) => {
-          const isVideo = asset?.mimeType?.startsWith("video/") || asset?.type === "video";
-          const isAudio = asset?.mimeType?.startsWith("audio/") || asset?.type === "audio";
-          const isPDF = asset?.mimeType === "application/pdf" || asset?.type === "pdf";
+          const isVideo =
+            asset?.mimeType?.startsWith("video/") || asset?.type === "video";
+          const isAudio =
+            asset?.mimeType?.startsWith("audio/") || asset?.type === "audio";
+          const isPDF =
+            asset?.mimeType === "application/pdf" || asset?.type === "pdf";
 
           return (
             <button

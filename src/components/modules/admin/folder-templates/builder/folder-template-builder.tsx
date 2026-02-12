@@ -134,7 +134,6 @@ export function FolderTemplateBuilder({
   const [showNameConfirm, setShowNameConfirm] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-
   // Compute the back URL based on context
   // Note: Standalone folder templates route is deprecated, so fallback goes to project-types
   const backUrl = isProjectTypeContext
@@ -144,7 +143,8 @@ export function FolderTemplateBuilder({
   // Form setup
   const form = useForm({
     defaultValues: {
-      name: (existingTemplate?.name || (!templateId ? "New Template" : "")) as string,
+      name: (existingTemplate?.name ||
+        (!templateId ? "New Template" : "")) as string,
       projectTypeId: ((propProjectTypeId as string) ||
         (existingTemplate?.projectTypeId as string) ||
         "") as string,
@@ -545,7 +545,11 @@ export function FolderTemplateBuilder({
               const nameErrors = form.state.fieldMeta.name?.errors;
               if (nameErrors && nameErrors.length > 0) {
                 const firstError = nameErrors[0];
-                toast.error(typeof firstError === 'string' ? firstError : (firstError as any)?.message || "Invalid template name");
+                toast.error(
+                  typeof firstError === "string"
+                    ? firstError
+                    : (firstError as any)?.message || "Invalid template name",
+                );
               }
             }}
             className="gap-3 bg-primary hover:bg-primary/90 text-white font-bold uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl shadow-lg shadow-primary/20 transition-all hover:scale-[1.02] active:scale-[0.98]"

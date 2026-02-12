@@ -41,13 +41,16 @@ export function useQuotationData(data: any | null | undefined) {
         const sectionGroups = sections
           .map((section: any) => ({
             section,
-            items: projectItems.filter((item: any) => item.sectionId === section._id),
+            items: projectItems.filter(
+              (item: any) => item.sectionId === section._id,
+            ),
           }))
           .filter((g: any) => g.items.length > 0);
 
         const unsectionedItems = projectItems.filter(
           (item: any) =>
-            !item.sectionId || !sections.some((s: any) => s._id === item.sectionId),
+            !item.sectionId ||
+            !sections.some((s: any) => s._id === item.sectionId),
         );
 
         if (unsectionedItems.length > 0) {

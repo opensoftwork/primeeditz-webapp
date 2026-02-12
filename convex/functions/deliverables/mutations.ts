@@ -3,7 +3,6 @@ import { mutation } from "../../_generated/server";
 import { getAuthUserWithProfile } from "../../lib/customFunctions";
 import { now } from "../../lib/helpers";
 
-
 /**
  * Create a new deliverable record after successful upload by employee.
  * Also creates a V1 entry in deliverableVersions for history tracking.
@@ -392,7 +391,9 @@ export const createVersionRequest = mutation({
       );
     }
     if (isStudio && deliverable.status !== "approved") {
-      throw new Error("Studio can only request versions for approved deliverables");
+      throw new Error(
+        "Studio can only request versions for approved deliverables",
+      );
     }
 
     // Auto-increment version number

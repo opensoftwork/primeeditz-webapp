@@ -11,7 +11,7 @@ export const getPackages = authenticatedQuery({
   },
   handler: async (ctx, args) => {
     let packages;
-    
+
     if (args.activeOnly) {
       packages = await ctx.db
         .query("servicePackages")
@@ -20,11 +20,11 @@ export const getPackages = authenticatedQuery({
     } else {
       packages = await ctx.db.query("servicePackages").collect();
     }
-    
+
     if (args.categoryId) {
-      return packages.filter(p => p.categoryId === args.categoryId);
+      return packages.filter((p) => p.categoryId === args.categoryId);
     }
-    
+
     return packages;
   },
 });

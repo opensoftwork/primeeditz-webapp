@@ -179,13 +179,13 @@ export default function StudioList({
   }
 
   return (
-      <div
-        className={
-          showHeader
-            ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
-            : "w-full"
-        }
-      >
+    <div
+      className={
+        showHeader
+          ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
+          : "w-full"
+      }
+    >
       {showHeader && (
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <motion.div

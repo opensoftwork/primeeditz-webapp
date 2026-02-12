@@ -34,12 +34,12 @@ export function PackagePreviewPanel({
   });
 
   const projectTypes = useQuery(
-    api.functions.projectTypes.queries.getActiveProjectTypes
+    api.functions.projectTypes.queries.getActiveProjectTypes,
   );
 
   const folderTemplates = useQuery(
-     api.functions.folderTemplates.queries.getFolderTemplates,
-     { activeOnly: true }
+    api.functions.folderTemplates.queries.getFolderTemplates,
+    { activeOnly: true },
   );
 
   if (!pkg) {
@@ -109,7 +109,7 @@ export function PackagePreviewPanel({
 
   const subtotal = pkg.lineItems.reduce(
     (acc: number, item: any) => acc + item.rate * item.quantity,
-    0
+    0,
   );
 
   return (
@@ -121,35 +121,41 @@ export function PackagePreviewPanel({
             <h2 className="text-2xl font-black uppercase tracking-tight text-white mb-2 leading-none">
               {pkg.name}
             </h2>
-             <div className="flex items-center gap-3">
-                 <Badge variant="outline" className="border-white/10 text-white/40 text-[10px] uppercase font-black tracking-widest bg-white/5 px-2 py-1">
-                   {pkg.projectConfigs?.length ? "Multi-Project" : "Standard"}
+            <div className="flex items-center gap-3">
+              <Badge
+                variant="outline"
+                className="border-white/10 text-white/40 text-[10px] uppercase font-black tracking-widest bg-white/5 px-2 py-1"
+              >
+                {pkg.projectConfigs?.length ? "Multi-Project" : "Standard"}
+              </Badge>
+              {pkg.categoryId && (
+                <Badge
+                  variant="secondary"
+                  className="bg-primary/10 text-primary border-primary/20 text-[10px] uppercase font-black tracking-widest px-2 py-1"
+                >
+                  Category
                 </Badge>
-                {pkg.categoryId && (
-                     <Badge variant="secondary" className="bg-primary/10 text-primary border-primary/20 text-[10px] uppercase font-black tracking-widest px-2 py-1">
-                       Category
-                     </Badge>
-                )}
-             </div>
+              )}
+            </div>
           </div>
           <Button
             onClick={() => onToggle(pkg._id)}
             variant={isSelected ? "default" : "outline"}
-             className={cn(
-                "h-10 px-6 uppercase tracking-widest font-black text-[10px] transition-all",
-                isSelected
-                  ? "bg-primary text-black hover:bg-primary/90"
-                  : "bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white"
-              )}
+            className={cn(
+              "h-10 px-6 uppercase tracking-widest font-black text-[10px] transition-all",
+              isSelected
+                ? "bg-primary text-black hover:bg-primary/90"
+                : "bg-transparent border-white/20 text-white hover:bg-white/10 hover:text-white",
+            )}
           >
-             {isSelected ? (
-                <>
-                  <CheckCircle2 className="mr-2 h-4 w-4" />
-                  Selected
-                </>
-             ) : (
-                "Add to Quote"
-             )}
+            {isSelected ? (
+              <>
+                <CheckCircle2 className="mr-2 h-4 w-4" />
+                Selected
+              </>
+            ) : (
+              "Add to Quote"
+            )}
           </Button>
         </div>
 
@@ -160,92 +166,121 @@ export function PackagePreviewPanel({
 
       {/* Content */}
       <div className="p-8 space-y-10">
-        
         {/* Project Intelligence Section */}
         <div className="space-y-4">
-           <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
-              <Layers className="h-3 w-3" />
-              Project Intelligence
-           </h3>
-           
-           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pkg.projectConfigs?.length ? (
-                  pkg.projectConfigs.map((config: any, idx: number) => {
-                      const pType = projectTypes?.find(t => t._id === config.projectTypeId);
-                      return (
-                          <div key={idx} className="p-4 rounded-2xl bg-white/3 border border-white/5 flex items-center gap-4">
-                              <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs border border-primary/10">
-                                  P{idx + 1}
-                              </div>
-                              <div className="space-y-1">
-                                  <p className="text-[11px] font-bold text-white uppercase tracking-wide">
-                                    {pType?.name || "Unknown Project"}
-                                  </p>
-                                  <p className="text-[9px] text-white/40 font-medium">
-                                     Auto-creates project & folders
-                                  </p>
-                              </div>
-                          </div>
-                      )
-                  })
-              ) : (
-                  // Fallback for single project logic if migrated
-                  <div className="p-4 rounded-2xl bg-white/3 border border-white/5 flex items-center gap-4">
-                      <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 font-black text-xs border border-white/10">
-                          P1
-                      </div>
-                      <div className="space-y-1">
-                           <p className="text-[11px] font-bold text-white uppercase tracking-wide">
-                              Standard Project
-                           </p>
-                            <p className="text-[9px] text-white/40 font-medium">
-                               Creates single project entity
-                            </p>
-                      </div>
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40 flex items-center gap-2">
+            <Layers className="h-3 w-3" />
+            Project Intelligence
+          </h3>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pkg.projectConfigs?.length ? (
+              pkg.projectConfigs.map((config: any, idx: number) => {
+                const pType = projectTypes?.find(
+                  (t) => t._id === config.projectTypeId,
+                );
+                return (
+                  <div
+                    key={idx}
+                    className="p-4 rounded-2xl bg-white/3 border border-white/5 flex items-center gap-4"
+                  >
+                    <div className="h-10 w-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary font-black text-xs border border-primary/10">
+                      P{idx + 1}
+                    </div>
+                    <div className="space-y-1">
+                      <p className="text-[11px] font-bold text-white uppercase tracking-wide">
+                        {pType?.name || "Unknown Project"}
+                      </p>
+                      <p className="text-[9px] text-white/40 font-medium">
+                        Auto-creates project & folders
+                      </p>
+                    </div>
                   </div>
-              )}
-           </div>
+                );
+              })
+            ) : (
+              // Fallback for single project logic if migrated
+              <div className="p-4 rounded-2xl bg-white/3 border border-white/5 flex items-center gap-4">
+                <div className="h-10 w-10 rounded-xl bg-white/5 flex items-center justify-center text-white/40 font-black text-xs border border-white/10">
+                  P1
+                </div>
+                <div className="space-y-1">
+                  <p className="text-[11px] font-bold text-white uppercase tracking-wide">
+                    Standard Project
+                  </p>
+                  <p className="text-[9px] text-white/40 font-medium">
+                    Creates single project entity
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Pricing Breakdown - Shadcn Table */}
-         <div className="space-y-4">
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">
-              Financial Breakdown
-            </h3>
-            
-            <div className="rounded-2xl border border-white/5 overflow-hidden">
-                <Table>
-                    <TableHeader className="bg-white/5">
-                        <TableRow className="hover:bg-transparent border-white/5">
-                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10">Description</TableHead>
-                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">Qty</TableHead>
-                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">Rate</TableHead>
-                            <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">Total</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {pkg.lineItems.map((item: any, idx: number) => (
-                            <TableRow key={idx} className="border-white/5 hover:bg-white/5 transition-colors">
-                                <TableCell className="font-medium text-[11px] text-white/80 py-3">
-                                   {item.description}
-                                   <div className="text-[9px] text-white/30 font-normal mt-0.5 uppercase tracking-wider">{item.unit}</div>
-                                </TableCell>
-                                <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">{item.quantity}</TableCell>
-                                <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">₹{item.rate.toLocaleString()}</TableCell>
-                                <TableCell className="text-right text-[11px] font-bold text-primary py-3">₹{(item.rate * item.quantity).toLocaleString()}</TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                     <TableFooter className="bg-white/10 border-t border-white/5">
-                        <TableRow className="hover:bg-transparent">
-                          <TableCell colSpan={3} className="text-[10px] font-black uppercase tracking-widest text-white/60">Package Total</TableCell>
-                          <TableCell className="text-right text-sm font-black text-white tracking-tight">₹{subtotal.toLocaleString()}</TableCell>
-                        </TableRow>
-                      </TableFooter>
-                </Table>
-            </div>
-         </div>
+        <div className="space-y-4">
+          <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">
+            Financial Breakdown
+          </h3>
 
+          <div className="rounded-2xl border border-white/5 overflow-hidden">
+            <Table>
+              <TableHeader className="bg-white/5">
+                <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10">
+                    Description
+                  </TableHead>
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                    Qty
+                  </TableHead>
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                    Rate
+                  </TableHead>
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                    Total
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {pkg.lineItems.map((item: any, idx: number) => (
+                  <TableRow
+                    key={idx}
+                    className="border-white/5 hover:bg-white/5 transition-colors"
+                  >
+                    <TableCell className="font-medium text-[11px] text-white/80 py-3">
+                      {item.description}
+                      <div className="text-[9px] text-white/30 font-normal mt-0.5 uppercase tracking-wider">
+                        {item.unit}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">
+                      {item.quantity}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">
+                      ₹{item.rate.toLocaleString()}
+                    </TableCell>
+                    <TableCell className="text-right text-[11px] font-bold text-primary py-3">
+                      ₹{(item.rate * item.quantity).toLocaleString()}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+              <TableFooter className="bg-white/10 border-t border-white/5">
+                <TableRow className="hover:bg-transparent">
+                  <TableCell
+                    colSpan={3}
+                    className="text-[10px] font-black uppercase tracking-widest text-white/60"
+                  >
+                    Package Total
+                  </TableCell>
+                  <TableCell className="text-right text-sm font-black text-white tracking-tight">
+                    ₹{subtotal.toLocaleString()}
+                  </TableCell>
+                </TableRow>
+              </TableFooter>
+            </Table>
+          </div>
+        </div>
       </div>
     </div>
   );

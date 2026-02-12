@@ -276,7 +276,10 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
     description: "Complete project setup to begin uploading",
     color: "text-amber-400",
     isActionNeeded: true,
-    cta: { label: "Complete Onboarding", href: (id) => `/projects/${id}/onboarding` },
+    cta: {
+      label: "Complete Onboarding",
+      href: (id) => `/projects/${id}/onboarding`,
+    },
   },
   awaiting_uploads: {
     label: "Upload Files",

@@ -55,7 +55,7 @@ export function QuotationDetail({
 
   const [isSendDrawerOpen, setIsSendDrawerOpen] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
-  
+
   const duplicateMutation = useMutation(
     api.functions.quotations.mutations.duplicateQuotation,
   );
@@ -112,7 +112,7 @@ export function QuotationDetail({
   const handleDuplicate = async () => {
     try {
       const toastId = toast.loading("Duplicating quotation...");
-      const user = "Divya"; 
+      const user = "Divya";
       const newId = await duplicateMutation({
         quotationId: quotationId as Id<"quotations">,
         createdBy: user,

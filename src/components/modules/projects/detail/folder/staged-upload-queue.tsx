@@ -67,10 +67,16 @@ export function StagedUploadQueue({
       <CardHeader className="p-4 pb-3 border-b border-primary/10">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={cn(
-              "p-2 rounded-xl flex items-center justify-center",
-              isUploading ? "bg-primary/20" : allCompleted ? "bg-emerald-500/10" : "bg-primary/10"
-            )}>
+            <div
+              className={cn(
+                "p-2 rounded-xl flex items-center justify-center",
+                isUploading
+                  ? "bg-primary/20"
+                  : allCompleted
+                    ? "bg-emerald-500/10"
+                    : "bg-primary/10",
+              )}
+            >
               {isUploading ? (
                 <Loader2 className="h-4 w-4 text-primary animate-spin" />
               ) : allCompleted ? (
@@ -81,7 +87,11 @@ export function StagedUploadQueue({
             </div>
             <div>
               <CardTitle className="text-sm font-black uppercase tracking-tight text-white leading-none">
-                {isUploading ? "Uploading Assets" : allCompleted ? "Upload Complete" : "Staged Files"}
+                {isUploading
+                  ? "Uploading Assets"
+                  : allCompleted
+                    ? "Upload Complete"
+                    : "Staged Files"}
               </CardTitle>
               <CardDescription className="text-[9px] font-bold uppercase tracking-[0.15em] mt-1.5 text-white/40">
                 {stagedFiles.length} files • {formatBytes(totalSize)}
@@ -111,9 +121,9 @@ export function StagedUploadQueue({
               </>
             )}
             {allCompleted && (
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <Button
+                variant="ghost"
+                size="sm"
                 className="h-8 px-4 text-[9px] font-black uppercase tracking-widest text-white/30 hover:text-white rounded-lg"
                 onClick={onClearAll}
               >
@@ -129,7 +139,9 @@ export function StagedUploadQueue({
             <Progress value={overallProgress} className="h-1.5 bg-primary/10" />
             <div className="flex justify-between items-center text-[8px] font-black uppercase tracking-widest text-primary/60">
               <span>{overallProgress}% COMPLETE</span>
-              <span>{formatBytes(uploadedSize)} / {formatBytes(totalSize)}</span>
+              <span>
+                {formatBytes(uploadedSize)} / {formatBytes(totalSize)}
+              </span>
             </div>
           </div>
         )}
@@ -163,11 +175,14 @@ export function StagedUploadQueue({
                     {formatBytes(stagedFile.file.size)}
                   </span>
                 </div>
-                
+
                 <div className="flex items-center gap-2">
                   {stagedFile.status === "uploading" && (
                     <div className="flex-1 flex items-center gap-3 mt-1">
-                      <Progress value={stagedFile.progress} className="h-1 flex-1 bg-primary/10" />
+                      <Progress
+                        value={stagedFile.progress}
+                        className="h-1 flex-1 bg-primary/10"
+                      />
                       <span className="text-[8px] font-black text-primary tabular-nums">
                         {stagedFile.progress}%
                       </span>

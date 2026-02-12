@@ -1,4 +1,11 @@
-import { AlertCircle, ArrowRight, CheckCircle2, Clock, FileText, ShieldCheck } from "lucide-react";
+import {
+  AlertCircle,
+  ArrowRight,
+  CheckCircle2,
+  Clock,
+  FileText,
+  ShieldCheck,
+} from "lucide-react";
 
 export const statusConfig: Record<
   string,

@@ -174,7 +174,8 @@ export function Step3Review() {
                 Template Name
               </span>
               <p className="text-[12px] font-bold text-white/70 tracking-tight mt-0.5">
-                {folderTemplateName || `${step1Data?.name || "Untitled"} Default`}
+                {folderTemplateName ||
+                  `${step1Data?.name || "Untitled"} Default`}
               </p>
             </div>
             <div className="space-y-1 max-h-[400px] overflow-y-auto pr-4 custom-scrollbar">

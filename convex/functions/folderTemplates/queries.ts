@@ -1,5 +1,9 @@
 import { v } from "convex/values";
-import { adminQuery, authenticatedQuery, authenticatedWithProfileQuery } from "../../lib/customFunctions";
+import {
+  adminQuery,
+  authenticatedQuery,
+  authenticatedWithProfileQuery,
+} from "../../lib/customFunctions";
 
 /**
  * List all folder templates with project type names.
@@ -40,7 +44,7 @@ export const listByProjectType = authenticatedQuery({
     return await ctx.db
       .query("folderTemplates")
       .withIndex("by_projectType_isActive", (q) =>
-        q.eq("projectTypeId", args.projectTypeId).eq("isActive", true)
+        q.eq("projectTypeId", args.projectTypeId).eq("isActive", true),
       )
       .collect();
   },
@@ -55,7 +59,7 @@ export const getByProjectTypeId = adminQuery({
     return await ctx.db
       .query("folderTemplates")
       .withIndex("by_projectTypeId", (q) =>
-        q.eq("projectTypeId", args.projectTypeId)
+        q.eq("projectTypeId", args.projectTypeId),
       )
       .first();
   },
@@ -71,7 +75,7 @@ export const listAllByProjectType = adminQuery({
     const templates = await ctx.db
       .query("folderTemplates")
       .withIndex("by_projectTypeId", (q) =>
-        q.eq("projectTypeId", args.projectTypeId)
+        q.eq("projectTypeId", args.projectTypeId),
       )
       .collect();
 

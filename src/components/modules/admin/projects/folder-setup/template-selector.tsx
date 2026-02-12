@@ -9,7 +9,12 @@ import { cn } from "@/lib/utils";
 interface FolderTemplate {
   _id: Id<"folderTemplates">;
   name: string;
-  folders: { name: string; path: string; description?: string; isRequired?: boolean }[];
+  folders: {
+    name: string;
+    path: string;
+    description?: string;
+    isRequired?: boolean;
+  }[];
   projectTypeName?: string;
   isDefault?: boolean;
 }

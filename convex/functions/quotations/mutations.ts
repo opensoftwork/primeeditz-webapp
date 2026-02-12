@@ -122,7 +122,9 @@ async function aggregateLineItemsFromPackages(
       let selectedFolderTemplateId = pkg.folderTemplateId;
 
       if (item.projectConfigId && pkg.projectConfigs) {
-        const config = pkg.projectConfigs.find(c => c.id === item.projectConfigId);
+        const config = pkg.projectConfigs.find(
+          (c) => c.id === item.projectConfigId,
+        );
         if (config) {
           projectTypeId = config.projectTypeId;
           selectedFolderTemplateId = config.folderTemplateId;
@@ -302,7 +304,10 @@ export const createQuotation = adminMutation({
   },
   handler: async (ctx, args) => {
     // Validation
-    if (args.selectedPackageIds.length === 0 && (!args.lineItems || args.lineItems.length === 0)) {
+    if (
+      args.selectedPackageIds.length === 0 &&
+      (!args.lineItems || args.lineItems.length === 0)
+    ) {
       throw new Error("At least one package or one line item must be provided");
     }
 
@@ -567,7 +572,9 @@ export const approveQuotation = adminMutation({
     // Update quotation with spawned project IDs
     if (spawnedProjectIds.length > 0) {
       const existingProjectIds = quotation.projectIds || [];
-      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      const allProjectIds = Array.from(
+        new Set([...existingProjectIds, ...spawnedProjectIds]),
+      );
       await ctx.db.patch(args.quotationId, {
         projectIds: allProjectIds,
         updatedAt: Date.now(),
@@ -731,7 +738,9 @@ export const acceptQuotation = studioMutation({
     // Update quotation with spawned project IDs
     if (spawnedProjectIds.length > 0) {
       const existingProjectIds = quotation.projectIds || [];
-      const allProjectIds = Array.from(new Set([...existingProjectIds, ...spawnedProjectIds]));
+      const allProjectIds = Array.from(
+        new Set([...existingProjectIds, ...spawnedProjectIds]),
+      );
       await ctx.db.patch(args.quotationId, {
         projectIds: allProjectIds,
         updatedAt: Date.now(),
@@ -984,4 +993,3 @@ export const deleteDraft = studioMutation({
     await ctx.db.delete(draftId);
   },
 });
-

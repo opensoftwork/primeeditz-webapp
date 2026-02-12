@@ -52,14 +52,9 @@ const generateFileId = (): string => {
  * Create a preview URL for previewable files
  */
 const createPreviewUrl = (file: File): string | null => {
-  const previewableTypes = [
-    "image/",
-    "video/",
-    "audio/",
-    "application/pdf"
-  ];
+  const previewableTypes = ["image/", "video/", "audio/", "application/pdf"];
 
-  if (previewableTypes.some(type => file.type.startsWith(type))) {
+  if (previewableTypes.some((type) => file.type.startsWith(type))) {
     return URL.createObjectURL(file);
   }
   return null;
