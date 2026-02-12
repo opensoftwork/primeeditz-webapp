@@ -29,6 +29,7 @@ import type { AdminProjectType } from "./types";
 export function ProjectTypeList() {
   const router = useRouter();
   const projectTypes = useQuery(
+    //@ts-ignore
     api.functions.projectTypes.queries.getProjectTypes,
   );
   const categories =

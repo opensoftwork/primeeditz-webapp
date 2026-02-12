@@ -104,9 +104,10 @@ export const createWithTemplate = adminMutation({
       isActive: v.boolean(),
     }),
     folders: v.array(folderLevel1Validator), // Validated by schema on insert
+    templateName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { projectType, folders } = args;
+    const { projectType, folders, templateName } = args;
 
     // 1. Create the project type first
     const projectTypeId = await ctx.db.insert("projectTypes", {
@@ -117,7 +118,7 @@ export const createWithTemplate = adminMutation({
 
     // 2. Create the default folder template
     const templateId = await ctx.db.insert("folderTemplates", {
-      name: `${projectType.name} Default`,
+      name: templateName || `${projectType.name} Default`,
       projectTypeId,
       folders,
       isActive: true,
@@ -147,9 +148,10 @@ export const updateWithTemplate = adminMutation({
       isActive: v.boolean(),
     }),
     folders: v.array(folderLevel1Validator),
+    templateName: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
-    const { projectTypeId, templateId, projectType, folders } = args;
+    const { projectTypeId, templateId, projectType, folders, templateName } = args;
 
     // 1. Update project type
     await ctx.db.patch(projectTypeId, {
@@ -158,16 +160,18 @@ export const updateWithTemplate = adminMutation({
       draftData: undefined, // Clear draft data
     });
 
+    const resolvedTemplateName = templateName || `${projectType.name} Default`;
+
     if (templateId) {
       // 2a. Update existing template
       await ctx.db.patch(templateId, {
-        name: `${projectType.name} Default`,
+        name: resolvedTemplateName,
         folders,
       });
     } else {
       // 2b. Create new template if none exists
       const newTemplateId = await ctx.db.insert("folderTemplates", {
-        name: `${projectType.name} Default`,
+        name: resolvedTemplateName,
         projectTypeId,
         folders,
         isActive: true,
