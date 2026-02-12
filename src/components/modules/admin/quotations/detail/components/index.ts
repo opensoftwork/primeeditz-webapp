@@ -6,3 +6,5 @@ export { ReviewActions } from "./review-actions";
 export { StudioFeedbackSection } from "./studio-feedback-section";
 export { StudioProjectInfo } from "./studio-project-info";
 export { TermsConditions } from "./terms-conditions";
+export { SpawnedProjectsList } from "./spawned-projects-list";
+export { QuotationDetailSkeleton } from "./skeleton";

@@ -7,7 +7,7 @@ import { AlertCircle, ArrowLeft } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect } from "react";
 import { toast } from "sonner";
-import { SpawnedProjectsList } from "@/components/modules/quotations/detail/spawned-projects-list";
+import { SpawnedProjectsList } from "@/components/modules/admin/quotations/detail/components";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
@@ -23,7 +23,7 @@ export function StudioQuotationDetail() {
   const params = useParams();
   const router = useRouter();
   const quotationId = params.id as string;
-
+//@ts-ignore
   const data = useQuery(api.functions.quotations.queries.getMyQuotationDetail, {
     quotationId: quotationId as Id<"quotations">,
   });
@@ -216,7 +216,7 @@ export function StudioQuotationDetail() {
             formatCurrency={formatCurrency}
           />
           {quotation.status === "approved" && (
-            <SpawnedProjectsList quotationId={quotationId} isAdmin={false} />
+            <SpawnedProjectsList quotationId={quotationId} />
           )}
           <QuotationTermsView terms={quotation.terms} />
         </div>

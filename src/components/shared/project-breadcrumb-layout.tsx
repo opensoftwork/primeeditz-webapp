@@ -11,11 +11,15 @@ interface ProjectBreadcrumbLayoutProps {
   params: Promise<{ projectId: string }>;
 }
 
-export function ProjectBreadcrumbLayout({
+import { ConvexErrorBoundary } from "./convex-error-boundary";
+
+function ProjectBreadcrumbContent({
   children,
-  params,
-}: ProjectBreadcrumbLayoutProps) {
-  const { projectId } = use(params);
+  projectId,
+}: {
+  children: React.ReactNode;
+  projectId: string;
+}) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const project = useQuery(api.functions.projects.queries.getProject, {
@@ -35,4 +39,19 @@ export function ProjectBreadcrumbLayout({
   }, [projectId, removeOverride]);
 
   return <>{children}</>;
+}
+
+export function ProjectBreadcrumbLayout({
+  children,
+  params,
+}: ProjectBreadcrumbLayoutProps) {
+  const { projectId } = use(params);
+
+  return (
+    <ConvexErrorBoundary>
+      <ProjectBreadcrumbContent projectId={projectId}>
+        {children}
+      </ProjectBreadcrumbContent>
+    </ConvexErrorBoundary>
+  );
 }

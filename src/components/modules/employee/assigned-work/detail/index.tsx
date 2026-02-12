@@ -49,16 +49,13 @@ export default function EmployeeProjectDetail({
 
   useEffect(() => {
     if (project?.eventName) {
-      setOverride([
-        { label: "Assigned Work", href: "/assigned-work" },
-        { label: project.eventName, href: `/assigned-work/${projectId}` },
-      ]);
+      setOverride(projectId, project.eventName);
     }
-    return () => removeOverride();
+    return () => removeOverride(projectId);
   }, [project?.eventName, projectId, setOverride, removeOverride]);
 
   if (project === undefined || deliverables === undefined)
-    return <EmployeeProjectDetailSkeleton />;
+    return <EmployeeProjectDetailSkeleton />; 
 
   if (project === null) {
     return (
@@ -91,8 +88,8 @@ export default function EmployeeProjectDetail({
           </Button>
 
           <div className="flex items-center gap-6">
-            <div className="p-4 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
-              <Shield className="h-8 w-8 text-indigo-400" />
+            <div className="p-3 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
+              <Shield className="h-6 w-6 text-indigo-400" />
             </div>
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
