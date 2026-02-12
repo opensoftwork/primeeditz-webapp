@@ -1,8 +1,10 @@
-export * from "./deliverable-detail-view";
-export * from "./deliverable-header";
-export * from "./deliverable-preview";
-export * from "./deliverable-actions";
-export * from "./deliverable-meta-card";
-export * from "./versions-dialog";
-export * from "./version-history";
-export * from "./types";
+export { DeliverableDetailView } from "./deliverable-detail-view";
+export { DeliverableActions } from "./deliverable-actions";
+export { DeliverableMetaCard } from "./deliverable-meta-card";
+export { DeliverablePreview } from "./deliverable-preview";
+export { VersionHistory } from "./version-history";
+export { VersionDialog } from "./versions-dialog";
+export { VersionsPage } from "./versions-page";
+export { VersionRequestDetailView } from "./version-request-detail-view";
+export { VersionRequestsList } from "./version-requests-list";
+

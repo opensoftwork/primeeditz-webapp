@@ -90,6 +90,7 @@ export const deliverableStatusValidator = v.union(
   v.literal("approved"),
   v.literal("version_needed"),
   v.literal("version_requested"),
+  v.literal("revision_requested"),
 );
 
 // Quotation status flow
@@ -431,21 +432,42 @@ export default defineSchema({
     projectId: v.id("projects"),
     name: v.string(),
     description: v.optional(v.string()),
-    version: v.number(),
+    version: v.number(), // Current/latest version number (cached)
     status: deliverableStatusValidator,
+    // Cached from latest deliverableVersions entry for query performance
     minioKey: v.string(),
     sizeBytes: v.number(),
     mimeType: v.optional(v.string()),
-    uploadedBy: v.id("profiles"),
+    uploadedBy: v.id("profiles"), // Original uploader
     qcReviewedBy: v.optional(v.id("profiles")),
     qcNotes: v.optional(v.string()),
     versionFeedback: v.optional(v.string()),
-    parentDeliverableId: v.optional(v.id("deliverables")), // Links corrected version to original
+    rejectionNotes: v.optional(v.string()),
+    parentDeliverableId: v.optional(v.id("deliverables")), // @deprecated — legacy child-deliverable linking
+    latestVersionId: v.optional(v.id("deliverableVersions")), // Points to latest version record
     // Uses _creationTime
   })
     .index("by_projectId", ["projectId"])
     .index("by_status", ["status"])
     .index("by_parentDeliverableId", ["parentDeliverableId"]),
+
+  // --------------------------------------------------------------------------
+  // Deliverable Versions (Physical file history per deliverable)
+  // --------------------------------------------------------------------------
+  deliverableVersions: defineTable({
+    deliverableId: v.id("deliverables"),
+    projectId: v.id("projects"),
+    versionNumber: v.number(), // 1, 2, 3...
+    minioKey: v.string(),
+    sizeBytes: v.number(),
+    mimeType: v.optional(v.string()),
+    uploadedBy: v.id("profiles"),
+    uploadedByRole: v.union(v.literal("admin"), v.literal("employee")),
+    description: v.optional(v.string()),
+    createdAt: v.number(),
+  })
+    .index("by_deliverableId", ["deliverableId"])
+    .index("by_projectId", ["projectId"]),
 
   // --------------------------------------------------------------------------
   // Version Requests

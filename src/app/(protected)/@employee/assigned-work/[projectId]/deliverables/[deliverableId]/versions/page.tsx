@@ -1,6 +1,6 @@
 "use client";
 
-import { VersionsWorkspace } from "@/components/modules/employee/assigned-work/details/versions-workspace";
+import { VersionsWorkspace } from "@/components/modules/employee/assigned-work/detail/versions-workspace";
 import { use } from "react";
 
 interface VersionsPageProps {

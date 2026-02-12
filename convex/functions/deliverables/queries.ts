@@ -260,3 +260,29 @@ export const getProjectVersionHistory = query({
     return enriched;
   },
 });
+
+/**
+ * Get a single version request by ID.
+ */
+export const getVersionRequest = query({
+  args: {
+    requestId: v.id("versionRequests"),
+  },
+  handler: async (ctx, args) => {
+    await getAuthUserWithProfile(ctx);
+
+    const request = await ctx.db.get(args.requestId);
+    if (!request) return null;
+
+    const requester = await ctx.db.get(request.requestedBy);
+    const deliverable = await ctx.db.get(request.deliverableId);
+
+    return {
+      ...request,
+      requestedByName: requester ? requester.name : "Unknown",
+      deliverableName: deliverable?.name || "Unknown",
+      deliverableMinioKey: deliverable?.minioKey,
+      deliverableMimeType: deliverable?.mimeType,
+    };
+  },
+});

@@ -1,16 +1,14 @@
 "use client";
 
-import { use } from "react";
-import { VersionsPage } from "@/components/modules/admin/projects/project-detail/deliverables/detail/versions-page";
+import { useParams } from "next/navigation";
+import { VersionRequestsList } from "@/components/modules/admin/projects/project-detail/deliverables/detail/version-requests-list";
 
-interface VersionsPageProps {
-  params: Promise<{
+export default function AdminVersionsPage() {
+  const { projectId, deliverableId } = useParams<{
     projectId: string;
     deliverableId: string;
-  }>;
-}
-
-export default function AdminVersionsPage({ params }: VersionsPageProps) {
-  const { projectId, deliverableId } = use(params);
-  return <VersionsPage projectId={projectId} deliverableId={deliverableId} />;
+  }>();
+  return (
+    <VersionRequestsList projectId={projectId} deliverableId={deliverableId} />
+  );
 }
