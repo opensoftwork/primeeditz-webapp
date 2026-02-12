@@ -32,6 +32,7 @@ interface ProjectDetailViewProps {
 
 export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
+  //@ts-ignore
   const project = useQuery(api.functions.projects.queries.getProject, {
     projectId: projectId as Id<"projects">,
   });
@@ -52,6 +53,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   ]);
 
   const fields = useQuery(
+    //@ts-ignore
     api.functions.projectTypeFields.queries.getFieldsByProjectType,
     project?.projectTypeId ? { projectTypeId: project.projectTypeId } : "skip",
   );
@@ -90,10 +92,6 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
       animate={{ opacity: 1 }}
       className="w-full space-y-12 p-6 md:p-12 relative"
     >
-      <DeliverableStatusBanner
-        projectId={projectId as Id<"projects">}
-        role="studio"
-      />
       <motion.div
         initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
@@ -105,6 +103,10 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           status={project.actionState}
         />
       </motion.div>
+      <DeliverableStatusBanner
+        projectId={projectId as Id<"projects">}
+        role="studio"
+      />
 
       {/* Grid Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">

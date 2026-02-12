@@ -7,12 +7,14 @@ interface MusicVisualizerProps {
   isPlaying?: boolean;
   className?: string;
   children?: React.ReactNode;
+  size?: number;
 }
 
 export function MusicVisualizer({
   isPlaying = true,
   className,
   children,
+  size = 400,
 }: MusicVisualizerProps) {
   const [bars, setBars] = useState<number[]>([]);
   const BAR_COUNT = 80;
@@ -21,19 +23,22 @@ export function MusicVisualizer({
     setBars(Array.from({ length: BAR_COUNT }, (_, i) => i));
   }, []);
 
+  const innerSize = Math.round(size * 0.64); // Ratio from original 256/400
+
   return (
     <div
-      className={cn(
-        "relative flex items-center justify-center w-[400px] h-[400px]",
-        className,
-      )}
+      className={cn("relative flex items-center justify-center", className)}
+      style={{ width: size, height: size }}
     >
       {/* Central Circle Area */}
       <div className="absolute inset-0 z-20 flex items-center justify-center">
-        <div className="relative w-64 h-64 rounded-full bg-black border-2 border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex items-col justify-center overflow-hidden">
+        <div
+          className="relative rounded-full bg-black border-2 border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.5)] flex flex-col items-center justify-center overflow-hidden"
+          style={{ width: innerSize, height: innerSize }}
+        >
           {/* Inner contents (Text/Status) */}
           <div className="absolute inset-0 bg-linear-to-b from-zinc-900 to-black opacity-90" />
-          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-6 text-center">
+          <div className="relative z-10 w-full h-full flex flex-col items-center justify-center p-2 text-center">
             {children}
           </div>
         </div>
@@ -43,10 +48,6 @@ export function MusicVisualizer({
       <div className="absolute inset-0 z-10">
         {bars.map((i) => {
           const rotation = (i * 360) / BAR_COUNT;
-          // Calculate color based on rotation to match the image:
-          // Image seems to go Blue -> Teal -> Green -> Yellow -> Red -> Pink -> Purple -> Blue
-          // We can map 0-360 to HSL.
-          // Let's offset it so top (0deg) is Blue. Blue is ~240.
           const hue = (rotation + 200) % 360;
 
           return (
@@ -66,14 +67,10 @@ export function MusicVisualizer({
                   isPlaying ? "animate-music-bar" : "",
                 )}
                 style={{
-                  height: `${60 + Math.random() * 40}%`, // Ensure it starts from center and extends past the covering circle
-                  backgroundColor: `hsl(${hue}, 100%, 60%)`, // More vibrant
-                  boxShadow: `0 0 15px 2px hsl(${hue}, 100%, 60%)`, // Stronger glow
+                  height: `${60 + Math.random() * 40}%`,
+                  backgroundColor: `hsl(${hue}, 100%, 60%)`,
+                  boxShadow: `0 0 15px 2px hsl(${hue}, 100%, 60%)`,
                   animationDelay: `-${Math.random() * 2}s`,
-                  // We position it at the OUTER edge of the circle (which is at top of this container due to rotation)
-                  // Wait, origin is center. "top-0" of the container (which is rotated) is the edge?
-                  // No, we need to be careful with positioning.
-                  // Let's try simpler: rotated container, bar is at `top: 0`.
                 }}
               />
             </div>
