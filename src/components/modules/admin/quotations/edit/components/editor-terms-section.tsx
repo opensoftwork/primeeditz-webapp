@@ -11,12 +11,12 @@ const TERMS_TEMPLATES = [
   {
     id: "standard",
     name: "Standard",
-    content: `1. PAYMENT TERMS\n• 50% advance payment\n• 50% on delivery\n\n2. REVISIONS\n• 2 rounds included\n\n3. RIGHTS\n• Transferred upon full payment`,
+    content: `1. PAYMENT TERMS\n• 50% advance payment\n• 50% on delivery\n\n2. VERSIONS\n• 2 rounds included\n\n3. RIGHTS\n• Transferred upon full payment`,
   },
   {
     id: "detailed",
     name: "Detailed",
-    content: `TERMS AND CONDITIONS\n\n1. SCOPE OF WORK\nAs specified in line items.\n\n2. PAYMENT SCHEDULE\n• 50% Booking Amount\n• 50% Balance before final delivery\n\n3. REVISION POLICY\n• Two rounds of revisions included.\n\n4. INTELLECTUAL PROPERTY\n• Rights transfer upon full payment.`,
+    content: `TERMS AND CONDITIONS\n\n1. SCOPE OF WORK\nAs specified in line items.\n\n2. PAYMENT SCHEDULE\n• 50% Booking Amount\n• 50% Balance before final delivery\n\n3. VERSION POLICY\n• Two rounds of versions included.\n\n4. INTELLECTUAL PROPERTY\n• Rights transfer upon full payment.`,
   },
 ];
 
@@ -50,7 +50,7 @@ export function EditorTermsSection() {
         </h2>
       </div>
 
-      <div className="p-6 rounded-[2rem] bg-white/2 border border-white/5 space-y-6">
+      <div className="p-6 rounded-4xl bg-white/2 border border-white/5 space-y-6">
         <div className="flex flex-wrap gap-2">
           {TERMS_TEMPLATES.map((t) => (
             <Button

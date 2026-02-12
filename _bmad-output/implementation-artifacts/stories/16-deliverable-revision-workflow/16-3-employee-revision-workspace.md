@@ -1,7 +1,7 @@
 # Story 16-3: Employee Revision Workspace
 
 **Epic**: Epic 16 - Deliverable Revision Workflow  
-**Status**: backlog  
+**Status**: review  
 **Complexity**: Large (10 points)  
 **Created**: 2026-02-11  
 **Priority**: MUST — Completes the admin→employee revision cycle
@@ -73,17 +73,17 @@
 
 ### AC1: Navigate to Revision Workspace
 
-- [ ] **Given** I am an employee viewing a deliverable with status `revision_requested`
-- [ ] **When** I click on the revision notification banner or the deliverable card
-- [ ] **Then** I am navigated to the revision workspace page
-- [ ] **And** the page shows the revision request details
+- [x] **Given** I am an employee viewing a deliverable with status `revision_requested`
+- [x] **When** I click on the revision notification banner or the deliverable card
+- [x] **Then** I am navigated to the revision workspace page
+- [x] **And** the page shows the revision request details
 
 ### AC2: Original Deliverable Preview
 
-- [ ] **Given** I am on the revision workspace
-- [ ] **Then** the left panel shows the original deliverable preview
-- [ ] **And** I can download the original file
-- [ ] **And** the preview uses the existing `FilePreview` component
+- [x] **Given** I am on the revision workspace
+- [x] **Then** the left panel shows the original deliverable preview
+- [x] **And** I can download the original file
+- [x] **And** the preview uses the existing `FilePreview` component
 
 ### AC3: Revision Request Details
 
@@ -106,15 +106,15 @@
 
 ### AC5: Upload Corrected Version
 
-- [ ] **Given** I am viewing the revision workspace
-- [ ] **When** I click "Upload Corrected Version"
-- [ ] **Then** a file picker opens for selecting the corrected file
-- [ ] **And** the file uploads to MinIO via signed URL
-- [ ] **And** a new deliverable version is created (v2, v3, etc.)
-- [ ] **And** the pending revision request is resolved with `resolvedDeliverableId`
-- [ ] **And** deliverable goes back to `pending_qc` for admin review
-- [ ] **And** success toast: "Corrected version uploaded! Admin will review."
-- [ ] **And** I am navigated back to the deliverable list
+- [x] **Given** I am viewing the revision workspace
+- [x] **When** I click "Upload Corrected Version"
+- [x] **Then** a file picker opens for selecting the corrected file
+- [x] **And** the file uploads to MinIO via signed URL
+- [x] **And** a new deliverable version is created (v2, v3, etc.)
+- [x] **And** the pending revision request is resolved with `resolvedDeliverableId`
+- [x] **And** deliverable goes back to `pending_qc` for admin review
+- [x] **And** success toast: "Corrected version uploaded! Admin will review."
+- [x] **And** I am navigated back to the deliverable list
 
 ### AC6: Mark as In Progress
 
@@ -398,12 +398,12 @@ if (deliverable?.status === "revision_requested") {
 
 ### Phase D: Styling & Polish (~1 point)
 
-- [ ] D1.1 Split-pane layout: Preview (left, 55%) + Workspace (right, 45%)
-- [ ] D1.2 Responsive: Stack vertically on mobile
-- [ ] D1.3 Revision notes in amber/warning-styled card
-- [ ] D1.4 Reference images with subtle borders and hover effects
-- [ ] D1.5 Upload area with drag-and-drop zone styling
-- [ ] D1.6 "Corrected version uploaded" success animation
+- [x] D1.1 Split-pane layout: Preview (left, 55%) + Workspace (right, 45%)
+- [x] D1.2 Responsive: Stack vertically on mobile
+- [x] D1.3 Revision notes in amber/warning-styled card
+- [x] D1.4 Reference images with subtle borders and hover effects
+- [x] D1.5 Upload area with drag-and-drop zone styling
+- [x] D1.6 "Corrected version uploaded" success animation
 
 ---
 
@@ -466,9 +466,37 @@ if (deliverable?.status === "revision_requested") {
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes         |
-| ---------- | ------- | ------------- |
-| 2026-02-11 | backlog | Story created |
+| Date       | Status      | Notes                  |
+| ---------- | ----------- | ---------------------- |
+| 2026-02-11 | backlog     | Story created          |
+| 2026-02-12 | in-progress | Started implementation |
+
+---
+
+## 📝 Dev Agent Record
+
+### 🏗️ Implementation Plan
+
+1. **Phase A: Route Setup**
+   - Create route at `src/app/(protected)/@employee/assigned-work/[projectId]/deliverables/[deliverableId]/revision/page.tsx`.
+2. **Phase B: Revision Workspace Component**
+   - Create `RevisionWorkspace` container in `src/components/modules/employee/assigned-work/details/revision-workspace.tsx`.
+   - Implement `RevisionReferenceViewer` for admin notes and images.
+   - Implement `CorrectedUpload` for employee corrected file upload.
+3. **Phase C: Integration (Gaps & Banners)**
+   - Link from `DeliverableStatusBanner`.
+   - Add revision alert to employee project detail.
+   - Redirect/Banner on existing deliverable page.
+4. **Phase D: Styling & Polish**
+   - Dark mode premium aesthetic, split layout.
+
+### 📜 Debug Log
+
+- [2026-02-12 11:30] Initializing story 16-3. Resolved project context and sprint status.
+
+### ✅ Completion Notes
+
+- (In progress)
 
 ---
 

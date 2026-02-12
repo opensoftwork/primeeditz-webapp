@@ -4,7 +4,7 @@ import { CheckCircle, Clock, User, XCircle, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DeliverableMetaCardProps {
-  status: "pending_qc" | "approved" | "revision_needed" | "revision_requested";
+  status: "pending_qc" | "approved" | "version_needed" | "version_requested";
   uploadedByName: string;
 }
 
@@ -25,15 +25,16 @@ export function DeliverableMetaCard({
               "inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider",
               status === "approved"
                 ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
-                : status === "revision_requested"
+                : status === "version_requested"
                   ? "text-red-400 border-red-500/20 bg-red-500/10"
-                  : status === "revision_needed"
+                  : status === "version_needed"
                     ? "text-orange-400 border-orange-500/20 bg-orange-500/10"
-                    : "text-amber-400 border-amber-500/20 bg-amber-500/10"
+                    : "text-amber-400 border-amber-500/20 bg-amber-500/10",
             )}
           >
             {status === "approved" && <CheckCircle className="h-3.5 w-3.5" />}
-            {(status === "revision_requested" || status === "revision_needed") && (
+            {(status === "version_requested" ||
+              status === "version_needed") && (
               <XCircle className="h-3.5 w-3.5" />
             )}
             {status === "pending_qc" && <Clock className="h-3.5 w-3.5" />}

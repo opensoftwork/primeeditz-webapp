@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Id } from "@convex/_generated/dataModel";
+import { FilePreview } from "@/components/shared/file-preview";
 
 interface DeliverableCardProps {
   id: Id<"deliverables">;
@@ -20,6 +21,7 @@ interface DeliverableCardProps {
   variant?: "card" | "flat";
   href?: string;
   disableLink?: boolean;
+  signedUrl?: string;
 }
 
 export function DeliverableCard({
@@ -35,6 +37,7 @@ export function DeliverableCard({
   variant = "card",
   href,
   disableLink,
+  signedUrl,
 }: DeliverableCardProps) {
   const CardWrapper = (disableLink ? "div" : Link) as any;
   const cardHref = href || `/projects/${projectId}/deliverables/${id}`;
@@ -50,9 +53,15 @@ export function DeliverableCard({
       )}
     >
       <div className="flex items-center gap-4">
-        <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shrink-0">
-          <FileIcon className="h-6 w-6 text-indigo-400" />
-        </div>
+        {signedUrl ? (
+          <div className="h-16 w-16 rounded-xl overflow-hidden bg-black/20 border border-white/10 shrink-0">
+            <FilePreview url={signedUrl} fileName={name} />
+          </div>
+        ) : (
+          <div className="h-12 w-12 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shrink-0">
+            <FileIcon className="h-6 w-6 text-indigo-400" />
+          </div>
+        )}
         <div>
           <h4 className="text-sm font-bold text-white mb-1 group-hover:text-indigo-400 transition-colors">
             {name}
@@ -70,13 +79,13 @@ export function DeliverableCard({
               className={cn(
                 status === "approved"
                   ? "text-emerald-400"
-                  : status === "revision_requested" ||
-                      status === "revision_needed"
+                  : status === "version_requested" ||
+                      status === "version_needed"
                     ? "text-red-400"
                     : "text-amber-400",
               )}
             >
-              {status.replace("_", " ")}
+              {status.replace("_", " ").replace("revision", "version")}
             </span>
           </div>
         </div>

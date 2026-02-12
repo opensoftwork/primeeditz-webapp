@@ -14,8 +14,8 @@ import { DeliverableHeader } from "./deliverable-header";
 import { DeliverablePreview } from "./deliverable-preview";
 import { DeliverableActions } from "./deliverable-actions";
 import { DeliverableMetaCard } from "./deliverable-meta-card";
-import { RevisionDialog } from "./revision-dialog";
 import { VersionHistory } from "./version-history";
+import { VersionsTimeline } from "@/components/shared/versions-timeline";
 
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
@@ -74,9 +74,6 @@ export function DeliverableDetailView({
   const approveDeliverable = useMutation(
     api.functions.deliverables.mutations.approveDeliverable,
   );
-  const requestRevision = useMutation(
-    api.functions.deliverables.mutations.requestRevision,
-  );
   const sendToStudio = useMutation(
     api.functions.deliverables.mutations.sendToStudio,
   );
@@ -88,8 +85,6 @@ export function DeliverableDetailView({
 
   // Local state
   const [fileUrl, setFileUrl] = useState<string | null>(null);
-  const [showRevisionDialog, setShowRevisionDialog] = useState(false);
-  const [revisionNotes, setRevisionNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showVersionHistory, setShowVersionHistory] = useState(false);
 
@@ -141,25 +136,10 @@ export function DeliverableDetailView({
     }
   };
 
-  const handleRequestRevision = async () => {
-    if (!revisionNotes.trim()) {
-      toast.error("Please provide revision notes");
-      return;
-    }
-    setIsSubmitting(true);
-    try {
-      await requestRevision({
-        deliverableId,
-        rejectionNotes: revisionNotes,
-      });
-      toast.success("Revision requested! Employee will be notified.");
-      setShowRevisionDialog(false);
-      setRevisionNotes("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to request revision");
-    } finally {
-      setIsSubmitting(false);
-    }
+  const handleRequestVersion = () => {
+    router.push(
+      `/projects/${projectId}/deliverables/${deliverableId}/versions`,
+    );
   };
 
   const handleSendToStudio = async () => {
@@ -175,9 +155,9 @@ export function DeliverableDetailView({
   };
 
   const canApprove = deliverable.status === "pending_qc";
-  const canRequestRevision =
+  const canRequestVersion =
     deliverable.status === "pending_qc" ||
-    deliverable.status === "revision_needed";
+    deliverable.status === "version_needed";
 
   // Can send to studio if deliverable is approved AND project isn't already in review/delivery
   const canSendToStudio =
@@ -215,14 +195,16 @@ export function DeliverableDetailView({
       )}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-8">
           <DeliverablePreview
             url={fileUrl}
             fileName={deliverable.name}
             mimeType={deliverable.mimeType}
             description={deliverable.description}
-            rejectionNotes={deliverable.rejectionNotes}
+            versionFeedback={deliverable.versionFeedback}
           />
+
+          <VersionsTimeline deliverableId={deliverableId} />
         </div>
 
         <div className="space-y-6">
@@ -233,25 +215,16 @@ export function DeliverableDetailView({
           {isAdmin && (
             <DeliverableActions
               canApprove={canApprove}
-              canRequestRevision={canRequestRevision}
+              canRequestVersion={canRequestVersion}
               canSendToStudio={canSendToStudio}
               isSubmitting={isSubmitting}
               onApprove={handleApprove}
-              onRequestRevision={() => setShowRevisionDialog(true)}
+              onRequestVersion={handleRequestVersion}
               onSendToStudio={handleSendToStudio}
             />
           )}
         </div>
       </div>
-
-      <RevisionDialog
-        open={showRevisionDialog}
-        onOpenChange={setShowRevisionDialog}
-        revisionNotes={revisionNotes}
-        onNotesChange={setRevisionNotes}
-        onSubmit={handleRequestRevision}
-        isSubmitting={isSubmitting}
-      />
     </div>
   );
 }

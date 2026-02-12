@@ -78,7 +78,7 @@ const statusConfig: Record<
     borderColor: "border-emerald-400/20",
   },
   changes_requested: {
-    label: "Revisions",
+    label: "Version Requested",
     icon: Clock,
     color: "text-amber-400",
     bgColor: "bg-amber-400/10",

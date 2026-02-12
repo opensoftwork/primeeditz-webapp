@@ -72,7 +72,7 @@ function getAwaitingConfig(role: string, state: string, employeeName?: string) {
       awaiting_review: {
         title: "Client Reviewing",
         message:
-          "Client is reviewing the deliverables. They can approve or request revisions.",
+          "Client is reviewing the deliverables. They can approve or request versions.",
       },
       delivered: {
         title: "Client Receipt",
@@ -104,11 +104,11 @@ function getAwaitingConfig(role: string, state: string, employeeName?: string) {
           ? `${employeeName} is currently active on deliverables.`
           : "Employee is currently active on deliverables.",
       },
-      revisions_requested: {
-        title: "Revisions In Progress",
+      versions_requested: {
+        title: "Versions In Progress",
         message: employeeName
-          ? `${employeeName} is working on the requested revisions.`
-          : "Employee is working on the requested revisions.",
+          ? `${employeeName} is working on the requested versions.`
+          : "Employee is working on the requested versions.",
       },
     };
     return {

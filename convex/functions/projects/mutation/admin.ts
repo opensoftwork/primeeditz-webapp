@@ -407,6 +407,16 @@ export const permanentlyDeleteProject = adminMutation({
       await ctx.db.delete(deliverable._id);
     }
 
+    // NEW: Delete version requests
+    const versionRequests = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    for (const request of versionRequests) {
+      await ctx.db.delete(request._id);
+    }
+
     // E. Delete status history
     const statusHistory = await ctx.db
       .query("statusHistory")

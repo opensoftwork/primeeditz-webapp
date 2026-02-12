@@ -56,7 +56,7 @@ export const projectActionStateValidator = v.union(
 
   // Review Phase
   v.literal("awaiting_review"),
-  v.literal("revisions_requested"),
+  v.literal("versions_requested"),
   v.literal("review_approved"),
 
   // Delivery Phase
@@ -77,19 +77,19 @@ export const projectSourceValidator = v.union(
   v.literal("quotation_spawned"),
 );
 
-// Folder status flow: pending_upload → in_progress → completed
+// Status flow: pending_upload → in_progress → completed
 export const folderStatusValidator = v.union(
   v.literal("pending_upload"),
   v.literal("in_progress"),
   v.literal("completed"),
 );
 
-// Deliverable status flow: pending_qc → approved / revision_needed / revision_requested
+// Deliverable status flow: pending_qc → approved / version_needed / version_requested
 export const deliverableStatusValidator = v.union(
   v.literal("pending_qc"),
   v.literal("approved"),
-  v.literal("revision_needed"),
-  v.literal("revision_requested"),
+  v.literal("version_needed"),
+  v.literal("version_requested"),
 );
 
 // Quotation status flow
@@ -105,6 +105,22 @@ export const quotationStatusValidator = v.union(
   v.literal("expired"),
   v.literal("superseded"),
 );
+
+// Version request status validator
+export const versionRequestStatusValidator = v.union(
+  v.literal("pending"), // Awaiting employee action
+  v.literal("in_progress"), // Employee working on corrections
+  v.literal("resolved"), // New version uploaded, request fulfilled
+);
+
+// Reference image object validator
+const versionReferenceImageValidator = v.object({
+  fileName: v.string(),
+  fileSize: v.number(),
+  mimeType: v.string(),
+  minioKey: v.string(),
+  note: v.optional(v.string()), // Per-image note describing what's wrong
+});
 
 // Project Config Validator - Links a package to project type and folder template
 export const projectConfigValidator = v.object({
@@ -346,7 +362,7 @@ export default defineSchema({
     deletedAt: v.optional(v.number()),
     deletedBy: v.optional(v.id("profiles")),
     // Timestamp (uses _creationTime for created)
-    revisionCount: v.optional(v.number()), // NEW: Track client revisions
+    versionCount: v.optional(v.number()), // NEW: Track client versions
     updatedAt: v.number(),
   })
     .index("by_studioId", ["studioId"])
@@ -423,9 +439,32 @@ export default defineSchema({
     uploadedBy: v.id("profiles"),
     qcReviewedBy: v.optional(v.id("profiles")),
     qcNotes: v.optional(v.string()),
-    rejectionNotes: v.optional(v.string()),
+    versionFeedback: v.optional(v.string()),
+    parentDeliverableId: v.optional(v.id("deliverables")), // Links corrected version to original
     // Uses _creationTime
   })
+    .index("by_projectId", ["projectId"])
+    .index("by_status", ["status"])
+    .index("by_parentDeliverableId", ["parentDeliverableId"]),
+
+  // --------------------------------------------------------------------------
+  // Version Requests
+  // --------------------------------------------------------------------------
+  versionRequests: defineTable({
+    deliverableId: v.id("deliverables"),
+    projectId: v.id("projects"),
+    requestedBy: v.id("profiles"),
+    requestedByRole: v.union(v.literal("admin"), v.literal("studio")),
+    versionNumber: v.number(), // Auto-incremented: 1, 2, 3...
+    notes: v.string(), // General version description
+    referenceImages: v.optional(v.array(versionReferenceImageValidator)),
+    annotations: v.optional(v.string()), // Future: JSON blob for PDF/image annotations
+    status: versionRequestStatusValidator,
+    resolvedDeliverableId: v.optional(v.id("deliverables")), // Link to corrected version
+    resolvedAt: v.optional(v.number()),
+    createdAt: v.number(),
+  })
+    .index("by_deliverableId", ["deliverableId"])
     .index("by_projectId", ["projectId"])
     .index("by_status", ["status"]),
 
@@ -695,4 +734,16 @@ export default defineSchema({
     updatedAt: v.number(),
     updatedBy: v.id("profiles"),
   }),
+
+  // --------------------------------------------------------------------------
+  // Studio Individual Deliverable Approvals
+  // --------------------------------------------------------------------------
+  studioApprovals: defineTable({
+    deliverableId: v.id("deliverables"),
+    projectId: v.id("projects"),
+    studioProfileId: v.id("profiles"),
+    approvedAt: v.number(),
+  })
+    .index("by_deliverableId", ["deliverableId"])
+    .index("by_projectId", ["projectId"]),
 });

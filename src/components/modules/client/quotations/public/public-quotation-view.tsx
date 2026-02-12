@@ -166,7 +166,7 @@ export function PublicQuotationView() {
 
           <div className="rounded-[2.5rem] bg-white/2 border border-white/5 p-8 text-center space-y-4">
             <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.3em] leading-relaxed">
-              Need assistance or revisions?
+              Need assistance or changes?
               <br />
               <span className="text-white/40">
                 Email us at studio@primeeditz.com

@@ -22,7 +22,7 @@ export default function Docs() {
             </h2>
             <p className="text-lg md:text-xl">
               Understand our service guidelines, including file formats,
-              delivery timelines, revision policies, and best practices for
+              delivery timelines, version policies, and best practices for
               submitting your content.
             </p>
           </section>

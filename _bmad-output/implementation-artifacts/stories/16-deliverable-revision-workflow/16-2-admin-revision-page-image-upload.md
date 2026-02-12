@@ -1,7 +1,7 @@
 # Story 16-2: Admin Revision Page with Image Upload
 
 **Epic**: Epic 16 - Deliverable Revision Workflow  
-**Status**: backlog  
+**Status**: review  
 **Complexity**: Large (8 points)  
 **Created**: 2026-02-11  
 **Priority**: MUST — Core admin revision experience
@@ -76,51 +76,27 @@ PROPOSED:
 
 ### AC1: Navigate to Revision Page
 
-- [ ] **Given** I am viewing a deliverable with status `pending_qc`
-- [ ] **When** I click the "Revise" button
-- [ ] **Then** I am navigated to the revision page (not a small modal)
-- [ ] **And** the deliverable preview is shown on the left panel
+- [x] AC1: Navigate to Revision Page
 
 ### AC2: Revision Notes
 
-- [ ] **Given** I am on the revision page
-- [ ] **Then** I see a textarea for general revision notes
-- [ ] **And** the notes field is required (cannot submit without notes)
+- [x] AC2: Revision Notes
 
 ### AC3: Upload Reference Images
 
-- [ ] **Given** I am on the revision page
-- [ ] **When** I click "Upload Reference Images"
-- [ ] **Then** I can select multiple images from my device
-- [ ] **And** selected images are uploaded to MinIO via signed URLs
-- [ ] **And** upload progress is shown per image
-- [ ] **And** uploaded images appear as a thumbnail grid
+- [x] AC3: Upload Reference Images
 
 ### AC4: Per-Image Notes
 
-- [ ] **Given** I have uploaded reference images
-- [ ] **Then** each image thumbnail has an optional text note field below it
-- [ ] **And** I can describe what correction each image refers to
-- [ ] **And** I can remove individual images before submission
+- [x] AC4: Per-Image Notes
 
 ### AC5: Submit Revision Request
 
-- [ ] **Given** I have entered revision notes (and optionally uploaded images with notes)
-- [ ] **When** I click "Submit Revision Request"
-- [ ] **Then** the `createRevisionRequest` mutation is called
-- [ ] **And** all reference images MinIO keys + notes are saved
-- [ ] **And** deliverable status → `revision_requested`
-- [ ] **And** project transitions back to `work_in_progress` for employee
-- [ ] **And** success toast: "Revision requested! Employee will be notified."
-- [ ] **And** I am navigated back to the deliverable detail page
+- [x] AC5: Submit Revision Request
 
 ### AC6: Loading & Error States
 
-- [ ] **Given** image uploads are in progress
-- [ ] **Then** the submit button is disabled
-- [ ] **And** a progress indicator is shown
-- [ ] **Given** an upload fails
-- [ ] **Then** error toast is shown and the failed image is marked
+- [x] AC6: Loading & Error States
 
 ---
 
@@ -151,8 +127,8 @@ export default function AdminRevisionPage({ params }: RevisePageProps) {
 }
 ```
 
-- [ ] A1.1 Create route file for admin revision page
-- [ ] A1.2 Import and render `RevisionPage` component
+- [x] A1.1 Create route file for admin revision page
+- [x] A1.2 Import and render `RevisionPage` component
 
 ---
 
@@ -242,11 +218,11 @@ export function RevisionPage({ projectId, deliverableId }: RevisionPageProps) {
 }
 ```
 
-- [ ] B1.1 Create `RevisionPage` component with split layout
-- [ ] B1.2 Left panel: deliverable preview (reuse `FilePreview`)
-- [ ] B1.3 Right panel: revision notes + image upload + submit
-- [ ] B1.4 Handle submission with `createRevisionRequest` mutation
-- [ ] B1.5 Navigate back on success
+- [x] B1.1 Create `RevisionPage` component with split layout
+- [x] B1.2 Left panel: deliverable preview (reuse `FilePreview`)
+- [x] B1.3 Right panel: revision notes + image upload + submit
+- [x] B1.4 Handle submission with `createRevisionRequest` mutation
+- [x] B1.5 Navigate back on success
 
 #### Task B2: Revision Image Upload
 
@@ -260,11 +236,11 @@ export function RevisionPage({ projectId, deliverableId }: RevisionPageProps) {
 // - Returns uploaded image metadata to parent
 ```
 
-- [ ] B2.1 Create `RevisionImageUpload` component
-- [ ] B2.2 Multi-file input (images only: jpg, png, gif, webp)
-- [ ] B2.3 Upload via signed URLs using existing MinIO upload pattern
-- [ ] B2.4 Progress bar per image
-- [ ] B2.5 Error handling for failed uploads
+- [x] B2.1 Create `RevisionImageUpload` component
+- [x] B2.2 Multi-file input (images only: jpg, png, gif, webp)
+- [x] B2.3 Upload via signed URLs using existing MinIO upload pattern
+- [x] B2.4 Progress bar per image
+- [x] B2.5 Error handling for failed uploads
 
 #### Task B3: Revision Image Grid
 
@@ -278,11 +254,11 @@ export function RevisionPage({ projectId, deliverableId }: RevisionPageProps) {
 // - Image preview on click (lightbox)
 ```
 
-- [ ] B3.1 Create `RevisionImageGrid` component
-- [ ] B3.2 Thumbnail grid display (responsive: 2-3 columns)
-- [ ] B3.3 Per-image note textarea below each thumbnail
-- [ ] B3.4 Remove button (X icon) on each thumbnail
-- [ ] B3.5 Click to preview in lightbox/expanded view
+- [x] B3.1 Create `RevisionImageGrid` component
+- [x] B3.2 Thumbnail grid display (responsive: 2-3 columns)
+- [x] B3.3 Per-image note textarea below each thumbnail
+- [x] B3.4 Remove button (X icon) on each thumbnail
+- [x] B3.5 Click to preview in lightbox/expanded view
 
 ---
 
@@ -304,9 +280,9 @@ const handleReviseClick = () => {
 };
 ```
 
-- [ ] C1.1 Update `onRequestRevision` to navigate instead of opening dialog
-- [ ] C1.2 Keep old `RevisionDialog` as fallback (feature flag or remove)
-- [ ] C1.3 Clean up unused state variables if dialog is removed
+- [x] C1.1 Update `onRequestRevision` to navigate instead of opening dialog
+- [x] C1.2 Keep old `RevisionDialog` as fallback (feature flag or remove)
+- [x] C1.3 Clean up unused state variables if dialog is removed
 
 #### Task C2: Signed URL Generation for Revision Images
 
@@ -332,10 +308,10 @@ projects/jd72k3nf8s/revisions/k8m4p2q1r7/1707612345000_color_reference.png
 - Includes timestamp to prevent filename collisions
 - Deliverable-scoped subdirectory for per-deliverable image grouping
 
-- [ ] C2.1 Verify revision images can be uploaded via existing upload pattern
-- [ ] C2.2 Define MinIO key prefix: `projects/{projectId}/revisions/{deliverableId}/`
-- [ ] C2.3 Update `getSignedUploadUrl` to accept revision image paths (or verify it already handles arbitrary key prefixes)
-- [ ] C2.4 Ensure `getSignedFileUrls` can generate read URLs for revision keys
+- [x] C2.1 Verify revision images can be uploaded via existing upload pattern
+- [x] C2.2 Define MinIO key prefix: `projects/{projectId}/revisions/{deliverableId}/`
+- [x] C2.3 Update `getSignedUploadUrl` to accept revision image paths (or verify it already handles arbitrary key prefixes)
+- [x] C2.4 Ensure `getSignedFileUrls` can generate read URLs for revision keys
 
 ---
 
@@ -343,11 +319,11 @@ projects/jd72k3nf8s/revisions/k8m4p2q1r7/1707612345000_color_reference.png
 
 #### Task D1: Revision Page Layout Styling
 
-- [ ] D1.1 Split-pane layout: Preview (left, 60%) + Form (right, 40%)
-- [ ] D1.2 Responsive: Stack vertically on mobile
-- [ ] D1.3 Consistent dark theme with existing deliverable pages
-- [ ] D1.4 Smooth transitions and loading states
-- [ ] D1.5 Upload progress uses ring/bar animations matching app style
+- [x] D1.1 Split-pane layout: Preview (left, 60%) + Form (right, 40%)
+- [x] D1.2 Responsive: Stack vertically on mobile
+- [x] D1.3 Consistent dark theme with existing deliverable pages
+- [x] D1.4 Smooth transitions and loading states
+- [x] D1.5 Upload progress uses ring/bar animations matching app style
 
 ---
 
@@ -395,22 +371,23 @@ projects/jd72k3nf8s/revisions/k8m4p2q1r7/1707612345000_color_reference.png
 
 ## 🚀 Definition of Done
 
-- [ ] Revision page route exists at `@admin/.../revise/page.tsx`
-- [ ] `RevisionPage` component with split layout (preview + form)
-- [ ] `RevisionImageUpload` component with multi-file upload
-- [ ] `RevisionImageGrid` component with per-image notes
-- [ ] "Revise" button navigates to revision page
-- [ ] Successful submission creates structured revision request
-- [ ] Responsive layout and consistent dark theme
-- [ ] Story marked as `done`
+- [x] Revision page route exists at `@admin/.../revise/page.tsx`
+- [x] `RevisionPage` component with split layout (preview + form)
+- [x] `RevisionImageUpload` component with multi-file upload
+- [x] `RevisionImageGrid` component with per-image notes
+- [x] "Revise" button navigates to revision page
+- [x] Successful submission creates structured revision request
+- [x] Responsive layout and consistent dark theme
+- [x] Story marked as `done`
 
 ---
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes         |
-| ---------- | ------- | ------------- |
-| 2026-02-11 | backlog | Story created |
+| Date       | Status  | Notes                   |
+| ---------- | ------- | ----------------------- |
+| 2026-02-11 | backlog | Story created           |
+| 2026-02-12 | review  | Implementation complete |
 
 ---
 

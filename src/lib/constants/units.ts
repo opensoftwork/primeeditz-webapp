@@ -15,7 +15,6 @@ export const UNITS = {
     "set",
     "Item",
     "deliverables",
-    "revisions",
     "versions",
   ],
 

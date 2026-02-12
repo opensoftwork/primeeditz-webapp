@@ -47,8 +47,8 @@ export function HandoffPanel({ project, isLead }: HandoffPanelProps) {
         return [{ value: "deliverables_ready", label: "Submit for QC" }];
       case "deliverables_ready":
         return [{ value: "awaiting_review", label: "Push to Client Review" }];
-      case "revisions_requested":
-        return [{ value: "work_in_progress", label: "Resume Revisions" }];
+      case "versions_requested":
+        return [{ value: "work_in_progress", label: "Resume Versions" }];
       default:
         return [];
     }

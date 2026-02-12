@@ -36,7 +36,7 @@ export async function canUpload(
       "work_in_progress",
       "deliverables_ready",
       "awaiting_review",
-      "revisions_requested",
+      "versions_requested",
     ];
     if (allowedAdminStates.includes(actionState)) {
       return {
@@ -80,7 +80,7 @@ export async function canUpload(
       case "work_in_progress":
       case "deliverables_ready":
       case "awaiting_review":
-      case "revisions_requested":
+      case "versions_requested":
         return { allowed: true, reason: "Admin can upload" };
       case "awaiting_uploads":
         return {
@@ -103,7 +103,7 @@ export async function canUpload(
     switch (actionState) {
       case "assigned":
       case "work_in_progress":
-      case "revisions_requested":
+      case "versions_requested":
         return { allowed: true, reason: "Upload deliverables" };
       default:
         return { allowed: false, reason: "Not in production phase" };

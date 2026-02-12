@@ -33,6 +33,8 @@ export const clearAllData = internalMutation({
       "projectSquads",
       "handoffLogs",
       "servicePackageDrafts",
+      "versionRequests",
+      "studioApprovals",
     ];
 
     const stats: Record<string, number> = {};

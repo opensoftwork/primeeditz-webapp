@@ -7,7 +7,7 @@ interface DeliverablePreviewProps {
   fileName: string;
   mimeType?: string;
   description?: string;
-  rejectionNotes?: string;
+  versionFeedback?: string;
 }
 
 export function DeliverablePreview({
@@ -15,7 +15,7 @@ export function DeliverablePreview({
   fileName,
   mimeType,
   description,
-  rejectionNotes,
+  versionFeedback,
 }: DeliverablePreviewProps) {
   return (
     <div className="space-y-6">
@@ -41,14 +41,14 @@ export function DeliverablePreview({
         </p>
       </div>
 
-      {/* Rejection Notes */}
-      {rejectionNotes && (
+      {/* Version Feedback */}
+      {versionFeedback && (
         <div className="p-6 rounded-3xl bg-red-500/5 border border-red-500/20 space-y-4">
           <h3 className="text-xs font-black uppercase tracking-widest text-red-400 flex items-center gap-2">
-            Revision Requested
+            Version Feedback
           </h3>
           <p className="text-sm text-red-200/80 leading-relaxed">
-            {rejectionNotes}
+            {versionFeedback}
           </p>
         </div>
       )}

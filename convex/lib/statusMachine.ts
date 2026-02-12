@@ -39,8 +39,8 @@ const VALID_TRANSITIONS: Record<ActionState, ActionState[]> = {
   deliverables_ready: ["awaiting_review", "work_in_progress"], // QC approve/reject
 
   // Review Phase
-  awaiting_review: ["review_approved", "revisions_requested"],
-  revisions_requested: ["deliverables_ready"],
+  awaiting_review: ["review_approved", "versions_requested"],
+  versions_requested: ["deliverables_ready"],
   review_approved: ["preparing_delivery"],
 
   // Delivery Phase
@@ -73,7 +73,7 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
   deliverables_ready: "production",
 
   awaiting_review: "review",
-  revisions_requested: "review",
+  versions_requested: "review",
   review_approved: "review",
 
   preparing_delivery: "delivery",
@@ -101,7 +101,7 @@ const STATE_TO_ACTOR: Record<ActionState, Role> = {
   work_in_progress: "employee",
   deliverables_ready: "admin",
   awaiting_review: "studio",
-  revisions_requested: "employee",
+  versions_requested: "employee",
   review_approved: "admin",
   preparing_delivery: "admin",
   ready_for_delivery: "admin",

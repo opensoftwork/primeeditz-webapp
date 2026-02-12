@@ -15,10 +15,10 @@ interface AssignedWorkDeliverablesProps {
 export function AssignedWorkDeliverables({
   projectId,
 }: AssignedWorkDeliverablesProps) {
-    const deliverables = useQuery(
-      //@ts-ignore
+  const deliverables = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getProjectDeliverables,
-    { projectId: projectId as Id<"projects"> }
+    { projectId: projectId as Id<"projects"> },
   );
 
   if (deliverables === undefined) {
@@ -59,7 +59,11 @@ export function AssignedWorkDeliverables({
             status={item.status}
             createdAt={item._creationTime}
             uploadedByName={item.uploadedByName}
-            href={`/assigned-work/${projectId}/deliverables/${item._id}`}
+            href={
+              item.status === "version_requested"
+                ? `/assigned-work/${projectId}/deliverables/${item._id}/versions`
+                : `/assigned-work/${projectId}/deliverables/${item._id}`
+            }
           />
         ))}
       </div>

@@ -360,3 +360,13 @@ development_status:
   14-10-deprecate-folder-templates-route: done # 2 points - FINAL
 
   epic-14-retrospective: optional
+
+  # ============================================================================
+  # EPIC 16: Deliverable Revision Workflow
+  # ============================================================================
+  epic-16: in-progress
+  16-1-revision-requests-schema-backend: review
+  16-2-admin-revision-page-image-upload: review
+  16-3-employee-revision-workspace: review
+  16-4-revision-history-timeline: review
+  16-5-studio-per-deliverable-review: review

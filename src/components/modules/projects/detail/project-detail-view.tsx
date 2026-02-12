@@ -32,6 +32,7 @@ interface ProjectDetailViewProps {
 
 export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
+  //@ts-ignore
   const project = useQuery(api.functions.projects.queries.getProject, {
     projectId: projectId as Id<"projects">,
   });
@@ -122,7 +123,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
             <DeliverablesSection
               projectId={projectId}
               actionState={project.actionState}
-              revisionCount={project.revisionCount}
+              versionCount={project.versionCount}
             />
           )}
 

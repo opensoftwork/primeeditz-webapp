@@ -125,11 +125,13 @@ export const generateUploadUrl = action({
     contentType: v.string(),
     projectId: v.id("projects"),
     folderId: v.optional(v.id("folders")),
+    deliverableId: v.optional(v.id("deliverables")),
     fileSize: v.number(),
   },
   handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
     // 1. Verify eligibility using role-agnostic query
     const uploadEligibility = await ctx.runQuery(
+      //@ts-ignore
       api.functions.projects.queries.getProjectUploadEligibility,
       {
         projectId: args.projectId,
@@ -157,7 +159,16 @@ export const generateUploadUrl = action({
     // 3. Generate unique storage key
     const timestamp = Date.now();
     const cleanName = args.fileName.replace(/\s+/g, "_");
-    const subPath = args.folderId ? `assets/${args.folderId}` : "deliverables";
+    
+    let subPath: string;
+    if (args.deliverableId) {
+      subPath = `versions/${args.deliverableId}`;
+    } else if (args.folderId) {
+      subPath = `assets/${args.folderId}`;
+    } else {
+      subPath = "deliverables";
+    }
+    
     const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
 
     // 3. Generate pre-signed PUT URL

@@ -34,11 +34,18 @@ export function VersionHistory({
               "px-3 py-2 rounded-xl border text-xs font-bold transition-all",
               v._id === currentId
                 ? "bg-indigo-500/20 border-indigo-500/30 text-indigo-300"
-                : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10"
+                : "bg-white/5 border-white/10 text-white/60 hover:bg-white/10",
             )}
           >
-            <span>v{v.version}</span>
-            <span className="ml-2 text-[10px] text-white/40">
+            <div className="flex items-center gap-2">
+              <span>v{v.version}</span>
+              {v.parentDeliverableId && (
+                <span className="px-1 rounded bg-red-500/20 text-red-400 text-[8px] font-black uppercase tracking-tighter">
+                  REV
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-white/40 font-medium">
               {format(v._creationTime, "MMM dd")}
             </span>
           </Link>

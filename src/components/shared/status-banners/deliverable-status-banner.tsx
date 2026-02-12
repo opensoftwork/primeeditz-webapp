@@ -62,19 +62,23 @@ export function DeliverableStatusBanner({
             >
               {change.status === "approved"
                 ? `Deliverable "${change.name}" approved! 🎉`
-                : `Revision requested on "${change.name}"`}
+                : `Version change requested on "${change.name}"`}
             </p>
 
-            {change.rejectionNotes &&
-              change.status === "revision_requested" && (
+            {change.versionFeedback &&
+              change.status === "version_requested" && (
                 <div className="mt-2 text-xs text-white/60 bg-white/5 p-3 rounded-xl border border-white/5 italic">
-                  "{change.rejectionNotes}"
+                  "{change.versionFeedback}"
                 </div>
               )}
 
             <div className="mt-3 flex items-center gap-4">
               <Link
-                href={`/projects/${projectId}/deliverables/${change._id}`}
+                href={
+                  role === "employee" && change.status === "version_requested"
+                    ? `/assigned-work/${projectId}/deliverables/${change._id}/versions`
+                    : `/projects/${projectId}/deliverables/${change._id}`
+                }
                 className={cn(
                   "text-[10px] font-black uppercase tracking-widest hover:underline",
                   change.status === "approved"
@@ -82,7 +86,9 @@ export function DeliverableStatusBanner({
                     : "text-amber-400/80",
                 )}
               >
-                View Details →
+                {role === "employee" && change.status === "version_requested"
+                  ? "Open Versions Workspace →"
+                  : "View Details →"}
               </Link>
             </div>
           </div>

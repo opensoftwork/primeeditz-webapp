@@ -2,17 +2,28 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
 import { Loader2 } from "lucide-react";
 
-interface ClientRevisionDialogProps {
+interface ClientVersionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (notes: string) => Promise<void>;
 }
 
-export function ClientRevisionDialog({ open, onOpenChange, onSubmit }: ClientRevisionDialogProps) {
+export function ClientVersionDialog({
+  open,
+  onOpenChange,
+  onSubmit,
+}: ClientVersionDialogProps) {
   const [notes, setNotes] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -35,10 +46,11 @@ export function ClientRevisionDialog({ open, onOpenChange, onSubmit }: ClientRev
       <DialogContent className="sm:max-w-md bg-zinc-950 border-white/10 rounded-3xl">
         <DialogHeader>
           <DialogTitle className="text-xl font-black uppercase tracking-tight text-white">
-            Request Revision
+            Request Version
           </DialogTitle>
           <DialogDescription className="text-xs font-bold text-white/40 uppercase tracking-widest">
-            Please describe the changes you'd like to see. Our team will review your feedback and update the deliverables.
+            Please describe the changes you'd like to see. Our team will review
+            your feedback and update the deliverables.
           </DialogDescription>
         </DialogHeader>
 
@@ -70,7 +82,7 @@ export function ClientRevisionDialog({ open, onOpenChange, onSubmit }: ClientRev
                 Submitting...
               </>
             ) : (
-              "Submit Revision"
+              "Submit Version Request"
             )}
           </Button>
         </DialogFooter>

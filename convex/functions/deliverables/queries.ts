@@ -87,12 +87,13 @@ export const getDeliverableVersions = query({
       status: v.status,
       sizeBytes: v.sizeBytes,
       _creationTime: v._creationTime,
+      parentDeliverableId: v.parentDeliverableId,
     }));
   },
 });
 
 /**
- * Get recent status changes for deliverables (Approved or Revision Requested).
+ * Get recent status changes for deliverables (Approved or Version Requested).
  * Used for in-app status banners.
  */
 export const getRecentStatusChanges = query({
@@ -114,7 +115,7 @@ export const getRecentStatusChanges = query({
           q.gte(q.field("_creationTime"), oneDayAgo),
           q.or(
             q.eq(q.field("status"), "approved"),
-            q.eq(q.field("status"), "revision_requested"),
+            q.eq(q.field("status"), "version_requested"),
           ),
         ),
       )
@@ -145,7 +146,7 @@ export const getClientDeliverables = query({
     const isVisibleToClient = 
       project.actionState === "awaiting_review" || 
       project.actionState === "review_approved" || 
-      project.actionState === "revisions_requested" ||
+      project.actionState === "versions_requested" ||
       project.phase === "delivery";
 
     if (!isVisibleToClient) {
@@ -160,6 +161,102 @@ export const getClientDeliverables = query({
       .order("desc") // Newest first
       .collect();
 
-    return deliverables;
+    // Enrich with approval and version data
+    const enriched = await Promise.all(
+      deliverables.map(async (d) => {
+        // Check studio approval
+        const approval = await ctx.db
+          .query("studioApprovals")
+          .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
+          .first();
+
+        // Check latest version request
+        const latestVersion = await ctx.db
+          .query("versionRequests")
+          .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
+          .order("desc")
+          .first();
+
+        return {
+          ...d,
+          isStudioApproved: !!approval,
+          studioApprovedAt: approval?.approvedAt,
+          latestVersionStatus: latestVersion?.status,
+          latestVersionId: latestVersion?._id,
+        };
+      }),
+    );
+
+    return enriched;
+  },
+});
+
+/**
+ * Get all version requests for a specific deliverable.
+ */
+export const getDeliverableVersionRequests = query({
+  args: {
+    deliverableId: v.id("deliverables"),
+  },
+  handler: async (ctx, args) => {
+    await getAuthUserWithProfile(ctx);
+
+    const requests = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_deliverableId", (q) =>
+        q.eq("deliverableId", args.deliverableId),
+      )
+      .order("asc")
+      .collect();
+
+    // Enrich with requester names
+    const enriched = await Promise.all(
+      requests.map(async (r) => {
+        const requester = await ctx.db.get(r.requestedBy);
+        return {
+          ...r,
+          requestedByName: requester
+            ? `${requester.name}`
+            : "Unknown",
+        };
+      }),
+    );
+
+    return enriched;
+  },
+});
+
+/**
+ * Get full version history for a project.
+ */
+export const getProjectVersionHistory = query({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    await getAuthUserWithProfile(ctx);
+
+    const requests = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .order("desc")
+      .collect();
+
+    // Enrich with deliverable names and requester names
+    const enriched = await Promise.all(
+      requests.map(async (r) => {
+        const deliverable = await ctx.db.get(r.deliverableId);
+        const requester = await ctx.db.get(r.requestedBy);
+        return {
+          ...r,
+          deliverableName: deliverable?.name || "Unknown",
+          requestedByName: requester
+            ? `${requester.name}`
+            : "Unknown",
+        };
+      }),
+    );
+
+    return enriched;
   },
 });

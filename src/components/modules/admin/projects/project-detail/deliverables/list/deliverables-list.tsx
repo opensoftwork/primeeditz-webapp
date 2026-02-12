@@ -116,16 +116,15 @@ export function DeliverablesList() {
               "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
               status === "approved"
                 ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : status === "revision_requested" ||
-                    status === "revision_needed"
+                : status === "version_requested" || status === "version_needed"
                   ? "bg-red-500/10 border-red-500/20 text-red-400"
                   : "bg-amber-500/10 border-amber-500/20 text-amber-400",
             )}
           >
             {status === "approved" ? (
               <CheckCircle className="h-3 w-3" />
-            ) : status === "revision_requested" ||
-              status === "revision_needed" ? (
+            ) : status === "version_requested" ||
+              status === "version_needed" ? (
               <XCircle className="h-3 w-3" />
             ) : (
               <Clock className="h-3 w-3" />
@@ -229,7 +228,7 @@ export function DeliverablesList() {
               </Badge>
             </div>
             <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-              Deliverables 
+              Deliverables
             </h1>
             <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
               Reviewing {deliverables.length} finalized assets for{" "}
@@ -287,14 +286,14 @@ export function DeliverablesList() {
           </div>
           <div>
             <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-1">
-              Revisions
+              Versions
             </h3>
             <p className="text-2xl font-black text-white">
               {
                 deliverables.filter(
                   (d) =>
-                    d.status === "revision_requested" ||
-                    d.status === "revision_needed",
+                    d.status === "version_requested" ||
+                    d.status === "version_needed",
                 ).length
               }
             </p>

@@ -6,7 +6,7 @@ export interface DeliverableData {
   name: string;
   description?: string;
   version: number;
-  status: "pending_qc" | "approved" | "revision_needed" | "revision_requested";
+  status: "pending_qc" | "approved" | "version_needed" | "version_requested";
   minioKey: string;
   sizeBytes: number;
   mimeType?: string;
@@ -14,7 +14,7 @@ export interface DeliverableData {
   uploadedByName?: string;
   qcReviewedBy?: Id<"profiles">;
   qcNotes?: string;
-  rejectionNotes?: string;
+  versionFeedback?: string;
   projectId: Id<"projects">;
 }
 
@@ -24,4 +24,5 @@ export interface DeliverableVersion {
   status: string;
   sizeBytes: number;
   _creationTime: number;
+  parentDeliverableId?: Id<"deliverables">;
 }

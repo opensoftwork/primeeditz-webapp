@@ -24,8 +24,8 @@ const EMPLOYEE_STATUS_MAP: Record<
     color: "text-blue-400",
     bgColor: "bg-blue-500/10 border-blue-500/20",
   },
-  revisions_requested: {
-    label: "Revisions Needed",
+  versions_requested: {
+    label: "Versions Needed",
     icon: RotateCcw,
     color: "text-amber-400",
     bgColor: "bg-amber-500/10 border-amber-500/20",

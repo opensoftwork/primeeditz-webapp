@@ -69,7 +69,7 @@ export function StudioFeedbackSection({
               quotation.status === "quotation_approved"
                 ? "Proposal Approved"
                 : quotation.status === "changes_requested"
-                  ? "Revision Requested"
+                  ? "Version Requested"
                   : "Proposal Declined"}
             </h4>
             <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-0.5">

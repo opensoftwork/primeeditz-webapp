@@ -4,6 +4,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import {
+  AlertTriangle,
   ArrowLeft,
   ArrowRight,
   CheckCheck,
@@ -39,6 +40,13 @@ export default function EmployeeProjectDetail({
     projectId: projectId as Id<"projects">,
   });
 
+  const deliverables = useQuery(
+    api.functions.deliverables.queries.getProjectDeliverables,
+    {
+      projectId: projectId as Id<"projects">,
+    },
+  );
+
   if (project === undefined) return <EmployeeProjectDetailSkeleton />;
 
   if (project === null) {
@@ -53,6 +61,9 @@ export default function EmployeeProjectDetail({
   }
 
   const { squad, projectTypeName, currentMemberRole, isLead } = project;
+
+  const versionsCount =
+    deliverables?.filter((d) => d.status === "version_requested").length || 0;
 
   return (
     <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
@@ -114,6 +125,44 @@ export default function EmployeeProjectDetail({
       </div>
 
       <div className="max-w-[1700px] mx-auto space-y-8">
+        {versionsCount > 0 && (
+          <div className="p-6 rounded-3xl bg-amber-500/10 border border-amber-500/20 flex flex-col sm:flex-row items-center justify-between gap-6 overflow-hidden relative group">
+            <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:opacity-10 transition-opacity">
+              <AlertTriangle className="h-32 w-32 text-amber-500 -rotate-12" />
+            </div>
+            <div className="flex items-center gap-6 relative z-10">
+              <div className="p-4 rounded-2xl bg-amber-500/20 border border-amber-500/30">
+                <AlertTriangle className="h-8 w-8 text-amber-400" />
+              </div>
+              <div>
+                <h4 className="text-xl font-black uppercase text-amber-400 tracking-tight">
+                  Version Requests
+                </h4>
+                <p className="text-xs font-bold text-white/40 uppercase tracking-widest mt-1">
+                  {versionsCount} deliverable(s) need corrections based on
+                  admin/studio feedback
+                </p>
+              </div>
+            </div>
+            <Button
+              className="bg-amber-500 hover:bg-amber-600 text-black font-black uppercase tracking-widest text-[10px] h-12 px-8 rounded-xl relative z-10 shadow-lg shadow-amber-500/20"
+              onClick={() => {
+                const firstVersion = deliverables?.find(
+                  (d) => d.status === "version_requested",
+                );
+                if (firstVersion) {
+                  router.push(
+                    `/assigned-work/${projectId}/deliverables/${firstVersion._id}/versions`,
+                  );
+                }
+              }}
+            >
+              Open Versions
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
+
         <DeliverableStatusBanner
           projectId={projectId as Id<"projects">}
           role="employee"

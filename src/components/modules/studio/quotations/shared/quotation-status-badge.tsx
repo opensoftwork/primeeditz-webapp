@@ -73,7 +73,7 @@ const statusConfig: Record<
     glowColor: "bg-green-400/10",
   },
   changes_requested: {
-    label: "Revisions Requested",
+    label: "Changes Requested",
     icon: RefreshCw,
     color: "text-indigo-400",
     bgColor: "bg-indigo-400/10",

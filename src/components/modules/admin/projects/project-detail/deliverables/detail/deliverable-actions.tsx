@@ -5,21 +5,21 @@ import { Button } from "@/components/ui/button";
 
 interface DeliverableActionsProps {
   canApprove: boolean;
-  canRequestRevision: boolean;
+  canRequestVersion: boolean;
   canSendToStudio: boolean;
   isSubmitting: boolean;
   onApprove: () => void;
-  onRequestRevision: () => void;
+  onRequestVersion: () => void;
   onSendToStudio: () => void;
 }
 
 export function DeliverableActions({
   canApprove,
-  canRequestRevision,
+  canRequestVersion,
   canSendToStudio,
   isSubmitting,
   onApprove,
-  onRequestRevision,
+  onRequestVersion,
   onSendToStudio,
 }: DeliverableActionsProps) {
   return (
@@ -40,7 +40,7 @@ export function DeliverableActions({
         </Button>
       )}
 
-      {/* Approve / Revise */}
+      {/* Approve / Versions */}
       <div className="grid grid-cols-2 gap-3">
         <Button
           variant="outline"
@@ -60,11 +60,11 @@ export function DeliverableActions({
         <Button
           variant="outline"
           className="rounded-xl border-red-500/20 text-red-400 hover:bg-red-500/10 font-bold uppercase tracking-wider text-[10px] h-10"
-          onClick={onRequestRevision}
-          disabled={!canRequestRevision || isSubmitting}
+          onClick={onRequestVersion}
+          disabled={!canRequestVersion || isSubmitting}
         >
           <RotateCcw className="h-3.5 w-3.5 mr-1" />
-          Revise
+          Versions
         </Button>
       </div>
     </div>

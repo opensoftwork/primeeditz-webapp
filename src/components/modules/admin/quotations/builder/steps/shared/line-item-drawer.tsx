@@ -372,7 +372,7 @@ export function LineItemDrawer({
               <Textarea
                 value={notes}
                 onChange={(e) => setNotes(e.target.value)}
-                placeholder="Specifications, deliverables format, revisions included..."
+                placeholder="Specifications, deliverables format, versions included..."
                 className="min-h-[70px] bg-white/5 border-white/10 rounded-xl text-sm text-white placeholder:text-white/20 resize-none"
               />
             </FieldContent>

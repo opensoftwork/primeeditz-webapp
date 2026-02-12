@@ -24,9 +24,9 @@ const TERMS_TEMPLATES = [
 • 50% upon delivery of final files
 • Payment via bank transfer or UPI
 
-2. REVISIONS
-• Up to 2 rounds of revisions included
-• Additional revisions charged at ₹2,000 per round
+2. VERSIONS
+• Up to 2 rounds of versions included
+• Additional versions charged at ₹2,000 per round
 
 3. DELIVERY
 • Delivery timeline as per project scope
@@ -44,7 +44,7 @@ const TERMS_TEMPLATES = [
     id: "simple",
     name: "Simple",
     content: `• 50% advance, 50% on delivery
-• 2 revision rounds included
+• 2 version rounds included
 • Full rights transferred upon payment
 • Advance non-refundable after work starts`,
   },
@@ -61,9 +61,9 @@ The services covered in this quotation are as specified in the line items above.
 • Balance Payment: Remaining 50% before final delivery
 • Mode: Bank Transfer / UPI / Cheque
 
-3. REVISION POLICY
-• Two (2) rounds of revisions are included in this quote
-• Additional revisions will be charged at standard hourly rates
+3. VERSION POLICY
+• Two (2) rounds of versions are included in this quote
+• Additional versions will be charged at standard hourly rates
 • Major scope changes will require a revised quotation
 
 4. PROJECT TIMELINE

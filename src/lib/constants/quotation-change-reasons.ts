@@ -12,7 +12,7 @@ export const QUOTATION_CHANGE_REASONS = [
   {
     id: "timeline",
     label: "Timeline doesn't work",
-    description: "The delivery dates or production schedule need revision.",
+    description: "The delivery dates or production schedule need update.",
   },
   {
     id: "terms",

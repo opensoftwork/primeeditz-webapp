@@ -29,7 +29,7 @@ export type ActionState =
   | "work_in_progress"
   | "deliverables_ready"
   | "awaiting_review"
-  | "revisions_requested"
+  | "versions_requested"
   | "review_approved"
   | "preparing_delivery"
   | "ready_for_delivery"
@@ -121,8 +121,8 @@ export const ACTION_STATE_CONFIG: Record<ActionState, StatusConfig> = {
     color: "text-amber-400",
     bgColor: "bg-amber-500/10 border-amber-500/20",
   },
-  revisions_requested: {
-    label: "Revisions",
+  versions_requested: {
+    label: "Versions",
     color: "text-amber-400",
     bgColor: "bg-amber-500/10 border-amber-500/20",
   },
@@ -325,7 +325,7 @@ export const CLIENT_STATUS_MAP: Record<ActionState, ClientStatusDisplay> = {
       href: (id) => `/projects/${id}/review`,
     }, // Hypothetical review page
   },
-  revisions_requested: {
+  versions_requested: {
     label: "Making Changes",
     description: "Working on your requested changes",
     color: "text-amber-400",

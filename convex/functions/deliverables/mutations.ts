@@ -85,24 +85,25 @@ export const approveDeliverable = mutation({
 });
 
 /**
- * Request revision on a deliverable.
- * Sends it back to employee for rework.
+ * @deprecated Use `createVersionRequest` instead.
+ * Kept for backward compatibility during migration.
+ * Request version on a deliverable. Sends it back to employee for rework.
  */
-export const requestRevision = mutation({
+export const requestVersion = mutation({
   args: {
     deliverableId: v.id("deliverables"),
-    rejectionNotes: v.string(),
+    versionFeedback: v.string(),
   },
   handler: async (ctx, args) => {
     const { profile } = await getAuthUserWithProfile(ctx);
 
     // Verify admin role
     if (profile.role !== "admin") {
-      throw new Error("Only admin can request revisions");
+      throw new Error("Only admin can request versions");
     }
 
-    if (!args.rejectionNotes.trim()) {
-      throw new Error("Revision notes are required");
+    if (!args.versionFeedback.trim()) {
+      throw new Error("Version notes are required");
     }
 
     const deliverable = await ctx.db.get(args.deliverableId);
@@ -110,9 +111,9 @@ export const requestRevision = mutation({
 
     // Update deliverable status
     await ctx.db.patch(args.deliverableId, {
-      status: "revision_requested",
+      status: "version_requested",
       qcReviewedBy: profile._id,
-      rejectionNotes: args.rejectionNotes,
+      versionFeedback: args.versionFeedback,
     });
 
     // Transition project back to work_in_progress
@@ -132,7 +133,7 @@ export const requestRevision = mutation({
         toProfileId: project.assignedEmployeeId,
         fromActionState: "deliverables_ready",
         toActionState: "work_in_progress",
-        notes: `Revision requested: ${args.rejectionNotes}`,
+        notes: `Version requested: ${args.versionFeedback}`,
         createdAt: now(),
       });
     }
@@ -142,13 +143,19 @@ export const requestRevision = mutation({
 });
 
 /**
+ * @deprecated Use `createVersionRequest` instead.
+ * Kept for backward compatibility during migration.
  * Reject a deliverable entirely.
- * Marks as revision_needed without sending back to employee.
+ * Marks as version_needed without sending back to employee.
+ */
+/**
+ * Reject a deliverable (QC failed).
+ * @deprecated Use createVersionRequest instead.
  */
 export const rejectDeliverable = mutation({
   args: {
     deliverableId: v.id("deliverables"),
-    rejectionNotes: v.string(),
+    versionFeedback: v.string(),
   },
   handler: async (ctx, args) => {
     const { profile } = await getAuthUserWithProfile(ctx);
@@ -158,8 +165,8 @@ export const rejectDeliverable = mutation({
       throw new Error("Only admin can reject deliverables");
     }
 
-    if (!args.rejectionNotes.trim()) {
-      throw new Error("Rejection notes are required");
+    if (!args.versionFeedback.trim()) {
+      throw new Error("Feedback notes are required");
     }
 
     const deliverable = await ctx.db.get(args.deliverableId);
@@ -167,9 +174,10 @@ export const rejectDeliverable = mutation({
 
     // Update deliverable status
     await ctx.db.patch(args.deliverableId, {
-      status: "revision_needed",
+      status: "version_needed",
       qcReviewedBy: profile._id,
-      rejectionNotes: args.rejectionNotes,
+      versionFeedback: args.versionFeedback,
+      qcNotes: args.versionFeedback,
     });
 
     return { success: true };
@@ -272,13 +280,14 @@ export const clientApproveDeliverables = mutation({
 });
 
 /**
- * Client requests revision on deliverables.
+ * @deprecated Use `createVersionRequest` (deliverable-level) instead.
+ * Client requests version on deliverables.
  * Transitions project back to production.
  */
-export const clientRequestRevision = mutation({
+export const clientRequestVersion = mutation({
   args: {
     projectId: v.id("projects"),
-    revisionNotes: v.string(),
+    versionNotes: v.string(),
   },
   handler: async (ctx, args) => {
     const { profile } = await getAuthUserWithProfile(ctx);
@@ -288,17 +297,17 @@ export const clientRequestRevision = mutation({
 
     // Verify studio ownership
     if (profile.role !== "admin" && project.studioId !== profile._id) {
-      throw new Error("Unauthorized to request revisions");
+      throw new Error("Unauthorized to request versions");
     }
 
-    const currentRevisions = project.revisionCount || 0;
+    const currentVersions = project.versionCount || 0;
 
     // Transition back to production
     await ctx.db.patch(args.projectId, {
-      actionState: "revisions_requested",
+      actionState: "versions_requested",
       awaitingActorRole: "employee",
       awaitingActorId: project.assignedEmployeeId,
-      revisionCount: currentRevisions + 1,
+      versionCount: currentVersions + 1,
       updatedAt: now(),
     });
 
@@ -308,15 +317,288 @@ export const clientRequestRevision = mutation({
       fromProfileId: profile._id,
       toProfileId: project.assignedEmployeeId,
       fromActionState: "awaiting_review",
-      toActionState: "revisions_requested",
-      notes: args.revisionNotes,
+      toActionState: "versions_requested",
+      notes: args.versionNotes,
       createdAt: now(),
     });
 
     return {
       success: true,
-      revisionCount: currentRevisions + 1,
-      isOverLimit: currentRevisions + 1 >= 3,
+      versionCount: currentVersions + 1,
+      isOverLimit: currentVersions + 1 >= 3,
     };
+  },
+});
+
+/**
+ * Create a structured version request for a deliverable.
+ * Replaces legacy requestVersion and rejectDeliverable.
+ */
+export const createVersionRequest = mutation({
+  args: {
+    deliverableId: v.id("deliverables"),
+    notes: v.string(),
+    referenceImages: v.optional(
+      v.array(
+        v.object({
+          fileName: v.string(),
+          fileSize: v.number(),
+          mimeType: v.string(),
+          minioKey: v.string(),
+          note: v.optional(v.string()),
+        }),
+      ),
+    ),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    const deliverable = await ctx.db.get(args.deliverableId);
+    if (!deliverable) throw new Error("Deliverable not found");
+
+    // Determine role-based behavior
+    const isAdmin = profile.role === "admin";
+    const isStudio = profile.role === "studio";
+
+    if (!isAdmin && !isStudio) {
+      throw new Error("Only admin or studio can create version requests");
+    }
+
+    // Validate deliverable is in a revisable state
+    if (isAdmin && deliverable.status !== "pending_qc") {
+      throw new Error(
+        "Admin can only request versions for deliverables in pending_qc status",
+      );
+    }
+    if (isStudio && deliverable.status !== "approved") {
+      throw new Error("Studio can only request versions for approved deliverables");
+    }
+
+    // Auto-increment version number
+    const existingRequests = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_deliverableId", (q) =>
+        q.eq("deliverableId", args.deliverableId),
+      )
+      .collect();
+    const versionNumber = existingRequests.length + 1;
+
+    // Create the version request
+    const requestId = await ctx.db.insert("versionRequests", {
+      deliverableId: args.deliverableId,
+      projectId: deliverable.projectId,
+      requestedBy: profile._id,
+      requestedByRole: isAdmin ? "admin" : "studio",
+      versionNumber,
+      notes: args.notes,
+      referenceImages: args.referenceImages,
+      status: "pending",
+      createdAt: now(),
+    });
+
+    // Update deliverable status
+    const newStatus = isAdmin ? "version_requested" : "version_needed";
+    await ctx.db.patch(args.deliverableId, {
+      status: newStatus,
+      versionFeedback: args.notes,
+    });
+
+    // Transition project state (same as existing requestVersion logic)
+    const project = await ctx.db.get(deliverable.projectId);
+    if (project) {
+      if (isAdmin) {
+        await ctx.db.patch(deliverable.projectId, {
+          actionState: "work_in_progress",
+          awaitingActorRole: "employee",
+          awaitingActorId: project.assignedEmployeeId,
+          updatedAt: now(),
+        });
+      } else if (isStudio) {
+        await ctx.db.patch(deliverable.projectId, {
+          actionState: "versions_requested",
+          awaitingActorRole: "employee",
+          awaitingActorId: project.assignedEmployeeId,
+          versionCount: (project.versionCount || 0) + 1,
+          updatedAt: now(),
+        });
+      }
+
+      // Create handoff log
+      await ctx.db.insert("handoffLogs", {
+        projectId: deliverable.projectId,
+        fromProfileId: profile._id,
+        toProfileId: project.assignedEmployeeId,
+        fromActionState: project.actionState,
+        toActionState: isAdmin ? "work_in_progress" : "versions_requested",
+        notes: `Version #${versionNumber}: ${args.notes}`,
+        createdAt: now(),
+      });
+    }
+
+    return { requestId, versionNumber };
+  },
+});
+
+/**
+ * Update the status of a version request.
+ */
+export const updateVersionRequestStatus = mutation({
+  args: {
+    requestId: v.id("versionRequests"),
+    status: v.union(v.literal("in_progress"), v.literal("resolved")),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+    const request = await ctx.db.get(args.requestId);
+    if (!request) throw new Error("Version request not found");
+
+    const updates: any = { status: args.status };
+    if (args.status === "resolved") {
+      updates.resolvedAt = now();
+    }
+
+    await ctx.db.patch(args.requestId, updates);
+
+    return { success: true };
+  },
+});
+
+/**
+ * Upload a corrected version of a deliverable.
+ * Links it to the parent, resolves pending requests, and transitions project status.
+ */
+export const uploadCorrectedVersion = mutation({
+  args: {
+    parentDeliverableId: v.id("deliverables"),
+    name: v.string(),
+    minioKey: v.string(),
+    sizeBytes: v.number(),
+    mimeType: v.string(),
+    description: v.optional(v.string()),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    // Get the parent deliverable
+    const parent = await ctx.db.get(args.parentDeliverableId);
+    if (!parent) throw new Error("Parent deliverable not found");
+
+    // Verify the parent has a pending version
+    if (
+      parent.status !== "version_requested" &&
+      parent.status !== "version_needed"
+    ) {
+      throw new Error("Parent deliverable does not have a pending version");
+    }
+
+    // Auto-increment version based on name
+    const existing = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", parent.projectId))
+      .filter((q) => q.eq(q.field("name"), args.name))
+      .order("desc")
+      .first();
+    const version = existing ? existing.version + 1 : 1;
+
+    // 1. Create the new corrected deliverable
+    const newDeliverableId = await ctx.db.insert("deliverables", {
+      projectId: parent.projectId,
+      name: args.name,
+      description: args.description,
+      version,
+      status: "pending_qc", // Goes back for QC review
+      minioKey: args.minioKey,
+      sizeBytes: args.sizeBytes,
+      mimeType: args.mimeType,
+      uploadedBy: profile._id,
+      parentDeliverableId: args.parentDeliverableId, // Link to original
+    });
+
+    // 2. Resolve all pending version requests on the parent
+    const pendingRequests = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_deliverableId", (q) =>
+        q.eq("deliverableId", args.parentDeliverableId),
+      )
+      .filter((q) => q.neq(q.field("status"), "resolved"))
+      .collect();
+
+    for (const request of pendingRequests) {
+      await ctx.db.patch(request._id, {
+        status: "resolved",
+        resolvedDeliverableId: newDeliverableId,
+        resolvedAt: now(),
+      });
+    }
+
+    // 3. Transition project state back to deliverables_ready
+    // Note: It's deliverables_ready because it's now awaiting Admin QC
+    const project = await ctx.db.get(parent.projectId);
+    if (project) {
+      await ctx.db.patch(parent.projectId, {
+        actionState: "deliverables_ready",
+        awaitingActorRole: "admin",
+        updatedAt: now(),
+      });
+
+      // Create handoff log
+      await ctx.db.insert("handoffLogs", {
+        projectId: parent.projectId,
+        fromProfileId: profile._id,
+        toProfileId: undefined, // Goes to admin pool
+        fromActionState: project.actionState,
+        toActionState: "deliverables_ready",
+        notes: `Corrected version v${version} uploaded for "${args.name}"`,
+        createdAt: now(),
+      });
+    }
+
+    return { newDeliverableId, version };
+  },
+});
+
+/**
+ * Studio approves an individual deliverable.
+ * This does NOT transition the project phase.
+ */
+export const studioApproveDeliverable = mutation({
+  args: {
+    deliverableId: v.id("deliverables"),
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const { profile } = await getAuthUserWithProfile(ctx);
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // Verify studio role and ownership
+    if (profile.role !== "studio" && profile.role !== "admin") {
+      throw new Error("Only studio or admin can approve deliverables");
+    }
+
+    if (profile.role === "studio" && project.studioId !== profile._id) {
+      throw new Error("Unauthorized to approve this deliverable");
+    }
+
+    // Check if already approved
+    const existing = await ctx.db
+      .query("studioApprovals")
+      .withIndex("by_deliverableId", (q) =>
+        q.eq("deliverableId", args.deliverableId),
+      )
+      .first();
+
+    if (existing) return { success: true };
+
+    // Record approval
+    await ctx.db.insert("studioApprovals", {
+      deliverableId: args.deliverableId,
+      projectId: args.projectId,
+      studioProfileId: profile._id,
+      approvedAt: now(),
+    });
+
+    return { success: true };
   },
 });

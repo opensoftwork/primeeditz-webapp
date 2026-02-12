@@ -12,28 +12,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 
-interface RevisionDialogProps {
+interface VersionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  revisionNotes: string;
+  versionNotes: string;
   onNotesChange: (notes: string) => void;
   onSubmit: () => void;
   isSubmitting: boolean;
 }
 
-export function RevisionDialog({
+export function VersionDialog({
   open,
   onOpenChange,
-  revisionNotes,
+  versionNotes,
   onNotesChange,
   onSubmit,
   isSubmitting,
-}: RevisionDialogProps) {
+}: VersionDialogProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-zinc-900 border-white/10">
         <DialogHeader>
-          <DialogTitle className="text-white">Request Revision</DialogTitle>
+          <DialogTitle className="text-white">Request Version</DialogTitle>
           <DialogDescription className="text-white/60">
             Provide feedback for the employee. They will be notified and
             assigned to rework this deliverable.
@@ -42,7 +42,7 @@ export function RevisionDialog({
         <div className="py-4">
           <Textarea
             placeholder="Describe what needs to be changed..."
-            value={revisionNotes}
+            value={versionNotes}
             onChange={(e) => onNotesChange(e.target.value)}
             className="min-h-[120px] bg-white/5 border-white/10 text-white placeholder:text-white/30"
           />
@@ -57,11 +57,11 @@ export function RevisionDialog({
           </Button>
           <Button
             onClick={onSubmit}
-            disabled={isSubmitting || !revisionNotes.trim()}
+            disabled={isSubmitting || !versionNotes.trim()}
             className="bg-red-600 hover:bg-red-500"
           >
             {isSubmitting && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Request Revision
+            Request Version
           </Button>
         </DialogFooter>
       </DialogContent>

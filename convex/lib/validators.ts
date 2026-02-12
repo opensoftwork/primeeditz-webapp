@@ -48,13 +48,13 @@ export const projectSourceValidator = v.union(
 /**
  * Quotation status flow:
  * draft → sent → approved
- *          └→ revision_requested → sent (loop)
+ *          └→ version_requested → sent (loop)
  */
 export const quotationStatusValidator = v.union(
   v.literal("draft"),
   v.literal("sent"),
   v.literal("approved"),
-  v.literal("revision_requested"),
+  v.literal("version_requested"),
 );
 
 /** Line item for quotations */
@@ -81,14 +81,14 @@ export const folderStatusValidator = v.union(
 /**
  * Deliverable status flow:
  * pending_qc → approved
- *          └→ revision_needed → pending_qc (loop)
- *          (client can request) → revision_requested
+ *          └→ version_needed → pending_qc (loop)
+ *          (client can request) → version_requested
  */
 export const deliverableStatusValidator = v.union(
   v.literal("pending_qc"),
   v.literal("approved"),
-  v.literal("revision_needed"),
-  v.literal("revision_requested"),
+  v.literal("version_needed"),
+  v.literal("version_requested"),
 );
 
 // ============================================================================
