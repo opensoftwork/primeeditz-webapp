@@ -20,12 +20,16 @@ import { action, internalAction } from "../../_generated/server";
 import { adminAction } from "../../lib/customFunctions";
 
 // Initialize S3 client for MinIO
+let cachedS3Client: S3Client | null = null;
+
 function getS3Client(): S3Client {
+  if (cachedS3Client) return cachedS3Client;
+
   if (!process.env.MINIO_ENDPOINT) {
     throw new Error("MINIO_ENDPOINT is not configured");
   }
 
-  return new S3Client({
+  cachedS3Client = new S3Client({
     endpoint: process.env.MINIO_ENDPOINT,
     region: process.env.MINIO_REGION || "us-east-1",
     credentials: {
@@ -34,6 +38,8 @@ function getS3Client(): S3Client {
     },
     forcePathStyle: true,
   });
+
+  return cachedS3Client;
 }
 
 function getBucket(): string {
@@ -119,6 +125,10 @@ export const getSignedFileUrls = action({
  * Generate a pre-signed PUT URL for uploading a small file.
  * Small files (< 100MB) use direct S3 upload for simplicity.
  */
+/**
+ * Generate a pre-signed PUT URL for uploading a small file.
+ * Consolidated queries reduce action roundtrips to improve stability.
+ */
 export const generateUploadUrl = action({
   args: {
     fileName: v.string(),
@@ -129,61 +139,53 @@ export const generateUploadUrl = action({
     fileSize: v.number(),
   },
   handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
-    // 1. Verify eligibility using role-agnostic query
-    const uploadEligibility = await ctx.runQuery(
-      //@ts-ignore
-      api.functions.projects.queries.getProjectUploadEligibility,
-      {
-        projectId: args.projectId,
-      },
-    );
-
-    if (!uploadEligibility?.isAllowed) {
-      throw new Error(uploadEligibility?.reason || "Upload not allowed");
-    }
-
-    // 2. Storage Limit Check
-    const storageStats = await ctx.runQuery(
-      api.functions.storage.queries.getProjectStorageUsage,
-      {
-        projectId: args.projectId,
-      },
-    );
-
-    if (storageStats.used + args.fileSize > storageStats.allocated) {
-      throw new Error(
-        `Storage limit reached. Remaining: ${((storageStats.allocated - storageStats.used) / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+    console.log(`[STORAGE_ACTION] generateUploadUrl started for projectId=${args.projectId}, deliverableId=${args.deliverableId}`);
+    try {
+      // 1. Unified Context Check (Eligibility + Storage)
+      const context = await ctx.runQuery(
+        api.functions.storage.queries.getUploadContext,
+        {
+          projectId: args.projectId,
+          fileSize: args.fileSize,
+        },
       );
+
+      if (!context.isAllowed) {
+        throw new Error(context.reason || "Upload not allowed");
+      }
+
+      // 2. Generate unique storage key
+      const timestamp = Date.now();
+      const cleanName = args.fileName.replace(/\s+/g, "_");
+      
+      let subPath: string;
+      if (args.deliverableId) {
+        subPath = `versions/${args.deliverableId}`;
+      } else if (args.folderId) {
+        subPath = `assets/${args.folderId}`;
+      } else {
+        subPath = "deliverables";
+      }
+      
+      const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
+
+      // 3. Generate pre-signed PUT URL
+      const s3Client = getS3Client();
+      const command = new PutObjectCommand({
+        Bucket: getBucket(),
+        Key: storageKey,
+        ContentType: args.contentType,
+      });
+
+      const url = await getSignedUrl(s3Client, command, {
+        expiresIn: 3600, // 1 hour
+      });
+
+      return { url, storageKey };
+    } catch (error: any) {
+      console.error("[STORAGE_ACTION_ERROR] Error in generateUploadUrl:", error);
+      throw new Error(error.message || "Failed to generate upload URL");
     }
-
-    // 3. Generate unique storage key
-    const timestamp = Date.now();
-    const cleanName = args.fileName.replace(/\s+/g, "_");
-    
-    let subPath: string;
-    if (args.deliverableId) {
-      subPath = `versions/${args.deliverableId}`;
-    } else if (args.folderId) {
-      subPath = `assets/${args.folderId}`;
-    } else {
-      subPath = "deliverables";
-    }
-    
-    const storageKey = `projects/${args.projectId}/${subPath}/${timestamp}_${cleanName}`;
-
-    // 3. Generate pre-signed PUT URL
-    const s3Client = getS3Client();
-    const command = new PutObjectCommand({
-      Bucket: getBucket(),
-      Key: storageKey,
-      ContentType: args.contentType,
-    });
-
-    const url = await getSignedUrl(s3Client, command, {
-      expiresIn: 3600, // 1 hour
-    });
-
-    return { url, storageKey };
   },
 });
 

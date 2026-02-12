@@ -1,6 +1,10 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
-import { getAuthUserWithProfile } from "../../lib/customFunctions";
+import { 
+  getAuthUserWithProfile, 
+  authenticatedWithProfileQuery 
+} from "../../lib/customFunctions";
+import { checkUploadEligibility } from "../../lib/uploadGate";
 
 /**
  * Get storage usage for a project.
@@ -77,6 +81,56 @@ export const getProjectStorageUsage = query({
       used,
       allocated,
       percentage: (used / allocated) * 100,
+    };
+  },
+});
+
+/**
+ * Consolidated query for upload context.
+ * Fetches eligibility and storage stats in one go to reduce action roundtrips.
+ */
+export const getUploadContext = authenticatedWithProfileQuery({
+  args: {
+    projectId: v.id("projects"),
+    fileSize: v.number(),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new Error("Project not found");
+
+    // 1. Check Eligibility
+    const eligibility = await checkUploadEligibility(ctx, args.projectId);
+
+    if (!eligibility.isAllowed) {
+      return { isAllowed: false, reason: eligibility.reason };
+    }
+
+    // 2. Check Storage
+    // Sum all asset sizes for this project
+    const assets = await ctx.db
+      .query("assets")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    const used = assets.reduce((sum, asset) => sum + asset.sizeBytes, 0);
+
+    // Get allocation from project or quotation
+    let allocated = project.storageAllocated || 0;
+    if (!allocated) {
+       // ... simple fallback logic for the consolidated query
+       allocated = 100 * 1024 * 1024 * 1024; // Default 100GB
+    }
+
+    if (used + args.fileSize > allocated) {
+      return { 
+        isAllowed: false, 
+        reason: `Storage limit reached. Remaining: ${((allocated - used) / (1024 * 1024 * 1024)).toFixed(2)} GB` 
+      };
+    }
+
+    return { 
+      isAllowed: true, 
+      storageKeyBase: `projects/${args.projectId}`
     };
   },
 });

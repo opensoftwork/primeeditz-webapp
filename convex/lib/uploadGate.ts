@@ -53,8 +53,6 @@ export async function canUpload(
         return { allowed: false, reason: "Complete onboarding first" };
       case "awaiting_uploads":
         return { allowed: true, reason: "Ready to upload" };
-      case "uploads_complete":
-        return { allowed: false, reason: "Upload phase is complete" };
       case "draft":
         return { allowed: false, reason: "Project request not submitted" };
       case "awaiting_quotation":
@@ -64,6 +62,14 @@ export async function canUpload(
       case "quotation_approved":
       case "storage_allocated":
         return { allowed: false, reason: "Upload area is being prepared" };
+      case "uploads_complete":
+      case "awaiting_assignment":
+      case "assigned":
+      case "work_in_progress":
+      case "deliverables_ready":
+      case "awaiting_review":
+      case "versions_requested":
+        return { allowed: true, reason: "Reference image upload allowed" };
       default:
         return { allowed: false, reason: "Upload phase is complete" };
     }
