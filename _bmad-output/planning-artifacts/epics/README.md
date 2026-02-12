@@ -38,7 +38,8 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
   - [Epic 13D: Legacy Cleanup & Migration](./13d-legacy-cleanup-migration.md)
 - **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)**
 - [Epic 15: Quotation Review Notification System](./15-quotation-review-notifications.md)
-- **[Epic 16: Deliverable Revision Workflow](./16-deliverable-revision-workflow.md)** ⬅️ NEW
+- **[Epic 16: Deliverable Revision Workflow](./16-deliverable-revision-workflow.md)**
+- **[Epic 17: Studio Deliverables UX & Folder Restructure](./17-studio-deliverables-ux-restructure.md)** ⬅️ NEW
 
 ---
 
@@ -250,20 +251,20 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 
 ## FR Coverage Map
 
-| Requirement             | Epic      | Stories             |
-| ----------------------- | --------- | ------------------- |
-| FR1: Authentication     | Epic 1    | 1.1, 1.2, 1.3       |
-| FR2: User Profiles      | Epic 1    | 1.4, 1.5            |
-| FR3: Project Creation   | Epic 2    | 2.1, 2.2, 2.3, 2.4  |
-| FR4: Project Management | Epic 3    | 3.1, 3.2, 3.3       |
-| FR5: Stage Management   | Epic 3    | 3.4, 3.5, 3.6       |
-| FR6: Quotation System   | Epic 4    | 4.1, 4.2, 4.3       |
-| FR7: Folder Structure   | Epic 5    | 5.1, 5.2            |
-| FR8: Asset Upload       | Epic 5    | 5.3, 5.4, 5.5       |
-| FR9: Status Tracking    | Epic 7    | 7.1, 7.2            |
-| FR10: RBAC              | Epic 1, 3 | Embedded            |
-| FR11: System Config     | Epic 3    | 3.7, 3.8, 3.9, 3.10 |
-| FR12: Deliverables & QC | Epic 6    | 6.1, 6.2, 6.3, 6.4  |
+| Requirement             | Epic       | Stories             |
+| ----------------------- | ---------- | ------------------- |
+| FR1: Authentication     | Epic 1     | 1.1, 1.2, 1.3       |
+| FR2: User Profiles      | Epic 1     | 1.4, 1.5            |
+| FR3: Project Creation   | Epic 2     | 2.1, 2.2, 2.3, 2.4  |
+| FR4: Project Management | Epic 3     | 3.1, 3.2, 3.3       |
+| FR5: Stage Management   | Epic 3     | 3.4, 3.5, 3.6       |
+| FR6: Quotation System   | Epic 4     | 4.1, 4.2, 4.3       |
+| FR7: Folder Structure   | Epic 5     | 5.1, 5.2            |
+| FR8: Asset Upload       | Epic 5     | 5.3, 5.4, 5.5       |
+| FR9: Status Tracking    | Epic 7     | 7.1, 7.2            |
+| FR10: RBAC              | Epic 1, 3  | Embedded            |
+| FR11: System Config     | Epic 3     | 3.7, 3.8, 3.9, 3.10 |
+| FR12: Deliverables & QC | Epic 6, 17 | 6.1–6.4, 17.1–17.5  |
 
 ---
 
@@ -333,18 +334,19 @@ The following features are documented in user flows but deferred to Phase 2:
 
 ## Story Summary
 
-| Epic  | Stories               | Key Features                                                                      |
-| ----- | --------------------- | --------------------------------------------------------------------------------- |
-| **0** | 0.1, 0.2, 0.3a/b, 0.4 | Infrastructure (Convex Cloud + MinIO), Full Schema, Layout (split), Auth Wrappers |
-| **1** | 1.1a/b/c, 1.2-1.5     | Better Auth (3-part), Sign Up/In, Onboarding, Middleware                          |
-| **2** | 2.0 - 2.7             | Wizard Infrastructure, Dashboard, 5-Step Wizard (dynamic fields), Detail View     |
-| **3** | 3.1 - 3.10            | Admin Dashboard, Project Mgmt, System Config (4 areas)                            |
-| **4** | 4.1 - 4.6             | Quotation Create/Edit/Send, Client Approve/Reject                                 |
-| **5** | 5.1 - 5.7             | Folders, Gated Upload, Signed URLs, Storage Limits, Admin Internal Upload         |
-| **6** | 6.1 - 6.4             | Deliverable Upload (Admin/Employee), QC Review, Client Approve/Revise             |
-| **7** | 7.1 - 7.5             | Enhanced Dashboards, Real-time Updates, History, Download Deliverables            |
+| Epic   | Stories               | Key Features                                                                      |
+| ------ | --------------------- | --------------------------------------------------------------------------------- |
+| **0**  | 0.1, 0.2, 0.3a/b, 0.4 | Infrastructure (Convex Cloud + MinIO), Full Schema, Layout (split), Auth Wrappers |
+| **1**  | 1.1a/b/c, 1.2-1.5     | Better Auth (3-part), Sign Up/In, Onboarding, Middleware                          |
+| **2**  | 2.0 - 2.7             | Wizard Infrastructure, Dashboard, 5-Step Wizard (dynamic fields), Detail View     |
+| **3**  | 3.1 - 3.10            | Admin Dashboard, Project Mgmt, System Config (4 areas)                            |
+| **4**  | 4.1 - 4.6             | Quotation Create/Edit/Send, Client Approve/Reject                                 |
+| **5**  | 5.1 - 5.7             | Folders, Gated Upload, Signed URLs, Storage Limits, Admin Internal Upload         |
+| **6**  | 6.1 - 6.4             | Deliverable Upload (Admin/Employee), QC Review, Client Approve/Revise             |
+| **7**  | 7.1 - 7.5             | Enhanced Dashboards, Real-time Updates, History, Download Deliverables            |
+| **17** | 17.1 - 17.5           | Folder Restructure, Data Fixes, Studio Detail View, Card Navigation, Polish       |
 
-**Total Stories:** 49 (after Epic 4-7 updates)
+**Total Stories:** 54 (after Epic 17 addition)
 
 ---
 
