@@ -1,9 +1,10 @@
 "use client";
 
-import { ArrowLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Briefcase } from "lucide-react";
 import Link from "next/link";
 import { getStatusConfig } from "@/lib/status-display";
 import { StatusBadge } from "./shared";
+import { Button } from "@/components/ui/button";
 
 interface ProjectHeaderProps {
   code: string;
@@ -20,43 +21,49 @@ export function ProjectHeader({
   const statusInfo = getStatusConfig(status);
 
   return (
-    <div className="space-y-10">
-      {/* Breadcrumb & Quick Actions */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="flex items-center gap-4 text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
-          <Link
-            href="/dashboard"
-            className="hover:text-primary transition-colors flex items-center gap-2"
+    <div className="flex flex-col gap-8">
+      {/* Navigation & Core Identification Row */}
+      <div className="flex items-start justify-between">
+        <div className="flex items-center gap-4">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
           >
-            <ArrowLeft className="h-3 w-3" />
-            Dashboard
-          </Link>
+            <Link href="/dashboard">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+
+          <div className="flex items-center gap-4">
+            <div className="relative group">
+              <div className="absolute inset-0 bg-primary/20 blur-xl rounded-full scale-125 group-hover:bg-primary/30 transition-all opacity-50" />
+              <div className="relative w-12 h-12 rounded-xl bg-linear-to-br from-primary/20 to-primary/5 border border-primary/20 flex items-center justify-center group-hover:border-primary/40 transition-all shadow-xl shadow-primary/10">
+                <Briefcase className="h-5 w-5 text-primary" />
+              </div>
+            </div>
+
+            <div className="space-y-0">
+              <div className="flex items-center gap-2">
+                <span className="text-[8px] font-black uppercase tracking-[0.2em] text-primary/60">
+                  Project Detail • ID: {code}
+                </span>
+              </div>
+              <h1 className="text-2xl font-black uppercase tracking-tighter text-white leading-none">
+                {title}
+              </h1>
+              <h4 className="text-[11px] font-black text-white/30 uppercase tracking-tight">
+                Production Queue Status •{" "}
+                <span className="text-primary/80">{statusInfo.label}</span>
+              </h4>
+            </div>
+          </div>
         </div>
 
         <div className="flex items-center gap-3">
           <StatusBadge status={status} />
-          <div className="h-8 w-px bg-white/10 mx-2 hidden md:block" />
-          <span className="font-mono text-[10px] font-black text-white/30 bg-white/2 px-3 py-1.5 rounded-lg border border-white/5">
-            ID: {code}
-          </span>
         </div>
-      </div>
-
-      {/* Hero Header */}
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="h-0.5 w-10 bg-primary rounded-full shadow-[0_0_15px_rgba(var(--primary),0.6)]" />
-          <span className="text-[11px] font-black uppercase tracking-[0.4em] text-primary">
-            Project Overview
-          </span>
-        </div>
-        <h1 className="text-4xl md:text-6xl font-black uppercase tracking-tight text-white leading-[0.9] max-w-4xl">
-          {title}
-        </h1>
-        <p className="text-[11px] font-bold text-white/50 uppercase tracking-[0.4em]">
-          Production Queue Status •{" "}
-          <span className="text-primary/80">{statusInfo.label}</span>
-        </p>
       </div>
     </div>
   );

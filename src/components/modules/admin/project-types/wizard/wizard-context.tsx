@@ -27,6 +27,7 @@ interface ProjectTypeWizardContextValue extends WizardState {
   // Data setters
   setStep1Data: (data: Step1Data) => void;
   setFolders: (folders: FolderLevel1[]) => void;
+  setFolderTemplateName: (name: string) => void;
 
   // Actions
   saveDraft: () => Promise<void>;
@@ -53,6 +54,7 @@ export function ProjectTypeWizardProvider({
   const [step, setStep] = useState<WizardStep>(1);
   const [step1Data, setStep1DataState] = useState<Step1Data | null>(null);
   const [folders, setFoldersState] = useState<FolderLevel1[]>([]);
+  const [folderTemplateName, setFolderTemplateNameState] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSavingDraft, setIsSavingDraft] = useState(false);
 
@@ -104,6 +106,9 @@ export function ProjectTypeWizardProvider({
 
     if (existingTemplate && folders.length === 0) {
       setFoldersState(existingTemplate.folders);
+      if (existingTemplate.name && !folderTemplateName) {
+        setFolderTemplateNameState(existingTemplate.name);
+      }
     }
   }, [existingProjectType, existingTemplate, step1Data, folders.length]);
 
@@ -151,6 +156,10 @@ export function ProjectTypeWizardProvider({
 
   const setFolders = useCallback((newFolders: FolderLevel1[]) => {
     setFoldersState(newFolders);
+  }, []);
+
+  const setFolderTemplateName = useCallback((name: string) => {
+    setFolderTemplateNameState(name);
   }, []);
 
   // Actions
@@ -209,6 +218,7 @@ export function ProjectTypeWizardProvider({
             isActive: step1Data.isActive,
           },
           folders,
+          templateName: folderTemplateName || undefined,
         });
         toast.success("Project type updated successfully");
       } else {
@@ -220,6 +230,7 @@ export function ProjectTypeWizardProvider({
             isActive: step1Data.isActive,
           },
           folders,
+          templateName: folderTemplateName || undefined,
         });
         toast.success("Project type created successfully");
       }
@@ -246,6 +257,7 @@ export function ProjectTypeWizardProvider({
     step,
     step1Data,
     folders,
+    folderTemplateName,
     isDraft,
     draftId: isDraft ? (projectTypeId ?? null) : null,
     isEditing,
@@ -266,6 +278,7 @@ export function ProjectTypeWizardProvider({
     // Data setters
     setStep1Data,
     setFolders,
+    setFolderTemplateName,
 
     // Actions
     saveDraft,

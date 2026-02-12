@@ -15,7 +15,29 @@ import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
-const ICON_NAMES = Object.keys(icons).sort() as (keyof typeof icons)[];
+// Curated list of icons relevant to post-production and media workflows
+const RECOMMENDED_ICONS: (keyof typeof icons)[] = [
+  // Media & Capture
+  "Camera", "Video", "Film", "Clapperboard", "Aperture", "Focus", "Play", "Monitor", "Tv",
+  "Mic", "Headphones", "Music", "Speaker", "Volume2",
+  // Tools & Editing
+  "Scissors", "Pencil", "Palette", "Brush", "Layers", "Crop", "Eraser", "Highlighter",
+  "Wand", "Sparkles", "Zap", "Sun", "Contrast", "Maximize", "Minimize",
+  // Assets & Delivery
+  "Image", "Images", "HardDrive", "Usb", "CloudUpload", "Download", "Send", "Share2",
+  // Organization & Flow
+  "Folder", "FolderOpen", "FolderTree", "Archive", "Package", "Library", "Book",
+  "Clock", "Calendar", "Timer", "History", "CircleCheck", "CircleAlert", "Info",
+  "LayoutGrid", "Columns2", "Grid3x3", "List",
+  // Engagement & Feedback
+  "Users", "User", "MessageSquare", "Phone", "Mail", "Heart", "Star", "Award", "Trophy", "Target",
+  // App & System
+  "Settings", "Search", "Tag", "Link", "Eye", "Lock", "LockOpen",
+  "Smartphone", "Laptop", "Tablet", "Globe", "Cloud"
+];
+
+const ALL_ICON_NAMES = Object.keys(icons).sort() as (keyof typeof icons)[];
+const ICON_NAMES = RECOMMENDED_ICONS.sort();
 
 interface IconPickerProps {
   value?: string;
@@ -43,14 +65,18 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
   const filteredIcons = React.useMemo(() => {
     if (!deferredSearch) return ICON_NAMES;
     const lowerSearch = deferredSearch.toLowerCase();
-    return ICON_NAMES.filter((name) =>
+    // When searching, allow searching through ALL Lucide icons, not just recommended ones
+    return ALL_ICON_NAMES.filter((name) =>
       name.toLowerCase().includes(lowerSearch),
     );
   }, [deferredSearch]);
 
   const visibleIcons = React.useMemo(() => {
+    // If searching, we might want to show more or less depending on performance
+    // but for the recommended set, we show them all
+    if (!deferredSearch) return ICON_NAMES;
     return filteredIcons.slice(0, displayCount);
-  }, [filteredIcons, displayCount]);
+  }, [filteredIcons, displayCount, deferredSearch]);
 
   // Load more icons on scroll or via intersection observer if needed,
   // but for now let's just use a "Load More" or auto-increment for simplicity
@@ -115,7 +141,15 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
           </div>
         </SheetHeader>
 
-        <ScrollArea className="flex-1 p-6">
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-6">
+          {!deferredSearch && (
+            <div className="flex items-center gap-2 mb-6">
+              <div className="h-4 w-1 rounded-full bg-primary" />
+              <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                Recommended for Post Production
+              </span>
+            </div>
+          )}
           <div className="grid grid-cols-2 xs:grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
             {visibleIcons.map((name) => (
               <button
@@ -158,7 +192,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
               </button>
             ))}
 
-            {hasMore && (
+            {hasMore && deferredSearch && (
               <div className="col-span-full pt-6 flex justify-center">
                 <Button
                   variant="outline"
@@ -181,7 +215,7 @@ export function IconPicker({ value, onChange, className }: IconPickerProps) {
               </div>
             )}
           </div>
-        </ScrollArea>
+        </div>
 
         <div className="p-6 border-t border-white/5 bg-white/2 shrink-0">
           <div className="flex items-center justify-between">

@@ -8,7 +8,6 @@ import {
   ArrowLeft,
   ArrowRight,
   CheckCheck,
-  ChevronLeft,
   FolderOpen,
   Shield,
   Users,
@@ -35,19 +34,21 @@ export default function EmployeeProjectDetail({
   const router = useRouter();
   const [isFinalizeOpen, setIsFinalizeOpen] = useState(false);
   const { setOverride, removeOverride } = useBreadcrumbStore();
-
+  // @ts-ignore
   const project = useQuery(api.employees.getEmployeeProject, {
     projectId: projectId as Id<"projects">,
   });
 
   const deliverables = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getProjectDeliverables,
     {
       projectId: projectId as Id<"projects">,
     },
   );
 
-  if (project === undefined) return <EmployeeProjectDetailSkeleton />;
+  if (project === undefined || deliverables === undefined)
+    return <EmployeeProjectDetailSkeleton />;
 
   if (project === null) {
     return (
@@ -69,48 +70,56 @@ export default function EmployeeProjectDetail({
     <div className="flex-1 space-y-10 p-8 md:p-12 w-full animate-in fade-in slide-in-from-bottom-5">
       {/* Header Area */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-        <div className="space-y-4">
+        <div className="flex items-center gap-6">
           <Button
             onClick={() => router.back()}
-            className="bg-blue-500 hover:bg-blue-600 text-white rounded-2xl h-9 px-5 flex items-center gap-2 mb-6 group transition-all active:scale-95 shadow-lg shadow-blue-500/20"
+            variant="ghost"
+            size="icon"
+            className="h-12 w-12 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all active:scale-95 shrink-0"
           >
-            <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Back
-            </span>
+            <ArrowLeft className="h-5 w-5 text-white/60" />
           </Button>
 
-          <div className="flex items-center gap-5">
+          <div className="flex items-center gap-6">
             <div className="p-4 rounded-3xl bg-indigo-500/10 border border-indigo-500/20 shadow-[0_0_20px_rgba(99,102,241,0.1)]">
               <Shield className="h-8 w-8 text-indigo-400" />
             </div>
-            <div>
-              <div className="flex items-center gap-3">
-                <h1 className="text-3xl font-black uppercase tracking-tight text-white leading-none">
-                  {project.eventName}
-                </h1>
-                <span className="bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-[9px] font-black px-2 py-1 rounded-lg uppercase tracking-widest mt-1">
+            <div className="space-y-1.5">
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-400 bg-indigo-400/10 px-2 py-0.5 rounded">
                   {currentMemberRole}
                 </span>
+                <span className="text-[10px] font-black uppercase tracking-[0.2em] text-white/40">
+                  / PRODUCTION VIEW • ID: {project.code}
+                </span>
               </div>
-              <p className="text-xs font-bold text-white/40 uppercase tracking-[0.3em] mt-2">
-                PROJECT: {project.code} — {projectTypeName}
+              <h1 className="text-4xl font-black uppercase tracking-tighter text-white leading-none">
+                {project.eventName}
+              </h1>
+              <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.3em]">
+                {projectTypeName} PIPELINE
               </p>
             </div>
           </div>
         </div>
 
         <div className="flex gap-4">
-          <Button
-            variant="outline"
-            className="rounded-2xl h-14 border-white/5 bg-white/2 gap-3 px-6 hover:bg-white/5"
-            onClick={() => setIsFinalizeOpen(true)}
-          >
-            <CheckCheck className="h-4 w-4 text-white/40" />
-            <span className="text-[10px] font-black uppercase tracking-widest">
-              Finalize Work
-            </span>
-          </Button>
+          {(project.actionState === "versions_requested" ||
+            (deliverables.length === 0 &&
+              ["assigned", "work_in_progress"].includes(
+                project.actionState,
+              ))) && (
+            <Button
+              variant="outline"
+              className="rounded-2xl h-14 border-white/5 bg-white/2 gap-3 px-6 hover:bg-white/5"
+              onClick={() => setIsFinalizeOpen(true)}
+            >
+              <CheckCheck className="h-4 w-4 text-white/40" />
+              <span className="text-[10px] font-black uppercase tracking-widest">
+                Finalize Work
+              </span>
+            </Button>
+          )}
 
           <Button
             className="rounded-2xl h-14 bg-indigo-600 hover:bg-indigo-500 text-white gap-3 px-8 shadow-lg shadow-indigo-600/20"

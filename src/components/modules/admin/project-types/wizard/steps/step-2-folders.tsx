@@ -2,14 +2,21 @@
 
 import { FolderTree as FolderTreeComponent } from "@/components/modules/admin/folder-templates/builder/folder-tree";
 import { useProjectTypeWizard } from "../wizard-context";
-import { FolderOpen, AlertCircle } from "lucide-react";
+import { FolderOpen, AlertCircle, FileText } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Input } from "@/components/ui/input";
 import type { FolderLevel1, FolderLevel2, FolderLevel3 } from "@convex/schema";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
 export function Step2Folders({ compact = false }: { compact?: boolean }) {
-  const { folders, setFolders, step1Data } = useProjectTypeWizard();
+  const {
+    folders,
+    setFolders,
+    step1Data,
+    folderTemplateName,
+    setFolderTemplateName,
+  } = useProjectTypeWizard();
 
   // Calculate folder statistics
   const folderStats = useMemo(() => calculateFolderStats(folders), [folders]);
@@ -201,6 +208,34 @@ export function Step2Folders({ compact = false }: { compact?: boolean }) {
               Max 3 levels • 10 per level
             </span>
           </div>
+        </div>
+      )}
+
+      {/* Template Name Input */}
+      {!compact && (
+        <div className="shrink-0 mb-4">
+          <label className="block text-[9px] font-black uppercase tracking-[0.2em] text-white/40 mb-2">
+            Folder Template Name
+          </label>
+          <div className="relative">
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 p-1.5 rounded-md bg-primary/10 border border-primary/20">
+              <FileText className="h-3.5 w-3.5 text-primary" />
+            </div>
+            <Input
+              id="folder-template-name"
+              value={folderTemplateName}
+              onChange={(e) => setFolderTemplateName(e.target.value)}
+              placeholder={
+                step1Data?.name
+                  ? `${step1Data.name} Default`
+                  : "e.g. Wedding Standard, Event Premium..."
+              }
+              className="pl-12 h-10 bg-white/3 border-white/10 text-white placeholder:text-white/20 rounded-xl text-sm font-medium focus:border-primary/40 focus:ring-primary/20 transition-all"
+            />
+          </div>
+          <p className="text-[8px] uppercase tracking-[0.15em] text-white/20 font-semibold mt-1.5">
+            Leave empty to auto-generate from project type name
+          </p>
         </div>
       )}
 

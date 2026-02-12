@@ -36,6 +36,7 @@ export interface WizardState {
   step: WizardStep;
   step1Data: Step1Data | null;
   folders: FolderLevel1[];
+  folderTemplateName: string;
   isDraft: boolean;
   draftId: Id<"projectTypes"> | null;
   isEditing: boolean;

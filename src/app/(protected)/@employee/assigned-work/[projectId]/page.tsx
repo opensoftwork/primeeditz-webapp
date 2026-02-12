@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import EmployeeProjectDetail from "@/components/modules/employee/assigned-work/details/index";
+import EmployeeProjectDetail from "@/components/modules/employee/assigned-work/detail/index";
 
 interface AssignedWorkDetailPageProps {
   params: Promise<{
