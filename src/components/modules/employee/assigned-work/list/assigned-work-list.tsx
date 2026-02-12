@@ -85,11 +85,7 @@ export function AssignedWorkList() {
         emptyTitle="No assigned work found"
         emptyDescription="Your production pipeline is currently clear. Take a breather!"
         renderCard={(item) => (
-          <AssignedWorkCard
-            key={item._id}
-            item={item}
-            onView={handleView}
-          />
+          <AssignedWorkCard key={item._id} item={item} onView={handleView} />
         )}
         defaultView="cards"
         showViewToggle={true}
@@ -107,7 +103,7 @@ export function AssignedWorkList() {
                 { label: "Work in Progress", value: "work_in_progress" },
                 { label: "Deliverables Ready", value: "deliverables_ready" },
                 { label: "Awaiting Review", value: "awaiting_review" },
-                { label: "Revisions Requested", value: "revisions_requested" },
+                { label: "Versions Requested", value: "versions_requested" },
                 { label: "Approved", value: "review_approved" },
               ],
             },

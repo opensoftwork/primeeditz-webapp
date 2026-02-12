@@ -112,7 +112,7 @@ export function RequestChangesDrawer({
           <div className="space-y-6">
             <div className="space-y-4">
               <Label className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em]">
-                Reason(s) for revision
+                Reason(s) for change
               </Label>
               <div className="space-y-3">
                 {QUOTATION_CHANGE_REASONS.map((reason) => (

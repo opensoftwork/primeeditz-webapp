@@ -59,22 +59,42 @@ export function getColumns(
       cell: ({ row }) => {
         const state = row.getValue("actionState") as string;
         const isWip = state === "work_in_progress" || state === "assigned";
-        const isPending = state === "awaiting_review" || state === "deliverables_ready";
-        const isActionRequired = state === "revisions_requested";
-        const isCompleted = state === "review_approved" || state === "delivered" || state === "completed";
-        
+        const isPending =
+          state === "awaiting_review" || state === "deliverables_ready";
+        const isActionRequired = state === "versions_requested";
+        const isCompleted =
+          state === "review_approved" ||
+          state === "delivered" ||
+          state === "completed";
+
         return (
           <div className="flex items-center gap-2">
             <div
               className={cn(
                 "h-1.5 w-1.5 rounded-full animate-pulse",
-                isWip ? "bg-indigo-400" : isActionRequired ? "bg-red-400" : isPending ? "bg-amber-400" : isCompleted ? "bg-emerald-400" : "bg-white/40",
+                isWip
+                  ? "bg-indigo-400"
+                  : isActionRequired
+                    ? "bg-red-400"
+                    : isPending
+                      ? "bg-amber-400"
+                      : isCompleted
+                        ? "bg-emerald-400"
+                        : "bg-white/40",
               )}
             />
             <span
               className={cn(
                 "text-[10px] font-black uppercase tracking-widest",
-                isWip ? "text-indigo-400" : isActionRequired ? "text-red-400" : isPending ? "text-amber-400" : isCompleted ? "text-emerald-400" : "text-white/40",
+                isWip
+                  ? "text-indigo-400"
+                  : isActionRequired
+                    ? "text-red-400"
+                    : isPending
+                      ? "text-amber-400"
+                      : isCompleted
+                        ? "text-emerald-400"
+                        : "text-white/40",
               )}
             >
               {state.replace(/_/g, " ")}

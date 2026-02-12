@@ -47,6 +47,16 @@ export default function EmployeeProjectDetail({
     },
   );
 
+  useEffect(() => {
+    if (project?.eventName) {
+      setOverride([
+        { label: "Assigned Work", href: "/assigned-work" },
+        { label: project.eventName, href: `/assigned-work/${projectId}` },
+      ]);
+    }
+    return () => removeOverride();
+  }, [project?.eventName, projectId, setOverride, removeOverride]);
+
   if (project === undefined || deliverables === undefined)
     return <EmployeeProjectDetailSkeleton />;
 
