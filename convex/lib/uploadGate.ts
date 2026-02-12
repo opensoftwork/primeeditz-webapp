@@ -104,6 +104,7 @@ export async function canUpload(
       case "assigned":
       case "work_in_progress":
       case "versions_requested":
+      case "deliverables_ready": // Employee may upload corrected versions during QC cycle
         return { allowed: true, reason: "Upload deliverables" };
       default:
         return { allowed: false, reason: "Not in production phase" };

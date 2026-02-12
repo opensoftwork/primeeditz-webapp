@@ -16,13 +16,25 @@ export interface DeliverableData {
   qcNotes?: string;
   versionFeedback?: string;
   projectId: Id<"projects">;
+  latestVersionId?: Id<"deliverableVersions">;
 }
 
+/**
+ * A single version entry from the deliverableVersions table.
+ * Replaces the legacy pattern where each version was a separate deliverable row.
+ */
 export interface DeliverableVersion {
-  _id: Id<"deliverables">;
-  version: number;
-  status: string;
-  sizeBytes: number;
+  _id: Id<"deliverableVersions">;
   _creationTime: number;
-  parentDeliverableId?: Id<"deliverables">;
+  deliverableId: Id<"deliverables">;
+  projectId: Id<"projects">;
+  versionNumber: number;
+  minioKey: string;
+  sizeBytes: number;
+  mimeType?: string;
+  uploadedBy: Id<"profiles">;
+  uploadedByRole: "admin" | "employee";
+  uploadedByName?: string;
+  description?: string;
+  createdAt: number;
 }

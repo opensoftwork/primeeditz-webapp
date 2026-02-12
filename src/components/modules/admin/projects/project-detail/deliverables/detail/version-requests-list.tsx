@@ -40,11 +40,13 @@ interface VersionRequestRow {
 interface VersionRequestsListProps {
   projectId: string;
   deliverableId: string;
+  hideHeader?: boolean;
 }
 
 export function VersionRequestsList({
   projectId,
   deliverableId,
+  hideHeader = false,
 }: VersionRequestsListProps) {
   const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
@@ -200,99 +202,137 @@ export function VersionRequestsList({
     );
   }
 
-  return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
-        <div className="flex items-center gap-5">
+  if (deliverable === null) {
+    return (
+      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+        <div className="text-center space-y-4">
+          <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
+            <ArrowLeft className="h-8 w-8 text-white/20" />
+          </div>
+          <h1 className="text-xl font-black text-white">
+            Deliverable Not Found
+          </h1>
+          <p className="text-sm text-white/40">
+            The deliverable you are looking for could not be found.
+          </p>
           <Button
             variant="outline"
-            size="icon"
-            className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
             onClick={() => router.back()}
+            className="mt-4 rounded-xl border-white/10"
           >
-            <ArrowLeft className="h-5 w-5 text-white/60" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go Back
           </Button>
-
-          <div>
-            <div className="flex items-center gap-3 mb-1">
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
-                VERSION HISTORY
-              </span>
-              <Badge
-                variant="outline"
-                className="rounded-md border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase px-2 py-0"
-              >
-                {deliverable.name}
-              </Badge>
-            </div>
-            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
-              Version Requests
-            </h1>
-            <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
-              {versionRequests.length} request
-              {versionRequests.length !== 1 ? "s" : ""} for {deliverable.name}
-            </p>
-          </div>
         </div>
-
-        <Button
-          onClick={() =>
-            router.push(
-              `/projects/${projectId}/deliverables/${deliverableId}/versions/new`,
-            )
-          }
-          className="bg-indigo-500 hover:bg-indigo-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(99,102,241,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2 text-xs uppercase tracking-widest"
-        >
-          <Plus className="h-4 w-4" />
-          New Version Request
-        </Button>
       </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        "flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700",
+        !hideHeader && "min-h-[calc(100vh-120px)] px-8 pt-10 pb-12",
+      )}
+    >
+      {/* Header */}
+      {!hideHeader && (
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <div className="flex items-center gap-5">
+            <Button
+              variant="outline"
+              size="icon"
+              className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
+              onClick={() => router.back()}
+            >
+              <ArrowLeft className="h-5 w-5 text-white/60" />
+            </Button>
+
+            <div>
+              <div className="flex items-center gap-3 mb-1">
+                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
+                  VERSION HISTORY
+                </span>
+                <Badge
+                  variant="outline"
+                  className="rounded-md border-indigo-500/20 bg-indigo-500/5 text-indigo-400 text-[10px] font-black uppercase px-2 py-0"
+                >
+                  {deliverable.name}
+                </Badge>
+              </div>
+              <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
+                Version Requests
+              </h1>
+              <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
+                {versionRequests.length} request
+                {versionRequests.length !== 1 ? "s" : ""} for {deliverable.name}
+              </p>
+            </div>
+          </div>
+
+          <Button
+            onClick={() =>
+              router.push(
+                `/projects/${projectId}/deliverables/${deliverableId}/versions/new`,
+              )
+            }
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(99,102,241,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] gap-2 text-xs uppercase tracking-widest"
+          >
+            <Plus className="h-4 w-4" />
+            New Version Request
+          </Button>
+        </div>
+      )}
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
-        <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
-          <div className="h-10 w-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
-            <Clock className="h-5 w-5 text-amber-400" />
+      {!hideHeader && (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div className="p-6 rounded-3xl bg-amber-500/5 border border-amber-500/10 flex items-start gap-4">
+            <div className="h-10 w-10 rounded-2xl bg-amber-500/10 flex items-center justify-center border border-amber-500/20">
+              <Clock className="h-5 w-5 text-amber-400" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-1">
+                Pending
+              </h3>
+              <p className="text-2xl font-black text-white">
+                {versionRequests.filter((r) => r.status === "pending").length}
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-amber-300 mb-1">
-              Pending
-            </h3>
-            <p className="text-2xl font-black text-white">
-              {versionRequests.filter((r) => r.status === "pending").length}
-            </p>
-          </div>
-        </div>
 
-        <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 flex items-start gap-4">
-          <div className="h-10 w-10 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
-            <Play className="h-5 w-5 text-blue-400" />
+          <div className="p-6 rounded-3xl bg-blue-500/5 border border-blue-500/10 flex items-start gap-4">
+            <div className="h-10 w-10 rounded-2xl bg-blue-500/10 flex items-center justify-center border border-blue-500/20">
+              <Play className="h-5 w-5 text-blue-400" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-1">
+                In Progress
+              </h3>
+              <p className="text-2xl font-black text-white">
+                {
+                  versionRequests.filter((r) => r.status === "in_progress")
+                    .length
+                }
+              </p>
+            </div>
           </div>
-          <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-blue-300 mb-1">
-              In Progress
-            </h3>
-            <p className="text-2xl font-black text-white">
-              {versionRequests.filter((r) => r.status === "in_progress").length}
-            </p>
-          </div>
-        </div>
 
-        <div className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 flex items-start gap-4">
-          <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
-            <CheckCircle className="h-5 w-5 text-emerald-400" />
-          </div>
-          <div>
-            <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-1">
-              Resolved
-            </h3>
-            <p className="text-2xl font-black text-white">
-              {versionRequests.filter((r) => r.status === "resolved").length}
-            </p>
+          <div className="p-6 rounded-3xl bg-emerald-500/5 border border-emerald-500/10 flex items-start gap-4">
+            <div className="h-10 w-10 rounded-2xl bg-emerald-500/10 flex items-center justify-center border border-emerald-500/20">
+              <CheckCircle className="h-5 w-5 text-emerald-400" />
+            </div>
+            <div>
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-emerald-300 mb-1">
+                Resolved
+              </h3>
+              <p className="text-2xl font-black text-white">
+                {versionRequests.filter((r) => r.status === "resolved").length}
+              </p>
+            </div>
           </div>
         </div>
-      </div>
+      )}
 
       {/* Table */}
       <div className="flex-1">

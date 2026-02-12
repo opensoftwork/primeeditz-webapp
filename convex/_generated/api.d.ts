@@ -26,6 +26,7 @@ import type * as functions_assets_mutations from "../functions/assets/mutations.
 import type * as functions_company_mutations from "../functions/company/mutations.js";
 import type * as functions_company_queries from "../functions/company/queries.js";
 import type * as functions_deliverables_index from "../functions/deliverables/index.js";
+import type * as functions_deliverables_migrateDeliverableVersions from "../functions/deliverables/migrateDeliverableVersions.js";
 import type * as functions_deliverables_mutations from "../functions/deliverables/mutations.js";
 import type * as functions_deliverables_queries from "../functions/deliverables/queries.js";
 import type * as functions_employees_dashboard from "../functions/employees/dashboard.js";
@@ -109,6 +110,7 @@ declare const fullApi: ApiFromModules<{
   "functions/company/mutations": typeof functions_company_mutations;
   "functions/company/queries": typeof functions_company_queries;
   "functions/deliverables/index": typeof functions_deliverables_index;
+  "functions/deliverables/migrateDeliverableVersions": typeof functions_deliverables_migrateDeliverableVersions;
   "functions/deliverables/mutations": typeof functions_deliverables_mutations;
   "functions/deliverables/queries": typeof functions_deliverables_queries;
   "functions/employees/dashboard": typeof functions_employees_dashboard;

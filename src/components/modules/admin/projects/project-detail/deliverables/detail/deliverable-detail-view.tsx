@@ -42,6 +42,12 @@ export function DeliverableDetailView() {
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const [viewedVersion, setViewedVersion] = useState<{
+    version: number;
+    minioKey: string;
+    mimeType?: string;
+    description?: string;
+  } | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [versionDialogOpen, setVersionDialogOpen] = useState(false);
   const [versionNotes, setVersionNotes] = useState("");
@@ -57,8 +63,7 @@ export function DeliverableDetailView() {
     api.functions.deliverables.queries.getDeliverableVersions,
     deliverable
       ? {
-          projectId: deliverable.projectId,
-          name: deliverable.name,
+          deliverableId: deliverableId as Id<"deliverables">,
         }
       : "skip",
   );
@@ -94,13 +99,25 @@ export function DeliverableDetailView() {
     return () => removeOverride(deliverableId);
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
-  // Fetch signed URL
+  // Sync viewed version with latest deliverable when loaded
+  useEffect(() => {
+    if (deliverable && !viewedVersion) {
+      setViewedVersion({
+        version: deliverable.version,
+        minioKey: deliverable.minioKey,
+        mimeType: deliverable.mimeType,
+        description: deliverable.description,
+      });
+    }
+  }, [deliverable, viewedVersion]);
+
+  // Fetch signed URL for the VIEWED version
   useEffect(() => {
     async function fetchUrl() {
-      if (deliverable?.minioKey) {
+      if (viewedVersion?.minioKey) {
         try {
           const url = await getSignedUrlAction({
-            storageKey: deliverable.minioKey,
+            storageKey: viewedVersion.minioKey,
           });
           setFileUrl(url);
         } catch (error) {
@@ -109,12 +126,14 @@ export function DeliverableDetailView() {
       }
     }
     fetchUrl();
-  }, [deliverable, getSignedUrlAction]);
+  }, [viewedVersion?.minioKey, getSignedUrlAction]);
 
   // Computed permissions
   const canApprove =
     deliverable?.status === "pending_qc" ||
-    deliverable?.status === "version_needed";
+    deliverable?.status === "version_needed" ||
+    deliverable?.status === "version_requested" ||
+    deliverable?.status === "revision_requested";
   const canRequestVersion =
     deliverable?.status === "pending_qc" || deliverable?.status === "approved";
   const canSendToStudio =
@@ -156,6 +175,17 @@ export function DeliverableDetailView() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleVersionSelect = (v: any) => {
+    setViewedVersion({
+      version: v.versionNumber,
+      minioKey: v.minioKey,
+      mimeType: v.mimeType,
+      description: v.description,
+    });
+    // Scroll preview into view if on mobile
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   // Loading state
@@ -292,11 +322,16 @@ export function DeliverableDetailView() {
             <h1 className="text-3xl xl:text-4xl font-black uppercase tracking-tighter text-white">
               {deliverable.name}
             </h1>
-            <p className="text-xs text-white/30 mt-1 uppercase tracking-widest font-bold">
-              v{deliverable.version} •{" "}
-              {(deliverable.sizeBytes / (1024 * 1024)).toFixed(2)} MB •{" "}
-              {format(deliverable._creationTime, "MMM dd, yyyy • HH:mm")}
-            </p>
+            <div className="flex items-center gap-3 mt-1.5">
+              <p className="text-xs text-indigo-400 uppercase tracking-widest font-black">
+                Viewing v{viewedVersion?.version ?? deliverable.version}
+              </p>
+              <span className="text-white/20">|</span>
+              <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                {(deliverable.sizeBytes / (1024 * 1024)).toFixed(2)} MB •{" "}
+                {format(deliverable._creationTime, "MMM dd, yyyy")}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -319,11 +354,37 @@ export function DeliverableDetailView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
         {/* Left: Preview */}
         <div className="lg:col-span-2 space-y-6">
+          {viewedVersion && viewedVersion.version !== deliverable.version && (
+            <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between mb-2">
+              <div className="flex items-center gap-3">
+                <div className="h-2 w-2 rounded-full bg-indigo-500 animate-pulse" />
+                <p className="text-xs font-bold text-indigo-300">
+                  You are viewing a historical version (v{viewedVersion.version}
+                  ). Actions below still apply to the latest version.
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-8 text-[10px] font-black uppercase tracking-widest text-white/60 hover:text-white"
+                onClick={() =>
+                  handleVersionSelect({
+                    versionNumber: deliverable.version,
+                    minioKey: deliverable.minioKey,
+                    mimeType: deliverable.mimeType,
+                    description: deliverable.description,
+                  })
+                }
+              >
+                Back to Latest
+              </Button>
+            </div>
+          )}
           <DeliverablePreview
             url={fileUrl}
             fileName={deliverable.name}
-            mimeType={deliverable.mimeType}
-            description={deliverable.description}
+            mimeType={viewedVersion?.mimeType ?? deliverable.mimeType}
+            description={viewedVersion?.description ?? deliverable.description}
             versionFeedback={deliverable.versionFeedback}
           />
         </div>
@@ -346,8 +407,10 @@ export function DeliverableDetailView() {
           {versions && versions.length > 1 && (
             <VersionHistory
               versions={versions}
-              currentId={deliverableId}
-              projectId={projectId}
+              currentVersionNumber={
+                viewedVersion?.version ?? deliverable.version
+              }
+              onSelect={handleVersionSelect}
             />
           )}
 
