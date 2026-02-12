@@ -11,7 +11,7 @@ export default function QuotationBuilderPage() {
   // Get initial step from query params, default to 1
   const stepParam = searchParams.get("step");
   const initialStep = stepParam
-    ? (parseInt(stepParam, 10) as 1 | 2 | 3 | 4)
+    ? (Math.max(1, Math.min(3, parseInt(stepParam, 10))) as 1 | 2 | 3)
     : 1;
 
   return (
