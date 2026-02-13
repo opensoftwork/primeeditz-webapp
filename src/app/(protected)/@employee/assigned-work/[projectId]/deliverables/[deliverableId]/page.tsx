@@ -51,6 +51,7 @@ export default function EmployeeDeliverablePage({
       projectId={projectId}
       deliverableId={deliverableId}
       hrefPrefix={`/assigned-work/${projectId}/deliverables`}
+      role="employee"
     />
   );
 }

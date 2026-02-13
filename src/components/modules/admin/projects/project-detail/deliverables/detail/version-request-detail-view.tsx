@@ -19,6 +19,7 @@ import {
   Maximize2,
   Play,
   Hash,
+  Send,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -265,14 +266,23 @@ export function VersionRequestDetailView({
             <Button
               onClick={() => handleUpdateStatus("in_progress")}
               disabled={isUpdating}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest"
+              className={cn(
+                "text-white font-black px-6 py-5 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest",
+                versionRequest.requestedByRole === "studio"
+                  ? "bg-indigo-500 hover:bg-indigo-600 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+                  : "bg-blue-500 hover:bg-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.2)]",
+              )}
             >
               {isUpdating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : versionRequest.requestedByRole === "studio" ? (
+                <Send className="h-4 w-4" />
               ) : (
                 <Play className="h-4 w-4" />
               )}
-              Mark In Progress
+              {versionRequest.requestedByRole === "studio"
+                ? "Forward to Employee"
+                : "Mark In Progress"}
             </Button>
           )}
           {versionRequest.status === "in_progress" && (

@@ -38,12 +38,14 @@ interface DeliverableDetailViewProps {
   projectId?: string;
   deliverableId?: string;
   hrefPrefix?: string;
+  role?: "admin" | "employee";
 }
 
 export function DeliverableDetailView({
   projectId: propProjectId,
   deliverableId: propDeliverableId,
   hrefPrefix = "/projects/[projectId]/deliverables", // Default prefix
+  role = "admin",
 }: DeliverableDetailViewProps) {
   const params = useParams();
   const router = useRouter();
@@ -481,16 +483,18 @@ export function DeliverableDetailView({
             </div>
           )}
 
-          {/* Actions */}
-          <DeliverableActions
-            canApprove={canApprove}
-            canRequestVersion={canRequestVersion}
-            canSendToStudio={canSendToStudio}
-            isSubmitting={isSubmitting}
-            onApprove={handleApprove}
-            onRequestVersion={handleRequestVersion}
-            onSendToStudio={handleSendToStudio}
-          />
+          {/* Actions — hidden for employees (read-only view) */}
+          {role === "admin" && (
+            <DeliverableActions
+              canApprove={canApprove}
+              canRequestVersion={canRequestVersion}
+              canSendToStudio={canSendToStudio}
+              isSubmitting={isSubmitting}
+              onApprove={handleApprove}
+              onRequestVersion={handleRequestVersion}
+              onSendToStudio={handleSendToStudio}
+            />
+          )}
         </div>
       </div>
     </div>

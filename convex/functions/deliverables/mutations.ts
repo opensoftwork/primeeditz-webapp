@@ -498,6 +498,44 @@ export const updateVersionRequestStatus = mutation({
 
     await ctx.db.patch(args.requestId, updates);
 
+    // When admin marks a studio-originated request as "in_progress",
+    // forward the work to the assigned employee
+    if (
+      args.status === "in_progress" &&
+      request.requestedByRole === "studio"
+    ) {
+      const deliverable = await ctx.db.get(request.deliverableId);
+      if (deliverable) {
+        // Update deliverable status so employee knows to act
+        await ctx.db.patch(request.deliverableId, {
+          status: "version_requested",
+          versionFeedback: request.notes,
+        });
+
+        // Route the project to the employee
+        const project = await ctx.db.get(request.projectId);
+        if (project) {
+          await ctx.db.patch(request.projectId, {
+            actionState: "work_in_progress",
+            awaitingActorRole: "employee",
+            awaitingActorId: project.assignedEmployeeId,
+            updatedAt: now(),
+          });
+
+          // Create handoff log: admin → employee
+          await ctx.db.insert("handoffLogs", {
+            projectId: request.projectId,
+            fromProfileId: profile._id,
+            toProfileId: project.assignedEmployeeId,
+            fromActionState: project.actionState,
+            toActionState: "work_in_progress",
+            notes: `Admin forwarded studio version request #${request.versionNumber} to employee`,
+            createdAt: now(),
+          });
+        }
+      }
+    }
+
     return { success: true };
   },
 });
