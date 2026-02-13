@@ -43,18 +43,23 @@ export function VersionHistory({
             >
               <div className="flex items-center gap-2">
                 <span>v{v.versionNumber}</span>
+                {v.scope === "external" && (
+                  <span className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-[7px] font-black uppercase tracking-widest border border-indigo-500/20">
+                    CLIENT V{v.studioVersionNumber}
+                  </span>
+                )}
                 {isSelected && (
-                  <span className="px-1 rounded bg-indigo-500/20 text-indigo-400 text-[8px] font-black uppercase tracking-tighter">
+                  <span className="px-1.5 py-0.5 rounded-md bg-white/10 text-white/50 text-[7px] font-black uppercase tracking-widest border border-white/10">
                     VIEWING
                   </span>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-[10px] text-white/40 font-medium">
+              <div className="flex items-center gap-1.5 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">
+                <span className="text-[9px] text-white/40 font-bold uppercase tracking-tighter">
                   {format(v.createdAt, "MMM dd")}
                 </span>
-                <span className="text-[10px] text-white/30">·</span>
-                <span className="text-[10px] text-white/30 capitalize">
+                <span className="text-[9px] text-white/20">·</span>
+                <span className="text-[9px] text-white/40 font-bold uppercase tracking-widest">
                   {v.uploadedByRole}
                 </span>
               </div>

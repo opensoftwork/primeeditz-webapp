@@ -13,6 +13,7 @@ interface DeliverableCardProps {
   projectId: string;
   name: string;
   version: number;
+  studioVersion?: number;
   sizeBytes: number;
   status: string;
   createdAt: number;
@@ -29,6 +30,7 @@ export function DeliverableCard({
   projectId,
   name,
   version,
+  studioVersion,
   sizeBytes,
   status,
   createdAt,
@@ -67,9 +69,17 @@ export function DeliverableCard({
             {name}
           </h4>
           <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase font-bold tracking-wider text-white/40">
-            <span className="bg-white/5 px-2 py-0.5 rounded-md">
-              v{version}
-            </span>
+            <div className="flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-md">
+              <span className="text-white/30">Internal</span>
+              <span className="text-white">v{version}</span>
+              {studioVersion != null && (
+                <>
+                  <span className="w-px h-2 bg-white/10 mx-0.5" />
+                  <span className="text-indigo-400/50">Client</span>
+                  <span className="text-indigo-400">v{studioVersion}</span>
+                </>
+              )}
+            </div>
             <span>•</span>
             <span>{(sizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
             <span>•</span>

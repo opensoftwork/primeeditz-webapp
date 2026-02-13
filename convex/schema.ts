@@ -445,6 +445,7 @@ export default defineSchema({
     rejectionNotes: v.optional(v.string()),
     parentDeliverableId: v.optional(v.id("deliverables")), // @deprecated — legacy child-deliverable linking
     latestVersionId: v.optional(v.id("deliverableVersions")), // Points to latest version record
+    studioVersion: v.optional(v.number()), // NEW: Client-facing version (v1, v2...)
     // Uses _creationTime
   })
     .index("by_projectId", ["projectId"])
@@ -464,10 +465,13 @@ export default defineSchema({
     uploadedBy: v.id("profiles"),
     uploadedByRole: v.union(v.literal("admin"), v.literal("employee")),
     description: v.optional(v.string()),
+    studioVersionNumber: v.optional(v.number()), // External version number if scope is external
+    scope: v.optional(v.union(v.literal("internal"), v.literal("external"))), // internal (QC) vs external (Studio)
     createdAt: v.number(),
   })
     .index("by_deliverableId", ["deliverableId"])
-    .index("by_projectId", ["projectId"]),
+    .index("by_projectId", ["projectId"])
+    .index("by_scope", ["scope"]),
 
   // --------------------------------------------------------------------------
   // Version Requests

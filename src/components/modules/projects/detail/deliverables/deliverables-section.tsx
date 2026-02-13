@@ -244,14 +244,7 @@ export function DeliverablesSection({
         )}
 
         {/* Deliverables Grid */}
-        <div
-          className={cn(
-            "grid gap-6",
-            isReviewMode
-              ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-              : "grid-cols-1",
-          )}
-        >
+        <div className="grid grid-cols-1 gap-4">
           {deliverables.map((item, index) =>
             isReviewMode ? (
               <motion.div
@@ -278,6 +271,7 @@ export function DeliverablesSection({
                   projectId={projectId}
                   name={item.name}
                   version={item.version}
+                  studioVersion={item.studioVersion}
                   sizeBytes={item.sizeBytes}
                   status={item.status}
                   createdAt={item._creationTime}

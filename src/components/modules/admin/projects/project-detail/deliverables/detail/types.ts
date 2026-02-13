@@ -17,6 +17,7 @@ export interface DeliverableData {
   versionFeedback?: string;
   projectId: Id<"projects">;
   latestVersionId?: Id<"deliverableVersions">;
+  studioVersion?: number;
 }
 
 /**
@@ -29,6 +30,8 @@ export interface DeliverableVersion {
   deliverableId: Id<"deliverables">;
   projectId: Id<"projects">;
   versionNumber: number;
+  studioVersionNumber?: number;
+  scope?: "internal" | "external";
   minioKey: string;
   sizeBytes: number;
   mimeType?: string;
@@ -37,4 +40,5 @@ export interface DeliverableVersion {
   uploadedByName?: string;
   description?: string;
   createdAt: number;
+  displayVersionNumber?: number;
 }

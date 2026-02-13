@@ -32,6 +32,8 @@ interface StudioDeliverable {
   _creationTime: number;
   name: string;
   version: number;
+  studioVersion?: number;
+  displayVersion?: number;
   status: string;
   sizeBytes: number;
   minioKey: string;
@@ -134,7 +136,7 @@ export function StudioDeliverablesList({
               </div>
               <div className="flex flex-wrap items-center gap-2 text-[10px] uppercase font-bold tracking-wider text-white/40">
                 <span className="bg-white/5 px-2 py-0.5 rounded-md">
-                  v{item.version}
+                  v{item.displayVersion || item.version}
                 </span>
                 <span>•</span>
                 <span>{(item.sizeBytes / (1024 * 1024)).toFixed(2)} MB</span>

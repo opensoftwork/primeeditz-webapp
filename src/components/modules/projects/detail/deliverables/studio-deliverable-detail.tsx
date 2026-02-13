@@ -2,7 +2,7 @@
 
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { useQuery, useAction } from "convex/react";
+import { useQuery, useAction, useMutation } from "convex/react";
 import { useState, useEffect } from "react";
 import {
   ArrowLeft,
@@ -11,7 +11,10 @@ import {
   ShieldCheck,
   Calendar,
   HardDrive,
-  User,
+  CheckCircle,
+  RotateCcw,
+  Loader2,
+  Info,
 } from "lucide-react";
 import { format } from "date-fns";
 import { motion } from "motion/react";
@@ -23,6 +26,8 @@ import { DeliverablePreview } from "@/components/modules/admin/projects/project-
 import { VersionHistory } from "@/components/modules/admin/projects/project-detail/deliverables/detail/version-history";
 import type { DeliverableVersion } from "@/components/modules/admin/projects/project-detail/deliverables/detail/types";
 import Link from "next/link";
+import { toast } from "sonner";
+import { StudioVersionsDialog } from "./studio-versions-dialog";
 
 interface StudioDeliverableDetailViewProps {
   projectId: string;
@@ -42,9 +47,12 @@ export function StudioDeliverableDetailView({
     mimeType?: string;
     description?: string;
   } | null>(null);
+  const [showVersionDialog, setShowVersionDialog] = useState(false);
+  const [isApproving, setIsApproving] = useState(false);
 
   // Queries
   const deliverable = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
@@ -56,7 +64,21 @@ export function StudioDeliverableDetailView({
       : "skip",
   );
 
-  // Signed URL
+  // Check if studio has ever requested versions for this deliverable
+  const versionRequests = useQuery(
+    api.functions.deliverables.queries.getDeliverableVersionRequests,
+    deliverable
+      ? { deliverableId: deliverableId as Id<"deliverables"> }
+      : "skip",
+  );
+
+  // Mutations
+  const studioApprove = useMutation(
+    // @ts-ignore
+    api.functions.deliverables.mutations.studioApproveDeliverable,
+  );
+
+  // Actions
   const getSignedUrlAction = useAction(
     api.functions.storage.actions.getSignedFileUrl,
   );
@@ -73,7 +95,7 @@ export function StudioDeliverableDetailView({
   useEffect(() => {
     async function fetchUrl() {
       const keyToFetch = viewedVersion?.minioKey || deliverable?.minioKey;
-      if (keyToFetch && !fileUrl) {
+      if (keyToFetch) {
         try {
           const url = await getSignedUrlAction({
             storageKey: keyToFetch,
@@ -85,22 +107,32 @@ export function StudioDeliverableDetailView({
       }
     }
     fetchUrl();
-  }, [
-    deliverable?.minioKey,
-    viewedVersion?.minioKey,
-    getSignedUrlAction,
-    fileUrl,
-  ]);
+  }, [deliverable?.minioKey, viewedVersion?.minioKey, getSignedUrlAction]);
 
   // Handle version selection
-  const handleVersionSelect = (version: DeliverableVersion) => {
+  const handleVersionSelect = (version: any) => {
     setViewedVersion({
-      version: version.versionNumber,
+      version: version.displayVersionNumber || version.versionNumber,
       minioKey: version.minioKey,
       mimeType: version.mimeType,
       description: version.description,
     });
     setFileUrl(null); // Reset to fetch new URL
+  };
+
+  const handleApprove = async () => {
+    setIsApproving(true);
+    try {
+      await studioApprove({
+        deliverableId: deliverableId as Id<"deliverables">,
+        projectId: projectId as Id<"projects">,
+      });
+      toast.success(`"${deliverable?.name}" approved`);
+    } catch (error: any) {
+      toast.error(error.message || "Failed to approve deliverable");
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   // Loading state
@@ -127,10 +159,18 @@ export function StudioDeliverableDetailView({
 
   const formattedSize = (deliverable.sizeBytes / (1024 * 1024)).toFixed(2);
   const hasMultipleVersions = versions && versions.length > 1;
-  const currentVersionNumber = viewedVersion?.version || deliverable.version;
+  // Only show version history if the studio has actually requested changes
+  const studioHasRequestedVersions =
+    versionRequests && versionRequests.length > 0;
+  const currentVersionNumber =
+    viewedVersion?.version || deliverable.studioVersion || 1;
   const currentMimeType = viewedVersion?.mimeType || deliverable.mimeType;
   const currentDescription =
     viewedVersion?.description || deliverable.description;
+  const isApproved = deliverable.isStudioApproved;
+  const isPendingVersion =
+    deliverable.latestVersionStatus === "pending" ||
+    deliverable.latestVersionStatus === "in_progress";
 
   return (
     <motion.div
@@ -139,42 +179,88 @@ export function StudioDeliverableDetailView({
       className="p-6 md:p-12 space-y-8"
     >
       {/* Header */}
-      <div className="flex items-center gap-4">
-        <Button
-          variant="outline"
-          size="icon"
-          asChild
-          className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
-        >
-          <Link href={`/projects/${projectId}/deliverables`}>
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20">
-            <FileIcon className="h-5 w-5 text-indigo-400" />
-          </div>
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-4">
+        <div className="flex items-center gap-5">
+          <Button
+            variant="outline"
+            size="icon"
+            asChild
+            className="h-11 w-11 rounded-xl bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0 shadow-lg"
+          >
+            <Link href={`/projects/${projectId}/deliverables`}>
+              <ArrowLeft className="h-5 w-5" />
+            </Link>
+          </Button>
           <div>
-            <h1 className="text-lg font-black uppercase tracking-tight text-white">
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
+                DELIVERABLE REVIEW
+              </span>
+              {isApproved && (
+                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border bg-emerald-500/10 border-emerald-500/20 text-emerald-400">
+                  <CheckCircle className="h-3 w-3" />
+                  Approved
+                </span>
+              )}
+            </div>
+            <h1 className="text-2xl xl:text-3xl font-black uppercase tracking-tighter text-white">
               {deliverable.name}
             </h1>
-            <div className="flex items-center gap-3 text-[10px] font-bold uppercase tracking-widest text-white/40">
-              <span className="bg-white/5 px-2 py-0.5 rounded-md">
-                v{currentVersionNumber}
-              </span>
-              <span>•</span>
-              <span>{formattedSize} MB</span>
-              <span>•</span>
-              <span>{format(deliverable._creationTime, "PPP")}</span>
+            <div className="flex items-center gap-3 mt-1.5 opacity-60">
+              <p className="text-xs text-indigo-400 uppercase tracking-widest font-black">
+                Viewing v{currentVersionNumber}
+              </p>
+              <span className="text-white/20">|</span>
+              <p className="text-[10px] text-white/30 uppercase tracking-widest font-bold">
+                {formattedSize} MB • {format(deliverable._creationTime, "PPP")}
+              </p>
             </div>
           </div>
         </div>
+
+        {fileUrl && (
+          <Button
+            variant="outline"
+            asChild
+            className="rounded-xl border-white/10 bg-white/5 hover:bg-white/10 text-[10px] font-black uppercase tracking-widest h-11 px-6 transition-all"
+          >
+            <a
+              href={fileUrl}
+              download={deliverable.name}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download File
+            </a>
+          </Button>
+        )}
       </div>
 
       {/* Main Content */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10 items-start">
         {/* Preview — 2/3 width */}
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
+          {viewedVersion &&
+            viewedVersion.version !== (deliverable.studioVersion || 1) && (
+              <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Info className="h-4 w-4 text-indigo-400" />
+                  <p className="text-xs font-bold text-indigo-300">
+                    Viewing a historical version. Actions apply to the latest
+                    release.
+                  </p>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-[10px] font-black uppercase tracking-widest text-white/40 hover:text-white"
+                  onClick={() => setViewedVersion(null)}
+                >
+                  Back to Latest
+                </Button>
+              </div>
+            )}
           <DeliverablePreview
             url={fileUrl}
             fileName={deliverable.name}
@@ -185,69 +271,106 @@ export function StudioDeliverableDetailView({
 
         {/* Sidebar — 1/3 width */}
         <div className="space-y-6">
-          {/* Download Button */}
-          {fileUrl && (
-            <a
-              href={fileUrl}
-              download={deliverable.name}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="flex items-center justify-center gap-2 w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-indigo-600/20 transition-all"
-            >
-              <Download className="h-4 w-4" />
-              Download File
-            </a>
-          )}
+          {/* Status & Meta Card */}
+          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 space-y-6 relative overflow-hidden group">
+            <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+              <FileIcon className="h-12 w-12" />
+            </div>
+            <div className="space-y-4">
+              <h3 className="text-xs font-black uppercase tracking-widest text-white/30">
+                File Details
+              </h3>
+              <div className="space-y-4">
+                <MetaItem
+                  icon={<ShieldCheck className="h-4 w-4" />}
+                  label="Review Status"
+                  value={
+                    <span
+                      className={cn(
+                        "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
+                        isApproved
+                          ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                          : "text-amber-400 border-amber-500/20 bg-amber-500/10",
+                      )}
+                    >
+                      {isApproved ? "Approved" : "Pending Review"}
+                    </span>
+                  }
+                />
+                <MetaItem
+                  icon={<HardDrive className="h-4 w-4" />}
+                  label="File Info"
+                  value={
+                    <div className="flex items-center gap-2">
+                      <span className="text-sm font-bold text-white">
+                        {formattedSize} MB
+                      </span>
+                      <span className="text-white/20 px-1.5">•</span>
+                      <span className="text-xs font-bold text-white/60 lowercase">
+                        {currentMimeType?.split("/")[1] || "File"}
+                      </span>
+                    </div>
+                  }
+                />
+                <MetaItem
+                  icon={<Calendar className="h-4 w-4" />}
+                  label="Delivered On"
+                  value={
+                    <span className="text-sm font-bold text-white">
+                      {format(
+                        deliverable._creationTime,
+                        "MMM dd, yyyy • HH:mm",
+                      )}
+                    </span>
+                  }
+                />
+              </div>
+            </div>
 
-          {/* File Metadata Card */}
-          <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-5">
-            <MetaItem
-              icon={<ShieldCheck className="h-4 w-4" />}
-              label="Status"
-              value={
-                <span
-                  className={cn(
-                    "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider border",
-                    deliverable.status === "approved"
-                      ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
-                      : "text-amber-400 border-amber-500/20 bg-amber-500/10",
-                  )}
-                >
-                  {deliverable.status.replace(/_/g, " ")}
-                </span>
-              }
-            />
-            <MetaItem
-              icon={<User className="h-4 w-4" />}
-              label="Submitted By"
-              value={
-                <span className="text-sm font-bold text-white">
-                  {deliverable.uploadedByName || "PrimeEditz Team"}
-                </span>
-              }
-            />
-            <MetaItem
-              icon={<HardDrive className="h-4 w-4" />}
-              label="File Size"
-              value={
-                <span className="text-sm font-bold text-white">
-                  {formattedSize} MB
-                </span>
-              }
-            />
-            <MetaItem
-              icon={<Calendar className="h-4 w-4" />}
-              label="Uploaded"
-              value={
-                <span className="text-sm font-bold text-white">
-                  {format(deliverable._creationTime, "PPP p")}
-                </span>
-              }
-            />
+            {/* Actions */}
+            <div className="pt-4 border-t border-white/5 space-y-3">
+              {isApproved ? (
+                <div className="flex items-center justify-center gap-2 py-4 px-3 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+                  <CheckCircle className="h-5 w-5" />
+                  <span className="text-[10px] font-black uppercase tracking-widest">
+                    Deliverable Approved
+                  </span>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 gap-3">
+                  <Button
+                    onClick={handleApprove}
+                    disabled={isApproving || isPendingVersion}
+                    className="h-12 rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-emerald-600/20 border-none transition-all"
+                  >
+                    {isApproving ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <CheckCircle className="h-4 w-4 mr-2" />
+                    )}
+                    Approve Deliverable
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => setShowVersionDialog(true)}
+                    disabled={isApproving || isPendingVersion}
+                    className="h-12 rounded-2xl border-white/10 hover:bg-white/5 text-white/80 font-black uppercase tracking-widest text-[10px] transition-all"
+                  >
+                    <RotateCcw className="h-4 w-4 mr-2" />
+                    Request Changes
+                  </Button>
+                </div>
+              )}
+              {isPendingVersion && (
+                <p className="text-[9px] font-black text-center text-amber-500/60 uppercase tracking-widest">
+                  Changes requested • Awaiting new version
+                </p>
+              )}
+            </div>
           </div>
 
-          {/* Version History */}
-          {hasMultipleVersions && (
+          {/* Version History List — only shown when studio has requested changes */}
+          {hasMultipleVersions && studioHasRequestedVersions && (
             <VersionHistory
               versions={versions as DeliverableVersion[]}
               currentVersionNumber={currentVersionNumber}
@@ -256,6 +379,14 @@ export function StudioDeliverableDetailView({
           )}
         </div>
       </div>
+
+      <StudioVersionsDialog
+        open={showVersionDialog}
+        onOpenChange={setShowVersionDialog}
+        deliverableId={deliverableId as Id<"deliverables">}
+        deliverableName={deliverable.name}
+        projectId={projectId as Id<"projects">}
+      />
     </motion.div>
   );
 }

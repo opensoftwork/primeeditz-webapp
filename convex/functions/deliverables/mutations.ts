@@ -59,6 +59,7 @@ export const uploadDeliverable = mutation({
       uploadedBy: profile._id,
       uploadedByRole: profile.role === "admin" ? "admin" : "employee",
       description: args.description,
+      scope: "internal", // Default to internal QC scope
       createdAt: now(),
     });
 
@@ -236,6 +237,20 @@ export const sendToStudio = mutation({
       updatedAt: now(),
     });
 
+    // Increment studio-facing version
+    const newStudioVersion = (deliverable.studioVersion || 0) + 1;
+    await ctx.db.patch(args.deliverableId, {
+      studioVersion: newStudioVersion,
+    });
+
+    // Mark the latest deliverable version record as the public "external" version
+    if (deliverable.latestVersionId) {
+      await ctx.db.patch(deliverable.latestVersionId, {
+        scope: "external",
+        studioVersionNumber: newStudioVersion,
+      });
+    }
+
     // Record handoff
     await ctx.db.insert("handoffLogs", {
       projectId: deliverable.projectId,
@@ -243,11 +258,11 @@ export const sendToStudio = mutation({
       toProfileId: project.studioId,
       fromActionState: "deliverables_ready",
       toActionState: "awaiting_review",
-      notes: args.notes || "Deliverable sent for studio review",
+      notes: args.notes || `Deliverable v${newStudioVersion} sent for studio review`,
       createdAt: now(),
     });
 
-    return { success: true, studioId: project.studioId };
+    return { success: true, studioId: project.studioId, studioVersion: newStudioVersion };
   },
 });
 
@@ -537,6 +552,7 @@ export const uploadCorrectedVersion = mutation({
       uploadedBy: profile._id,
       uploadedByRole: profile.role === "admin" ? "admin" : "employee",
       description: args.description,
+      scope: "internal", // Default to internal until explicitly sent to studio
       createdAt: now(),
     });
 
