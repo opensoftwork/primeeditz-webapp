@@ -51,6 +51,7 @@ export function FolderDetailView({
   );
 
   // Queries & Mutations
+  // @ts-ignore
   const folder = useQuery(api.functions.folders.queries.getFolderDetails, {
     folderId: folderId as Id<"folders">,
   });

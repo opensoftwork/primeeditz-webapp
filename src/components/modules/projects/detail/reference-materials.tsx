@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { nanoid } from "nanoid";
 import {
@@ -27,6 +27,7 @@ import { AssetSlider } from "@/components/shared/asset-viewer";
 import { Button } from "@/components/ui/button";
 import { DetailSection } from "./shared";
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
+import { FileUploadDialog, type OnUploadFn } from "@/components/shared/file-upload";
 
 interface ReferenceFile {
   fileId: string;
@@ -52,8 +53,7 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
     null,
   );
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
-  const [isUploading, setIsUploading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
 
   // Action to get signed URLs
   const getSignedUrls = useAction(
@@ -139,17 +139,12 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
     }
   };
 
-  const handleUploadClick = () => {
-    fileInputRef.current?.click();
-  };
+  // Upload handler for FileUploadDialog — uses XHR for real progress tracking
+  const handleUpload: OnUploadFn = useCallback(
+    async (file: File, onProgress: (progress: number) => void) => {
+      if (!projectId) throw new Error("No project ID");
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file || !projectId) return;
-
-    setIsUploading(true);
-    try {
-      // 1. Generate Upload URL
+      // 1. Generate pre-signed upload URL
       const { url, storageKey } = await generateUploadUrl({
         projectId: projectId as Id<"projects">,
         fileName: file.name,
@@ -157,18 +152,27 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
         contentType: file.type,
       });
 
-      // 2. Upload to S3
-      const result = await fetch(url, {
-        method: "PUT",
-        body: file,
-        headers: {
-          "Content-Type": file.type,
-        },
-      });
+      // 2. Upload to S3 with XHR for progress tracking
+      await new Promise<void>((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open("PUT", url);
+        xhr.setRequestHeader("Content-Type", file.type);
 
-      if (!result.ok) {
-        throw new Error("Failed to upload file to storage");
-      }
+        xhr.upload.onprogress = (event) => {
+          if (event.lengthComputable) {
+            const progress = Math.round((event.loaded / event.total) * 100);
+            onProgress(progress);
+          }
+        };
+
+        xhr.onload = () => {
+          if (xhr.status >= 200 && xhr.status < 300) resolve();
+          else reject(new Error(`Upload failed: ${xhr.status}`));
+        };
+
+        xhr.onerror = () => reject(new Error("Network error"));
+        xhr.send(file);
+      });
 
       // 3. Register file in project referenceFiles
       await addReferenceFile({
@@ -179,19 +183,13 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
         fileType: file.type,
         storageKey,
       });
+    },
+    [projectId, generateUploadUrl, addReferenceFile],
+  );
 
-      toast.success("Reference file uploaded successfully");
-    } catch (error) {
-      console.error("Upload error:", error);
-      toast.error("Failed to upload reference file");
-    } finally {
-      setIsUploading(false);
-      // Reset input
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-    }
-  };
+  const handleAllUploadsComplete = useCallback(() => {
+    toast.success("All reference files uploaded successfully");
+  }, []);
 
   // Map to normalized Vault format for the shared drawer
   const vaultFiles: VaultFile[] = useMemo(() => {
@@ -215,15 +213,10 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
       variant="outline"
       size="sm"
       className="rounded-xl border-white/10 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/20 font-black uppercase tracking-widest text-[10px] h-9 px-4 gap-2"
-      onClick={handleUploadClick}
-      disabled={isUploading}
+      onClick={() => setIsUploadDialogOpen(true)}
     >
-      {isUploading ? (
-        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-      ) : (
-        <Upload className="h-3.5 w-3.5" />
-      )}
-      {isUploading ? "Uploading..." : "Upload Reference"}
+      <Upload className="h-3.5 w-3.5" />
+      Upload Reference
     </Button>
   ) : null;
 
@@ -233,12 +226,6 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
       icon={<FileText className="h-5 w-5" />}
       action={UploadButton}
     >
-      <input
-        type="file"
-        ref={fileInputRef}
-        className="hidden"
-        onChange={handleFileChange}
-      />
       
       {hasFiles ? (
         <div className="space-y-8">
@@ -396,6 +383,18 @@ export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterials
         fileName={previewFile?.name || ""}
         mimeType={previewFile?.type}
       />
+
+      {/* File Upload Dialog */}
+      {projectId && (
+        <FileUploadDialog
+          open={isUploadDialogOpen}
+          onOpenChange={setIsUploadDialogOpen}
+          onUpload={handleUpload}
+          title="Upload References"
+          subtitle="Add reference materials to this project"
+          onAllComplete={handleAllUploadsComplete}
+        />
+      )}
     </DetailSection>
   );
 }
