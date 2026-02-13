@@ -1,7 +1,8 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { useAction } from "convex/react";
+import type { Id } from "@convex/_generated/dataModel";
+import { useAction, useMutation } from "convex/react";
 import {
   ArrowRight,
   ExternalLink,
@@ -11,10 +12,13 @@ import {
   Loader2,
   Video,
   Music,
+  Upload,
 } from "lucide-react";
 import { motion } from "motion/react";
 import Image from "next/image";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
+import { toast } from "sonner";
+import { nanoid } from "nanoid";
 import {
   FilesVaultDrawer,
   type VaultFile,
@@ -35,9 +39,10 @@ interface ReferenceFile {
 
 interface ReferenceMaterialsProps {
   files?: ReferenceFile[];
+  projectId?: string;
 }
 
-export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
+export function ReferenceMaterials({ files = [], projectId }: ReferenceMaterialsProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
@@ -47,10 +52,21 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
     null,
   );
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Action to get signed URLs
   const getSignedUrls = useAction(
+    // @ts-ignore
     api.functions.storage.actions.getSignedFileUrls,
+  );
+
+  const generateUploadUrl = useAction(
+    api.functions.storage.actions.generateUploadUrl,
+  );
+  
+  const addReferenceFile = useMutation(
+    api.functions.projects.mutations.addReferenceFile,
   );
 
   // Extract storage keys
@@ -123,6 +139,60 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
     }
   };
 
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !projectId) return;
+
+    setIsUploading(true);
+    try {
+      // 1. Generate Upload URL
+      const { url, storageKey } = await generateUploadUrl({
+        projectId: projectId as Id<"projects">,
+        fileName: file.name,
+        fileSize: file.size,
+        contentType: file.type,
+      });
+
+      // 2. Upload to S3
+      const result = await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: {
+          "Content-Type": file.type,
+        },
+      });
+
+      if (!result.ok) {
+        throw new Error("Failed to upload file to storage");
+      }
+
+      // 3. Register file in project referenceFiles
+      await addReferenceFile({
+        projectId: projectId as Id<"projects">,
+        fileId: nanoid(),
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        storageKey,
+      });
+
+      toast.success("Reference file uploaded successfully");
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload reference file");
+    } finally {
+      setIsUploading(false);
+      // Reset input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   // Map to normalized Vault format for the shared drawer
   const vaultFiles: VaultFile[] = useMemo(() => {
     return files.map((f) => ({
@@ -140,11 +210,36 @@ export function ReferenceMaterials({ files = [] }: ReferenceMaterialsProps) {
   const displayFiles = files.slice(0, 5);
   const remainingCount = files.length - 5;
 
+  const UploadButton = projectId ? (
+    <Button
+      variant="outline"
+      size="sm"
+      className="rounded-xl border-white/10 hover:bg-emerald-500/10 hover:text-emerald-500 hover:border-emerald-500/20 font-black uppercase tracking-widest text-[10px] h-9 px-4 gap-2"
+      onClick={handleUploadClick}
+      disabled={isUploading}
+    >
+      {isUploading ? (
+        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+      ) : (
+        <Upload className="h-3.5 w-3.5" />
+      )}
+      {isUploading ? "Uploading..." : "Upload Reference"}
+    </Button>
+  ) : null;
+
   return (
     <DetailSection
       title="Reference Materials"
       icon={<FileText className="h-5 w-5" />}
+      action={UploadButton}
     >
+      <input
+        type="file"
+        ref={fileInputRef}
+        className="hidden"
+        onChange={handleFileChange}
+      />
+      
       {hasFiles ? (
         <div className="space-y-8">
           <div className="flex items-center justify-between">

@@ -48,6 +48,7 @@ export function Step1Identity({ compact = false }: { compact?: boolean }) {
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
 
   const categories = useQuery(
+    // @ts-ignore
     api.functions.projectCategories.queries.getActiveCategories,
   );
   const createCategory = useMutation(
