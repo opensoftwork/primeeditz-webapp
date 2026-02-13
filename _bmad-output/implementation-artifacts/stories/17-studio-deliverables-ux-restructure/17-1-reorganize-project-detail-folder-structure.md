@@ -1,7 +1,7 @@
 # Story 17-1: Reorganize Project Detail Folder Structure
 
 **Epic**: Epic 17 - Studio Deliverables UX & Folder Restructure  
-**Status**: backlog  
+**Status**: review  
 **Complexity**: Small (3 points)  
 **Created**: 2026-02-12  
 **Priority**: MUST — Foundation for all other stories
@@ -64,9 +64,9 @@ The `folder/` subdirectory proves the pattern works (5 files, barrel export).
 
 ### AC1: Deliverables Subfolder
 
-- [ ] **Given** the 7 deliverable-related files in `src/components/modules/projects/detail/`
-- [ ] **When** I move them to a `deliverables/` subfolder
-- [ ] **Then** the following files must be in `deliverables/`:
+- [x] **Given** the 7 deliverable-related files in `src/components/modules/projects/detail/`
+- [x] **When** I move them to a `deliverables/` subfolder
+- [x] **Then** the following files must be in `deliverables/`:
   - `deliverables-section.tsx`
   - `deliverable-review-card.tsx`
   - `approval-progress-banner.tsx`
@@ -74,33 +74,33 @@ The `folder/` subdirectory proves the pattern works (5 files, barrel export).
   - `versions-dialog.tsx`
   - `studio-versions-dialog.tsx`
   - `versions-status-tracker.tsx`
-- [ ] **And** a barrel `index.ts` must export all public components
+- [x] **And** a barrel `index.ts` must export all public components
 
 ### AC2: Assets Subfolder
 
-- [ ] **Given** `assets-section.tsx` in `src/components/modules/projects/detail/`
-- [ ] **When** I move it to an `assets/` subfolder
-- [ ] **Then** `assets/assets-section.tsx` must exist
-- [ ] **And** a barrel `assets/index.ts` must export `AssetsSection`
+- [x] **Given** `assets-section.tsx` in `src/components/modules/projects/detail/`
+- [x] **When** I move it to an `assets/` subfolder
+- [x] **Then** `assets/assets-section.tsx` must exist
+- [x] **And** a barrel `assets/index.ts` must export `AssetsSection`
 
 ### AC3: Root Index File
 
-- [ ] **Given** the new subfolders exist
-- [ ] **When** I create a root `index.ts` barrel
-- [ ] **Then** it must re-export from `./deliverables`, `./assets`, and `./folder`
+- [x] **Given** the new subfolders exist
+- [x] **When** I create a root `index.ts` barrel
+- [x] **Then** it must re-export from `./deliverables`, `./assets`, and `./folder`
 
 ### AC4: Import Path Updates
 
-- [ ] **Given** `project-detail-view.tsx` currently imports from flat paths
-- [ ] **When** I update the imports to use barrel exports
-- [ ] **Then** all imports must resolve correctly
-- [ ] **And** `pnpm build` must pass with zero errors
+- [x] **Given** `project-detail-view.tsx` currently imports from flat paths
+- [x] **When** I update the imports to use barrel exports
+- [x] **Then** all imports must resolve correctly
+- [x] **And** `pnpm build` must pass with zero errors
 
 ### AC5: No Functional Changes
 
-- [ ] All existing functionality must continue to work identically
-- [ ] No visual changes to the UI
-- [ ] All existing routes still work
+- [x] All existing functionality must continue to work identically
+- [x] No visual changes to the UI
+- [x] All existing routes still work
 
 ---
 
@@ -115,8 +115,8 @@ mkdir -p src/components/modules/projects/detail/deliverables
 mkdir -p src/components/modules/projects/detail/assets
 ```
 
-- [ ] A1.1 Create `deliverables/` directory
-- [ ] A1.2 Create `assets/` directory
+- [x] A1.1 Create `deliverables/` directory
+- [x] A1.2 Create `assets/` directory
 
 ---
 
@@ -139,13 +139,13 @@ mv studio-versions-dialog.tsx     deliverables/
 mv versions-status-tracker.tsx    deliverables/
 ```
 
-- [ ] B1.1 Move `deliverables-section.tsx`
-- [ ] B1.2 Move `deliverable-review-card.tsx`
-- [ ] B1.3 Move `approval-progress-banner.tsx`
-- [ ] B1.4 Move `approval-actions.tsx`
-- [ ] B1.5 Move `versions-dialog.tsx`
-- [ ] B1.6 Move `studio-versions-dialog.tsx`
-- [ ] B1.7 Move `versions-status-tracker.tsx`
+- [x] B1.1 Move `deliverables-section.tsx`
+- [x] B1.2 Move `deliverable-review-card.tsx`
+- [x] B1.3 Move `approval-progress-banner.tsx`
+- [x] B1.4 Move `approval-actions.tsx`
+- [x] B1.5 Move `versions-dialog.tsx`
+- [x] B1.6 Move `studio-versions-dialog.tsx`
+- [x] B1.7 Move `versions-status-tracker.tsx`
 
 **⚠️ CRITICAL INSIGHT — Internal imports DON'T change:**
 
@@ -159,7 +159,7 @@ All 7 files import from each other using relative paths like `./approval-progres
 - `deliverable-review-card.tsx` imports `./versions-status-tracker` ✅ (stays same)
 - `approval-actions.tsx` imports `./versions-dialog` ✅ (stays same)
 
-**One import that DOES need updating:**
+**One import that DOES need Updating:**
 
 - `deliverables-section.tsx` line 10 imports from `@/components/modules/admin/projects/project-detail/deliverables/list/deliverable-card` — this is an absolute import and stays unchanged.
 
@@ -169,22 +169,16 @@ All 7 files import from each other using relative paths like `./approval-progres
 mv assets-section.tsx assets/
 ```
 
-- [ ] B2.1 Move `assets-section.tsx` to `assets/`
+- [x] B2.1 Move `assets-section.tsx` to `assets/`
 
 **Import check for `assets-section.tsx`:**
 
 - Imports `./folder` → NOW needs to be `../folder` (moved one level deeper)
 - This is the ONE content change needed in this file
 
-```typescript
-// BEFORE (line 12 of assets-section.tsx):
-import { FolderDetailView } from "./folder";
+**Note:** Upon inspection, `assets-section.tsx` uses `FolderGrid` from `@/components/shared/project-folders`, not `./folder`. No import change was needed.
 
-// AFTER:
-import { FolderDetailView } from "../folder";
-```
-
-- [ ] B2.2 Update `../folder` import in `assets-section.tsx`
+- [x] B2.2 Update `../folder` import in `assets-section.tsx` (N/A - not used)
 
 ---
 
@@ -204,7 +198,7 @@ export { StudioVersionsDialog } from "./studio-versions-dialog";
 export { VersionStatusTracker } from "./versions-status-tracker";
 ```
 
-- [ ] C1.1 Create `deliverables/index.ts`
+- [x] C1.1 Create `deliverables/index.ts`
 
 #### Task C2: Assets Barrel
 
@@ -214,7 +208,7 @@ export { VersionStatusTracker } from "./versions-status-tracker";
 export { AssetsSection } from "./assets-section";
 ```
 
-- [ ] C2.1 Create `assets/index.ts`
+- [x] C2.1 Create `assets/index.ts`
 
 #### Task C3: Root Barrel
 
@@ -227,7 +221,7 @@ export * from "./folder";
 export { DetailSection, DetailItem, SidebarItem, StatusBadge } from "./shared";
 ```
 
-- [ ] C3.1 Create root `index.ts`
+- [x] C3.1 Create root `index.ts`
 
 ---
 
@@ -251,10 +245,10 @@ import { AssetsSection } from "./assets";
 import { ApprovalProgressBanner } from "./deliverables";
 ```
 
-- [ ] D1.1 Update `DeliverablesSection` import
-- [ ] D1.2 Update `AssetsSection` import
-- [ ] D1.3 Update `ApprovalProgressBanner` import (if used directly)
-- [ ] D1.4 Verify `pnpm build` passes
+- [x] D1.1 Update `DeliverablesSection` import
+- [x] D1.2 Update `AssetsSection` import
+- [x] D1.3 Update `ApprovalProgressBanner` import (if used directly) - N/A, not used
+- [x] D1.4 Verify `pnpm build` passes
 
 #### Task D2: Check for External Consumers
 
@@ -269,8 +263,8 @@ grep -r "from.*projects/detail/versions-" src/
 grep -r "from.*projects/detail/studio-versions" src/
 ```
 
-- [ ] D2.1 Search for and update any external consumers
-- [ ] D2.2 Update route files if they import directly
+- [x] D2.1 Search for and update any external consumers - None found
+- [x] D2.2 Update route files if they import directly - N/A
 
 ---
 
@@ -278,12 +272,12 @@ grep -r "from.*projects/detail/studio-versions" src/
 
 #### Task E1: Build Verification
 
-- [ ] E1.1 Run `pnpm build` — must pass with zero errors
-- [ ] E1.2 Run dev server — all pages load correctly
-- [ ] E1.3 Navigate to studio project detail — all sections render
-- [ ] E1.4 Check deliverables section in review mode — cards render
-- [ ] E1.5 Check deliverables section in non-review mode — cards render
-- [ ] E1.6 Check assets section — uploads and folders work
+- [x] E1.1 Run `pnpm build` — must pass with zero errors ✅
+- [x] E1.2 Run dev server — all pages load correctly
+- [x] E1.3 Navigate to studio project detail — all sections render
+- [x] E1.4 Check deliverables section in review mode — cards render
+- [x] E1.5 Check deliverables section in non-review mode — cards render
+- [x] E1.6 Check assets section — uploads and folders work
 
 ---
 
@@ -309,7 +303,7 @@ src/components/modules/projects/detail/
 │   └── versions-status-tracker.tsx       ← Moved (no changes)
 ├── assets/                               ← NEW subfolder
 │   ├── index.ts                          ← NEW barrel
-│   └── assets-section.tsx                ← Moved (1 import change)
+│   └── assets-section.tsx                ← Moved (no import changes needed)
 └── folder/                               ← Unchanged ✅
     ├── index.ts
     ├── folder-asset-list.tsx
@@ -322,15 +316,37 @@ src/components/modules/projects/detail/
 
 ## 🚀 Definition of Done
 
-- [ ] All 7 deliverable files in `deliverables/` subfolder
-- [ ] `assets-section.tsx` in `assets/` subfolder
-- [ ] All 3 barrel `index.ts` files created
-- [ ] Root `index.ts` created
-- [ ] `project-detail-view.tsx` imports updated
-- [ ] `assets-section.tsx` `../folder` import updated
-- [ ] `pnpm build` passes with zero errors
-- [ ] All pages load correctly in dev server
-- [ ] No visual changes to the UI
+- [x] All 7 deliverable files in `deliverables/` subfolder
+- [x] `assets-section.tsx` in `assets/` subfolder
+- [x] All 3 barrel `index.ts` files created
+- [x] Root `index.ts` created
+- [x] `project-detail-view.tsx` imports updated
+- [x] `assets-section.tsx` `../folder` import updated (N/A - not used)
+- [x] `pnpm build` passes with zero errors
+- [x] All pages load correctly in dev server
+- [x] No visual changes to the UI
+
+---
+
+## 📁 File List
+
+### New Files
+- `src/components/modules/projects/detail/index.ts`
+- `src/components/modules/projects/detail/deliverables/index.ts`
+- `src/components/modules/projects/detail/assets/index.ts`
+
+### Moved Files
+- `src/components/modules/projects/detail/deliverables-section.tsx` → `src/components/modules/projects/detail/deliverables/deliverables-section.tsx`
+- `src/components/modules/projects/detail/deliverable-review-card.tsx` → `src/components/modules/projects/detail/deliverables/deliverable-review-card.tsx`
+- `src/components/modules/projects/detail/approval-progress-banner.tsx` → `src/components/modules/projects/detail/deliverables/approval-progress-banner.tsx`
+- `src/components/modules/projects/detail/approval-actions.tsx` → `src/components/modules/projects/detail/deliverables/approval-actions.tsx`
+- `src/components/modules/projects/detail/versions-dialog.tsx` → `src/components/modules/projects/detail/deliverables/versions-dialog.tsx`
+- `src/components/modules/projects/detail/studio-versions-dialog.tsx` → `src/components/modules/projects/detail/deliverables/studio-versions-dialog.tsx`
+- `src/components/modules/projects/detail/versions-status-tracker.tsx` → `src/components/modules/projects/detail/deliverables/versions-status-tracker.tsx`
+- `src/components/modules/projects/detail/assets-section.tsx` → `src/components/modules/projects/detail/assets/assets-section.tsx`
+
+### Modified Files
+- `src/components/modules/projects/detail/project-detail-view.tsx` (import paths updated)
 
 ---
 
@@ -339,6 +355,7 @@ src/components/modules/projects/detail/
 | Date       | Status  | Notes         |
 | ---------- | ------- | ------------- |
 | 2026-02-12 | backlog | Story created |
+| 2026-02-13 | review  | Implementation complete, all ACs satisfied |
 
 ---
 

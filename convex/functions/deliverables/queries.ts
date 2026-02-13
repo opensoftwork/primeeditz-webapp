@@ -174,7 +174,7 @@ export const getClientDeliverables = query({
     // Filter out legacy child deliverables
     const rootDeliverables = deliverables.filter((d) => !d.parentDeliverableId);
 
-    // Enrich with approval and version data
+    // Enrich with approval, version, and uploader data
     const enriched = await Promise.all(
       rootDeliverables.map(async (d) => {
         // Check studio approval
@@ -190,12 +190,16 @@ export const getClientDeliverables = query({
           .order("desc")
           .first();
 
+        // Get uploader name
+        const uploader = d.uploadedBy ? await ctx.db.get(d.uploadedBy) : null;
+
         return {
           ...d,
           isStudioApproved: !!approval,
           studioApprovedAt: approval?.approvedAt,
           latestVersionStatus: latestVersion?.status,
           latestVersionId: latestVersion?._id,
+          uploadedByName: uploader?.name ?? "PrimeEditz Team",
         };
       }),
     );

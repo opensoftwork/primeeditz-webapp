@@ -1,7 +1,7 @@
 "use client";
 
 import { use } from "react";
-import { DeliverableDetailView } from "@/components/modules/admin/projects/project-detail/deliverables/detail/deliverable-detail-view";
+import { StudioDeliverableDetailView } from "@/components/modules/projects/detail/deliverables";
 
 interface DeliverablePageProps {
   params: Promise<{
@@ -16,7 +16,7 @@ export default function StudioDeliverablePage({
   const { projectId, deliverableId } = use(params);
 
   return (
-    <DeliverableDetailView
+    <StudioDeliverableDetailView
       projectId={projectId}
       deliverableId={deliverableId}
     />

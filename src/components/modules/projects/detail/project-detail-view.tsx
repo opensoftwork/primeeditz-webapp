@@ -17,14 +17,14 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import { AssetsSection } from "./assets-section";
+import { AssetsSection } from "./assets";
 // Modular Components
 import { ProjectHeader } from "./header";
 import { ReferenceMaterials } from "./reference-materials";
 import { DetailSidebar } from "./sidebar";
 import { ProjectSpecifications } from "./specifications";
 import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
-import { DeliverablesSection } from "./deliverables-section";
+import { DeliverablesSection } from "./deliverables";
 
 interface ProjectDetailViewProps {
   projectId: string;
