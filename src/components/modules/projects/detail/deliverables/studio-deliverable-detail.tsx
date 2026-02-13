@@ -4,6 +4,7 @@ import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useQuery, useAction, useMutation } from "convex/react";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
   FileIcon,
@@ -27,7 +28,6 @@ import { VersionHistory } from "@/components/modules/admin/projects/project-deta
 import type { DeliverableVersion } from "@/components/modules/admin/projects/project-detail/deliverables/detail/types";
 import Link from "next/link";
 import { toast } from "sonner";
-import { StudioVersionsDialog } from "./studio-versions-dialog";
 
 interface StudioDeliverableDetailViewProps {
   projectId: string;
@@ -39,6 +39,7 @@ export function StudioDeliverableDetailView({
   deliverableId,
 }: StudioDeliverableDetailViewProps) {
   const { setOverride, removeOverride } = useBreadcrumbStore();
+  const router = useRouter();
 
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [viewedVersion, setViewedVersion] = useState<{
@@ -47,7 +48,6 @@ export function StudioDeliverableDetailView({
     mimeType?: string;
     description?: string;
   } | null>(null);
-  const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [isApproving, setIsApproving] = useState(false);
 
   // Queries
@@ -352,7 +352,11 @@ export function StudioDeliverableDetailView({
                   </Button>
                   <Button
                     variant="outline"
-                    onClick={() => setShowVersionDialog(true)}
+                    onClick={() =>
+                      router.push(
+                        `/projects/${projectId}/deliverables/${deliverableId}/versions/new`,
+                      )
+                    }
                     disabled={isApproving || isPendingVersion}
                     className="h-12 rounded-2xl border-white/10 hover:bg-white/5 text-white/80 font-black uppercase tracking-widest text-[10px] transition-all"
                   >
@@ -379,14 +383,6 @@ export function StudioDeliverableDetailView({
           )}
         </div>
       </div>
-
-      <StudioVersionsDialog
-        open={showVersionDialog}
-        onOpenChange={setShowVersionDialog}
-        deliverableId={deliverableId as Id<"deliverables">}
-        deliverableName={deliverable.name}
-        projectId={projectId as Id<"projects">}
-      />
     </motion.div>
   );
 }

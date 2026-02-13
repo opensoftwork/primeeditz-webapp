@@ -9,7 +9,6 @@ import { CheckCircle, RotateCcw, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { FilePreview } from "@/components/shared/file-preview";
-import { StudioVersionsDialog } from "./studio-versions-dialog";
 import { VersionStatusTracker } from "./versions-status-tracker";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -39,7 +38,6 @@ export function DeliverableReviewCard({
   onStatusChange,
 }: DeliverableReviewCardProps) {
   const router = useRouter();
-  const [showVersionDialog, setShowVersionDialog] = useState(false);
   const [loading, setLoading] = useState(false);
 
   const studioApprove = useMutation(
@@ -183,7 +181,9 @@ export function DeliverableReviewCard({
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowVersionDialog(true);
+                router.push(
+                  `/projects/${projectId}/deliverables/${deliverable._id}/versions/new`,
+                );
               }}
             >
               <RotateCcw className="h-3.5 w-3.5 mr-2" />
@@ -192,16 +192,6 @@ export function DeliverableReviewCard({
           </>
         )}
       </div>
-
-      {/* Version Dialog */}
-      <StudioVersionsDialog
-        open={showVersionDialog}
-        onOpenChange={setShowVersionDialog}
-        deliverableId={deliverable._id}
-        deliverableName={deliverable.name}
-        projectId={projectId}
-        onSuccess={onStatusChange}
-      />
     </div>
   );
 }
