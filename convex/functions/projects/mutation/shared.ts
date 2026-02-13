@@ -506,3 +506,55 @@ export const completeOnboarding = authenticatedMutation({
     throw new ConvexError("Project is not in onboarding phase");
   },
 });
+
+/**
+ * Add a reference file to an existing project.
+ * Allows studio users to upload additional assets.
+ */
+export const addReferenceFile = authenticatedMutation({
+  args: {
+    projectId: v.id("projects"),
+    fileId: v.string(),
+    fileName: v.string(),
+    fileSize: v.number(),
+    fileType: v.string(),
+    storageKey: v.string(),
+  },
+  handler: async (ctx, args) => {
+    // Get profile
+    const profile = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", ctx.authUser._id))
+      .first();
+
+    if (!profile) throw new ConvexError("Profile not found");
+
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new ConvexError("Project not found");
+
+    // Verify ownership/permissions
+    if (profile.role !== "admin" && profile.role !== "employee") {
+      if (project.studioId !== profile._id)
+        throw new ConvexError("Access denied");
+    }
+
+    // Add file to referenceFiles array
+    const newFile = {
+      fileId: args.fileId,
+      fileName: args.fileName,
+      fileSize: args.fileSize,
+      fileType: args.fileType,
+      storageKey: args.storageKey,
+    };
+
+    const currentFiles = project.referenceFiles || [];
+    
+    await ctx.db.patch(args.projectId, {
+      referenceFiles: [...currentFiles, newFile],
+      storageUsed: (project.storageUsed || 0) + args.fileSize,
+      updatedAt: now(),
+    });
+
+    return { success: true };
+  },
+});

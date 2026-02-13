@@ -118,7 +118,7 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           className="lg:col-span-8 space-y-12"
         >
           <ProjectSpecifications project={project} fields={fields} />
-          <ReferenceMaterials files={project.referenceFiles} />
+          <ReferenceMaterials files={project.referenceFiles} projectId={projectId} />
 
           {project.phase !== "setup" && (
             <DeliverablesSection

@@ -1,28 +1,18 @@
 "use client";
 
-import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
-import { useQuery } from "convex/react";
 import {
   Save,
   Loader2,
-  Layout,
-  FolderTree,
-  Info,
-  ChevronRight,
-  Sparkles,
   ChevronLeft,
 } from "lucide-react";
-import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import {
   ProjectTypeWizardProvider,
   useProjectTypeWizard,
 } from "../wizard/wizard-context";
 import { Step1Identity } from "../wizard/steps/step-1-identity";
-import { Step2Folders } from "../wizard/steps/step-2-folders";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 interface ProjectTypeEditorProps {
@@ -111,53 +101,14 @@ function EditorContent({
       <main className="flex-1 p-6 lg:p-10 pb-24 overflow-y-auto bg-white/2">
         <div className="flex flex-col gap-8">
           {/* Identity Section - Now the primary focus of this editor */}
-          <section className="bg-zinc-950/40 rounded-4xl overflow-hidden group hover:bg-white/5 transition-all glass-subtle shadow-2xl">
-            <div className="p-8 bg-white/3 flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center border border-primary/20 shadow-xl shadow-primary/5 group-hover:scale-105 transition-transform">
-                  <Layout className="h-6 w-6 text-primary" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-black uppercase tracking-tight text-white">
-                    Engine Identity
-                  </h2>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-primary/40 leading-none mt-1">
-                    System classification & metadata
-                  </p>
-                </div>
-              </div>
-            </div>
-            <div className="p-10">
-              <Step1Identity compact={true} />
-            </div>
-          </section>
+          {/* Identity Section - Content only */}
+          <div className="mt-4">
+            <Step1Identity compact={true} />
+          </div>
         </div>
       </main>
 
-      {/* Global CSS to clean up nested components */}
-      <style
-        key="editor-styles"
-        dangerouslySetInnerHTML={{
-          __html: `
-        /* Hide step numbers and redundant headers */
-        .identity-step-indicator,
-        .folder-step-indicator,
-        .shrink-0.flex.items-center.gap-4.pb-4,
-        header.shrink-0.flex.items-center.gap-4.pb-4 {
-          display: none !important;
-        }
 
-        /* Compact form elements */
-        form.flex-1.flex.flex-col.gap-6 { gap: 1rem !important; }
-        .grid.grid-cols-1.md\\:grid-cols-2.gap-6 { gap: 1rem !important; }
-        .space-y-3 { space-y: 0.5rem !important; }
-        
-        /* Compact FolderTree */
-        .space-y-8 { space-y: 1.5rem !important; }
-        .flex.flex-col.gap-4.border-b.pb-6 { pb: 1rem !important; mb: 1rem !important; }
-      `,
-        }}
-      />
     </div>
   );
 }
