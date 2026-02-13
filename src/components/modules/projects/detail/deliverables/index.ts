@@ -6,3 +6,4 @@ export { ClientVersionDialog } from "./versions-dialog";
 export { StudioVersionsDialog } from "./studio-versions-dialog";
 export { VersionStatusTracker } from "./versions-status-tracker";
 export { StudioDeliverableDetailView } from "./studio-deliverable-detail";
+export { StudioDeliverablesList } from "./studio-deliverables-list";

@@ -3,8 +3,9 @@
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useQuery, useAction } from "convex/react";
-import { ShieldCheck, Info } from "lucide-react";
+import { ShieldCheck, Info, ArrowRight } from "lucide-react";
 import { motion } from "motion/react";
+import Link from "next/link";
 import { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { DeliverableCard } from "@/components/modules/admin/projects/project-detail/deliverables/list/deliverable-card";
@@ -28,6 +29,7 @@ export function DeliverablesSection({
   const [loadingUrls, setLoadingUrls] = useState(false);
 
   const deliverables = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getClientDeliverables,
     { projectId: projectId as Id<"projects"> },
   );
@@ -109,7 +111,10 @@ export function DeliverablesSection({
   // Empty state
   if (deliverables.length === 0) {
     return (
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+      >
         <DetailSection
           title="Final Deliverables"
           icon={<ShieldCheck className="h-5 w-5" />}
@@ -184,6 +189,13 @@ export function DeliverablesSection({
             >
               {statusBadge.label}
             </span>
+            <Link
+              href={`/projects/${projectId}/deliverables`}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-widest text-primary/80 bg-primary/5 border border-primary/10 hover:bg-primary/10 hover:border-primary/20 hover:text-primary transition-all"
+            >
+              View All
+              <ArrowRight className="h-3 w-3" />
+            </Link>
           </div>
         }
       >

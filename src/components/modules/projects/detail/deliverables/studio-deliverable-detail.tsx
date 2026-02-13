@@ -85,7 +85,12 @@ export function StudioDeliverableDetailView({
       }
     }
     fetchUrl();
-  }, [deliverable?.minioKey, viewedVersion?.minioKey, getSignedUrlAction, fileUrl]);
+  }, [
+    deliverable?.minioKey,
+    viewedVersion?.minioKey,
+    getSignedUrlAction,
+    fileUrl,
+  ]);
 
   // Handle version selection
   const handleVersionSelect = (version: DeliverableVersion) => {
@@ -111,9 +116,9 @@ export function StudioDeliverableDetailView({
           Deliverable not found
         </p>
         <Button variant="outline" className="rounded-xl" asChild>
-          <Link href={`/projects/${projectId}`}>
+          <Link href={`/projects/${projectId}/deliverables`}>
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Project
+            Back to Deliverables
           </Link>
         </Button>
       </div>
@@ -124,7 +129,8 @@ export function StudioDeliverableDetailView({
   const hasMultipleVersions = versions && versions.length > 1;
   const currentVersionNumber = viewedVersion?.version || deliverable.version;
   const currentMimeType = viewedVersion?.mimeType || deliverable.mimeType;
-  const currentDescription = viewedVersion?.description || deliverable.description;
+  const currentDescription =
+    viewedVersion?.description || deliverable.description;
 
   return (
     <motion.div
@@ -140,7 +146,7 @@ export function StudioDeliverableDetailView({
           asChild
           className="h-9 w-9 rounded-lg bg-white/5 hover:bg-white/10 text-white/40 border-white/10 shrink-0"
         >
-          <Link href={`/projects/${projectId}`}>
+          <Link href={`/projects/${projectId}/deliverables`}>
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
