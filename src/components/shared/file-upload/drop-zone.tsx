@@ -1,6 +1,7 @@
 "use client";
 
 import { Upload } from "lucide-react";
+import { motion } from "motion/react";
 import { useCallback, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -19,6 +20,8 @@ export interface DropZoneProps {
   multiple?: boolean;
   /** Additional className for the container */
   className?: string;
+  /** Compact mode — smaller padding for embedded use */
+  compact?: boolean;
 }
 
 export function DropZone({
@@ -29,6 +32,7 @@ export function DropZone({
   description = "Supports all major file formats",
   multiple = true,
   className,
+  compact = false,
 }: DropZoneProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
@@ -43,7 +47,7 @@ export function DropZone({
     const files = e.target.files;
     if (files && files.length > 0) {
       onFilesSelected(Array.from(files));
-      e.target.value = ""; // Reset input
+      e.target.value = "";
     }
   };
 
@@ -63,9 +67,7 @@ export function DropZone({
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
-    if (!disabled) {
-      setIsDragOver(true);
-    }
+    if (!disabled) setIsDragOver(true);
   };
 
   const handleDragLeave = (e: React.DragEvent) => {
@@ -85,16 +87,16 @@ export function DropZone({
         disabled={disabled}
       />
 
-      <div
+      <motion.div
         role="button"
         tabIndex={disabled ? -1 : 0}
         className={cn(
-          "relative rounded-2xl border-2 border-dashed transition-all duration-300 cursor-pointer group overflow-hidden",
+          "relative rounded-2xl border-2 border-dashed transition-all duration-500 cursor-pointer group overflow-hidden",
           disabled
             ? "border-white/5 opacity-50 cursor-not-allowed"
             : isDragOver
-              ? "border-primary/50 bg-primary/10 scale-[1.01]"
-              : "border-white/10 hover:border-primary/30 hover:bg-white/2",
+              ? "border-primary/50 bg-primary/5"
+              : "border-white/10 hover:border-white/20",
           className,
         )}
         onClick={handleClick}
@@ -107,38 +109,59 @@ export function DropZone({
             handleClick();
           }
         }}
+        animate={isDragOver ? { scale: 1.01 } : { scale: 1 }}
+        transition={{ type: "spring", stiffness: 300, damping: 25 }}
       >
-        {/* Subtle glow effect on drag over */}
+        {/* Animated glow */}
         {isDragOver && (
-          <div className="absolute inset-0 bg-primary/5 blur-xl pointer-events-none" />
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/5 to-transparent pointer-events-none"
+          />
         )}
 
-        <div className="relative z-10 p-10 text-center flex flex-col items-center gap-4">
-          <div
+        <div
+          className={cn(
+            "relative z-10 text-center flex flex-col items-center gap-3",
+            compact ? "py-6 px-4" : "py-10 px-6",
+          )}
+        >
+          <motion.div
             className={cn(
-              "h-16 w-16 rounded-2xl bg-primary/10 flex items-center justify-center transition-all duration-300",
-              !disabled && "group-hover:scale-110 group-hover:bg-primary/15",
-              isDragOver && "scale-110 bg-primary/20",
+              "rounded-2xl bg-white/5 flex items-center justify-center transition-colors duration-300",
+              compact ? "h-12 w-12" : "h-14 w-14",
+              !disabled && "group-hover:bg-primary/10",
+              isDragOver && "bg-primary/15",
             )}
+            animate={isDragOver ? { y: -4 } : { y: 0 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
             <Upload
               className={cn(
-                "h-7 w-7 text-primary/60 transition-colors duration-300",
-                !disabled && "group-hover:text-primary",
-                isDragOver && "text-primary",
+                "transition-colors duration-300",
+                compact ? "h-5 w-5" : "h-6 w-6",
+                isDragOver
+                  ? "text-primary"
+                  : "text-white/25 group-hover:text-white/50",
               )}
             />
-          </div>
-          <div className="space-y-1.5">
-            <p className="text-sm font-black uppercase tracking-tight text-white">
+          </motion.div>
+          <div className="space-y-1">
+            <p
+              className={cn(
+                "font-black uppercase tracking-tight text-white/80",
+                compact ? "text-xs" : "text-sm",
+              )}
+            >
               {title}
             </p>
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
+            <p className="text-[9px] font-bold uppercase tracking-[0.2em] text-white/25">
               {description}
             </p>
           </div>
         </div>
-      </div>
+      </motion.div>
     </>
   );
 }

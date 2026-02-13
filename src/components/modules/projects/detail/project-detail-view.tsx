@@ -120,7 +120,12 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           <ProjectSpecifications project={project} fields={fields} />
           <ReferenceMaterials files={project.referenceFiles} projectId={projectId} />
 
-          {project.phase !== "setup" && (
+          {/* Only show Final Deliverables once admin has sent them for review */}
+          {(project.actionState === "awaiting_review" ||
+            project.actionState === "review_approved" ||
+            project.actionState === "versions_requested" ||
+            project.phase === "delivery" ||
+            project.phase === "completed") && (
             <DeliverablesSection
               projectId={projectId}
               actionState={project.actionState}
