@@ -772,4 +772,55 @@ export default defineSchema({
   })
     .index("by_deliverableId", ["deliverableId"])
     .index("by_projectId", ["projectId"]),
+
+  // --------------------------------------------------------------------------
+  // Public Form Submissions (Contact, Feedback, Surveys)
+  // --------------------------------------------------------------------------
+
+  /** Contact form submissions from the public website */
+  contacts: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phoneno: v.string(),
+    service: v.string(),
+    message: v.string(),
+  }),
+
+  /** Feedback submissions from the public website */
+  feedbacks: defineTable({
+    name: v.string(),
+    email: v.string(),
+    rating: v.number(),
+    feedback: v.string(),
+  }),
+
+  /** Survey submissions from the public website */
+  surveys: defineTable({
+    // Contact details (required)
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    channelName: v.optional(v.string()),
+    instagramHandle: v.optional(v.string()),
+    bestTimeToContact: v.optional(v.string()),
+    preferredContactMethod: v.optional(v.string()),
+    mayContact: v.optional(v.string()),
+
+    // Section A: Basic Information
+    q1_role: v.optional(v.string()),
+    q1_roleOther: v.optional(v.string()),
+    q2_frequency: v.optional(v.string()),
+    q3_contentTypes: v.optional(v.array(v.string())),
+    q3_contentTypesOther: v.optional(v.string()),
+    q4_monthlyVolume: v.optional(v.string()),
+
+    // Section B: Current Workflow Pain Points
+    q5_currentEditing: v.optional(v.string()),
+    q6_frustrations: v.optional(v.any()), // Ranking object
+    q7_editingChallenges: v.optional(v.array(v.string())),
+    q7_editingChallengesOther: v.optional(v.string()),
+    q8_turnaroundTime: v.optional(v.string()),
+    q9_turnaroundSatisfaction: v.optional(v.string()),
+    q10_revisionRounds: v.optional(v.string()),
+  }),
 });

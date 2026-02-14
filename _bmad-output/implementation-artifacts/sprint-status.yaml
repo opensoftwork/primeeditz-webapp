@@ -370,3 +370,10 @@ development_status:
   16-3-employee-revision-workspace: review
   16-4-revision-history-timeline: review
   16-5-studio-per-deliverable-review: review
+
+  # ============================================================================
+  # EPIC 20: Public Form Submissions
+  # ============================================================================
+  epic-20: in-progress
+  20-1-backend-mutations-queries-http: in-progress
+  20-2-frontend-admin-dashboard: ready-for-dev

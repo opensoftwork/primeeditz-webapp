@@ -39,7 +39,10 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 - **[Epic 14: Project Type + Folder Template Integration](./14-project-type-folder-template-integration.md)**
 - [Epic 15: Quotation Review Notification System](./15-quotation-review-notifications.md)
 - **[Epic 16: Deliverable Revision Workflow](./16-deliverable-revision-workflow.md)**
-- **[Epic 17: Studio Deliverables UX & Folder Restructure](./17-studio-deliverables-ux-restructure.md)** ⬅️ NEW
+- **[Epic 17: Studio Deliverables UX & Folder Restructure](./17-studio-deliverables-ux-restructure.md)**
+- [Epic 18: Dual-Track Versioning System](./18-dual-track-versioning.md)
+- [Epic 19: File Upload UX Refactor](./19-file-upload-ux-refactor.md)
+- **[Epic 20: Public Form Submissions (Contacts, Feedbacks & Surveys)](./20-public-form-submissions.md)** ⬅️ NEW
 
 ---
 
@@ -345,8 +348,11 @@ The following features are documented in user flows but deferred to Phase 2:
 | **6**  | 6.1 - 6.4             | Deliverable Upload (Admin/Employee), QC Review, Client Approve/Revise             |
 | **7**  | 7.1 - 7.5             | Enhanced Dashboards, Real-time Updates, History, Download Deliverables            |
 | **17** | 17.1 - 17.5           | Folder Restructure, Data Fixes, Studio Detail View, Card Navigation, Polish       |
+| **18** | 18.1 - 18.3           | Dual-Track Schema, Admin Badge UI, Studio Version Filter                          |
+| **19** | 19.1 - 19.3           | Shared Upload Components, Reference Materials Integration, Folder Refactor        |
+| **20** | 20.1 - 20.2           | Backend CRUD + HTTP Endpoints, Admin Dashboard List & Detail Views                |
 
-**Total Stories:** 54 (after Epic 17 addition)
+**Total Stories:** 62 (after Epics 18, 19, 20 addition)
 
 ---
 
