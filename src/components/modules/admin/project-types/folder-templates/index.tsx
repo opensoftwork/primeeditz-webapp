@@ -3,8 +3,9 @@
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { toast } from "sonner";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -35,6 +36,7 @@ export function FolderTemplatesList({
   const router = useRouter();
 
   // Queries
+  //@ts-ignore
   const projectType = useQuery(api.functions.projectTypes.queries.getById, {
     id: projectTypeId,
   });
@@ -42,6 +44,17 @@ export function FolderTemplatesList({
     api.functions.folderTemplates.queries.listAllByProjectType,
     { projectTypeId },
   );
+
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    if (projectType?.name) {
+      setOverride(projectTypeId, projectType.name);
+    }
+    return () => {
+      removeOverride(projectTypeId);
+    };
+  }, [projectType?.name, projectTypeId, setOverride, removeOverride]);
 
   // Mutations
   const deleteMutation = useMutation(

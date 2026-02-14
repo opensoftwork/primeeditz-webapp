@@ -21,6 +21,11 @@ import {
   EditorTermsSection,
   EditorValiditySection,
 } from "./components";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 
 export function EditQuotation({ quotationId }: { quotationId: string }) {
   return (
@@ -32,6 +37,21 @@ export function EditQuotation({ quotationId }: { quotationId: string }) {
 
 function QuotationEditorContent({ quotationId }: { quotationId: string }) {
   const router = useRouter();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  const quotation = useQuery(
+    //@ts-ignore
+    api.functions.quotations.queries.getQuotation,
+    { quotationId: quotationId as Id<"quotations"> },
+  );
+
+  useEffect(() => {
+    if (quotation?.code) {
+      setOverride(quotationId, quotation.code);
+    }
+    return () => removeOverride(quotationId);
+  }, [quotationId, quotation?.code, setOverride, removeOverride]);
+
   const {
     saveQuotation,
     isLoading,
@@ -128,7 +148,7 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
             <EditorValiditySection />
 
             {/* Editor Mode Warning */}
-            <div className="p-6 rounded-[2rem] bg-amber-500/5 border border-amber-500/10 space-y-3">
+            <div className="p-6 rounded-4xl bg-amber-500/5 border border-amber-500/10 space-y-3">
               <h4 className="text-[10px] font-black uppercase tracking-widest text-amber-500/60">
                 Editor Mode
               </h4>

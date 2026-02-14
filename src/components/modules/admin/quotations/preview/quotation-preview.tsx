@@ -31,6 +31,7 @@ interface QuotationPreviewProps {
   companyInfo?: CompanyInfo;
   studioName?: string;
   projectName?: string;
+  autoDownload?: boolean;
 }
 
 // ============================================================================
@@ -45,6 +46,7 @@ export function QuotationPreview({
   companyInfo,
   studioName,
   projectName,
+  autoDownload = false,
 }: QuotationPreviewProps) {
   const documentRef = useRef<HTMLDivElement>(null);
 
@@ -95,6 +97,7 @@ export function QuotationPreview({
               projectName={projectName}
               variant="outline"
               size="sm"
+              autoTrigger={autoDownload}
               className="h-9 px-4 rounded-lg bg-white/5 border-white/10 text-white font-bold text-xs hover:bg-white/10"
             />
           </div>

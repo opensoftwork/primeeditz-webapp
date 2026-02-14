@@ -74,13 +74,13 @@ function ProjectCard({ project }: { project: AdminProject }) {
             <div className="w-6 h-6 rounded-full bg-white/5 border border-white/10 flex items-center justify-center group-hover:border-primary/20 transition-colors">
               <User className="h-2.5 w-2.5 text-white/40 group-hover:text-primary transition-colors" />
             </div>
-            <span className="font-black text-white/60 uppercase tracking-tight text-[10px] truncate">
+            <span className="font-black text-white uppercase tracking-tight text-[18px] truncate">
               {project.studioName}
             </span>
           </div>
 
           <div className="space-y-0.5">
-            <h3 className="text-[14px] font-black text-white leading-tight uppercase tracking-tight truncate">
+            <h3 className="text-[10px] font-black text-white/60 leading-tight uppercase tracking-tight truncate">
               {project.eventName || "General Project"}
             </h3>
             {project.eventDate && (

@@ -1,6 +1,6 @@
 "use client";
 
-import { VersionsWorkspace } from "@/components/modules/employee/assigned-work/detail/versions-workspace";
+import { VersionRequestsList } from "@/components/modules/employee/assigned-work/detail/version-requests-list";
 import { use } from "react";
 
 interface VersionsPageProps {
@@ -13,6 +13,6 @@ interface VersionsPageProps {
 export default function EmployeeVersionsPage({ params }: VersionsPageProps) {
   const { projectId, deliverableId } = use(params);
   return (
-    <VersionsWorkspace projectId={projectId} deliverableId={deliverableId} />
+    <VersionRequestsList projectId={projectId} deliverableId={deliverableId} />
   );
 }

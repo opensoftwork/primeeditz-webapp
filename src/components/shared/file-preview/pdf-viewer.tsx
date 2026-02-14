@@ -12,6 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { cn } from "@/lib/utils";
 
 // Set up the PDF.js worker
@@ -68,6 +69,18 @@ export default function PDFViewer({
     // Open PDF in new tab for fullscreen/printing
     window.open(url, "_blank");
   };
+
+  const [containerWidth, setContainerWidth] = useState<number>(700);
+  const containerRef = useCallback((node: HTMLDivElement | null) => {
+    if (node !== null) {
+      const resizeObserver = new ResizeObserver((entries) => {
+        if (entries[0].contentRect.width) {
+          setContainerWidth(entries[0].contentRect.width);
+        }
+      });
+      resizeObserver.observe(node);
+    }
+  }, []);
 
   if (error) {
     return (
@@ -176,25 +189,30 @@ export default function PDFViewer({
         )}
       >
         {isLoading && (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 flex items-center justify-center z-10">
             <Loader2 className="h-8 w-8 animate-spin text-indigo-400" />
           </div>
         )}
-        <Document
-          file={url}
-          onLoadSuccess={onDocumentLoadSuccess}
-          onLoadError={onDocumentLoadError}
-          loading={null}
-          className="shadow-2xl"
-        >
-          <Page
-            pageNumber={pageNumber}
-            scale={scale}
-            renderTextLayer={false}
-            renderAnnotationLayer={false}
-            className="shadow-lg"
-          />
-        </Document>
+        <div ref={containerRef} className="w-full max-w-2xl mx-auto">
+          <AspectRatio ratio={1 / 1.4142}>
+            <Document
+              file={url}
+              onLoadSuccess={onDocumentLoadSuccess}
+              onLoadError={onDocumentLoadError}
+              loading={null}
+              className="h-full w-full flex items-center justify-center"
+            >
+              <Page
+                pageNumber={pageNumber}
+                scale={scale}
+                width={containerWidth}
+                renderTextLayer={false}
+                renderAnnotationLayer={false}
+                className="shadow-2xl max-w-full"
+              />
+            </Document>
+          </AspectRatio>
+        </div>
       </div>
 
       {/* Hint */}

@@ -19,6 +19,8 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { FolderTree as FolderTreeComponent } from "@/components/modules/admin/folder-templates/builder/folder-tree";
 import { Badge } from "@/components/ui/badge";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
 
 interface FolderTemplateDetailProps {
   projectTypeId: Id<"projectTypes">;
@@ -35,6 +37,28 @@ export default function FolderTemplateDetail({
   const template = useQuery(api.functions.folderTemplates.queries.get, {
     id: templateId,
   });
+
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    if (projectType?.name) {
+      setOverride(projectTypeId, projectType.name);
+    }
+    if (template?.name) {
+      setOverride(templateId, template.name);
+    }
+    return () => {
+      removeOverride(projectTypeId);
+      removeOverride(templateId);
+    };
+  }, [
+    projectType?.name,
+    projectTypeId,
+    template?.name,
+    templateId,
+    setOverride,
+    removeOverride,
+  ]);
 
   if (template === undefined || projectType === undefined) {
     return (

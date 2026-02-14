@@ -70,10 +70,10 @@ export function SquadBuilderBar({
 
           <div className="hidden sm:flex flex-col">
             <span className="text-xs font-black uppercase tracking-tight text-white leading-none">
-              Build Project Squad
+              Configure Project Team
             </span>
             <span className="text-[10px] font-bold text-white/40 uppercase tracking-widest mt-1">
-              {selectedMembers.length} Members Prepared
+              {selectedMembers.length} Professionals Selected
             </span>
           </div>
         </div>
@@ -88,7 +88,7 @@ export function SquadBuilderBar({
           ) : (
             <>
               <Check className="h-4 w-4" />
-              ASSIGN SQUAD
+              UPDATE TEAM
             </>
           )}
         </Button>

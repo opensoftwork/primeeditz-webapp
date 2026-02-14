@@ -2,7 +2,7 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Eye, Receipt, User } from "lucide-react";
+import { Download, Eye, FileText, Pencil, Receipt, User } from "lucide-react";
 import Link from "next/link";
 import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
 import { Button } from "@/components/ui/button";
@@ -110,10 +110,41 @@ export const columns: ColumnDef<AdminQuotation>[] = [
               quotationCode={quotation.code}
             />
           )}
+          <Link href={`/quotations/${quotation._id}/edit`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Edit Quotation"
+              className="h-8 w-8 p-0 rounded-lg text-white/20 hover:text-primary hover:bg-primary/10"
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href={`/quotations/${quotation._id}/preview`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Professional Preview"
+              className="h-8 w-8 p-0 rounded-lg text-white/20 hover:text-primary hover:bg-primary/10"
+            >
+              <FileText className="h-4 w-4" />
+            </Button>
+          </Link>
+          <Link href={`/quotations/${quotation._id}/preview?download=true`}>
+            <Button
+              variant="ghost"
+              size="sm"
+              title="Download PDF"
+              className="h-8 w-8 p-0 rounded-lg text-white/20 hover:text-primary hover:bg-primary/10"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+          </Link>
           <Link href={`/quotations/${quotation._id}`}>
             <Button
               variant="ghost"
               size="sm"
+              title="View Details"
               className="h-8 w-8 p-0 rounded-lg text-white/20 hover:text-primary hover:bg-primary/10"
             >
               <Eye className="h-4 w-4" />

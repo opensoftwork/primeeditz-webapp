@@ -10,7 +10,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ArrowLeft, Loader2, Receipt } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QuotationPreview } from "@/components/modules/admin/quotations/preview";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +22,8 @@ export function QuotationPreviewClient({
   quotationId,
 }: QuotationPreviewClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoDownload = searchParams.get("download") === "true";
 
   // Fetch quotation with sections
   const data = useQuery(
@@ -95,6 +97,7 @@ export function QuotationPreviewClient({
       studioName={quotation.studioName}
       projectName={quotation.projectName}
       onBack={() => router.back()}
+      autoDownload={autoDownload}
     />
   );
 }

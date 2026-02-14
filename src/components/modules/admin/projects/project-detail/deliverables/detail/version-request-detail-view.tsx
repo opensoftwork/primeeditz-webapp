@@ -75,8 +75,21 @@ export function VersionRequestDetailView({
     if (versionRequest) {
       setOverride(versionId, `Request #${versionRequest.versionNumber}`);
     }
-    return () => removeOverride(versionId);
-  }, [versionId, versionRequest, setOverride, removeOverride]);
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    return () => {
+      removeOverride(versionId);
+      removeOverride(deliverableId);
+    };
+  }, [
+    versionId,
+    versionRequest,
+    deliverableId,
+    deliverable,
+    setOverride,
+    removeOverride,
+  ]);
 
   // Fetch deliverable file URL
   useEffect(() => {

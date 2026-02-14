@@ -50,7 +50,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
-
+//@ts-ignore
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
@@ -206,7 +206,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}
           onViewFolders={handleViewFolders}
           onOpenAssignEmployee={() =>
-            router.push(`/projects/${projectId}/assign`)
+            router.push(`/projects/${projectId}/team`)
           }
         />
         <AwaitingActorBanner project={project} />
@@ -256,9 +256,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 folderSetupReason={folderSetupStatus?.reason}
                 onSetupFolders={() => setIsFolderSetupOpen(true)}
                 onViewFolders={handleViewFolders}
-                onAssignTeam={() =>
-                  router.push(`/projects/${projectId}/assign`)
-                }
+                onViewTeam={() => router.push(`/projects/${projectId}/team`)}
               />
             </div>
           </div>

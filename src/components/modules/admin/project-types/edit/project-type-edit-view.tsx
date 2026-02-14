@@ -11,6 +11,10 @@ import {
   useProjectTypeWizard,
 } from "../wizard/wizard-context";
 import { Step1Identity } from "../wizard/steps/step-1-identity";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
 
 interface ProjectTypeEditViewProps {
   projectTypeId: Id<"projectTypes">;
@@ -19,6 +23,21 @@ interface ProjectTypeEditViewProps {
 export default function ProjectTypeEditView({
   projectTypeId,
 }: ProjectTypeEditViewProps) {
+  const projectType = useQuery(api.functions.projectTypes.queries.getById, {
+    id: projectTypeId,
+  });
+
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  useEffect(() => {
+    if (projectType?.name) {
+      setOverride(projectTypeId, projectType.name);
+    }
+    return () => {
+      removeOverride(projectTypeId);
+    };
+  }, [projectType?.name, projectTypeId, setOverride, removeOverride]);
+
   return (
     <ProjectTypeWizardProvider projectTypeId={projectTypeId}>
       <EditorContent projectTypeId={projectTypeId} />

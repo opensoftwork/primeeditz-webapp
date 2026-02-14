@@ -3,10 +3,11 @@
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
-import { CheckCircle2, AlertTriangle, X } from "lucide-react";
+import { CheckCircle2, AlertTriangle, X, ArrowRight } from "lucide-react";
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 interface DeliverableStatusBannerProps {
   projectId: Id<"projects">;
@@ -21,6 +22,7 @@ export function DeliverableStatusBanner({
 
   // Get recent deliverable status changes
   const recentChanges = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getRecentStatusChanges,
     { projectId },
   );
@@ -39,58 +41,76 @@ export function DeliverableStatusBanner({
         <div
           key={change._id}
           className={cn(
-            "p-4 rounded-2xl border flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-300",
+            "p-4 rounded-2xl border flex items-start gap-4 animate-in fade-in slide-in-from-top-2 duration-300",
             change.status === "approved"
               ? "bg-emerald-500/10 border-emerald-500/20"
               : "bg-amber-500/10 border-amber-500/20",
           )}
         >
-          {change.status === "approved" ? (
-            <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0 mt-0.5" />
-          ) : (
-            <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0 mt-0.5" />
-          )}
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-4">
+              <div className="flex items-center gap-3">
+                {change.status === "approved" ? (
+                  <CheckCircle2 className="h-5 w-5 text-emerald-400 shrink-0" />
+                ) : (
+                  <AlertTriangle className="h-5 w-5 text-amber-400 shrink-0" />
+                )}
+                <p
+                  className={cn(
+                    "text-sm font-bold uppercase tracking-tight",
+                    change.status === "approved"
+                      ? "text-emerald-300"
+                      : "text-amber-300",
+                  )}
+                >
+                  {change.status === "approved"
+                    ? `Deliverable "${change.name}" approved! 🎉`
+                    : `Version change requested on "${change.name}"`}
+                </p>
+              </div>
 
-          <div className="flex-1">
-            <p
-              className={cn(
-                "text-sm font-bold uppercase tracking-tight",
-                change.status === "approved"
-                  ? "text-emerald-300"
-                  : "text-amber-300",
-              )}
-            >
-              {change.status === "approved"
-                ? `Deliverable "${change.name}" approved! 🎉`
-                : `Version change requested on "${change.name}"`}
-            </p>
+              <div className="flex items-center gap-3 shrink-0">
+                {role === "employee" &&
+                  change.status === "version_requested" && (
+                    <Button
+                      variant="ghost"
+                      asChild
+                      className="h-9 px-4 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20 transition-all"
+                    >
+                      <Link
+                        href={`/assigned-work/${projectId}/deliverables/${change._id}/versions`}
+                      >
+                        Open Versions <ArrowRight className="h-3 w-3 ml-2" />
+                      </Link>
+                    </Button>
+                  )}
+
+                {change.status === "approved" && (
+                  <Button
+                    variant="ghost"
+                    asChild
+                    className="h-9 px-4 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-500 text-[9px] font-black uppercase tracking-widest border border-emerald-500/20 transition-all"
+                  >
+                    <Link
+                      href={
+                        role === "employee"
+                          ? `/assigned-work/${projectId}/deliverables/${change._id}`
+                          : `/projects/${projectId}/deliverables/${change._id}`
+                      }
+                    >
+                      View Details <ArrowRight className="h-3 w-3 ml-2" />
+                    </Link>
+                  </Button>
+                )}
+              </div>
+            </div>
 
             {change.versionFeedback &&
               change.status === "version_requested" && (
-                <div className="mt-2 text-xs text-white/60 bg-white/5 p-3 rounded-xl border border-white/5 italic">
+                <div className="mt-3 ml-8 text-xs text-white/60 bg-white/5 p-3 rounded-xl border border-white/5 italic">
                   "{change.versionFeedback}"
                 </div>
               )}
-
-            <div className="mt-3 flex items-center gap-4">
-              <Link
-                href={
-                  role === "employee" && change.status === "version_requested"
-                    ? `/assigned-work/${projectId}/deliverables/${change._id}/versions`
-                    : `/projects/${projectId}/deliverables/${change._id}`
-                }
-                className={cn(
-                  "text-[10px] font-black uppercase tracking-widest hover:underline",
-                  change.status === "approved"
-                    ? "text-emerald-400/80"
-                    : "text-amber-400/80",
-                )}
-              >
-                {role === "employee" && change.status === "version_requested"
-                  ? "Open Versions Workspace →"
-                  : "View Details →"}
-              </Link>
-            </div>
           </div>
 
           <button

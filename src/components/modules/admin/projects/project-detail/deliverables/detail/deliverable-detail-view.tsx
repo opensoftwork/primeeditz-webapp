@@ -150,9 +150,7 @@ export function DeliverableDetailView({
   // Computed permissions
   const canApprove =
     deliverable?.status === "pending_qc" ||
-    deliverable?.status === "version_needed" ||
-    deliverable?.status === "version_requested" ||
-    deliverable?.status === "revision_requested";
+    deliverable?.status === "version_needed";
   const canRequestVersion =
     deliverable?.status === "pending_qc" || deliverable?.status === "approved";
   const canSendToStudio =
@@ -490,6 +488,7 @@ export function DeliverableDetailView({
               canRequestVersion={canRequestVersion}
               canSendToStudio={canSendToStudio}
               isSubmitting={isSubmitting}
+              status={deliverable.status}
               onApprove={handleApprove}
               onRequestVersion={handleRequestVersion}
               onSendToStudio={handleSendToStudio}

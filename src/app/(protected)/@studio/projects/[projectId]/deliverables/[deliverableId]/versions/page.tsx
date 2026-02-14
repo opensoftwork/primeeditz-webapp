@@ -1,10 +1,11 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import {
   History,
   MessageSquare,
@@ -29,12 +30,20 @@ export default function StudioVersionsPage() {
   }>();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("requests");
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const deliverable = useQuery(
     // @ts-ignore
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
+
+  useEffect(() => {
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    return () => removeOverride(deliverableId);
+  }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   const versionRequests = useQuery(
     api.functions.deliverables.queries.getDeliverableVersionRequests,

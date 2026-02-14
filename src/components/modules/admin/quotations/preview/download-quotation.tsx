@@ -11,7 +11,7 @@ import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import { Download as DownloadIcon, Loader2 } from "lucide-react";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -40,6 +40,7 @@ interface DownloadQuotationProps {
   className?: string;
   label?: string;
   icon?: React.ReactNode;
+  autoTrigger?: boolean;
 }
 
 // ============================================================================
@@ -59,6 +60,7 @@ export function DownloadQuotation({
   className,
   label,
   icon,
+  autoTrigger = false,
 }: DownloadQuotationProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
@@ -214,6 +216,17 @@ export function DownloadQuotation({
       setIsGenerating(false);
     }
   };
+
+  // Auto-trigger download if requested
+  useEffect(() => {
+    if (autoTrigger && !isGenerating) {
+      // Small timeout to ensure documentRef is fully populated and layout is stable
+      const timer = setTimeout(() => {
+        handleDownload();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [autoTrigger]);
 
   return (
     <>

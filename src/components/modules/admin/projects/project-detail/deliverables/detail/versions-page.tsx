@@ -13,6 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { DeliverablePreview } from "./deliverable-preview";
 import { VersionImageUpload } from "./versions-image-upload";
 import { VersionImageGrid, VersionImage } from "./versions-image-grid";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface VersionsPageProps {
   projectId: string;
@@ -26,12 +27,20 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [fileUrl, setFileUrl] = useState<string | null>(null);
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const deliverable = useQuery(
     //@ts-ignore
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
+
+  useEffect(() => {
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    return () => removeOverride(deliverableId);
+  }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   const createVersionRequest = useMutation(
     api.functions.deliverables.mutations.createVersionRequest,

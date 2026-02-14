@@ -35,6 +35,11 @@ import {
   Step2PackageSelection,
   Step5ReviewSend,
 } from "./steps";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 
 // ============================================================================
 // Main Export (with Provider wrapper)
@@ -77,6 +82,22 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     selectedStudio,
     goToStep,
   } = useQuotationBuilder();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  const quotation = useQuery(
+    //@ts-ignore
+    api.functions.quotations.queries.getQuotation,
+    quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
+  );
+
+  useEffect(() => {
+    if (quotationId && quotation?.code) {
+      setOverride(quotationId, quotation.code);
+    }
+    return () => {
+      if (quotationId) removeOverride(quotationId);
+    };
+  }, [quotationId, quotation?.code, setOverride, removeOverride]);
 
   const handlePrimaryAction = () => {
     if (currentStep < 3) {

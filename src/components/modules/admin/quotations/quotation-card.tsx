@@ -1,7 +1,7 @@
 "use client";
 
 import { format } from "date-fns";
-import { Calendar, User } from "lucide-react";
+import { Calendar, Download, FileText, Pencil, User } from "lucide-react";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -80,15 +80,36 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
           <div className="text-[9px] font-bold text-white/30 uppercase tracking-widest">
             Valuation
           </div>
-          {quotation.status === "draft" && (
-            <div onClick={(e) => e.stopPropagation()}>
+          <div
+            className="flex items-center gap-2 px-2 py-1 rounded-lg bg-black/20 border border-white/5 shadow-inner"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Link
+              href={`/quotations/${quotation._id}/edit`}
+              title="Edit Quotation"
+            >
+              <Pencil className="w-3.5 h-3.5 text-white/20 hover:text-white transition-colors cursor-pointer" />
+            </Link>
+            <Link
+              href={`/quotations/${quotation._id}/preview`}
+              title="Professional Preview"
+            >
+              <FileText className="w-3.5 h-3.5 text-white/20 hover:text-white transition-colors cursor-pointer" />
+            </Link>
+            <Link
+              href={`/quotations/${quotation._id}/preview?download=true`}
+              title="Download PDF"
+            >
+              <Download className="w-3.5 h-3.5 text-white/20 hover:text-white transition-colors cursor-pointer" />
+            </Link>
+            {quotation.status === "draft" && (
               <DeleteQuotationAction
                 quotationId={quotation._id}
                 quotationCode={quotation.code}
-                className="h-7 w-7 text-white/20 hover:text-red-400 transition-colors"
+                className="h-3.5 w-3.5 text-white/20 hover:text-red-400 transition-colors"
               />
-            </div>
-          )}
+            )}
+          </div>
         </div>
         <div className="flex items-baseline gap-0.5">
           <span className="text-xs font-bold text-primary/60">₹</span>

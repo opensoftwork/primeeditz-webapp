@@ -69,7 +69,7 @@ export function VersionReferenceViewer({
   }, [referenceImages, getSignedUrl]);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Header Info */}
       <div className="flex flex-wrap items-center gap-4 text-xs text-white/40 mb-2">
         <Badge
@@ -94,7 +94,7 @@ export function VersionReferenceViewer({
       <motion.div
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
-        className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-3"
+        className="p-4 rounded-2xl bg-amber-500/10 border border-amber-500/20 space-y-2"
       >
         <div className="flex items-center gap-2 text-amber-500">
           <AlertTriangle className="h-4 w-4" />
@@ -109,14 +109,14 @@ export function VersionReferenceViewer({
 
       {/* Reference Images */}
       {referenceImages && referenceImages.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-3">
           <div className="flex items-center justify-between">
             <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30">
               Reference Images ({referenceImages.length})
             </h4>
           </div>
 
-          <div className="grid grid-cols-1 gap-4">
+          <div className="grid grid-cols-1 gap-3">
             {referenceImages.map((img, idx) => (
               <motion.div
                 key={img.minioKey}
@@ -127,7 +127,7 @@ export function VersionReferenceViewer({
               >
                 <div className="flex gap-4 p-4">
                   <div
-                    className="relative h-24 w-24 shrink-0 rounded-xl overflow-hidden bg-black/40 border border-white/5 cursor-zoom-in"
+                    className="relative h-20 w-20 shrink-0 rounded-xl overflow-hidden bg-black/40 border border-white/5 cursor-zoom-in"
                     onClick={() =>
                       setSelectedImage(imageUrls[img.minioKey] ?? null)
                     }

@@ -3,7 +3,7 @@
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useQuery, useAction } from "convex/react";
-import { ShieldCheck, Info, ArrowRight } from "lucide-react";
+import { ShieldCheck, Info, ArrowRight, Loader2, Circle, Loader } from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -110,6 +110,10 @@ export function DeliverablesSection({
 
   // Empty state
   if (deliverables.length === 0) {
+    const isInProgress =
+      actionState === "versions_requested" ||
+      (versionCount != null && versionCount > 0);
+
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -122,14 +126,15 @@ export function DeliverablesSection({
         >
           <div className="flex flex-col items-center justify-center py-16 text-center rounded-3xl bg-white/3 border border-white/5">
             <div className="h-16 w-16 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center mb-6">
-              <ShieldCheck className="h-7 w-7 text-white/20" />
+              <Loader className="h-7 w-7 text-white/50" />
             </div>
             <h3 className="text-sm font-bold text-white/50 uppercase tracking-wider mb-2">
-              No Deliverables Yet
+              {isInProgress ? "New Version in Progress" : "No Deliverables Yet"}
             </h3>
-            <p className="text-[11px] font-medium text-white/30 uppercase tracking-widest max-w-md leading-relaxed">
-              Your finalized media files will appear here once uploaded and
-              approved by the quality control team
+            <p className="text-[11px] font-medium text-white/30 uppercase tracking-widest max-w-md leading-relaxed px-6">
+              {isInProgress
+                ? "Our team is currently working on the requested changes. You'll be notified as soon as the updated versions are ready for review."
+                : "Your finalized media files will appear here once uploaded and approved by the quality control team"}
             </p>
           </div>
         </DetailSection>
