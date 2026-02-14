@@ -11,28 +11,17 @@ export const clearAllData = internalMutation({
     console.log("⚠️ STARTING FULL DATABASE WIPE...");
 
     const tableNames = [
-      "appSettings",
       "assets",
       "clients",
-      "company",
       "deliverables",
       "deliverableVersions",
       "employees",
-      "folderTemplates",
       "folders",
-      "projectCategories",
-      "projectTypeFields",
-      "projectTypes",
       "projects",
       "quotations",
-      "servicePackages",
       "statusHistory",
-      "storageTiers",
-      "quotationSections",
-      "quotationLibraryItems",
       "projectSquads",
       "handoffLogs",
-      "servicePackageDrafts",
       "quotationRequestDrafts",
       "versionRequests",
       "studioApprovals",
@@ -63,7 +52,9 @@ export const clearAllData = internalMutation({
     console.log(
       `\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`,
     );
-    console.log("ℹ️ Profiles and Auth tables were preserved.");
+    console.log(
+      "ℹ️ Preserved: Profiles, Auth, Project Types, Storage Tiers, Service Packages, and related system configurations.",
+    );
     return { success: true, totalDeleted, stats };
   },
 });
