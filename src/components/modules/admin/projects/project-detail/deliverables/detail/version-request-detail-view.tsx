@@ -22,11 +22,17 @@ import {
   Send,
 } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DeliverablePreview } from "./deliverable-preview";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import {
+  AssetSlider,
+  type ViewerAsset,
+} from "@/components/shared/asset-viewer";
 
 interface VersionRequestDetailProps {
   projectId: string;
@@ -46,7 +52,8 @@ export function VersionRequestDetailView({
   );
   const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
 
   // Queries
   const versionRequest = useQuery(
@@ -131,7 +138,52 @@ export function VersionRequestDetailView({
     fetchImageUrls();
   }, [versionRequest, getSignedUrlAction]);
 
+  // Prepare assets for the viewer
+  const viewerAssets: ViewerAsset[] = useMemo(() => {
+    const assets: ViewerAsset[] = [];
+
+    // Add main deliverable first if it exists
+    if (deliverable && deliverableFileUrl) {
+      const mimeType = deliverable.mimeType || "application/octet-stream";
+      let type: "image" | "pdf" | "video" | "audio" | "other" = "other";
+
+      if (mimeType.startsWith("image/")) type = "image";
+      else if (mimeType === "application/pdf") type = "pdf";
+      else if (mimeType.startsWith("video/")) type = "video";
+      else if (mimeType.startsWith("audio/")) type = "audio";
+
+      assets.push({
+        url: deliverableFileUrl,
+        fileName: deliverable.name,
+        fileId: deliverable._id,
+        type,
+      });
+    }
+
+    // Add reference images
+    if (versionRequest?.referenceImages) {
+      versionRequest.referenceImages.forEach((img) => {
+        if (imageUrls[img.minioKey]) {
+          assets.push({
+            url: imageUrls[img.minioKey],
+            fileName: img.fileName,
+            fileId: img.minioKey,
+            type: "image",
+          });
+        }
+      });
+    }
+
+    return assets;
+  }, [deliverable, deliverableFileUrl, versionRequest, imageUrls]);
+
   // Handlers
+  const handleOpenAsset = (index: number, isReferenceImage = false) => {
+    const offset =
+      isReferenceImage && deliverable && deliverableFileUrl ? 1 : 0;
+    setCurrentAssetIndex(index + offset);
+    setIsSliderOpen(true);
+  };
   const handleUpdateStatus = async (status: "in_progress" | "resolved") => {
     setIsUpdating(true);
     try {
@@ -251,9 +303,10 @@ export function VersionRequestDetailView({
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
                 VERSION REQUEST
               </span>
-              <span
+              <Badge
+                variant="outline"
                 className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
+                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider",
                   currentStatus.bg,
                   currentStatus.border,
                   currentStatus.text,
@@ -261,9 +314,9 @@ export function VersionRequestDetailView({
               >
                 <StatusIcon className="h-3 w-3" />
                 {currentStatus.label}
-              </span>
+              </Badge>
             </div>
-            <h1 className="text-3xl xl:text-4xl font-black uppercase tracking-tighter text-white">
+            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
               Request #{versionRequest.versionNumber}
             </h1>
             <p className="text-xs text-white/30 mt-1 uppercase tracking-widest font-bold">
@@ -332,11 +385,19 @@ export function VersionRequestDetailView({
               Original Deliverable
             </h2>
           </div>
-          <DeliverablePreview
-            url={deliverableFileUrl}
-            fileName={deliverable?.name || "Unknown"}
-            mimeType={deliverable?.mimeType}
-          />
+          <div
+            className="cursor-pointer group relative"
+            onClick={() => handleOpenAsset(0)}
+          >
+            <DeliverablePreview
+              url={deliverableFileUrl}
+              fileName={deliverable?.name || "Unknown"}
+              mimeType={deliverable?.mimeType}
+            />
+            <div className="absolute top-4 right-4 h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all shadow-2xl">
+              <Maximize2 className="h-5 w-5" />
+            </div>
+          </div>
         </div>
 
         {/* Right: Version Request Details */}
@@ -433,7 +494,13 @@ export function VersionRequestDetailView({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
                   {versionRequest.referenceImages.map((img, index) => {
                     const url = imageUrls[img.minioKey];
                     return (
@@ -459,14 +526,17 @@ export function VersionRequestDetailView({
                           {/* Expand */}
                           {url && (
                             <button
-                              onClick={() => setSelectedImage(url)}
+                              onClick={() => handleOpenAsset(index, true)}
                               className="absolute top-2 right-2 h-7 w-7 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30"
                             >
                               <Maximize2 className="h-3.5 w-3.5" />
                             </button>
                           )}
 
-                          <div className="absolute bottom-2 left-2 truncate max-w-[80%]">
+                          <div
+                            className="absolute bottom-2 left-2 truncate max-w-[80%] cursor-pointer"
+                            onClick={() => handleOpenAsset(index, true)}
+                          >
                             <p className="text-[10px] font-medium text-white/60 truncate drop-shadow-md">
                               {img.fileName}
                             </p>
@@ -490,32 +560,19 @@ export function VersionRequestDetailView({
                       </div>
                     );
                   })}
-                </div>
+                </motion.div>
               </div>
             )}
         </div>
       </div>
 
-      {/* Full Image Lightbox */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-8 animate-in fade-in duration-200"
-          onClick={() => setSelectedImage(null)}
-        >
-          <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors text-sm font-black uppercase tracking-widest"
-          >
-            Close ✕
-          </button>
-          <img
-            src={selectedImage}
-            alt="Full size preview"
-            className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      {/* Full Asset Viewer */}
+      <AssetSlider
+        assets={viewerAssets}
+        initialIndex={currentAssetIndex}
+        open={isSliderOpen}
+        onOpenChange={setIsSliderOpen}
+      />
     </div>
   );
 }
