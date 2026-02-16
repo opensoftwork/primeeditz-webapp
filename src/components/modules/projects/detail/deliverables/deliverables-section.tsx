@@ -3,7 +3,14 @@
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
 import { useQuery, useAction } from "convex/react";
-import { ShieldCheck, Info, ArrowRight, Loader2, Circle, Loader } from "lucide-react";
+import {
+  ShieldCheck,
+  Info,
+  ArrowRight,
+  Loader2,
+  Circle,
+  Loader,
+} from "lucide-react";
 import { motion } from "motion/react";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -204,24 +211,6 @@ export function DeliverablesSection({
           </div>
         }
       >
-        {/* Stats Row */}
-        <div className="flex flex-wrap items-center gap-4 mb-6 mt-2">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-white/40">
-              {approvedCount}/{deliverables.length} Approved
-            </span>
-          </div>
-          {versionCount != null && versionCount > 0 && (
-            <div className="flex items-center gap-2">
-              <div className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-              <span className="text-[10px] font-black uppercase tracking-widest text-amber-400/60">
-                {versionCount} Version Request{versionCount > 1 ? "s" : ""}
-              </span>
-            </div>
-          )}
-        </div>
-
         {/* Info Banner */}
         <div className="p-4 rounded-2xl bg-indigo-500/5 border border-indigo-500/10 flex items-start gap-4 mb-6">
           <div className="h-8 w-8 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shrink-0 mt-0.5">
@@ -238,15 +227,6 @@ export function DeliverablesSection({
             </p>
           </div>
         </div>
-
-        {/* Approval Progress Banner (Review Mode Only) */}
-        {isReviewMode && (
-          <ApprovalProgressBanner
-            projectId={projectId}
-            deliverables={deliverables}
-            versionCount={versionCount}
-          />
-        )}
 
         {/* Deliverables Grid */}
         <div className="grid grid-cols-1 gap-4">
