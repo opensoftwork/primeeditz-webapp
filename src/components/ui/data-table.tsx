@@ -83,9 +83,17 @@ export function DataTable<TData, TValue>({
                     duration: 0.2,
                     ease: "easeOut",
                   }}
-                  onClick={() => onRowClick?.(row.original)}
+                  data-slot="table-row"
+                  onClick={(e) => {
+                    const target = e.target as HTMLElement;
+                    const interactive = target.closest(
+                      "button, a, [role='menuitem'], [role='checkbox'], [data-slot='dropdown-menu-content']",
+                    );
+                    if (interactive) return;
+                    onRowClick?.(row.original);
+                  }}
                   className={cn(
-                    "group border-b last:border-0 border-white/5 hover:bg-white/5 transition-all duration-300 cursor-pointer",
+                    "group border-b last:border-0 border-white/5 hover:bg-white/5 transition-all duration-300",
                     onRowClick && "cursor-pointer",
                   )}
                 >

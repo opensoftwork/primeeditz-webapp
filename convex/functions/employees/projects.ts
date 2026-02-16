@@ -92,6 +92,7 @@ export const getEmployeeProject = employeeQuery({
         return {
           ...h,
           actorName: profile?.name || "System",
+          actorRole: profile?.role || "system",
         };
       }),
     );

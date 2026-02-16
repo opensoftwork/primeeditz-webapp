@@ -21,6 +21,7 @@ import type { AdminProjectDetail } from "../project-detail/types";
 import type { EmployeeWithWorkload } from "./columns";
 import { getTeamColumns, type TeamMember } from "./team-columns";
 import { AddEmployeeDrawer } from "./add-employee-drawer";
+import { ProjectTeamSkeleton } from "./skeleton";
 
 interface ProjectTeamContainerProps {
   projectId: string;
@@ -176,7 +177,10 @@ export default function ProjectTeamContainer({
     [teamMembers],
   );
 
-  if (!project) return null;
+  // Loading state
+  const isLoading = project === undefined || !hasInitialized;
+  if (isLoading) return <ProjectTeamSkeleton />;
+  if (project === null) return null;
 
   return (
     <div className="flex-1 p-8 md:p-12 flex flex-col space-y-10 animate-in fade-in slide-in-from-bottom-5 duration-700">

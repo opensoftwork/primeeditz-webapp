@@ -109,10 +109,13 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
 
   if (deliverable === undefined) {
     return (
-      <div className="p-12 space-y-8 max-w-7xl mx-auto">
-        <div className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full bg-white/5" />
-          <Skeleton className="h-8 w-64 bg-white/5 rounded-lg" />
+      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+        <div className="flex items-center gap-5 mb-12">
+          <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
+          <div className="space-y-2">
+            <Skeleton className="h-4 w-32 bg-white/5" />
+            <Skeleton className="h-10 w-64 bg-white/5" />
+          </div>
         </div>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           <Skeleton className="h-[600px] w-full bg-white/5 rounded-3xl" />
@@ -125,11 +128,13 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
   if (deliverable === null) {
     return (
       <div className="p-12 text-center">
-        <h1 className="text-xl font-bold text-white">Deliverable Not Found</h1>
+        <h1 className="text-xl font-bold text-white uppercase tracking-tighter">
+          Deliverable Not Found
+        </h1>
         <Button
           variant="link"
           onClick={() => router.back()}
-          className="mt-4 text-indigo-400"
+          className="mt-4 text-indigo-400 uppercase tracking-widest font-black"
         >
           Go Back
         </Button>
@@ -138,31 +143,38 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
   }
 
   return (
-    <div className="p-6 md:p-10 space-y-8  animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex items-center gap-5">
           <Button
-            variant="ghost"
-            size="sm"
+            variant="outline"
+            size="icon"
+            className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
             onClick={() => router.back()}
-            className="group -ml-2 text-white/40 hover:text-white hover:bg-white/5 rounded-lg transition-all"
           >
-            <ArrowLeft className="h-4 w-4 mr-2 transition-transform group-hover:-translate-x-1" />
-            Back to Deliverable
+            <ArrowLeft className="h-5 w-5 text-white/60" />
           </Button>
-          <h1 className="text-2xl font-black text-white tracking-tight flex items-center gap-3">
-            Version Request
-            <span className="text-sm font-medium text-white/20 bg-white/5 px-3 py-1 rounded-full border border-white/5">
-              {deliverable.name} v{deliverable.version}
-            </span>
-          </h1>
+
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
+                NEW VERSION REQUEST
+              </span>
+              <span className="text-[10px] font-black uppercase bg-white/5 px-2 py-0.5 rounded-md border border-white/5 text-white/40">
+                {deliverable.name} v{deliverable.version}
+              </span>
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
+              Version Request
+            </h1>
+          </div>
         </div>
 
         <Button
           onClick={handleSubmit}
           disabled={isSubmitting || isUploading}
-          className="bg-indigo-500 hover:bg-indigo-600 text-white font-black px-8 py-6 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-3"
+          className="bg-indigo-500 hover:bg-indigo-600 text-white font-black px-8 py-6 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-3 text-xs uppercase tracking-widest"
         >
           {isSubmitting ? (
             <Loader2 className="h-5 w-5 animate-spin" />

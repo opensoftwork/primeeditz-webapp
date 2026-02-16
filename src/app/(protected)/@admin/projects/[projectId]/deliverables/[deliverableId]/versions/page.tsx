@@ -11,9 +11,6 @@ import {
   MessageSquare,
   ArrowLeft,
   Plus,
-  Clock,
-  CheckCircle,
-  Play,
   Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";

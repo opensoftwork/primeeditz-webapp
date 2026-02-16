@@ -565,3 +565,39 @@ export const unlinkProjectFromQuotation = adminMutation({
     return { success: true };
   },
 });
+
+/**
+ * Update project storage allocation (admin only).
+ */
+export const updateStorageAllocation = adminMutation({
+  args: {
+    projectId: v.id("projects"),
+    storageAllocated: v.number(), // in bytes
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+
+    if (!project) {
+      throw new ConvexError("Project not found");
+    }
+
+    await ctx.db.patch(args.projectId, {
+      storageAllocated: args.storageAllocated,
+      updatedAt: now(),
+    });
+
+    // Record status history
+    await ctx.db.insert("statusHistory", {
+      projectId: args.projectId,
+      previousPhase: project.phase,
+      newPhase: project.phase,
+      previousActionState: project.actionState,
+      newActionState: project.actionState,
+      changedBy: ctx.profile._id,
+      changedAt: now(),
+      notes: `Storage allocation updated to ${args.storageAllocated / (1024 * 1024 * 1024)} GB`,
+    });
+
+    return { success: true };
+  },
+});

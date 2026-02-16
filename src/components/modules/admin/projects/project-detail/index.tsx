@@ -23,6 +23,8 @@ import { ProjectSpecs } from "./project-specs";
 import { ProjectDetailSkeleton } from "./skeleton";
 import { StudioCard } from "./studio-card";
 import { SystemControls } from "./system-controls";
+import { StorageUpdateDrawer } from "../storage-update-drawer";
+
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 import { AssetSlider } from "@/components/shared/asset-viewer";
 import type { VaultFile } from "@/components/shared/files-vault/types";
@@ -43,6 +45,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
+  const [isStorageUpdateOpen, setIsStorageUpdateOpen] = useState(false);
+
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
     null,
@@ -50,7 +54,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
-//@ts-ignore
+  //@ts-ignore
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
@@ -257,6 +261,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 onSetupFolders={() => setIsFolderSetupOpen(true)}
                 onViewFolders={handleViewFolders}
                 onViewTeam={() => router.push(`/projects/${projectId}/team`)}
+                onAddStorage={() => setIsStorageUpdateOpen(true)}
               />
             </div>
           </div>
@@ -315,6 +320,19 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         currentStatus={project.actionState}
         projectCode={project.code}
         projectName={project.eventName}
+      />
+
+      <StorageUpdateDrawer
+        open={isStorageUpdateOpen}
+        onOpenChange={setIsStorageUpdateOpen}
+        projectId={projectId as Id<"projects">}
+        projectCode={project.code}
+        projectName={project.eventName}
+        currentStorageGB={
+          project.storageAllocated
+            ? project.storageAllocated / (1024 * 1024 * 1024)
+            : 0
+        }
       />
     </div>
   );

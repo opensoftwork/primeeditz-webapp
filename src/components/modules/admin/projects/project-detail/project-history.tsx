@@ -66,8 +66,11 @@ export function ProjectHistory({ history }: ProjectHistoryProps) {
                       {new Date(entry.changedAt).toLocaleString()}
                     </span>
                   </div>
-                  <p className="text-[10px] font-semibold text-white/30 mt-1 uppercase tracking-widest">
-                    Actor: {entry.actorName}
+                  <p className="text-[10px] font-semibold text-white/30 mt-1 uppercase tracking-widest flex items-center gap-2">
+                    <span>Actor: {entry.actorName}</span>
+                    <span className="text-[8px] font-black px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
+                      {entry.actorRole}
+                    </span>
                   </p>
                 </div>
               </div>

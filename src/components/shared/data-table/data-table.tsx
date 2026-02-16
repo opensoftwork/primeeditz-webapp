@@ -182,6 +182,7 @@ export function DataTable<TData, TValue>({
         <div className="flex-1">
           <DataTableToolbar
             table={table}
+            columnVisibility={columnVisibility}
             search={toolbar?.search}
             filters={toolbar?.filters}
             actions={toolbar?.actions}
@@ -312,8 +313,18 @@ export function DataTable<TData, TValue>({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
+                        data-slot="table-row"
                         data-state={row.getIsSelected() && "selected"}
-                        onClick={() => onRowClick?.(row.original)}
+                        onClick={(e) => {
+                          // Don't fire row click if user clicked an interactive element
+                          // (button, link, dropdown, checkbox, etc.)
+                          const target = e.target as HTMLElement;
+                          const interactive = target.closest(
+                            "button, a, [role='menuitem'], [role='checkbox'], [data-slot='dropdown-menu-content']",
+                          );
+                          if (interactive) return;
+                          onRowClick?.(row.original);
+                        }}
                         className={cn(
                           "transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group",
                           onRowClick && "cursor-pointer",
@@ -355,6 +366,40 @@ export function DataTable<TData, TValue>({
         <DataTablePagination
           table={table}
           serverPagination={serverPagination}
+          clientPagination={
+            !serverPagination
+              ? (() => {
+                  const totalRows = table.getFilteredRowModel().rows.length;
+                  const totalPages = Math.max(
+                    1,
+                    Math.ceil(totalRows / pagination.pageSize),
+                  );
+                  return {
+                    pageSize: pagination.pageSize,
+                    pageIndex: pagination.pageIndex,
+                    totalPages,
+                    canPrevPage: pagination.pageIndex > 0,
+                    canNextPage: pagination.pageIndex < totalPages - 1,
+                    setPageSize: (size: number) =>
+                      setPagination((prev) => ({
+                        ...prev,
+                        pageSize: size,
+                        pageIndex: 0,
+                      })),
+                    nextPage: () =>
+                      setPagination((prev) => ({
+                        ...prev,
+                        pageIndex: Math.min(prev.pageIndex + 1, totalPages - 1),
+                      })),
+                    prevPage: () =>
+                      setPagination((prev) => ({
+                        ...prev,
+                        pageIndex: Math.max(prev.pageIndex - 1, 0),
+                      })),
+                  };
+                })()
+              : undefined
+          }
         />
       </div>
     </div>

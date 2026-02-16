@@ -61,6 +61,8 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
     ?.toLowerCase()
     .includes("complete");
 
+  const hasFiles = folders?.some((f: any) => (f.assetCount || 0) > 0);
+
   const canSubmit =
     project?.actionState === "awaiting_uploads" &&
     folders &&
@@ -141,8 +143,13 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                disabled={isSubmitting}
-                className="rounded-2xl h-11 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95"
+                disabled={isSubmitting || !hasFiles}
+                className={cn(
+                  "rounded-2xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 transition-all active:scale-95",
+                  hasFiles
+                    ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
+                    : "bg-white/5 border border-white/10 text-white/20 cursor-not-allowed",
+                )}
               >
                 {isSubmitting ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

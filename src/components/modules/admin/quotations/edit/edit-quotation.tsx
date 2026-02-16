@@ -63,28 +63,37 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
   } = useQuotationBuilder();
 
   return (
-    <div className="min-h-screen p-6 md:p-8 space-y-8 w-full">
+    <div className="flex-1 space-y-10 p-8 md:p-12 w-full transition-all duration-700 animate-in fade-in slide-in-from-bottom-5">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="space-y-1">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => router.push(`/quotations/${quotationId}`)}
-              className="h-8 px-2 -ml-2 text-white/40 hover:text-white font-bold"
-            >
-              <ArrowLeft className="h-4 w-4 mr-1" />
-              Cancel
-            </Button>
-            <h1 className="text-3xl font-black text-white uppercase tracking-tighter">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+        <div className="flex items-center gap-5">
+          <Button
+            variant="outline"
+            size="icon"
+            className="rounded-xl h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 transition-all shadow-lg shrink-0"
+            onClick={() => router.back()}
+          >
+            <ArrowLeft className="h-5 w-5 text-white/60" />
+          </Button>
+
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
+                QUOTATION EDITOR
+              </span>
+              {quotation?.code && (
+                <span className="text-[10px] font-black uppercase bg-white/5 px-2 py-0.5 rounded-md border border-white/5 text-white/40">
+                  {quotation.code}
+                </span>
+              )}
+            </div>
+            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
               Edit Quotation
             </h1>
+            <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
+              Adjusting value for {selectedStudio?.name || "selected client"}.
+            </p>
           </div>
-          <p className="text-white/50 text-xs font-medium ml-12">
-            Modifying quotation details for{" "}
-            {selectedStudio?.name || "selected client"}.
-          </p>
         </div>
 
         <div className="flex items-center gap-4">
@@ -92,13 +101,13 @@ function QuotationEditorContent({ quotationId }: { quotationId: string }) {
             type="button"
             onClick={saveQuotation}
             disabled={isLoading}
-            className="bg-primary text-primary-foreground font-black px-8 h-12 rounded-2xl shadow-xl shadow-primary/20 hover:scale-[1.02] active:scale-[0.98] transition-all"
+            className="bg-indigo-500 hover:bg-indigo-600 text-white font-black px-8 py-6 rounded-2xl shadow-[0_0_40px_rgba(99,102,241,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-3 text-xs uppercase tracking-widest"
           >
             {isLoading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <Loader2 className="h-5 w-5 animate-spin" />
             ) : (
               <>
-                <Save className="h-4 w-4 mr-2" />
+                <Save className="h-5 w-5" />
                 Save Changes
               </>
             )}

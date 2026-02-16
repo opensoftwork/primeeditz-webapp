@@ -7,6 +7,7 @@ export interface StatusHistoryEntry {
   previousActionState?: string;
   newActionState: string;
   actorName: string;
+  actorRole: string;
 }
 
 export interface AdminProjectDetail {

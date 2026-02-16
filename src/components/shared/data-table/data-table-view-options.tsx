@@ -2,32 +2,62 @@
  * DataTable View Options
  *
  * Column visibility toggle dropdown for TanStack Table.
- * Premium styling matching the app's dark glassmorphic theme.
+ * Uses explicit columnVisibility prop to ensure reactivity across portals.
  */
 
 "use client";
 
-import { DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
 import type { Table } from "@tanstack/react-table";
 import { Check, SlidersHorizontal } from "lucide-react";
+import * as React from "react";
 
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
+  DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 interface DataTableViewOptionsProps<TData> {
   table: Table<TData>;
+  columnVisibility?: any;
+}
+
+/**
+ * Extracts a human-readable title from a column definition
+ */
+function getColumnTitle(column: any) {
+  const header = column.columnDef.header;
+
+  if (typeof header === "function") {
+    try {
+      const rendered = header({ column });
+      if (rendered?.props?.title) {
+        return rendered.props.title;
+      }
+    } catch (e) {}
+  }
+
+  if (typeof header === "string") {
+    return header;
+  }
+
+  const idValue = column.id || "";
+  return idValue.replace(/([A-Z])/g, " $1").trim();
 }
 
 export function DataTableViewOptions<TData>({
   table,
+  columnVisibility,
 }: DataTableViewOptionsProps<TData>) {
+  // Use visibility state as a local dependency to ensure re-render
+  // even though we use column.getIsVisible() for the actual value
+  const visibilityString = JSON.stringify(columnVisibility || {});
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -52,36 +82,24 @@ export function DataTableViewOptions<TData>({
           .getAllColumns()
           .filter((column) => column.getCanHide())
           .map((column) => {
-            // Map known column IDs to friendly titles
-            const friendlyTitles: Record<string, string> = {
-              name: "Package Name",
-              categoryName: "Category",
-              projectTypeName: "Project Type",
-              isActive: "Status",
-              totalValue: "Value",
-              items: "Items",
-              actions: "Actions",
-            };
-
-            const title =
-              friendlyTitles[column.id] ||
-              (typeof column.columnDef.header === "string"
-                ? column.columnDef.header
-                : column.id.replace(/([A-Z])/g, " $1").trim());
-
+            // Force re-calculation of isVisible based on state change
+            const isVisible = column.getIsVisible();
             return (
               <DropdownMenuItem
-                key={column.id}
-                className="text-[10px] font-bold uppercase tracking-widest text-white/60 focus:bg-white/10 focus:text-white relative pl-8 cursor-pointer"
+                key={`${column.id}-${visibilityString}`}
+                className={cn(
+                  "text-[10px] font-bold uppercase tracking-widest relative pl-8 cursor-pointer focus:bg-white/10",
+                  isVisible ? "text-white" : "text-white/40",
+                )}
                 onSelect={(e) => {
                   e.preventDefault();
-                  column.toggleVisibility(!column.getIsVisible());
+                  column.toggleVisibility(!isVisible);
                 }}
               >
                 <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
-                  {column.getIsVisible() && <Check className="h-4 w-4" />}
+                  {isVisible && <Check className="h-3.5 w-3.5 text-primary" />}
                 </span>
-                {title}
+                {getColumnTitle(column)}
               </DropdownMenuItem>
             );
           })}
