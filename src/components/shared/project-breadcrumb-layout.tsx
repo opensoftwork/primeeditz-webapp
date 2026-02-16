@@ -30,12 +30,18 @@ function ProjectBreadcrumbContent({
     if (project) {
       const label =
         project.eventName || project.projectTypeName || project.code;
-      setOverride(projectId, label);
+      if (label) {
+        setOverride(projectId, label);
+      }
     }
   }, [projectId, project, setOverride]);
 
   useEffect(() => {
-    return () => removeOverride(projectId);
+    return () => {
+      // Small delay to prevent flickering during rapid navigation
+      // or if another component is about to set it again
+      setTimeout(() => removeOverride(projectId), 100);
+    };
   }, [projectId, removeOverride]);
 
   return <>{children}</>;
@@ -48,10 +54,8 @@ export function ProjectBreadcrumbLayout({
   const { projectId } = use(params);
 
   return (
-    <ConvexErrorBoundary>
-      <ProjectBreadcrumbContent projectId={projectId}>
-        {children}
-      </ProjectBreadcrumbContent>
-    </ConvexErrorBoundary>
+    <ProjectBreadcrumbContent projectId={projectId}>
+      {children}
+    </ProjectBreadcrumbContent>
   );
 }

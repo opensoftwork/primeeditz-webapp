@@ -39,6 +39,7 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
   const router = useRouter();
 
   const updateFolderStatus = useMutation(
+    //@ts-ignore
     api.functions.folders.mutations.updateFolderStatus,
   );
 
@@ -143,12 +144,9 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
           <AlertDialog>
             <AlertDialogTrigger asChild>
               <Button
-                disabled={isSubmitting || !hasFiles}
+                disabled={isSubmitting}
                 className={cn(
-                  "rounded-2xl h-11 px-6 font-black uppercase tracking-widest text-[10px] gap-2 transition-all active:scale-95",
-                  hasFiles
-                    ? "bg-emerald-500 hover:bg-emerald-600 text-white shadow-lg shadow-emerald-500/20"
-                    : "bg-white/5 border border-white/10 text-white/20 cursor-not-allowed",
+                  "rounded-2xl h-11 px-6 bg-emerald-500 hover:bg-emerald-600 text-white font-black uppercase tracking-widest text-[10px] gap-2 shadow-lg shadow-emerald-500/20 transition-all active:scale-95",
                 )}
               >
                 {isSubmitting ? (
@@ -162,12 +160,14 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
             <AlertDialogContent className="bg-zinc-950 border border-white/10 rounded-3xl">
               <AlertDialogHeader>
                 <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white">
-                  Confirm Project Submission
+                  {hasFiles
+                    ? "Confirm Project Submission"
+                    : "No Files Uploaded"}
                 </AlertDialogTitle>
                 <AlertDialogDescription className="text-white/60 font-medium">
-                  Are you sure you want to submit this project? Once submitted,
-                  you won't be able to upload more files to these folders. Any
-                  pending folders will be marked as complete.
+                  {hasFiles
+                    ? "Are you sure you want to submit this project? Once submitted, you won't be able to upload more files to these folders. Any pending folders will be marked as complete."
+                    : "You haven't uploaded any files to this project. Are you sure you want to submit it to the admin without any assets?"}
                 </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter className="mt-6">
@@ -178,7 +178,7 @@ export function AssetsSection({ projectId }: AssetsSectionProps) {
                   onClick={handleProjectSubmit}
                   className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white uppercase tracking-widest text-[10px] font-black h-12 px-6"
                 >
-                  Yes, Submit Project
+                  {hasFiles ? "Yes, Submit Project" : "Yes, Submit Anyway"}
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

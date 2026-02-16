@@ -48,11 +48,15 @@ export default function EmployeeProjectDetail({
   );
 
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    if (project) {
+      const label =
+        project.eventName || project.projectTypeName || project.code;
+      if (label) {
+        setOverride(projectId, label);
+      }
     }
     return () => removeOverride(projectId);
-  }, [project?.eventName, projectId, setOverride, removeOverride]);
+  }, [project, projectId, setOverride, removeOverride]);
 
   if (project === undefined || deliverables === undefined)
     return <EmployeeProjectDetailSkeleton />;

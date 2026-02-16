@@ -22,6 +22,16 @@ import type { EmployeeWithWorkload } from "./columns";
 import { getTeamColumns, type TeamMember } from "./team-columns";
 import { AddEmployeeDrawer } from "./add-employee-drawer";
 import { ProjectTeamSkeleton } from "./skeleton";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface ProjectTeamContainerProps {
   projectId: string;
@@ -35,6 +45,7 @@ export default function ProjectTeamContainer({
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [isSaving, setIsSaving] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   // ------ Data Queries ------
   //@ts-ignore
@@ -140,6 +151,14 @@ export default function ProjectTeamContainer({
     }
   }, [teamMembers, projectId, assignSquad, router]);
 
+  const handleBackClick = () => {
+    if (hasChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      router.back();
+    }
+  };
+
   // ------ Table config ------
   const teamColumns = useMemo(
     () => getTeamColumns(handleRemoveMember),
@@ -190,10 +209,10 @@ export default function ProjectTeamContainer({
           <Button
             variant="outline"
             size="icon"
-            className="rounded-xl shrink-0"
-            onClick={() => router.back()}
+            className="rounded-xl shrink-0 h-11 w-11 border-white/10 bg-white/5 hover:bg-white/10 text-white transition-all hover:scale-105"
+            onClick={handleBackClick}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-5 w-5" />
           </Button>
 
           <div className="flex items-center gap-4">
@@ -299,6 +318,39 @@ export default function ProjectTeamContainer({
         existingMemberIds={existingMemberIds}
         onAddEmployee={handleAddEmployee}
       />
+
+      {/* Unsaved Changes Dialog */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent className="bg-[#0A0A0B] border-white/10 rounded-2xl max-w-md">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-xl font-black uppercase tracking-tight text-white mb-2">
+              Unsaved Changes
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-white/40 font-medium text-sm leading-relaxed">
+              You have made changes to the project team. Would you like to save
+              them before leaving this page?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="flex-col sm:flex-row gap-3 mt-6">
+            <AlertDialogCancel className="rounded-xl bg-white/5 hover:bg-white/10 border-white/10 text-white font-black uppercase tracking-widest text-[10px] h-11 px-6">
+              Cancel
+            </AlertDialogCancel>
+            <Button
+              variant="ghost"
+              onClick={() => router.back()}
+              className="rounded-xl bg-red-500/10 hover:bg-red-500/20 text-red-500 font-black uppercase tracking-widest text-[10px] h-11 px-6 border border-red-500/20"
+            >
+              Discard
+            </Button>
+            <AlertDialogAction
+              onClick={handleSaveTeam}
+              className="rounded-xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest text-[10px] h-11 px-6"
+            >
+              Save & Exit
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
