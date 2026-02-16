@@ -13,6 +13,7 @@ import { FilePreview } from "@/components/shared/file-preview";
 import { VersionReferenceViewer } from "./versions-reference-viewer";
 import { ReviseVersionDrawer } from "./revise-version-drawer";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrl } from "@/components/shared/deliverables";
 
 interface VersionsWorkspaceProps {
   projectId: string;
@@ -42,24 +43,22 @@ export function VersionsWorkspace({
     return () => removeOverride(deliverableId);
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
+  // Mutations
+  const updateStatus = useMutation(
+    api.functions.deliverables.mutations.updateVersionRequestStatus,
+  );
+
   const versionRequests = useQuery(
     //@ts-ignore
     api.functions.deliverables.queries.getDeliverableVersionRequests,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
-  const getSignedUrl = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
-  // Mutations
-  const updateStatus = useMutation(
-    api.functions.deliverables.mutations.updateVersionRequestStatus,
-  );
-
   // Local state
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [isReviseOpen, setIsReviseOpen] = useState(false);
+
+  // Fetch deliverable file URL using custom hook
+  const { url: fileUrl } = useSignedUrl(deliverable?.minioKey);
 
   // Auto-mark as in_progress when first viewed
   useEffect(() => {
@@ -70,21 +69,6 @@ export function VersionsWorkspace({
       }
     }
   }, [versionRequests, updateStatus]);
-
-  // Fetch deliverable file URL
-  useEffect(() => {
-    async function fetchUrl() {
-      if (deliverable?.minioKey) {
-        try {
-          const url = await getSignedUrl({ storageKey: deliverable.minioKey });
-          setFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching deliverable URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [deliverable?.minioKey, getSignedUrl]);
 
   // Loading state
   if (deliverable === undefined || versionRequests === undefined) {

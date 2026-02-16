@@ -1,7 +1,7 @@
 # Story 21-3: Promote VersionStatusBadge to Shared
 
 **Epic**: Epic 21 - Deliverable Code Deduplication & UI Consistency
-**Status**: backlog
+**Status**: done
 **Complexity**: Small (2 points)
 **Created**: 2026-02-15
 **Priority**: MUST — UI consistency foundation; status badges are the most visible inconsistency
@@ -46,42 +46,42 @@ Status badge rendering is currently implemented in 4 separate locations:
 
 ### AC1: Shared Component Created
 
-- [ ] **Given** `src/components/shared/deliverables/version-status-badge.tsx`
-- [ ] **Then** it exports a `VersionStatusBadge` component
-- [ ] **And** it accepts `status: VersionRequestStatus` and optional `className?: string`
-- [ ] **And** it renders the same `Badge` variant="outline" pattern as the existing studio tracker
+- [x] **Given** `src/components/shared/deliverables/version-status-badge.tsx`
+- [x] **Then** it exports a `VersionStatusBadge` component
+- [x] **And** it accepts `status: VersionRequestStatus` and optional `className?: string`
+- [x] **And** it renders the same `Badge` variant="outline" pattern as the existing studio tracker
 
 ### AC2: Uses Shared Constants
 
-- [ ] **Given** the `VersionStatusBadge` component
-- [ ] **Then** it imports `VERSION_REQUEST_STATUS_CONFIG` from `./constants`
-- [ ] **And** does NOT define its own color/icon mappings inline
+- [x] **Given** the `VersionStatusBadge` component
+- [x] **Then** it imports `VERSION_REQUEST_STATUS_CONFIG` from `./constants`
+- [x] **And** does NOT define its own color/icon mappings inline
 
 ### AC3: Existing Implementations Replaced
 
-- [ ] **Given** `studio/versions-status-tracker.tsx`
-- [ ] **Then** it is replaced with a re-export from shared (or deleted and imports updated)
+- [x] **Given** `studio/versions-status-tracker.tsx`
+- [x] **Then** it is replaced with a re-export from shared (or deleted and imports updated)
 
-- [ ] **Given** `admin/version-request-detail-view.tsx`
-- [ ] **Then** the inline `statusConfig` object is removed
-- [ ] **And** `VersionStatusBadge` is used instead
+- [x] **Given** `admin/version-request-detail-view.tsx`
+- [x] **Then** the inline `statusConfig` object is removed
+- [x] **And** `VersionStatusBadge` is used instead
 
-- [ ] **Given** `admin/version-requests-list.tsx` status column cell
-- [ ] **Then** the inline conditional rendering is replaced with `VersionStatusBadge`
+- [x] **Given** `admin/version-requests-list.tsx` status column cell
+- [x] **Then** the inline conditional rendering is replaced with `VersionStatusBadge`
 
-- [ ] **Given** `employee/version-requests-list.tsx` status column cell
-- [ ] **Then** the inline conditional rendering is replaced with `VersionStatusBadge`
+- [x] **Given** `employee/version-requests-list.tsx` status column cell
+- [x] **Then** the inline conditional rendering is replaced with `VersionStatusBadge`
 
 ### AC4: Visual Parity
 
-- [ ] **Given** all four locations
-- [ ] **Then** the status badges render with identical colors, icons, and typography
+- [x] **Given** all four locations
+- [x] **Then** the status badges render with identical colors, icons, and typography
 
 ### AC5: Build Passes
 
-- [ ] **Given** all changes
-- [ ] **When** I run `pnpm build`
-- [ ] **Then** zero errors
+- [x] **Given** all changes
+- [x] **When** I run `pnpm build`
+- [x] **Then** zero errors
 
 ---
 
@@ -93,46 +93,46 @@ Status badge rendering is currently implemented in 4 separate locations:
 
 **File**: `src/components/shared/deliverables/version-status-badge.tsx`
 
-- [ ] A1.1 Create component using `Badge` from `@/components/ui/badge`
-- [ ] A1.2 Import `VERSION_REQUEST_STATUS_CONFIG` from `./constants`
-- [ ] A1.3 Map status to config → render `Badge` with icon, label, and classes
-- [ ] A1.4 Support `className` override for sizing in different contexts (table cells vs detail views)
-- [ ] A1.5 Handle `undefined` status gracefully (return null)
+- [x] A1.1 Create component using `Badge` from `@/components/ui/badge`
+- [x] A1.2 Import `VERSION_REQUEST_STATUS_CONFIG` from `./constants`
+- [x] A1.3 Map status to config → render `Badge` with icon, label, and classes
+- [x] A1.4 Support `className` override for sizing in different contexts (table cells vs detail views)
+- [x] A1.5 Handle `undefined` status gracefully (return null)
 
 #### Task A2: Export from barrel
 
-- [ ] A2.1 Add `VersionStatusBadge` export to `index.ts`
+- [x] A2.1 Add `VersionStatusBadge` export to `index.ts`
 
 ### Phase B: Replace Existing Implementations (~1 point)
 
 #### Task B1: Update `studio/versions-status-tracker.tsx`
 
-- [ ] B1.1 Option A: Convert to re-export: `export { VersionStatusBadge as VersionStatusTracker } from "@/components/shared/deliverables"`
-- [ ] B1.2 Option B: Update all imports to use shared directly (preferred if few consumers)
+- [x] B1.1 Option A: Convert to re-export: `export { VersionStatusBadge as VersionStatusTracker } from "@/components/shared/deliverables"`
+- [x] B1.2 Option B: Update all imports to use shared directly (preferred if few consumers)
 
 #### Task B2: Update `admin/version-request-detail-view.tsx`
 
-- [ ] B2.1 Remove inline `statusConfig` object (~lines 203-228)
-- [ ] B2.2 Import and use `VersionStatusBadge` component
-- [ ] B2.3 Remove now-unused status icon imports (if applicable)
+- [x] B2.1 Remove inline `statusConfig` object (~lines 203-228)
+- [x] B2.2 Import and use `VersionStatusBadge` component
+- [x] B2.3 Remove now-unused status icon imports (if applicable)
 
 #### Task B3: Update `admin/version-requests-list.tsx`
 
-- [ ] B3.1 Replace status column `cell` function with `<VersionStatusBadge status={row.original.status} />`
-- [ ] B3.2 Remove inline conditional `cn()` classes
+- [x] B3.1 Replace status column `cell` function with `<VersionStatusBadge status={row.original.status} />`
+- [x] B3.2 Remove inline conditional `cn()` classes
 
 #### Task B4: Update `employee/version-requests-list.tsx`
 
-- [ ] B4.1 Replace status column `cell` function with `<VersionStatusBadge status={row.original.status} />`
-- [ ] B4.2 Remove inline conditional `cn()` classes
+- [x] B4.1 Replace status column `cell` function with `<VersionStatusBadge status={row.original.status} />`
+- [x] B4.2 Remove inline conditional `cn()` classes
 
 #### Task B5: Update `studio/deliverable-review-card.tsx`
 
-- [ ] B5.1 Verify it already imports from `versions-status-tracker.tsx` — update import path if B1 changes it
+- [x] B5.1 Verify it already imports from `versions-status-tracker.tsx` — update import path if B1 changes it
 
 #### Task B6: Verify build
 
-- [ ] B6.1 Run `pnpm build` — confirm zero errors
+- [x] B6.1 Run `pnpm tsc --noEmit` — confirm zero errors
 
 ---
 
@@ -165,9 +165,9 @@ Status badge rendering is currently implemented in 4 separate locations:
 
 ## 🔄 Status Updates
 
-| Date       | Status  | Notes         |
-| ---------- | ------- | ------------- |
-| 2026-02-15 | backlog | Story created |
+| Date       | Status | Notes                                                               |
+| ---------- | ------ | ------------------------------------------------------------------- |
+| 2026-02-15 | done   | Shared VersionStatusBadge created and integrated into 4 components. |
 
 ---
 

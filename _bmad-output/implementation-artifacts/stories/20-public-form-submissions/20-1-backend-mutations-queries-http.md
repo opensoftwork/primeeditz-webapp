@@ -14,7 +14,7 @@ updated: 2026-02-14
 # Story 20-1: Backend — Convex Mutations, Queries & HTTP Endpoints
 
 **Epic**: Epic 20 - Public Form Submissions (Contacts, Feedbacks & Surveys)
-**Status**: in-progress
+**Status**: done
 **Complexity**: Medium (5 points)
 **Created**: 2026-02-14
 **Priority**: CRITICAL — Foundation for external form integration and admin views
@@ -166,9 +166,9 @@ export const deleteContact = adminMutation({
 });
 ```
 
-- [ ] A1.1 Create `createContact` public mutation with all schema fields as args
-- [ ] A1.2 Create `deleteContact` admin mutation with `v.id("contacts")` arg
-- [ ] A1.3 Validate file stays under 150 lines
+- [x] A1.1 Create `createContact` public mutation with all schema fields as args
+- [x] A1.2 Create `deleteContact` admin mutation with `v.id("contacts")` arg
+- [x] A1.3 Validate file stays under 150 lines
 
 #### Task A2: Contact Queries
 
@@ -200,8 +200,8 @@ export const getContactById = adminQuery({
 });
 ```
 
-- [ ] A2.1 Create `listContacts` query with `adminQuery` wrapper, `.order("desc")`
-- [ ] A2.2 Create `getContactById` query with `adminQuery` wrapper
+- [x] A2.1 Create `listContacts` query with `adminQuery` wrapper, `.order("desc")`
+- [x] A2.2 Create `getContactById` query with `adminQuery` wrapper
 
 #### Task A3: Contact Index
 
@@ -212,7 +212,7 @@ export * from "./mutations";
 export * from "./queries";
 ```
 
-- [ ] A3.1 Create barrel export file
+- [x] A3.1 Create barrel export file
 
 ---
 
@@ -258,8 +258,8 @@ export const deleteFeedback = adminMutation({
 });
 ```
 
-- [ ] B1.1 Create `createFeedback` public mutation
-- [ ] B1.2 Create `deleteFeedback` admin mutation
+- [x] B1.1 Create `createFeedback` public mutation
+- [x] B1.2 Create `deleteFeedback` admin mutation
 
 #### Task B2: Feedback Queries
 
@@ -285,13 +285,13 @@ export const getFeedbackById = adminQuery({
 });
 ```
 
-- [ ] B2.1 Create `listFeedbacks` and `getFeedbackById` queries
+- [x] B2.1 Create `listFeedbacks` and `getFeedbackById` queries
 
 #### Task B3: Feedback Index
 
 **File**: `convex/functions/feedbacks/index.ts`
 
-- [ ] B3.1 Create barrel export file
+- [x] B3.1 Create barrel export file
 
 ---
 
@@ -353,20 +353,20 @@ export const deleteSurvey = adminMutation({
 });
 ```
 
-- [ ] C1.1 Create `createSurvey` public mutation matching full schema
-- [ ] C1.2 Create `deleteSurvey` admin mutation
+- [x] C1.1 Create `createSurvey` public mutation matching full schema
+- [x] C1.2 Create `deleteSurvey` admin mutation
 
 #### Task C2: Survey Queries
 
 **File**: `convex/functions/surveys/queries.ts`
 
-- [ ] C2.1 Create `listSurveys` and `getSurveyById` queries (same pattern as contacts/feedbacks)
+- [x] C2.1 Create `listSurveys` and `getSurveyById` queries (same pattern as contacts/feedbacks)
 
 #### Task C3: Survey Index
 
 **File**: `convex/functions/surveys/index.ts`
 
-- [ ] C3.1 Create barrel export file
+- [x] C3.1 Create barrel export file
 
 ---
 
@@ -443,16 +443,16 @@ http.route({
 export default http;
 ```
 
-- [ ] D1.1 Import `httpAction` from `convex/_generated/server` and `api` from `convex/_generated/api`
-- [ ] D1.2 Define `corsHeaders` object
-- [ ] D1.3 Add POST route for `/contacts` with try/catch, calling `api.functions.contacts.mutations.createContact`
-- [ ] D1.4 Add OPTIONS route for `/contacts`
-- [ ] D1.5 Add POST route for `/feedbacks` calling `api.functions.feedbacks.mutations.createFeedback`
-- [ ] D1.6 Add OPTIONS route for `/feedbacks`
-- [ ] D1.7 Add POST route for `/surveys` calling `api.functions.surveys.mutations.createSurvey`
-- [ ] D1.8 Add OPTIONS route for `/surveys`
-- [ ] D1.9 Keep auth routes intact (do NOT remove `authComponent.registerRoutes(http, createAuth)`)
-- [ ] D1.10 Verify file compiles without errors
+- [x] D1.1 Import `httpAction` from `convex/_generated/server` and `api` from `convex/_generated/api`
+- [x] D1.2 Define `corsHeaders` object
+- [x] D1.3 Add POST route for `/contacts` with try/catch, calling `api.functions.contacts.mutations.createContact`
+- [x] D1.4 Add OPTIONS route for `/contacts`
+- [x] D1.5 Add POST route for `/feedbacks` calling `api.functions.feedbacks.mutations.createFeedback`
+- [x] D1.6 Add OPTIONS route for `/feedbacks`
+- [x] D1.7 Add POST route for `/surveys` calling `api.functions.surveys.mutations.createSurvey`
+- [x] D1.8 Add OPTIONS route for `/surveys`
+- [x] D1.9 Keep auth routes intact (do NOT remove `authComponent.registerRoutes(http, createAuth)`)
+- [x] D1.10 Verify file compiles without errors
 
 **CRITICAL NOTES FOR HTTP ROUTES:**
 

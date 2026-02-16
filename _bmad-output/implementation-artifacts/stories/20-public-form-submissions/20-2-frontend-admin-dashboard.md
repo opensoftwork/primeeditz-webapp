@@ -623,16 +623,16 @@ export default function ContactDetail({ contactId }: ContactDetailProps) {
 }
 ```
 
-- [ ] A6.1 Create `ContactDetail` component with `useQuery(getContactById)`
-- [ ] A6.2 Display all fields in card-based layout
-- [ ] A6.3 Loading, not-found, and delete states
-- [ ] A6.4 Motion animations for entrance
+- [x] A6.1 Create `ContactDetail` component with `useQuery(getContactById)`
+- [x] A6.2 Display all fields in card-based layout
+- [x] A6.3 Loading, not-found, and delete states
+- [x] A6.4 Motion animations for entrance
 
 #### Task A7: Contact Detail Index
 
 **File**: `src/components/modules/admin/contacts/detail/index.ts`
 
-- [ ] A7.1 Create barrel export: `export { default as ContactDetail } from "./contact-detail";`
+- [x] A7.1 Create barrel export: `export { default as ContactDetail } from "./contact-detail";`
 
 #### Task A8: Contact Module Root Index
 
@@ -643,7 +643,7 @@ export * from "./list";
 export { default as ContactDetail } from "./detail/contact-detail";
 ```
 
-- [ ] A8.1 Create module root barrel export
+- [x] A8.1 Create module root barrel export
 
 #### Task A9: Contact Route Pages
 
@@ -661,7 +661,7 @@ export default function ContactsPage() {
 
 ```tsx
 import { notFound } from "next/navigation";
-import type { Id } from "@convex/_generated/dataModel";
+import type { Id } => "@convex/_generated/dataModel";
 import ContactDetail from "@/components/modules/admin/contacts/detail/contact-detail";
 
 interface PageProps {
@@ -677,8 +677,8 @@ export default async function ContactDetailPage({ params }: PageProps) {
 }
 ```
 
-- [ ] A9.1 Create list route page (<30 lines)
-- [ ] A9.2 Create detail route page with `params.id` extraction (<30 lines)
+- [x] A9.1 Create list route page (<30 lines)
+- [x] A9.2 Create detail route page with `params.id` extraction (<30 lines)
 
 ---
 
@@ -690,9 +690,9 @@ Same structure as contacts, with following differences:
 
 **File**: `src/components/modules/admin/feedbacks/list/feedbacks-list.tsx`
 
-- [ ] B1.1 Create `FeedbacksList` component using `useQuery(api.functions.feedbacks.queries.listFeedbacks)`
-- [ ] B1.2 Integrate `DataTable` with search on `name` and filter on `rating`
-- [ ] B1.3 No create button (read-only)
+- [x] B1.1 Create `FeedbacksList` component using `useQuery(api.functions.feedbacks.queries.listFeedbacks)`
+- [x] B1.2 Integrate `DataTable` with search on `name` and filter on `rating`
+- [x] B1.3 No create button (read-only)
 
 #### Task B2: Feedback Columns
 
@@ -706,14 +706,14 @@ Columns: Name, Email, Rating (numeric badge with color coding), Date, Actions.
 - Rating 3: `bg-amber-500/10 text-amber-400 border-amber-500/20`
 - Rating 4-5: `bg-green-500/10 text-green-400 border-green-500/20`
 
-- [ ] B2.1 Create columns with rating badge color coding
-- [ ] B2.2 Actions: View + Delete icon buttons
+- [x] B2.1 Create columns with rating badge color coding
+- [x] B2.2 Actions: View + Delete icon buttons
 
 #### Task B3: Feedback Card
 
 **File**: `src/components/modules/admin/feedbacks/list/feedback-card.tsx`
 
-- [ ] B3.1 Card showing name, rating (stars or badge), truncated feedback preview
+- [x] B3.1 Card showing name, rating (stars or badge), truncated feedback preview
 
 #### Task B4: Feedback Types + Index
 
@@ -726,28 +726,28 @@ import type { Doc } from "@convex/_generated/dataModel";
 export type AdminFeedback = Doc<"feedbacks">;
 ```
 
-- [ ] B4.1 Create types and barrel exports
+- [x] B4.1 Create types and barrel exports
 
 #### Task B5: Feedback Detail View
 
 **File**: `src/components/modules/admin/feedbacks/detail/feedback-detail.tsx`
 
-- [ ] B5.1 Create `FeedbackDetail` showing all fields: name, email, rating (with large badge), full feedback text
-- [ ] B5.2 Loading, not-found, delete states
-- [ ] B5.3 Back button and delete action
+- [x] B5.1 Create `FeedbackDetail` showing all fields: name, email, rating (with large badge), full feedback text
+- [x] B5.2 Loading, not-found, delete states
+- [x] B5.3 Back button and delete action
 
 #### Task B6: Feedback Detail Index + Module Index
 
-- [ ] B6.1 `src/components/modules/admin/feedbacks/detail/index.ts`
-- [ ] B6.2 `src/components/modules/admin/feedbacks/index.ts`
+- [x] B6.1 `src/components/modules/admin/feedbacks/detail/index.ts`
+- [x] B6.2 `src/components/modules/admin/feedbacks/index.ts`
 
 #### Task B7: Feedback Route Pages
 
 **File**: `src/app/(protected)/@admin/feedbacks/page.tsx`
 **File**: `src/app/(protected)/@admin/feedbacks/[id]/page.tsx`
 
-- [ ] B7.1 Create thin list route page
-- [ ] B7.2 Create thin detail route page
+- [x] B7.1 Create thin list route page
+- [x] B7.2 Create thin detail route page
 
 ---
 
@@ -759,9 +759,9 @@ Same structure, with key difference: survey detail has many grouped sections.
 
 **File**: `src/components/modules/admin/surveys/list/surveys-list.tsx`
 
-- [ ] C1.1 Create `SurveysList` component using `useQuery(api.functions.surveys.queries.listSurveys)`
-- [ ] C1.2 Default view: `table` (not cards) due to data density
-- [ ] C1.3 Search on `name`, filter on `q1_role`
+- [x] C1.1 Create `SurveysList` component using `useQuery(api.functions.surveys.queries.listSurveys)`
+- [x] C1.2 Default view: `table` (not cards) due to data density
+- [x] C1.3 Search on `name`, filter on `q1_role`
 
 #### Task C2: Survey Columns
 
@@ -769,14 +769,14 @@ Same structure, with key difference: survey detail has many grouped sections.
 
 Columns: Name, Email, Role (q1_role), Date, Actions.
 
-- [ ] C2.1 Create columns
-- [ ] C2.2 Show `q1_role` or "Not specified" fallback
+- [x] C2.1 Create columns
+- [x] C2.2 Show `q1_role` or "Not specified" fallback
 
 #### Task C3: Survey Card
 
 **File**: `src/components/modules/admin/surveys/list/survey-card.tsx`
 
-- [ ] C3.1 Card with name, email, role, content type tags
+- [x] C3.1 Card with name, email, role, content type tags
 
 #### Task C4: Survey Types + Index
 
@@ -789,7 +789,7 @@ import type { Doc } from "@convex/_generated/dataModel";
 export type AdminSurvey = Doc<"surveys">;
 ```
 
-- [ ] C4.1 Create types and barrel exports
+- [x] C4.1 Create types and barrel exports
 
 #### Task C5: Survey Detail View
 
@@ -872,24 +872,24 @@ function DetailTags({
 }
 ```
 
-- [ ] C5.1 Create `SurveyDetail` with three section cards
-- [ ] C5.2 Use `DetailField` helper to hide empty optional fields
-- [ ] C5.3 Use `DetailTags` for array fields (content types, editing challenges)
-- [ ] C5.4 Loading, not-found, delete states
-- [ ] C5.5 Back button and delete action
+- [x] C5.1 Create `SurveyDetail` with three section cards
+- [x] C5.2 Use `DetailField` helper to hide empty optional fields
+- [x] C5.3 Use `DetailTags` for array fields (content types, editing challenges)
+- [x] C5.4 Loading, not-found, delete states
+- [x] C5.5 Back button and delete action
 
 #### Task C6: Survey Detail Index + Module Index
 
-- [ ] C6.1 `src/components/modules/admin/surveys/detail/index.ts`
-- [ ] C6.2 `src/components/modules/admin/surveys/index.ts`
+- [x] C6.1 `src/components/modules/admin/surveys/detail/index.ts`
+- [x] C6.2 `src/components/modules/admin/surveys/index.ts`
 
 #### Task C7: Survey Route Pages
 
 **File**: `src/app/(protected)/@admin/surveys/page.tsx`
 **File**: `src/app/(protected)/@admin/surveys/[id]/page.tsx`
 
-- [ ] C7.1 Create thin list route page
-- [ ] C7.2 Create thin detail route page
+- [x] C7.1 Create thin list route page
+- [x] C7.2 Create thin detail route page
 
 ---
 

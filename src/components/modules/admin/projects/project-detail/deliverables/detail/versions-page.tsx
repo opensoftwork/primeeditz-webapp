@@ -14,6 +14,7 @@ import { DeliverablePreview } from "./deliverable-preview";
 import { VersionImageUpload } from "./versions-image-upload";
 import { VersionImageGrid, VersionImage } from "./versions-image-grid";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrl } from "@/components/shared/deliverables";
 
 interface VersionsPageProps {
   projectId: string;
@@ -26,7 +27,6 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
   const [uploadedImages, setUploadedImages] = useState<VersionImage[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const deliverable = useQuery(
@@ -46,25 +46,8 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
     api.functions.deliverables.mutations.createVersionRequest,
   );
 
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
-  useEffect(() => {
-    async function fetchUrl() {
-      if (deliverable?.minioKey) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: deliverable.minioKey,
-          });
-          setFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching signed URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [deliverable, getSignedUrlAction]);
+  // Fetch signed URL for the deliverable using custom hook
+  const { url: fileUrl } = useSignedUrl(deliverable?.minioKey);
 
   const handleSubmit = async () => {
     if (!notes.trim()) {

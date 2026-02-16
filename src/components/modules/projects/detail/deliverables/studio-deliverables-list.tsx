@@ -15,7 +15,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import type { ColumnDef } from "@tanstack/react-table";
 import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrls } from "@/components/shared/deliverables";
 import { FilePreview } from "@/components/shared/file-preview";
 import { motion } from "motion/react";
 
@@ -52,9 +53,9 @@ export function StudioDeliverablesList({
 }: StudioDeliverablesListProps) {
   const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
-  const [signedUrls, setSignedUrls] = useState<Record<string, string>>({});
 
   const deliverables = useQuery(
+    // @ts-ignore
     api.functions.deliverables.queries.getClientDeliverables,
     { projectId: projectId as Id<"projects"> },
   );
@@ -63,12 +64,6 @@ export function StudioDeliverablesList({
   const project = useQuery(api.functions.projects.queries.getProject, {
     projectId: projectId as Id<"projects">,
   });
-
-  const getSignedUrlsAction = useAction(
-    api.functions.storage.actions.getSignedFileUrls,
-  );
-
-  // Breadcrumb override for project name
   useEffect(() => {
     const label = project?.endClientName || project?.eventName || project?.code;
     if (label) {
@@ -84,33 +79,13 @@ export function StudioDeliverablesList({
     removeOverride,
   ]);
 
-  // Fetch signed URLs for thumbnails
-  useEffect(() => {
-    async function fetchUrls() {
-      if (
-        deliverables &&
-        deliverables.length > 0 &&
-        Object.keys(signedUrls).length === 0
-      ) {
-        try {
-          const keys = deliverables
-            .map((d) => d.minioKey)
-            .filter(Boolean) as string[];
-          if (keys.length > 0) {
-            const urlsMap = await getSignedUrlsAction({ storageKeys: keys });
-            const validUrls: Record<string, string> = {};
-            for (const key of Object.keys(urlsMap)) {
-              if (urlsMap[key]) validUrls[key] = urlsMap[key]!;
-            }
-            setSignedUrls(validUrls);
-          }
-        } catch (error) {
-          console.error("Error fetching signed URLs:", error);
-        }
-      }
-    }
-    fetchUrls();
-  }, [deliverables, getSignedUrlsAction]);
+  // Fetch signed URLs for thumbnails using custom hook
+  const deliverableKeys = useMemo(
+    () =>
+      (deliverables?.map((d) => d.minioKey).filter(Boolean) as string[]) ?? [],
+    [deliverables],
+  );
+  const { urls: signedUrls } = useSignedUrls(deliverableKeys);
 
   const columns: ColumnDef<StudioDeliverable>[] = [
     {

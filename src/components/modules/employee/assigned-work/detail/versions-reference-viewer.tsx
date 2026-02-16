@@ -2,8 +2,9 @@
 
 import { useAction } from "convex/react";
 import { api } from "@convex/_generated/api";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSignedUrls } from "@/components/shared/deliverables";
 import { AlertTriangle, User, Calendar, ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -32,41 +33,13 @@ export function VersionReferenceViewer({
   createdAt,
   referenceImages,
 }: VersionReferenceViewerProps) {
-  const getSignedUrl = useAction(
-    // @ts-ignore
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
-  const [loadingUrls, setLoadingUrls] = useState(true);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  useEffect(() => {
-    async function fetchUrls() {
-      if (!referenceImages?.length) {
-        setLoadingUrls(false);
-        return;
-      }
-
-      const urls: Record<string, string> = {};
-      try {
-        await Promise.all(
-          referenceImages.map(async (img) => {
-            const url = await getSignedUrl({ storageKey: img.minioKey });
-            if (url) {
-              urls[img.minioKey] = url;
-            }
-          }),
-        );
-        setImageUrls(urls);
-      } catch (error) {
-        console.error("Error fetching reference image URLs:", error);
-      } finally {
-        setLoadingUrls(false);
-      }
-    }
-
-    fetchUrls();
-  }, [referenceImages, getSignedUrl]);
+  const imageKeys = useMemo(
+    () => referenceImages?.map((img) => img.minioKey) ?? [],
+    [referenceImages],
+  );
+  const { urls: imageUrls, isLoading: loadingUrls } = useSignedUrls(imageKeys);
 
   return (
     <div className="space-y-5">

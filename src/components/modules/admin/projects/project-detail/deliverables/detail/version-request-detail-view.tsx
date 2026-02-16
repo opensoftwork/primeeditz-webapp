@@ -30,6 +30,11 @@ import { cn } from "@/lib/utils";
 import { DeliverablePreview } from "./deliverable-preview";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import {
+  useSignedUrl,
+  useSignedUrls,
+  VersionStatusBadge,
+} from "@/components/shared/deliverables";
+import {
   AssetSlider,
   type ViewerAsset,
 } from "@/components/shared/asset-viewer";
@@ -47,10 +52,6 @@ export function VersionRequestDetailView({
 }: VersionRequestDetailProps) {
   const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
-  const [deliverableFileUrl, setDeliverableFileUrl] = useState<string | null>(
-    null,
-  );
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
@@ -70,11 +71,6 @@ export function VersionRequestDetailView({
   // Mutations
   const updateStatusMutation = useMutation(
     api.functions.deliverables.mutations.updateVersionRequestStatus,
-  );
-
-  // Actions
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
   );
 
   // Breadcrumb
@@ -98,45 +94,15 @@ export function VersionRequestDetailView({
     removeOverride,
   ]);
 
-  // Fetch deliverable file URL
-  useEffect(() => {
-    async function fetchUrl() {
-      if (deliverable?.minioKey) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: deliverable.minioKey,
-          });
-          setDeliverableFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching deliverable URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [deliverable, getSignedUrlAction]);
+  // Fetch deliverable file URL using custom hook
+  const { url: deliverableFileUrl } = useSignedUrl(deliverable?.minioKey);
 
-  // Fetch reference image URLs
-  useEffect(() => {
-    async function fetchImageUrls() {
-      if (versionRequest?.referenceImages?.length) {
-        const urls: Record<string, string> = {};
-        for (const img of versionRequest.referenceImages) {
-          try {
-            const url = await getSignedUrlAction({
-              storageKey: img.minioKey,
-            });
-            if (url) {
-              urls[img.minioKey] = url;
-            }
-          } catch (error) {
-            console.error("Error fetching image URL:", error);
-          }
-        }
-        setImageUrls(urls);
-      }
-    }
-    fetchImageUrls();
-  }, [versionRequest, getSignedUrlAction]);
+  // Fetch reference image URLs using custom hook
+  const imageKeys = useMemo(
+    () => versionRequest?.referenceImages?.map((img) => img.minioKey) ?? [],
+    [versionRequest?.referenceImages],
+  );
+  const { urls: imageUrls } = useSignedUrls(imageKeys);
 
   // Prepare assets for the viewer
   const viewerAssets: ViewerAsset[] = useMemo(() => {
@@ -252,38 +218,6 @@ export function VersionRequestDetailView({
     );
   }
 
-  const statusConfig = {
-    pending: {
-      label: "Pending",
-      icon: Clock,
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/20",
-      text: "text-amber-400",
-      dotColor: "bg-amber-400",
-    },
-    in_progress: {
-      label: "In Progress",
-      icon: Play,
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
-      text: "text-blue-400",
-      dotColor: "bg-blue-400",
-    },
-    resolved: {
-      label: "Resolved",
-      icon: CheckCircle,
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-      text: "text-emerald-400",
-      dotColor: "bg-emerald-400",
-    },
-  } as const;
-
-  const currentStatus =
-    statusConfig[versionRequest.status as keyof typeof statusConfig] ||
-    statusConfig.pending;
-  const StatusIcon = currentStatus.icon;
-
   return (
     <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
@@ -303,18 +237,7 @@ export function VersionRequestDetailView({
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
                 VERSION REQUEST
               </span>
-              <Badge
-                variant="outline"
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider",
-                  currentStatus.bg,
-                  currentStatus.border,
-                  currentStatus.text,
-                )}
-              >
-                <StatusIcon className="h-3 w-3" />
-                {currentStatus.label}
-              </Badge>
+              <VersionStatusBadge status={versionRequest.status} />
             </div>
             <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
               Request #{versionRequest.versionNumber}

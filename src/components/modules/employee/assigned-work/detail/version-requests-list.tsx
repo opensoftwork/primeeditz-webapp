@@ -7,12 +7,12 @@ import { useRouter } from "next/navigation";
 import { useEffect } from "react";
 import {
   ArrowLeft,
-  Clock,
-  CheckCircle,
-  Play,
   Eye,
   ImageIcon,
   Hash,
+  Clock,
+  Play,
+  CheckCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -24,16 +24,10 @@ import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import Link from "next/link";
 
-interface VersionRequestRow {
-  _id: Id<"versionRequests">;
-  versionNumber: number;
-  notes: string;
-  status: string;
-  requestedByName: string;
-  requestedByRole: string;
-  createdAt: number;
-  referenceImages?: { fileName: string }[];
-}
+import {
+  VersionRequestRow,
+  VersionStatusBadge,
+} from "@/components/shared/deliverables";
 
 interface VersionRequestsListProps {
   projectId: string;
@@ -96,30 +90,7 @@ export function VersionRequestsList({
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <div
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
-              status === "resolved"
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : status === "in_progress"
-                  ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-400",
-            )}
-          >
-            {status === "resolved" ? (
-              <CheckCircle className="h-3 w-3" />
-            ) : status === "in_progress" ? (
-              <Play className="h-3 w-3" />
-            ) : (
-              <Clock className="h-3 w-3" />
-            )}
-            {status.replace("_", " ")}
-          </div>
-        );
-      },
+      cell: ({ row }) => <VersionStatusBadge status={row.original.status} />,
     },
     {
       accessorKey: "requestedByName",

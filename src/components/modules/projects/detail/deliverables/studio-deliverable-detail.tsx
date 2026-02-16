@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrl } from "@/components/shared/deliverables";
 import { DeliverablePreview } from "@/components/modules/admin/projects/project-detail/deliverables/detail/deliverable-preview";
 import { VersionHistory } from "@/components/modules/admin/projects/project-detail/deliverables/detail/version-history";
 import type { DeliverableVersion } from "@/components/modules/admin/projects/project-detail/deliverables/detail/types";
@@ -41,7 +42,6 @@ export function StudioDeliverableDetailView({
   const { setOverride, removeOverride } = useBreadcrumbStore();
   const router = useRouter();
 
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [viewedVersion, setViewedVersion] = useState<{
     version: number;
     minioKey: string;
@@ -78,11 +78,6 @@ export function StudioDeliverableDetailView({
     api.functions.deliverables.mutations.studioApproveDeliverable,
   );
 
-  // Actions
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
   // Breadcrumb override
   useEffect(() => {
     if (deliverable) {
@@ -91,23 +86,9 @@ export function StudioDeliverableDetailView({
     return () => removeOverride(deliverableId);
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
-  // Fetch signed URL for current file (or viewed version)
-  useEffect(() => {
-    async function fetchUrl() {
-      const keyToFetch = viewedVersion?.minioKey || deliverable?.minioKey;
-      if (keyToFetch) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: keyToFetch,
-          });
-          setFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching signed URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [deliverable?.minioKey, viewedVersion?.minioKey, getSignedUrlAction]);
+  // Fetch signed URL for current file (or viewed version) using custom hook
+  const keyToFetch = viewedVersion?.minioKey || deliverable?.minioKey;
+  const { url: fileUrl } = useSignedUrl(keyToFetch);
 
   // Handle version selection
   const handleVersionSelect = (version: any) => {
@@ -117,7 +98,6 @@ export function StudioDeliverableDetailView({
       mimeType: version.mimeType,
       description: version.description,
     });
-    setFileUrl(null); // Reset to fetch new URL
   };
 
   const handleApprove = async () => {
@@ -272,7 +252,7 @@ export function StudioDeliverableDetailView({
         {/* Sidebar — 1/3 width */}
         <div className="space-y-6">
           {/* Status & Meta Card */}
-          <div className="p-6 rounded-[2rem] bg-white/5 border border-white/5 space-y-6 relative overflow-hidden group">
+          <div className="p-6 rounded-4xl bg-white/5 border border-white/5 space-y-6 relative overflow-hidden group">
             <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
               <FileIcon className="h-12 w-12" />
             </div>

@@ -3,6 +3,8 @@
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 import { DeliverableVersion } from "./types";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 
 interface VersionHistoryProps {
   versions: DeliverableVersion[];
@@ -44,14 +46,20 @@ export function VersionHistory({
               <div className="flex items-center gap-2">
                 <span>v{v.versionNumber}</span>
                 {v.scope === "external" && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-indigo-500/10 text-indigo-400 text-[7px] font-black uppercase tracking-widest border border-indigo-500/20">
+                  <Badge
+                    variant="outline"
+                    className="bg-indigo-500/10 text-indigo-400 text-[7px] font-black uppercase tracking-widest border-indigo-500/20 px-1.5 py-0.5 rounded-md h-auto"
+                  >
                     CLIENT V{v.studioVersionNumber}
-                  </span>
+                  </Badge>
                 )}
                 {isSelected && (
-                  <span className="px-1.5 py-0.5 rounded-md bg-white/10 text-white/50 text-[7px] font-black uppercase tracking-widest border border-white/10">
+                  <Badge
+                    variant="outline"
+                    className="bg-white/10 text-white/50 text-[7px] font-black uppercase tracking-widest border-white/10 px-1.5 py-0.5 rounded-md h-auto"
+                  >
                     VIEWING
-                  </span>
+                  </Badge>
                 )}
               </div>
               <div className="flex items-center gap-1.5 mt-1 opacity-60 group-hover:opacity-100 transition-opacity">

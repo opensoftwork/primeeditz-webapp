@@ -374,6 +374,19 @@ development_status:
   # ============================================================================
   # EPIC 20: Public Form Submissions
   # ============================================================================
-  epic-20: in-progress
-  20-1-backend-mutations-queries-http: in-progress
-  20-2-frontend-admin-dashboard: ready-for-dev
+  epic-20: done
+  20-1-backend-mutations-queries-http: done
+  20-2-frontend-admin-dashboard: done
+
+  # ============================================================================
+  # EPIC 21: Deliverable Code Deduplication & UI Consistency
+  # ============================================================================
+  epic-21: in-progress
+  21-1-extract-shared-types-constants: done
+  21-2-signed-url-custom-hooks: done
+  21-3-promote-version-status-badge: done
+  21-4-unify-version-requests-list: ready-for-dev
+  21-5-consolidate-version-request-dialogs: ready-for-dev
+  21-6-employee-lightbox-assetslider: ready-for-dev
+  21-7-move-image-grid-upload-shared: ready-for-dev
+  21-8-ui-consistency-pass: ready-for-dev

@@ -33,6 +33,7 @@ import { DeliverableActions } from "./deliverable-actions";
 import { VersionHistory } from "./version-history";
 import { VersionDialog } from "./versions-dialog";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrl } from "@/components/shared/deliverables";
 
 interface DeliverableDetailViewProps {
   projectId?: string;
@@ -60,7 +61,6 @@ export function DeliverableDetailView({
 
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [viewedVersion, setViewedVersion] = useState<{
     version: number;
     minioKey: string;
@@ -105,11 +105,6 @@ export function DeliverableDetailView({
     api.functions.deliverables.mutations.sendToStudio,
   );
 
-  // Actions
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
   // Breadcrumb override
   useEffect(() => {
     if (deliverable) {
@@ -130,22 +125,8 @@ export function DeliverableDetailView({
     }
   }, [deliverable, viewedVersion]);
 
-  // Fetch signed URL for the VIEWED version
-  useEffect(() => {
-    async function fetchUrl() {
-      if (viewedVersion?.minioKey) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: viewedVersion.minioKey,
-          });
-          setFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching signed URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [viewedVersion?.minioKey, getSignedUrlAction]);
+  // Fetch signed URL for the VIEWED version using custom hook
+  const { url: fileUrl } = useSignedUrl(viewedVersion?.minioKey);
 
   // Computed permissions
   const canApprove =
