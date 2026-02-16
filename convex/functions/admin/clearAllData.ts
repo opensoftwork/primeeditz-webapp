@@ -12,19 +12,21 @@ export const clearAllData = internalMutation({
 
     const tableNames = [
       "assets",
-      "clients",
+      "projects",
+      "folders",
       "deliverables",
       "deliverableVersions",
-      "employees",
-      "folders",
-      "projects",
-      "quotations",
+      "versionRequests",
       "statusHistory",
+      "quotations",
       "projectSquads",
       "handoffLogs",
       "quotationRequestDrafts",
-      "versionRequests",
+      "servicePackageDrafts",
       "studioApprovals",
+      "projectTypeFields",
+      "clients", // Legacy
+      "employees", // Legacy
     ];
 
     const stats: Record<string, number> = {};
@@ -44,7 +46,9 @@ export const clearAllData = internalMutation({
         }
         totalDeleted += docs.length;
       } catch (e) {
-        console.log(`  ○ Skipping ${tableName} (table may not exist or access denied)`);
+        console.log(
+          `  ○ Skipping ${tableName} (table may not exist or access denied)`,
+        );
         stats[tableName] = 0;
       }
     }
@@ -53,7 +57,7 @@ export const clearAllData = internalMutation({
       `\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`,
     );
     console.log(
-      "ℹ️ Preserved: Profiles, Auth, Project Types, Storage Tiers, Service Packages, and related system configurations.",
+      "ℹ️ Preserved: Configuration (Profiles, Project Types, Packages, etc.) and Form Submissions (Contacts, Feedbacks, Surveys).",
     );
     return { success: true, totalDeleted, stats };
   },
