@@ -11,6 +11,7 @@ export const handlePost = httpAction(async (ctx, request) => {
   try {
     const body = await request.json();
     const id = await ctx.runMutation(
+      // @ts-ignore
       api.functions.feedbacks.mutations.createFeedback,
       body,
     );
