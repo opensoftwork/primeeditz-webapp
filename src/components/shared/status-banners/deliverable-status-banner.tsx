@@ -70,7 +70,9 @@ export function DeliverableStatusBanner({
               </div>
 
               <div className="flex items-center gap-3 shrink-0">
-                {role === "employee" &&
+                {(role === "employee" ||
+                  role === "admin" ||
+                  role === "studio") &&
                   change.status === "version_requested" && (
                     <Button
                       variant="ghost"
@@ -78,7 +80,15 @@ export function DeliverableStatusBanner({
                       className="h-9 px-4 rounded-lg bg-amber-500/10 hover:bg-amber-500/20 text-amber-500 text-[9px] font-black uppercase tracking-widest border border-amber-500/20 transition-all"
                     >
                       <Link
-                        href={`/assigned-work/${projectId}/deliverables/${change._id}/versions`}
+                        href={
+                          role === "employee"
+                            ? change.latestVersionRequestId
+                              ? `/assigned-work/${projectId}/deliverables/${change._id}/versions/${change.latestVersionRequestId}`
+                              : `/assigned-work/${projectId}/deliverables/${change._id}/versions`
+                            : change.latestVersionRequestId
+                              ? `/projects/${projectId}/deliverables/${change._id}/versions/${change.latestVersionRequestId}`
+                              : `/projects/${projectId}/deliverables/${change._id}/versions`
+                        }
                       >
                         Open Versions <ArrowRight className="h-3 w-3 ml-2" />
                       </Link>

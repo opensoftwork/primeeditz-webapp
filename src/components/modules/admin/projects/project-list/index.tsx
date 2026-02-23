@@ -19,6 +19,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 import { DataTable, DataTableSkeleton } from "@/components/shared/data-table";
 import {
   AlertDialog,
@@ -45,14 +46,36 @@ import { Skeleton } from "@/components/ui/skeleton";
 function ProjectCard({ project }: { project: AdminProject }) {
   const router = useRouter();
 
+  const isAdminActionRequired = [
+    "awaiting_quotation",
+    "quotation_approved",
+    "storage_allocated",
+    "uploads_complete",
+    "awaiting_assignment",
+    "deliverables_ready",
+    "versions_requested",
+  ].includes(project.actionState);
+
   return (
     <Link href={`/projects/${project._id}`}>
       <motion.div
         whileHover={{ y: -3 }}
-        className="group relative p-4 rounded-2xl bg-white/3 border border-white/5 hover:bg-white/5 hover:border-primary/20 transition-all duration-300 overflow-hidden flex flex-col h-full"
+        className={cn(
+          "group relative p-4 rounded-2xl bg-white/3 border transition-all duration-300 overflow-hidden flex flex-col h-full",
+          isAdminActionRequired
+            ? "border-red-500/40 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:border-red-500/60"
+            : "border-white/5 hover:bg-white/5 hover:border-primary/20",
+        )}
       >
         {/* Glow effect */}
-        <div className="absolute top-0 right-0 w-24 h-24 bg-primary/5 blur-2xl rounded-full translate-x-10 -translate-y-10 group-hover:bg-primary/10 transition-colors" />
+        <div
+          className={cn(
+            "absolute top-0 right-0 w-24 h-24 blur-2xl rounded-full translate-x-10 -translate-y-10 transition-colors",
+            isAdminActionRequired
+              ? "bg-red-500/10 group-hover:bg-red-500/20"
+              : "bg-primary/5 group-hover:bg-primary/10",
+          )}
+        />
 
         <div className="relative space-y-3 flex-1 flex flex-col">
           <div className="flex items-start justify-between gap-3">
@@ -79,16 +102,16 @@ function ProjectCard({ project }: { project: AdminProject }) {
             </span>
           </div>
 
-          <div className="space-y-0.5">
+          <div className="space-y-0.5 min-h-[32px]">
             <h3 className="text-[10px] font-black text-white/60 leading-tight uppercase tracking-tight truncate">
               {project.eventName || "General Project"}
             </h3>
-            {project.eventDate && (
-              <div className="flex items-center gap-1 text-[9px] font-bold text-white/20 uppercase tracking-widest">
-                <Calendar className="h-2.5 w-2.5" />
-                {new Date(project.eventDate).toLocaleDateString()}
-              </div>
-            )}
+            <div className="flex items-center gap-1 text-[9px] font-bold text-white/20 uppercase tracking-widest">
+              <Calendar className="h-2.5 w-2.5" />
+              {project.eventDate
+                ? new Date(project.eventDate).toLocaleDateString()
+                : "-"}
+            </div>
           </div>
 
           <div className="mt-auto pt-3 border-t border-white/5">
@@ -279,7 +302,7 @@ export default function ProjectList() {
 
   if (query.status === "loading" && !projects.length) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -293,7 +316,7 @@ export default function ProjectList() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
         <motion.div
           initial={{ opacity: 0, y: -10 }}

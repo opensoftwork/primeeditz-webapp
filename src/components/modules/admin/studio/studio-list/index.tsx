@@ -55,20 +55,16 @@ function StudioCard({ studio }: { studio: AdminStudio }) {
                 {studio.email}
               </span>
             </div>
-            {studio.company && (
-              <div className="flex items-center gap-2">
-                <Building className="h-3 w-3 text-white/30" />
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">
-                  {studio.company}
-                </span>
-              </div>
-            )}
-            {studio.phone && (
-              <div className="flex items-center gap-2 text-white/40">
-                <Phone className="h-3 w-3" />
-                <span className="text-xs font-mono">{studio.phone}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Building className="h-3 w-3 text-white/30" />
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">
+                {studio.company || "-"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-white/40">
+              <Phone className="h-3 w-3" />
+              <span className="text-xs font-mono">{studio.phone || "-"}</span>
+            </div>
           </div>
 
           <div className="pt-3 border-t border-white/5 flex items-center justify-between">
@@ -160,7 +156,7 @@ export default function StudioList({
       <div
         className={
           showHeader
-            ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
+            ? "flex flex-1 w-full flex-col p-6"
             : "w-full"
         }
       >
@@ -182,7 +178,7 @@ export default function StudioList({
     <div
       className={
         showHeader
-          ? "flex min-h-[calc(100vh-120px)] w-full flex-col p-6"
+          ? "flex flex-1 w-full flex-col p-6"
           : "w-full"
       }
     >

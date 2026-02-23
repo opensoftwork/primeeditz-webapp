@@ -15,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { createPortal } from "react-dom";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -230,9 +231,18 @@ export default function DashboardLayout({
             </div>
           </header>
         )}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div
+          id="layout-main-content"
+          className="flex flex-1 flex-col overflow-y-auto scrollbar-hide"
+        >
           {renderRoleContent()}
         </div>
+
+        {/* Global Footer Area - For Sticky Pagination / Portals */}
+        <div
+          id="layout-sticky-footer"
+          className="shrink-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 empty:hidden"
+        />
       </SidebarInset>
     </SidebarProvider>
   );

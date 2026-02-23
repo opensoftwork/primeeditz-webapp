@@ -3,7 +3,7 @@
 import { api } from "@convex/_generated/api";
 import { useMutation } from "convex/react";
 import {
-  type AlertCircle,
+  AlertCircle,
   Archive,
   ArrowRight,
   CheckCircle,
@@ -276,6 +276,13 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
         "Deliverables are ready for QC. Review and approve to send to the client.",
       buttonLabel: "Review Deliverables",
       icon: CheckCircle,
+      onClick: () => router.push(`/projects/${project._id}/deliverables`),
+    },
+    versions_requested: {
+      message:
+        "Studio has requested changes on final deliverables. Review feedback and coordinate versions.",
+      buttonLabel: "Review Requests",
+      icon: AlertCircle,
       onClick: () => router.push(`/projects/${project._id}/deliverables`),
     },
 

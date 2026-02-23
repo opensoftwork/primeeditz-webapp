@@ -23,6 +23,7 @@ interface DeliverableCardProps {
   href?: string;
   disableLink?: boolean;
   signedUrl?: string;
+  versionFeedback?: string;
 }
 
 export function DeliverableCard({
@@ -40,6 +41,7 @@ export function DeliverableCard({
   href,
   disableLink,
   signedUrl,
+  versionFeedback,
 }: DeliverableCardProps) {
   const CardWrapper = (disableLink ? "div" : Link) as any;
   const cardHref = href || `/projects/${projectId}/deliverables/${id}`;
@@ -98,6 +100,12 @@ export function DeliverableCard({
               {status.replace("_", " ").replace("revision", "version")}
             </span>
           </div>
+          {versionFeedback &&
+            (status === "version_requested" || status === "version_needed") && (
+              <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-red-300 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20 max-w-md italic animate-in fade-in slide-in-from-left-2 transition-all">
+                "{versionFeedback}"
+              </div>
+            )}
         </div>
       </div>
 

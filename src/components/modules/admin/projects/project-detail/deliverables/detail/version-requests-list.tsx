@@ -161,7 +161,7 @@ export function VersionRequestsList({
   // Loading
   if (versionRequests === undefined || deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -176,7 +176,7 @@ export function VersionRequestsList({
 
   if (deliverable === null) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className="flex flex-1 w-full items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
             <ArrowLeft className="h-8 w-8 text-white/20" />
@@ -204,7 +204,7 @@ export function VersionRequestsList({
     <div
       className={cn(
         "flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700",
-        !hideHeader && "min-h-[calc(100vh-120px)] px-8 pt-10 pb-12",
+        !hideHeader && "flex-1 px-8 pt-10 pb-12",
       )}
     >
       {/* Header */}

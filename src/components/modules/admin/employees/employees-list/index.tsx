@@ -47,28 +47,22 @@ function EmployeeCard({ employee }: { employee: AdminEmployee }) {
           </div>
 
           <div className="space-y-2 pt-2">
-            {employee.designation && (
-              <div className="flex items-center gap-2">
-                <Briefcase className="h-3 w-3 text-indigo-400/50" />
-                <span className="text-[10px] font-black text-indigo-400/70 uppercase tracking-widest">
-                  {employee.designation}
-                </span>
-              </div>
-            )}
-            {employee.company && (
-              <div className="flex items-center gap-2">
-                <Building className="h-3 w-3 text-white/30" />
-                <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">
-                  {employee.company}
-                </span>
-              </div>
-            )}
-            {employee.phone && (
-              <div className="flex items-center gap-2 text-white/40">
-                <Phone className="h-3 w-3" />
-                <span className="text-xs font-mono">{employee.phone}</span>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <Briefcase className="h-3 w-3 text-indigo-400/50" />
+              <span className="text-[10px] font-black text-indigo-400/70 uppercase tracking-widest">
+                {employee.designation || "-"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Building className="h-3 w-3 text-white/30" />
+              <span className="text-[10px] font-black text-white/50 uppercase tracking-widest">
+                {employee.company || "-"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-white/40">
+              <Phone className="h-3 w-3" />
+              <span className="text-xs font-mono">{employee.phone || "-"}</span>
+            </div>
           </div>
 
           <div className="pt-3 border-t border-white/5 flex items-center justify-between">
@@ -146,9 +140,7 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
     return (
       <div
         className={
-          showHeader
-            ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
-            : "w-full"
+          showHeader ? "flex flex-1 w-full flex-col px-8 pt-10 pb-12" : "w-full"
         }
       >
         {showHeader && (
@@ -168,9 +160,7 @@ export default function EmployeeList({ showHeader = true }: EmployeeListProps) {
   return (
     <div
       className={
-        showHeader
-          ? "flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12"
-          : "w-full"
+        showHeader ? "flex flex-1 w-full flex-col px-8 pt-10 pb-12" : "w-full"
       }
     >
       {showHeader && (

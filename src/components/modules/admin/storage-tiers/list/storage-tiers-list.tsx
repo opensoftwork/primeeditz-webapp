@@ -150,7 +150,7 @@ export function StorageTiersList() {
   // Loading State
   if (storageTiers === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -164,7 +164,7 @@ export function StorageTiersList() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
       <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <motion.div
           initial={{ opacity: 0, y: -10 }}

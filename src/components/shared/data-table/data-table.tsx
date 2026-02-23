@@ -30,6 +30,7 @@ import {
 import { LayoutGrid, List, Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -278,7 +279,7 @@ export function DataTable<TData, TValue>({
 
         {/* Table View */}
         {!showCards && (
-          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto">
+          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto scrollbar-hide">
             <Table className="min-w-full">
               <TableHeader className="bg-white/3">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -362,46 +363,86 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <div className="mt-auto pt-6">
-        <DataTablePagination
-          table={table}
-          serverPagination={serverPagination}
-          clientPagination={
-            !serverPagination
-              ? (() => {
-                  const totalRows = table.getFilteredRowModel().rows.length;
-                  const totalPages = Math.max(
-                    1,
-                    Math.ceil(totalRows / pagination.pageSize),
-                  );
-                  return {
-                    pageSize: pagination.pageSize,
-                    pageIndex: pagination.pageIndex,
-                    totalPages,
-                    canPrevPage: pagination.pageIndex > 0,
-                    canNextPage: pagination.pageIndex < totalPages - 1,
-                    setPageSize: (size: number) =>
-                      setPagination((prev) => ({
-                        ...prev,
-                        pageSize: size,
-                        pageIndex: 0,
-                      })),
-                    nextPage: () =>
-                      setPagination((prev) => ({
-                        ...prev,
-                        pageIndex: Math.min(prev.pageIndex + 1, totalPages - 1),
-                      })),
-                    prevPage: () =>
-                      setPagination((prev) => ({
-                        ...prev,
-                        pageIndex: Math.max(prev.pageIndex - 1, 0),
-                      })),
-                  };
-                })()
-              : undefined
+      {(() => {
+        const paginationContent = (
+          <div className="w-full px-8 py-4">
+            <DataTablePagination
+              table={table}
+              serverPagination={serverPagination}
+              clientPagination={
+                !serverPagination
+                  ? (() => {
+                      const totalRows = table.getFilteredRowModel().rows.length;
+                      const totalPages = Math.max(
+                        1,
+                        Math.ceil(totalRows / pagination.pageSize),
+                      );
+                      return {
+                        pageSize: pagination.pageSize,
+                        pageIndex: pagination.pageIndex,
+                        totalPages,
+                        canPrevPage: pagination.pageIndex > 0,
+                        canNextPage: pagination.pageIndex < totalPages - 1,
+                        setPageSize: (size: number) =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            pageSize: size,
+                            pageIndex: 0,
+                          })),
+                        nextPage: () =>
+                          setViewMode((prev) => {
+                            // Scroll to top when changing page in card view
+                            if (prev === "cards") {
+                              document
+                                .getElementById("layout-main-content")
+                                ?.scrollTo({ top: 0, behavior: "smooth" });
+                            }
+                            setPagination((p) => ({
+                              ...p,
+                              pageIndex: Math.min(
+                                p.pageIndex + 1,
+                                totalPages - 1,
+                              ),
+                            }));
+                            return prev;
+                          }),
+                        prevPage: () =>
+                          setViewMode((prev) => {
+                            // Scroll to top when changing page in card view
+                            if (prev === "cards") {
+                              document
+                                .getElementById("layout-main-content")
+                                ?.scrollTo({ top: 0, behavior: "smooth" });
+                            }
+                            setPagination((p) => ({
+                              ...p,
+                              pageIndex: Math.max(p.pageIndex - 1, 0),
+                            }));
+                            return prev;
+                          }),
+                      };
+                    })()
+                  : undefined
+              }
+            />
+          </div>
+        );
+
+        // Try to teleport to the global footer if it exists
+        if (typeof document !== "undefined") {
+          const footer = document.getElementById("layout-sticky-footer");
+          if (footer) {
+            return createPortal(paginationContent, footer);
           }
-        />
-      </div>
+        }
+
+        // Fallback to inline rendering if footer doesn't exist (e.g., SSR or specific pages)
+        return (
+          <div className="mt-auto pt-6" id="data-table-pagination-container">
+            {paginationContent}
+          </div>
+        );
+      })()}
     </div>
   );
 }

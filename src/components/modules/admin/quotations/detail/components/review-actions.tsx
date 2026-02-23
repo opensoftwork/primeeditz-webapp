@@ -1,5 +1,7 @@
 "use client";
 
+import { cn } from "@/lib/utils";
+
 import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useMutation, useQuery } from "convex/react";
@@ -34,6 +36,7 @@ export function ReviewActions({ quotation }: ReviewActionsProps) {
 
   // Queries & Mutations
   const approveQuotation = useMutation(
+    // @ts-ignore
     api.functions.quotations.mutations.approveQuotation,
   );
   const rejectQuotation = useMutation(
@@ -87,11 +90,20 @@ export function ReviewActions({ quotation }: ReviewActionsProps) {
     return null;
   }
 
+  const isPendingAction =
+    quotation.status === "initiated" ||
+    quotation.status === "changes_requested";
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
       animate={{ opacity: 1, scale: 1 }}
-      className="p-6 rounded-4xl bg-amber-400/5 border border-amber-400/10 space-y-6"
+      className={cn(
+        "p-6 rounded-4xl space-y-6 transition-all duration-300",
+        isPendingAction
+          ? "bg-red-500/5 border-2 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+          : "bg-amber-400/5 border border-amber-400/10",
+      )}
     >
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 rounded-2xl bg-amber-400/10 flex items-center justify-center text-amber-400">

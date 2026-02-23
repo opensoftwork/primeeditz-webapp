@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import {
   Download,
@@ -19,6 +19,11 @@ interface ImageViewerProps {
 
 export default function ImageViewer({ url, fileName }: ImageViewerProps) {
   const [rotation, setRotation] = useState(0);
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const rotate = () => {
     setRotation((prev) => (prev + 90) % 360);
@@ -28,22 +33,32 @@ export default function ImageViewer({ url, fileName }: ImageViewerProps) {
     window.open(url, "_blank");
   };
 
+  if (!isMounted) {
+    return (
+      <div className="flex flex-col h-[500px] w-full items-center justify-center bg-zinc-800/50 rounded-xl animate-pulse">
+        <div className="text-white/20">Loading viewer...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-full">
-      {/* Toolbar */}
-      <div className="flex items-center justify-between p-3 border-b border-white/5 bg-black/20 rounded-t-xl">
-        <div className="text-xs font-bold text-white/40 uppercase tracking-widest truncate max-w-[200px]">
-          {fileName}
-        </div>
+      <TransformWrapper
+        initialScale={1}
+        minScale={0.5}
+        maxScale={5}
+        centerOnInit
+        wheel={{ step: 0.1 }}
+        pinch={{ step: 5 }}
+      >
+        {({ zoomIn, zoomOut, resetTransform }) => (
+          <>
+            {/* Toolbar */}
+            <div className="flex items-center justify-between p-3 border-b border-white/5 bg-black/20 rounded-t-xl">
+              <div className="text-xs font-bold text-white/40 uppercase tracking-widest truncate max-w-[200px]">
+                {fileName}
+              </div>
 
-        <TransformWrapper
-          initialScale={1}
-          minScale={0.5}
-          maxScale={5}
-          centerOnInit
-        >
-          {({ zoomIn, zoomOut, resetTransform }) => (
-            <>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
@@ -104,48 +119,37 @@ export default function ImageViewer({ url, fileName }: ImageViewerProps) {
                   </a>
                 </Button>
               </div>
+            </div>
 
-              {/* Image Display - hidden, actual content below */}
-            </>
-          )}
-        </TransformWrapper>
-      </div>
-
-      {/* Image Content with Zoom/Pan */}
-      <div className="flex-1 overflow-hidden flex items-center justify-center bg-zinc-800/50 min-h-[400px]">
-        <TransformWrapper
-          initialScale={1}
-          minScale={0.5}
-          maxScale={5}
-          centerOnInit
-          wheel={{ step: 0.1 }}
-          pinch={{ step: 5 }}
-        >
-          <TransformComponent
-            wrapperStyle={{
-              width: "100%",
-              height: "100%",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-            contentStyle={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-            }}
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={url}
-              alt={fileName}
-              className="max-w-full max-h-[500px] object-contain shadow-2xl transition-transform duration-300"
-              style={{ transform: `rotate(${rotation}deg)` }}
-              draggable={false}
-            />
-          </TransformComponent>
-        </TransformWrapper>
-      </div>
+            {/* Image Content with Zoom/Pan */}
+            <div className="flex-1 overflow-hidden flex items-center justify-center bg-zinc-800/50 min-h-[400px]">
+              <TransformComponent
+                wrapperStyle={{
+                  width: "100%",
+                  height: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+                contentStyle={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={url}
+                  alt={fileName}
+                  className="max-w-full max-h-[500px] object-contain shadow-2xl transition-transform duration-300"
+                  style={{ transform: `rotate(${rotation}deg)` }}
+                  draggable={false}
+                />
+              </TransformComponent>
+            </div>
+          </>
+        )}
+      </TransformWrapper>
 
       {/* Hint */}
       <div className="p-2 bg-black/20 border-t border-white/5 rounded-b-xl">

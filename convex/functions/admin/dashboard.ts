@@ -8,11 +8,21 @@ import { adminQuery } from "../../lib/customFunctions";
 export const getAdminDashboardStats = adminQuery({
   args: {},
   handler: async (ctx) => {
-    // Count pending requests (actionState: awaiting_quotation)
+    // Count all projects that require admin action/intervention
+    const adminActionStates = [
+      "awaiting_quotation",
+      "quotation_approved",
+      "storage_allocated",
+      "uploads_complete",
+      "awaiting_assignment",
+      "deliverables_ready",
+      "versions_requested",
+    ];
+
     const pendingProjects = await ctx.db
       .query("projects")
-      .withIndex("by_actionState", (q) =>
-        q.eq("actionState", "awaiting_quotation"),
+      .filter((q) =>
+        q.or(...adminActionStates.map((state) => q.eq(q.field("actionState"), state))),
       )
       .collect();
     const pendingRequestsCount = pendingProjects.length;

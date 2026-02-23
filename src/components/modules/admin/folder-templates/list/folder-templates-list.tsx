@@ -74,7 +74,7 @@ export function FolderTemplatesList() {
 
   if (templates === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -125,7 +125,7 @@ export function FolderTemplatesList() {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between mb-12">
         <motion.div
           initial={{ opacity: 0, y: -10 }}

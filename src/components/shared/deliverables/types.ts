@@ -30,6 +30,7 @@ export interface DeliverableData {
   versionFeedback?: string;
   projectId: Id<"projects">;
   latestVersionId?: Id<"deliverableVersions">;
+  latestVersionRequestId?: Id<"versionRequests">;
   studioVersion?: number;
 }
 

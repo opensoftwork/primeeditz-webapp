@@ -159,7 +159,7 @@ export function VersionRequestsList({
   // Loading
   if (versionRequests === undefined || deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <DataTableSkeleton rows={5} columns={6} viewMode="table" />
       </div>
     );
@@ -173,7 +173,7 @@ export function VersionRequestsList({
     <div
       className={cn(
         "flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700",
-        !hideHeader && "min-h-[calc(100vh-120px)] px-8 pt-10 pb-12",
+        !hideHeader && "flex-1 px-8 pt-10 pb-12",
       )}
     >
       {/* Header */}

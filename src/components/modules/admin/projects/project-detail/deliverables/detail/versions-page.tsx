@@ -109,7 +109,7 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
 
   if (deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="flex items-center gap-5 mb-12">
           <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
           <div className="space-y-2">
@@ -143,7 +143,7 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
         <div className="flex items-center gap-5">

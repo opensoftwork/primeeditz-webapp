@@ -64,6 +64,7 @@ export function VersionRequestDetailView({
   );
 
   const deliverable = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
@@ -172,7 +173,7 @@ export function VersionRequestDetailView({
   // Loading
   if (versionRequest === undefined || deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="flex items-center gap-4 mb-10">
           <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
           <div className="space-y-2">
@@ -194,7 +195,7 @@ export function VersionRequestDetailView({
   // Not found
   if (versionRequest === null) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className="flex flex-1 w-full items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
             <MessageSquare className="h-8 w-8 text-white/20" />
@@ -219,7 +220,7 @@ export function VersionRequestDetailView({
   }
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div className="flex items-center gap-5">
@@ -390,7 +391,14 @@ export function VersionRequestDetailView({
           </div>
 
           {/* Notes / Feedback */}
-          <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+          <div
+            className={cn(
+              "p-6 rounded-3xl space-y-4 transition-all",
+              versionRequest.status === "pending"
+                ? "bg-red-500/5 border-2 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                : "bg-white/5 border border-white/5",
+            )}
+          >
             <h3 className="text-xs font-black uppercase tracking-widest text-white/50 flex items-center gap-2">
               <MessageSquare className="h-3.5 w-3.5 text-indigo-400" />
               General Feedback

@@ -1,5 +1,6 @@
 "use client";
 
+import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Calendar, User } from "lucide-react";
 import { motion } from "motion/react";
@@ -14,6 +15,10 @@ interface QuotationCardProps {
 export function QuotationCard({ quotation }: QuotationCardProps) {
   const router = useRouter();
 
+  const isPendingAction =
+    quotation.status === "initiated" ||
+    quotation.status === "changes_requested";
+
   const handleCardClick = () => {
     router.push(`/quotations/${quotation._id}`);
   };
@@ -23,7 +28,12 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
       onClick={handleCardClick}
       whileHover={{ y: -4 }}
       whileTap={{ scale: 0.98 }}
-      className="group relative flex flex-col justify-between h-full p-5 rounded-2xl bg-white/5 border border-white/5 hover:bg-white/[0.07] hover:border-primary/20 transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/20"
+      className={cn(
+        "group relative flex flex-col justify-between h-full p-5 rounded-2xl bg-white/5 border transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/20",
+        isPendingAction
+          ? "border-red-500/40 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:border-red-500/60"
+          : "border-white/5 hover:bg-white/[0.07] hover:border-primary/20",
+      )}
     >
       {/* Glow Effect */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 blur-[60px] rounded-full translate-x-12 -translate-y-12 group-hover:bg-primary/20 transition-colors duration-500" />

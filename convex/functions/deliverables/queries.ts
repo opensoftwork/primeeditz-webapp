@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
 
 import { getAuthUserWithProfile } from "../../lib/customFunctions";
 
@@ -160,7 +161,28 @@ export const getRecentStatusChanges = query({
       .order("desc")
       .take(5);
 
-    return deliverables;
+    const enriched = await Promise.all(
+      deliverables.map(async (d) => {
+        let latestVersionRequestId: Id<"versionRequests"> | undefined;
+
+        if (d.status === "version_requested") {
+          const latestRequest = await ctx.db
+            .query("versionRequests")
+            .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
+            .order("desc")
+            .first();
+
+          latestVersionRequestId = latestRequest?._id;
+        }
+
+        return {
+          ...d,
+          latestVersionRequestId,
+        };
+      }),
+    );
+
+    return enriched;
   },
 });
 
@@ -227,7 +249,7 @@ export const getClientDeliverables = query({
           isStudioApproved: !!approval,
           studioApprovedAt: approval?.approvedAt,
           latestVersionStatus: latestVersion?.status,
-          latestVersionId: latestVersion?._id,
+          latestVersionRequestId: latestVersion?._id,
           uploadedByName: uploader?.name ?? "PrimeEditz Team",
           // Use studioVersion for Studio display
           displayVersion: d.studioVersion || 1,
