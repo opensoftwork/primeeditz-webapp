@@ -5,7 +5,7 @@ import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import React, { useEffect } from "react";
-import { UserNav } from "@/components/modules/header/user-nav";
+
 import { AppSidebar } from "@/components/modules/sidebar";
 import {
   Breadcrumb,
@@ -42,6 +42,7 @@ export default function DashboardLayout({
 
   // Skip query if not authenticated - matches reference pattern
   const userProfile = useQuery(
+    //@ts-ignore
     api.profiles.getMyProfile,
     isAuthenticated ? {} : "skip",
   );
@@ -217,18 +218,6 @@ export default function DashboardLayout({
                 )}
               </BreadcrumbList>
             </Breadcrumb>
-
-            {/* Right side - Polished user info */}
-            <div className="ml-auto flex items-center gap-3">
-              <UserNav
-                user={{
-                  name: userProfile.name,
-                  email: userProfile.email,
-                  role: userProfile.role,
-                  image: userProfile.image,
-                }}
-              />
-            </div>
           </header>
         )}
         <div
