@@ -189,15 +189,31 @@ export default function DashboardLayout({
                       .map((segment, index, array) => {
                         const isLast = index === array.length - 1;
                         const href = `/${array.slice(0, index + 1).join("/")}`;
-                        const label =
-                          overrides[segment] ||
-                          segment
-                            .split("-")
-                            .map(
-                              (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1),
-                            )
-                            .join(" ");
+
+                        // Determine label with role-aware defaults
+                        let label = overrides[segment];
+                        if (!label) {
+                          if (segment === "projects") {
+                            label =
+                              userProfile?.role === "admin"
+                                ? "All Projects"
+                                : userProfile?.role === "studio"
+                                  ? "My Projects"
+                                  : "Projects";
+                          } else if (segment === "clients") {
+                            label = "Studios";
+                          } else if (segment === "assigned-work") {
+                            label = "Assigned Work";
+                          } else {
+                            label = segment
+                              .split("-")
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1),
+                              )
+                              .join(" ");
+                          }
+                        }
 
                         return (
                           <React.Fragment key={href}>

@@ -72,6 +72,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
     api.functions.storage.actions.getSignedFileUrls,
   );
 
+  // Project-level breadcrumb overrides are now centrally managed
+  // by ProjectBreadcrumbLayout to prevent duplicate overrides and flickering.
+
   useEffect(() => {
     async function fetchUrls() {
       if (project?.referenceFiles && project.referenceFiles.length > 0) {

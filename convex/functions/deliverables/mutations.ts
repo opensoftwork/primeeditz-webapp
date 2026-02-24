@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
 import { getAuthUserWithProfile } from "../../lib/customFunctions";
 import { now } from "../../lib/helpers";
+import { getPhaseForState } from "../../lib/statusMachine";
 
 /**
  * Create a new deliverable record after successful upload by employee.
@@ -230,11 +231,25 @@ export const sendToStudio = mutation({
     if (!project.studioId) throw new Error("No studio associated with project");
 
     // Update project state to awaiting review by studio
+    const newPhase = getPhaseForState("awaiting_review");
     await ctx.db.patch(deliverable.projectId, {
+      phase: newPhase,
       actionState: "awaiting_review",
       awaitingActorRole: "studio",
       awaitingActorId: project.studioId,
       updatedAt: now(),
+    });
+
+    // Create status history entry
+    await ctx.db.insert("statusHistory", {
+      projectId: deliverable.projectId,
+      previousPhase: project.phase,
+      newPhase: newPhase,
+      previousActionState: project.actionState,
+      newActionState: "awaiting_review",
+      changedBy: profile._id,
+      changedAt: now(),
+      notes: `Deliverable sent to studio for review`,
     });
 
     // Increment studio-facing version
@@ -334,7 +349,9 @@ export const clientRequestVersion = mutation({
     const currentVersions = project.versionCount || 0;
 
     // Transition back to production
+    const versionPhase = getPhaseForState("versions_requested");
     await ctx.db.patch(args.projectId, {
+      phase: versionPhase,
       actionState: "versions_requested",
       awaitingActorRole: "employee",
       awaitingActorId: project.assignedEmployeeId,
@@ -445,7 +462,9 @@ export const createVersionRequest = mutation({
     if (project) {
       if (isAdmin) {
         // Admin → route to employee for rework
+        const adminPhase = getPhaseForState("work_in_progress");
         await ctx.db.patch(deliverable.projectId, {
+          phase: adminPhase,
           actionState: "work_in_progress",
           awaitingActorRole: "employee",
           awaitingActorId: project.assignedEmployeeId,
@@ -453,7 +472,9 @@ export const createVersionRequest = mutation({
         });
       } else if (isStudio) {
         // Studio → route to ADMIN for triage (not directly to employee)
+        const studioPhase = getPhaseForState("versions_requested");
         await ctx.db.patch(deliverable.projectId, {
+          phase: studioPhase,
           actionState: "versions_requested",
           awaitingActorRole: "admin", // Admin triages first
           awaitingActorId: undefined, // Goes to admin pool
@@ -515,7 +536,9 @@ export const updateVersionRequestStatus = mutation({
         // Route the project to the employee
         const project = await ctx.db.get(request.projectId);
         if (project) {
+          const wipPhase = getPhaseForState("work_in_progress");
           await ctx.db.patch(request.projectId, {
+            phase: wipPhase,
             actionState: "work_in_progress",
             awaitingActorRole: "employee",
             awaitingActorId: project.assignedEmployeeId,
@@ -626,7 +649,9 @@ export const uploadCorrectedVersion = mutation({
     // 4. Transition project state back to deliverables_ready (awaiting admin QC)
     const project = await ctx.db.get(deliverable.projectId);
     if (project) {
+      const correctedPhase = getPhaseForState("deliverables_ready");
       await ctx.db.patch(deliverable.projectId, {
+        phase: correctedPhase,
         actionState: "deliverables_ready",
         awaitingActorRole: "admin",
         updatedAt: now(),

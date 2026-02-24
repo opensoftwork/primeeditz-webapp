@@ -110,7 +110,9 @@ export function DeliverableDetailView({
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
+    return () => {
+      removeOverride(deliverableId);
+    };
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   // Sync viewed version with latest deliverable when loaded

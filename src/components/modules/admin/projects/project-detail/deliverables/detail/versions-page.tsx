@@ -35,12 +35,35 @@ export function VersionsPage({ projectId, deliverableId }: VersionsPageProps) {
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
+  const project = useQuery(
+    //@ts-ignore
+    api.functions.projects.queries.getProject,
+    {
+      projectId: projectId as Id<"projects">,
+    },
+  );
+
   useEffect(() => {
+    if (project) {
+      const projectLabel =
+        project.eventName || project.projectTypeName || project.code;
+      setOverride(projectId, projectLabel);
+    }
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
-  }, [deliverableId, deliverable, setOverride, removeOverride]);
+    return () => {
+      removeOverride(projectId);
+      removeOverride(deliverableId);
+    };
+  }, [
+    projectId,
+    project,
+    deliverableId,
+    deliverable,
+    setOverride,
+    removeOverride,
+  ]);
 
   const createVersionRequest = useMutation(
     api.functions.deliverables.mutations.createVersionRequest,

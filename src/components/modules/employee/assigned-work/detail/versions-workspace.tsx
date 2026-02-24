@@ -36,12 +36,9 @@ export function VersionsWorkspace({
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
-  useEffect(() => {
-    if (deliverable) {
-      setOverride(deliverableId, deliverable.name);
-    }
-    return () => removeOverride(deliverableId);
-  }, [deliverableId, deliverable, setOverride, removeOverride]);
+  const project = useQuery(api.admin.getAdminProject, {
+    projectId: projectId as Id<"projects">,
+  });
 
   // Mutations
   const updateStatus = useMutation(
@@ -59,6 +56,46 @@ export function VersionsWorkspace({
 
   // Fetch deliverable file URL using custom hook
   const { url: fileUrl } = useSignedUrl(deliverable?.minioKey);
+
+  // Get active requested version
+  const activeRequest = versionRequests
+    ? requestId
+      ? versionRequests.find((r) => r._id === requestId)
+      : versionRequests.find(
+          (r) => r.status === "pending" || r.status === "in_progress",
+        ) || versionRequests[versionRequests.length - 1]
+    : null;
+
+  useEffect(() => {
+    if (project) {
+      const projectLabel =
+        project.endClientName ||
+        project.eventName ||
+        project.projectTypeName ||
+        project.code;
+      setOverride(projectId, projectLabel);
+    }
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    if (requestId && activeRequest) {
+      setOverride(requestId, `Version #${activeRequest.versionNumber}`);
+    }
+    return () => {
+      removeOverride(projectId);
+      removeOverride(deliverableId);
+      if (requestId) removeOverride(requestId);
+    };
+  }, [
+    projectId,
+    project,
+    deliverableId,
+    deliverable,
+    requestId,
+    activeRequest,
+    setOverride,
+    removeOverride,
+  ]);
 
   // Auto-mark as in_progress when first viewed
   useEffect(() => {
@@ -98,13 +135,6 @@ export function VersionsWorkspace({
       </div>
     );
   }
-
-  // Get active requested version
-  const activeRequest = requestId
-    ? versionRequests.find((r) => r._id === requestId)
-    : versionRequests.find(
-        (r) => r.status === "pending" || r.status === "in_progress",
-      ) || versionRequests[versionRequests.length - 1]; // Fallback to last resolved if none active
 
   return (
     <div className="h-screen bg-zinc-950 flex flex-col overflow-hidden">

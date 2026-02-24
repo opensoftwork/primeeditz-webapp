@@ -50,7 +50,10 @@ export default function EmployeeProjectDetail({
   useEffect(() => {
     if (project) {
       const label =
-        project.eventName || project.projectTypeName || project.code;
+        project.endClientName ||
+        project.eventName ||
+        project.projectTypeName ||
+        project.code;
       if (label) {
         setOverride(projectId, label);
       }

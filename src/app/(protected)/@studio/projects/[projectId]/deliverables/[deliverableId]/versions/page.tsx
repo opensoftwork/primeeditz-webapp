@@ -38,11 +38,17 @@ export default function StudioVersionsPage() {
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
+  const project = useQuery(api.functions.projects.queries.getProject, {
+    projectId: projectId as Id<"projects">,
+  });
+
   useEffect(() => {
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
+    return () => {
+      removeOverride(deliverableId);
+    };
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   const versionRequests = useQuery(

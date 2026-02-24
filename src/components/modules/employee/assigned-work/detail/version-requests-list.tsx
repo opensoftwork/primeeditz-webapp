@@ -54,12 +54,34 @@ export function VersionRequestsList({
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
+  const project = useQuery(api.employees.getEmployeeProject, {
+    projectId: projectId as Id<"projects">,
+  });
+
   useEffect(() => {
+    if (project) {
+      const projectLabel =
+        project.endClientName ||
+        project.eventName ||
+        project.projectTypeName ||
+        project.code;
+      setOverride(projectId, projectLabel);
+    }
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
-  }, [deliverableId, deliverable, setOverride, removeOverride]);
+    return () => {
+      removeOverride(projectId);
+      removeOverride(deliverableId);
+    };
+  }, [
+    projectId,
+    project,
+    deliverableId,
+    deliverable,
+    setOverride,
+    removeOverride,
+  ]);
 
   const columns: ColumnDef<VersionRequestRow>[] = [
     {

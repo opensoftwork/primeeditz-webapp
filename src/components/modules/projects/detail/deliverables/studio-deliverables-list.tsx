@@ -65,19 +65,9 @@ export function StudioDeliverablesList({
     projectId: projectId as Id<"projects">,
   });
   useEffect(() => {
-    const label = project?.endClientName || project?.eventName || project?.code;
-    if (label) {
-      setOverride(projectId, label);
-    }
-    return () => removeOverride(projectId);
-  }, [
-    projectId,
-    project?.endClientName,
-    project?.eventName,
-    project?.code,
-    setOverride,
-    removeOverride,
-  ]);
+    // projectId and projects overrides are handled by ProjectBreadcrumbLayout
+    return () => {};
+  }, [projectId, project, setOverride, removeOverride]);
 
   // Fetch signed URLs for thumbnails using custom hook
   const deliverableKeys = useMemo(

@@ -50,11 +50,18 @@ export function EmployeeDeliverablesList() {
   const project = useQuery(api.employees.getEmployeeProject, { projectId });
 
   useEffect(() => {
-    if (project?.eventName) {
-      setOverride(projectId, project.eventName);
+    if (project) {
+      const label =
+        project.endClientName ||
+        project.eventName ||
+        project.projectTypeName ||
+        project.code;
+      if (label) {
+        setOverride(projectId, label);
+      }
     }
     return () => removeOverride(projectId);
-  }, [projectId, project?.eventName, setOverride, removeOverride]);
+  }, [projectId, project, setOverride, removeOverride]);
 
   const columns: ColumnDef<Deliverable>[] = [
     {
@@ -195,7 +202,8 @@ export function EmployeeDeliverablesList() {
               Project Assets
             </h1>
             <p className="text-sm text-white/40 mt-2 uppercase tracking-widest font-bold">
-              {deliverables.length} finalized assets for {project?.eventName}
+              {deliverables.length} finalized assets for{" "}
+              {project?.eventName || project?.endClientName || "this project"}
             </p>
           </div>
         </div>

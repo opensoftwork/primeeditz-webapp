@@ -38,19 +38,9 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   });
 
   useEffect(() => {
-    const label = project?.endClientName || project?.eventName || project?.code;
-    if (label) {
-      setOverride(projectId, label);
-    }
-    return () => removeOverride(projectId);
-  }, [
-    projectId,
-    project?.endClientName,
-    project?.eventName,
-    project?.code,
-    setOverride,
-    removeOverride,
-  ]);
+    // Project-level overrides are centrally managed by ProjectBreadcrumbLayout
+    return () => {};
+  }, [projectId, project, setOverride, removeOverride]);
 
   const fields = useQuery(
     //@ts-ignore
@@ -118,7 +108,10 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           className="lg:col-span-8 space-y-12"
         >
           <ProjectSpecifications project={project} fields={fields} />
-          <ReferenceMaterials files={project.referenceFiles} projectId={projectId} />
+          <ReferenceMaterials
+            files={project.referenceFiles}
+            projectId={projectId}
+          />
 
           {/* Only show Final Deliverables once admin has sent them for review */}
           {(project.actionState === "awaiting_review" ||

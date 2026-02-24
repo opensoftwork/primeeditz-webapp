@@ -57,6 +57,10 @@ export function StudioDeliverableDetailView({
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
 
+  const project = useQuery(api.functions.projects.queries.getProject, {
+    projectId: projectId as Id<"projects">,
+  });
+
   const versions = useQuery(
     api.functions.deliverables.queries.getDeliverableVersions,
     deliverable
@@ -78,12 +82,14 @@ export function StudioDeliverableDetailView({
     api.functions.deliverables.mutations.studioApproveDeliverable,
   );
 
-  // Breadcrumb override
+  // Breadcrumb overrides
   useEffect(() => {
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
+    return () => {
+      removeOverride(deliverableId);
+    };
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   // Fetch signed URL for current file (or viewed version) using custom hook

@@ -145,6 +145,7 @@ export const generateUploadUrl = action({
     try {
       // 1. Unified Context Check (Eligibility + Storage)
       const context = await ctx.runQuery(
+        //@ts-ignore
         api.functions.storage.queries.getUploadContext,
         {
           projectId: args.projectId,
