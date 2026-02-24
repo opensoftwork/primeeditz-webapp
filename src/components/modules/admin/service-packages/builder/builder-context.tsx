@@ -15,6 +15,7 @@ import {
   useState,
 } from "react";
 import { toast } from "sonner";
+import type { QuotationSubItem } from "../../quotations/types";
 
 export interface Step1Data {
   name: string;
@@ -42,6 +43,7 @@ export interface LineItem {
   rate: number;
   quantity: number;
   unit: string;
+  subItems?: QuotationSubItem[];
 }
 
 export interface Step3Data {
@@ -130,6 +132,7 @@ export function BuilderProvider({
 
   // Mutations
   const createDraft = useMutation(
+    //@ts-ignore
     api.functions.servicePackages.drafts.mutations.createDraft,
   );
   const updateDraft = useMutation(
@@ -196,6 +199,7 @@ export function BuilderProvider({
             projectConfigId: item.projectConfigId || undefined,
             rate: Number(item.rate) || 0,
             quantity: Number(item.quantity) || 1,
+            subItems: item.subItems, // Sub-items are already typed correctly
           })),
           terms: step3DataRef.current?.terms,
           applyGST: step3DataRef.current?.applyGST,
@@ -438,6 +442,7 @@ export function BuilderProvider({
           projectConfigId: item.projectConfigId || undefined,
           rate: Number(item.rate) || 0,
           quantity: Number(item.quantity) || 1,
+          subItems: item.subItems,
         })),
         terms: step3DataRef.current?.terms,
         applyGST: step3DataRef.current?.applyGST,

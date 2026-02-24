@@ -20,7 +20,8 @@ export function PublicQuotationView() {
   const shareToken = params.token as string;
 
   const data = useQuery(
-    api.functions.quotations.queries.getQuotationByShareToken,
+    //@ts-ignore
+    api.functions.quotations.queries.getQuotationByShareToken as any,
     {
       shareToken,
     },
@@ -89,12 +90,12 @@ export function PublicQuotationView() {
         (item: { sectionId?: string }) => item.sectionId === section._id,
       ),
     }))
-    .filter((g) => g.items.length > 0);
+    .filter((g: any) => g.items.length > 0);
 
   // Add unsectioned items
   const unsectionedItems = quotation.lineItems.filter(
     (item: { sectionId?: string }) =>
-      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+      !item.sectionId || !sections.some((s: any) => s._id === item.sectionId),
   );
 
   if (unsectionedItems.length > 0) {
@@ -164,7 +165,9 @@ export function PublicQuotationView() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
         <div className="lg:col-span-2 space-y-12">
           <QuotationLineItemsView
+            groupedByProject={[]}
             groupedBySection={groupedBySection}
+            projects={[]}
             formatCurrency={formatCurrency}
           />
           <QuotationTermsView terms={quotation.terms} />

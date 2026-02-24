@@ -43,19 +43,24 @@ interface ProjectSectionItemsProps {
   expandedProjects: Set<string>;
   onToggleProject: (projectId: string) => void;
   onEditItem: (item: LineItemWithIdx) => void;
+  onUpdateItem: (item: LineItemWithIdx) => void;
   onRemoveItem: (idx: number) => void;
   onAddItem: (projectId: string, sectionId?: string) => void;
   onAddFromLibrary: (projectId: string, sectionId?: string) => void;
 }
 
-/** Calculate total for a set of items */
+/** Calculate total for a set of items including sub-items (3 levels) */
 const calculateTotal = (items: LineItemWithIdx[]): number => {
   return items.reduce((sum, item) => {
     const itemTotal = item.rate * item.quantity;
-    const subItemsTotal = (item.subItems || []).reduce(
-      (subSum, sub) => subSum + sub.rate * sub.quantity,
-      0,
-    );
+    const subItemsTotal = (item.subItems || []).reduce((subSum, sub) => {
+      const subSelf = sub.rate * sub.quantity;
+      const subSubTotal = (sub.subItems || []).reduce(
+        (s, ss) => s + ss.rate * ss.quantity,
+        0,
+      );
+      return subSum + subSelf + subSubTotal;
+    }, 0);
     return sum + itemTotal + subItemsTotal;
   }, 0);
 };
@@ -67,6 +72,7 @@ export function ProjectSectionItems({
   expandedProjects,
   onToggleProject,
   onEditItem,
+  onUpdateItem,
   onRemoveItem,
   onAddItem,
   onAddFromLibrary,
@@ -243,6 +249,7 @@ export function ProjectSectionItems({
                                 items={sectionItems}
                                 section={section}
                                 onEditItem={onEditItem}
+                                onUpdateItem={onUpdateItem}
                                 onRemoveItem={onRemoveItem}
                                 onAddItem={() =>
                                   onAddItem(project._id, section._id)
@@ -273,6 +280,7 @@ export function ProjectSectionItems({
                               items={unsectionedItems}
                               section={{ _id: "", name: "Uncategorized" }}
                               onEditItem={onEditItem}
+                              onUpdateItem={onUpdateItem}
                               onRemoveItem={onRemoveItem}
                               onAddItem={() => onAddItem(project._id)}
                               onAddFromLibrary={() =>

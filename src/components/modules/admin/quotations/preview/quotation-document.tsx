@@ -76,7 +76,7 @@ export const QuotationDocument = React.forwardRef<
     // -------------------------------------------------------------------------
     // 1. Data Processing & Calculations
     // -------------------------------------------------------------------------
-
+//@ts-ignore
     const dbCompany = useQuery(api.functions.company.queries.get);
 
     const {
@@ -105,14 +105,25 @@ export const QuotationDocument = React.forwardRef<
           })
         : quotation.lineItems;
 
+      // Recursive total calculation
+      const calculateItemTotal = (item: any): number => {
+        const self = item.rate * item.quantity;
+        const subTotal = (item.subItems || []).reduce(
+          (sum: number, sub: any) => {
+            const subSelf = sub.rate * sub.quantity;
+            const subSubTotal = (sub.subItems || []).reduce(
+              (s: number, ss: any) => s + ss.rate * ss.quantity,
+              0,
+            );
+            return sum + subSelf + subSubTotal;
+          },
+          0,
+        );
+        return self + subTotal;
+      };
+
       // Calculate totals based on filtered items
-      const st = fli.reduce((acc, item) => {
-        const itemTotal = item.rate * item.quantity;
-        const subItemsTotal =
-          item.subItems?.reduce((s, sub) => s + sub.rate * sub.quantity, 0) ??
-          0;
-        return acc + itemTotal + subItemsTotal;
-      }, 0);
+      const st = fli.reduce((acc, item) => acc + calculateItemTotal(item), 0);
 
       const da = activeSection ? 0 : quotation.discountAmount || 0;
       const tr = quotation.taxRate || 0.18;
@@ -159,15 +170,10 @@ export const QuotationDocument = React.forwardRef<
               return {
                 project,
                 sectionGroups,
-                total: projectItems.reduce((acc, item) => {
-                  const itemTotal = item.rate * item.quantity;
-                  const subItemsTotal =
-                    item.subItems?.reduce(
-                      (s, sub) => s + sub.rate * sub.quantity,
-                      0,
-                    ) ?? 0;
-                  return acc + itemTotal + subItemsTotal;
-                }, 0),
+                total: projectItems.reduce(
+                  (acc, item) => acc + calculateItemTotal(item),
+                  0,
+                ),
               };
             })
             .filter((pg) => pg.sectionGroups.length > 0)

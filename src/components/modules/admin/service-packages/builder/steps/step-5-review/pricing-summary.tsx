@@ -1,5 +1,12 @@
+/**
+ * Pricing Summary (Service Package Review)
+ *
+ * Displays the final cost structure in a professional table format.
+ */
+
 "use client";
 
+import React from "react";
 import { CreditCard, Pencil, Save } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -25,7 +32,7 @@ export function PricingSummary({ lineItems }: PricingSummaryProps) {
         </div>
         <button
           onClick={() => goToStep(3)}
-          className="h-8 px-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all"
+          className="h-8 px-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 transition-all text-white"
         >
           <Pencil className="h-3 w-3" />
           Edit
@@ -43,32 +50,130 @@ export function PricingSummary({ lineItems }: PricingSummaryProps) {
                 Cost Structure
               </h4>
             </div>
+            <p className="text-[9px] font-black text-white/20 uppercase tracking-widest flex items-center gap-2">
+              <Save className="h-3 w-3" /> Itemized Breakdown
+            </p>
           </div>
-          <div className="p-8 space-y-8">
-            <div className="space-y-4">
-              <p className="text-[9px] font-black text-white/20 uppercase tracking-widest flex items-center gap-2">
-                <Save className="h-3 w-3" /> Itemized Breakdown
-              </p>
-              <div className="space-y-3">
-                {lineItems.map((item) => (
-                  <div
-                    key={item.id}
-                    className="flex items-center justify-between py-3 border-b border-white/5 last:border-0 group/item hover:bg-white/5 -mx-2 px-2 rounded-xl transition-colors"
-                  >
-                    <div>
-                      <p className="text-xs font-black text-white uppercase tracking-tight group-hover:text-primary transition-colors">
-                        {item.description}
-                      </p>
-                      <p className="text-[9px] text-white/40 font-bold uppercase tracking-widest mt-1">
-                        {item.quantity} × {item.unit}
-                      </p>
-                    </div>
-                    <span className="font-black text-white tracking-widest text-sm">
-                      ₹{(item.rate * item.quantity).toLocaleString()}
-                    </span>
-                  </div>
-                ))}
-              </div>
+
+          <div className="p-8">
+            <div className="w-full bg-white/2 rounded-2xl border border-white/5 overflow-hidden">
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="bg-white/5 border-b border-white/10 text-left">
+                    <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-white/30 w-12 text-center">
+                      #
+                    </th>
+                    <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-white/30">
+                      Description
+                    </th>
+                    <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-white/30 text-center w-20">
+                      Qty
+                    </th>
+                    <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-white/30 text-right w-28">
+                      Rate
+                    </th>
+                    <th className="py-3 px-4 text-[9px] font-black uppercase tracking-widest text-white/30 text-right w-32">
+                      Total
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-white/5">
+                  {lineItems.map((item, idx) => (
+                    <React.Fragment key={item.id}>
+                      <tr className="group bg-white/2 hover:bg-white/4 transition-colors">
+                        <td className="py-3 px-4 text-[11px] font-black text-white/20 text-center tabular-nums">
+                          {idx + 1}
+                        </td>
+                        <td className="py-3 px-4">
+                          <span className="text-[13px] font-bold text-white uppercase tracking-tight">
+                            {item.description}
+                          </span>
+                        </td>
+                        <td className="py-3 px-4 text-[11px] font-bold text-white/40 text-center">
+                          {item.quantity}
+                        </td>
+                        <td className="py-3 px-4 text-[11px] font-mono font-bold text-white/40 text-right">
+                          ₹{Number(item.rate).toLocaleString()}
+                        </td>
+                        <td className="py-3 px-4 text-[13px] font-mono font-black text-white text-right">
+                          ₹{Number(item.rate * item.quantity).toLocaleString()}
+                        </td>
+                      </tr>
+                      {item.subItems?.map((sub: any, sIdx: number) => (
+                        <React.Fragment key={sub.id}>
+                          <tr className="bg-white/1 border-l-2 border-primary/20 group hover:bg-white/3 transition-colors">
+                            <td className="py-2.5 px-4 text-[9px] font-bold text-white/10 text-center tabular-nums">
+                              {idx + 1}.{sIdx + 1}
+                            </td>
+                            <td className="py-2.5 px-4">
+                              <div className="flex items-center gap-2 pl-2">
+                                <span className="text-white/10 font-light translate-y-[-2px]">
+                                  └
+                                </span>
+                                <span className="text-[11px] font-bold text-white/50">
+                                  {sub.description}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="py-2.5 px-4 text-[10px] text-white/30 text-center tabular-nums">
+                              {sub.quantity}
+                            </td>
+                            <td className="py-2.5 px-4 text-[10px] font-mono text-white/30 text-right">
+                              ₹{Number(sub.rate).toLocaleString()}
+                            </td>
+                            <td className="py-2.5 px-4 text-[12px] font-mono font-bold text-white/40 text-right">
+                              ₹
+                              {Number(sub.rate * sub.quantity).toLocaleString()}
+                            </td>
+                          </tr>
+                          {sub.subItems?.map((ssub: any, ssIdx: number) => (
+                            <tr
+                              key={ssub.id}
+                              className="bg-white/0.5 border-l-2 border-primary/10 group hover:bg-white/2 transition-colors"
+                            >
+                              <td className="py-1.5 px-4 text-[8px] text-white/5 text-center tabular-nums">
+                                {idx + 1}.{sIdx + 1}.{ssIdx + 1}
+                              </td>
+                              <td className="py-1.5 px-4">
+                                <div className="flex items-center gap-2 pl-6">
+                                  <span className="text-white/5 font-light translate-y-[-2px]">
+                                    └
+                                  </span>
+                                  <span className="text-[10px] text-white/30 italic">
+                                    {ssub.description}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="py-1.5 px-4 text-[9px] text-white/20 text-center tabular-nums">
+                                {ssub.quantity}
+                              </td>
+                              <td className="py-1.5 px-4 text-[9px] font-mono text-white/20 text-right">
+                                ₹{Number(ssub.rate).toLocaleString()}
+                              </td>
+                              <td className="py-1.5 px-4 text-[11px] font-mono font-bold text-white/20 text-right">
+                                ₹
+                                {Number(
+                                  ssub.rate * ssub.quantity,
+                                ).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      ))}
+                    </React.Fragment>
+                  ))}
+                  {lineItems.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={5}
+                        className="py-12 text-center text-[10px] font-black uppercase tracking-widest text-white/20"
+                      >
+                        No line items configured
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
           </div>
         </CardContent>

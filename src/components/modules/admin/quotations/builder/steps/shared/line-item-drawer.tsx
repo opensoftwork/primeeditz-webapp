@@ -72,6 +72,9 @@ interface LineItemDrawerProps {
   isSubmitting?: boolean;
   /** If true, project selection is mandatory before adding items */
   requireProject?: boolean;
+  /** Sub-item mode props */
+  isSubItem?: boolean;
+  parentName?: string;
 }
 
 export function LineItemDrawer({
@@ -85,8 +88,11 @@ export function LineItemDrawer({
   onSave,
   isSubmitting = false,
   requireProject = false,
+  isSubItem = false,
+  parentName,
 }: LineItemDrawerProps) {
   const isEditing = !!item;
+  const isActuallySubItem = isSubItem || (item as any)?.parentItemId;
 
   // Form state
   const [description, setDescription] = useState("");
@@ -108,6 +114,7 @@ export function LineItemDrawer({
 
   // Queries
   const activeProjectTypes = useQuery(
+    //@ts-ignore
     api.functions.projectTypes.queries.getActiveProjectTypes,
   );
   const folderTemplates = useQuery(
@@ -196,12 +203,20 @@ export function LineItemDrawer({
             </div>
             <div>
               <DrawerTitle className="text-lg font-black uppercase tracking-tight text-white">
-                {isEditing ? "Edit Item" : "Add Line Item"}
+                {isActuallySubItem
+                  ? isEditing
+                    ? "Edit Sub-Item"
+                    : "Add Sub-Item"
+                  : isEditing
+                    ? "Edit Item"
+                    : "Add Line Item"}
               </DrawerTitle>
               <DrawerDescription className="text-xs text-white/40">
-                {isEditing
-                  ? "Update the details for this item"
-                  : "Add a new service or deliverable"}
+                {isActuallySubItem
+                  ? "Breakdown for " + (parentName || "parent item")
+                  : isEditing
+                    ? "Update the details for this item"
+                    : "Add a new service or deliverable"}
               </DrawerDescription>
             </div>
           </div>
@@ -210,21 +225,23 @@ export function LineItemDrawer({
         {/* Form Content */}
         <div className="flex-1 overflow-y-auto p-6 space-y-5">
           {/* Section Selector */}
-          <Field>
-            <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest">
-              Section *
-            </FieldLabel>
-            <FieldContent>
-              <SectionPickerDrawer
-                sections={sections}
-                selectedSectionId={sectionId}
-                onSelect={setSectionId}
-              />
-            </FieldContent>
-          </Field>
+          {!isActuallySubItem && (
+            <Field>
+              <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+                Section *
+              </FieldLabel>
+              <FieldContent>
+                <SectionPickerDrawer
+                  sections={sections}
+                  selectedSectionId={sectionId}
+                  onSelect={setSectionId}
+                />
+              </FieldContent>
+            </Field>
+          )}
 
           {/* Project Association */}
-          {projects && projects.length > 0 && (
+          {!isActuallySubItem && projects && projects.length > 0 && (
             <Field>
               <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest">
                 Associated Project {requireProject && "*"}
@@ -244,106 +261,108 @@ export function LineItemDrawer({
             </Field>
           )}
 
-          {/* Project Spawning Configuration (Story 11B.1 & 11B.2) */}
-          <div className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-4">
-            <div className="flex items-center justify-between">
-              <div className="space-y-0.5">
-                <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
-                  <Rocket className="h-3 w-3" />
-                  Project Spawning
-                </FieldLabel>
-                <p className="text-[10px] text-white/20">
-                  Create new project on approval
-                </p>
+          {/* Project Spawning Configuration */}
+          {!isActuallySubItem && (
+            <div className="p-4 rounded-2xl bg-white/3 border border-white/5 space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="space-y-0.5">
+                  <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest flex items-center gap-2">
+                    <Rocket className="h-3 w-3" />
+                    Project Spawning
+                  </FieldLabel>
+                  <p className="text-[10px] text-white/20">
+                    Create new project on approval
+                  </p>
+                </div>
+                <Switch
+                  checked={spawnsProject}
+                  onCheckedChange={setSpawnsProject}
+                />
               </div>
-              <Switch
-                checked={spawnsProject}
-                onCheckedChange={setSpawnsProject}
-              />
-            </div>
 
-            {spawnsProject && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="space-y-4 pt-2 border-t border-white/5"
-              >
-                {/* Project Type Selector */}
-                <Field>
-                  <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
-                    Project Type
-                  </FieldLabel>
-                  <FieldContent>
-                    <Select
-                      value={projectTypeId || ""}
-                      onValueChange={(val) => {
-                        setProjectTypeId(val as Id<"projectTypes">);
-                        // Auto-select default folder template if available
-                        const defaultTpl = folderTemplates?.find(
-                          (t) => t.projectTypeId === val && t.isDefault,
-                        );
-                        if (defaultTpl)
-                          setSelectedFolderTemplateId(defaultTpl._id);
-                      }}
-                    >
-                      <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
-                        <SelectValue placeholder="Select Project Type..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                        {activeProjectTypes?.map((t) => (
-                          <SelectItem
-                            key={t._id}
-                            value={t._id}
-                            className="text-[11px] font-bold"
-                          >
-                            {t.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FieldContent>
-                </Field>
-
-                {/* Folder Template Selector (Story 11B.2) */}
-                <Field>
-                  <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1.5">
-                    <Folders className="h-3 w-3" /> Folder Template
-                  </FieldLabel>
-                  <FieldContent>
-                    <Select
-                      value={selectedFolderTemplateId || ""}
-                      onValueChange={(val) =>
-                        setSelectedFolderTemplateId(
-                          val as Id<"folderTemplates">,
-                        )
-                      }
-                    >
-                      <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
-                        <SelectValue placeholder="Select Folder Template..." />
-                      </SelectTrigger>
-                      <SelectContent className="bg-zinc-900 border-white/10 text-white">
-                        {filteredFolderTemplates.map((t) => {
-                          const variantLabel = t.variant
-                            ? ` (${t.variant})`
-                            : "";
-                          return (
+              {spawnsProject && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  className="space-y-4 pt-2 border-t border-white/5"
+                >
+                  {/* Project Type Selector */}
+                  <Field>
+                    <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2">
+                      Project Type
+                    </FieldLabel>
+                    <FieldContent>
+                      <Select
+                        value={projectTypeId || ""}
+                        onValueChange={(val) => {
+                          setProjectTypeId(val as Id<"projectTypes">);
+                          // Auto-select default folder template if available
+                          const defaultTpl = folderTemplates?.find(
+                            (t) => t.projectTypeId === val && t.isDefault,
+                          );
+                          if (defaultTpl)
+                            setSelectedFolderTemplateId(defaultTpl._id);
+                        }}
+                      >
+                        <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
+                          <SelectValue placeholder="Select Project Type..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                          {activeProjectTypes?.map((t) => (
                             <SelectItem
                               key={t._id}
                               value={t._id}
                               className="text-[11px] font-bold"
                             >
                               {t.name}
-                              {variantLabel}
                             </SelectItem>
-                          );
-                        })}
-                      </SelectContent>
-                    </Select>
-                  </FieldContent>
-                </Field>
-              </motion.div>
-            )}
-          </div>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FieldContent>
+                  </Field>
+
+                  {/* Folder Template Selector */}
+                  <Field>
+                    <FieldLabel className="text-[10px] font-black text-white/40 uppercase tracking-widest pl-1 mb-2 flex items-center gap-1.5">
+                      <Folders className="h-3 w-3" /> Folder Template
+                    </FieldLabel>
+                    <FieldContent>
+                      <Select
+                        value={selectedFolderTemplateId || ""}
+                        onValueChange={(val) =>
+                          setSelectedFolderTemplateId(
+                            val as Id<"folderTemplates">,
+                          )
+                        }
+                      >
+                        <SelectTrigger className="h-11 bg-white/5 border-none rounded-xl text-[11px] font-bold text-white">
+                          <SelectValue placeholder="Select Folder Template..." />
+                        </SelectTrigger>
+                        <SelectContent className="bg-zinc-900 border-white/10 text-white">
+                          {filteredFolderTemplates.map((t) => {
+                            const variantLabel = t.variant
+                              ? ` (${t.variant})`
+                              : "";
+                            return (
+                              <SelectItem
+                                key={t._id}
+                                value={t._id}
+                                className="text-[11px] font-bold"
+                              >
+                                {t.name}
+                                {variantLabel}
+                              </SelectItem>
+                            );
+                          })}
+                        </SelectContent>
+                      </Select>
+                    </FieldContent>
+                  </Field>
+                </motion.div>
+              )}
+            </div>
+          )}
 
           {/* Item Description */}
           <Field>

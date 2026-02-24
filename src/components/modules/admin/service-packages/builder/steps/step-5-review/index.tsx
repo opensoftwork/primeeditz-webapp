@@ -49,10 +49,26 @@ export function Step5Review() {
 
   // Totals Calculation
   const lineItems = step3Data?.lineItems ?? [];
+
+  const calculateItemTotal = (item: any): number => {
+    const self = (Number(item.rate) || 0) * (Number(item.quantity) || 0);
+    const subTotal = (item.subItems || []).reduce((sum: number, sub: any) => {
+      const subSelf = (Number(sub.rate) || 0) * (Number(sub.quantity) || 0);
+      const subSubTotal = (sub.subItems || []).reduce(
+        (s: number, ss: any) =>
+          s + (Number(ss.rate) || 0) * (Number(ss.quantity) || 0),
+        0,
+      );
+      return sum + subSelf + subSubTotal;
+    }, 0);
+    return self + subTotal;
+  };
+
   const subtotal = lineItems.reduce(
-    (sum, item) => sum + (item.rate || 0) * (item.quantity || 1),
+    (sum, item) => sum + calculateItemTotal(item),
     0,
   );
+
   const gstPercentage = step3Data?.gstPercentage ?? 18;
   const gstAmount = step3Data?.applyGST
     ? Math.round(subtotal * (gstPercentage / 100))
@@ -108,6 +124,7 @@ export function Step5Review() {
             unit: item.unit,
             rate: Number(item.rate) || 0,
             quantity: Number(item.quantity) || 1,
+            subItems: item.subItems,
           })),
           terms: step3Data.terms,
           applyGST: step3Data.applyGST,

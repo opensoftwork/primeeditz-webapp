@@ -390,3 +390,16 @@ development_status:
   21-6-employee-lightbox-assetslider: ready-for-dev
   21-7-move-image-grid-upload-shared: ready-for-dev
   21-8-ui-consistency-pass: ready-for-dev
+
+  # ============================================================================
+  # EPIC 23: Quotation Sub-Items & Table Format
+  # ============================================================================
+  epic-23: in-progress
+  23-1-sub-item-schema-and-display: done
+  23-2-sub-item-crud-builder: done
+  23-3-sub-item-crud-editor: review
+  23-4-sub-item-detail-view: review
+  23-5-sub-item-pdf-preview: review
+  23-6-table-format-studio-detail: review
+  23-7-sub-item-crud-service-package: review
+  23-8-sub-item-flow-package-to-quotation: review

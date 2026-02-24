@@ -52,6 +52,7 @@ export function EditorLineItemsSection() {
     ) || [];
 
   const sections =
+    //@ts-ignore
     (useQuery(api.functions.quotations.sections.queries.getSections, {
       activeOnly: true,
     }) as Section[]) || [];
@@ -61,7 +62,13 @@ export function EditorLineItemsSection() {
   const [targetSectionId, setTargetSectionId] = useState<string | null>(null);
   const [itemDrawerOpen, setItemDrawerOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<
-    (QuotationLineItem & { originalIdx: number }) | null
+    | (QuotationLineItem & {
+        originalIdx: number;
+        _isSubItem?: boolean;
+        _subIdx?: number;
+        _parentName?: string;
+      })
+    | null
   >(null);
   const [defaultSectionForDrawer, setDefaultSectionForDrawer] = useState<
     string | undefined
@@ -92,6 +99,74 @@ export function EditorLineItemsSection() {
     [],
   );
 
+  const openAddSubItemDrawer = useCallback(
+    (parentIdx: number, parentName?: string) => {
+      setEditingItem({
+        id: crypto.randomUUID(),
+        description: "",
+        rate: 0,
+        quantity: 1,
+        unit: "ea",
+        originalIdx: parentIdx,
+        _isSubItem: true,
+        _parentName: parentName,
+      } as any);
+      setItemDrawerOpen(true);
+    },
+    [],
+  );
+
+  const openEditSubItemDrawer = useCallback(
+    (
+      parentIdx: number,
+      subIdx: number,
+      sub: any,
+      parentName?: string,
+      subSubIdx?: number,
+    ) => {
+      setEditingItem({
+        ...sub,
+        originalIdx: parentIdx,
+        _isSubItem: true,
+        _subIdx: subIdx,
+        _subSubIdx: subSubIdx,
+        _parentName: parentName,
+      });
+      setItemDrawerOpen(true);
+    },
+    [],
+  );
+
+  const { addSubItem, updateSubItem, removeSubItem } = useQuotationBuilder();
+
+  const handleSaveItem = useCallback(
+    (itemData: Omit<QuotationLineItem, "id">) => {
+      if (editingItem) {
+        if (editingItem._isSubItem) {
+          if (editingItem._subIdx !== undefined) {
+            // Update sub-item
+            updateSubItem(
+              editingItem.originalIdx,
+              editingItem._subIdx,
+              itemData,
+              (editingItem as any)._subSubIdx,
+            );
+          } else {
+            // Add sub-item
+            addSubItem(editingItem.originalIdx, itemData as any);
+          }
+        } else {
+          updateLineItem(editingItem.originalIdx, itemData);
+        }
+      } else {
+        addLineItem(itemData);
+      }
+      setItemDrawerOpen(false);
+      setEditingItem(null);
+    },
+    [editingItem, addLineItem, updateLineItem, addSubItem, updateSubItem],
+  );
+
   const handleSelectFromLibrary = useCallback(
     (item: any, projectId?: string) => {
       const defaultProjectId =
@@ -108,19 +183,6 @@ export function EditorLineItemsSection() {
       });
     },
     [addLineItem, filteredProjects],
-  );
-
-  const handleSaveItem = useCallback(
-    (itemData: Omit<QuotationLineItem, "id">) => {
-      if (editingItem) {
-        updateLineItem(editingItem.originalIdx, itemData);
-      } else {
-        addLineItem(itemData);
-      }
-      setItemDrawerOpen(false);
-      setEditingItem(null);
-    },
-    [editingItem, addLineItem, updateLineItem],
   );
 
   const handleAddProject = useCallback(
@@ -166,22 +228,34 @@ export function EditorLineItemsSection() {
     return counts;
   }, [allItemsWithIdx, sections]);
 
+  // Recursive total calculation for 3-level nesting (1 → 1.1 → 1.1.1)
+  const calculateItemTotal = useCallback(
+    (item: { rate: number; quantity: number; subItems?: any[] }): number => {
+      const self = item.rate * item.quantity;
+      const subTotal = (item.subItems || []).reduce((sum, sub) => {
+        const subSelf = sub.rate * sub.quantity;
+        const subSubTotal = (sub.subItems || []).reduce(
+          (s: number, ss: any) => s + (ss.rate || 0) * (ss.quantity || 0),
+          0,
+        );
+        return sum + subSelf + subSubTotal;
+      }, 0);
+      return self + subTotal;
+    },
+    [],
+  );
+
   const sectionTotals = useMemo(() => {
     const totals: Record<string, number> = { all: 0 };
     allItemsWithIdx.forEach((item) => {
-      const itemTotal =
-        item.rate * item.quantity +
-        (item.subItems || []).reduce(
-          (sum, sub) => sum + sub.rate * sub.quantity,
-          0,
-        );
+      const itemTotal = calculateItemTotal(item);
       totals.all += itemTotal;
       if (item.sectionId) {
         totals[item.sectionId] = (totals[item.sectionId] || 0) + itemTotal;
       }
     });
     return totals;
-  }, [allItemsWithIdx]);
+  }, [allItemsWithIdx, calculateItemTotal]);
 
   const displayedItems = useMemo(() => {
     if (activeTab === "all") return allItemsWithIdx;
@@ -298,9 +372,10 @@ export function EditorLineItemsSection() {
               name: activeTab === "all" ? "All" : activeSection?.name || "",
             }}
             onEditItem={openEditItemDrawer}
+            onUpdateItem={(item) => updateLineItem(item.originalIdx, item)}
             onRemoveItem={removeLineItem}
-            onAddItem={(sectionId) => openAddItemDrawer(sectionId)}
-            onAddFromLibrary={(sectionId) => openLibrary(sectionId)}
+            onAddItem={() => openAddItemDrawer()}
+            onAddFromLibrary={() => openLibrary()}
           />
         </div>
       </div>
@@ -318,11 +393,13 @@ export function EditorLineItemsSection() {
           setItemDrawerOpen(open);
           if (!open) setEditingItem(null);
         }}
-        item={editingItem}
+        item={editingItem || undefined}
         sections={sections}
         defaultSectionId={defaultSectionForDrawer}
         projects={filteredProjects}
         onSave={handleSaveItem}
+        isSubItem={editingItem?._isSubItem}
+        parentName={editingItem?._parentName}
       />
     </div>
   );

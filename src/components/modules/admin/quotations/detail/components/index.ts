@@ -7,4 +7,5 @@ export { StudioFeedbackSection } from "./studio-feedback-section";
 export { StudioProjectInfo } from "./studio-project-info";
 export { TermsConditions } from "./terms-conditions";
 export { SpawnedProjectsList } from "./spawned-projects-list";
+export { LineItemRow } from "./line-item-table-row";
 export { QuotationDetailSkeleton } from "./skeleton";

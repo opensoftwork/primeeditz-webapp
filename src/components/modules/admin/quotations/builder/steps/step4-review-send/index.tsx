@@ -28,21 +28,28 @@ import { SendQuotationDrawer } from "../../../send/send-quotation-drawer";
 import { DownloadQuotation } from "../../../preview";
 import type { Id } from "@convex/_generated/dataModel";
 import { cn } from "@/lib/utils";
+import { ProjectSectionItems } from "../shared/project-section-items";
+import { LineItemDrawer } from "../shared/line-item-drawer";
+import { Project, QuotationLineItem } from "../../types";
 
 export function Step5ReviewSend() {
   const {
     formData,
+    setFormData,
     subtotal,
     taxAmount,
     grandTotal,
     projects: contextProjects,
-    sections,
+    sections: contextSections,
     selectedStudio,
     saveQuotation,
     saveQuotationAndReturn,
     isLoading,
     setSubmitTrigger,
     quotationId,
+    addLineItem,
+    updateLineItem,
+    removeLineItem,
   } = useQuotationBuilder();
 
   const router = useRouter();
@@ -53,8 +60,33 @@ export function Step5ReviewSend() {
     quotationId,
   );
 
+  // Expanded projects state
+  const [expandedProjects, setExpandedProjects] = useState<Set<string>>(
+    new Set(),
+  );
+
+  // Line Item Drawer state
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editingItem, setEditingItem] = useState<
+    (QuotationLineItem & { originalIdx?: number }) | null
+  >(null);
+  const [targetProjectId, setTargetProjectId] = useState<string | undefined>();
+  const [targetSectionId, setTargetSectionId] = useState<string | undefined>();
+
+  // Auto-expand projects that have items on mount
+  useEffect(() => {
+    if (contextProjects && formData.step4.lineItems.length > 0) {
+      const activeIds = new Set<string>();
+      formData.step4.lineItems.forEach((item) => {
+        if (item.projectId) activeIds.add(item.projectId);
+      });
+      setExpandedProjects(activeIds);
+    }
+  }, [contextProjects === undefined]); // Run once when projects load
+
   // Fetch real quotation data to get current status
   const savedQuotation = useQuery(
+    // @ts-ignore - Deep instantiation error due to recursive sub-item schema inference
     api.functions.quotations.queries.getQuotation,
     savedQuotationId
       ? { quotationId: savedQuotationId as Id<"quotations"> }
@@ -106,7 +138,7 @@ export function Step5ReviewSend() {
       );
 
       const sectionGroups =
-        sections
+        contextSections
           ?.map((section) => ({
             section,
             items: projectItems.filter(
@@ -118,7 +150,8 @@ export function Step5ReviewSend() {
       // Unsectioned items
       const unsectionedItems = projectItems.filter(
         (item: any) =>
-          !item.sectionId || !sections?.some((s) => s._id === item.sectionId),
+          !item.sectionId ||
+          !contextSections?.some((s) => s._id === item.sectionId),
       );
 
       if (unsectionedItems.length > 0) {
@@ -147,7 +180,7 @@ export function Step5ReviewSend() {
   );
 
   const groupedBySection =
-    sections
+    contextSections
       ?.map((section) => ({
         section,
         items: generalItems.filter(
@@ -158,7 +191,8 @@ export function Step5ReviewSend() {
 
   const globalUnsectioned = generalItems.filter(
     (item: any) =>
-      !item.sectionId || !sections?.some((s) => s._id === item.sectionId),
+      !item.sectionId ||
+      !contextSections?.some((s) => s._id === item.sectionId),
   );
 
   if (globalUnsectioned.length > 0) {
@@ -208,6 +242,50 @@ export function Step5ReviewSend() {
     setIsSendDrawerOpen(false);
     router.push("/quotations");
   };
+
+  // Handle Line Item Actions
+  const handleAddItem = (projectId: string, sectionId?: string) => {
+    setEditingItem(null);
+    setTargetProjectId(projectId);
+    setTargetSectionId(sectionId);
+    setDrawerOpen(true);
+  };
+
+  const handleEditItem = (item: any) => {
+    setEditingItem(item);
+    setDrawerOpen(true);
+  };
+
+  const handleSaveItem = (data: any) => {
+    if (editingItem && editingItem.originalIdx !== undefined) {
+      updateLineItem(editingItem.originalIdx, data);
+    } else {
+      addLineItem(data);
+    }
+    setDrawerOpen(false);
+  };
+
+  const handleUpdateItem = (item: any) => {
+    if (item.originalIdx !== undefined) {
+      updateLineItem(item.originalIdx, item);
+    }
+  };
+
+  const toggleProject = (projectId: string) => {
+    const newExpanded = new Set(expandedProjects);
+    if (newExpanded.has(projectId)) {
+      newExpanded.delete(projectId);
+    } else {
+      newExpanded.add(projectId);
+    }
+    setExpandedProjects(newExpanded);
+  };
+
+  // Preparation for ProjectSectionItems
+  const itemsWithIdx = formData.step4.lineItems.map((item, idx) => ({
+    ...item,
+    originalIdx: idx,
+  }));
 
   // Handle Preview - save first, then navigate to preview page
   const handlePreview = async () => {
@@ -292,7 +370,7 @@ export function Step5ReviewSend() {
           {/* Download PDF Button */}
           <DownloadQuotation
             quotation={mockQuotation}
-            sections={sections || []}
+            sections={contextSections || []}
             projects={projects}
             variant="default"
             size="sm"
@@ -325,12 +403,28 @@ export function Step5ReviewSend() {
         <div className="flex-1 lg:overflow-y-auto lg:custom-scrollbar lg:pr-4 space-y-6 pb-8">
           <StudioProjectInfo quotation={mockQuotation} />
 
-          <LineItemsSection
-            groupedByProject={groupedByProject}
-            groupedBySection={groupedBySection}
-            projects={projects}
-            formatCurrency={formatCurrency}
-          />
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-black uppercase tracking-widest text-white/40">
+                Service Breakdown
+              </h3>
+              <p className="text-[10px] font-bold text-primary/40 uppercase tracking-widest">
+                Edit items inline below
+              </p>
+            </div>
+            <ProjectSectionItems
+              projects={projects as Project[]}
+              sections={contextSections || []}
+              items={itemsWithIdx}
+              expandedProjects={expandedProjects}
+              onToggleProject={toggleProject}
+              onEditItem={handleEditItem}
+              onUpdateItem={handleUpdateItem}
+              onRemoveItem={removeLineItem}
+              onAddItem={handleAddItem}
+              onAddFromLibrary={() => {}} // Library not yet integrated here
+            />
+          </div>
 
           <TermsConditions terms={formData.step4.terms} />
         </div>
@@ -419,6 +513,18 @@ export function Step5ReviewSend() {
           />
         </div>
       </div>
+
+      {/* Line Item Drawer */}
+      <LineItemDrawer
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+        item={editingItem}
+        sections={contextSections || []}
+        projects={projects as Project[]}
+        defaultProjectId={targetProjectId}
+        defaultSectionId={targetSectionId}
+        onSave={handleSaveItem}
+      />
 
       {/* Send Quotation Drawer */}
       {savedQuotationId && (

@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { IndianRupee } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -22,11 +23,24 @@ export function GroupedPricingDisplay({
     return acc;
   }, {});
 
+  const calculateItemTotal = (item: any): number => {
+    const self = (item.rate || 0) * (item.quantity || 0);
+    const subTotal = (item.subItems || []).reduce((sum: number, sub: any) => {
+      const subSelf = (sub.rate || 0) * (sub.quantity || 0);
+      const subSubTotal = (sub.subItems || []).reduce(
+        (s: number, ss: any) => s + (ss.rate || 0) * (ss.quantity || 0),
+        0,
+      );
+      return sum + subSelf + subSubTotal;
+    }, 0);
+    return self + subTotal;
+  };
+
   const calculateSubtotal = (items: any[]) =>
-    items.reduce((sum, item) => sum + item.rate * item.quantity, 0);
+    items.reduce((sum, item) => sum + calculateItemTotal(item), 0);
 
   const totalBeforeGST = lineItems.reduce(
-    (sum, item) => sum + item.rate * item.quantity,
+    (sum, item) => sum + calculateItemTotal(item),
     0,
   );
   const gstAmount = applyGST ? totalBeforeGST * 0.18 : 0;
@@ -73,24 +87,81 @@ export function GroupedPricingDisplay({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-white/5">
-                  {items.map((item: any) => (
-                    <tr
-                      key={item.id}
-                      className="hover:bg-white/2 transition-colors"
-                    >
-                      <td className="px-6 py-4 text-xs font-medium text-white/60">
-                        {item.description}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-bold text-white/40 text-right">
-                        ₹{item.rate.toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-bold text-white text-center">
-                        {item.quantity}
-                      </td>
-                      <td className="px-6 py-4 text-xs font-black text-white text-right">
-                        ₹{(item.rate * item.quantity).toLocaleString()}
-                      </td>
-                    </tr>
+                  {items.map((item: any, idx: number) => (
+                    <React.Fragment key={item.id}>
+                      <tr className="hover:bg-white/2 transition-colors">
+                        <td className="px-6 py-4 text-xs font-medium text-white/60">
+                          {item.description}
+                        </td>
+                        <td className="px-6 py-4 text-xs font-bold text-white/40 text-right">
+                          ₹{item.rate.toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 text-xs font-bold text-white text-center">
+                          {item.quantity}
+                        </td>
+                        <td className="px-6 py-4 text-xs font-black text-white text-right">
+                          ₹{calculateItemTotal(item).toLocaleString()}
+                        </td>
+                      </tr>
+
+                      {/* Level 2 Sub-Items */}
+                      {item.subItems?.map((sub: any, sIdx: number) => (
+                        <React.Fragment key={sub.id}>
+                          <tr className="bg-white/1">
+                            <td className="px-6 py-2">
+                              <div className="flex items-center gap-2 pl-4">
+                                <span className="text-white/10 font-light">
+                                  └
+                                </span>
+                                <span className="text-[11px] font-bold text-white/40">
+                                  {sub.description}
+                                </span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-2 text-[10px] text-white/20 text-right">
+                              ₹{sub.rate.toLocaleString()}
+                            </td>
+                            <td className="px-6 py-2 text-[10px] text-white/20 text-center">
+                              {sub.quantity}
+                            </td>
+                            <td className="px-6 py-2 text-[10px] font-bold text-white/30 text-right">
+                              ₹
+                              {(
+                                (sub.rate || 0) * (sub.quantity || 0)
+                              ).toLocaleString()}
+                            </td>
+                          </tr>
+
+                          {/* Level 3 Sub-Items */}
+                          {sub.subItems?.map((ssub: any) => (
+                            <tr key={ssub.id} className="bg-white/0.5">
+                              <td className="px-6 py-1">
+                                <div className="flex items-center gap-2 pl-10">
+                                  <span className="text-white/5 font-light">
+                                    └
+                                  </span>
+                                  <span className="text-[10px] text-white/20 italic">
+                                    {ssub.description}
+                                  </span>
+                                </div>
+                              </td>
+                              <td className="px-6 py-1 text-[9px] text-white/10 text-right">
+                                ₹{ssub.rate.toLocaleString()}
+                              </td>
+                              <td className="px-6 py-1 text-[9px] text-white/10 text-center">
+                                {ssub.quantity}
+                              </td>
+                              <td className="px-6 py-1 text-[9px] text-white/10 text-right">
+                                ₹
+                                {(
+                                  (ssub.rate || 0) * (ssub.quantity || 0)
+                                ).toLocaleString()}
+                              </td>
+                            </tr>
+                          ))}
+                        </React.Fragment>
+                      ))}
+                    </React.Fragment>
                   ))}
                 </tbody>
               </table>

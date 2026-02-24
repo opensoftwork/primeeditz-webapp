@@ -158,7 +158,22 @@ export function PackageSelector({
                 >
                   Starting from ₹
                   {pkg.lineItems
-                    .reduce((acc, i) => acc + i.rate * i.quantity, 0)
+                    .reduce((acc, i: any) => {
+                      const self = (i.rate || 0) * (i.quantity || 1);
+                      const subTotal = (i.subItems || []).reduce(
+                        (sum: number, sub: any) => {
+                          const subSelf = (sub.rate || 0) * (sub.quantity || 1);
+                          const subSubTotal = (sub.subItems || []).reduce(
+                            (s: number, ss: any) =>
+                              s + (ss.rate || 0) * (ss.quantity || 1),
+                            0,
+                          );
+                          return sum + subSelf + subSubTotal;
+                        },
+                        0,
+                      );
+                      return acc + self + subTotal;
+                    }, 0)
                     .toLocaleString()}
                 </p>
               </div>

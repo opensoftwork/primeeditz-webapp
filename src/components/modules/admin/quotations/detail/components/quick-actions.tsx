@@ -5,24 +5,8 @@ import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { DownloadQuotation } from "../../preview";
 import { DeleteQuotationAction } from "../../delete-quotation-action";
-import { Project } from "../../types";
+import { Project, QuotationLineItem } from "../../types";
 import type { Id } from "@convex/_generated/dataModel";
-
-interface QuotationLineItem {
-  id: string;
-  description: string;
-  rate: number;
-  quantity: number;
-  unit: string;
-  sectionId?: string;
-  projectId?: string;
-  subItems?: {
-    description: string;
-    rate: number;
-    quantity: number;
-    unit: string;
-  }[];
-}
 
 interface QuickActionsProps {
   quotation: {

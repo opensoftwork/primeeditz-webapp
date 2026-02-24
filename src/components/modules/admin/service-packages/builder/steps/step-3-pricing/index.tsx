@@ -5,21 +5,13 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useForm } from "@tanstack/react-form";
 import { useQuery } from "convex/react";
-import {
-  Field,
-  FieldError,
-  FieldLabel,
-  FieldGroup,
-} from "@/components/ui/field";
 import { Plus, Calculator } from "lucide-react";
 
-import { toast } from "sonner";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
 
-import { cn } from "@/lib/utils";
 import { useBuilder } from "../../builder-context";
-import { LineItemCard } from "../../components/line-item-card";
+import { ServicePackageItemsTable } from "../../components/service-package-items-table";
 import { PricingSidebar } from "../../components/pricing-sidebar";
 
 const lineItemSchema = z.object({
@@ -87,6 +79,16 @@ export function Step3Pricing() {
           projectConfigId: item.projectConfigId || undefined,
           rate: Number(item.rate) || 0,
           quantity: Number(item.quantity) || 1,
+          subItems: (item.subItems || []).map((sub: any) => ({
+            ...sub,
+            rate: Number(sub.rate) || 0,
+            quantity: Number(sub.quantity) || 1,
+            subItems: (sub.subItems || []).map((ssub: any) => ({
+              ...ssub,
+              rate: Number(ssub.rate) || 0,
+              quantity: Number(ssub.quantity) || 1,
+            })),
+          })),
         })),
         terms: step3Data?.terms, // Preserve existing terms from step 4
         applyGST: value.applyGST,
@@ -96,13 +98,13 @@ export function Step3Pricing() {
         goToStep(4);
       }
     },
-  });
+  }) as any; // TS2589 workaround: TanStack Form + Zod deep type recursion
 
   // Register submit trigger
   useEffect(() => {
     setSubmitTrigger(() => () => form.handleSubmit());
     return () => setSubmitTrigger(null);
-  }, [form, setSubmitTrigger]);
+  }, [form, setSubmitTrigger]); // eslint-disable-line
 
   // Register sync callback - saves form data to context before navigation
   useEffect(() => {
@@ -117,6 +119,16 @@ export function Step3Pricing() {
           projectConfigId: item.projectConfigId || undefined,
           rate: Number(item.rate) || 0,
           quantity: Number(item.quantity) || 1,
+          subItems: (item.subItems || []).map((sub: any) => ({
+            ...sub,
+            rate: Number(sub.rate) || 0,
+            quantity: Number(sub.quantity) || 1,
+            subItems: (sub.subItems || []).map((ssub: any) => ({
+              ...ssub,
+              rate: Number(ssub.rate) || 0,
+              quantity: Number(ssub.quantity) || 1,
+            })),
+          })),
         })),
         terms: step3Data?.terms, // Preserve terms from step 4
         applyGST: values.applyGST,
@@ -124,11 +136,11 @@ export function Step3Pricing() {
       });
     });
     return () => setSyncCurrentStep(null);
-  }, [form, setStep3Data, setSyncCurrentStep, step3Data?.terms]);
+  }, [form, setStep3Data, setSyncCurrentStep, step3Data?.terms]); // eslint-disable-line
 
   return (
-    <form.Subscribe selector={(state) => state.values}>
-      {(values) => {
+    <form.Subscribe selector={(state: any) => state.values}>
+      {(values: any) => {
         return (
           <div className="w-full space-y-10 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-20">
             {/* Header */}
@@ -188,65 +200,11 @@ export function Step3Pricing() {
                     </Button>
                   </div>
 
-                  <div className="space-y-4">
-                    <form.Field name="lineItems" mode="array">
-                      {(field) => (
-                        <>
-                          {field.state.value.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center p-12 border-2 border-dashed border-white/5 rounded-[32px] bg-white/2 gap-4">
-                              <div className="p-4 rounded-full bg-white/5">
-                                <Plus className="h-8 w-8 text-white/10" />
-                              </div>
-                              <div className="text-center">
-                                <p className="text-xs font-black text-white/40 uppercase tracking-widest">
-                                  No line items added
-                                </p>
-                                <p className="text-[10px] text-white/20 uppercase tracking-widest mt-1">
-                                  Start by adding your first service offering
-                                </p>
-                              </div>
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() =>
-                                  field.pushValue({
-                                    id: crypto.randomUUID(),
-                                    projectConfigId:
-                                      projectConfigs[0]?.id || "",
-                                    description: "",
-                                    unit: "per project",
-                                    rate: 0,
-                                    quantity: 1,
-                                  })
-                                }
-                                className="mt-2 h-9 px-6 rounded-xl text-[9px] font-black uppercase tracking-widest bg-primary text-black hover:bg-primary/90 border-none"
-                              >
-                                Add First Item
-                              </Button>
-                            </div>
-                          ) : (
-                            field.state.value.map((_, index) => (
-                              <LineItemCard
-                                key={field.state.value[index]?.id ?? index}
-                                form={form}
-                                index={index}
-                                projectConfigs={projectConfigs}
-                                canRemove={field.state.value.length > 1}
-                                onRemove={() => {
-                                  if (field.state.value.length > 1) {
-                                    field.removeValue(index);
-                                  } else {
-                                    toast.error(
-                                      "At least one line item is required",
-                                    );
-                                  }
-                                }}
-                              />
-                            ))
-                          )}
-                        </>
-                      )}
-                    </form.Field>
+                  <div>
+                    <ServicePackageItemsTable
+                      form={form}
+                      projectConfigs={projectConfigs}
+                    />
                   </div>
                 </section>
               </div>
@@ -259,10 +217,10 @@ export function Step3Pricing() {
                   applyGST={values.applyGST}
                   gstPercentage={values.gstPercentage}
                   onToggleGST={(checked) =>
-                    form.setFieldValue("applyGST", checked)
+                    (form as any).setFieldValue("applyGST", checked)
                   }
                   onUpdateGSTPercentage={(value) =>
-                    form.setFieldValue("gstPercentage", value)
+                    (form as any).setFieldValue("gstPercentage", value)
                   }
                 />
               </div>

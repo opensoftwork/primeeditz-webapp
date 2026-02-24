@@ -143,6 +143,39 @@ export const draftProjectConfigValidator = v.object({
   defaultStorageTierId: v.optional(v.id("storageTiers")),
 });
 
+// ============================================================================
+// Unified Sub-Item Validators (3-level explicit nesting)
+// ============================================================================
+
+// Level 3: Leaf sub-item (no children allowed — max depth)
+export const subItemLevel3Validator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+});
+
+// Level 2: Mid-level sub-item (can have Level 3 children)
+export const subItemLevel2Validator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+  subItems: v.optional(v.array(subItemLevel3Validator)),
+});
+
+// Level 1: Top-level sub-item (used in lineItems.subItems, can have Level 2 children)
+export const quotationSubItemValidator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+  subItems: v.optional(v.array(subItemLevel2Validator)),
+});
+
 // Service Package Line Item Validator - PRICING ONLY, no spawning config
 export const servicePackageLineItemValidator = v.object({
   id: v.string(),
@@ -151,15 +184,8 @@ export const servicePackageLineItemValidator = v.object({
   unit: v.string(),
   rate: v.number(),
   quantity: v.number(),
-  projectConfigId: v.optional(v.string()), // NEW: Links to projectConfigs.id
-  subItems: v.optional(
-    v.array(
-      v.object({
-        description: v.string(),
-        amount: v.optional(v.number()),
-      }),
-    ),
-  ),
+  projectConfigId: v.optional(v.string()), // Links to projectConfigs.id
+  subItems: v.optional(v.array(quotationSubItemValidator)),
 });
 
 // Level 3: Leaf nodes (no children allowed)
@@ -598,17 +624,7 @@ export default defineSchema({
         image: v.optional(v.string()),
         sourcePackageId: v.optional(v.id("servicePackages")), // NEW: Source package tracker
         projectConfigId: v.optional(v.string()), // NEW: Link to project configuration
-        subItems: v.optional(
-          v.array(
-            v.object({
-              id: v.string(),
-              description: v.string(),
-              unit: v.string(),
-              rate: v.number(),
-              quantity: v.number(),
-            }),
-          ),
-        ),
+        subItems: v.optional(v.array(quotationSubItemValidator)),
       }),
     ),
     subtotal: v.number(),

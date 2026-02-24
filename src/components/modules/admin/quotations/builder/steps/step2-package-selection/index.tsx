@@ -5,7 +5,7 @@ import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { Check, ChevronRight, Loader2, Search } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -56,7 +56,7 @@ export function Step2PackageSelection() {
 
   // Queries
   const packagesQuery = useQuery(
-    api.functions.quotations.templates.queries.getPackages,
+    api.functions.quotations.templates.queries.getPackages as any,
     { activeOnly: true },
   );
   const categoriesQuery = useQuery(
@@ -226,23 +226,33 @@ export function Step2PackageSelection() {
                   >
                     {pkg.name}
                   </h3>
-                  {(pkg.price ||
-                    pkg.lineItems?.reduce(
-                      (acc, item) => acc + item.rate * item.quantity,
-                      0,
-                    ) > 0) && (
-                    <p className="text-[10px] font-bold text-primary italic">
-                      Starting from ₹
-                      {(
-                        pkg.price ||
-                        pkg.lineItems?.reduce(
-                          (acc, item) => acc + item.rate * item.quantity,
+                  {(() => {
+                    const total =
+                      pkg.price ||
+                      pkg.lineItems?.reduce((acc, item: any) => {
+                        const self = (item.rate || 0) * (item.quantity || 1);
+                        const subTotal = (item.subItems || []).reduce(
+                          (sum: number, sub: any) => {
+                            const subSelf =
+                              (sub.rate || 0) * (sub.quantity || 1);
+                            const subSubTotal = (sub.subItems || []).reduce(
+                              (s: number, ss: any) =>
+                                s + (ss.rate || 0) * (ss.quantity || 1),
+                              0,
+                            );
+                            return sum + subSelf + subSubTotal;
+                          },
                           0,
-                        ) ||
-                        0
-                      ).toLocaleString()}
-                    </p>
-                  )}
+                        );
+                        return acc + self + subTotal;
+                      }, 0) ||
+                      0;
+                    return total > 0 ? (
+                      <p className="text-[10px] font-bold text-primary italic">
+                        Starting from ₹{total.toLocaleString()}
+                      </p>
+                    ) : null;
+                  })()}
                 </div>
               </motion.div>
             );
@@ -374,32 +384,111 @@ export function Step2PackageSelection() {
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-white/5">
-                      {focusedPackage.lineItems?.map((item, i) => (
-                        <tr
-                          key={i}
-                          className="hover:bg-white/2 transition-colors"
-                        >
-                          <td className="px-5 py-3">
-                            <p className="text-[11px] font-bold text-white/80">
-                              {item.description}
-                            </p>
-                            <p className="text-[9px] text-white/30 uppercase tracking-wider">
-                              {item.projectTypeId
-                                ? "Per Project Type"
-                                : "Service Item"}
-                            </p>
-                          </td>
-                          <td className="px-5 py-3 text-right text-[11px] font-mono text-white/60">
-                            {item.quantity}
-                          </td>
-                          <td className="px-5 py-3 text-right text-[11px] font-mono text-white/60">
-                            ₹{item.rate.toLocaleString()}
-                          </td>
-                          <td className="px-5 py-3 text-right text-[11px] font-mono text-primary font-bold">
-                            ₹{(item.rate * item.quantity).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {focusedPackage.lineItems?.map((item, i) => {
+                        const itemTotal = (() => {
+                          const self = (item.rate || 0) * (item.quantity || 1);
+                          const subTotal = (
+                            (item as any).subItems || []
+                          ).reduce((sum: number, sub: any) => {
+                            const subSelf =
+                              (sub.rate || 0) * (sub.quantity || 1);
+                            const subSubTotal = (sub.subItems || []).reduce(
+                              (s: number, ss: any) =>
+                                s + (ss.rate || 0) * (ss.quantity || 1),
+                              0,
+                            );
+                            return sum + subSelf + subSubTotal;
+                          }, 0);
+                          return self + subTotal;
+                        })();
+
+                        return (
+                          <React.Fragment key={i}>
+                            <tr className="hover:bg-white/2 transition-colors">
+                              <td className="px-5 py-3">
+                                <p className="text-[11px] font-bold text-white/80">
+                                  {item.description}
+                                </p>
+                                <p className="text-[9px] text-white/30 uppercase tracking-wider">
+                                  {item.unit || "Service Item"}
+                                </p>
+                              </td>
+                              <td className="px-5 py-3 text-right text-[11px] font-mono text-white/60">
+                                {item.quantity}
+                              </td>
+                              <td className="px-5 py-3 text-right text-[11px] font-mono text-white/60">
+                                ₹{item.rate.toLocaleString()}
+                              </td>
+                              <td className="px-5 py-3 text-right text-[11px] font-mono text-primary font-bold">
+                                ₹{itemTotal.toLocaleString()}
+                              </td>
+                            </tr>
+                            {/* Level 2 sub-items */}
+                            {(item as any).subItems?.map(
+                              (sub: any, sIdx: number) => (
+                                <React.Fragment key={`${i}-${sIdx}`}>
+                                  <tr className="hover:bg-white/2 transition-colors">
+                                    <td className="px-5 py-2 pl-10">
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-white/10 text-xs">
+                                          └
+                                        </span>
+                                        <span className="text-[10px] font-medium text-white/50">
+                                          {sub.description}
+                                        </span>
+                                      </div>
+                                    </td>
+                                    <td className="px-5 py-2 text-right text-[10px] font-mono text-white/30">
+                                      {sub.quantity}
+                                    </td>
+                                    <td className="px-5 py-2 text-right text-[10px] font-mono text-white/30">
+                                      ₹{sub.rate.toLocaleString()}
+                                    </td>
+                                    <td className="px-5 py-2 text-right text-[10px] font-mono text-white/40">
+                                      ₹
+                                      {(
+                                        sub.rate * sub.quantity
+                                      ).toLocaleString()}
+                                    </td>
+                                  </tr>
+                                  {/* Level 3 sub-sub-items */}
+                                  {sub.subItems?.map(
+                                    (ssub: any, ssIdx: number) => (
+                                      <tr
+                                        key={`${i}-${sIdx}-${ssIdx}`}
+                                        className="hover:bg-white/1 transition-colors"
+                                      >
+                                        <td className="px-5 py-1.5 pl-16">
+                                          <div className="flex items-center gap-1.5">
+                                            <span className="text-white/5 text-xs">
+                                              └
+                                            </span>
+                                            <span className="text-[9px] font-medium text-white/30 italic">
+                                              {ssub.description}
+                                            </span>
+                                          </div>
+                                        </td>
+                                        <td className="px-5 py-1.5 text-right text-[9px] font-mono text-white/20">
+                                          {ssub.quantity}
+                                        </td>
+                                        <td className="px-5 py-1.5 text-right text-[9px] font-mono text-white/20">
+                                          ₹{ssub.rate.toLocaleString()}
+                                        </td>
+                                        <td className="px-5 py-1.5 text-right text-[9px] font-mono text-white/25">
+                                          ₹
+                                          {(
+                                            ssub.rate * ssub.quantity
+                                          ).toLocaleString()}
+                                        </td>
+                                      </tr>
+                                    ),
+                                  )}
+                                </React.Fragment>
+                              ),
+                            )}
+                          </React.Fragment>
+                        );
+                      })}
                       {(!focusedPackage.lineItems ||
                         focusedPackage.lineItems.length === 0) && (
                         <tr>
@@ -424,7 +513,26 @@ export function Step2PackageSelection() {
                           ₹
                           {(
                             focusedPackage.lineItems?.reduce(
-                              (acc, item) => acc + item.rate * item.quantity,
+                              (acc, item: any) => {
+                                const self =
+                                  (item.rate || 0) * (item.quantity || 1);
+                                const subTotal = (item.subItems || []).reduce(
+                                  (sum: number, sub: any) => {
+                                    const subSelf =
+                                      (sub.rate || 0) * (sub.quantity || 1);
+                                    const subSubTotal = (
+                                      sub.subItems || []
+                                    ).reduce(
+                                      (s: number, ss: any) =>
+                                        s + (ss.rate || 0) * (ss.quantity || 1),
+                                      0,
+                                    );
+                                    return sum + subSelf + subSubTotal;
+                                  },
+                                  0,
+                                );
+                                return acc + self + subTotal;
+                              },
                               0,
                             ) || 0
                           ).toLocaleString()}

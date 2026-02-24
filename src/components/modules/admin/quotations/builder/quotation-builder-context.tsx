@@ -132,6 +132,22 @@ interface QuotationBuilderContextValue {
   addLineItem: (data?: Partial<QuotationLineItem>) => void;
   updateLineItem: (idx: number, updates: Partial<QuotationLineItem>) => void;
   removeLineItem: (idx: number) => void;
+  addSubItem: (
+    parentIdx: number,
+    subItem: QuotationSubItem,
+    subParentIdx?: number,
+  ) => void;
+  updateSubItem: (
+    parentIdx: number,
+    subIdx: number,
+    updates: Partial<QuotationSubItem>,
+    subSubIdx?: number,
+  ) => void;
+  removeSubItem: (
+    parentIdx: number,
+    subIdx: number,
+    subSubIdx?: number,
+  ) => void;
   saveQuotation: () => Promise<void>;
   saveQuotationAndReturn: () => Promise<string | null>;
   setSubmitTrigger: (fn: (() => void) | null) => void;
@@ -336,17 +352,33 @@ export function QuotationBuilderProvider({
     return projectsQuery as Project[];
   }, [projectsQuery]);
 
-  const subtotal = useMemo(() => {
-    return formData.step4.lineItems.reduce((acc, item) => {
-      const itemTotal = item.rate * item.quantity;
-      const subItemsTotal =
-        item.subItems?.reduce(
-          (s: number, sub: QuotationSubItem) => s + sub.rate * sub.quantity,
+  // Recursive total calculation for 3-level nesting (1 → 1.1 → 1.1.1)
+  const calculateItemTotal = useCallback(
+    (item: {
+      rate: number;
+      quantity: number;
+      subItems?: QuotationSubItem[];
+    }): number => {
+      const self = item.rate * item.quantity;
+      const subTotal = (item.subItems || []).reduce((sum, sub) => {
+        const subSelf = sub.rate * sub.quantity;
+        const subSubTotal = (sub.subItems || []).reduce(
+          (s, ss) => s + ss.rate * ss.quantity,
           0,
-        ) ?? 0;
-      return acc + itemTotal + subItemsTotal;
-    }, 0);
-  }, [formData.step4.lineItems]);
+        );
+        return sum + subSelf + subSubTotal;
+      }, 0);
+      return self + subTotal;
+    },
+    [],
+  );
+
+  const subtotal = useMemo(() => {
+    return formData.step4.lineItems.reduce(
+      (acc, item) => acc + calculateItemTotal(item),
+      0,
+    );
+  }, [formData.step4.lineItems, calculateItemTotal]);
 
   const taxAmount =
     (subtotal - formData.step5.discountAmount) * (formData.step5.taxRate / 100);
@@ -403,6 +435,13 @@ export function QuotationBuilderProvider({
             unit: s.unit,
             rate: s.rate,
             quantity: s.quantity,
+            subItems: s.subItems?.map((ss) => ({
+              id: ss.id || crypto.randomUUID(),
+              description: ss.description,
+              unit: ss.unit,
+              rate: ss.rate,
+              quantity: ss.quantity,
+            })),
           })),
         };
       });
@@ -563,6 +602,105 @@ export function QuotationBuilderProvider({
     setIsDirty(true);
   }, []);
 
+  const addSubItem = useCallback(
+    (parentIdx: number, subItem: QuotationSubItem, subParentIdx?: number) => {
+      setFormDataState((prev) => {
+        const newItems = [...prev.step4.lineItems];
+        const item = { ...newItems[parentIdx] };
+
+        if (subParentIdx !== undefined) {
+          // Level 3
+          const subItems = [...(item.subItems || [])];
+          const subItemToUpdate = { ...subItems[subParentIdx] };
+          subItemToUpdate.subItems = [
+            ...(subItemToUpdate.subItems || []),
+            subItem,
+          ];
+          subItems[subParentIdx] = subItemToUpdate;
+          item.subItems = subItems;
+        } else {
+          // Level 2
+          item.subItems = [...(item.subItems || []), subItem];
+        }
+
+        newItems[parentIdx] = item;
+        return {
+          ...prev,
+          step4: { ...prev.step4, lineItems: newItems },
+        };
+      });
+      setIsDirty(true);
+    },
+    [],
+  );
+
+  const updateSubItem = useCallback(
+    (
+      parentIdx: number,
+      subIdx: number,
+      updates: Partial<QuotationSubItem>,
+      subSubIdx?: number,
+    ) => {
+      setFormDataState((prev) => {
+        const newItems = [...prev.step4.lineItems];
+        const item = { ...newItems[parentIdx] };
+        const subItems = [...(item.subItems || [])];
+
+        if (subSubIdx !== undefined) {
+          // Level 3
+          const subItemToUpdate = { ...subItems[subIdx] };
+          const subSubItems = [...(subItemToUpdate.subItems || [])];
+          subSubItems[subSubIdx] = { ...subSubItems[subSubIdx], ...updates };
+          subItemToUpdate.subItems = subSubItems;
+          subItems[subIdx] = subItemToUpdate;
+        } else {
+          // Level 2
+          subItems[subIdx] = { ...subItems[subIdx], ...updates };
+        }
+
+        item.subItems = subItems;
+        newItems[parentIdx] = item;
+        return {
+          ...prev,
+          step4: { ...prev.step4, lineItems: newItems },
+        };
+      });
+      setIsDirty(true);
+    },
+    [],
+  );
+
+  const removeSubItem = useCallback(
+    (parentIdx: number, subIdx: number, subSubIdx?: number) => {
+      setFormDataState((prev) => {
+        const newItems = [...prev.step4.lineItems];
+        const item = { ...newItems[parentIdx] };
+        const subItems = [...(item.subItems || [])];
+
+        if (subSubIdx !== undefined) {
+          // Level 3
+          const subItemToUpdate = { ...subItems[subIdx] };
+          const subSubItems = [...(subItemToUpdate.subItems || [])];
+          subSubItems.splice(subSubIdx, 1);
+          subItemToUpdate.subItems = subSubItems;
+          subItems[subIdx] = subItemToUpdate;
+        } else {
+          // Level 2
+          subItems.splice(subIdx, 1);
+        }
+
+        item.subItems = subItems;
+        newItems[parentIdx] = item;
+        return {
+          ...prev,
+          step4: { ...prev.step4, lineItems: newItems },
+        };
+      });
+      setIsDirty(true);
+    },
+    [],
+  );
+
   // Package Logic
   const applyPackageItems = useCallback(() => {
     // Only apply if we have packages and no items yet (or logic to merge)
@@ -598,10 +736,18 @@ export function QuotationBuilderProvider({
           projectTypeId: item.projectTypeId as string,
           selectedFolderTemplateId: item.selectedFolderTemplateId as string,
           subItems: item.subItems?.map((s) => ({
+            id: s.id || crypto.randomUUID(),
             description: s.description,
-            unit: "unit",
-            rate: s.amount || 0,
-            quantity: 1,
+            unit: s.unit,
+            rate: s.rate,
+            quantity: s.quantity,
+            subItems: s.subItems?.map((ss) => ({
+              id: ss.id || crypto.randomUUID(),
+              description: ss.description,
+              unit: ss.unit,
+              rate: ss.rate,
+              quantity: ss.quantity,
+            })),
           })),
         });
       });
@@ -748,6 +894,9 @@ export function QuotationBuilderProvider({
         addLineItem,
         updateLineItem,
         removeLineItem,
+        addSubItem,
+        updateSubItem,
+        removeSubItem,
         saveQuotation,
         saveQuotationAndReturn,
         setSubmitTrigger,

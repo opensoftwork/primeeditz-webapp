@@ -15,15 +15,22 @@ export function useQuotationData(data: any | null | undefined) {
       projectTypeId: p.projectTypeId,
     }));
 
-    // 2. Calculate totals
-    const subtotal = quotation.lineItems.reduce((acc: number, item: any) => {
-      const itemTotal = item.rate * item.quantity;
-      const subItemsTotal =
-        item.subItems?.reduce(
-          (s: number, sub: any) => s + sub.rate * sub.quantity,
+    // 2. Calculate totals (recursive for 3-level nesting)
+    const calculateItemTotal = (item: any): number => {
+      const self = item.rate * item.quantity;
+      const subTotal = (item.subItems || []).reduce((sum: number, sub: any) => {
+        const subSelf = sub.rate * sub.quantity;
+        const subSubTotal = (sub.subItems || []).reduce(
+          (s: number, ss: any) => s + ss.rate * ss.quantity,
           0,
-        ) ?? 0;
-      return acc + itemTotal + subItemsTotal;
+        );
+        return sum + subSelf + subSubTotal;
+      }, 0);
+      return self + subTotal;
+    };
+
+    const subtotal = quotation.lineItems.reduce((acc: number, item: any) => {
+      return acc + calculateItemTotal(item);
     }, 0);
 
     const discountAmount = quotation.discountAmount || 0;

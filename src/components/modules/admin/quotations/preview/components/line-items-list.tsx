@@ -115,6 +115,8 @@ export function LineItemsList({
                         key={item.id}
                         item={item}
                         index={idx + 1}
+                        level={0}
+                        parentNumber=""
                         formatCurrency={formatCurrency}
                       />
                     ))}
@@ -189,6 +191,8 @@ export function LineItemsList({
                       key={item.id}
                       item={item}
                       index={idx + 1}
+                      level={0}
+                      parentNumber=""
                       formatCurrency={formatCurrency}
                     />
                   ))}

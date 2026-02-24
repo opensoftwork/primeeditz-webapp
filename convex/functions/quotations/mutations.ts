@@ -12,7 +12,10 @@ import {
   studioMutation,
 } from "../../lib/customFunctions";
 import { getActorForState, getPhaseForState } from "../../lib/statusMachine";
-import type { ActionState } from "../../schema";
+import {
+  type ActionState,
+  quotationSubItemValidator,
+} from "../../schema";
 import { spawnProjectsFromQuotation } from "../projects/spawning";
 
 /*
@@ -35,17 +38,7 @@ const lineItemInput = v.object({
   selectedFolderTemplateId: v.optional(v.id("folderTemplates")),
   sourcePackageId: v.optional(v.id("servicePackages")),
   projectConfigId: v.optional(v.string()),
-  subItems: v.optional(
-    v.array(
-      v.object({
-        id: v.string(),
-        description: v.string(),
-        unit: v.string(),
-        rate: v.number(),
-        quantity: v.number(),
-      }),
-    ),
-  ),
+  subItems: v.optional(v.array(quotationSubItemValidator)),
 });
 
 /**
@@ -69,13 +62,28 @@ async function generateQuotationCode(
 }
 
 /**
- * Calculate totals from line items
+ * Recursively calculate total for a single item and all its sub-items
+ */
+function calculateItemTotal(item: { rate: number; quantity: number; subItems?: Array<{ rate: number; quantity: number; subItems?: Array<{ rate: number; quantity: number }> }> }): number {
+  const self = item.rate * item.quantity;
+  const subTotal = (item.subItems || []).reduce((sum, sub) => {
+    const subSelf = sub.rate * sub.quantity;
+    const subSubTotal = (sub.subItems || []).reduce(
+      (s, ss) => s + ss.rate * ss.quantity, 0
+    );
+    return sum + subSelf + subSubTotal;
+  }, 0);
+  return self + subTotal;
+}
+
+/**
+ * Calculate totals from line items (recursive, supports 3-level nesting)
  */
 function calculateTotals(
   lineItems: Array<{
     rate: number;
     quantity: number;
-    subItems?: Array<{ rate: number; quantity: number }>;
+    subItems?: Array<{ rate: number; quantity: number; subItems?: Array<{ rate: number; quantity: number }> }>;
   }>,
   taxRate: number,
   discountAmount?: number,
@@ -83,12 +91,7 @@ function calculateTotals(
   let subtotal = 0;
 
   for (const item of lineItems) {
-    subtotal += item.rate * item.quantity;
-    if (item.subItems) {
-      for (const subItem of item.subItems) {
-        subtotal += subItem.rate * subItem.quantity;
-      }
-    }
+    subtotal += calculateItemTotal(item);
   }
 
   const discount = discountAmount || 0;
@@ -138,12 +141,21 @@ async function aggregateLineItemsFromPackages(
         spawnsProject: true, // Packages always spawn projects now
         projectTypeId,
         selectedFolderTemplateId,
-        subItems: item.subItems?.map((si) => ({
+        // Map sub-items with new IDs (unified format: id, description, unit, rate, quantity, subItems?)
+        subItems: item.subItems?.map((si: any) => ({
           id: crypto.randomUUID(),
           description: si.description,
-          unit: "Unit",
-          rate: si.amount ?? 0,
-          quantity: 1,
+          unit: si.unit ?? "Unit",
+          rate: si.rate ?? si.amount ?? 0,
+          quantity: si.quantity ?? 1,
+          // Map level-3 sub-items if present
+          subItems: si.subItems?.map((ssi: any) => ({
+            id: crypto.randomUUID(),
+            description: ssi.description,
+            unit: ssi.unit ?? "Unit",
+            rate: ssi.rate ?? ssi.amount ?? 0,
+            quantity: ssi.quantity ?? 1,
+          })),
         })),
       });
     }
