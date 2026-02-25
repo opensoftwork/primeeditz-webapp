@@ -63,7 +63,7 @@ function ProjectCard({ project }: { project: AdminProject }) {
         className={cn(
           "group relative p-4 rounded-2xl bg-white/3 border transition-all duration-300 overflow-hidden flex flex-col h-full",
           isAdminActionRequired
-            ? "border-red-500/40 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:border-red-500/60"
+            ? "border-amber-500/40 bg-amber-500/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/60"
             : "border-white/5 hover:bg-white/5 hover:border-primary/20",
         )}
       >
@@ -72,7 +72,7 @@ function ProjectCard({ project }: { project: AdminProject }) {
           className={cn(
             "absolute top-0 right-0 w-24 h-24 blur-2xl rounded-full translate-x-10 -translate-y-10 transition-colors",
             isAdminActionRequired
-              ? "bg-red-500/10 group-hover:bg-red-500/20"
+              ? "bg-amber-500/10 group-hover:bg-amber-500/20"
               : "bg-primary/5 group-hover:bg-primary/10",
           )}
         />

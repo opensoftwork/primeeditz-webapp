@@ -31,7 +31,7 @@ export function QuotationCard({ quotation }: QuotationCardProps) {
       className={cn(
         "group relative flex flex-col justify-between h-full p-5 rounded-2xl bg-white/5 border transition-all duration-300 cursor-pointer overflow-hidden shadow-lg shadow-black/20",
         isPendingAction
-          ? "border-red-500/40 bg-red-500/5 shadow-[0_0_20px_rgba(239,68,68,0.1)] hover:border-red-500/60"
+          ? "border-amber-500/40 bg-amber-500/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/60"
           : "border-white/5 hover:bg-white/[0.07] hover:border-primary/20",
       )}
     >

@@ -12,8 +12,8 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
     <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <div className="h-0.5 w-8 bg-cyan-400 shadow-[0_0_10px_#22d3ee] rounded-full" />
-          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-cyan-400">
+          <div className="h-0.5 w-8 bg-white/40 shadow-none rounded-full" />
+          <span className="text-[9px] font-black uppercase tracking-[0.4em] text-white/40">
             Administrative Command
           </span>
         </div>
@@ -22,7 +22,7 @@ export function DashboardHeader({ userName }: DashboardHeaderProps) {
             G'day, {userName.split(" ")[0]}
             <Badge
               variant="outline"
-              className="border-cyan-400/40 text-cyan-400 uppercase text-[8px] tracking-[0.2em] font-black py-0.5 px-2"
+              className="border-white/20 text-white/40 uppercase text-[8px] tracking-[0.2em] font-black py-0.5 px-2"
             >
               ADMIN ACCESS
             </Badge>

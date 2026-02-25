@@ -25,6 +25,7 @@ export function PackageCard({
       : null);
 
   const projectType = useQuery(
+    // @ts-ignore
     api.functions.projectTypes.queries.getProjectType,
     singleTypeId
       ? { projectTypeId: singleTypeId as Id<"projectTypes"> }

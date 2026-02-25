@@ -243,16 +243,19 @@ export function PackagePreviewPanel({
             <Table>
               <TableHeader className="bg-white/5">
                 <TableRow className="hover:bg-transparent border-white/5">
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 w-16 text-center">
+                    SL NO
+                  </TableHead>
                   <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10">
                     Description
                   </TableHead>
-                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right w-16">
                     Qty
                   </TableHead>
-                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right w-24">
                     Rate
                   </TableHead>
-                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right">
+                  <TableHead className="text-[9px] font-black uppercase tracking-widest text-white/40 h-10 text-right w-24">
                     Total
                   </TableHead>
                 </TableRow>
@@ -261,42 +264,79 @@ export function PackagePreviewPanel({
                 {pkg.lineItems.map((item: any, idx: number) => (
                   <React.Fragment key={idx}>
                     <TableRow className="border-white/5 hover:bg-white/5 transition-colors">
-                      <TableCell className="font-medium text-[11px] text-white/80 py-3">
+                      <TableCell className="text-center font-bold text-[12px] text-white/40 py-3.5">
+                        {idx + 1}
+                      </TableCell>
+                      <TableCell className="font-medium text-[13px] text-white/80 py-3.5">
                         {item.description}
-                        <div className="text-[9px] text-white/30 font-normal mt-0.5 uppercase tracking-wider">
+                        <div className="text-[10px] text-white/30 font-normal mt-1 uppercase tracking-wider">
                           {item.unit}
                         </div>
                       </TableCell>
-                      <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">
+                      <TableCell className="text-right text-[12px] font-bold text-white/60 py-3.5">
                         {item.quantity}
                       </TableCell>
-                      <TableCell className="text-right text-[11px] font-bold text-white/60 py-3">
-                        ₹{item.rate.toLocaleString()}
+                      <TableCell
+                        className={cn(
+                          "text-[12px] font-bold py-3.5",
+                          item.rate
+                            ? "text-right text-white/60"
+                            : "text-center text-white/40",
+                        )}
+                      >
+                        {item.rate ? `₹${item.rate.toLocaleString()}` : "-"}
                       </TableCell>
-                      <TableCell className="text-right text-[11px] font-bold text-primary py-3">
-                        ₹{calculateItemTotal(item).toLocaleString()}
+                      <TableCell
+                        className={cn(
+                          "text-[12px] font-bold py-3.5",
+                          calculateItemTotal(item)
+                            ? "text-right text-primary"
+                            : "text-center text-white/40",
+                        )}
+                      >
+                        {calculateItemTotal(item)
+                          ? `₹${calculateItemTotal(item).toLocaleString()}`
+                          : "-"}
                       </TableCell>
                     </TableRow>
                     {/* Level 2 sub-items */}
                     {item.subItems?.map((sub: any, sIdx: number) => (
                       <React.Fragment key={`${idx}-${sIdx}`}>
                         <TableRow className="border-white/5 hover:bg-white/3 transition-colors">
-                          <TableCell className="py-2 pl-8">
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-white/10 text-xs">└</span>
-                              <span className="text-[10px] font-medium text-white/50">
+                          <TableCell className="text-center text-[11px] font-medium text-white/30 py-2.5">
+                            {idx + 1}.{sIdx + 1}
+                          </TableCell>
+                          <TableCell className="py-2.5 pl-2">
+                            <div className="flex items-center gap-2">
+                              <span className="text-[12px] font-medium text-white/60">
                                 {sub.description}
                               </span>
                             </div>
                           </TableCell>
-                          <TableCell className="text-right text-[10px] font-medium text-white/30 py-2">
+                          <TableCell className="text-right text-[11px] font-medium text-white/40 py-2.5">
                             {sub.quantity}
                           </TableCell>
-                          <TableCell className="text-right text-[10px] font-medium text-white/30 py-2">
-                            ₹{sub.rate.toLocaleString()}
+                          <TableCell
+                            className={cn(
+                              "text-[11px] font-medium py-2.5",
+                              sub.rate
+                                ? "text-right text-white/40"
+                                : "text-center text-white/30",
+                            )}
+                          >
+                            {sub.rate ? `₹${sub.rate.toLocaleString()}` : "-"}
                           </TableCell>
-                          <TableCell className="text-right text-[10px] font-medium text-white/40 py-2">
-                            ₹{(sub.rate * sub.quantity).toLocaleString()}
+                          <TableCell
+                            className={cn(
+                              "text-[11px] font-medium py-2.5",
+                              (sub.rate || 0) * (sub.quantity || 1)
+                                ? "text-right text-white/50"
+                                : "text-center text-white/30",
+                            )}
+                          >
+                            {(sub.rate || 0) * (sub.quantity || 1)
+                              ? `₹${((sub.rate || 0) * (sub.quantity || 1)).toLocaleString()}`
+                              : "-"}
                           </TableCell>
                         </TableRow>
                         {/* Level 3 sub-sub-items */}
@@ -305,22 +345,42 @@ export function PackagePreviewPanel({
                             key={`${idx}-${sIdx}-${ssIdx}`}
                             className="border-white/5 hover:bg-white/2 transition-colors"
                           >
-                            <TableCell className="py-1.5 pl-14">
-                              <div className="flex items-center gap-1.5">
-                                <span className="text-white/5 text-xs">└</span>
-                                <span className="text-[9px] font-medium text-white/30 italic">
+                            <TableCell className="text-center text-[10px] font-medium text-white/20 py-2">
+                              {idx + 1}.{sIdx + 1}.{ssIdx + 1}
+                            </TableCell>
+                            <TableCell className="py-2 pl-6">
+                              <div className="flex items-center gap-2">
+                                <span className="text-[11px] font-medium text-white/40 italic">
                                   {ssub.description}
                                 </span>
                               </div>
                             </TableCell>
-                            <TableCell className="text-right text-[9px] font-medium text-white/20 py-1.5">
+                            <TableCell className="text-right text-[10px] font-medium text-white/30 py-2">
                               {ssub.quantity}
                             </TableCell>
-                            <TableCell className="text-right text-[9px] font-medium text-white/20 py-1.5">
-                              ₹{ssub.rate.toLocaleString()}
+                            <TableCell
+                              className={cn(
+                                "text-[10px] font-medium py-2",
+                                ssub.rate
+                                  ? "text-right text-white/30"
+                                  : "text-center text-white/20",
+                              )}
+                            >
+                              {ssub.rate
+                                ? `₹${ssub.rate.toLocaleString()}`
+                                : "-"}
                             </TableCell>
-                            <TableCell className="text-right text-[9px] font-medium text-white/25 py-1.5">
-                              ₹{(ssub.rate * ssub.quantity).toLocaleString()}
+                            <TableCell
+                              className={cn(
+                                "text-[10px] font-medium py-2",
+                                (ssub.rate || 0) * (ssub.quantity || 1)
+                                  ? "text-right text-white/40"
+                                  : "text-center text-white/20",
+                              )}
+                            >
+                              {(ssub.rate || 0) * (ssub.quantity || 1)
+                                ? `₹${((ssub.rate || 0) * (ssub.quantity || 1)).toLocaleString()}`
+                                : "-"}
                             </TableCell>
                           </TableRow>
                         ))}
@@ -332,7 +392,7 @@ export function PackagePreviewPanel({
               <TableFooter className="bg-white/10 border-t border-white/5">
                 <TableRow className="hover:bg-transparent">
                   <TableCell
-                    colSpan={3}
+                    colSpan={4}
                     className="text-[10px] font-black uppercase tracking-widest text-white/60"
                   >
                     Package Total

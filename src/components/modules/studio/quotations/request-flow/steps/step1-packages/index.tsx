@@ -1,8 +1,8 @@
 "use client";
 
 import { motion } from "motion/react";
-import { useRequestWizard } from "../request-wizard-context";
-import { PackageSelector } from "../../../quotation-request/package-selector";
+import { useRequestWizard } from "../../request-wizard-context";
+import { PackageSelector } from "../shared/package-selector";
 
 import { Step1Loader } from "./step-1-loader";
 

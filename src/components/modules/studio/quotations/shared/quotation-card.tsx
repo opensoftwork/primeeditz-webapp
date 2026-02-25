@@ -116,9 +116,9 @@ export function QuotationCard({
       onClick={handleCardClick}
       whileHover={{ scale: 1.01 }}
       whileTap={{ scale: 0.99 }}
-      className="group p-5 rounded-2xl bg-[#0F0F0F] border border-white/5 hover:border-white/10 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
+      className="group p-5 rounded-2xl bg-white/5 border border-white/5 hover:border-white/15 transition-all duration-300 cursor-pointer relative overflow-hidden h-full flex flex-col justify-between"
     >
-      <div className="relative space-y-4 h-full flex flex-col">
+      <div className="relative space-y-4 h-full flex flex-col ">
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="space-y-1">
@@ -126,9 +126,7 @@ export function QuotationCard({
               <span className="text-sm font-black tracking-tight text-white uppercase">
                 {quotation.code}
               </span>
-              <span className="bg-white/5 border border-white/5 text-[9px] font-bold text-white/40 px-1.5 py-0.5 rounded-md">
-                v1
-              </span>
+
             </div>
             <div className="flex items-center gap-1.5 text-[10px] font-medium text-white/40">
               <Calendar className="h-3 w-3 opacity-60" />

@@ -198,11 +198,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
       />
 
       {/* Phase Progress Bar */}
-      <div className="max-w-[1600px] mx-auto">
-        <PhaseProgress currentPhase={project.phase} />
-      </div>
+      <PhaseProgress currentPhase={project.phase} />
 
-      <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="space-y-6">
         <DeliverableStatusBanner
           projectId={projectId as Id<"projects">}
           role="admin"

@@ -38,6 +38,7 @@ import {
   AssetSlider,
   type ViewerAsset,
 } from "@/components/shared/asset-viewer";
+import { ResolveVersionDrawer } from "./resolve-version-drawer";
 
 interface VersionRequestDetailProps {
   projectId: string;
@@ -54,6 +55,7 @@ export function VersionRequestDetailView({
   const { setOverride, removeOverride } = useBreadcrumbStore();
   const [isUpdating, setIsUpdating] = useState(false);
   const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [isResolveOpen, setIsResolveOpen] = useState(false);
   const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
 
   // Queries
@@ -277,7 +279,7 @@ export function VersionRequestDetailView({
           )}
           {versionRequest.status === "in_progress" && (
             <Button
-              onClick={() => handleUpdateStatus("resolved")}
+              onClick={() => setIsResolveOpen(true)}
               disabled={isUpdating}
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest"
             >
@@ -503,6 +505,15 @@ export function VersionRequestDetailView({
         initialIndex={currentAssetIndex}
         open={isSliderOpen}
         onOpenChange={setIsSliderOpen}
+      />
+
+      <ResolveVersionDrawer
+        open={isResolveOpen}
+        onOpenChange={setIsResolveOpen}
+        projectId={projectId}
+        deliverableId={deliverableId}
+        deliverableName={deliverable?.name || "Deliverable"}
+        versionNumber={versionRequest.versionNumber}
       />
     </div>
   );

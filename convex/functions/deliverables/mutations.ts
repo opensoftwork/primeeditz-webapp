@@ -675,7 +675,8 @@ export const uploadCorrectedVersion = mutation({
 
 /**
  * Studio approves an individual deliverable.
- * This does NOT transition the project phase.
+ * When all deliverables for the project are approved, auto-transitions
+ * the project from review → delivery phase.
  */
 export const studioApproveDeliverable = mutation({
   args: {
@@ -714,6 +715,56 @@ export const studioApproveDeliverable = mutation({
       studioProfileId: profile._id,
       approvedAt: now(),
     });
+
+    // --- Auto-transition: check if ALL deliverables are now approved ---
+    // Get all studio-facing deliverables for this project
+    const allDeliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    // Only consider deliverables that have been sent to studio (studioVersion > 0)
+    const studioDeliverables = allDeliverables.filter(
+      (d) => (d.studioVersion || 0) > 0,
+    );
+
+    if (studioDeliverables.length > 0) {
+      // Get all existing approvals for this project
+      const allApprovals = await ctx.db
+        .query("studioApprovals")
+        .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+        .collect();
+
+      const approvedIds = new Set(allApprovals.map((a) => a.deliverableId));
+
+      // Check if every studio-facing deliverable has been approved
+      const allApproved = studioDeliverables.every((d) =>
+        approvedIds.has(d._id),
+      );
+
+      if (allApproved && project.actionState === "awaiting_review") {
+        // Transition project to delivery phase
+        await ctx.db.patch(args.projectId, {
+          phase: "delivery",
+          actionState: "review_approved",
+          awaitingActorRole: "admin",
+          reviewApprovedAt: now(),
+          updatedAt: now(),
+        });
+
+        // Create status history entry
+        await ctx.db.insert("statusHistory", {
+          projectId: args.projectId,
+          previousPhase: "review",
+          newPhase: "delivery",
+          previousActionState: "awaiting_review",
+          newActionState: "review_approved",
+          changedBy: profile._id,
+          changedAt: now(),
+          notes: "All deliverables approved by studio",
+        });
+      }
+    }
 
     return { success: true };
   },

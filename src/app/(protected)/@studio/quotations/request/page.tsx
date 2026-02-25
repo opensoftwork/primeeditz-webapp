@@ -1,5 +1,5 @@
 import { Metadata } from "next";
-import { QuotationRequestForm } from "@/components/modules/studio/quotation-request";
+import { QuotationRequestForm } from "@/components/modules/studio/quotations/request-flow/steps/shared/quotation-request-form";
 
 export const metadata: Metadata = {
   title: "Request Quotation | PrimeEditz Studio",

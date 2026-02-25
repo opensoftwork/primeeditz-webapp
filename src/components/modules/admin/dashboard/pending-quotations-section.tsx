@@ -15,6 +15,7 @@ import { QuotationCard } from "@/components/modules/studio/quotations/shared/quo
  */
 export function PendingQuotationsSection() {
   const pendingQuotations = useQuery(
+    //@ts-ignore
     api.functions.quotations.queries.getPendingQuotationsForAdmin,
     { limit: 5 },
   );

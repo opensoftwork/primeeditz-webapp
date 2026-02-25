@@ -1,6 +1,6 @@
 "use client";
 
-import { QuotationRequestError } from "@/components/modules/studio/quotation-request";
+import { QuotationRequestError } from "@/components/modules/studio/quotations/request-flow/steps/shared/quotation-request-error";
 
 export default function ErrorPage({
   error,

@@ -2,8 +2,8 @@
 
 import { User, Calendar, MapPin, Tag, FileText } from "lucide-react";
 import { motion } from "motion/react";
-import { useRequestWizard } from "../request-wizard-context";
-import { SelectedPackagesSummary } from "../../../quotation-request/selected-packages-summary";
+import { useRequestWizard } from "../../request-wizard-context";
+import { SelectedPackagesSummary } from "../shared/selected-packages-summary";
 
 export function Step3Review() {
   const { formData, selectedPackageIds } = useRequestWizard();
