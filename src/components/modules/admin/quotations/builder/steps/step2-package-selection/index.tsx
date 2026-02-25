@@ -56,7 +56,8 @@ export function Step2PackageSelection() {
 
   // Queries
   const packagesQuery = useQuery(
-    api.functions.quotations.templates.queries.getPackages as any,
+    //@ts-ignore
+    api.functions.quotations.templates.queries.getPackages,
     { activeOnly: true },
   );
   const categoriesQuery = useQuery(
