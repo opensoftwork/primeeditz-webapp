@@ -248,6 +248,26 @@ export const getQuotationWithSections = adminQuery({
       }),
     );
 
+    // Get selected packages for package-based grouping in preview
+    const selectedPackageIds = quotation.selectedPackageIds || [];
+    const packages = await Promise.all(
+      selectedPackageIds.map(async (pkgId) => {
+        const pkg = await ctx.db.get(pkgId);
+        if (!pkg) return null;
+        const projectType = pkg.projectTypeId
+          ? projectTypes.find((pt) => pt._id === pkg.projectTypeId)
+          : undefined;
+        return {
+          _id: pkg._id,
+          name: pkg.name,
+          projectTypeId: pkg.projectTypeId || undefined,
+          projectTypeName: projectType?.name,
+          // Include line item descriptions for fallback matching in preview
+          lineItemDescriptions: pkg.lineItems?.map((li) => li.description) || [],
+        };
+      }),
+    );
+
     return {
       quotation: {
         ...quotation,
@@ -260,6 +280,7 @@ export const getQuotationWithSections = adminQuery({
         (s): s is Doc<"quotationSections"> => s !== null,
       ),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
+      packages: packages.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
 });

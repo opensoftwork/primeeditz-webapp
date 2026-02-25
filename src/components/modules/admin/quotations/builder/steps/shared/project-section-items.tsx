@@ -32,6 +32,7 @@ import { api } from "@convex/_generated/api";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
+  if (amount === 0) return "-";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",
@@ -49,6 +50,7 @@ interface ProjectSectionItemsProps {
   sections: Section[];
   items: LineItemWithIdx[];
   templates?: Template[];
+  packageIds?: string[];
   expandedProjects: Set<string>;
   onToggleProject: (projectId: string) => void;
   onEditItem: (item: LineItemWithIdx) => void;
@@ -92,11 +94,20 @@ const getSectionColorClasses = (color?: string) => {
   }
 };
 
+interface PackageGroup {
+  packageId: string;
+  packageName: string;
+  projectTypeName?: string;
+  items: LineItemWithIdx[];
+  totalAmount: number;
+}
+
 export function ProjectSectionItems({
   projects,
   sections,
   items,
   templates,
+  packageIds,
   expandedProjects,
   onToggleProject,
   onEditItem,
@@ -105,7 +116,7 @@ export function ProjectSectionItems({
   onAddItem,
   onAddFromLibrary,
 }: ProjectSectionItemsProps) {
-  // 
+  //@ts-ignore
   const projectTypes = useQuery(api.functions.projectTypes.queries.getActiveProjectTypes);
 
   // Separate items: assigned to a project vs unassigned (no projectId)
@@ -157,50 +168,139 @@ export function ProjectSectionItems({
 
   // Group unassigned items by SOURCE PACKAGE (matching studio-side UX)
   const groupedByPackage = useMemo(() => {
-    if (unassignedItems.length === 0) return [];
-
-    // Build a map of packageId -> { template, items }
-    const packageMap = new Map<
-      string,
-      { template: Template | undefined; items: LineItemWithIdx[] }
-    >();
-
-    unassignedItems.forEach((item) => {
-      // Fallback for missing sourcePackageId: try to find a package that matches the item's projectTypeId
-      let pkgId = (item.sourcePackageId as string);
+    // If no packageIds provided, fall back to grouping items by their sourcePackageId
+    if (!packageIds || packageIds.length === 0) {
+      if (unassignedItems.length === 0) return [];
       
-      if (!pkgId && item.projectTypeId) {
-        // If no sourcePackageId, try to find the template from our templates list that matches this projectTypeId
-        const matchingTemplate = templates?.find(t => t.projectTypeId === item.projectTypeId || t.projectConfigs?.some(c => c.projectTypeId === item.projectTypeId));
-        if (matchingTemplate) {
-          pkgId = matchingTemplate._id;
+      const packageMap = new Map<
+        string,
+        { template: Template | undefined; items: LineItemWithIdx[] }
+      >();
+
+      unassignedItems.forEach((item) => {
+        const pkgId = (item.sourcePackageId as string) || "__no_package__";
+        if (!packageMap.has(pkgId)) {
+          const tmpl = templates?.find((t) => t._id === pkgId);
+          packageMap.set(pkgId, { template: tmpl, items: [] });
         }
-      }
+        packageMap.get(pkgId)!.items.push(item);
+      });
 
-      const finalPkgId = pkgId || "__no_package__";
+      return Array.from(packageMap.entries()).map(
+        ([pkgId, { template, items: pkgItems }]) => {
+          const projectTypeId = template?.projectTypeId || pkgItems[0]?.projectTypeId;
+          const projectType = projectTypes?.find((t) => t._id === projectTypeId);
 
-      if (!packageMap.has(finalPkgId)) {
-        const tmpl = templates?.find((t) => t._id === finalPkgId);
-        packageMap.set(finalPkgId, { template: tmpl, items: [] });
+          return {
+            packageId: pkgId,
+            packageName: template?.name || (projectType ? `${projectType.name} Package` : "Manual Items"),
+            projectTypeName: projectType?.name,
+            items: pkgItems,
+            totalAmount: calculateTotal(pkgItems),
+          } as PackageGroup;
+        },
+      );
+    }
+
+    // Strategy: Show a section for EVERY selected package.
+    // Match items to packages using multiple strategies:
+    // 1. Direct sourcePackageId match (best)
+    // 2. Description match against template lineItems (fallback for items without sourcePackageId)
+    // 3. projectTypeId match (last resort)
+
+    const uniqueSelectedIds = Array.from(new Set(packageIds));
+    const processedItemIds = new Set<string>();
+
+    // Build a description-to-packageId lookup from templates for fallback matching
+    const descriptionToPackageId = new Map<string, string>();
+    uniqueSelectedIds.forEach((pkgId) => {
+      const template = templates?.find(t => t._id === pkgId);
+      if (template?.lineItems) {
+        template.lineItems.forEach((li) => {
+          if (li.description) {
+            descriptionToPackageId.set(li.description.trim().toLowerCase(), pkgId);
+          }
+        });
       }
-      packageMap.get(finalPkgId)!.items.push(item);
     });
 
-    return Array.from(packageMap.entries()).map(
-      ([pkgId, { template, items: pkgItems }]) => {
-        const projectTypeId = template?.projectTypeId || pkgItems[0]?.projectTypeId;
-        const projectType = projectTypes?.find(t => t._id === projectTypeId);
+    // First pass: assign items to packages
+    const packageItemsMap = new Map<string, LineItemWithIdx[]>();
+    uniqueSelectedIds.forEach(pkgId => packageItemsMap.set(pkgId, []));
 
-        return {
-          packageId: pkgId,
-          packageName: template?.name || (projectType ? `${projectType.name} Package` : "Manual Items"),
-          projectTypeName: projectType?.name,
-          items: pkgItems,
-          totalAmount: calculateTotal(pkgItems),
-        };
-      },
-    );
-  }, [unassignedItems, templates, projectTypes]);
+    // Pass 1: Direct sourcePackageId match
+    unassignedItems.forEach((item) => {
+      const spId = item.sourcePackageId as string;
+      if (spId && packageItemsMap.has(spId)) {
+        packageItemsMap.get(spId)!.push(item);
+        processedItemIds.add(item.id);
+      }
+    });
+
+    // Pass 2: For remaining items, try description match against template lineItems
+    unassignedItems.forEach((item) => {
+      if (processedItemIds.has(item.id)) return;
+      const descKey = item.description?.trim().toLowerCase();
+      if (descKey && descriptionToPackageId.has(descKey)) {
+        const matchedPkgId = descriptionToPackageId.get(descKey)!;
+        packageItemsMap.get(matchedPkgId)!.push(item);
+        processedItemIds.add(item.id);
+      }
+    });
+
+    // Pass 3: For still-remaining items, try projectTypeId match
+    unassignedItems.forEach((item) => {
+      if (processedItemIds.has(item.id)) return;
+      if (item.projectTypeId) {
+        // Find a selected package whose template has this projectTypeId
+        for (const pkgId of uniqueSelectedIds) {
+          const template = templates?.find(t => t._id === pkgId);
+          if (
+            template &&
+            (template.projectTypeId === item.projectTypeId ||
+              template.projectConfigs?.some(c => c.projectTypeId === item.projectTypeId))
+          ) {
+            packageItemsMap.get(pkgId)!.push(item);
+            processedItemIds.add(item.id);
+            break;
+          }
+        }
+      }
+    });
+
+    // Build result from collected data
+    const result: PackageGroup[] = [];
+    uniqueSelectedIds.forEach((pkgId) => {
+      const template = templates?.find(t => t._id === pkgId);
+      const pkgItems = packageItemsMap.get(pkgId)!;
+
+      // Always show the package section if it was selected (even if 0 items — user selected it)
+      const projectTypeId = template?.projectTypeId || pkgItems[0]?.projectTypeId;
+      const projectType = projectTypes?.find((t) => t._id === projectTypeId);
+
+      result.push({
+        packageId: pkgId,
+        packageName: template?.name || (projectType ? `${projectType.name} Package` : "Package"),
+        projectTypeName: projectType?.name,
+        items: pkgItems,
+        totalAmount: calculateTotal(pkgItems),
+      });
+    });
+
+    // Collect truly manual remaining items
+    const manualItems = unassignedItems.filter(item => !processedItemIds.has(item.id));
+    if (manualItems.length > 0) {
+      result.push({
+        packageId: "__no_package__",
+        packageName: "Manual Items",
+        projectTypeName: undefined,
+        items: manualItems,
+        totalAmount: calculateTotal(manualItems),
+      });
+    }
+
+    return result;
+  }, [unassignedItems, templates, projectTypes, packageIds]);
 
   // Check if there's anything to display
   const hasProjectItems = groupedByProject.length > 0;
@@ -356,29 +456,27 @@ export function ProjectSectionItems({
                           ))}
 
                         {/* Items without section within this package */}
-                        {pkgItems.filter((item) => !item.sectionId).length >
-                          0 && (
+                        {pkgItems.filter((item) => !item.sectionId).length > 0 && (
                           <div className="space-y-3">
-                            <div className="flex items-center gap-3 px-1">
+                            {/* Only show header if there are other sections to differentiate from */}
+                            {sections.some(s => pkgItems.some(item => item.sectionId === s._id)) && (
+                              <div className="flex items-center gap-3 px-1">
                                 <div className="h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest bg-zinc-500/10 border-zinc-500/20 text-zinc-400">
                                   Uncategorized
                                 </div>
                                 <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                  {pkgItems.filter((item) => !item.sectionId).length} manual entries
+                                  {pkgItems.filter((item) => !item.sectionId).length} items
                                 </span>
-                            </div>
+                              </div>
+                            )}
                             <LineItemsTable
-                              items={pkgItems.filter(
-                                (item) => !item.sectionId,
-                              )}
+                              items={pkgItems.filter((item) => !item.sectionId)}
                               section={{ _id: "", name: "Uncategorized" }}
                               onEditItem={onEditItem}
                               onUpdateItem={onUpdateItem}
                               onRemoveItem={onRemoveItem}
                               onAddItem={() => onAddItem(packageId)}
-                              onAddFromLibrary={() =>
-                                onAddFromLibrary(packageId)
-                              }
+                              onAddFromLibrary={() => onAddFromLibrary(packageId)}
                             />
                           </div>
                         )}
@@ -521,16 +619,19 @@ export function ProjectSectionItems({
                             {/* Unsectioned Items */}
                             {unsectionedItems.length > 0 && (
                               <div className="space-y-3">
-                                <div className="flex items-center justify-between px-1">
-                                  <div className="flex items-center gap-3">
-                                    <div className="h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest bg-zinc-500/10 border-zinc-500/20 text-zinc-400">
-                                      Uncategorized
+                                {/* Only show header if there are other sections to differentiate from */}
+                                {sectionGroups.length > 0 && (
+                                  <div className="flex items-center justify-between px-1">
+                                    <div className="flex items-center gap-3">
+                                      <div className="h-6 px-2.5 rounded-lg flex items-center justify-center border text-[8px] font-black uppercase tracking-widest bg-zinc-500/10 border-zinc-500/20 text-zinc-400">
+                                        Uncategorized
+                                      </div>
+                                      <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
+                                        {unsectionedItems.length} items
+                                      </span>
                                     </div>
-                                    <span className="text-[9px] font-black uppercase tracking-widest text-white/20">
-                                      {unsectionedItems.length} manual entries
-                                    </span>
                                   </div>
-                                </div>
+                                )}
                                 <LineItemsTable
                                   items={unsectionedItems}
                                   section={{ _id: "", name: "Uncategorized" }}

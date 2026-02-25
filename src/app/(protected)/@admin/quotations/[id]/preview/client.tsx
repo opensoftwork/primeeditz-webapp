@@ -74,7 +74,15 @@ export function QuotationPreviewClient({
     );
   }
 
-  const { quotation, sections, projects = [] } = data;
+  // DEBUG: Remove after fixing
+  console.log('[PreviewClient DEBUG] raw data:', {
+    hasData: !!data,
+    keys: data ? Object.keys(data) : [],
+    packagesFromData: data?.packages,
+    selectedPackageIds: data?.quotation?.selectedPackageIds,
+  });
+
+  const { quotation, sections, projects = [], packages = [] } = data;
 
   return (
     <QuotationPreview
@@ -93,6 +101,7 @@ export function QuotationPreviewClient({
       }}
       sections={sections}
       projects={projects}
+      packages={packages}
       companyInfo={companyInfo || undefined}
       studioName={quotation.studioName}
       projectName={quotation.projectName}

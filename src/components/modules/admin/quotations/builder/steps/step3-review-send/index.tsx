@@ -1,3 +1,19 @@
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import { 
+  Calendar, 
+  FileText, 
+  MapPin, 
+  Tag, 
+  User,
+  ShieldAlert,
+  Loader2,
+  Send
+} from "lucide-react";
+import { motion } from "motion/react";
+import { useQuotationBuilder } from "../../quotation-builder-context";
 import {
   PricingSummary,
   TermsConditions,
@@ -10,10 +26,6 @@ import { LineItemDrawer } from "../shared/line-item-drawer";
 import type { Project, QuotationData, QuotationLineItem } from "../../types";
 import { ReviewHeader } from "./review-header";
 import { ReviewProtocolCard } from "./review-protocol-card";
-import { motion } from "motion/react";
-import { useRouter } from "next/navigation";
-import { useQuotationBuilder } from "../../quotation-builder-context";
-import { useCallback, useEffect, useMemo, useState } from "react";
 
 // Module-level currency formatter — no per-render allocation
 const formatCurrency = (amount: number): string => {
@@ -67,13 +79,16 @@ export function Step3ReviewSend() {
 
   // Auto-expand projects/packages that have items on mount
   useEffect(() => {
-    if (formData.step3.lineItems.length === 0) return;
+    if (formData.step3.lineItems.length === 0 && formData.step2.packageIds.length === 0) return;
     const activeIds = new Set<string>();
+    // Expand all selected package IDs from Step 2
+    formData.step2.packageIds.forEach((pkgId) => activeIds.add(pkgId));
+    // Also expand from items' own sourcePackageId
     formData.step3.lineItems.forEach((item) => {
       if (item.projectId) activeIds.add(item.projectId);
       if (item.sourcePackageId) activeIds.add(item.sourcePackageId as string);
     });
-    // Also add __no_package__ if any items lack sourcePackageId
+    // Also add __no_package__ if any items lack sourcePackageId and projectId
     if (formData.step3.lineItems.some((item) => !item.projectId && !item.sourcePackageId)) {
       activeIds.add("__no_package__");
     }
@@ -133,14 +148,14 @@ export function Step3ReviewSend() {
       taxRate: formData.step3.taxRate / 100,
       discountAmount: formData.step3.discountAmount,
       _creationTime: Date.now(),
-      // Extra fields consumed by StudioProjectInfo
+      // Extra fields used for display
       studioName: selectedStudio?.name || "Not Selected",
       endClientName:
         firstProject?.eventName ||
         firstProject?.endClientName ||
         selectedStudio?.name ||
-        undefined,
-      projectId: firstProject?._id as string | undefined,
+        "N/A",
+      projectId: (firstProject?._id as string) || undefined,
       projectName:
         firstProject?.eventName || firstProject?.code || undefined,
       projectCode: firstProject?.code || undefined,
@@ -165,6 +180,7 @@ export function Step3ReviewSend() {
       router.push("/quotations");
     } catch (error) {
       console.error("Failed to save", error);
+      toast.error("Failed to save changes");
     }
   }, [saveQuotation, router]);
 
@@ -362,7 +378,7 @@ export function Step3ReviewSend() {
                   </span>
                 </div>
                 <p className="text-sm font-black text-white uppercase tracking-wider truncate">
-                  {firstProject?.venue || "Global Production"}
+                  {firstProject?.projectTypeName || "Universal Production"}
                 </p>
               </div>
             </div>
@@ -383,6 +399,7 @@ export function Step3ReviewSend() {
               sections={contextSections || []}
               items={itemsWithIdx}
               templates={templates}
+              packageIds={formData.step2.packageIds}
               expandedProjects={expandedProjects}
               onToggleProject={toggleProject}
               onEditItem={handleEditItem}
@@ -422,6 +439,7 @@ export function Step3ReviewSend() {
           <ReviewProtocolCard
             grandTotal={grandTotal}
             isLoading={isLoading}
+            isSavingForSend={isSavingForSend}
             onSendToStudio={handleSendToStudio}
             onSaveAsDraft={handleSaveAsDraft}
           />
@@ -435,6 +453,8 @@ export function Step3ReviewSend() {
             </div>
             <PricingSummary
               subtotal={subtotal}
+              discountAmount={formData.step3.discountAmount}
+              taxRate={formData.step3.taxRate / 100}
               taxAmount={taxAmount}
               grandTotal={grandTotal}
               formatCurrency={formatCurrency}
@@ -443,18 +463,17 @@ export function Step3ReviewSend() {
         </div>
       </div>
 
-      {/* Line Item Drawer */}
       <LineItemDrawer
-        isOpen={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
         item={editingItem}
         onSave={handleSaveItem}
         sections={contextSections || []}
-        projectId={targetProjectId}
-        sectionId={targetSectionId}
+        projects={projects as Project[]}
+        defaultProjectId={targetProjectId}
+        defaultSectionId={targetSectionId}
       />
 
-      {/* Send Quotation Drawer */}
       {activeQuotationId && (
         <SendQuotationDrawer
           isOpen={isSendDrawerOpen}
@@ -463,8 +482,8 @@ export function Step3ReviewSend() {
             _id: activeQuotationId as Id<"quotations">,
             code: reviewQuotation.code,
             total: grandTotal,
-            studioId: formData.step1.studioId,
-            studioName: selectedStudio?.name,
+            studioId: formData.step1.studioId as Id<"profiles">,
+            studioName: selectedStudio?.name || "Studio",
             status: "draft",
           }}
         />

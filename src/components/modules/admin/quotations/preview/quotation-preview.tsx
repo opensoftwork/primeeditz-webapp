@@ -23,10 +23,19 @@ import { QuotationDocument } from "./quotation-document";
 // Component Props
 // ============================================================================
 
+export interface PackageInfo {
+  _id: string;
+  name: string;
+  projectTypeId?: string;
+  projectTypeName?: string;
+  lineItemDescriptions?: string[];
+}
+
 interface QuotationPreviewProps {
   quotation: QuotationData;
   sections: QuotationSection[];
   projects?: Project[];
+  packages?: PackageInfo[];
   onBack?: () => void;
   companyInfo?: CompanyInfo;
   studioName?: string;
@@ -42,6 +51,7 @@ export function QuotationPreview({
   quotation,
   sections,
   projects = [],
+  packages = [],
   onBack,
   companyInfo,
   studioName,
@@ -51,7 +61,7 @@ export function QuotationPreview({
   const documentRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="min-h-screen bg-zinc-100 print:bg-white">
+    <div className="h-screen overflow-y-auto scrollbar-hide bg-zinc-100 print:bg-white print:h-auto print:overflow-visible">
       {/* Control Panel - Hidden on Print */}
       <div className="sticky top-0 z-50 bg-zinc-950/95 backdrop-blur-xl border-b border-white/5 print:hidden">
         <div className="max-w-[900px] mx-auto flex flex-col sm:flex-row justify-between items-center p-6 gap-4">
@@ -92,6 +102,7 @@ export function QuotationPreview({
               quotation={quotation}
               sections={sections}
               projects={projects}
+              packages={packages}
               companyInfo={companyInfo}
               studioName={studioName}
               projectName={projectName}
@@ -111,6 +122,7 @@ export function QuotationPreview({
           quotation={quotation}
           sections={sections}
           projects={projects}
+          packages={packages}
           companyInfo={companyInfo}
           studioName={studioName}
           projectName={projectName}

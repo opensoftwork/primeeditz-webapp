@@ -16,6 +16,7 @@ import type {
   QuotationData,
   QuotationSection,
 } from "../types";
+import type { PackageInfo } from "./quotation-preview";
 
 // Sub-components
 import { ClientInfo } from "./components/client-info";
@@ -35,6 +36,7 @@ interface QuotationDocumentProps {
   quotation: QuotationData;
   sections: QuotationSection[];
   projects?: Project[];
+  packages?: PackageInfo[];
   activeSection?: string; // Filter to show only this section
   companyInfo?: CompanyInfo;
   studioName?: string;
@@ -66,6 +68,7 @@ export const QuotationDocument = React.forwardRef<
       quotation,
       sections,
       projects = [],
+      packages = [],
       activeSection,
       companyInfo,
       studioName,
@@ -90,6 +93,9 @@ export const QuotationDocument = React.forwardRef<
       hasProjects,
       groupedByProject,
       groupedBySection,
+      hasPackages,
+      groupedByPackage,
+      manualItems,
       company,
     } = useMemo(() => {
       // Filter sections if activeSection is provided
@@ -203,6 +209,99 @@ export const QuotationDocument = React.forwardRef<
         });
       }
 
+      const filteredLineItems: typeof fli = fli;
+      const filteredSections: typeof fs = fs;
+      const subtotal = st;
+      const discountAmount: number = da;
+      const taxRate = tr;
+      const taxAmount = ta;
+      const grandTotal = gt;
+      const hasProjects = hp;
+      const groupedByProject = gbp;
+      const groupedBySection = gbs;
+
+      // Group items by package (for package-based preview)
+      // Uses a 3-pass matching strategy (same as builder's ProjectSectionItems):
+      // 1. Direct sourcePackageId match (best)
+      // 2. Description match against package line item descriptions (fallback)
+      // 3. projectTypeId match (last resort)
+      const hasPackages = packages.length > 0;
+      const processedItemIds = new Set<string>();
+
+      const groupedByPackage = hasPackages
+        ? (() => {
+            // Initialize buckets for each package
+            const packageItemsMap = new Map<string, typeof fli>();
+            packages.forEach((pkg) => packageItemsMap.set(pkg._id, []));
+
+            // Build a description-to-packageId lookup from package data
+            const descriptionToPackageId = new Map<string, string>();
+            packages.forEach((pkg) => {
+              if (pkg.lineItemDescriptions) {
+                pkg.lineItemDescriptions.forEach((desc) => {
+                  if (desc) {
+                    descriptionToPackageId.set(desc.trim().toLowerCase(), pkg._id);
+                  }
+                });
+              }
+            });
+
+            // Pass 1: Direct sourcePackageId match (best)
+            fli.forEach((item) => {
+              if (item.sourcePackageId && packageItemsMap.has(item.sourcePackageId as string)) {
+                packageItemsMap.get(item.sourcePackageId as string)!.push(item);
+                processedItemIds.add(item.id);
+              }
+            });
+
+            // Pass 2: Description match against package line items
+            fli.forEach((item) => {
+              if (processedItemIds.has(item.id)) return;
+              const descKey = item.description?.trim().toLowerCase();
+              if (descKey && descriptionToPackageId.has(descKey)) {
+                const matchedPkgId = descriptionToPackageId.get(descKey)!;
+                packageItemsMap.get(matchedPkgId)!.push(item);
+                processedItemIds.add(item.id);
+              }
+            });
+
+            // Pass 3: For remaining items, try projectTypeId match
+            fli.forEach((item) => {
+              if (processedItemIds.has(item.id)) return;
+              if (item.projectTypeId) {
+                for (const pkg of packages) {
+                  if (pkg.projectTypeId && pkg.projectTypeId === item.projectTypeId) {
+                    packageItemsMap.get(pkg._id)!.push(item);
+                    processedItemIds.add(item.id);
+                    break;
+                  }
+                }
+              }
+            });
+
+            // Build grouped result
+            return packages.map((pkg, pkgIdx) => {
+              const pkgItems = packageItemsMap.get(pkg._id) || [];
+              return {
+                packageId: pkg._id,
+                packageName: pkg.name,
+                packageIndex: pkgIdx + 1,
+                projectTypeName: pkg.projectTypeName,
+                items: pkgItems,
+                total: pkgItems.reduce(
+                  (acc, item) => acc + calculateItemTotal(item),
+                  0,
+                ),
+              };
+            }).filter((pg) => pg.items.length > 0);
+          })()
+        : [];
+
+      // Items not in any package (manual items)
+      const manualItems = hasPackages
+        ? fli.filter((item) => !processedItemIds.has(item.id))
+        : [];
+
       const comp = companyInfo ||
         dbCompany || {
           name: "PRIMEEDITZ",
@@ -213,23 +312,37 @@ export const QuotationDocument = React.forwardRef<
         };
 
       return {
-        filteredLineItems: fli,
-        filteredSections: fs,
-        subtotal: st,
-        discountAmount: da,
-        taxRate: tr,
-        taxAmount: ta,
-        grandTotal: gt,
-        hasProjects: hp,
-        groupedByProject: gbp,
-        groupedBySection: gbs,
+        filteredLineItems,
+        filteredSections,
+        subtotal,
+        discountAmount,
+        taxRate,
+        taxAmount,
+        grandTotal,
+        hasProjects,
+        groupedByProject,
+        groupedBySection,
+        hasPackages,
+        groupedByPackage,
+        manualItems,
         company: comp as unknown as CompanyInfo,
       };
-    }, [quotation, sections, projects, activeSection, companyInfo, dbCompany]);
+    }, [quotation, sections, projects, packages, activeSection, companyInfo, dbCompany]);
 
     // -------------------------------------------------------------------------
     // 2. Render
     // -------------------------------------------------------------------------
+
+    // DEBUG: Remove after fixing
+    console.log('[QuotationDocument DEBUG]', {
+      packagesReceived: packages.length,
+      packages: packages.map(p => ({ _id: p._id, name: p.name })),
+      hasPackages,
+      groupedByPackageCount: groupedByPackage.length,
+      manualItemsCount: manualItems.length,
+      totalLineItems: quotation.lineItems.length,
+      lineItemSourcePkgIds: quotation.lineItems.map(li => ({ desc: li.description, sourcePackageId: li.sourcePackageId })),
+    });
 
     return (
       <div
@@ -252,6 +365,9 @@ export const QuotationDocument = React.forwardRef<
             hasProjects={hasProjects}
             groupedByProject={groupedByProject}
             groupedBySection={groupedBySection}
+            hasPackages={hasPackages}
+            groupedByPackage={groupedByPackage}
+            manualItems={manualItems}
             formatCurrency={formatCurrency}
           />
 

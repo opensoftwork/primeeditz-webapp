@@ -1,10 +1,19 @@
 "use client";
 
-import { Layers } from "lucide-react";
+import { Layers, Package } from "lucide-react";
 import React from "react";
 import { cn } from "@/lib/utils";
 import type { Project, QuotationLineItem, QuotationSection } from "../../types";
 import { DocumentLineItem } from "./document-line-item";
+
+interface PackageGroup {
+  packageId: string;
+  packageName: string;
+  packageIndex: number;
+  projectTypeName?: string;
+  items: QuotationLineItem[];
+  total: number;
+}
 
 interface LineItemsListProps {
   hasProjects: boolean;
@@ -20,15 +29,145 @@ interface LineItemsListProps {
     section: QuotationSection;
     items: QuotationLineItem[];
   }>;
+  hasPackages?: boolean;
+  groupedByPackage?: PackageGroup[];
+  manualItems?: QuotationLineItem[];
   formatCurrency: (amount: number) => string;
+}
+
+// Reusable table header
+function ItemsTableHeader() {
+  return (
+    <thead>
+      <tr className="border-b-2 border-slate-950 bg-slate-50/50">
+        <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-12">
+          #
+        </th>
+        <th className="py-3 px-4 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
+          Description
+        </th>
+        <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-16">
+          Unit
+        </th>
+        <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-14">
+          Qty
+        </th>
+        <th className="py-3 px-3 text-right text-[9px] font-black uppercase tracking-widest text-slate-400 w-24">
+          Rate
+        </th>
+        <th className="py-3 px-4 text-right text-[9px] font-black uppercase tracking-widest text-slate-400 w-28">
+          Amount
+        </th>
+      </tr>
+    </thead>
+  );
 }
 
 export function LineItemsList({
   hasProjects,
   groupedByProject,
   groupedBySection,
+  hasPackages = false,
+  groupedByPackage = [],
+  manualItems = [],
   formatCurrency,
 }: LineItemsListProps) {
+  // =========================================================================
+  // Priority 1: Package-based grouping (P1, P2, etc.)
+  // =========================================================================
+  if (hasPackages && groupedByPackage.length > 0) {
+    return (
+      <div className="pt-2 space-y-12">
+        {groupedByPackage.map((pkg) => (
+          <div
+            key={pkg.packageId}
+            className="space-y-4 section-container print:mb-8 break-inside-avoid page-break-inside-avoid relative block overflow-visible"
+          >
+            {/* Package Header */}
+            <div className="flex items-center gap-3 pb-3 border-b-2 border-slate-950">
+              <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-200 flex items-center justify-center text-blue-600 font-black text-[10px]">
+                P{pkg.packageIndex}
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-black uppercase tracking-wide text-slate-900">
+                  {pkg.packageName}
+                </div>
+                {pkg.projectTypeName && (
+                  <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                    {pkg.projectTypeName}
+                  </div>
+                )}
+              </div>
+              <div className="text-right">
+                <div className="text-[8px] font-black text-slate-400 uppercase tracking-widest">
+                  Pkg Estimation
+                </div>
+                <div className="text-base font-black text-slate-900">
+                  {formatCurrency(pkg.total)}
+                </div>
+              </div>
+            </div>
+
+            {/* Package Items Table */}
+            <table className="w-full border-collapse">
+              <ItemsTableHeader />
+              <tbody>
+                {pkg.items.map((item, idx) => (
+                  <DocumentLineItem
+                    key={item.id}
+                    item={item}
+                    index={idx + 1}
+                    level={0}
+                    parentNumber=""
+                    formatCurrency={formatCurrency}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ))}
+
+        {/* Manual Items (not part of any package) */}
+        {manualItems.length > 0 && (
+          <div className="space-y-4 section-container print:mb-8 break-inside-avoid page-break-inside-avoid relative block overflow-visible">
+            <div className="flex items-center gap-3 pb-3 border-b-2 border-slate-200">
+              <div className="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center">
+                <Package className="w-4 h-4 text-slate-400" />
+              </div>
+              <div className="flex-1">
+                <div className="text-sm font-black uppercase tracking-wide text-slate-600">
+                  Additional Items
+                </div>
+                <div className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                  Manual entries
+                </div>
+              </div>
+            </div>
+
+            <table className="w-full border-collapse">
+              <ItemsTableHeader />
+              <tbody>
+                {manualItems.map((item, idx) => (
+                  <DocumentLineItem
+                    key={item.id}
+                    item={item}
+                    index={idx + 1}
+                    level={0}
+                    parentNumber=""
+                    formatCurrency={formatCurrency}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // =========================================================================
+  // Priority 2: Project-based grouping
+  // =========================================================================
   if (hasProjects && groupedByProject.length > 0) {
     return (
       <div className="pt-2 space-y-12">
@@ -130,7 +269,9 @@ export function LineItemsList({
     );
   }
 
-  /* Fallback: Section-based grouping (backward compatibility) */
+  // =========================================================================
+  // Priority 3: Section-based grouping (fallback)
+  // =========================================================================
   return (
     <div className="pt-2 space-y-10">
       {groupedBySection.map(
@@ -163,28 +304,7 @@ export function LineItemsList({
               </div>
 
               <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b-2 border-slate-950 bg-slate-50/50">
-                    <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-12">
-                      #
-                    </th>
-                    <th className="py-3 px-4 text-left text-[9px] font-black uppercase tracking-widest text-slate-400">
-                      Description
-                    </th>
-                    <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-16">
-                      Unit
-                    </th>
-                    <th className="py-3 px-2 text-center text-[9px] font-black uppercase tracking-widest text-slate-400 w-14">
-                      Qty
-                    </th>
-                    <th className="py-3 px-3 text-right text-[9px] font-black uppercase tracking-widest text-slate-400 w-24">
-                      Rate
-                    </th>
-                    <th className="py-3 px-4 text-right text-[9px] font-black uppercase tracking-widest text-slate-400 w-28">
-                      Amount
-                    </th>
-                  </tr>
-                </thead>
+                <ItemsTableHeader />
                 <tbody>
                   {items.map((item, idx) => (
                     <DocumentLineItem
