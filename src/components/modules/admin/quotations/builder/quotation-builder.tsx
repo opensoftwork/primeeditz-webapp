@@ -33,7 +33,7 @@ import { QuotationStepNavigation } from "./quotation-step-navigation";
 import {
   Step1StudioContext,
   Step2PackageSelection,
-  Step5ReviewSend,
+  Step3ReviewSend,
 } from "./steps";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import { useEffect } from "react";
@@ -289,7 +289,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   <div className="w-full mx-auto space-y-8">
                     {currentStep === 1 && <Step1StudioContext />}
                     {currentStep === 2 && <Step2PackageSelection />}
-                    {currentStep === 3 && <Step5ReviewSend />}
+                    {currentStep === 3 && <Step3ReviewSend />}
                   </div>
                 </motion.div>
               </AnimatePresence>
