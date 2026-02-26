@@ -292,3 +292,38 @@ export const generateSystemUploadUrl = adminAction({
     return { url, storageKey };
   },
 });
+
+/**
+ * Generate a pre-signed PUT URL for profile photo uploads.
+ * Any authenticated user can upload their own profile photo.
+ */
+export const generateProfilePhotoUploadUrl = action({
+  args: {
+    fileName: v.string(),
+    contentType: v.string(),
+  },
+  handler: async (ctx, args): Promise<{ url: string; storageKey: string }> => {
+    // Auth check: get the current user's profile
+    const profile = await ctx.runQuery(api.profiles.getMyProfile);
+    if (!profile) {
+      throw new Error("Not authenticated");
+    }
+
+    const timestamp = Date.now();
+    const cleanName = args.fileName.replace(/\s+/g, "_");
+    const storageKey = `profiles/${profile._id}/${timestamp}_${cleanName}`;
+
+    const s3Client = getS3Client();
+    const command = new PutObjectCommand({
+      Bucket: getBucket(),
+      Key: storageKey,
+      ContentType: args.contentType,
+    });
+
+    const url = await getSignedUrl(s3Client, command, {
+      expiresIn: 3600,
+    });
+
+    return { url, storageKey };
+  },
+});

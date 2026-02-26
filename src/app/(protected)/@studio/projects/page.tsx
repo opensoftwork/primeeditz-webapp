@@ -2,7 +2,7 @@ import { GroupedStudioProjectList } from "@/components/modules/projects/project-
 
 export default function ProjectsPage() {
   return (
-    <div>
+    <div className="flex flex-col min-h-[calc(100vh-64px)]">
       <GroupedStudioProjectList />
     </div>
   );

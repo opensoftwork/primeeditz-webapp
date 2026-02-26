@@ -1,13 +1,25 @@
 "use client";
 
+import { useState, useRef, useEffect } from "react";
 import { motion } from "motion/react";
-import { Camera, CheckCircle2, Clock, Pencil, Save, X } from "lucide-react";
+import {
+  Camera,
+  CheckCircle2,
+  Clock,
+  Pencil,
+  Save,
+  X,
+  Loader2,
+} from "lucide-react";
+import { useAction, useMutation } from "convex/react";
+import { toast } from "sonner";
 
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { roleBadgeStyles } from "./constants";
+import { api } from "@convex/_generated/api";
 
 interface ProfileSidebarProps {
   profile: any;
@@ -32,6 +44,98 @@ export function ProfileSidebar({
     .toUpperCase()
     .slice(0, 2);
 
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isUploading, setIsUploading] = useState(false);
+  const [photoPreviewUrl, setPhotoPreviewUrl] = useState<string | null>(null);
+
+  const generateUploadUrl = useAction(
+    //@ts-ignore
+    api.functions.storage.actions.generateProfilePhotoUploadUrl,
+  );
+  const getSignedUrl = useAction(
+    api.functions.storage.actions.getSignedFileUrl,
+  );
+  const updateProfile = useMutation(
+    api.functions.profiles.mutations.updateProfile,
+  );
+
+  // Resolve the stored image key to a signed URL for display
+  useEffect(() => {
+    const fetchPhotoUrl = async () => {
+      if (
+        profile.image &&
+        (profile.image.startsWith("profiles/") || profile.image.includes("/"))
+      ) {
+        try {
+          const url = await getSignedUrl({ storageKey: profile.image });
+          setPhotoPreviewUrl(url);
+        } catch (error) {
+          console.error("Failed to fetch profile photo URL:", error);
+          setPhotoPreviewUrl(null);
+        }
+      } else if (profile.image) {
+        // Direct URL (e.g. from auth provider)
+        setPhotoPreviewUrl(profile.image);
+      } else {
+        setPhotoPreviewUrl(null);
+      }
+    };
+    fetchPhotoUrl();
+  }, [profile.image, getSignedUrl]);
+
+  const handlePhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate image type
+    if (!file.type.startsWith("image/")) {
+      toast.error("Please upload an image file");
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image must be under 5MB");
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      // 1. Get a pre-signed upload URL
+      const { url, storageKey } = await generateUploadUrl({
+        fileName: file.name,
+        contentType: file.type,
+      });
+
+      // 2. Upload to MinIO
+      const response = await fetch(url, {
+        method: "PUT",
+        body: file,
+        headers: { "Content-Type": file.type },
+      });
+
+      if (!response.ok) throw new Error("Upload failed");
+
+      // 3. Save the storage key to the profile
+      await updateProfile({ image: storageKey });
+
+      // 4. Show preview immediately
+      const preview = await getSignedUrl({ storageKey });
+      setPhotoPreviewUrl(preview);
+
+      toast.success("Profile photo updated!");
+    } catch (error) {
+      console.error("Profile photo upload error:", error);
+      toast.error("Failed to upload profile photo");
+    } finally {
+      setIsUploading(false);
+      // Reset file input
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+    }
+  };
+
   return (
     <motion.aside
       initial={{ opacity: 0, x: -20 }}
@@ -44,9 +148,9 @@ export function ProfileSidebar({
         <div className="relative group mb-6">
           <div className="relative">
             <Avatar className="size-28 ring-4 ring-white/5 shadow-2xl">
-              {profile.image ? (
+              {photoPreviewUrl ? (
                 <AvatarImage
-                  src={profile.image}
+                  src={photoPreviewUrl}
                   alt={profile.name}
                   className="object-cover"
                 />
@@ -56,15 +160,36 @@ export function ProfileSidebar({
               </AvatarFallback>
             </Avatar>
 
-            {/* Camera overlay */}
-            <button className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer">
-              <Camera className="size-6 text-white/80" />
-            </button>
+            {/* Upload spinner overlay */}
+            {isUploading && (
+              <div className="absolute inset-0 rounded-full bg-black/60 flex items-center justify-center z-20">
+                <Loader2 className="size-8 text-primary animate-spin" />
+              </div>
+            )}
+
+            {/* Camera overlay - clickable to upload */}
+            {!isUploading && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center cursor-pointer"
+              >
+                <Camera className="size-6 text-white/80" />
+              </button>
+            )}
           </div>
 
           {/* Online indicator */}
           <div className="absolute bottom-1 right-1 size-5 rounded-full bg-emerald-500 ring-4 ring-background shadow-lg shadow-emerald-500/30" />
         </div>
+
+        {/* Hidden file input */}
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handlePhotoUpload}
+          accept="image/*"
+          className="hidden"
+        />
 
         {/* Name */}
         <h2 className="text-xl font-black tracking-tight text-white mb-1">
