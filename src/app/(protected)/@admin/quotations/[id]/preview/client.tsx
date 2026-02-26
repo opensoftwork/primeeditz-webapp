@@ -33,6 +33,7 @@ export function QuotationPreviewClient({
   );
 
   // Fetch company info
+  // @ts-ignore
   const companyInfo = useQuery(api.functions.company.queries.get);
 
   // Loading state

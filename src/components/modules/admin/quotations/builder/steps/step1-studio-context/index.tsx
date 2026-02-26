@@ -5,15 +5,13 @@
 "use client";
 
 import { useForm } from "@tanstack/react-form";
-import { format } from "date-fns";
-import { Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 import { motion } from "motion/react";
 import { useEffect } from "react";
 import { toast } from "sonner";
 import type { Studio } from "@/components/modules/admin/studio/studio-data-table";
 import { StudioDataTable } from "@/components/modules/admin/studio/studio-data-table";
 import { Button } from "@/components/ui/button";
-import { Calendar } from "@/components/ui/calendar";
 import {
   Field,
   FieldContent,
@@ -22,11 +20,6 @@ import {
   FieldLabel,
   FieldSet,
 } from "@/components/ui/field";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { useQuotationBuilder } from "../../quotation-builder-context";
 
@@ -40,12 +33,10 @@ export function Step1StudioContext() {
   const form = useForm({
     defaultValues: {
       studioId: step1Data.studioId,
-      validUntil: step1Data.validUntil,
     },
     onSubmit: async ({ value }) => {
       setFormData("step1", {
         studioId: value.studioId,
-        validUntil: value.validUntil ?? undefined,
       });
       nextStep();
     },
@@ -134,61 +125,6 @@ export function Step1StudioContext() {
             </FieldGroup>
           </FieldSet>
 
-          {/* Project & Validity */}
-          <div className="p-1 rounded-3xl bg-white/2 border border-white/5">
-            <div className="p-8 space-y-8">
-              {/* Validity Window */}
-              <div>
-                <form.Field
-                  name="validUntil"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel className="text-[10px] font-black uppercase tracking-widest text-white/40 mb-3">
-                        Validity Window
-                      </FieldLabel>
-                      <FieldContent>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button
-                              type="button"
-                              variant="outline"
-                              className={cn(
-                                "w-full h-14 bg-white/5 border-white/5 rounded-2xl px-5 flex items-center justify-between text-white font-bold hover:bg-white/10 transition-colors text-left",
-                                !field.state.value && "text-white/40",
-                              )}
-                            >
-                              <span>
-                                {field.state.value
-                                  ? format(field.state.value, "PPP")
-                                  : "Pick a date"}
-                              </span>
-                              <CalendarIcon className="h-4 w-4 opacity-40" />
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent
-                            className="w-auto p-0 bg-zinc-900 border-white/10"
-                            align="start"
-                          >
-                            <Calendar
-                              mode="single"
-                              selected={field.state.value}
-                              onSelect={(date) => {
-                                field.handleChange(date);
-                                setFormData("step1", {
-                                  validUntil: date ?? undefined,
-                                });
-                              }}
-                              initialFocus
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </FieldContent>
-                    </Field>
-                  )}
-                />
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </form>
