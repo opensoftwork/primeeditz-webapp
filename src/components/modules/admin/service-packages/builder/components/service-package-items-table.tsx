@@ -29,6 +29,7 @@ import {
 import { cn } from "@/lib/utils";
 import { SubItemDrawer } from "../../../quotations/builder/steps/shared/sub-item-drawer";
 import type { QuotationSubItem } from "../../../quotations/types";
+import { LineItemDrawer, type LineItem } from "./line-item-drawer";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
@@ -55,6 +56,13 @@ export function ServicePackageItemsTable({
     item: QuotationSubItem;
     parentIndices?: number[];
     level: number;
+  } | null>(null);
+
+  // Line Item Drawer State
+  const [lineItemDrawerOpen, setLineItemDrawerOpen] = useState(false);
+  const [editingLineItem, setEditingLineItem] = useState<{
+    item: LineItem;
+    index: number;
   } | null>(null);
 
   const toggleExpand = (id: string) => {
@@ -163,10 +171,15 @@ export function ServicePackageItemsTable({
     return self + subTotal;
   };
 
-  const [editingItemId, setEditingItemId] = useState<string | null>(null);
+  const toggleEditItem = (id: string, index: number, item: any) => {
+    setEditingLineItem({ item, index });
+    setLineItemDrawerOpen(true);
+  };
 
-  const toggleEditItem = (id: string) => {
-    setEditingItemId((prev) => (prev === id ? null : id));
+  const handleSaveLineItem = (updatedItem: LineItem) => {
+    if (editingLineItem === null) return;
+    form.setFieldValue(`lineItems[${editingLineItem.index}]`, updatedItem);
+    setLineItemDrawerOpen(false);
   };
 
   return (
@@ -205,7 +218,6 @@ export function ServicePackageItemsTable({
             {(lineItems: any[]) => (
               <>
                 {lineItems?.map((item, idx) => {
-                  const isEditing = editingItemId === item.id;
                   const configLabel =
                     projectConfigs.find((c) => c.id === item.projectConfigId)
                       ?.label || "—";
@@ -235,118 +247,29 @@ export function ServicePackageItemsTable({
                           </div>
                         </td>
                         <td className="py-3 px-4">
-                          {isEditing ? (
-                            <form.Field name={`lineItems[${idx}].description`}>
-                              {(field: any) => (
-                                <Input
-                                  value={field.state.value}
-                                  onChange={(e) =>
-                                    field.handleChange(e.target.value)
-                                  }
-                                  className="bg-white/5 border-white/10 focus:border-primary/30 h-8 text-[12px] font-bold text-white placeholder:text-white/10 px-2 rounded-lg transition-all"
-                                  placeholder="Service Name..."
-                                  autoFocus
-                                />
-                              )}
-                            </form.Field>
-                          ) : (
-                            <span className="text-[13px] font-bold text-white leading-tight">
-                              {item.description || "Untitled"}
-                            </span>
-                          )}
+                          <span className="text-[13px] font-bold text-white leading-tight">
+                            {item.description || "Untitled"}
+                          </span>
                         </td>
                         <td className="py-3 px-4">
-                          {isEditing ? (
-                            <form.Field
-                              name={`lineItems[${idx}].projectConfigId`}
-                            >
-                              {(field: any) => (
-                                <Select
-                                  value={field.state.value}
-                                  onValueChange={field.handleChange}
-                                >
-                                  <SelectTrigger className="bg-white/5 border-white/10 h-8 text-[11px] font-bold text-white/60 px-2 rounded-lg transition-all">
-                                    <SelectValue placeholder="Select" />
-                                  </SelectTrigger>
-                                  <SelectContent className="bg-zinc-900 border-white/10">
-                                    {projectConfigs.map((config) => (
-                                      <SelectItem
-                                        key={config.id}
-                                        value={config.id}
-                                        className="text-[11px] font-bold text-white/60 focus:bg-primary focus:text-black cursor-pointer"
-                                      >
-                                        {config.label}
-                                      </SelectItem>
-                                    ))}
-                                  </SelectContent>
-                                </Select>
-                              )}
-                            </form.Field>
-                          ) : (
-                            <span className="text-[11px] font-bold text-white/50">
-                              {configLabel}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-bold text-white/50">
+                            {configLabel}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          {isEditing ? (
-                            <form.Field name={`lineItems[${idx}].unit`}>
-                              {(field: any) => (
-                                <Input
-                                  value={field.state.value}
-                                  onChange={(e) =>
-                                    field.handleChange(e.target.value)
-                                  }
-                                  className="bg-white/5 border-white/10 text-center h-8 text-[11px] font-bold text-white/60 px-2 rounded-lg"
-                                  placeholder="unit"
-                                />
-                              )}
-                            </form.Field>
-                          ) : (
-                            <span className="text-[11px] font-medium text-white/40">
-                              {item.unit}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-medium text-white/40">
+                            {item.unit}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-center">
-                          {isEditing ? (
-                            <form.Field name={`lineItems[${idx}].quantity`}>
-                              {(field: any) => (
-                                <Input
-                                  type="number"
-                                  value={field.state.value}
-                                  onChange={(e) =>
-                                    field.handleChange(Number(e.target.value))
-                                  }
-                                  className="bg-white/5 border-white/10 text-center h-8 text-[11px] font-mono font-bold text-white/60 px-2 rounded-lg"
-                                />
-                              )}
-                            </form.Field>
-                          ) : (
-                            <span className="text-[11px] font-mono font-medium text-white/40">
-                              {item.quantity}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-mono font-medium text-white/40">
+                            {item.quantity}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-right">
-                          {isEditing ? (
-                            <form.Field name={`lineItems[${idx}].rate`}>
-                              {(field: any) => (
-                                <Input
-                                  type="number"
-                                  value={field.state.value}
-                                  onChange={(e) =>
-                                    field.handleChange(Number(e.target.value))
-                                  }
-                                  className="bg-white/5 border-white/10 text-right h-8 text-[11px] font-mono font-bold text-white/60 px-2 rounded-lg"
-                                />
-                              )}
-                            </form.Field>
-                          ) : (
-                            <span className="text-[11px] font-mono font-medium text-white/40">
-                              {formatCurrency(item.rate)}
-                            </span>
-                          )}
+                          <span className="text-[11px] font-mono font-medium text-white/40">
+                            {formatCurrency(item.rate)}
+                          </span>
                         </td>
                         <td className="py-3 px-4 text-right">
                           <span className="text-[13px] font-mono font-black text-white px-2">
@@ -356,16 +279,11 @@ export function ServicePackageItemsTable({
                         <td className="py-3 px-4 text-center">
                           <div className="flex items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                             <Button
-                              onClick={() => toggleEditItem(item.id)}
+                              onClick={() => toggleEditItem(item.id, idx, item)}
                               variant="ghost"
                               size="icon"
-                              className={cn(
-                                "h-8 w-8 rounded-xl transition-all",
-                                isEditing
-                                  ? "bg-primary/20 text-primary opacity-100"
-                                  : "hover:bg-white/10",
-                              )}
-                              title={isEditing ? "Done Editing" : "Edit Item"}
+                              className="h-8 w-8 rounded-xl hover:bg-white/10"
+                              title="Edit Item"
                               type="button"
                             >
                               <Settings2 className="h-4 w-4" />
@@ -605,6 +523,15 @@ export function ServicePackageItemsTable({
         onSave={handleSaveSubItem}
         subItem={editingSubItem?.item}
         isLevel3={editingSubItem?.level === 1}
+      />
+
+      {/* Line Item Drawer (Left Side) */}
+      <LineItemDrawer
+        open={lineItemDrawerOpen}
+        onOpenChange={setLineItemDrawerOpen}
+        projectConfigs={projectConfigs}
+        lineItem={editingLineItem?.item}
+        onSave={handleSaveLineItem}
       />
     </div>
   );

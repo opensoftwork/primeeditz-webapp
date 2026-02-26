@@ -10,7 +10,9 @@ export const clearAllData = internalMutation({
   handler: async (ctx) => {
     console.log("⚠️ STARTING FULL DATABASE WIPE...");
 
+    // List of all tables from schema.ts plus legacy tables
     const tableNames = [
+      // Transactional Data
       "assets",
       "projects",
       "folders",
@@ -18,15 +20,36 @@ export const clearAllData = internalMutation({
       "deliverableVersions",
       "versionRequests",
       "statusHistory",
-      "quotations",
       "projectSquads",
       "handoffLogs",
+      "studioApprovals",
       "quotationRequestDrafts",
       "servicePackageDrafts",
-      "studioApprovals",
+      "quotations",
+
+      // Configuration & Setup
+      "projectTypes",
+      "projectCategories",
       "projectTypeFields",
-      "clients", // Legacy
-      "employees", // Legacy
+      "storageTiers",
+      "folderTemplates",
+      "quotationSections",
+      "servicePackages",
+      "quotationLibraryItems",
+      "company",
+      "appSettings",
+
+      // Public Form Submissions
+      "contacts",
+      "feedbacks",
+      "surveys",
+
+      // Identity & User Data
+      "profiles",
+
+      // Legacy Tables (prior to schema unification)
+      "clients",
+      "employees",
     ];
 
     const stats: Record<string, number> = {};
@@ -34,10 +57,13 @@ export const clearAllData = internalMutation({
 
     for (const tableName of tableNames) {
       try {
+        // Collect all documents from the table
         const docs = await ctx.db.query(tableName as any).collect();
         stats[tableName] = docs.length;
+
         if (docs.length > 0) {
           console.log(`  Deleting ${docs.length} from ${tableName}...`);
+          // Batch delete for better performance if possible, but keep it simple for now
           for (const doc of docs) {
             await ctx.db.delete(doc._id);
           }
@@ -46,6 +72,7 @@ export const clearAllData = internalMutation({
         }
         totalDeleted += docs.length;
       } catch (e) {
+        // Table might not exist or schema might have moved/renamed it
         console.log(
           `  ○ Skipping ${tableName} (table may not exist or access denied)`,
         );
@@ -57,8 +84,9 @@ export const clearAllData = internalMutation({
       `\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`,
     );
     console.log(
-      "ℹ️ Preserved: Configuration (Profiles, Project Types, Packages, etc.) and Form Submissions (Contacts, Feedbacks, Surveys).",
+      "ℹ️ Database has been reset to a completely clean state. You will need to re-seed and re-login (re-create your profile).",
     );
+    
     return { success: true, totalDeleted, stats };
   },
 });
