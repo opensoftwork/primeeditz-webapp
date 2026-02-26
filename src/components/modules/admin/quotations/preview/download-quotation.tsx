@@ -21,6 +21,7 @@ import type {
   QuotationData,
   QuotationSection,
 } from "../types";
+import type { PackageInfo } from "./quotation-preview";
 import { QuotationDocument } from "./quotation-document";
 
 // ============================================================================
@@ -31,6 +32,7 @@ interface DownloadQuotationProps {
   quotation: QuotationData;
   sections: QuotationSection[];
   projects?: Project[];
+  packages?: PackageInfo[];
   activeSection?: string; // Section name for filtered download
   companyInfo?: CompanyInfo;
   studioName?: string;
@@ -51,6 +53,7 @@ export function DownloadQuotation({
   quotation,
   sections,
   projects = [],
+  packages = [],
   activeSection,
   companyInfo,
   studioName,
@@ -280,6 +283,7 @@ export function DownloadQuotation({
             quotation={quotation}
             sections={sections}
             projects={projects}
+            packages={packages}
             activeSection={activeSection}
             companyInfo={companyInfo}
             studioName={studioName}

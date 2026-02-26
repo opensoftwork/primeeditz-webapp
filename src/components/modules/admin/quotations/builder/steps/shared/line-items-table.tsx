@@ -17,6 +17,7 @@ import { SubItemDrawer } from "./sub-item-drawer";
 
 // Currency formatter
 const formatCurrency = (amount: number): string => {
+  if (amount === 0) return "-";
   return new Intl.NumberFormat("en-IN", {
     style: "currency",
     currency: "INR",

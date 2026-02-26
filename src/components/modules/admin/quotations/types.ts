@@ -45,6 +45,8 @@ export interface QuotationLineItem {
   spawnsProject?: boolean;
   projectTypeId?: string | Id<"projectTypes">;
   selectedFolderTemplateId?: string | Id<"folderTemplates">;
+  sourcePackageId?: string | Id<"servicePackages">;
+  projectConfigId?: string;
 }
 
 // ============================================================================
