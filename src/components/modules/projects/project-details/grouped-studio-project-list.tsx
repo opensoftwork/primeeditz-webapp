@@ -8,6 +8,13 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo } from "react";
 import { DataTableSkeleton } from "@/components/shared/data-table";
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyMedia,
+  EmptyTitle,
+} from "@/components/ui/empty";
 import { PhaseProgress } from "../phase-progress";
 import { StudioStatusBadge } from "../studio-status-badge";
 
@@ -17,6 +24,7 @@ import { StudioStatusBadge } from "../studio-status-badge";
  */
 export function GroupedStudioProjectList() {
   const groupedProjects = useQuery(
+    //@ts-ignore
     api.functions.projects.queries.getMyProjectsGroupedByEndClient,
   );
 
@@ -30,25 +38,25 @@ export function GroupedStudioProjectList() {
 
   if (groupedProjects.length === 0) {
     return (
-      <div className="flex-1 p-8 md:p-12 w-full flex flex-col items-center justify-center text-center space-y-6">
-        <div className="w-20 h-20 rounded-full bg-white/5 flex items-center justify-center">
-          <Users className="h-10 w-10 text-white/20" />
-        </div>
-        <div className="space-y-2">
-          <h2 className="text-2xl font-black uppercase tracking-tight text-white">
-            No Projects Yet
-          </h2>
-          <p className="text-white/40 max-w-md">
-            Your production journey starts with a quotation. Request a quote to
-            initiate your first project manifest.
-          </p>
-        </div>
-        <Link href="/quotations/new">
-          <button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.05] active:scale-[0.95] transition-all shadow-xl shadow-primary/20">
-            REQUEST A QUOTE
-          </button>
-        </Link>
-      </div>
+      <Empty className="flex-1">
+        <EmptyMedia variant="icon" className="size-16 rounded-full bg-white/5">
+          <Users className="size-8! text-white/20" />
+        </EmptyMedia>
+        <EmptyTitle className="text-2xl font-black uppercase tracking-tight text-white">
+          No Projects Yet
+        </EmptyTitle>
+        <EmptyDescription className="text-white/40">
+          Your production journey starts with a quotation. Request a quote to
+          initiate your first project manifest.
+        </EmptyDescription>
+        <EmptyContent>
+          <Link href="/quotations/new">
+            <button className="h-12 px-8 rounded-xl font-black uppercase tracking-widest text-[11px] bg-primary text-primary-foreground hover:scale-[1.05] active:scale-[0.95] transition-all shadow-xl shadow-primary/20">
+              REQUEST A QUOTE
+            </button>
+          </Link>
+        </EmptyContent>
+      </Empty>
     );
   }
 
