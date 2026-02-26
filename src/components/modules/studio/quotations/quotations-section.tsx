@@ -11,6 +11,7 @@ import { QuotationCard } from "./shared/quotation-card";
 
 export function QuotationsSection() {
   const router = useRouter();
+  // @ts-ignore
   const quotations = useQuery(api.functions.quotations.queries.getMyQuotations);
 
   if (quotations === undefined) {
