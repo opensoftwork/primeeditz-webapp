@@ -42,7 +42,15 @@ This directory contains the complete epic and story breakdown for **primeeditz-t
 - **[Epic 17: Studio Deliverables UX & Folder Restructure](./17-studio-deliverables-ux-restructure.md)**
 - [Epic 18: Dual-Track Versioning System](./18-dual-track-versioning.md)
 - [Epic 19: File Upload UX Refactor](./19-file-upload-ux-refactor.md)
-- **[Epic 20: Public Form Submissions (Contacts, Feedbacks & Surveys)](./20-public-form-submissions.md)** ⬅️ NEW
+- **[Epic 20: Public Form Submissions (Contacts, Feedbacks & Surveys)](./20-public-form-submissions.md)**
+- [Epic 21: Deliverable Code Deduplication](./21-deliverable-code-deduplication.md)
+- [Epic 22: Profile Settings](./22-profile-settings.md)
+- [Epic 23: Quotation Sub-Items & Table Format](./23-quotation-sub-items-table-format.md)
+- **[Epic 24: Quotation Status Machine & Action Consolidation](./24-quotation-status-action-consolidation.md)** ⬅️ NEW (P0)
+- **[Epic 25: Quotation ID & Display Fixes](./25-quotation-id-display-fixes.md)** ⬅️ NEW (P1)
+- **[Epic 26: Public Link & Grouping Consistency](./26-public-link-grouping-consistency.md)** ⬅️ NEW (P1)
+- **[Epic 27: PDF Preview Polish](./27-pdf-preview-polish.md)** ⬅️ NEW (P2)
+- **[Epic 28: Admin Internal Project Flow](./28-admin-internal-project-flow.md)** ⬅️ NEW (P2)
 
 ---
 
@@ -352,7 +360,13 @@ The following features are documented in user flows but deferred to Phase 2:
 | **19** | 19.1 - 19.3           | Shared Upload Components, Reference Materials Integration, Folder Refactor        |
 | **20** | 20.1 - 20.2           | Backend CRUD + HTTP Endpoints, Admin Dashboard List & Detail Views                |
 
-**Total Stories:** 62 (after Epics 18, 19, 20 addition)
+| **24** | 24.1 - 24.9 | Status Machine Fix, Finalize Drawer, Action Consolidation, Role-Aware Actions |
+| **25** | 25.1 - 25.2 | Fix Fabricated QT Code in Builder, Display Audit |
+| **26** | 26.1 - 26.2 | Public View Package Grouping, Visual Parity Verification |
+| **27** | 27.1 - 27.4 | PDF Signatures, Color Consistency, Arrow Cleanup, Performance |
+| **28** | 28.1 - 28.6 | Internal Project Mutation, Creation UI, Employee Assignment, Badge Display |
+
+**Total Stories:** 85 (after Epics 24-28 addition)
 
 ---
 

@@ -122,7 +122,7 @@ export function useQuotationData(data: any | null | undefined) {
           sectionGroups,
         };
       })
-      .filter((pg) => pg.sectionGroups.length > 0);
+      .filter((pg: any) => pg.sectionGroups.length > 0);
 
     // Merge project-based and package-based groups (prioritize projects)
     const finalGroupedByProject =
