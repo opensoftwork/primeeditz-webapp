@@ -290,4 +290,4 @@ Small adaptations for internal projects:
 ---
 
 **Previous Epic**: Epic 27 - PDF Preview Polish
-**Next Epic**: TBD
+**Next Epic**: Epic 29 - Resumable Upload Enhancement

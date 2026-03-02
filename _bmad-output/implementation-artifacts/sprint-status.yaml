@@ -478,3 +478,42 @@ development_status:
   28-5-internal-project-detail-adaptations: ready-for-dev # 3 points
   28-6-employee-listing-internal-projects: ready-for-dev # 2 points
   epic-28-retrospective: optional
+
+  # ============================================================================
+  # EPIC 29: Resumable Upload Enhancement
+  # ============================================================================
+  # Context: Created 2026-03-02 via Party Mode infrastructure discussion
+  # Goal: Auto-resume, pause/resume, retry for interrupted uploads
+  # Priority: P1 — Reliability improvement for core upload workflow
+  # Key Insight: Existing TUS infrastructure needs only client-side enhancements
+  epic-29: backlog
+  # Phase A: Core Auto-Resume (Highest Impact)
+  29-1-auto-resume-tus-uploads: ready-for-dev # 3 points - findPreviousUploads()
+  29-2-retry-failed-uploads: ready-for-dev # 2 points
+  # Phase B: Pause/Resume Controls
+  29-3-pause-resume-upload-state: ready-for-dev # 2 points
+  29-4-upload-overlay-action-buttons: ready-for-dev # 3 points
+  # Phase C: Recovery
+  29-5-upload-recovery-on-init: ready-for-dev # 3 points
+  epic-29-retrospective: optional
+
+  # ============================================================================
+  # EPIC 30: Internal Network Asset Routing
+  # ============================================================================
+  # Context: Created 2026-03-02 via Party Mode infrastructure discussion
+  # Goal: Detect LAN, serve assets via internal network for 20-100x speed
+  # Priority: P1 — Performance multiplier for core team workflows
+  # Key Insight: Unlocks bulk download, instant review, version diff
+  epic-30: backlog
+  # Phase A: Infrastructure Validation (Spike)
+  30-1-dokploy-lan-reachability-validation: ready-for-dev # 2 points - GO/NO-GO gate
+  # Phase B: Core Detection & URL Resolution
+  30-2-network-detection-utility: ready-for-dev # 3 points
+  30-3-dual-endpoint-signed-urls: ready-for-dev # 3 points
+  30-4-integrate-internal-url-resolution: ready-for-dev # 3 points
+  # Phase C: UI Enhancement
+  30-5-internal-network-indicator-badge: ready-for-dev # 1 point
+  # Phase D: Unlocked Features
+  30-6-bulk-download-folders-deliverables: ready-for-dev # 5 points
+  30-7-full-res-deliverable-preview-carousel: ready-for-dev # 3 points
+  epic-30-retrospective: optional
