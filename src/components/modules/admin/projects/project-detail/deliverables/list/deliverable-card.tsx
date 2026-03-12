@@ -13,6 +13,7 @@ interface DeliverableCardProps {
   projectId: string;
   name: string;
   version: number;
+  studioVersion?: number;
   sizeBytes: number;
   status: string;
   createdAt: number;
@@ -22,6 +23,7 @@ interface DeliverableCardProps {
   href?: string;
   disableLink?: boolean;
   signedUrl?: string;
+  versionFeedback?: string;
 }
 
 export function DeliverableCard({
@@ -29,6 +31,7 @@ export function DeliverableCard({
   projectId,
   name,
   version,
+  studioVersion,
   sizeBytes,
   status,
   createdAt,
@@ -38,6 +41,7 @@ export function DeliverableCard({
   href,
   disableLink,
   signedUrl,
+  versionFeedback,
 }: DeliverableCardProps) {
   const CardWrapper = (disableLink ? "div" : Link) as any;
   const cardHref = href || `/projects/${projectId}/deliverables/${id}`;
@@ -67,9 +71,17 @@ export function DeliverableCard({
             {name}
           </h4>
           <div className="flex flex-wrap items-center gap-3 text-[10px] uppercase font-bold tracking-wider text-white/40">
-            <span className="bg-white/5 px-2 py-0.5 rounded-md">
-              v{version}
-            </span>
+            <div className="flex items-center gap-1.5 bg-white/5 px-2 py-0.5 rounded-md">
+              <span className="text-white/30">Internal</span>
+              <span className="text-white">v{version}</span>
+              {studioVersion != null && (
+                <>
+                  <span className="w-px h-2 bg-white/10 mx-0.5" />
+                  <span className="text-indigo-400/50">Client</span>
+                  <span className="text-indigo-400">v{studioVersion}</span>
+                </>
+              )}
+            </div>
             <span>•</span>
             <span>{(sizeBytes / (1024 * 1024)).toFixed(2)} MB</span>
             <span>•</span>
@@ -88,6 +100,12 @@ export function DeliverableCard({
               {status.replace("_", " ").replace("revision", "version")}
             </span>
           </div>
+          {versionFeedback &&
+            (status === "version_requested" || status === "version_needed") && (
+              <div className="mt-2 text-[10px] font-bold uppercase tracking-wider text-red-300 bg-red-500/10 px-3 py-1.5 rounded-lg border border-red-500/20 max-w-md italic animate-in fade-in slide-in-from-left-2 transition-all">
+                "{versionFeedback}"
+              </div>
+            )}
         </div>
       </div>
 

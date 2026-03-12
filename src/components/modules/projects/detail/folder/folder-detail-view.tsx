@@ -51,6 +51,7 @@ export function FolderDetailView({
   );
 
   // Queries & Mutations
+  // @ts-ignore
   const folder = useQuery(api.functions.folders.queries.getFolderDetails, {
     folderId: folderId as Id<"folders">,
   });
@@ -80,10 +81,19 @@ export function FolderDetailView({
       setOverride(folderId, folder.name);
     }
 
+    if (project) {
+      // @ts-ignore
+      const label =
+        project.eventName || project.projectTypeName || project.code;
+      if (label) {
+        setOverride(projectId, label);
+      }
+    }
+
     return () => {
       removeOverride(folderId);
     };
-  }, [folderId, folder?.name, setOverride, removeOverride]);
+  }, [folderId, folder?.name, project, projectId, setOverride, removeOverride]);
 
   const assets = useQuery(api.functions.folders.queries.getFolderAssets, {
     folderId: folderId as Id<"folders">,

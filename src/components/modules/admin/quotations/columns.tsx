@@ -2,12 +2,10 @@
 
 import type { ColumnDef } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { Eye, Receipt, User } from "lucide-react";
+import { Receipt, User } from "lucide-react";
 import Link from "next/link";
 import { QuotationStatusBadge } from "@/components/modules/studio/quotations/shared/quotation-status-badge";
-import { Button } from "@/components/ui/button";
 import type { AdminQuotation } from "./list-types";
-import { DeleteQuotationAction } from "./delete-quotation-action";
 
 export const columns: ColumnDef<AdminQuotation>[] = [
   {
@@ -95,31 +93,6 @@ export const columns: ColumnDef<AdminQuotation>[] = [
         <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest">
           {format(row.getValue("_creationTime"), "MMM dd, yyyy")}
         </span>
-      );
-    },
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const quotation = row.original;
-      return (
-        <div className="flex justify-end items-center gap-1">
-          {quotation.status === "draft" && (
-            <DeleteQuotationAction
-              quotationId={quotation._id}
-              quotationCode={quotation.code}
-            />
-          )}
-          <Link href={`/quotations/${quotation._id}`}>
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-8 w-8 p-0 rounded-lg text-white/20 hover:text-primary hover:bg-primary/10"
-            >
-              <Eye className="h-4 w-4" />
-            </Button>
-          </Link>
-        </div>
       );
     },
   },

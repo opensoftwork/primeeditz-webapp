@@ -1,9 +1,9 @@
 "use client";
 
 import { api } from "@convex/_generated/api";
-import { useMutation } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import {
-  type AlertCircle,
+  AlertCircle,
   Archive,
   ArrowRight,
   CheckCircle,
@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 import { getDeliveryPhaseLabel } from "@/lib/status-display";
 import type { AdminProjectDetail } from "./types";
 
@@ -54,6 +55,7 @@ export function AdminActionBanner({
   } | null>(null);
 
   const transitionProject = useMutation(
+    //@ts-ignore
     api.functions.projects.mutations.transitionProject,
   );
   const { awaitingActorRole, actionState } = project;
@@ -95,6 +97,15 @@ export function AdminActionBanner({
     });
   };
 
+  const deliverables = useQuery(
+    api.functions.deliverables.queries.getProjectDeliverables,
+    actionState === "deliverables_ready" ||
+      actionState === "versions_requested" ||
+      actionState === "awaiting_review"
+      ? { projectId: project._id }
+      : "skip",
+  );
+
   const action = getAdminAction(actionState, {
     project,
     deliveryLabel,
@@ -104,6 +115,7 @@ export function AdminActionBanner({
     handleTransition,
     confirmTransition,
     router,
+    deliverables,
   });
 
   if (!action) return null;
@@ -113,7 +125,12 @@ export function AdminActionBanner({
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
-        className="p-5 rounded-2xl bg-primary/10 border border-primary/20 mb-10 overflow-hidden relative group"
+        onClick={action.onClick}
+        className={cn(
+          "p-5 rounded-2xl bg-primary/10 border border-primary/20 mb-10 overflow-hidden relative group transition-all",
+          action.onClick &&
+            "cursor-pointer hover:bg-primary/15 hover:border-primary/30 active:scale-[0.99]",
+        )}
       >
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 blur-[100px] -translate-y-32 translate-x-32" />
 
@@ -132,10 +149,7 @@ export function AdminActionBanner({
             </div>
           </div>
 
-          <Button
-            onClick={action.onClick}
-            className="rounded-xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest gap-2 group/btn"
-          >
+          <Button className="rounded-xl bg-primary hover:bg-primary/90 text-black font-black uppercase tracking-widest gap-2 group/btn">
             {action.buttonLabel}
             <ArrowRight className="h-4 w-4 group-hover/btn:translate-x-1 transition-transform" />
           </Button>
@@ -193,10 +207,11 @@ interface ActionHandlers {
     notes?: string,
   ) => void;
   router: ReturnType<typeof useRouter>;
+  deliverables?: any[];
 }
 
 function getAdminAction(state: string, handlers: ActionHandlers) {
-  const { project, deliveryLabel, router } = handlers;
+  const { project, deliveryLabel, router, deliverables } = handlers;
 
   const actions: Record<
     string,
@@ -204,7 +219,7 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
       message: string;
       buttonLabel: string;
       icon: typeof AlertCircle;
-      onClick: () => void;
+      onClick?: () => void;
     }
   > = {
     // Setup Phase
@@ -276,7 +291,32 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
         "Deliverables are ready for QC. Review and approve to send to the client.",
       buttonLabel: "Review Deliverables",
       icon: CheckCircle,
-      onClick: () => router.push(`/projects/${project._id}/deliverables`),
+      onClick: () => {
+        // Smart navigation: if only one deliverable, go directly to it
+        if (deliverables?.length === 1) {
+          router.push(
+            `/projects/${project._id}/deliverables/${deliverables[0]._id}`,
+          );
+        } else {
+          router.push(`/projects/${project._id}/deliverables`);
+        }
+      },
+    },
+    versions_requested: {
+      message:
+        "Studio has requested changes on final deliverables. Review feedback and coordinate versions.",
+      buttonLabel: "Review Requests",
+      icon: AlertCircle,
+      onClick: () => {
+        // Smart navigation: if only one deliverable, go directly to it
+        if (deliverables?.length === 1) {
+          router.push(
+            `/projects/${project._id}/deliverables/${deliverables[0]._id}`,
+          );
+        } else {
+          router.push(`/projects/${project._id}/deliverables`);
+        }
+      },
     },
 
     // Review Phase
@@ -344,7 +384,6 @@ function getAdminAction(state: string, handlers: ActionHandlers) {
       message: "This project has been cancelled.",
       buttonLabel: "View Details",
       icon: XCircle,
-      onClick: () => {}, // No action, just informational
     },
   };
 

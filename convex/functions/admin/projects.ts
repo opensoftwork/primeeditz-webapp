@@ -228,6 +228,7 @@ export const getAdminProject = staffQuery({
         return {
           ...entry,
           actorName: actor?.name ?? "Unknown",
+          actorRole: actor?.role ?? "Unknown",
         };
       }),
     );

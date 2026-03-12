@@ -7,6 +7,8 @@ import {
   HardDrive,
   LayoutDashboard,
   LayoutGrid,
+  Mail,
+  MessageSquare,
   type LucideIcon,
   Settings,
   Users,
@@ -116,6 +118,26 @@ export const adminNavGroups: NavGroup[] = [
         title: "Service Packages",
         url: "/settings/service-packages",
         icon: ClipboardCheck,
+      },
+    ],
+  },
+  {
+    label: "Form Submissions",
+    items: [
+      {
+        title: "Contacts",
+        url: "/contacts",
+        icon: Mail,
+      },
+      {
+        title: "Feedbacks",
+        url: "/feedbacks",
+        icon: MessageSquare,
+      },
+      {
+        title: "Surveys",
+        url: "/surveys",
+        icon: ClipboardList,
       },
     ],
   },

@@ -4,6 +4,7 @@ import {
   Eye,
   FolderTree,
   HardDrive,
+  Plus,
   Settings,
   Shield,
   Users,
@@ -19,7 +20,8 @@ interface SystemControlsProps {
   folderSetupReason?: string | null;
   onSetupFolders?: () => void;
   onViewFolders?: () => void;
-  onAssignTeam?: () => void;
+  onViewTeam?: () => void;
+  onAddStorage?: () => void;
 }
 
 function formatBytes(bytes: number): string {
@@ -37,7 +39,8 @@ export function SystemControls({
   folderSetupReason,
   onSetupFolders,
   onViewFolders,
-  onAssignTeam,
+  onViewTeam,
+  onAddStorage,
 }: SystemControlsProps) {
   const isAdminActive = awaitingActorRole === "admin";
   // Determine folder button state
@@ -46,13 +49,23 @@ export function SystemControls({
 
   return (
     <div className="p-8 rounded-[2.5rem] bg-zinc-900/50 border border-white/5 space-y-8">
-      <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40">
-          <Shield className="h-5 w-5" />
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40">
+            <Shield className="h-5 w-5" />
+          </div>
+          <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">
+            System Control
+          </h3>
         </div>
-        <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/30">
-          System Control
-        </h3>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 rounded-full hover:bg-white/5 border border-white text-white/40"
+          onClick={onAddStorage}
+        >
+          <Plus className="h-3.5 w-3.5 text-white" />
+        </Button>
       </div>
 
       {/* Storage Allocation Status */}
@@ -112,16 +125,13 @@ export function SystemControls({
         )}
         <Button
           variant="outline"
-          onClick={onAssignTeam}
+          onClick={onViewTeam}
           className="w-full justify-between rounded-xl h-12 border-white/5 hover:bg-white/5 text-[10px] font-black uppercase tracking-widest group"
-          disabled={
-            !isAdminActive ||
-            ["draft", "awaiting_quotation", "quotation_sent"].includes(
-              actionState,
-            )
-          }
+          disabled={["draft", "awaiting_quotation", "quotation_sent"].includes(
+            actionState,
+          )}
         >
-          <span>ASSIGN TEAM</span>
+          <span>VIEW TEAM</span>
           <Users className="h-4 w-4 opacity-30 group-hover:opacity-100 transition-opacity" />
         </Button>
       </div>

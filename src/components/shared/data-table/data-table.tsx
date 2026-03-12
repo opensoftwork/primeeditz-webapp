@@ -30,6 +30,7 @@ import {
 import { LayoutGrid, List, Search } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import * as React from "react";
+import { createPortal } from "react-dom";
 
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -182,6 +183,7 @@ export function DataTable<TData, TValue>({
         <div className="flex-1">
           <DataTableToolbar
             table={table}
+            columnVisibility={columnVisibility}
             search={toolbar?.search}
             filters={toolbar?.filters}
             actions={toolbar?.actions}
@@ -277,7 +279,7 @@ export function DataTable<TData, TValue>({
 
         {/* Table View */}
         {!showCards && (
-          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto">
+          <div className="overflow-hidden rounded-3xl border border-white/5 bg-white/2 overflow-x-auto scrollbar-hide">
             <Table className="min-w-full">
               <TableHeader className="bg-white/3">
                 {table.getHeaderGroups().map((headerGroup) => (
@@ -312,8 +314,18 @@ export function DataTable<TData, TValue>({
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: -8 }}
                         transition={{ duration: 0.15 }}
+                        data-slot="table-row"
                         data-state={row.getIsSelected() && "selected"}
-                        onClick={() => onRowClick?.(row.original)}
+                        onClick={(e) => {
+                          // Don't fire row click if user clicked an interactive element
+                          // (button, link, dropdown, checkbox, etc.)
+                          const target = e.target as HTMLElement;
+                          const interactive = target.closest(
+                            "button, a, [role='menuitem'], [role='checkbox'], [data-slot='dropdown-menu-content']",
+                          );
+                          if (interactive) return;
+                          onRowClick?.(row.original);
+                        }}
                         className={cn(
                           "transition-colors hover:bg-white/3 data-[state=selected]:bg-primary/5 border-b border-white/5 last:border-0 group",
                           onRowClick && "cursor-pointer",
@@ -351,12 +363,86 @@ export function DataTable<TData, TValue>({
       </div>
 
       {/* Pagination */}
-      <div className="mt-auto pt-6">
-        <DataTablePagination
-          table={table}
-          serverPagination={serverPagination}
-        />
-      </div>
+      {(() => {
+        const paginationContent = (
+          <div className="w-full px-8 py-4">
+            <DataTablePagination
+              table={table}
+              serverPagination={serverPagination}
+              clientPagination={
+                !serverPagination
+                  ? (() => {
+                      const totalRows = table.getFilteredRowModel().rows.length;
+                      const totalPages = Math.max(
+                        1,
+                        Math.ceil(totalRows / pagination.pageSize),
+                      );
+                      return {
+                        pageSize: pagination.pageSize,
+                        pageIndex: pagination.pageIndex,
+                        totalPages,
+                        canPrevPage: pagination.pageIndex > 0,
+                        canNextPage: pagination.pageIndex < totalPages - 1,
+                        setPageSize: (size: number) =>
+                          setPagination((prev) => ({
+                            ...prev,
+                            pageSize: size,
+                            pageIndex: 0,
+                          })),
+                        nextPage: () =>
+                          setViewMode((prev) => {
+                            // Scroll to top when changing page in card view
+                            if (prev === "cards") {
+                              document
+                                .getElementById("layout-main-content")
+                                ?.scrollTo({ top: 0, behavior: "smooth" });
+                            }
+                            setPagination((p) => ({
+                              ...p,
+                              pageIndex: Math.min(
+                                p.pageIndex + 1,
+                                totalPages - 1,
+                              ),
+                            }));
+                            return prev;
+                          }),
+                        prevPage: () =>
+                          setViewMode((prev) => {
+                            // Scroll to top when changing page in card view
+                            if (prev === "cards") {
+                              document
+                                .getElementById("layout-main-content")
+                                ?.scrollTo({ top: 0, behavior: "smooth" });
+                            }
+                            setPagination((p) => ({
+                              ...p,
+                              pageIndex: Math.max(p.pageIndex - 1, 0),
+                            }));
+                            return prev;
+                          }),
+                      };
+                    })()
+                  : undefined
+              }
+            />
+          </div>
+        );
+
+        // Try to teleport to the global footer if it exists
+        if (typeof document !== "undefined") {
+          const footer = document.getElementById("layout-sticky-footer");
+          if (footer) {
+            return createPortal(paginationContent, footer);
+          }
+        }
+
+        // Fallback to inline rendering if footer doesn't exist (e.g., SSR or specific pages)
+        return (
+          <div className="mt-auto pt-6" id="data-table-pagination-container">
+            {paginationContent}
+          </div>
+        );
+      })()}
     </div>
   );
 }

@@ -144,6 +144,7 @@ export function AppSidebar() {
       <SidebarUserMenu
         userName={displayName}
         userRole={displayRole}
+        userImage={profile?.image}
         isLoading={isLoading}
       />
 

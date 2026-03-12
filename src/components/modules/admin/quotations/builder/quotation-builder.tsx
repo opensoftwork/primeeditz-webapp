@@ -10,6 +10,7 @@
 import {
   ArrowLeft,
   ArrowRight,
+  Calendar as CalendarIcon,
   CheckCircle2,
   FolderOpen,
   Layout,
@@ -20,9 +21,16 @@ import {
   X,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
+import { format } from "date-fns";
 import Link from "next/link";
 import { useMemo } from "react";
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import {
   QUOTATION_STEPS,
@@ -33,8 +41,13 @@ import { QuotationStepNavigation } from "./quotation-step-navigation";
 import {
   Step1StudioContext,
   Step2PackageSelection,
-  Step5ReviewSend,
+  Step3ReviewSend,
 } from "./steps";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useEffect } from "react";
+import { useQuery } from "convex/react";
+import { api } from "@convex/_generated/api";
+import { Id } from "@convex/_generated/dataModel";
 
 // ============================================================================
 // Main Export (with Provider wrapper)
@@ -76,7 +89,24 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
     grandTotal,
     selectedStudio,
     goToStep,
+    setFormData,
   } = useQuotationBuilder();
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
+  const quotation = useQuery(
+    //@ts-ignore
+    api.functions.quotations.queries.getQuotation,
+    quotationId ? { quotationId: quotationId as Id<"quotations"> } : "skip",
+  );
+
+  useEffect(() => {
+    if (quotationId && quotation?.code) {
+      setOverride(quotationId, quotation.code);
+    }
+    return () => {
+      if (quotationId) removeOverride(quotationId);
+    };
+  }, [quotationId, quotation?.code, setOverride, removeOverride]);
 
   const handlePrimaryAction = () => {
     if (currentStep < 3) {
@@ -154,19 +184,59 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                 ))}
               </div>
             </div>
+          </div>
+        </div>
 
-            {selectedStudio && (
+        <div className="flex items-center gap-4">
+          {selectedStudio && (
+            <div className="flex items-center gap-3 mr-4">
               <div className="flex items-center gap-3 bg-white/5 border border-white/5 px-3 py-1.5 rounded-xl">
                 <div className="h-1 w-1 rounded-full bg-primary animate-pulse" />
                 <span className="text-[9px] font-black uppercase tracking-[0.3em] text-white/60">
                   {selectedStudio.name}
                 </span>
               </div>
-            )}
-          </div>
-        </div>
 
-        <div className="flex items-center gap-4">
+              <div className="h-4 w-px bg-white/5" />
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 px-3 flex items-center gap-2.5 bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 rounded-lg transition-all group"
+                  >
+                    <CalendarIcon className="h-3 w-3 text-primary/60 group-hover:text-primary transition-colors" />
+                    <div className="flex flex-col items-start gap-0">
+                      <span className="text-[7px] font-black uppercase tracking-widest text-white/30 leading-none">
+                        Validity Window
+                      </span>
+                      <span className="text-[10px] font-bold text-white leading-tight">
+                        {formData.step1.validUntil
+                          ? format(formData.step1.validUntil, "MMM d, yyyy")
+                          : "Set Date"}
+                      </span>
+                    </div>
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent
+                  className="w-auto p-0 bg-zinc-900 border-white/10"
+                  align="start"
+                >
+                  <Calendar
+                    mode="single"
+                    selected={formData.step1.validUntil}
+                    onSelect={(date) => {
+                      setFormData("step1", {
+                        validUntil: date ?? undefined,
+                      });
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          )}
           <Link href="/quotations">
             <Button
               variant="ghost"
@@ -268,7 +338,7 @@ function QuotationBuilderContent({ quotationId }: { quotationId?: string }) {
                   <div className="w-full mx-auto space-y-8">
                     {currentStep === 1 && <Step1StudioContext />}
                     {currentStep === 2 && <Step2PackageSelection />}
-                    {currentStep === 3 && <Step5ReviewSend />}
+                    {currentStep === 3 && <Step3ReviewSend />}
                   </div>
                 </motion.div>
               </AnimatePresence>

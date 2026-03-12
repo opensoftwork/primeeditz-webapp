@@ -81,6 +81,7 @@ export function getColumns(
     },
     {
       id: "actions",
+      enableHiding: false,
       cell: ({ row }) => {
         const tier = row.original;
         return (

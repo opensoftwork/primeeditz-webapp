@@ -74,7 +74,7 @@ const STATE_TO_PHASE: Record<ActionState, ProjectPhase> = {
 
   awaiting_review: "review",
   versions_requested: "review",
-  review_approved: "review",
+  review_approved: "delivery",
 
   preparing_delivery: "delivery",
   ready_for_delivery: "delivery",

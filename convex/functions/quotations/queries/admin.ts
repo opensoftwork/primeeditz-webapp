@@ -248,6 +248,45 @@ export const getQuotationWithSections = adminQuery({
       }),
     );
 
+    // Get selected packages for package-based grouping in preview
+    // Strategy: collect package IDs from BOTH the quotation's selectedPackageIds
+    // AND from individual line items' sourcePackageId (handles legacy quotations
+    // where selectedPackageIds might be empty but items still track their source)
+    const selectedPackageIds = quotation.selectedPackageIds || [];
+
+    // Also collect sourcePackageId from line items
+    const lineItemPackageIds = [
+      ...new Set(
+        quotation.lineItems
+          .map((li) => li.sourcePackageId)
+          .filter((id): id is Id<"servicePackages"> => !!id),
+      ),
+    ];
+
+    // Merge both sources (deduplicated)
+    const allPackageIds = [
+      ...new Set([...selectedPackageIds, ...lineItemPackageIds]),
+    ];
+
+    const packages = await Promise.all(
+      allPackageIds.map(async (pkgId) => {
+        const pkg = await ctx.db.get(pkgId);
+        if (!pkg) return null;
+        const projectType = pkg.projectTypeId
+          ? projectTypes.find((pt) => pt._id === pkg.projectTypeId)
+          : undefined;
+        return {
+          _id: pkg._id,
+          name: pkg.name,
+          projectTypeId: pkg.projectTypeId || undefined,
+          projectTypeName: projectType?.name,
+          // Include line item descriptions for fallback matching in preview
+          lineItemDescriptions:
+            pkg.lineItems?.map((li) => li.description) || [],
+        };
+      }),
+    );
+
     return {
       quotation: {
         ...quotation,
@@ -260,6 +299,7 @@ export const getQuotationWithSections = adminQuery({
         (s): s is Doc<"quotationSections"> => s !== null,
       ),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
+      packages: packages.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
 });

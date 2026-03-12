@@ -2,6 +2,7 @@ import { v } from "convex/values";
 import { mutation } from "../../_generated/server";
 import { getAuthUserWithProfile } from "../../lib/customFunctions";
 import { now } from "../../lib/helpers";
+import { getPhaseForState } from "../../lib/statusMachine";
 
 /**
  * Create a new deliverable record after successful upload by employee.
@@ -59,6 +60,7 @@ export const uploadDeliverable = mutation({
       uploadedBy: profile._id,
       uploadedByRole: profile.role === "admin" ? "admin" : "employee",
       description: args.description,
+      scope: "internal", // Default to internal QC scope
       createdAt: now(),
     });
 
@@ -229,12 +231,40 @@ export const sendToStudio = mutation({
     if (!project.studioId) throw new Error("No studio associated with project");
 
     // Update project state to awaiting review by studio
+    const newPhase = getPhaseForState("awaiting_review");
     await ctx.db.patch(deliverable.projectId, {
+      phase: newPhase,
       actionState: "awaiting_review",
       awaitingActorRole: "studio",
       awaitingActorId: project.studioId,
       updatedAt: now(),
     });
+
+    // Create status history entry
+    await ctx.db.insert("statusHistory", {
+      projectId: deliverable.projectId,
+      previousPhase: project.phase,
+      newPhase: newPhase,
+      previousActionState: project.actionState,
+      newActionState: "awaiting_review",
+      changedBy: profile._id,
+      changedAt: now(),
+      notes: `Deliverable sent to studio for review`,
+    });
+
+    // Increment studio-facing version
+    const newStudioVersion = (deliverable.studioVersion || 0) + 1;
+    await ctx.db.patch(args.deliverableId, {
+      studioVersion: newStudioVersion,
+    });
+
+    // Mark the latest deliverable version record as the public "external" version
+    if (deliverable.latestVersionId) {
+      await ctx.db.patch(deliverable.latestVersionId, {
+        scope: "external",
+        studioVersionNumber: newStudioVersion,
+      });
+    }
 
     // Record handoff
     await ctx.db.insert("handoffLogs", {
@@ -243,11 +273,11 @@ export const sendToStudio = mutation({
       toProfileId: project.studioId,
       fromActionState: "deliverables_ready",
       toActionState: "awaiting_review",
-      notes: args.notes || "Deliverable sent for studio review",
+      notes: args.notes || `Deliverable v${newStudioVersion} sent for studio review`,
       createdAt: now(),
     });
 
-    return { success: true, studioId: project.studioId };
+    return { success: true, studioId: project.studioId, studioVersion: newStudioVersion };
   },
 });
 
@@ -319,7 +349,9 @@ export const clientRequestVersion = mutation({
     const currentVersions = project.versionCount || 0;
 
     // Transition back to production
+    const versionPhase = getPhaseForState("versions_requested");
     await ctx.db.patch(args.projectId, {
+      phase: versionPhase,
       actionState: "versions_requested",
       awaitingActorRole: "employee",
       awaitingActorId: project.assignedEmployeeId,
@@ -430,7 +462,9 @@ export const createVersionRequest = mutation({
     if (project) {
       if (isAdmin) {
         // Admin → route to employee for rework
+        const adminPhase = getPhaseForState("work_in_progress");
         await ctx.db.patch(deliverable.projectId, {
+          phase: adminPhase,
           actionState: "work_in_progress",
           awaitingActorRole: "employee",
           awaitingActorId: project.assignedEmployeeId,
@@ -438,7 +472,9 @@ export const createVersionRequest = mutation({
         });
       } else if (isStudio) {
         // Studio → route to ADMIN for triage (not directly to employee)
+        const studioPhase = getPhaseForState("versions_requested");
         await ctx.db.patch(deliverable.projectId, {
+          phase: studioPhase,
           actionState: "versions_requested",
           awaitingActorRole: "admin", // Admin triages first
           awaitingActorId: undefined, // Goes to admin pool
@@ -482,6 +518,46 @@ export const updateVersionRequestStatus = mutation({
     }
 
     await ctx.db.patch(args.requestId, updates);
+
+    // When admin marks a studio-originated request as "in_progress",
+    // forward the work to the assigned employee
+    if (
+      args.status === "in_progress" &&
+      request.requestedByRole === "studio"
+    ) {
+      const deliverable = await ctx.db.get(request.deliverableId);
+      if (deliverable) {
+        // Update deliverable status so employee knows to act
+        await ctx.db.patch(request.deliverableId, {
+          status: "version_requested",
+          versionFeedback: request.notes,
+        });
+
+        // Route the project to the employee
+        const project = await ctx.db.get(request.projectId);
+        if (project) {
+          const wipPhase = getPhaseForState("work_in_progress");
+          await ctx.db.patch(request.projectId, {
+            phase: wipPhase,
+            actionState: "work_in_progress",
+            awaitingActorRole: "employee",
+            awaitingActorId: project.assignedEmployeeId,
+            updatedAt: now(),
+          });
+
+          // Create handoff log: admin → employee
+          await ctx.db.insert("handoffLogs", {
+            projectId: request.projectId,
+            fromProfileId: profile._id,
+            toProfileId: project.assignedEmployeeId,
+            fromActionState: project.actionState,
+            toActionState: "work_in_progress",
+            notes: `Admin forwarded studio version request #${request.versionNumber} to employee`,
+            createdAt: now(),
+          });
+        }
+      }
+    }
 
     return { success: true };
   },
@@ -537,6 +613,7 @@ export const uploadCorrectedVersion = mutation({
       uploadedBy: profile._id,
       uploadedByRole: profile.role === "admin" ? "admin" : "employee",
       description: args.description,
+      scope: "internal", // Default to internal until explicitly sent to studio
       createdAt: now(),
     });
 
@@ -572,7 +649,9 @@ export const uploadCorrectedVersion = mutation({
     // 4. Transition project state back to deliverables_ready (awaiting admin QC)
     const project = await ctx.db.get(deliverable.projectId);
     if (project) {
+      const correctedPhase = getPhaseForState("deliverables_ready");
       await ctx.db.patch(deliverable.projectId, {
+        phase: correctedPhase,
         actionState: "deliverables_ready",
         awaitingActorRole: "admin",
         updatedAt: now(),
@@ -596,7 +675,8 @@ export const uploadCorrectedVersion = mutation({
 
 /**
  * Studio approves an individual deliverable.
- * This does NOT transition the project phase.
+ * When all deliverables for the project are approved, auto-transitions
+ * the project from review → delivery phase.
  */
 export const studioApproveDeliverable = mutation({
   args: {
@@ -635,6 +715,56 @@ export const studioApproveDeliverable = mutation({
       studioProfileId: profile._id,
       approvedAt: now(),
     });
+
+    // --- Auto-transition: check if ALL deliverables are now approved ---
+    // Get all studio-facing deliverables for this project
+    const allDeliverables = await ctx.db
+      .query("deliverables")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .collect();
+
+    // Only consider deliverables that have been sent to studio (studioVersion > 0)
+    const studioDeliverables = allDeliverables.filter(
+      (d) => (d.studioVersion || 0) > 0,
+    );
+
+    if (studioDeliverables.length > 0) {
+      // Get all existing approvals for this project
+      const allApprovals = await ctx.db
+        .query("studioApprovals")
+        .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+        .collect();
+
+      const approvedIds = new Set(allApprovals.map((a) => a.deliverableId));
+
+      // Check if every studio-facing deliverable has been approved
+      const allApproved = studioDeliverables.every((d) =>
+        approvedIds.has(d._id),
+      );
+
+      if (allApproved && project.actionState === "awaiting_review") {
+        // Transition project to delivery phase
+        await ctx.db.patch(args.projectId, {
+          phase: "delivery",
+          actionState: "review_approved",
+          awaitingActorRole: "admin",
+          reviewApprovedAt: now(),
+          updatedAt: now(),
+        });
+
+        // Create status history entry
+        await ctx.db.insert("statusHistory", {
+          projectId: args.projectId,
+          previousPhase: "review",
+          newPhase: "delivery",
+          previousActionState: "awaiting_review",
+          newActionState: "review_approved",
+          changedBy: profile._id,
+          changedAt: now(),
+          notes: "All deliverables approved by studio",
+        });
+      }
+    }
 
     return { success: true };
   },

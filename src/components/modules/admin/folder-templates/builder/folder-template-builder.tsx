@@ -76,6 +76,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 
 interface FormValues {
   name: string;
@@ -105,6 +106,8 @@ export function FolderTemplateBuilder({
   // Determine if we're in project type context
   const isProjectTypeContext = !!propProjectTypeId;
 
+  const { setOverride, removeOverride } = useBreadcrumbStore();
+
   // Convex Hooks
   //@ts-ignore
   const projectTypes = useQuery(api.functions.projectTypes.queries.list) || [];
@@ -117,6 +120,26 @@ export function FolderTemplateBuilder({
     api.functions.projectTypes.queries.getById,
     propProjectTypeId ? { id: propProjectTypeId } : "skip",
   );
+
+  useEffect(() => {
+    if (parentProjectType?.name && propProjectTypeId) {
+      setOverride(propProjectTypeId, parentProjectType.name);
+    }
+    if (existingTemplate?.name && templateId) {
+      setOverride(templateId, existingTemplate.name);
+    }
+    return () => {
+      if (propProjectTypeId) removeOverride(propProjectTypeId);
+      if (templateId) removeOverride(templateId);
+    };
+  }, [
+    parentProjectType?.name,
+    propProjectTypeId,
+    existingTemplate?.name,
+    templateId,
+    setOverride,
+    removeOverride,
+  ]);
 
   const createTemplate = useMutation(
     api.functions.folderTemplates.mutations.createFolderTemplate,

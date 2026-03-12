@@ -1,18 +1,16 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useQuery } from "convex/react";
 import { api } from "@convex/_generated/api";
 import { Id } from "@convex/_generated/dataModel";
+import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import {
   History,
   MessageSquare,
   ArrowLeft,
   Plus,
-  Clock,
-  CheckCircle,
-  Play,
   Hash,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -29,11 +27,19 @@ export default function AdminVersionsPage() {
   }>();
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("requests");
+  const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const deliverable = useQuery(
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
+
+  useEffect(() => {
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    return () => removeOverride(deliverableId);
+  }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   const versionRequests = useQuery(
     api.functions.deliverables.queries.getDeliverableVersionRequests,

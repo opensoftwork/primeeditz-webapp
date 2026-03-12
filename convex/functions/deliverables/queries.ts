@@ -1,5 +1,6 @@
 import { v } from "convex/values";
 import { query } from "../../_generated/server";
+import { Id } from "../../_generated/dataModel";
 
 import { getAuthUserWithProfile } from "../../lib/customFunctions";
 
@@ -55,9 +56,24 @@ export const getDeliverable = query({
 
     const uploader = await ctx.db.get(deliverable.uploadedBy);
 
+    // Check studio approval status
+    const approval = await ctx.db
+      .query("studioApprovals")
+      .withIndex("by_deliverableId", (q) => q.eq("deliverableId", args.deliverableId))
+      .first();
+
+    // Check latest version request status
+    const latestVersionRequest = await ctx.db
+      .query("versionRequests")
+      .withIndex("by_deliverableId", (q) => q.eq("deliverableId", args.deliverableId))
+      .order("desc")
+      .first();
+
     return {
       ...deliverable,
       uploadedByName: uploader?.name ?? "Unknown",
+      isStudioApproved: !!approval,
+      latestVersionStatus: latestVersionRequest?.status,
     };
   },
 });
@@ -86,13 +102,27 @@ export const getDeliverableVersions = query({
       .order("desc")
       .collect();
 
+    // Filter versions based on role: Studio only sees "external" versions
+    let filteredVersions = versions;
+    const user = await ctx.db
+      .query("profiles")
+      .withIndex("by_userId", (q) => q.eq("userId", identity.subject))
+      .first();
+
+    if (user?.role === "studio") {
+      filteredVersions = versions.filter((v) => v.scope === "external");
+    }
+
     // Enrich with uploader names
     const enriched = await Promise.all(
-      versions.map(async (v) => {
+      filteredVersions.map(async (v) => {
         const uploader = await ctx.db.get(v.uploadedBy);
         return {
           ...v,
           uploadedByName: uploader?.name ?? "Unknown",
+          // Map studioVersionNumber to versionNumber for Studio view consistency
+          displayVersionNumber:
+            user?.role === "studio" ? v.studioVersionNumber : v.versionNumber,
         };
       }),
     );
@@ -131,7 +161,28 @@ export const getRecentStatusChanges = query({
       .order("desc")
       .take(5);
 
-    return deliverables;
+    const enriched = await Promise.all(
+      deliverables.map(async (d) => {
+        let latestVersionRequestId: Id<"versionRequests"> | undefined;
+
+        if (d.status === "version_requested") {
+          const latestRequest = await ctx.db
+            .query("versionRequests")
+            .withIndex("by_deliverableId", (q) => q.eq("deliverableId", d._id))
+            .order("desc")
+            .first();
+
+          latestVersionRequestId = latestRequest?._id;
+        }
+
+        return {
+          ...d,
+          latestVersionRequestId,
+        };
+      }),
+    );
+
+    return enriched;
   },
 });
 
@@ -174,7 +225,7 @@ export const getClientDeliverables = query({
     // Filter out legacy child deliverables
     const rootDeliverables = deliverables.filter((d) => !d.parentDeliverableId);
 
-    // Enrich with approval and version data
+    // Enrich with approval, version, and uploader data
     const enriched = await Promise.all(
       rootDeliverables.map(async (d) => {
         // Check studio approval
@@ -190,12 +241,18 @@ export const getClientDeliverables = query({
           .order("desc")
           .first();
 
+        // Get uploader name
+        const uploader = d.uploadedBy ? await ctx.db.get(d.uploadedBy) : null;
+
         return {
           ...d,
           isStudioApproved: !!approval,
           studioApprovedAt: approval?.approvedAt,
           latestVersionStatus: latestVersion?.status,
-          latestVersionId: latestVersion?._id,
+          latestVersionRequestId: latestVersion?._id,
+          uploadedByName: uploader?.name ?? "PrimeEditz Team",
+          // Use studioVersion for Studio display
+          displayVersion: d.studioVersion || 1,
         };
       }),
     );

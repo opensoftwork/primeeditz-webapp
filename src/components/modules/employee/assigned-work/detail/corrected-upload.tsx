@@ -111,7 +111,7 @@ export function CorrectedUpload({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       <div className="space-y-4">
         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
           Upload Corrected Version
@@ -119,7 +119,7 @@ export function CorrectedUpload({
 
         <div
           className={cn(
-            "relative group aspect-square rounded-3xl border-2 border-dashed transition-all cursor-pointer flex flex-col items-center justify-center gap-4 bg-white/2",
+            "relative group h-32 rounded-2xl border-2 border-dashed transition-all cursor-pointer flex items-center justify-center gap-4 bg-white/2",
             file
               ? "border-emerald-500/30 bg-emerald-500/5"
               : "border-white/10 hover:border-indigo-500/30 hover:bg-white/5",
@@ -137,43 +137,43 @@ export function CorrectedUpload({
 
           {file ? (
             <>
-              <div className="w-16 h-16 rounded-2xl bg-emerald-500/20 flex items-center justify-center">
-                <CheckCircle2 className="h-8 w-8 text-emerald-500" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center shrink-0">
+                <CheckCircle2 className="h-5 w-5 text-emerald-500" />
               </div>
-              <div className="text-center group-hover:scale-105 transition-transform px-6">
+              <div className="group-hover:scale-105 transition-transform min-w-0">
                 <p className="text-sm font-black text-white uppercase tracking-tight truncate">
                   {file.name}
                 </p>
-                <p className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-widest mt-1">
+                <p className="text-[10px] font-bold text-emerald-500/60 uppercase tracking-widest mt-0.5">
                   {(file.size / (1024 * 1024)).toFixed(2)} MB • READY
                 </p>
               </div>
             </>
           ) : (
-            <>
-              <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                <Upload className="h-8 w-8 text-white/20" />
+            <div className="flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Upload className="h-5 w-5 text-white/20" />
               </div>
               <div className="text-center">
-                <p className="text-sm font-black text-white uppercase tracking-tight">
+                <p className="text-xs font-black text-white uppercase tracking-tight">
                   Select Corrected File
                 </p>
-                <p className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">
+                <p className="text-[9px] font-bold text-white/20 uppercase tracking-widest mt-0.5">
                   Click or drag assets here
                 </p>
               </div>
-            </>
+            </div>
           )}
 
           {isUploading && (
-            <div className="absolute inset-x-8 bottom-8 flex flex-col gap-2">
-              <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
+            <div className="absolute inset-x-6 bottom-4 flex flex-col gap-1.5">
+              <div className="h-1 w-full bg-white/5 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-500 transition-all duration-300 shadow-[0_0_10px_rgba(99,102,241,0.5)]"
                   style={{ width: `${uploadProgress}%` }}
                 />
               </div>
-              <p className="text-[10px] font-black text-center text-indigo-400 uppercase tracking-[0.2em]">
+              <p className="text-[9px] font-black text-center text-indigo-400 uppercase tracking-[0.2em]">
                 {uploadProgress}% UPLOADING...
               </p>
             </div>
@@ -181,14 +181,14 @@ export function CorrectedUpload({
         </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <Label className="text-[10px] font-black uppercase tracking-[0.2em] text-white/30 ml-1">
           Correction Notes (Optional)
         </Label>
         <div className="p-1 rounded-2xl bg-white/2 border border-white/5 focus-within:border-indigo-500/30 transition-colors">
           <Textarea
             placeholder="EXPLAIN THE CHANGES YOU MADE..."
-            className="bg-transparent border-none focus-visible:ring-0 min-h-[100px] text-xs font-bold uppercase tracking-widest placeholder:text-white/10 resize-none p-4"
+            className="bg-transparent border-none focus-visible:ring-0 min-h-[80px] text-[10px] font-bold uppercase tracking-widest placeholder:text-white/10 resize-none p-3"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             disabled={isUploading}
@@ -197,7 +197,7 @@ export function CorrectedUpload({
       </div>
 
       <Button
-        className="w-full h-14 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 font-black uppercase tracking-widest text-xs gap-3"
+        className="w-full h-12 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-lg shadow-indigo-600/20 font-black uppercase tracking-widest text-[10px] gap-2.5"
         onClick={handleUpload}
         disabled={!file || isUploading}
       >
@@ -214,7 +214,7 @@ export function CorrectedUpload({
         )}
       </Button>
 
-      <div className="p-4 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex gap-4">
+      <div className="p-3 rounded-xl bg-indigo-500/5 border border-indigo-500/10 flex gap-3">
         <AlertCircle className="h-4 w-4 text-indigo-400 shrink-0 mt-0.5" />
         <p className="text-[9px] font-bold text-white/30 uppercase tracking-wider leading-relaxed">
           Uploading this will resolve all active version requests and notify the

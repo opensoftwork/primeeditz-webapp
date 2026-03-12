@@ -10,31 +10,46 @@ export const clearAllData = internalMutation({
   handler: async (ctx) => {
     console.log("⚠️ STARTING FULL DATABASE WIPE...");
 
+    // List of all tables from schema.ts plus legacy tables
     const tableNames = [
-      "appSettings",
+      // Transactional Data
       "assets",
-      "clients",
-      "company",
-      "deliverables",
-      "employees",
-      "folderTemplates",
-      "folders",
-      "profiles",
-      "projectCategories",
-      "projectTypeFields",
-      "projectTypes",
       "projects",
-      "quotations",
-      "servicePackages",
+      "folders",
+      "deliverables",
+      "deliverableVersions",
+      "versionRequests",
       "statusHistory",
-      "storageTiers",
-      "quotationSections",
-      "quotationLibraryItems",
       "projectSquads",
       "handoffLogs",
-      "servicePackageDrafts",
-      "versionRequests",
       "studioApprovals",
+      "quotationRequestDrafts",
+      "servicePackageDrafts",
+      "quotations",
+
+      // Configuration & Setup
+      "projectTypes",
+      "projectCategories",
+      "projectTypeFields",
+      "storageTiers",
+      "folderTemplates",
+      "quotationSections",
+      "servicePackages",
+      "quotationLibraryItems",
+      "company",
+      "appSettings",
+
+      // Public Form Submissions
+      "contacts",
+      "feedbacks",
+      "surveys",
+
+      // Identity & User Data
+      "profiles",
+
+      // Legacy Tables (prior to schema unification)
+      "clients",
+      "employees",
     ];
 
     const stats: Record<string, number> = {};
@@ -42,10 +57,13 @@ export const clearAllData = internalMutation({
 
     for (const tableName of tableNames) {
       try {
+        // Collect all documents from the table
         const docs = await ctx.db.query(tableName as any).collect();
         stats[tableName] = docs.length;
+
         if (docs.length > 0) {
           console.log(`  Deleting ${docs.length} from ${tableName}...`);
+          // Batch delete for better performance if possible, but keep it simple for now
           for (const doc of docs) {
             await ctx.db.delete(doc._id);
           }
@@ -54,7 +72,10 @@ export const clearAllData = internalMutation({
         }
         totalDeleted += docs.length;
       } catch (e) {
-        console.log(`  ○ Skipping ${tableName} (table may not exist)`);
+        // Table might not exist or schema might have moved/renamed it
+        console.log(
+          `  ○ Skipping ${tableName} (table may not exist or access denied)`,
+        );
         stats[tableName] = 0;
       }
     }
@@ -62,6 +83,10 @@ export const clearAllData = internalMutation({
     console.log(
       `\n✅ WIPE COMPLETE! Deleted ${totalDeleted} documents across all tables.`,
     );
+    console.log(
+      "ℹ️ Database has been reset to a completely clean state. You will need to re-seed and re-login (re-create your profile).",
+    );
+    
     return { success: true, totalDeleted, stats };
   },
 });

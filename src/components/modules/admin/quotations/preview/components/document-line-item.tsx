@@ -1,3 +1,10 @@
+/**
+ * Document Line Item Component
+ *
+ * Renders a single quotation line item and its recursive sub-items
+ * for the professional PDF document.
+ */
+
 "use client";
 
 import React from "react";
@@ -20,53 +27,109 @@ export function DocumentLineItem({
   formatCurrency,
 }: DocumentLineItemProps) {
   const itemNumber = parentNumber ? `${parentNumber}.${index}` : `${index}`;
-  const itemTotal = item.rate * item.quantity;
+  const amount = item.rate * item.quantity;
+  const hasSubItems = item.subItems && item.subItems.length > 0;
 
   return (
-    <>
+    <React.Fragment>
       <tr
         className={cn(
-          "border-b border-slate-100 transition-colors",
-          level === 0 ? "bg-white font-semibold" : "bg-slate-50/30 text-[11px]",
+          "break-inside-avoid print:break-inside-avoid",
+          level === 0
+            ? "border-b border-slate-100"
+            : level === 1
+              ? "border-b border-slate-50 bg-slate-25"
+              : "border-b border-slate-50 bg-slate-50/50",
         )}
       >
-        <td className="py-3.5 px-3 text-center text-slate-400 font-bold align-top w-12">
-          {itemNumber}
-        </td>
-        <td className="py-3.5 px-4 align-top">
-          <div
+        <td className="py-2.5 px-2 text-center align-top">
+          <span
             className={cn(
-              "text-slate-900",
-              level === 0 ? "font-bold text-sm" : "font-medium pl-4",
+              "font-black tabular-nums",
+              level === 0
+                ? "text-[9px] text-slate-400"
+                : level === 1
+                  ? "text-[8px] text-slate-300"
+                  : "text-[7px] text-slate-300",
             )}
           >
-            {level > 0 && <span className="text-slate-300 mr-2">└</span>}
-            {item.description}
+            {itemNumber}
+          </span>
+        </td>
+        <td className="py-2.5 px-3 align-top">
+          <div
+            className={cn(
+              level === 0
+                ? "text-xs font-bold text-slate-800"
+                : level === 1
+                  ? "text-[11px] font-medium text-slate-600 pl-3"
+                  : "text-[10px] font-medium text-slate-500 pl-6 border-l border-slate-100 ml-1 mt-1",
+            )}
+          >
+            {level > 0 && (
+              <span className="text-slate-300 mr-1.5 inline-block -translate-y-px">
+                └
+              </span>
+            )}
+            <span className={cn(level > 1 && "italic")}>
+              {item.description}
+            </span>
           </div>
         </td>
-        <td className="py-3.5 px-2 text-center text-slate-500 align-top uppercase text-[10px] font-bold tracking-wider w-16">
+        <td
+          className={cn(
+            "py-2.5 px-2 text-center uppercase tracking-widest align-top",
+            level === 0
+              ? "text-[9px] text-slate-500"
+              : "text-[8px] text-slate-400 font-medium",
+          )}
+        >
           {item.unit}
         </td>
-        <td className="py-3.5 px-2 text-center font-bold text-slate-700 align-top w-14">
+        <td
+          className={cn(
+            "py-2.5 px-2 text-center font-bold align-top",
+            level === 0
+              ? "text-[10px] text-slate-700 font-black"
+              : "text-[9px] text-slate-500",
+          )}
+        >
           {item.quantity}
         </td>
-        <td className="py-3.5 px-3 text-right text-slate-600 align-top tabular-nums font-mono text-sm w-24">
+        <td
+          className={cn(
+            "py-2.5 px-2 text-right font-medium tabular-nums align-top",
+            level === 0
+              ? "text-[10px] text-slate-500"
+              : "text-[9px] text-slate-400",
+          )}
+        >
           {formatCurrency(item.rate)}
         </td>
-        <td className="py-3.5 px-4 text-right font-black text-slate-900 align-top tabular-nums w-28">
-          {formatCurrency(itemTotal)}
+        <td
+          className={cn(
+            "py-2.5 px-3 text-right font-black tabular-nums align-top",
+            level === 0
+              ? "text-[10px] text-slate-900"
+              : "text-[9px] text-slate-600",
+          )}
+        >
+          {formatCurrency(amount)}
         </td>
       </tr>
-      {item.subItems?.map((sub, idx) => (
-        <DocumentLineItem
-          key={`${item.id}-sub-${idx}`}
-          item={{ ...sub, id: `${item.id}-sub-${idx}` } as QuotationLineItem}
-          index={idx + 1}
-          level={level + 1}
-          parentNumber={itemNumber}
-          formatCurrency={formatCurrency}
-        />
-      ))}
-    </>
+
+      {/* Recursive sub-items */}
+      {hasSubItems &&
+        item.subItems!.map((sub: any, sIdx: number) => (
+          <DocumentLineItem
+            key={sub.id || `${item.id}-sub-${sIdx}`}
+            item={sub}
+            index={sIdx + 1}
+            level={level + 1}
+            parentNumber={itemNumber}
+            formatCurrency={formatCurrency}
+          />
+        ))}
+    </React.Fragment>
   );
 }

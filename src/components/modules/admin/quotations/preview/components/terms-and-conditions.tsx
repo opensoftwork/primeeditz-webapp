@@ -19,7 +19,7 @@ export function TermsAndConditions({ terms }: TermsAndConditionsProps) {
         </div>
         <div className="flex-1 h-px bg-slate-100" />
       </div>
-      <div className="text-[10px] text-slate-500 leading-relaxed whitespace-pre-wrap columns-1 md:columns-2 gap-10 text-justify">
+      <div className="text-[10px] text-slate-500 leading-relaxed whitespace-pre-wrap text-justify columns-2 gap-10">
         {terms}
       </div>
     </div>

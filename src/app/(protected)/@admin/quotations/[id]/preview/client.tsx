@@ -10,7 +10,7 @@ import { api } from "@convex/_generated/api";
 import type { Id } from "@convex/_generated/dataModel";
 import { useQuery } from "convex/react";
 import { ArrowLeft, Loader2, Receipt } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { QuotationPreview } from "@/components/modules/admin/quotations/preview";
 import { Button } from "@/components/ui/button";
 
@@ -22,6 +22,8 @@ export function QuotationPreviewClient({
   quotationId,
 }: QuotationPreviewClientProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const autoDownload = searchParams.get("download") === "true";
 
   // Fetch quotation with sections
   const data = useQuery(
@@ -31,6 +33,7 @@ export function QuotationPreviewClient({
   );
 
   // Fetch company info
+  // @ts-ignore
   const companyInfo = useQuery(api.functions.company.queries.get);
 
   // Loading state
@@ -72,7 +75,15 @@ export function QuotationPreviewClient({
     );
   }
 
-  const { quotation, sections, projects = [] } = data;
+  // DEBUG: Remove after fixing
+  console.log('[PreviewClient DEBUG] raw data:', {
+    hasData: !!data,
+    keys: data ? Object.keys(data) : [],
+    packagesFromData: data?.packages,
+    selectedPackageIds: data?.quotation?.selectedPackageIds,
+  });
+
+  const { quotation, sections, projects = [], packages = [] } = data;
 
   return (
     <QuotationPreview
@@ -91,10 +102,12 @@ export function QuotationPreviewClient({
       }}
       sections={sections}
       projects={projects}
+      packages={packages}
       companyInfo={companyInfo || undefined}
       studioName={quotation.studioName}
       projectName={quotation.projectName}
       onBack={() => router.back()}
+      autoDownload={autoDownload}
     />
   );
 }

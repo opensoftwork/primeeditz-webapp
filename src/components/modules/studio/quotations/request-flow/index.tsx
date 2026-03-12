@@ -24,9 +24,9 @@ import {
   RequestWizardProvider,
   useRequestWizard,
 } from "./request-wizard-context";
-import { Step1Packages } from "./steps/step-1-packages";
-import { Step2Details } from "./steps/step-2-details";
-import { Step3Review } from "./steps/step-3-review";
+import { Step1Packages } from "./steps/step1-packages";
+import { Step2Details } from "./steps/step2-details";
+import { Step3Review } from "./steps/step3-review";
 import { REQUEST_WIZARD_STEPS } from "./types";
 
 export default function QuoteRequestWizard() {

@@ -16,13 +16,15 @@ import type { Doc, Id } from "@convex/_generated/dataModel";
 
 /**
  * Sub-item within a line item (for nested/breakdown items)
+ * Supports recursive nesting up to 3 levels (1 → 1.1 → 1.1.1)
  */
 export interface QuotationSubItem {
-  id?: string;
+  id: string;
   description: string;
   unit: string;
   rate: number;
   quantity: number;
+  subItems?: QuotationSubItem[]; // Recursive for 3-level nesting
 }
 
 /**
@@ -43,6 +45,8 @@ export interface QuotationLineItem {
   spawnsProject?: boolean;
   projectTypeId?: string | Id<"projectTypes">;
   selectedFolderTemplateId?: string | Id<"folderTemplates">;
+  sourcePackageId?: string | Id<"servicePackages">;
+  projectConfigId?: string;
 }
 
 // ============================================================================
@@ -118,11 +122,15 @@ export interface GroupedLineItems {
 // ============================================================================
 
 /**
- * Sub-item within a template line item
+ * Sub-item within a template line item (unified format)
  */
 export interface TemplateSubItem {
+  id: string;
   description: string;
-  amount?: number;
+  unit: string;
+  rate: number;
+  quantity: number;
+  subItems?: TemplateSubItem[]; // Recursive for 3-level nesting
 }
 
 /**

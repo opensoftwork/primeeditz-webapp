@@ -41,6 +41,7 @@ export function AssignedWorkDeliverables({
     <DetailSection
       title="Sent Deliverables"
       icon={<History className="h-5 w-5" />}
+      noContainer
       action={
         <span className="text-[9px] font-bold text-white/20 uppercase tracking-widest">
           {deliverables.length} Deliverables
@@ -59,6 +60,7 @@ export function AssignedWorkDeliverables({
             status={item.status}
             createdAt={item._creationTime}
             uploadedByName={item.uploadedByName}
+            versionFeedback={item.versionFeedback}
             href={
               item.status === "version_requested"
                 ? `/assigned-work/${projectId}/deliverables/${item._id}/versions`

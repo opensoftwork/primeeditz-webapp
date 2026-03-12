@@ -23,9 +23,9 @@ export function TermsConditions({ terms }: TermsConditionsProps) {
           Terms & Conditions
         </h3>
       </div>
-      <pre className="text-sm text-white/60 font-mono whitespace-pre-wrap leading-relaxed">
+      <div className="text-sm text-white/60 font-medium whitespace-pre-wrap leading-relaxed columns-1 md:columns-2 gap-8 text-justify">
         {terms}
-      </pre>
+      </div>
     </motion.div>
   );
 }

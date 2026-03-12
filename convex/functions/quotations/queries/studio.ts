@@ -194,6 +194,34 @@ export const getMyQuotationDetail = studioQuery({
       }),
     );
 
+    // Get selected packages for package-based grouping (when projects haven't been spawned yet)
+    const selectedPackageIds = quotation.selectedPackageIds || [];
+    const lineItemPackageIds = [
+      ...new Set(
+        quotation.lineItems
+          .map((li) => li.sourcePackageId)
+          .filter((id): id is Id<"servicePackages"> => !!id),
+      ),
+    ];
+    const allPackageIds = [
+      ...new Set([...selectedPackageIds, ...lineItemPackageIds]),
+    ];
+    const packages = await Promise.all(
+      allPackageIds.map(async (pkgId) => {
+        const pkg = await ctx.db.get(pkgId);
+        if (!pkg) return null;
+        const projectType = pkg.projectTypeId
+          ? projectTypes.find((pt) => pt._id === pkg.projectTypeId)
+          : undefined;
+        return {
+          _id: pkg._id,
+          name: pkg.name,
+          projectTypeId: pkg.projectTypeId || undefined,
+          projectTypeName: projectType?.name,
+        };
+      }),
+    );
+
     return {
       quotation: {
         ...quotation,
@@ -202,6 +230,7 @@ export const getMyQuotationDetail = studioQuery({
         (s): s is Doc<"quotationSections"> => s !== null,
       ),
       projects: projects.filter((p): p is NonNullable<typeof p> => p !== null),
+      packages: packages.filter((p): p is NonNullable<typeof p> => p !== null),
     };
   },
 });

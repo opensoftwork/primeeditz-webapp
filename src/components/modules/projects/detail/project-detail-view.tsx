@@ -17,14 +17,14 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
-import { AssetsSection } from "./assets-section";
+import { AssetsSection } from "./assets";
 // Modular Components
 import { ProjectHeader } from "./header";
 import { ReferenceMaterials } from "./reference-materials";
 import { DetailSidebar } from "./sidebar";
 import { ProjectSpecifications } from "./specifications";
 import { DeliverableStatusBanner } from "@/components/shared/status-banners/deliverable-status-banner";
-import { DeliverablesSection } from "./deliverables-section";
+import { DeliverablesSection } from "./deliverables";
 
 interface ProjectDetailViewProps {
   projectId: string;
@@ -38,19 +38,9 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
   });
 
   useEffect(() => {
-    const label = project?.endClientName || project?.eventName || project?.code;
-    if (label) {
-      setOverride(projectId, label);
-    }
-    return () => removeOverride(projectId);
-  }, [
-    projectId,
-    project?.endClientName,
-    project?.eventName,
-    project?.code,
-    setOverride,
-    removeOverride,
-  ]);
+    // Project-level overrides are centrally managed by ProjectBreadcrumbLayout
+    return () => {};
+  }, [projectId, project, setOverride, removeOverride]);
 
   const fields = useQuery(
     //@ts-ignore
@@ -118,9 +108,17 @@ export function ProjectDetailView({ projectId }: ProjectDetailViewProps) {
           className="lg:col-span-8 space-y-12"
         >
           <ProjectSpecifications project={project} fields={fields} />
-          <ReferenceMaterials files={project.referenceFiles} />
+          <ReferenceMaterials
+            files={project.referenceFiles}
+            projectId={projectId}
+          />
 
-          {project.phase !== "setup" && (
+          {/* Only show Final Deliverables once admin has sent them for review */}
+          {(project.actionState === "awaiting_review" ||
+            project.actionState === "review_approved" ||
+            project.actionState === "versions_requested" ||
+            project.phase === "delivery" ||
+            project.phase === "completed") && (
             <DeliverablesSection
               projectId={projectId}
               actionState={project.actionState}

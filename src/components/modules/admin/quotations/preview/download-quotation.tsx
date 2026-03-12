@@ -11,7 +11,7 @@ import * as htmlToImage from "html-to-image";
 import jsPDF from "jspdf";
 import { Download as DownloadIcon, Loader2 } from "lucide-react";
 import type React from "react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ import type {
   QuotationData,
   QuotationSection,
 } from "../types";
+import type { PackageInfo } from "./quotation-preview";
 import { QuotationDocument } from "./quotation-document";
 
 // ============================================================================
@@ -31,6 +32,7 @@ interface DownloadQuotationProps {
   quotation: QuotationData;
   sections: QuotationSection[];
   projects?: Project[];
+  packages?: PackageInfo[];
   activeSection?: string; // Section name for filtered download
   companyInfo?: CompanyInfo;
   studioName?: string;
@@ -40,6 +42,7 @@ interface DownloadQuotationProps {
   className?: string;
   label?: string;
   icon?: React.ReactNode;
+  autoTrigger?: boolean;
 }
 
 // ============================================================================
@@ -50,6 +53,7 @@ export function DownloadQuotation({
   quotation,
   sections,
   projects = [],
+  packages = [],
   activeSection,
   companyInfo,
   studioName,
@@ -59,6 +63,7 @@ export function DownloadQuotation({
   className,
   label,
   icon,
+  autoTrigger = false,
 }: DownloadQuotationProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const documentRef = useRef<HTMLDivElement>(null);
@@ -215,6 +220,17 @@ export function DownloadQuotation({
     }
   };
 
+  // Auto-trigger download if requested
+  useEffect(() => {
+    if (autoTrigger && !isGenerating) {
+      // Small timeout to ensure documentRef is fully populated and layout is stable
+      const timer = setTimeout(() => {
+        handleDownload();
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [autoTrigger]);
+
   return (
     <>
       <Button
@@ -267,6 +283,7 @@ export function DownloadQuotation({
             quotation={quotation}
             sections={sections}
             projects={projects}
+            packages={packages}
             activeSection={activeSection}
             companyInfo={companyInfo}
             studioName={studioName}

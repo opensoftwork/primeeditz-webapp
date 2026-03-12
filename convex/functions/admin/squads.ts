@@ -194,3 +194,34 @@ export const recordHandoff = authenticatedWithProfileMutation({
     return { success: true };
   },
 });
+
+/**
+ * Get the current squad for a project.
+ */
+export const getProjectSquad = adminQuery({
+  args: {
+    projectId: v.id("projects"),
+  },
+  handler: async (ctx, args) => {
+    const project = await ctx.db.get(args.projectId);
+    if (!project) throw new ConvexError("Project not found");
+
+    const squadMembers = await ctx.db
+      .query("projectSquads")
+      .withIndex("by_projectId", (q) => q.eq("projectId", args.projectId))
+      .filter((q) => q.eq(q.field("dissolvedAt"), undefined))
+      .collect();
+
+    const membersWithProfiles = await Promise.all(
+      squadMembers.map(async (member) => {
+        const profile = await ctx.db.get(member.profileId);
+        return {
+          ...member,
+          profile,
+        };
+      }),
+    );
+
+    return membersWithProfiles;
+  },
+});

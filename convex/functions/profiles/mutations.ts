@@ -1,4 +1,4 @@
-/**
+  /**
  * Profile Mutations
  *
  * Mutations for user profile management.
@@ -63,6 +63,7 @@ export const updateProfile = authenticatedMutation({
     name: v.optional(v.string()),
     phone: v.optional(v.string()),
     company: v.optional(v.string()),
+    image: v.optional(v.string()),
   },
   handler: async (ctx, args) => {
     const userId = ctx.authUser._id;
@@ -85,6 +86,7 @@ export const updateProfile = authenticatedMutation({
     if (args.name !== undefined) updates.name = args.name;
     if (args.phone !== undefined) updates.phone = args.phone;
     if (args.company !== undefined) updates.company = args.company;
+    if (args.image !== undefined) updates.image = args.image;
 
     await ctx.db.patch(profile._id, updates);
 

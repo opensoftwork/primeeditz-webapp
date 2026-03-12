@@ -143,6 +143,39 @@ export const draftProjectConfigValidator = v.object({
   defaultStorageTierId: v.optional(v.id("storageTiers")),
 });
 
+// ============================================================================
+// Unified Sub-Item Validators (3-level explicit nesting)
+// ============================================================================
+
+// Level 3: Leaf sub-item (no children allowed — max depth)
+export const subItemLevel3Validator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+});
+
+// Level 2: Mid-level sub-item (can have Level 3 children)
+export const subItemLevel2Validator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+  subItems: v.optional(v.array(subItemLevel3Validator)),
+});
+
+// Level 1: Top-level sub-item (used in lineItems.subItems, can have Level 2 children)
+export const quotationSubItemValidator = v.object({
+  id: v.string(),
+  description: v.string(),
+  unit: v.string(),
+  rate: v.number(),
+  quantity: v.number(),
+  subItems: v.optional(v.array(subItemLevel2Validator)),
+});
+
 // Service Package Line Item Validator - PRICING ONLY, no spawning config
 export const servicePackageLineItemValidator = v.object({
   id: v.string(),
@@ -151,15 +184,8 @@ export const servicePackageLineItemValidator = v.object({
   unit: v.string(),
   rate: v.number(),
   quantity: v.number(),
-  projectConfigId: v.optional(v.string()), // NEW: Links to projectConfigs.id
-  subItems: v.optional(
-    v.array(
-      v.object({
-        description: v.string(),
-        amount: v.optional(v.number()),
-      }),
-    ),
-  ),
+  projectConfigId: v.optional(v.string()), // Links to projectConfigs.id
+  subItems: v.optional(v.array(quotationSubItemValidator)),
 });
 
 // Level 3: Leaf nodes (no children allowed)
@@ -445,6 +471,7 @@ export default defineSchema({
     rejectionNotes: v.optional(v.string()),
     parentDeliverableId: v.optional(v.id("deliverables")), // @deprecated — legacy child-deliverable linking
     latestVersionId: v.optional(v.id("deliverableVersions")), // Points to latest version record
+    studioVersion: v.optional(v.number()), // NEW: Client-facing version (v1, v2...)
     // Uses _creationTime
   })
     .index("by_projectId", ["projectId"])
@@ -464,10 +491,13 @@ export default defineSchema({
     uploadedBy: v.id("profiles"),
     uploadedByRole: v.union(v.literal("admin"), v.literal("employee")),
     description: v.optional(v.string()),
+    studioVersionNumber: v.optional(v.number()), // External version number if scope is external
+    scope: v.optional(v.union(v.literal("internal"), v.literal("external"))), // internal (QC) vs external (Studio)
     createdAt: v.number(),
   })
     .index("by_deliverableId", ["deliverableId"])
-    .index("by_projectId", ["projectId"]),
+    .index("by_projectId", ["projectId"])
+    .index("by_scope", ["scope"]),
 
   // --------------------------------------------------------------------------
   // Version Requests
@@ -594,17 +624,7 @@ export default defineSchema({
         image: v.optional(v.string()),
         sourcePackageId: v.optional(v.id("servicePackages")), // NEW: Source package tracker
         projectConfigId: v.optional(v.string()), // NEW: Link to project configuration
-        subItems: v.optional(
-          v.array(
-            v.object({
-              id: v.string(),
-              description: v.string(),
-              unit: v.string(),
-              rate: v.number(),
-              quantity: v.number(),
-            }),
-          ),
-        ),
+        subItems: v.optional(v.array(quotationSubItemValidator)),
       }),
     ),
     subtotal: v.number(),
@@ -768,4 +788,55 @@ export default defineSchema({
   })
     .index("by_deliverableId", ["deliverableId"])
     .index("by_projectId", ["projectId"]),
+
+  // --------------------------------------------------------------------------
+  // Public Form Submissions (Contact, Feedback, Surveys)
+  // --------------------------------------------------------------------------
+
+  /** Contact form submissions from the public website */
+  contacts: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phoneno: v.string(),
+    service: v.string(),
+    message: v.string(),
+  }),
+
+  /** Feedback submissions from the public website */
+  feedbacks: defineTable({
+    name: v.string(),
+    email: v.string(),
+    rating: v.number(),
+    feedback: v.string(),
+  }),
+
+  /** Survey submissions from the public website */
+  surveys: defineTable({
+    // Contact details (required)
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    channelName: v.optional(v.string()),
+    instagramHandle: v.optional(v.string()),
+    bestTimeToContact: v.optional(v.string()),
+    preferredContactMethod: v.optional(v.string()),
+    mayContact: v.optional(v.string()),
+
+    // Section A: Basic Information
+    q1_role: v.optional(v.string()),
+    q1_roleOther: v.optional(v.string()),
+    q2_frequency: v.optional(v.string()),
+    q3_contentTypes: v.optional(v.array(v.string())),
+    q3_contentTypesOther: v.optional(v.string()),
+    q4_monthlyVolume: v.optional(v.string()),
+
+    // Section B: Current Workflow Pain Points
+    q5_currentEditing: v.optional(v.string()),
+    q6_frustrations: v.optional(v.any()), // Ranking object
+    q7_editingChallenges: v.optional(v.array(v.string())),
+    q7_editingChallengesOther: v.optional(v.string()),
+    q8_turnaroundTime: v.optional(v.string()),
+    q9_turnaroundSatisfaction: v.optional(v.string()),
+    q10_revisionRounds: v.optional(v.string()),
+  }),
 });

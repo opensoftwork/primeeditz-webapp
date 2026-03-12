@@ -1,8 +1,11 @@
 /**
  * DataTable Pagination
  *
- * Premium server-side pagination controls for Convex cursor-based pagination.
+ * Premium pagination controls for data tables.
  * Supports both TanStack Table client-side and server-side pagination modes.
+ *
+ * Client-side mode uses direct React state control via clientPagination prop
+ * for reliable state updates (bypassing table.setPageSize/nextPage/previousPage).
  */
 
 "use client";
@@ -19,6 +22,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+const PAGE_SIZE_OPTIONS = [5, 10, 15, 20, 25, 50];
+
 interface DataTablePaginationProps<TData> {
   table: Table<TData>;
   // Server-side pagination props (from useSimplePaginatedQuery)
@@ -31,14 +36,61 @@ interface DataTablePaginationProps<TData> {
     setPageSize?: (size: number) => void;
     pageSize?: number;
   };
+  // Client-side pagination direct state control
+  clientPagination?: {
+    pageSize: number;
+    pageIndex: number;
+    totalPages: number;
+    canPrevPage: boolean;
+    canNextPage: boolean;
+    setPageSize: (size: number) => void;
+    nextPage: () => void;
+    prevPage: () => void;
+  };
+}
+
+function PageSizeSelector({
+  currentSize,
+  onSizeChange,
+}: {
+  currentSize: number;
+  onSizeChange: (size: number) => void;
+}) {
+  return (
+    <div className="hidden md:flex items-center gap-3 pl-6">
+      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
+        Rows
+      </span>
+      <Select
+        value={String(currentSize)}
+        onValueChange={(value) => onSizeChange(Number(value))}
+      >
+        <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
+          <SelectValue placeholder={String(currentSize)} />
+        </SelectTrigger>
+        <SelectContent side="top" className="bg-zinc-950 border-white/10">
+          {PAGE_SIZE_OPTIONS.map((size) => (
+            <SelectItem
+              key={size}
+              value={String(size)}
+              className="text-xs focus:bg-white/10"
+            >
+              {size}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
 }
 
 export function DataTablePagination<TData>({
   table,
   serverPagination,
+  clientPagination,
 }: DataTablePaginationProps<TData>) {
-  const totalRows = table.getFilteredRowModel().rows.length;
   const selectedRows = table.getFilteredSelectedRowModel().rows.length;
+  const totalRows = table.getFilteredRowModel().rows.length;
 
   // Server-side pagination mode
   if (serverPagination) {
@@ -69,33 +121,10 @@ export function DataTablePagination<TData>({
 
           {/* Page Size (if setPageSize provided) */}
           {setPageSize && (
-            <div className="hidden md:flex items-center gap-3  pl-6">
-              <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                Rows
-              </span>
-              <Select
-                value={`${pageSize}`}
-                onValueChange={(value) => setPageSize(Number(value))}
-              >
-                <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent
-                  side="top"
-                  className="bg-zinc-950 border-white/10"
-                >
-                  {[5, 10, 15, 20, 25, 50].map((size) => (
-                    <SelectItem
-                      key={size}
-                      value={`${size}`}
-                      className="text-xs focus:bg-white/10"
-                    >
-                      {size}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <PageSizeSelector
+              currentSize={pageSize}
+              onSizeChange={setPageSize}
+            />
           )}
         </div>
 
@@ -126,9 +155,52 @@ export function DataTablePagination<TData>({
     );
   }
 
-  // Client-side pagination mode (TanStack Table default)
-  const currentPage = table.getState().pagination.pageIndex + 1;
-  const totalPages = table.getPageCount();
+  // Client-side pagination mode
+  // Use clientPagination (direct React state) if available,
+  // otherwise fall back to table methods
+  const currentPage = clientPagination
+    ? clientPagination.pageIndex + 1
+    : table.getState().pagination.pageIndex + 1;
+
+  const totalPages = clientPagination
+    ? clientPagination.totalPages
+    : table.getPageCount();
+
+  const currentPageSize = clientPagination
+    ? clientPagination.pageSize
+    : table.getState().pagination.pageSize;
+
+  const canPrevPage = clientPagination
+    ? clientPagination.canPrevPage
+    : table.getCanPreviousPage();
+
+  const canNextPage = clientPagination
+    ? clientPagination.canNextPage
+    : table.getCanNextPage();
+
+  const handlePageSizeChange = (size: number) => {
+    if (clientPagination) {
+      clientPagination.setPageSize(size);
+    } else {
+      table.setPageSize(size);
+    }
+  };
+
+  const handlePrevPage = () => {
+    if (clientPagination) {
+      clientPagination.prevPage();
+    } else {
+      table.previousPage();
+    }
+  };
+
+  const handleNextPage = () => {
+    if (clientPagination) {
+      clientPagination.nextPage();
+    } else {
+      table.nextPage();
+    }
+  };
 
   return (
     <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -147,30 +219,10 @@ export function DataTablePagination<TData>({
         </div>
 
         {/* Page Size */}
-        <div className="hidden md:flex items-center gap-3 pl-6">
-          <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-            Rows
-          </span>
-          <Select
-            value={`${table.getState().pagination.pageSize}`}
-            onValueChange={(value) => table.setPageSize(Number(value))}
-          >
-            <SelectTrigger className="h-10 w-[80px] bg-white/5 border-white/10 text-xs font-bold rounded-xl">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent side="top" className="bg-zinc-950 border-white/10">
-              {[5, 10, 15, 20, 25, 50].map((size) => (
-                <SelectItem
-                  key={size}
-                  value={`${size}`}
-                  className="text-xs focus:bg-white/10"
-                >
-                  {size}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+        <PageSizeSelector
+          currentSize={currentPageSize}
+          onSizeChange={handlePageSizeChange}
+        />
       </div>
 
       {/* Right: Navigation */}
@@ -178,8 +230,8 @@ export function DataTablePagination<TData>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.previousPage()}
-          disabled={!table.getCanPreviousPage()}
+          onClick={handlePrevPage}
+          disabled={!canPrevPage}
           className="h-11 px-5 rounded-xl border-white/10 text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2 hover:bg-white/5 disabled:opacity-30"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -188,8 +240,8 @@ export function DataTablePagination<TData>({
         <Button
           variant="outline"
           size="sm"
-          onClick={() => table.nextPage()}
-          disabled={!table.getCanNextPage()}
+          onClick={handleNextPage}
+          disabled={!canNextPage}
           className="h-11 px-5 rounded-xl border-white/10 text-white/40 hover:text-white font-black uppercase tracking-widest text-[9px] gap-2 hover:bg-white/5 disabled:opacity-30"
         >
           Next

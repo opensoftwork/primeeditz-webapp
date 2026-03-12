@@ -8,13 +8,13 @@ import { useEffect } from "react";
 import {
   ArrowLeft,
   Plus,
-  Clock,
-  CheckCircle,
-  Play,
   Eye,
   MessageSquare,
   ImageIcon,
   Hash,
+  Clock,
+  Play,
+  CheckCircle,
 } from "lucide-react";
 import { format } from "date-fns";
 import { Button } from "@/components/ui/button";
@@ -26,16 +26,10 @@ import { Badge } from "@/components/ui/badge";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
 import Link from "next/link";
 
-interface VersionRequestRow {
-  _id: Id<"versionRequests">;
-  versionNumber: number;
-  notes: string;
-  status: string;
-  requestedByName: string;
-  requestedByRole: string;
-  createdAt: number;
-  referenceImages?: { fileName: string }[];
-}
+import {
+  VersionRequestRow,
+  VersionStatusBadge,
+} from "@/components/shared/deliverables";
 
 interface VersionRequestsListProps {
   projectId: string;
@@ -52,6 +46,7 @@ export function VersionRequestsList({
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
   const versionRequests = useQuery(
+    // @ts-ignore
     api.functions.deliverables.queries.getDeliverableVersionRequests,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
@@ -97,30 +92,7 @@ export function VersionRequestsList({
     {
       accessorKey: "status",
       header: "Status",
-      cell: ({ row }) => {
-        const status = row.original.status;
-        return (
-          <div
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
-              status === "resolved"
-                ? "bg-emerald-500/10 border-emerald-500/20 text-emerald-400"
-                : status === "in_progress"
-                  ? "bg-blue-500/10 border-blue-500/20 text-blue-400"
-                  : "bg-amber-500/10 border-amber-500/20 text-amber-400",
-            )}
-          >
-            {status === "resolved" ? (
-              <CheckCircle className="h-3 w-3" />
-            ) : status === "in_progress" ? (
-              <Play className="h-3 w-3" />
-            ) : (
-              <Clock className="h-3 w-3" />
-            )}
-            {status.replace("_", " ")}
-          </div>
-        );
-      },
+      cell: ({ row }) => <VersionStatusBadge status={row.original.status} />,
     },
     {
       accessorKey: "requestedByName",
@@ -189,7 +161,7 @@ export function VersionRequestsList({
   // Loading
   if (versionRequests === undefined || deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="mb-12 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
             <Skeleton className="h-4 w-32 bg-white/5" />
@@ -204,7 +176,7 @@ export function VersionRequestsList({
 
   if (deliverable === null) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className="flex flex-1 w-full items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
             <ArrowLeft className="h-8 w-8 text-white/20" />
@@ -232,7 +204,7 @@ export function VersionRequestsList({
     <div
       className={cn(
         "flex flex-col animate-in fade-in slide-in-from-bottom-4 duration-700",
-        !hideHeader && "min-h-[calc(100vh-120px)] px-8 pt-10 pb-12",
+        !hideHeader && "flex-1 px-8 pt-10 pb-12",
       )}
     >
       {/* Header */}

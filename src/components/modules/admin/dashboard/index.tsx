@@ -23,6 +23,7 @@ import { PendingQuotationsSection } from "./pending-quotations-section";
 import { StatCard } from "./stat-card";
 
 export default function AdminDashboard() {
+  //@ts-ignore
   const profile = useQuery(api.profiles.getMyProfile);
   const dashboardStats = useQuery(api.admin.getAdminDashboardStats);
   const pendingProjects = useQuery(api.admin.getPendingProjects);
@@ -52,8 +53,8 @@ export default function AdminDashboard() {
           value={dashboardStats.pendingRequestsCount}
           description="Awaiting Review"
           index={0}
-          color="text-amber-400"
-          glowColor="shadow-amber-400/20"
+          color="text-white/40"
+          glowColor="shadow-white/5"
         />
         <StatCard
           icon={<FolderKanban className="h-4 w-4" />}
@@ -61,8 +62,8 @@ export default function AdminDashboard() {
           value={dashboardStats.activeProjectsCount}
           description="Total Production"
           index={1}
-          color="text-cyan-400"
-          glowColor="shadow-cyan-400/20"
+          color="text-white/40"
+          glowColor="shadow-white/5"
         />
         <StatCard
           icon={<Users className="h-4 w-4" />}
@@ -70,8 +71,8 @@ export default function AdminDashboard() {
           value={dashboardStats.totalEmployeesCount}
           description="Active Personnel"
           index={2}
-          color="text-emerald-400"
-          glowColor="shadow-emerald-400/20"
+          color="text-white/40"
+          glowColor="shadow-white/5"
         />
       </div>
 
@@ -82,7 +83,7 @@ export default function AdminDashboard() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="p-2 rounded-lg bg-cyan-400/10 border border-cyan-400/30 text-cyan-400 shadow-[0_0_15px_rgba(34,211,238,0.2)]">
+            <div className="p-2 rounded-lg bg-white/5 border border-white/10 text-white/40 shadow-none">
               <Database className="h-4 w-4" />
             </div>
             <h3 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/70 font-mono">
@@ -91,7 +92,7 @@ export default function AdminDashboard() {
           </div>
           <Button
             variant="link"
-            className="text-[9px] font-black uppercase tracking-widest text-cyan-400/60 hover:text-cyan-400 transition-colors"
+            className="text-[9px] font-black uppercase tracking-widest text-white/40 hover:text-white transition-colors"
             asChild
           >
             <Link href="/projects?actionState=awaiting_quotation">

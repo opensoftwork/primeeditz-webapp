@@ -3,6 +3,9 @@
  *
  * Reusable dropdown menu for row-level actions.
  * Premium styling with icons and keyboard shortcuts support.
+ *
+ * IMPORTANT: Uses e.stopPropagation() to prevent row click events
+ * from firing when interacting with the dropdown menu.
  */
 
 "use client";
@@ -47,6 +50,7 @@ export function DataTableRowActions<TData>({
         <Button
           variant="ghost"
           className="h-9 w-9 p-0 data-[state=open]:bg-white/10 hover:bg-white/5 rounded-xl"
+          onClick={(e) => e.stopPropagation()}
         >
           <MoreHorizontal className="h-4 w-4 text-white/40" />
           <span className="sr-only">Open menu</span>
@@ -55,6 +59,7 @@ export function DataTableRowActions<TData>({
       <DropdownMenuContent
         align="end"
         className="w-[180px] bg-zinc-950 border-white/10"
+        onClick={(e) => e.stopPropagation()}
       >
         <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-white/30">
           {label}
@@ -68,7 +73,8 @@ export function DataTableRowActions<TData>({
                 <DropdownMenuSeparator className="bg-white/5" />
               )}
               <DropdownMenuItem
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (action.onClick) action.onClick(row);
                 }}
                 asChild={!!action.href}
@@ -79,7 +85,11 @@ export function DataTableRowActions<TData>({
                 }`}
               >
                 {action.href ? (
-                  <Link href={action.href} className="flex items-center w-full">
+                  <Link
+                    href={action.href}
+                    className="flex items-center w-full"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     {Icon && <Icon className="mr-2 h-4 w-4 opacity-60" />}
                     {action.label}
                   </Link>

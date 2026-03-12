@@ -29,14 +29,6 @@ export default function EmployeeDeliverablePage({
     },
   );
 
-  useEffect(() => {
-    if (deliverable?.status === "version_requested") {
-      router.replace(
-        `/assigned-work/${projectId}/deliverables/${deliverableId}/versions`,
-      );
-    }
-  }, [deliverable?.status, projectId, deliverableId, router]);
-
   if (deliverable === undefined) {
     return (
       <div className="p-12 space-y-8 max-w-5xl mx-auto">
@@ -51,6 +43,7 @@ export default function EmployeeDeliverablePage({
       projectId={projectId}
       deliverableId={deliverableId}
       hrefPrefix={`/assigned-work/${projectId}/deliverables`}
+      role="employee"
     />
   );
 }

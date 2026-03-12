@@ -30,7 +30,7 @@ export default function EmployeeDashboard() {
               </h3>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <ActionButton
                 href="/assigned-work"
                 icon={<Briefcase className="h-4 w-4" />}
@@ -43,12 +43,12 @@ export default function EmployeeDashboard() {
                 label="My Profile"
                 sublabel="Update your public info"
               />
-              <ActionButton
+              {/* <ActionButton
                 href="/settings"
                 icon={<Settings className="h-4 w-4" />}
                 label="Preferences"
                 sublabel="Configure portal settings"
-              />
+              /> */}
             </div>
             <p className="text-[9px] font-bold text-white/20 uppercase tracking-[0.2em] italic">
               New production tools and asset management modules are in

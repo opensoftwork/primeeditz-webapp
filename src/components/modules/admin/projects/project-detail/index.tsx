@@ -23,6 +23,8 @@ import { ProjectSpecs } from "./project-specs";
 import { ProjectDetailSkeleton } from "./skeleton";
 import { StudioCard } from "./studio-card";
 import { SystemControls } from "./system-controls";
+import { StorageUpdateDrawer } from "../storage-update-drawer";
+
 import { FilePreviewOverlay } from "@/components/shared/file-preview/file-preview-overlay";
 import { AssetSlider } from "@/components/shared/asset-viewer";
 import type { VaultFile } from "@/components/shared/files-vault/types";
@@ -43,6 +45,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [isVaultOpen, setIsVaultOpen] = useState(false);
   const [isFolderSetupOpen, setIsFolderSetupOpen] = useState(false);
   const [isStatusUpdateOpen, setIsStatusUpdateOpen] = useState(false);
+  const [isStorageUpdateOpen, setIsStorageUpdateOpen] = useState(false);
+
   const [previewFile, setPreviewFile] = useState<VaultFile | null>(null);
   const [selectedAssetIndex, setSelectedAssetIndex] = useState<number | null>(
     null,
@@ -50,7 +54,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const [signedUrls, setSignedUrls] = useState<Record<string, string | null>>(
     {},
   );
-
+  //@ts-ignore
   const project = useQuery(api.admin.getAdminProject, {
     projectId: projectId as Id<"projects">,
   }) as AdminProjectDetail | null | undefined;
@@ -67,6 +71,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
   const getSignedUrlsAction = useAction(
     api.functions.storage.actions.getSignedFileUrls,
   );
+
+  // Project-level breadcrumb overrides are now centrally managed
+  // by ProjectBreadcrumbLayout to prevent duplicate overrides and flickering.
 
   useEffect(() => {
     async function fetchUrls() {
@@ -191,11 +198,9 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
       />
 
       {/* Phase Progress Bar */}
-      <div className="max-w-[1600px] mx-auto">
-        <PhaseProgress currentPhase={project.phase} />
-      </div>
+      <PhaseProgress currentPhase={project.phase} />
 
-      <div className="max-w-[1600px] mx-auto space-y-6">
+      <div className="space-y-6">
         <DeliverableStatusBanner
           projectId={projectId as Id<"projects">}
           role="admin"
@@ -206,7 +211,7 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
           onSetIsFolderSetupOpen={setIsFolderSetupOpen}
           onViewFolders={handleViewFolders}
           onOpenAssignEmployee={() =>
-            router.push(`/projects/${projectId}/assign`)
+            router.push(`/projects/${projectId}/team`)
           }
         />
         <AwaitingActorBanner project={project} />
@@ -256,9 +261,8 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
                 folderSetupReason={folderSetupStatus?.reason}
                 onSetupFolders={() => setIsFolderSetupOpen(true)}
                 onViewFolders={handleViewFolders}
-                onAssignTeam={() =>
-                  router.push(`/projects/${projectId}/assign`)
-                }
+                onViewTeam={() => router.push(`/projects/${projectId}/team`)}
+                onAddStorage={() => setIsStorageUpdateOpen(true)}
               />
             </div>
           </div>
@@ -317,6 +321,19 @@ export default function ProjectDetail({ projectId }: ProjectDetailProps) {
         currentStatus={project.actionState}
         projectCode={project.code}
         projectName={project.eventName}
+      />
+
+      <StorageUpdateDrawer
+        open={isStorageUpdateOpen}
+        onOpenChange={setIsStorageUpdateOpen}
+        projectId={projectId as Id<"projects">}
+        projectCode={project.code}
+        projectName={project.eventName}
+        currentStorageGB={
+          project.storageAllocated
+            ? project.storageAllocated / (1024 * 1024 * 1024)
+            : 0
+        }
       />
     </div>
   );

@@ -370,3 +370,150 @@ development_status:
   16-3-employee-revision-workspace: review
   16-4-revision-history-timeline: review
   16-5-studio-per-deliverable-review: review
+
+  # ============================================================================
+  # EPIC 20: Public Form Submissions
+  # ============================================================================
+  epic-20: done
+  20-1-backend-mutations-queries-http: done
+  20-2-frontend-admin-dashboard: done
+
+  # ============================================================================
+  # EPIC 21: Deliverable Code Deduplication & UI Consistency
+  # ============================================================================
+  epic-21: in-progress
+  21-1-extract-shared-types-constants: done
+  21-2-signed-url-custom-hooks: done
+  21-3-promote-version-status-badge: done
+  21-4-unify-version-requests-list: ready-for-dev
+  21-5-consolidate-version-request-dialogs: ready-for-dev
+  21-6-employee-lightbox-assetslider: ready-for-dev
+  21-7-move-image-grid-upload-shared: ready-for-dev
+  21-8-ui-consistency-pass: ready-for-dev
+
+  # ============================================================================
+  # EPIC 23: Quotation Sub-Items & Table Format
+  # ============================================================================
+  epic-23: in-progress
+  23-1-sub-item-schema-and-display: done
+  23-2-sub-item-crud-builder: done
+  23-3-sub-item-crud-editor: review
+  23-4-sub-item-detail-view: review
+  23-5-sub-item-pdf-preview: review
+  23-6-table-format-studio-detail: review
+  23-7-sub-item-crud-service-package: review
+  23-8-sub-item-flow-package-to-quotation: review
+
+  # ============================================================================
+  # EPIC 24: Quotation Status Machine & Action Consolidation
+  # ============================================================================
+  # Context: Created 2026-02-27 via Party Mode discussion
+  # Goal: Fix broken admin-initiated flow, consolidate duplicate actions
+  # Priority: P0 (CRITICAL)
+  # Key Issue: Admin sees Approve/Reject on own drafts
+  epic-24: backlog
+  # Phase A: Schema & Backend Foundation
+  24-1-add-quotation-source-field: ready-for-dev # 2 points - FOUNDATION
+  24-2-update-mutations-set-source: ready-for-dev # 3 points
+  24-3-refactor-review-actions-role-aware: ready-for-dev # 5 points - Core bug fix
+  # Phase B: UI Consolidation — Finalize Drawer
+  24-4-create-finalize-drawer: ready-for-dev # 8 points - Major UI change
+  24-5-remove-duplicate-quick-actions: ready-for-dev # 2 points
+  24-6-remove-duplicate-download: ready-for-dev # 1 point (combined with 24.5)
+  24-7-fix-builder-step3-dedup: ready-for-dev # 2 points
+  # Phase C: Status Flow Verification
+  24-8-verify-studio-accept-decline: ready-for-dev # 3 points
+  24-9-e2e-status-flow-testing: ready-for-dev # 3 points
+  epic-24-retrospective: optional
+
+  # ============================================================================
+  # EPIC 25: Quotation ID & Display Fixes
+  # ============================================================================
+  # Context: Created 2026-02-27
+  # Goal: Fix fabricated QT code (QT-81XDBF) from quotationId.slice(-6)
+  # Priority: P1
+  # Root Cause: step3/index.tsx line 135 uses Convex _id hash instead of real code
+  epic-25: backlog
+  25-1-fix-fabricated-qt-code: ready-for-dev # 2 points
+  25-2-audit-qt-code-display: ready-for-dev # 1 point
+  epic-25-retrospective: optional
+
+  # ============================================================================
+  # EPIC 26: Public Link & Grouping Consistency
+  # ============================================================================
+  # Context: Created 2026-02-27
+  # Goal: Fix flat listing on public quotation view — group by package
+  # Priority: P1
+  # Evidence: Public view shows flat list vs PDF preview shows grouped packages
+  epic-26: backlog
+  26-1-port-package-grouping-to-public-view: ready-for-dev # 5 points
+  26-2-visual-parity-verification: ready-for-dev # 2 points
+  epic-26-retrospective: optional
+
+  # ============================================================================
+  # EPIC 27: PDF Preview Polish
+  # ============================================================================
+  # Context: Created 2026-02-27
+  # Goal: Signatures, color consistency, arrow cleanup, performance
+  # Priority: P2
+  epic-27: backlog
+  27-1-add-signatures-to-pdf: ready-for-dev # 5 points
+  27-2-fix-table-color-consistency: ready-for-dev # 2 points
+  27-3-remove-sub-item-arrows-pdf: ready-for-dev # 2 points
+  27-4-pdf-performance-optimization: ready-for-dev # 5 points
+  epic-27-retrospective: optional
+
+  # ============================================================================
+  # EPIC 28: Admin Internal Project Flow
+  # ============================================================================
+  # Context: Created 2026-02-27
+  # Goal: Admin creates projects without studio/quotation, same lifecycle
+  # Priority: P2
+  # Design Decision: Internal projects follow same project lifecycle
+  epic-28: backlog
+  28-1-create-internal-project-mutation: ready-for-dev # 5 points
+  28-2-project-listing-internal-badge: ready-for-dev # 3 points
+  28-3-create-internal-project-drawer: ready-for-dev # 8 points
+  28-4-employee-assignment-during-creation: ready-for-dev # 3 points
+  28-5-internal-project-detail-adaptations: ready-for-dev # 3 points
+  28-6-employee-listing-internal-projects: ready-for-dev # 2 points
+  epic-28-retrospective: optional
+
+  # ============================================================================
+  # EPIC 29: Resumable Upload Enhancement
+  # ============================================================================
+  # Context: Created 2026-03-02 via Party Mode infrastructure discussion
+  # Goal: Auto-resume, pause/resume, retry for interrupted uploads
+  # Priority: P1 — Reliability improvement for core upload workflow
+  # Key Insight: Existing TUS infrastructure needs only client-side enhancements
+  epic-29: backlog
+  # Phase A: Core Auto-Resume (Highest Impact)
+  29-1-auto-resume-tus-uploads: ready-for-dev # 3 points - findPreviousUploads()
+  29-2-retry-failed-uploads: ready-for-dev # 2 points
+  # Phase B: Pause/Resume Controls
+  29-3-pause-resume-upload-state: ready-for-dev # 2 points
+  29-4-upload-overlay-action-buttons: ready-for-dev # 3 points
+  # Phase C: Recovery
+  29-5-upload-recovery-on-init: ready-for-dev # 3 points
+  epic-29-retrospective: optional
+
+  # ============================================================================
+  # EPIC 30: Internal Network Asset Routing
+  # ============================================================================
+  # Context: Created 2026-03-02 via Party Mode infrastructure discussion
+  # Goal: Detect LAN, serve assets via internal network for 20-100x speed
+  # Priority: P1 — Performance multiplier for core team workflows
+  # Key Insight: Unlocks bulk download, instant review, version diff
+  epic-30: backlog
+  # Phase A: Infrastructure Validation (Spike)
+  30-1-dokploy-lan-reachability-validation: ready-for-dev # 2 points - GO/NO-GO gate
+  # Phase B: Core Detection & URL Resolution
+  30-2-network-detection-utility: ready-for-dev # 3 points
+  30-3-dual-endpoint-signed-urls: ready-for-dev # 3 points
+  30-4-integrate-internal-url-resolution: ready-for-dev # 3 points
+  # Phase C: UI Enhancement
+  30-5-internal-network-indicator-badge: ready-for-dev # 1 point
+  # Phase D: Unlocked Features
+  30-6-bulk-download-folders-deliverables: ready-for-dev # 5 points
+  30-7-full-res-deliverable-preview-carousel: ready-for-dev # 3 points
+  epic-30-retrospective: optional

@@ -4,8 +4,8 @@ import { api } from "@convex/_generated/api";
 import { useConvexAuth, useQuery } from "convex/react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect } from "react";
-import { UserNav } from "@/components/modules/header/user-nav";
+import React, { useEffect, useRef, useState } from "react";
+
 import { AppSidebar } from "@/components/modules/sidebar";
 import {
   Breadcrumb,
@@ -15,6 +15,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
+import { createPortal } from "react-dom";
 import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
@@ -41,12 +42,43 @@ export default function DashboardLayout({
 
   // Skip query if not authenticated - matches reference pattern
   const userProfile = useQuery(
+    //@ts-ignore
     api.profiles.getMyProfile,
     isAuthenticated ? {} : "skip",
   );
 
   const pathname = usePathname();
   const { overrides } = useBreadcrumbStore();
+
+  // Debounce: Only treat userProfile === null as "no profile" after it stays
+  // null for a short period. This avoids premature redirect to /onboarding
+  // when the Convex auth token hasn't synced yet (getMyProfile returns null
+  // during the auth handshake, then resolves to the real profile).
+  const [profileStabilized, setProfileStabilized] = useState(false);
+  const stabilizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    if (userProfile === null && isAuthenticated && !isAuthLoading) {
+      // Start a timer — only consider "no profile" after 1.5s of null
+      stabilizeTimerRef.current = setTimeout(() => {
+        setProfileStabilized(true);
+      }, 1500);
+    } else {
+      // Profile loaded or state changed — cancel any pending timer
+      if (stabilizeTimerRef.current) {
+        clearTimeout(stabilizeTimerRef.current);
+        stabilizeTimerRef.current = null;
+      }
+      setProfileStabilized(false);
+    }
+
+    return () => {
+      if (stabilizeTimerRef.current) {
+        clearTimeout(stabilizeTimerRef.current);
+      }
+    };
+  }, [userProfile, isAuthenticated, isAuthLoading]);
+
   const isWizardPage =
     pathname?.includes("/projects/new") ||
     pathname?.includes("/quotations/new") ||
@@ -71,14 +103,21 @@ export default function DashboardLayout({
       return;
     }
 
-    if (userProfile === null && !isOnboardingPage) {
+    // Only redirect to onboarding once we're confident there's no profile
+    if (profileStabilized && !isOnboardingPage) {
       const searchParams = window.location.search;
       router.push(`/onboarding${searchParams}`);
+    }
+
+    // If user already has a profile but is on the onboarding page, redirect to dashboard
+    if (userProfile && isOnboardingPage) {
+      router.push("/dashboard");
     }
   }, [
     isAuthLoading,
     isAuthenticated,
     userProfile,
+    profileStabilized,
     isOnboardingPage,
     router,
     pathname,
@@ -116,12 +155,14 @@ export default function DashboardLayout({
     return <>{children}</>;
   }
 
-  // Redirect to onboarding if no profile exists (handled by useEffect above)
+  // No profile yet — either still waiting for auth token sync, or truly no profile
   if (!userProfile) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <div className="text-lg text-muted-foreground animate-pulse font-medium">
-          Redirecting to onboarding...
+          {profileStabilized
+            ? "Redirecting to onboarding..."
+            : "Loading your dashboard..."}
         </div>
       </div>
     );
@@ -187,15 +228,31 @@ export default function DashboardLayout({
                       .map((segment, index, array) => {
                         const isLast = index === array.length - 1;
                         const href = `/${array.slice(0, index + 1).join("/")}`;
-                        const label =
-                          overrides[segment] ||
-                          segment
-                            .split("-")
-                            .map(
-                              (word) =>
-                                word.charAt(0).toUpperCase() + word.slice(1),
-                            )
-                            .join(" ");
+
+                        // Determine label with role-aware defaults
+                        let label = overrides[segment];
+                        if (!label) {
+                          if (segment === "projects") {
+                            label =
+                              userProfile?.role === "admin"
+                                ? "All Projects"
+                                : userProfile?.role === "studio"
+                                  ? "My Projects"
+                                  : "Projects";
+                          } else if (segment === "clients") {
+                            label = "Studios";
+                          } else if (segment === "assigned-work") {
+                            label = "Assigned Work";
+                          } else {
+                            label = segment
+                              .split("-")
+                              .map(
+                                (word) =>
+                                  word.charAt(0).toUpperCase() + word.slice(1),
+                              )
+                              .join(" ");
+                          }
+                        }
 
                         return (
                           <React.Fragment key={href}>
@@ -216,23 +273,20 @@ export default function DashboardLayout({
                 )}
               </BreadcrumbList>
             </Breadcrumb>
-
-            {/* Right side - Polished user info */}
-            <div className="ml-auto flex items-center gap-3">
-              <UserNav
-                user={{
-                  name: userProfile.name,
-                  email: userProfile.email,
-                  role: userProfile.role,
-                  image: userProfile.image,
-                }}
-              />
-            </div>
           </header>
         )}
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div
+          id="layout-main-content"
+          className="flex flex-1 flex-col overflow-y-auto scrollbar-hide"
+        >
           {renderRoleContent()}
         </div>
+
+        {/* Global Footer Area - For Sticky Pagination / Portals */}
+        <div
+          id="layout-sticky-footer"
+          className="shrink-0 bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/60 empty:hidden"
+        />
       </SidebarInset>
     </SidebarProvider>
   );

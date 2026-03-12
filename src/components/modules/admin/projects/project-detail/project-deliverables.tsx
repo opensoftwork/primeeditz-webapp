@@ -104,6 +104,7 @@ export function ProjectDeliverables({
                 status={item.status}
                 createdAt={item._creationTime}
                 uploadedByName={item.uploadedByName}
+                versionFeedback={item.versionFeedback}
                 onSend={
                   item.status === "approved"
                     ? () => {

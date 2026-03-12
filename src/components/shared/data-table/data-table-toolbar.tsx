@@ -45,6 +45,7 @@ interface DataTableToolbarProps<TData> {
   }>;
   customActions?: React.ReactNode;
   isLoading?: boolean;
+  columnVisibility?: any;
 }
 
 export function DataTableToolbar<TData>({
@@ -54,6 +55,7 @@ export function DataTableToolbar<TData>({
   actions = [],
   customActions,
   isLoading,
+  columnVisibility,
 }: DataTableToolbarProps<TData>) {
   const columnFilters = table.getState().columnFilters;
   const isFiltered = columnFilters.length > 0;
@@ -130,7 +132,10 @@ export function DataTableToolbar<TData>({
       {/* Right Side: View Options & Actions */}
       <div className="flex flex-wrap items-center gap-2">
         {customActions}
-        <DataTableViewOptions table={table} />
+        <DataTableViewOptions
+          table={table}
+          columnVisibility={columnVisibility}
+        />
         {actions.map((action, index) => {
           const Icon = action.icon;
           return (

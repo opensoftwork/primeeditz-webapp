@@ -79,7 +79,12 @@ export function StudioQuotationDetail() {
     );
   }
 
-  const { quotation, sections, projects = [] } = data;
+  const {
+    quotation,
+    sections,
+    projects = [],
+    packages: rawPackages = [],
+  } = data;
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-IN", {
@@ -89,57 +94,92 @@ export function StudioQuotationDetail() {
     }).format(amount);
   };
 
-  // Group line items by project, then by section (new project-based grouping)
-  const groupedByProject = projects
+  // Helper: group items into section groups
+  const buildSectionGroups = (items: any[]) => {
+    const sectionGroups = sections
+      .map((section: { _id: string; name: string; color?: string }) => ({
+        section,
+        items: items.filter(
+          (item: { sectionId?: string }) => item.sectionId === section._id,
+        ),
+      }))
+      .filter((g: any) => g.items.length > 0);
+
+    const unsectionedItems = items.filter(
+      (item: { sectionId?: string }) =>
+        !item.sectionId || !sections.some((s: any) => s._id === item.sectionId),
+    );
+
+    if (unsectionedItems.length > 0) {
+      sectionGroups.push({
+        section: {
+          _id: "unsectioned",
+          name: "Standard Services",
+          color: "zinc",
+        } as any,
+        items: unsectionedItems,
+      });
+    }
+
+    return sectionGroups;
+  };
+
+  // 1. Group line items by project (when projects exist)
+  const groupedByProjectDirect = projects
     .map(
       (project: {
         _id: string;
         code: string;
-        eventName?: string;
+        endClientName?: string;
         projectTypeName?: string;
       }) => {
         const projectItems = quotation.lineItems.filter(
           (item: { projectId?: string }) => item.projectId === project._id,
         );
-
-        // 1. Group by existing sections
-        const sectionGroups = sections
-          .map((section: { _id: string; name: string; color?: string }) => ({
-            section,
-            items: projectItems.filter(
-              (item: { sectionId?: string }) => item.sectionId === section._id,
-            ),
-          }))
-          .filter((g) => g.items.length > 0);
-
-        // 2. Catch items without sections (or with invalid sections)
-        const unsectionedItems = projectItems.filter(
-          (item: { sectionId?: string }) =>
-            !item.sectionId || !sections.some((s) => s._id === item.sectionId),
-        );
-
-        if (unsectionedItems.length > 0) {
-          sectionGroups.push({
-            section: {
-              _id: "unsectioned",
-              name: "Standard Services",
-              color: "zinc",
-            } as any,
-            items: unsectionedItems,
-          });
-        }
-
         return {
-          project,
-          sectionGroups,
-          eventName: project.eventName,
-          projectCode: project.code,
+          project: {
+            ...project,
+            eventName: project.endClientName || project.code,
+          },
+          sectionGroups: buildSectionGroups(projectItems),
         };
       },
     )
-    .filter((pg) => pg.sectionGroups.length > 0);
+    .filter((pg: any) => pg.sectionGroups.length > 0);
 
-  // Fallback: group by section only (for backward compatibility)
+  // 2. Group by package (fallback when projects aren't spawned yet)
+  const groupedByPackage = rawPackages
+    .map((pkg: any) => {
+      const packageItems = quotation.lineItems.filter(
+        (item: { sourcePackageId?: string }) =>
+          item.sourcePackageId === pkg._id,
+      );
+      return {
+        project: {
+          _id: pkg._id,
+          eventName: pkg.name,
+          code: "PACKAGE",
+          projectTypeName: pkg.projectTypeName,
+        } as any,
+        sectionGroups: buildSectionGroups(packageItems),
+      };
+    })
+    .filter((pg: any) => pg.sectionGroups.length > 0);
+
+  // Use project-based grouping first, fall back to package-based
+  const groupedByProject =
+    groupedByProjectDirect.length > 0
+      ? groupedByProjectDirect
+      : groupedByPackage;
+
+  // Track which items are already grouped
+  const groupedItemIds = new Set(
+    groupedByProject.flatMap((pg: any) =>
+      pg.sectionGroups.flatMap((sg: any) => sg.items.map((i: any) => i.id)),
+    ),
+  );
+
+  // Fallback: group by section only (for items not in any project/package group)
   const groupedBySection = sections
     .map((section: { _id: string; name: string; color?: string }) => ({
       section,
@@ -147,12 +187,11 @@ export function StudioQuotationDetail() {
         (item: { sectionId?: string }) => item.sectionId === section._id,
       ),
     }))
-    .filter((g) => g.items.length > 0);
+    .filter((g: any) => g.items.length > 0);
 
-  // Add unsectioned items to global fallback if not empty
+  // Add remaining ungrouped items
   const globalUnsectioned = quotation.lineItems.filter(
-    (item: { sectionId?: string }) =>
-      !item.sectionId || !sections.some((s) => s._id === item.sectionId),
+    (item: { id: string }) => !groupedItemIds.has(item.id),
   );
 
   if (globalUnsectioned.length > 0) {

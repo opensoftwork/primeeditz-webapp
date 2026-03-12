@@ -19,13 +19,26 @@ import {
   Maximize2,
   Play,
   Hash,
+  Send,
 } from "lucide-react";
 import { format } from "date-fns";
+import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { DeliverablePreview } from "./deliverable-preview";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import {
+  useSignedUrl,
+  useSignedUrls,
+  VersionStatusBadge,
+} from "@/components/shared/deliverables";
+import {
+  AssetSlider,
+  type ViewerAsset,
+} from "@/components/shared/asset-viewer";
+import { ResolveVersionDrawer } from "./resolve-version-drawer";
 
 interface VersionRequestDetailProps {
   projectId: string;
@@ -40,12 +53,10 @@ export function VersionRequestDetailView({
 }: VersionRequestDetailProps) {
   const router = useRouter();
   const { setOverride, removeOverride } = useBreadcrumbStore();
-  const [deliverableFileUrl, setDeliverableFileUrl] = useState<string | null>(
-    null,
-  );
-  const [imageUrls, setImageUrls] = useState<Record<string, string>>({});
   const [isUpdating, setIsUpdating] = useState(false);
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isSliderOpen, setIsSliderOpen] = useState(false);
+  const [isResolveOpen, setIsResolveOpen] = useState(false);
+  const [currentAssetIndex, setCurrentAssetIndex] = useState(0);
 
   // Queries
   const versionRequest = useQuery(
@@ -55,6 +66,7 @@ export function VersionRequestDetailView({
   );
 
   const deliverable = useQuery(
+    //@ts-ignore
     api.functions.deliverables.queries.getDeliverable,
     { deliverableId: deliverableId as Id<"deliverables"> },
   );
@@ -64,60 +76,83 @@ export function VersionRequestDetailView({
     api.functions.deliverables.mutations.updateVersionRequestStatus,
   );
 
-  // Actions
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
   // Breadcrumb
   useEffect(() => {
     if (versionRequest) {
       setOverride(versionId, `Request #${versionRequest.versionNumber}`);
     }
-    return () => removeOverride(versionId);
-  }, [versionId, versionRequest, setOverride, removeOverride]);
+    if (deliverable) {
+      setOverride(deliverableId, deliverable.name);
+    }
+    return () => {
+      removeOverride(versionId);
+      removeOverride(deliverableId);
+    };
+  }, [
+    versionId,
+    versionRequest,
+    deliverableId,
+    deliverable,
+    setOverride,
+    removeOverride,
+  ]);
 
-  // Fetch deliverable file URL
-  useEffect(() => {
-    async function fetchUrl() {
-      if (deliverable?.minioKey) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: deliverable.minioKey,
+  // Fetch deliverable file URL using custom hook
+  const { url: deliverableFileUrl } = useSignedUrl(deliverable?.minioKey);
+
+  // Fetch reference image URLs using custom hook
+  const imageKeys = useMemo(
+    () => versionRequest?.referenceImages?.map((img) => img.minioKey) ?? [],
+    [versionRequest?.referenceImages],
+  );
+  const { urls: imageUrls } = useSignedUrls(imageKeys);
+
+  // Prepare assets for the viewer
+  const viewerAssets: ViewerAsset[] = useMemo(() => {
+    const assets: ViewerAsset[] = [];
+
+    // Add main deliverable first if it exists
+    if (deliverable && deliverableFileUrl) {
+      const mimeType = deliverable.mimeType || "application/octet-stream";
+      let type: "image" | "pdf" | "video" | "audio" | "other" = "other";
+
+      if (mimeType.startsWith("image/")) type = "image";
+      else if (mimeType === "application/pdf") type = "pdf";
+      else if (mimeType.startsWith("video/")) type = "video";
+      else if (mimeType.startsWith("audio/")) type = "audio";
+
+      assets.push({
+        url: deliverableFileUrl,
+        fileName: deliverable.name,
+        fileId: deliverable._id,
+        type,
+      });
+    }
+
+    // Add reference images
+    if (versionRequest?.referenceImages) {
+      versionRequest.referenceImages.forEach((img) => {
+        if (imageUrls[img.minioKey]) {
+          assets.push({
+            url: imageUrls[img.minioKey],
+            fileName: img.fileName,
+            fileId: img.minioKey,
+            type: "image",
           });
-          setDeliverableFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching deliverable URL:", error);
         }
-      }
+      });
     }
-    fetchUrl();
-  }, [deliverable, getSignedUrlAction]);
 
-  // Fetch reference image URLs
-  useEffect(() => {
-    async function fetchImageUrls() {
-      if (versionRequest?.referenceImages?.length) {
-        const urls: Record<string, string> = {};
-        for (const img of versionRequest.referenceImages) {
-          try {
-            const url = await getSignedUrlAction({
-              storageKey: img.minioKey,
-            });
-            if (url) {
-              urls[img.minioKey] = url;
-            }
-          } catch (error) {
-            console.error("Error fetching image URL:", error);
-          }
-        }
-        setImageUrls(urls);
-      }
-    }
-    fetchImageUrls();
-  }, [versionRequest, getSignedUrlAction]);
+    return assets;
+  }, [deliverable, deliverableFileUrl, versionRequest, imageUrls]);
 
   // Handlers
+  const handleOpenAsset = (index: number, isReferenceImage = false) => {
+    const offset =
+      isReferenceImage && deliverable && deliverableFileUrl ? 1 : 0;
+    setCurrentAssetIndex(index + offset);
+    setIsSliderOpen(true);
+  };
   const handleUpdateStatus = async (status: "in_progress" | "resolved") => {
     setIsUpdating(true);
     try {
@@ -140,7 +175,7 @@ export function VersionRequestDetailView({
   // Loading
   if (versionRequest === undefined || deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="flex items-center gap-4 mb-10">
           <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
           <div className="space-y-2">
@@ -162,7 +197,7 @@ export function VersionRequestDetailView({
   // Not found
   if (versionRequest === null) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className="flex flex-1 w-full items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
             <MessageSquare className="h-8 w-8 text-white/20" />
@@ -186,40 +221,8 @@ export function VersionRequestDetailView({
     );
   }
 
-  const statusConfig = {
-    pending: {
-      label: "Pending",
-      icon: Clock,
-      bg: "bg-amber-500/10",
-      border: "border-amber-500/20",
-      text: "text-amber-400",
-      dotColor: "bg-amber-400",
-    },
-    in_progress: {
-      label: "In Progress",
-      icon: Play,
-      bg: "bg-blue-500/10",
-      border: "border-blue-500/20",
-      text: "text-blue-400",
-      dotColor: "bg-blue-400",
-    },
-    resolved: {
-      label: "Resolved",
-      icon: CheckCircle,
-      bg: "bg-emerald-500/10",
-      border: "border-emerald-500/20",
-      text: "text-emerald-400",
-      dotColor: "bg-emerald-400",
-    },
-  } as const;
-
-  const currentStatus =
-    statusConfig[versionRequest.status as keyof typeof statusConfig] ||
-    statusConfig.pending;
-  const StatusIcon = currentStatus.icon;
-
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div className="flex items-center gap-5">
@@ -237,19 +240,9 @@ export function VersionRequestDetailView({
               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/60">
                 VERSION REQUEST
               </span>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider border",
-                  currentStatus.bg,
-                  currentStatus.border,
-                  currentStatus.text,
-                )}
-              >
-                <StatusIcon className="h-3 w-3" />
-                {currentStatus.label}
-              </span>
+              <VersionStatusBadge status={versionRequest.status} />
             </div>
-            <h1 className="text-3xl xl:text-4xl font-black uppercase tracking-tighter text-white">
+            <h1 className="text-4xl xl:text-5xl font-black uppercase tracking-tighter text-white">
               Request #{versionRequest.versionNumber}
             </h1>
             <p className="text-xs text-white/30 mt-1 uppercase tracking-widest font-bold">
@@ -265,19 +258,28 @@ export function VersionRequestDetailView({
             <Button
               onClick={() => handleUpdateStatus("in_progress")}
               disabled={isUpdating}
-              className="bg-blue-500 hover:bg-blue-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(59,130,246,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest"
+              className={cn(
+                "text-white font-black px-6 py-5 rounded-2xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest",
+                versionRequest.requestedByRole === "studio"
+                  ? "bg-indigo-500 hover:bg-indigo-600 shadow-[0_0_30px_rgba(99,102,241,0.2)]"
+                  : "bg-blue-500 hover:bg-blue-600 shadow-[0_0_30px_rgba(59,130,246,0.2)]",
+              )}
             >
               {isUpdating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
+              ) : versionRequest.requestedByRole === "studio" ? (
+                <Send className="h-4 w-4" />
               ) : (
                 <Play className="h-4 w-4" />
               )}
-              Mark In Progress
+              {versionRequest.requestedByRole === "studio"
+                ? "Forward to Employee"
+                : "Mark In Progress"}
             </Button>
           )}
           {versionRequest.status === "in_progress" && (
             <Button
-              onClick={() => handleUpdateStatus("resolved")}
+              onClick={() => setIsResolveOpen(true)}
               disabled={isUpdating}
               className="bg-emerald-500 hover:bg-emerald-600 text-white font-black px-6 py-5 rounded-2xl shadow-[0_0_30px_rgba(16,185,129,0.2)] transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 gap-2 text-xs uppercase tracking-widest"
             >
@@ -309,11 +311,19 @@ export function VersionRequestDetailView({
               Original Deliverable
             </h2>
           </div>
-          <DeliverablePreview
-            url={deliverableFileUrl}
-            fileName={deliverable?.name || "Unknown"}
-            mimeType={deliverable?.mimeType}
-          />
+          <div
+            className="cursor-pointer group relative"
+            onClick={() => handleOpenAsset(0)}
+          >
+            <DeliverablePreview
+              url={deliverableFileUrl}
+              fileName={deliverable?.name || "Unknown"}
+              mimeType={deliverable?.mimeType}
+            />
+            <div className="absolute top-4 right-4 h-10 w-10 rounded-xl bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all shadow-2xl">
+              <Maximize2 className="h-5 w-5" />
+            </div>
+          </div>
         </div>
 
         {/* Right: Version Request Details */}
@@ -383,7 +393,14 @@ export function VersionRequestDetailView({
           </div>
 
           {/* Notes / Feedback */}
-          <div className="p-6 rounded-3xl bg-white/5 border border-white/5 space-y-4">
+          <div
+            className={cn(
+              "p-6 rounded-3xl space-y-4 transition-all",
+              versionRequest.status === "pending"
+                ? "bg-red-500/5 border-2 border-red-500/40 shadow-[0_0_20px_rgba(239,68,68,0.1)]"
+                : "bg-white/5 border border-white/5",
+            )}
+          >
             <h3 className="text-xs font-black uppercase tracking-widest text-white/50 flex items-center gap-2">
               <MessageSquare className="h-3.5 w-3.5 text-indigo-400" />
               General Feedback
@@ -410,7 +427,13 @@ export function VersionRequestDetailView({
                   </span>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5 }}
+                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                >
                   {versionRequest.referenceImages.map((img, index) => {
                     const url = imageUrls[img.minioKey];
                     return (
@@ -436,14 +459,17 @@ export function VersionRequestDetailView({
                           {/* Expand */}
                           {url && (
                             <button
-                              onClick={() => setSelectedImage(url)}
+                              onClick={() => handleOpenAsset(index, true)}
                               className="absolute top-2 right-2 h-7 w-7 rounded-lg bg-white/20 backdrop-blur-md border border-white/20 flex items-center justify-center text-white opacity-0 group-hover:opacity-100 transition-all hover:bg-white/30"
                             >
                               <Maximize2 className="h-3.5 w-3.5" />
                             </button>
                           )}
 
-                          <div className="absolute bottom-2 left-2 truncate max-w-[80%]">
+                          <div
+                            className="absolute bottom-2 left-2 truncate max-w-[80%] cursor-pointer"
+                            onClick={() => handleOpenAsset(index, true)}
+                          >
                             <p className="text-[10px] font-medium text-white/60 truncate drop-shadow-md">
                               {img.fileName}
                             </p>
@@ -467,32 +493,28 @@ export function VersionRequestDetailView({
                       </div>
                     );
                   })}
-                </div>
+                </motion.div>
               </div>
             )}
         </div>
       </div>
 
-      {/* Full Image Lightbox */}
-      {selectedImage && (
-        <div
-          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-8 animate-in fade-in duration-200"
-          onClick={() => setSelectedImage(null)}
-        >
-          <button
-            onClick={() => setSelectedImage(null)}
-            className="absolute top-6 right-6 text-white/60 hover:text-white transition-colors text-sm font-black uppercase tracking-widest"
-          >
-            Close ✕
-          </button>
-          <img
-            src={selectedImage}
-            alt="Full size preview"
-            className="max-w-full max-h-full object-contain rounded-2xl shadow-2xl animate-in zoom-in-95 duration-300"
-            onClick={(e) => e.stopPropagation()}
-          />
-        </div>
-      )}
+      {/* Full Asset Viewer */}
+      <AssetSlider
+        assets={viewerAssets}
+        initialIndex={currentAssetIndex}
+        open={isSliderOpen}
+        onOpenChange={setIsSliderOpen}
+      />
+
+      <ResolveVersionDrawer
+        open={isResolveOpen}
+        onOpenChange={setIsResolveOpen}
+        projectId={projectId}
+        deliverableId={deliverableId}
+        deliverableName={deliverable?.name || "Deliverable"}
+        versionNumber={versionRequest.versionNumber}
+      />
     </div>
   );
 }

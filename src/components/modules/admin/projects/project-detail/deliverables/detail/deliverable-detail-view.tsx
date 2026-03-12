@@ -33,17 +33,20 @@ import { DeliverableActions } from "./deliverable-actions";
 import { VersionHistory } from "./version-history";
 import { VersionDialog } from "./versions-dialog";
 import { useBreadcrumbStore } from "@/store/breadcrumb-store";
+import { useSignedUrl } from "@/components/shared/deliverables";
 
 interface DeliverableDetailViewProps {
   projectId?: string;
   deliverableId?: string;
   hrefPrefix?: string;
+  role?: "admin" | "employee";
 }
 
 export function DeliverableDetailView({
   projectId: propProjectId,
   deliverableId: propDeliverableId,
   hrefPrefix = "/projects/[projectId]/deliverables", // Default prefix
+  role = "admin",
 }: DeliverableDetailViewProps) {
   const params = useParams();
   const router = useRouter();
@@ -58,7 +61,6 @@ export function DeliverableDetailView({
 
   const { setOverride, removeOverride } = useBreadcrumbStore();
 
-  const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [viewedVersion, setViewedVersion] = useState<{
     version: number;
     minioKey: string;
@@ -103,17 +105,14 @@ export function DeliverableDetailView({
     api.functions.deliverables.mutations.sendToStudio,
   );
 
-  // Actions
-  const getSignedUrlAction = useAction(
-    api.functions.storage.actions.getSignedFileUrl,
-  );
-
   // Breadcrumb override
   useEffect(() => {
     if (deliverable) {
       setOverride(deliverableId, deliverable.name);
     }
-    return () => removeOverride(deliverableId);
+    return () => {
+      removeOverride(deliverableId);
+    };
   }, [deliverableId, deliverable, setOverride, removeOverride]);
 
   // Sync viewed version with latest deliverable when loaded
@@ -128,29 +127,13 @@ export function DeliverableDetailView({
     }
   }, [deliverable, viewedVersion]);
 
-  // Fetch signed URL for the VIEWED version
-  useEffect(() => {
-    async function fetchUrl() {
-      if (viewedVersion?.minioKey) {
-        try {
-          const url = await getSignedUrlAction({
-            storageKey: viewedVersion.minioKey,
-          });
-          setFileUrl(url);
-        } catch (error) {
-          console.error("Error fetching signed URL:", error);
-        }
-      }
-    }
-    fetchUrl();
-  }, [viewedVersion?.minioKey, getSignedUrlAction]);
+  // Fetch signed URL for the VIEWED version using custom hook
+  const { url: fileUrl } = useSignedUrl(viewedVersion?.minioKey);
 
   // Computed permissions
   const canApprove =
     deliverable?.status === "pending_qc" ||
-    deliverable?.status === "version_needed" ||
-    deliverable?.status === "version_requested" ||
-    deliverable?.status === "revision_requested";
+    deliverable?.status === "version_needed";
   const canRequestVersion =
     deliverable?.status === "pending_qc" || deliverable?.status === "approved";
   const canSendToStudio =
@@ -206,7 +189,7 @@ export function DeliverableDetailView({
   // Loading state
   if (deliverable === undefined) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12">
+      <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12">
         <div className="flex items-center gap-4 mb-10">
           <Skeleton className="h-11 w-11 rounded-xl bg-white/5" />
           <div className="space-y-2">
@@ -231,7 +214,7 @@ export function DeliverableDetailView({
   // Not found
   if (deliverable === null) {
     return (
-      <div className="flex min-h-[calc(100vh-120px)] w-full items-center justify-center">
+      <div className="flex flex-1 w-full items-center justify-center">
         <div className="text-center space-y-4">
           <div className="h-16 w-16 rounded-2xl bg-white/5 flex items-center justify-center mx-auto border border-white/10">
             <FileIcon className="h-8 w-8 text-white/20" />
@@ -304,7 +287,7 @@ export function DeliverableDetailView({
   const StatusIcon = currentStatus.icon;
 
   return (
-    <div className="flex min-h-[calc(100vh-120px)] w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+    <div className="flex flex-1 w-full flex-col px-8 pt-10 pb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
         <div className="flex items-center gap-5">
@@ -433,64 +416,74 @@ export function DeliverableDetailView({
                 Version Requests
               </h3>
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
-                {versionRequests.map((req) => (
-                  <button
-                    key={req._id}
-                    onClick={() =>
-                      router.push(
-                        `${basePath}/${deliverableId}/versions/${req._id}`,
-                      )
-                    }
-                    className="w-full text-left p-3 rounded-2xl bg-white/3 border border-white/5 hover:border-indigo-500/30 transition-all group"
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
-                        #{req.versionNumber}
-                      </span>
-                      <span
-                        className={cn(
-                          "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border",
-                          req.status === "resolved"
-                            ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
-                            : req.status === "in_progress"
-                              ? "text-blue-400 border-blue-500/20 bg-blue-500/10"
-                              : "text-amber-400 border-amber-500/20 bg-amber-500/10",
-                        )}
-                      >
-                        {req.status.replace("_", " ")}
-                      </span>
-                    </div>
-                    <p className="text-xs text-white/60 line-clamp-2 mb-1.5">
-                      {req.notes}
-                    </p>
-                    <div className="flex items-center justify-between">
-                      <span className="text-[10px] text-white/30 font-bold">
-                        by {req.requestedByName}
-                      </span>
-                      <span className="text-[10px] text-white/30 font-bold">
-                        {format(req.createdAt, "MMM dd")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-1 mt-2 text-[10px] text-indigo-400/60 font-bold group-hover:text-indigo-400 transition-colors">
-                      <Eye className="h-3 w-3" />
-                      View Details
-                    </div>
-                  </button>
-                ))}
+                {[...versionRequests]
+                  .sort((a, b) => b.versionNumber - a.versionNumber)
+                  .map((req) => (
+                    <button
+                      key={req._id}
+                      onClick={() =>
+                        router.push(
+                          `${basePath}/${deliverableId}/versions/${req._id}`,
+                        )
+                      }
+                      className={cn(
+                        "w-full text-left p-3 rounded-2xl transition-all group",
+                        req.status === "pending"
+                          ? "bg-red-500/5 border-2 border-red-500/40 shadow-[0_0_15px_rgba(239,68,68,0.1)] hover:border-red-500/60"
+                          : "bg-white/3 border border-white/5 hover:border-indigo-500/30",
+                      )}
+                    >
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-white/30">
+                          #{req.versionNumber}
+                        </span>
+                        <span
+                          className={cn(
+                            "px-2 py-0.5 rounded-md text-[9px] font-black uppercase tracking-widest border",
+                            req.status === "resolved"
+                              ? "text-emerald-400 border-emerald-500/20 bg-emerald-500/10"
+                              : req.status === "in_progress"
+                                ? "text-blue-400 border-blue-500/20 bg-blue-500/10"
+                                : "text-red-400 border-red-500/20 bg-red-500/10",
+                          )}
+                        >
+                          {req.status.replace("_", " ")}
+                        </span>
+                      </div>
+                      <p className="text-xs text-white/60 line-clamp-2 mb-1.5">
+                        {req.notes}
+                      </p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[10px] text-white/30 font-bold">
+                          by {req.requestedByName}
+                        </span>
+                        <span className="text-[10px] text-white/30 font-bold">
+                          {format(req.createdAt, "MMM dd")}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 mt-2 text-[10px] text-indigo-400/60 font-bold group-hover:text-indigo-400 transition-colors">
+                        <Eye className="h-3 w-3" />
+                        View Details
+                      </div>
+                    </button>
+                  ))}
               </div>
             </div>
           )}
 
-          {/* Actions */}
-          <DeliverableActions
-            canApprove={canApprove}
-            canRequestVersion={canRequestVersion}
-            canSendToStudio={canSendToStudio}
-            isSubmitting={isSubmitting}
-            onApprove={handleApprove}
-            onRequestVersion={handleRequestVersion}
-            onSendToStudio={handleSendToStudio}
-          />
+          {/* Actions — hidden for employees (read-only view) */}
+          {role === "admin" && (
+            <DeliverableActions
+              canApprove={canApprove}
+              canRequestVersion={canRequestVersion}
+              canSendToStudio={canSendToStudio}
+              isSubmitting={isSubmitting}
+              status={deliverable.status}
+              onApprove={handleApprove}
+              onRequestVersion={handleRequestVersion}
+              onSendToStudio={handleSendToStudio}
+            />
+          )}
         </div>
       </div>
     </div>

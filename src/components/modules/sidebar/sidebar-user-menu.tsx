@@ -2,8 +2,9 @@
 
 import { ChevronUp, LogOut, Settings, User2 } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAction } from "convex/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,21 +18,62 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { authClient } from "@/lib/auth-client";
+import { api } from "@convex/_generated/api";
 
 interface SidebarUserMenuProps {
   userName: string;
   userRole: string;
+  userImage?: string | null;
   isLoading?: boolean;
 }
 
 export function SidebarUserMenu({
   userName,
   userRole,
+  userImage,
   isLoading = false,
 }: SidebarUserMenuProps) {
   const [isSignOutLoading, setIsSignOutLoading] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  const getSignedUrl = useAction(
+    //@ts-ignore
+    api.functions.storage.actions.getSignedFileUrl,
+  );
+
+  // Resolve storage key to a signed URL
+  useEffect(() => {
+    const fetchUrl = async () => {
+      if (
+        userImage &&
+        (userImage.startsWith("profiles/") || userImage.includes("/"))
+      ) {
+        try {
+          const url = await getSignedUrl({ storageKey: userImage });
+          setAvatarUrl(url);
+        } catch (error) {
+          console.error("Failed to fetch sidebar avatar URL:", error);
+          setAvatarUrl(null);
+        }
+      } else if (userImage) {
+        // Direct URL (e.g. from auth provider)
+        setAvatarUrl(userImage);
+      } else {
+        setAvatarUrl(null);
+      }
+    };
+    fetchUrl();
+  }, [userImage, getSignedUrl]);
+
+  const initials = userName
+    ?.split(" ")
+    .map((n: string) => n[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
 
   const handleSignOut = async () => {
     setIsSignOutLoading(true);
@@ -77,9 +119,18 @@ export function SidebarUserMenu({
                   </>
                 ) : (
                   <>
-                    <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-linear-to-br from-white/10 to-transparent text-foreground/80 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] ring-1 ring-white/10 shrink-0 group-data-[collapsible=icon]:size-10 transition-transform duration-500 group-hover/user-btn:scale-110">
-                      <User2 className="size-5 group-data-[collapsible=icon]:size-5" />
-                    </div>
+                    <Avatar className="size-10 rounded-full shrink-0 group-data-[collapsible=icon]:size-10 ring-1 ring-white/10 shadow-[inset_0_0_10px_rgba(255,255,255,0.05)] transition-transform duration-500 group-hover/user-btn:scale-110">
+                      {avatarUrl ? (
+                        <AvatarImage
+                          src={avatarUrl}
+                          alt={userName}
+                          className="object-cover"
+                        />
+                      ) : null}
+                      <AvatarFallback className="bg-linear-to-br from-white/10 to-transparent text-foreground/80 text-sm font-bold rounded-full">
+                        {initials || <User2 className="size-5" />}
+                      </AvatarFallback>
+                    </Avatar>
                     <div className="grid flex-1 text-left leading-tight ml-3 group-data-[collapsible=icon]:hidden">
                       <span className="truncate text-[15px] font-bold tracking-tight">
                         {userName}
