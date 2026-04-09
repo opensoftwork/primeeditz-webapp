@@ -1,4 +1,4 @@
-import { httpAction } from "../../_generated/server";
+ import { httpAction } from "../../_generated/server";
 import { api } from "../../_generated/api";
 
 export const corsHeaders = {
