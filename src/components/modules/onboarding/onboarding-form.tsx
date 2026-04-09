@@ -53,7 +53,6 @@ export default function OnboardingForm() {
 
   const createProfile = useMutation(api.profiles.createProfile);
   const claimProfile = useMutation(api.profiles.claimDraftProfile);
-  const isFirstUser = useQuery(api.profiles.isFirstUser);
   const myProfile = useQuery(api.profiles.getMyProfile);
 
   const profileId = searchParams.get("profileId");
@@ -130,7 +129,7 @@ export default function OnboardingForm() {
   });
 
   // Show loading state while checking profile
-  if (myProfile === undefined || isFirstUser === undefined) {
+  if (myProfile === undefined) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-zinc-950">
         <div className="flex flex-col items-center gap-4">
@@ -224,197 +223,6 @@ export default function OnboardingForm() {
               only take a moment...
             </p>
           </div>
-        </motion.div>
-      </div>
-    );
-  }
-
-  // ==========================================================================
-  // FIRST USER (ADMIN) - Premium Setup Experience
-  // ==========================================================================
-  if (willBeAdmin) {
-    return (
-      <div className="min-h-screen w-full flex items-center justify-center p-4 bg-zinc-950 relative overflow-hidden">
-        {/* Background Effects */}
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,var(--tw-gradient-stops))] from-primary/10 via-transparent to-transparent" />
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-[128px]" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-amber-500/5 rounded-full blur-[128px]" />
-
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="relative z-10 w-full max-w-lg"
-        >
-          {/* Admin Badge */}
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 0.2 }}
-            className="flex justify-center mb-8"
-          >
-            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-linear-to-r from-amber-500/10 to-primary/10 border border-amber-500/20">
-              <Crown className="w-4 h-4 text-amber-400" />
-              <span className="text-xs font-black uppercase tracking-widest text-amber-400">
-                Admin Setup
-              </span>
-            </div>
-          </motion.div>
-
-          {/* Main Card */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="p-10 rounded-[2.5rem] border border-white/5 bg-white/2 backdrop-blur-3xl space-y-8"
-          >
-            {/* Header */}
-            <div className="text-center space-y-4">
-              <div className="relative mx-auto w-20 h-20">
-                <div className="absolute inset-0 bg-primary/20 blur-2xl rounded-full animate-pulse" />
-                <div className="relative flex items-center justify-center w-20 h-20 rounded-2xl bg-linear-to-br from-primary/20 to-amber-500/10 border border-primary/20">
-                  <Shield className="w-10 h-10 text-primary" />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <h1 className="text-3xl font-black text-white uppercase tracking-tight">
-                  Welcome to PrimeEditz
-                </h1>
-                <p className="text-white/40 text-sm font-medium max-w-sm mx-auto">
-                  You're setting up the studio! As the first user, you'll have
-                  full admin access.
-                </p>
-              </div>
-            </div>
-
-            {/* Form */}
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                form.handleSubmit();
-              }}
-              className="space-y-6"
-            >
-              <FieldGroup>
-                <form.Field
-                  name="name"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="text-xs font-black uppercase tracking-widest text-white/40"
-                      >
-                        Your Name *
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        placeholder="Enter your full name"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className="h-14 bg-white/5 border-white/5 rounded-2xl px-5 text-white font-medium placeholder:text-white/20 focus:border-primary/30 focus:bg-white/[0.07] transition-all"
-                        disabled={isLoading}
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                />
-
-                <form.Field
-                  name="phone"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="text-xs font-black uppercase tracking-widest text-white/40"
-                      >
-                        Phone Number
-                      </FieldLabel>
-                      <PhoneInput
-                        id={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(value) => field.handleChange(value)}
-                        placeholder="98765 43210"
-                        disabled={isLoading}
-                        className="w-full"
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                />
-
-                <form.Field
-                  name="company"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="text-xs font-black uppercase tracking-widest text-white/40"
-                      >
-                        Studio / Company Name
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        placeholder="Prime Editz Studio"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          field.handleChange(e.target.value)
-                        }
-                        className="h-14 bg-white/5 border-white/5 rounded-2xl px-5 text-white font-medium placeholder:text-white/20 focus:border-primary/30 focus:bg-white/[0.07] transition-all"
-                        disabled={isLoading}
-                      />
-                      <FieldError errors={field.state.meta.errors} />
-                    </Field>
-                  )}
-                />
-              </FieldGroup>
-
-              <Button
-                type="submit"
-                className="w-full h-14 bg-linear-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-black uppercase tracking-widest text-sm rounded-2xl shadow-xl shadow-primary/25 hover:shadow-2xl hover:shadow-primary/30 transition-all"
-                disabled={isLoading}
-              >
-                {isLoading ? (
-                  <>
-                    <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                    Setting up studio...
-                  </>
-                ) : (
-                  <>
-                    Initialize Studio
-                    <ArrowRight className="ml-2 h-5 w-5" />
-                  </>
-                )}
-              </Button>
-            </form>
-
-            {/* Features Preview */}
-            <div className="pt-6 border-t border-white/5">
-              <p className="text-[10px] font-black uppercase tracking-widest text-white/20 mb-4">
-                What you'll unlock
-              </p>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  "Manage Clients",
-                  "Create Quotations",
-                  "Track Projects",
-                  "Assign Team Members",
-                ].map((feature, i) => (
-                  <div
-                    key={i}
-                    className="flex items-center gap-2 text-white/40 text-xs font-medium"
-                  >
-                    <CheckCircle2 className="w-3.5 h-3.5 text-primary/60" />
-                    <span>{feature}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </motion.div>
         </motion.div>
       </div>
     );

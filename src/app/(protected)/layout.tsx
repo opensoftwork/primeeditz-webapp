@@ -48,23 +48,34 @@ export default function DashboardLayout({
   );
 
   const pathname = usePathname();
+  const isFirstUser = useQuery(api.profiles.isFirstUser);
+
   const { overrides } = useBreadcrumbStore();
-
-  // Debounce: Only treat userProfile === null as "no profile" after it stays
-  // null for a short period. This avoids premature redirect to /onboarding
-  // when the Convex auth token hasn't synced yet (getMyProfile returns null
-  // during the auth handshake, then resolves to the real profile).
-  const [profileStabilized, setProfileStabilized] = useState(false);
   const stabilizeTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [profileStabilized, setProfileStabilized] = useState(false);
 
+  // Profile stabilization logic - wait a bit after auth loads to see if profile follows
   useEffect(() => {
-    if (userProfile === null && isAuthenticated && !isAuthLoading) {
-      // Start a timer — only consider "no profile" after 1.5s of null
-      stabilizeTimerRef.current = setTimeout(() => {
-        setProfileStabilized(true);
-      }, 1500);
+    if (isAuthLoading) return;
+
+    if (isAuthenticated) {
+      if (userProfile === null) {
+        // If profile is missing, start a timer to "stabilize" the missing state
+        // before we trigger the onboarding redirect. This prevents flickering.
+        if (!stabilizeTimerRef.current) {
+          stabilizeTimerRef.current = setTimeout(() => {
+            setProfileStabilized(true);
+          }, 1500);
+        }
+      } else if (userProfile) {
+        // Profile exists, clear timer and stabilization state
+        if (stabilizeTimerRef.current) {
+          clearTimeout(stabilizeTimerRef.current);
+          stabilizeTimerRef.current = null;
+        }
+        setProfileStabilized(false);
+      }
     } else {
-      // Profile loaded or state changed — cancel any pending timer
       if (stabilizeTimerRef.current) {
         clearTimeout(stabilizeTimerRef.current);
         stabilizeTimerRef.current = null;
@@ -94,7 +105,14 @@ export default function DashboardLayout({
 
   // Redirect to onboarding or sign-in based on auth state
   useEffect(() => {
-    if (isAuthLoading) return;
+    if (isAuthLoading || isFirstUser === undefined) return;
+
+    // RULE 1: If there are no users in the system, ALWAYS redirect to /sign-up
+    // even if partially authenticated. This is the \"Initial Step\".
+    if (isFirstUser === true) {
+      router.push("/sign-up");
+      return;
+    }
 
     if (!isAuthenticated) {
       const signInUrl = new URL("/sign-in", window.location.origin);

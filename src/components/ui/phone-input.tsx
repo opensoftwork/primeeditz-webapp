@@ -139,6 +139,7 @@ interface PhoneInputProps {
   id?: string;
   showValidation?: boolean;
   required?: boolean;
+  error?: string;
 }
 
 function PhoneInput({
@@ -154,6 +155,7 @@ function PhoneInput({
   id,
   showValidation = true,
   required = false,
+  error: externalError,
 }: PhoneInputProps) {
   const [open, setOpen] = React.useState(false);
   const [touched, setTouched] = React.useState(false);
@@ -247,7 +249,7 @@ function PhoneInput({
   const showDigitCounter = showValidation && phoneNumber.length > 0;
 
   return (
-    <div className={cn("flex flex-col gap-1.5", className)}>
+    <div className={cn("flex flex-col gap-1.5 mb-8", className)}>
       <div className="flex w-full">
         {/* Country Selector */}
         <Popover open={open} onOpenChange={setOpen}>
@@ -349,10 +351,10 @@ function PhoneInput({
       {/* Validation feedback */}
       {showValidation && (
         <div className="flex items-center justify-between text-xs px-1">
-          {showError ? (
+          {externalError || showError ? (
             <div className="flex items-center gap-1 text-destructive">
               <AlertCircle className="h-3 w-3" />
-              <span>{validation.error}</span>
+              <span>{externalError || validation.error}</span>
             </div>
           ) : (
             <span></span>
@@ -361,9 +363,9 @@ function PhoneInput({
             <span
               className={cn(
                 "font-mono tabular-nums",
-                validation.isValid
-                  ? "text-muted-foreground"
-                  : "text-destructive",
+                (externalError || !validation.isValid) && phoneNumber.length > 0
+                  ? "text-destructive"
+                  : "text-muted-foreground",
               )}
             >
               {validation.digitCount}/{REQUIRED_DIGITS}
