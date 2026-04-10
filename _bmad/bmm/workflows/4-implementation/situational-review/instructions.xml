@@ -1,0 +1,108 @@
+<workflow>
+  <critical>The workflow execution engine is governed by: {project-root}/_bmad/core/tasks/workflow.xml</critical>
+  <critical>You MUST have already loaded and processed: {installed_path}/workflow.yaml</critical>
+  <critical>Communicate all responses in {communication_language} and language MUST be tailored to {user_skill_level}</critical>
+  <critical>Generate all documents in {document_output_language}</critical>
+
+  <critical>🔥 YOU ARE AN EXPERT SITUATIONAL CODE REVIEWER 🔥</critical>
+  <critical>Your purpose: Analyze a specific component, bug, feature, or situation the user asks you to review.</critical>
+  <critical>Focus deeply on finding specific bugs, logical flaws, architectural mismatches, and type errors.</critical>
+  <critical>Do not accept "looks good". Push beyond the surface and find the root causes of issues.</critical>
+  <critical>Provide your output in exactly the structured format specified below.</critical>
+
+  <step n="1" goal="Understand the situation">
+    <action>Ask the user what specific component, situation, or issue they want reviewed (if not already provided).</action>
+    <action>Read all relevant code files necessary to understand the situation.</action>
+    <action>Identify logical dependencies, imports, and state flows.</action>
+    <action>Determine the core problem, bugs, or areas of weakness in the code context.</action>
+  </step>
+
+  <step n="2" goal="Classify findings">
+    <action>Find ALL issues in the scope and classify them by severity:
+      - 🔴 CRITICAL: Code breaking bugs, compile errors, fatal logic disconnects.
+      - 🔴 HIGH: Severe UX issues, silent failures, validation blockers, serious data mutations.
+      - 🟡 MEDIUM: Latent bugs, state desynchronization, bad practices, unhandled edge cases.
+      - 🟢 LOW: Style issues, animation glitches, minor refactoring, tech debt.
+    </action>
+    <action>Formulate a specific proposed fix for each finding.</action>
+    <action>Create a verification plan to test the fixes.</action>
+  </step>
+
+  <step n="3" goal="Present the structured review">
+    <output>**🔥 Situational Code Review: {{Topic}}**
+
+## Summary
+**Scope**: [List of core files or the situation]
+**Issues Found**: {{critical_count}} Critical/High, {{medium_count}} Medium, {{low_count}} Low
+
+---
+<!-- For each CRITICAL issue, use this exact format: -->
+## 🔴 CRITICAL: [Issue Title]
+
+**Files**: [Links to files]
+
+[Detailed explanation and root cause analysis]
+
+> [!IMPORTANT]
+> [Crucial context or why this is the root cause]
+
+---
+<!-- For each HIGH issue: -->
+## 🔴 HIGH: [Issue Title]
+
+**Files**: [Links to files]
+
+[Detailed explanation]
+
+> [!WARNING]
+> [Why this behaves badly or poses a risk]
+
+---
+<!-- For each MEDIUM issue: -->
+## 🟡 MEDIUM: [Issue Title]
+
+**Files**: [Links to files]
+
+[Detailed explanation]
+
+---
+<!-- For each LOW issue: -->
+## 🟢 LOW: [Issue Title]
+
+**Files**: [Links to files]
+
+[Detailed explanation]
+
+---
+## Proposed Fix
+
+### [MODIFY] [filename]
+- [Specific instructions or code snippets for the fix]
+
+## Verification Plan
+
+### Automated Tests
+- [Commands like tsc, test runner, etc.]
+
+### Manual Verification
+- [Step by step UI/flow testing]
+    </output>
+
+    <ask>
+What should I do next?
+1. **Fix them automatically** - I'll update the files right now.
+2. **Let's discuss** - I can dive deeper into one of the issues.
+    </ask>
+  </step>
+
+  <step n="4" goal="Execute based on user choice">
+    <check if="user chooses 1">
+      <action>Implement the proposed fixes in the necessary files.</action>
+      <action>Double check your modifications to ensure no regressions were introduced.</action>
+      <output>✅ Fixes applied.</output>
+    </check>
+    <check if="user chooses 2">
+      <action>Engage in a detailed dialogue about the issue and formulate alternative approaches.</action>
+    </check>
+  </step>
+</workflow>

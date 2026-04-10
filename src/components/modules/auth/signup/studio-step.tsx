@@ -28,8 +28,15 @@ export function StudioStep({ form, isLoading }: StepProps) {
               disabled={isLoading}
               showValidation={true}
               error={
-                Array.isArray(field.state.meta.errors) && field.state.meta.errors.length > 0
-                  ? (field.state.meta.errors[0] as string)
+                Array.isArray(field.state.meta.errors) &&
+                field.state.meta.errors.length > 0
+                  ? typeof field.state.meta.errors[0] === "string"
+                    ? field.state.meta.errors[0]
+                    : field.state.meta.errors[0] &&
+                      typeof field.state.meta.errors[0] === "object" &&
+                      "message" in field.state.meta.errors[0]
+                      ? (field.state.meta.errors[0] as { message: string }).message
+                      : "Invalid input"
                   : undefined
               }
             />

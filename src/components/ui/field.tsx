@@ -200,19 +200,25 @@ function FieldError({
     }
 
     const uniqueErrors = [
-      ...new Map(errors.map((error) => [error?.message, error])).values(),
+      ...new Map(
+        errors.map((error) => [
+          typeof error === "string" ? error : error?.message,
+          error,
+        ]),
+      ).values(),
     ];
 
     if (uniqueErrors?.length == 1) {
-      return uniqueErrors[0]?.message;
+      const error = uniqueErrors[0];
+      return typeof error === "string" ? error : error?.message;
     }
 
     return (
       <ul className="ml-4 flex list-disc flex-col gap-1">
-        {uniqueErrors.map(
-          (error, index) =>
-            error?.message && <li key={index}>{error.message}</li>,
-        )}
+        {uniqueErrors.map((error, index) => {
+          const message = typeof error === "string" ? error : error?.message;
+          return message && <li key={index}>{message}</li>;
+        })}
       </ul>
     );
   }, [children, errors]);

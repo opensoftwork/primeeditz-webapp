@@ -26,10 +26,41 @@ export const signUpSchema = z
 
 export type SignUpSchema = z.infer<typeof signUpSchema>;
 
-export const STEP_FIELDS = {
-  0: ["firstName", "lastName"],
-  1: ["email", "password", "confirmPassword"],
-  2: ["phone", "company"],
-} as const;
+// Field names that belong to each logical step
+type FieldName = keyof Omit<SignUpSchema, never>;
 
-export type StepNumber = keyof typeof STEP_FIELDS;
+const IDENTITY_FIELDS: FieldName[] = ["firstName", "lastName"];
+const CREDENTIALS_FIELDS: FieldName[] = ["email", "password", "confirmPassword"];
+const STUDIO_FIELDS: FieldName[] = ["phone", "company"];
+
+/**
+ * A "step descriptor" defines what component renders and which fields to validate.
+ * This replaces the old static STEP_FIELDS map that broke when steps were remapped.
+ */
+export interface StepDescriptor {
+  id: "identity" | "credentials" | "studio";
+  fields: FieldName[];
+}
+
+/**
+ * Build the ordered list of steps based on auth state and setup mode.
+ *
+ * - isSetupMode + isAuthenticated: [identity, studio]        (2 steps, no credentials)
+ * - isSetupMode + !isAuthenticated: [identity, credentials, studio]  (3 steps)
+ * - !isSetupMode (regular signup): [identity, credentials]   (2 steps, no studio)
+ */
+export function buildStepPlan(isSetupMode: boolean, isAuthenticated: boolean): StepDescriptor[] {
+  const steps: StepDescriptor[] = [
+    { id: "identity", fields: IDENTITY_FIELDS },
+  ];
+
+  if (!isAuthenticated) {
+    steps.push({ id: "credentials", fields: CREDENTIALS_FIELDS });
+  }
+
+  if (isSetupMode) {
+    steps.push({ id: "studio", fields: STUDIO_FIELDS });
+  }
+
+  return steps;
+}

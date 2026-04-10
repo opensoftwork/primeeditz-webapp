@@ -15,7 +15,7 @@ export function StepIndicator({ currentStep, totalSteps }: StepIndicatorProps) {
         >
           {i <= currentStep && (
             <motion.div
-              layoutId="step-progress"
+              layoutId={`step-progress-${i}`}
               className="absolute inset-0 bg-indigo-500"
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}

@@ -23,31 +23,39 @@ export default function SignUpForm() {
   const createProfile = useMutation(api.profiles.createProfile);
   
   const isSetupMode = isFirstUser === true;
-  const totalSteps = isSetupMode ? (isAuthenticated ? 2 : 3) : 2;
 
   const {
     form,
     isLoading,
     isGoogleLoading,
     currentStep,
+    totalSteps,
+    stepPlan,
     handleNextStep,
     handlePrevStep,
     handleGoogleSignUp,
   } = useSignUpLogic({
     isAuthenticated,
     isSetupMode,
-    totalSteps,
     //@ts-ignore - handled inside mutation
     createProfile,
   });
 
-  if (isAuthLoading) {
+  if (isAuthLoading || isFirstUser === undefined) {
     return (
       <div className="min-h-screen w-full flex items-center justify-center bg-[#050507]">
         <Loader2 className="h-8 w-8 animate-spin text-white/20" />
       </div>
     );
   }
+
+  // Resolve the current step's component from the step plan
+  const currentStepDescriptor = stepPlan[currentStep];
+  const stepComponentMap = {
+    identity: <IdentityStep form={form} isLoading={isLoading} />,
+    credentials: <CredentialsStep form={form} isLoading={isLoading} />,
+    studio: <StudioStep form={form} isLoading={isLoading} />,
+  };
 
   return (
     <div className="flex-1 flex flex-col lg:flex-row bg-[#050507] min-h-screen lg:h-screen overflow-x-hidden">
@@ -82,17 +90,7 @@ export default function SignUpForm() {
                     transition={{ duration: 0.3, ease: "easeInOut" }}
                   >
                     <FieldGroup>
-                      {currentStep === 0 && (
-                        <IdentityStep form={form} isLoading={isLoading} />
-                      )}
-
-                      {currentStep === 1 && !isAuthenticated && (
-                        <CredentialsStep form={form} isLoading={isLoading} />
-                      )}
-
-                      {((currentStep === 1 && isAuthenticated) || currentStep === 2) && isSetupMode && (
-                        <StudioStep form={form} isLoading={isLoading} />
-                      )}
+                      {currentStepDescriptor && stepComponentMap[currentStepDescriptor.id]}
                     </FieldGroup>
                   </motion.div>
                 </AnimatePresence>

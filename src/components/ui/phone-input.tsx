@@ -354,7 +354,11 @@ function PhoneInput({
           {externalError || showError ? (
             <div className="flex items-center gap-1 text-destructive">
               <AlertCircle className="h-3 w-3" />
-              <span>{externalError || validation.error}</span>
+              <span>
+                {typeof (externalError || validation.error) === "string"
+                  ? (externalError || validation.error)
+                  : (externalError as any)?.message || validation.error}
+              </span>
             </div>
           ) : (
             <span></span>

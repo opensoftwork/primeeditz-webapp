@@ -1,12 +1,12 @@
-import { FormApi } from "@tanstack/react-form";
-import { SignUpSchema } from "./schema";
+import type { useSignUpLogic } from "./signup-logic";
 
-// Using 'any' for the rest of the generics to avoid the 12-argument requirement
-// while still keeping the data type for the schema.
-export type SignUpFormApi = FormApi<SignUpSchema, any, any, any, any, any, any, any, any, any, any, any>;
+// Derive the form type directly from useSignUpLogic's return type.
+// This captures the full ReactFormExtendedApi (FormApi + ReactFormApi)
+// which includes the .Field component, without manually specifying 12+ generics.
+export type SignUpFormApi = ReturnType<typeof useSignUpLogic>["form"];
 
 export interface StepProps {
-  form: any; // Using any here for the component props to be more flexible with ReactFormExtendedApi
+  form: SignUpFormApi;
   isLoading?: boolean;
 }
 
